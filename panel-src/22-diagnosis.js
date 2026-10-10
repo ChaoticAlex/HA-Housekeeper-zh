@@ -288,7 +288,7 @@ class DiagnosisMixin {
   // Tabs offered for one object; "attributes" only when it has some, so an empty tab never shows.
   detailTabs(item, key) {
     const tabs = [["overview", "tabOverview"], ["relations", "tabRelations", this.edgesTo(key).length + this.edgesFrom(key).length], ["technical", "tabTechnical"]];
-    if (item.object_type === "entity") tabs.splice(1, 0, ["actions", "tabActions", this.fixItems(item, key).items.length]);
+    if (this.hasActionsTab(item, key)) tabs.splice(1, 0, ["actions", "tabActions", this.fixItems(item, key).items.length]);
     if (item.attributes && Object.keys(item.attributes).length) tabs.push(["attributes", "tabAttributes"]);
     if (["automation", "script"].includes(item.object_type) && (item.actions?.length || item.triggers?.length)) tabs.push(["flow", "flowTab"]);
     if (item.object_type === "device") tabs.push(["life", "lifeTab"]);
@@ -340,7 +340,7 @@ class DiagnosisMixin {
       const cards = this.propertyCards(item);
       return `<div class="stack">${cards ? `<div class="propgrid">${cards}</div>` : `<section class="panel"><div class="panelhead"><h2>${this.t("registry")}</h2></div><div class="pad"><dl class="kv"><dt>${this.t("type")}</dt><dd>${this.t(item.object_type)}</dd>${fields.map(([k, v]) => `<dt>${this.esc(k)}</dt><dd>${this.esc(Array.isArray(v) ? v.join(", ") : v)}</dd>`).join("")}</dl></div></section>`}${automation}${this.detailLoading ? `<p class="sub">${this.t("loading")}</p>` : ""}</div>`;
     }
-    if (item.object_type === "entity") return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.nextStepBand(item, key)}${this.impactCard(item, key)}</div><div class="stack">${this.knownCard(item, key)}${this.entityRecorderCard(item)}${this.noteCard(item)}</div></div>`;
+    if (ACTION_TYPES.includes(item.object_type)) return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.nextStepBand(item, key)}${this.impactCard(item, key)}</div><div class="stack">${item.object_type === "entity" ? this.knownCard(item, key) : this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.noteCard(item)}</div></div>`;
     return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.actionsCard(item, key)}${this.detailEditCard(item)}${this.impactCard(item, key)}</div><div class="stack">${this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.entityTrimCard(item)}${this.staleCard(item)}${this.noteCard(item)}</div></div>`;
   }
 }

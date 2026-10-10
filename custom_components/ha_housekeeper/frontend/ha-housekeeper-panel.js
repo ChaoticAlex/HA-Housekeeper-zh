@@ -431,6 +431,8 @@ const USAGE_RELATIONS = ["TRIGGERS_ON", "USES_AS_CONDITION", "TARGETS", "REFEREN
 const SEARCH_DEBOUNCE_MS = 150;
 
 // What can carry a label: everything with an entry in the entity registry.
+// Objects whose page keeps reading on the overview and puts everything that changes something under the tab "Actions".
+const ACTION_TYPES = ["entity", "device", "config_entry", "automation", "script", "scene"];
 const LABEL_TYPES = ["entity", "automation", "script", "scene"];
 
 const NAV = [
@@ -4116,7 +4118,7 @@ class DiagnosisMixin {
   // Tabs offered for one object; "attributes" only when it has some, so an empty tab never shows.
   detailTabs(item, key) {
     const tabs = [["overview", "tabOverview"], ["relations", "tabRelations", this.edgesTo(key).length + this.edgesFrom(key).length], ["technical", "tabTechnical"]];
-    if (item.object_type === "entity") tabs.splice(1, 0, ["actions", "tabActions", this.fixItems(item, key).items.length]);
+    if (this.hasActionsTab(item, key)) tabs.splice(1, 0, ["actions", "tabActions", this.fixItems(item, key).items.length]);
     if (item.attributes && Object.keys(item.attributes).length) tabs.push(["attributes", "tabAttributes"]);
     if (["automation", "script"].includes(item.object_type) && (item.actions?.length || item.triggers?.length)) tabs.push(["flow", "flowTab"]);
     if (item.object_type === "device") tabs.push(["life", "lifeTab"]);
@@ -4168,7 +4170,7 @@ class DiagnosisMixin {
       const cards = this.propertyCards(item);
       return `<div class="stack">${cards ? `<div class="propgrid">${cards}</div>` : `<section class="panel"><div class="panelhead"><h2>${this.t("registry")}</h2></div><div class="pad"><dl class="kv"><dt>${this.t("type")}</dt><dd>${this.t(item.object_type)}</dd>${fields.map(([k, v]) => `<dt>${this.esc(k)}</dt><dd>${this.esc(Array.isArray(v) ? v.join(", ") : v)}</dd>`).join("")}</dl></div></section>`}${automation}${this.detailLoading ? `<p class="sub">${this.t("loading")}</p>` : ""}</div>`;
     }
-    if (item.object_type === "entity") return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.nextStepBand(item, key)}${this.impactCard(item, key)}</div><div class="stack">${this.knownCard(item, key)}${this.entityRecorderCard(item)}${this.noteCard(item)}</div></div>`;
+    if (ACTION_TYPES.includes(item.object_type)) return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.nextStepBand(item, key)}${this.impactCard(item, key)}</div><div class="stack">${item.object_type === "entity" ? this.knownCard(item, key) : this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.noteCard(item)}</div></div>`;
     return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.actionsCard(item, key)}${this.detailEditCard(item)}${this.impactCard(item, key)}</div><div class="stack">${this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.entityTrimCard(item)}${this.staleCard(item)}${this.noteCard(item)}</div></div>`;
   }
 }
@@ -7636,7 +7638,13 @@ class DetailActionsMixin {
     return `<section class="panel"><div class="nextstep"><span><strong>${this.t("nextStep")}:</strong> ${first.label}<small>${this.t(first.hint)}</small></span><span class="dbtns"><button class="btn quiet" data-detail-tab="actions">${this.t("moreActions")}</button><button class="btn primary" ${first.attr}>${first.label}</button></span></div></section>`;
   }
 
-  // The tab "Actions" of an entity: everything that changes something, grouped by purpose; the cards keep their own forms.
+  // Whether the tab "Actions" has anything to show for this object: findings to decide, buttons, a label or an edit form.
+  hasActionsTab(item, key) {
+    if (!ACTION_TYPES.includes(item.object_type)) return false;
+    return Boolean(this.findingRows(key) || this.fixItems(item, key).items.length || this.labelForm(item) || this.detailEditCard(item) || this.entityTrimCard(item) || this.staleCard(item));
+  }
+
+  // The tab "Actions" of an object: everything that changes something, grouped by purpose; the cards keep their own forms.
   actionsTab(item, key) {
     const group = (title, cards) => { const html = cards.filter(Boolean).join(""); return html ? `<div class="actgrp">${this.t(title)}</div>${html}` : ""; };
     const label = this.labelForm(item);
@@ -7703,14 +7711,14 @@ class DetailActionsMixin {
   }
 }
 Object.assign(TEXT.de, {
-  tabActions: "Aktionen", nextStep: "Nächster Schritt", moreActions: "Weitere Aktionen", actGroupRecommended: "Empfohlen", actGroupName: "Benennen und einordnen", actGroupRecord: "Aufzeichnung und Überwachung", actNone: "Für diese Entität gibt es nichts zu tun.",
+  tabActions: "Aktionen", nextStep: "Nächster Schritt", moreActions: "Weitere Aktionen", actGroupRecommended: "Empfohlen", actGroupName: "Benennen und einordnen", actGroupRecord: "Aufzeichnung und Überwachung", actNone: "Hier gibt es nichts zu tun.",
   actionsTitle: "Was möchtest du tun?", actReplace: "Ersetzen:", actReplaceThis: "Durch andere Entität ersetzen", actDisable: "Deaktivieren planen",
   actLabelTitle: "Label ergänzen", actLabelHint: "Fügt ein vorhandenes Label hinzu, zum Beispiel zum Filtern. Du siehst zuerst eine Vorschau.", actLabelPreview: "Vorschau erstellen",
   actPreviewOnly: "Hier startest du nur eine Vorschau. Geändert wird erst, wenn du sie bestätigst.",
   actEditInHa: "Eine einzelne Referenz entfernt Housekeeper nicht selbst. Öffne die Automation in Home Assistant und bearbeite sie dort.",
 });
 Object.assign(TEXT.en, {
-  tabActions: "Actions", nextStep: "Next step", moreActions: "More actions", actGroupRecommended: "Recommended", actGroupName: "Name and classify", actGroupRecord: "Recording and monitoring", actNone: "There is nothing to do for this entity.",
+  tabActions: "Actions", nextStep: "Next step", moreActions: "More actions", actGroupRecommended: "Recommended", actGroupName: "Name and classify", actGroupRecord: "Recording and monitoring", actNone: "There is nothing to do here.",
   actionsTitle: "What would you like to do?", actReplace: "Replace:", actReplaceThis: "Replace by another entity", actDisable: "Plan to disable",
   actLabelTitle: "Add a label", actLabelHint: "Adds an existing label, for example for filtering. You see a preview first.", actLabelPreview: "Create preview",
   actPreviewOnly: "This only starts a preview. Nothing changes until you confirm it.",

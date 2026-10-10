@@ -68,6 +68,8 @@ const USAGE_RELATIONS = ["TRIGGERS_ON", "USES_AS_CONDITION", "TARGETS", "REFEREN
 const SEARCH_DEBOUNCE_MS = 150;
 
 // What can carry a label: everything with an entry in the entity registry.
+// Objects whose page keeps reading on the overview and puts everything that changes something under the tab "Actions".
+const ACTION_TYPES = ["entity", "device", "config_entry", "automation", "script", "scene"];
 const LABEL_TYPES = ["entity", "automation", "script", "scene"];
 
 const NAV = [

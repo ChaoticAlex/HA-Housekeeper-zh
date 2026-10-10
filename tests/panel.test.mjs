@@ -3461,6 +3461,24 @@ test("an entity has an Actions tab that holds what changes something; the overvi
   assert.equal(el.nextStepBand({ ...ghost, status: "active" }, "entity:sensor.fine"), "");
 });
 
+test("devices, automations and integrations share the layout: the overview reads, the Actions tab changes things and appears only with content", () => {
+  const { el } = panel("en");
+  const device = { object_type: "device", object_id: "d1", name: "Hub", status: "active", area_id: "" };
+  const auto = { object_type: "automation", object_id: "a1", name: "Evening", status: "active" };
+  const entry = { object_type: "config_entry", object_id: "c1", name: "Hue", status: "active" };
+  el.data = { ...DATA, objects: [...DATA.objects, device, auto, entry, { object_type: "area", object_id: "living", name: "Living", status: "active" }, { object_type: "label", object_id: "l1", name: "Keep", status: "active" }], findings: [] };
+  el._rev = (el._rev || 0) + 1;
+  const tabs = o => el.detailTabs(o, el.objectKey(o)).map(([id]) => id);
+  assert.ok(tabs(device).includes("actions"), "a device offers the exchange and an area");
+  assert.ok(tabs(auto).includes("actions"), "an automation can get a label");
+  assert.ok(!tabs(entry).includes("actions"), "an integration without findings has nothing to do");
+  const overview = el.detailPanel("overview", device, "device:d1");
+  assert.ok(!overview.includes("data-de-area") && !overview.includes("data-act-exchange"), "no forms on the overview");
+  const actions = el.detailPanel("actions", device, "device:d1");
+  assert.ok(actions.includes("data-act-exchange") && actions.includes("data-de-area") && actions.includes("Name and classify"));
+  assert.ok(el.detailPanel("actions", auto, "automation:a1").includes("data-act-label-plan"));
+});
+
 test("the journal names the end of a follow-up and the safety line counts the watched plans", () => {
   const { el, shadow } = panel("en");
   const plan = (id, followup) => ({ plan_id: id, created_at: "2026-10-10T10:00:00+00:00", status: "verified", executed: true, summary: { total: 1, ok: 1, review: 0, blocked: 0 }, followup, followup_until: followup === "watching" ? "2026-10-11T10:00:00+00:00" : null });
