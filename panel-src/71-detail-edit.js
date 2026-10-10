@@ -23,10 +23,10 @@ class DetailEditMixin {
         <button type="submit" class="btn primary" data-de-rename-btn ${this.detailIdOk(item, e.value) && !this.planBusy ? "" : "disabled"}>${this.t("deRename")}</button>
         <small class="factnote">${this.t("deRenameNote")}</small></form>` : "";
     const suggest = !item.area_id;
-    const assign = areas.length ? `<form class="deform" data-de-area><label for="de-area"><strong>${this.t("deArea")}</strong></label>
+    const assign = areas.length ? `<form class="deform" data-de-area><label for="de-area"><strong>${this.t("deArea")}</strong><small class="denow${now ? "" : " none"}">${this.t("deAreaNow", { area: now || this.t("deNoArea") })}</small></label>
         <select id="de-area" data-de-area-select>${suggest ? `<option value="">${this.t("areaSuggest")}</option>` : ""}${areas.map(a => `<option value="${this.esc(a.object_id)}" ${e.area === a.object_id ? "selected" : ""}>${this.esc(a.name)}</option>`).join("")}</select>
         <button type="submit" class="btn primary" data-de-area-btn ${(suggest || e.area !== item.area_id) && !this.planBusy ? "" : "disabled"}>${this.t("deAssign")}</button>
-        <small class="factnote">${this.t("deAreaNow", { area: now || this.t("deNoArea") })}${suggest ? ` · ${this.t("areaNote")}` : ""}</small></form>` : `<small class="factnote">${this.t("areaNone")}</small>`;
+        ${suggest ? `<small class="factnote">${this.t("areaNote")}</small>` : ""}</form>` : `<small class="factnote">${this.t("areaNone")}</small>`;
     return `<section class="panel"><div class="panelhead"><h2>${this.t("deTitle")}</h2></div><div class="pad">${rename}${assign}${e.error ? `<small class="error" role="alert">${this.esc(this.t(e.error))}</small>` : ""}</div></section>`;
   }
 
