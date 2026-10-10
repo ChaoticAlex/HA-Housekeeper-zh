@@ -926,7 +926,10 @@ test("a blocked removal cannot be confirmed; a ready one asks for the removal wo
   el.journal = [];
   el.plan = plan(false, ["quarantine_too_short"]);
   el.render();
-  assert.ok(!shadow.innerHTML.includes("data-plan-confirm") && shadow.innerHTML.includes("Nothing to run") && shadow.innerHTML.includes("All 1 entries are blocked") && !shadow.innerHTML.includes('class="wz"') && shadow.innerHTML.includes("quarantine is still too short. (6 days to go)"));
+  assert.ok(!shadow.innerHTML.includes("data-plan-confirm") && shadow.innerHTML.includes("Nothing to run") && shadow.innerHTML.includes("The entry is blocked") && !shadow.innerHTML.includes('class="wz"') && shadow.innerHTML.includes("quarantine is still too short. (6 days to go)"));
+  el.plan = plan(false, ["nothing_found"]);
+  el.render();
+  assert.ok(shadow.innerHTML.includes("Nothing to change") && !shadow.innerHTML.includes("Nothing to run") && !shadow.innerHTML.includes(">Blocked<"));
   el.plan = plan(true, []);
   el._hass = { language: "en", callWS: async () => ({ plan_id: "p2", token: "t", expires_at: "x", execute: ["sensor.a"], removals: ["sensor.a"], needs_acknowledgement: [], skipped: [] }) };
   el.render();

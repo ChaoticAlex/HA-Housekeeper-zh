@@ -18,12 +18,12 @@ class DetailEditMixin {
     const e = this.detailEdit?.id === item.object_id ? this.detailEdit : (this.detailEdit = { id: item.object_id, value: item.object_id.split(".").slice(1).join("."), area: item.area_id || "", error: "" });
     const areas = (this.data.objects || []).filter(o => o.object_type === "area").sort((x, y) => String(x.name).localeCompare(String(y.name)));
     const now = this.areaName(item);
-    const rename = item.object_type === "entity" ? `<form class="polform" data-de-rename><label for="de-id"><strong>${this.t("deNewId")}</strong></label>
-        <span class="mono">${this.esc(item.object_id.split(".")[0])}.</span><input id="de-id" data-de-id value="${this.esc(e.value)}" autocomplete="off" spellcheck="false">
+    const rename = item.object_type === "entity" ? `<form class="deform" data-de-rename><label for="de-id"><strong>${this.t("deNewId")}</strong></label>
+        <span class="deid"><span class="mono">${this.esc(item.object_id.split(".")[0])}.</span><input id="de-id" data-de-id value="${this.esc(e.value)}" autocomplete="off" spellcheck="false"></span>
         <button type="submit" class="btn primary" data-de-rename-btn ${this.detailIdOk(item, e.value) && !this.planBusy ? "" : "disabled"}>${this.t("deRename")}</button>
         <small class="factnote">${this.t("deRenameNote")}</small></form>` : "";
     const suggest = !item.area_id;
-    const assign = areas.length ? `<form class="polform" data-de-area><label for="de-area"><strong>${this.t("deArea")}</strong></label>
+    const assign = areas.length ? `<form class="deform" data-de-area><label for="de-area"><strong>${this.t("deArea")}</strong></label>
         <select id="de-area" data-de-area-select>${suggest ? `<option value="">${this.t("areaSuggest")}</option>` : ""}${areas.map(a => `<option value="${this.esc(a.object_id)}" ${e.area === a.object_id ? "selected" : ""}>${this.esc(a.name)}</option>`).join("")}</select>
         <button type="submit" class="btn primary" data-de-area-btn ${(suggest || e.area !== item.area_id) && !this.planBusy ? "" : "disabled"}>${this.t("deAssign")}</button>
         <small class="factnote">${this.t("deAreaNow", { area: now || this.t("deNoArea") })}${suggest ? ` · ${this.t("areaNote")}` : ""}</small></form>` : `<small class="factnote">${this.t("areaNone")}</small>`;

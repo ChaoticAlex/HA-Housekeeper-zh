@@ -372,6 +372,8 @@ const REMOVAL_KINDS = ["remove_entity", "remove_device", "forget_device"];
 const BACKUP_KINDS = ["remove_entity", "remove_device", "forget_device", "replace_references", "rename_entity", "migrate_meter", "purge_statistics", "trim_history", "delete_automation", "refactor_automation", "repair_counter", "repair_range"];
 // Deleting recorder rows: cannot be undone, only the backup brings them back.
 const PURGE_KINDS = ["purge_statistics", "trim_history", "delete_backup"];
+// Reasons that mean "all is well, there is nothing to do" and not "Housekeeper may not".
+const NOTHING_REASONS = ["nothing_found", "nothing_to_do"];
 const REPAIR_KINDS = ["repair_counter", "repair_range"];
 const IMPACT_RANK = { none: 0, low: 1, medium: 2, high: 3 };
 const BACKUP_FAILURES = ["backup_failed", "backup_small_failed", "backup_unavailable", "no_backup_agent"];
@@ -1182,6 +1184,7 @@ class StylesMixin {
       .changesum{grid-template-columns:repeat(5,1fr)}
       .finding{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.finding strong{display:block;font-weight:600}.planfoot{display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap}.planfoot>:first-child{flex:1 1 280px;min-width:0}.planfoot>.factnote{border:0;padding:0}.planfoot>.btn,.planfoot>span,.planfoot>div:last-child{flex:0 0 auto}.simbox{margin:12px 16px;padding:12px 16px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-soft)}.simbox summary{cursor:pointer;font-weight:600;font-size:calc(13px*var(--hk-fs,1))}.simlist{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:6px;font-size:calc(13px*var(--hk-fs,1))}.simlist li{position:relative;padding-left:18px}.simlist li:before{content:"";position:absolute;left:4px;top:.55em;width:6px;height:6px;border-radius:50%;background:var(--hk-blue)}.simlimits{margin:10px 0 0;padding-top:10px;border-top:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.step{align-items:center}.fmeta{display:flex!important;flex-wrap:wrap;align-items:center;gap:4px 8px}.nw{white-space:nowrap}
       .finding:has(.polform){flex-wrap:wrap}.finding .polform{flex:1 1 100%;display:grid;grid-template-columns:minmax(150px,200px) minmax(180px,1fr) minmax(130px,170px) auto auto;gap:8px;align-items:center}.finding .polform .error{grid-column:1/-1}.finding .polform input,.finding .polform select{min-height:40px;box-sizing:border-box}@media(max-width:860px){.finding .polform{grid-template-columns:1fr 1fr}.finding .polform input{grid-column:1/-1}}
+      .deform{display:grid;grid-template-columns:6rem minmax(0,1fr) 13rem;gap:6px 14px;align-items:center}.deform+.deform{margin-top:18px;padding-top:18px;border-top:1px solid var(--hk-border)}.deform .factnote{grid-column:2/-1;margin:0;padding:0;border:0}.deform select,.deform .deid{min-height:40px;box-sizing:border-box;width:100%;min-width:0;padding:0 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit;font:inherit}.deform .deid{display:flex;align-items:center;gap:2px}.deform .deid .mono{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1))}.deform .deid input{flex:1;min-width:0;padding:0;border:0;outline:0;background:transparent;color:inherit;font:inherit}.deform .deid:focus-within{border-color:var(--hk-blue)}.deform .btn{min-height:40px;box-sizing:border-box;justify-content:center;width:100%}.deform .btn:disabled{background:var(--hk-soft);border-color:var(--hk-border);color:var(--hk-muted);box-shadow:none;opacity:1}@media(max-width:600px){.deform{grid-template-columns:1fr}.deform .factnote{grid-column:1}}
       .labelbox{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(160px,220px) auto;gap:12px 14px;align-items:center;margin-top:12px;padding:14px 16px;border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-soft)}.labelbox .labeltext strong{display:block;font-weight:600}.labelbox .labeltext small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.labelbox select{min-height:40px;box-sizing:border-box}@media(max-width:860px){.labelbox{grid-template-columns:auto minmax(0,1fr)}.labelbox select,.labelbox .btn{grid-column:1/-1}}
       .picker{position:relative;max-width:360px;width:100%}.search .picker{max-width:none}.picker input{width:100%;box-sizing:border-box}.picker .quicklist{left:0;right:auto;width:100%}
       .btn.accent{border-color:color-mix(in srgb,var(--hk-blue) 40%,var(--hk-border));background:color-mix(in srgb,var(--hk-blue) 7%,var(--hk-surface));box-shadow:var(--hk-sh1)}.btn.accent ha-icon{color:var(--hk-blue)}.btn.accent:hover{background:color-mix(in srgb,var(--hk-blue) 14%,var(--hk-surface));box-shadow:var(--hk-sh2)}.btn.danger{background:var(--hk-red);border-color:var(--hk-red);color:var(--hk-on,#fff)}.btn.dangersoft{border-color:color-mix(in srgb,var(--hk-red) 45%,var(--hk-border));background:color-mix(in srgb,var(--hk-red) 8%,var(--hk-surface));color:color-mix(in srgb,var(--hk-red) 70%,var(--hk-text))}.btn.dangersoft:hover{background:color-mix(in srgb,var(--hk-red) 15%,var(--hk-surface))}.btn.danger:hover{filter:brightness(1.08)}
@@ -2800,7 +2803,8 @@ class CleanupMixin {
     const open = plan.status === "dry_run";
     const rowList = plan.actions.map(a => {
       const settled = a.result?.state === "done";
-      const tone = settled ? "ok" : { ok: "ok", review: "warn", blocked: "red" }[a.verdict] || "mute";
+      const idle = a.verdict === "blocked" && (a.reasons || []).length > 0 && a.reasons.every(r => NOTHING_REASONS.includes(r));
+      const tone = settled ? "ok" : idle ? "mute" : { ok: "ok", review: "warn", blocked: "red" }[a.verdict] || "mute";
       const uses = (a.used_by || []).slice(0, 4).map(u => {
         const obj = this.findObject(u.source);
         return `<button class="chip" data-object="${this.esc(u.source)}">${this.esc(obj?.name || u.source.split(":").slice(1).join(":"))}</button>`;
@@ -2818,9 +2822,9 @@ class CleanupMixin {
       const undo = result?.state !== "done" || PURGE_KINDS.includes(a.kind) ? "" : this.undoAsk === a.object_id
         ? `<span class="askrow"><span>${this.t("undoAskOne")}</span><button class="btn danger" data-undo-one-yes="${this.esc(a.object_id)}">${this.t("undoYes")}</button><button class="btn accent" data-undo-no>${this.t("cancelRun")}</button></span>`
         : `<button class="btn accent" data-undo-one="${this.esc(a.object_id)}"><ha-icon icon="mdi:undo-variant"></ha-icon>${this.t("undoOne")}</button>`;
-      return `<div class="row planrow ${a.verdict === "blocked" ? "dim" : ""}"><span class="tile ${tone}"><ha-icon icon="${settled || a.verdict === "ok" ? "mdi:check" : a.verdict === "review" ? "mdi:alert-outline" : "mdi:close-octagon-outline"}"></ha-icon></span>
+      return `<div class="row planrow ${a.verdict === "blocked" ? "dim" : ""}"><span class="tile ${tone}"><ha-icon icon="${settled || idle || a.verdict === "ok" ? "mdi:check" : a.verdict === "review" ? "mdi:alert-outline" : "mdi:close-octagon-outline"}"></ha-icon></span>
         <span class="row-text"><strong>${obj ? `<button class="link" data-object="${this.esc(`${type}:${a.object_id}`)}">${this.esc(a.name)}</button>` : this.esc(a.name)}</strong><small>${this.esc([sub, reasons, abort.replace(/^ · /, "")].filter(Boolean).join(" · "))}</small>${ack}${sources || uses ? `<details class="rowdetails"><summary>${this.t("planDetails")}</summary>${sources}${uses ? `<span class="chips" style="padding:6px 0 0;border:0">${uses}${more}</span>` : ""}</details>` : ""}</span>
-        <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">${resultPill}${undo}${a.executable && (result || !(a.reasons || []).includes("irreversible")) ? this.undoBadge(a) : ""}${result ? "" : `<span class="pill ${tone}">${this.t(a.verdict === "review" && (a.reasons || []).includes("irreversible") ? "verdictIrreversible" : `verdict_${a.verdict}`)}</span>`}</span></div>`;
+        <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">${resultPill}${undo}${a.executable && (result || !(a.reasons || []).includes("irreversible")) ? this.undoBadge(a) : ""}${result ? "" : `<span class="pill ${tone}">${this.t(idle ? "verdictNothing" : a.verdict === "review" && (a.reasons || []).includes("irreversible") ? "verdictIrreversible" : `verdict_${a.verdict}`)}</span>`}</span></div>`;
     });
     const extra = [sm.uses ? this.t("planUses", { count: sm.uses }) : "", sm.statistics ? this.t("planStats", { count: sm.statistics }) : ""].filter(Boolean).join(" · ");
     const executable = plan.actions.some(a => a.executable);
@@ -2849,9 +2853,10 @@ class CleanupMixin {
     // Nothing can run: no steps and no confirmation, one clear band and the reasons.
     if (open && !executable) {
       const blocked = plan.actions.filter(a => a.verdict === "blocked").length;
-      const why = blocked && blocked === plan.actions.length ? this.t("wzIdleBlocked", { n: blocked }) : this.t("wzIdleNone");
-      return `<section class="panel" data-plan-card data-plan-idle><div class="panelhead"><div><h2>${this.t("planResult")} · <span class="pill mute">${this.t("plan_status_dry_run")}</span></h2><p>${this.esc(this.formatDate(plan.created_at))}</p></div><button class="btn" data-plan-close>${this.t("planClose")}</button></div>
-        <div class="outcome warn" role="status"><ha-icon icon="mdi:information-outline"></ha-icon><span><strong>${this.t("wzIdleTitle")}</strong><small>${this.esc(why)}</small></span></div>${rowList.join("")}${this.reportBlock(plan)}</section>`;
+      const nothing = plan.actions.length > 0 && plan.actions.every(a => a.verdict === "blocked" && (a.reasons || []).length > 0 && a.reasons.every(r => NOTHING_REASONS.includes(r)));
+      const why = nothing ? this.t("wzIdleNothing") : blocked && blocked === plan.actions.length ? this.t(blocked === 1 ? "wzIdleBlockedOne" : "wzIdleBlocked", { n: blocked }) : this.t("wzIdleNone");
+      return `<section class="panel" data-plan-card data-plan-idle><div class="panelhead"><div><h2>${this.t("plan_status_dry_run")}</h2><p>${this.esc(this.formatDate(plan.created_at))}</p></div><button class="btn" data-plan-close>${this.t("planClose")}</button></div>
+        <div class="outcome ${nothing ? "ok" : "warn"}" role="status"><ha-icon icon="${nothing ? "mdi:check-circle-outline" : "mdi:information-outline"}"></ha-icon><span><strong>${this.t(nothing ? "wzIdleNothingTitle" : "wzIdleTitle")}</strong><small>${this.esc(why)}</small></span></div>${rowList.join("")}${this.reportBlock(plan)}</section>`;
     }
     const rows = this.planRowsShown(plan, rowList);
     const summary = `<p class="factnote">${this.t("planSummary", { total: sm.total ?? 0, ok: sm.ok ?? 0, review: sm.review ?? 0, blocked: sm.blocked ?? 0 })}${extra ? ` ${this.esc(extra)}` : ""}</p>`;
@@ -6923,7 +6928,7 @@ class CounterMixin {
 
   // The reading before and after the repair around one glitch: original dashed, repaired solid.
   counterChart(series) {
-    if (!series || series.length < 3) return "";
+    if (!series || series.length < 3 || series.every(p => p[1] === p[2])) return ""; // nothing differs, so nothing to draw
     const w = 360, h = 90, pad = 4;
     const xs = series.map(p => p[0]), ys = series.flatMap(p => [p[1], p[2]]);
     const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
@@ -6968,8 +6973,10 @@ class CounterMixin {
     const range = c.range || action.range || {}, counts = c.counts || {}, avail = c.available || {}, d = c.detail || {};
     const line = text => `<small class="u-block">${this.esc(text)}</small>`;
     const warn = text => `<small class="u-amber u-block">${this.esc(text)}</small>`;
+    const idle = (action.reasons || []).length > 0 && action.reasons.every(r => NOTHING_REASONS.includes(r));
     const out = [line(this.t("rangeWhat", { kind: this.t(`rangeKind_${c.kind || "counter"}`), range: `${this.formatDate(range.from * 1000)} – ${this.formatDate(range.to * 1000)}`, mode: this.t(`rangeMode_${action.mode || "hold"}`) + (range.fixed != null ? ` (${n(range.fixed)})` : "") }))];
     if (c.bracket) out.push(line(this.t("rangeBracket", { before: n(c.bracket[1]), after: n(c.bracket[3]) })));
+    if (idle) return `<span class="u-pt6 u-block">${out.join("")}</span>`; // no tables, no chart: there is nothing to show
     out.push(line(this.t("rangeAvail", { states: this.formatNumber(avail.states || 0), short: this.formatNumber(avail.short_term || 0), long: this.formatNumber(avail.long_term || 0) })));
     for (const t of ["states", "short_term", "long_term"]) if (c.available && !avail[t]) out.push(warn(this.t("rangeGone", { table: this.t(`counterTable_${t}`) })));
     if (counts.estimated_long_term) out.push(warn(this.t("rangeEstimated", { count: this.formatNumber(counts.estimated_long_term) })));
@@ -7129,7 +7136,7 @@ Object.assign(TEXT.de, {
   counterNone: "Keine Ausreißer gefunden.", counterChecked: "{count} Sensoren geprüft.", counterPreview: "Vorschau erstellen", counterFix: "Diesen Fund bereinigen", rangePreview: "Zeitraum bereinigen",
   counterFound: "{range}: niedrigster Wert {low} {unit} statt etwa {good} {unit}", counterFinding: "{range}: Werte zwischen {low} und {high} {unit}; gute Werte davor {before} und danach {after} {unit}.",
   counterRows: "Geändert werden {states} Verlaufswerte, {short} 5-Minuten-Werte und {long} Stundenwerte; die Summe wird in {tail} späteren Statistikzeilen berichtigt.",
-  counterSkipped: "{table}: {count} Fund(e) nicht reparierbar (keine guten Werte davor oder danach).", counterTable_short_term: "5-Minuten-Werte", counterTable_long_term: "Stundenwerte",
+  counterSkipped: "{table}: {count} Fund(e) nicht reparierbar (keine guten Werte davor oder danach).", counterTable_states: "Verlaufswerte", counterTable_short_term: "5-Minuten-Werte", counterTable_long_term: "Stundenwerte",
   counterOriginal: "Original", counterRepaired: "repariert", counterChartLabel: "Verlauf vor und nach der Reparatur", counterUndone: "Die alten Werte sind wieder eingesetzt.",
   reason_counter_write: "Schreibt in die Recorder-Datenbank (Verlauf und Statistik). Ein Backup entsteht zuerst; die alten Werte lassen sich aus dem Journal zurückspielen.", reason_counter_partial: "Eine der Tabellen kann nicht repariert werden (zu wenig Werte davor oder danach); die anderen schon.",
   reason_no_counter_statistics: "Für diese ID gibt es keine Summenstatistik des Recorders.", reason_nothing_found: "Es gibt nichts zu ändern.", reason_too_many_rows: "Zu viele Zeilen für einen Lauf (mehr als 5000); den Zeitraum erst von Hand eingrenzen.",
@@ -7149,7 +7156,7 @@ Object.assign(TEXT.en, {
   counterNone: "No outliers found.", counterChecked: "{count} sensors checked.", counterPreview: "Create preview", counterFix: "Clean up this finding", rangePreview: "Clean up this range",
   counterFound: "{range}: lowest value {low} {unit} instead of about {good} {unit}", counterFinding: "{range}: values between {low} and {high} {unit}; good values before {before} and after {after} {unit}.",
   counterRows: "{states} history values, {short} 5-minute rows and {long} hourly rows change; the sum is corrected in {tail} later statistics rows.",
-  counterSkipped: "{table}: {count} finding(s) cannot be repaired (no good values before or after).", counterTable_short_term: "5-minute rows", counterTable_long_term: "Hourly rows",
+  counterSkipped: "{table}: {count} finding(s) cannot be repaired (no good values before or after).", counterTable_states: "History values", counterTable_short_term: "5-minute rows", counterTable_long_term: "Hourly rows",
   counterOriginal: "original", counterRepaired: "repaired", counterChartLabel: "Readings before and after the repair", counterUndone: "The old values are back.",
   reason_counter_write: "Writes into the recorder database (history and statistics). A backup is created first; the old values can be put back from the journal.", reason_counter_partial: "One of the tables cannot be repaired (too few values before or after); the others can.",
   reason_no_counter_statistics: "The recorder has no sum statistics for this ID.", reason_nothing_found: "There is nothing to change.", reason_too_many_rows: "Too many rows for one run (more than 5000); narrow the period down by hand first.",
@@ -7166,7 +7173,7 @@ Object.assign(TEXT.de, {
   rangeMode_hold: "Letzter guter Wert (empfohlen)", rangeMode_interpolate: "Gerade Linie zum nächsten guten Wert", rangeMode_fixed: "Fester Wert",
   rangeKind_counter: "Zähler", rangeKind_measurement: "Messwert",
   rangeWhat: "{kind}, Zeitraum {range}, ersetzt durch: {mode}.", rangeBracket: "Gute Werte davor {before} und danach {after}.",
-  rangeAvail: "Für den Zeitraum gibt es {states} Verlaufswerte (roh), {short} 5-Minuten-Werte und {long} Stundenwerte.", rangeGone: "{table}: für diesen Zeitraum nicht mehr vorhanden (Aufbewahrung abgelaufen); dort wird nichts angefasst.",
+  rangeAvail: "Für den Zeitraum gibt es {states} Verlaufswerte, {short} 5-Minuten-Werte und {long} Stundenwerte.", rangeGone: "{table}: für diesen Zeitraum nicht mehr vorhanden (Aufbewahrung abgelaufen); dort wird nichts angefasst.",
   rangeEstimated: "{count} Stundenwerte lassen sich ohne 5-Minuten-Werte nicht neu berechnen; sie bekommen den Ersatzwert als Schätzung.", rangeTail: "Die Summe wird in {short} späteren 5-Minuten-Zeilen und {long} späteren Stundenzeilen berichtigt.",
   rangeMoreRows: "… und {count} weitere Zeilen", rangeNothingHere: "In dieser Tabelle ändert sich nichts.",
   rangeCol_state: "Stand", rangeCol_sum: "Summe", rangeCol_mean: "Mittel", rangeCol_min: "Min", rangeCol_max: "Max",
@@ -7181,7 +7188,7 @@ Object.assign(TEXT.en, {
   rangeMode_hold: "Last good value (recommended)", rangeMode_interpolate: "Straight line to the next good value", rangeMode_fixed: "Fixed value",
   rangeKind_counter: "Counter", rangeKind_measurement: "Measurement",
   rangeWhat: "{kind}, period {range}, replaced by: {mode}.", rangeBracket: "Good values before {before} and after {after}.",
-  rangeAvail: "For the period there are {states} raw history values, {short} 5-minute rows and {long} hourly rows.", rangeGone: "{table}: no longer there for this period (retention expired); nothing is touched there.",
+  rangeAvail: "For the period there are {states} history values, {short} 5-minute rows and {long} hourly rows.", rangeGone: "{table}: no longer there for this period (retention expired); nothing is touched there.",
   rangeEstimated: "{count} hourly rows cannot be recalculated without 5-minute rows; they get the replacement value as an estimate.", rangeTail: "The sum is corrected in {short} later 5-minute rows and {long} later hourly rows.",
   rangeMoreRows: "… and {count} more rows", rangeNothingHere: "Nothing changes in this table.",
   rangeCol_state: "Reading", rangeCol_sum: "Sum", rangeCol_mean: "Mean", rangeCol_min: "Min", rangeCol_max: "Max",
@@ -7857,11 +7864,13 @@ class ExcludeMixin {
 // Mixed into the panel in 99-register.js; the plan card itself is built in 18-cleanup.js.
 Object.assign(TEXT.de, {
   wzLabel: "Schritte des Plans", wzReview: "Prüfen", wzConfirm: "Bestätigen", wzRun: "Ausführen", wzResult: "Ergebnis",
-  wzFlow: "Ablauf im Detail", wzIdleTitle: "Nichts auszuführen", wzIdleBlocked: "Alle {n} Einträge sind blockiert. Die Gründe stehen bei den Einträgen.", wzIdleNone: "Dieser Plan enthält keine ausführbare Aktion.", wzBack: "Zurück",
+  wzFlow: "Ablauf im Detail", wzIdleTitle: "Nichts auszuführen", wzIdleBlocked: "Alle {n} Einträge sind blockiert. Die Gründe stehen bei den Einträgen.", wzIdleBlockedOne: "Der Eintrag ist blockiert. Den Grund siehst du beim Eintrag.",
+  wzIdleNothingTitle: "Nichts zu ändern", wzIdleNothing: "Housekeeper hat geprüft und nichts gefunden, das sich ändern ließe. Du musst nichts tun.", verdictNothing: "Nichts zu ändern", wzIdleNone: "Dieser Plan enthält keine ausführbare Aktion.", wzBack: "Zurück",
 });
 Object.assign(TEXT.en, {
   wzLabel: "Steps of the plan", wzReview: "Review", wzConfirm: "Confirm", wzRun: "Run", wzResult: "Result",
-  wzFlow: "Flow in detail", wzIdleTitle: "Nothing to run", wzIdleBlocked: "All {n} entries are blocked. The reasons are shown with the entries.", wzIdleNone: "This plan holds no action that can run.", wzBack: "Back",
+  wzFlow: "Flow in detail", wzIdleTitle: "Nothing to run", wzIdleBlocked: "All {n} entries are blocked. The reasons are shown with the entries.", wzIdleBlockedOne: "The entry is blocked. Its reason is shown with the entry.",
+  wzIdleNothingTitle: "Nothing to change", wzIdleNothing: "Housekeeper checked and found nothing that could be changed. You do not need to do anything.", verdictNothing: "Nothing to change", wzIdleNone: "This plan holds no action that can run.", wzBack: "Back",
 });
 
 class PlanWizardMixin {
@@ -8830,12 +8839,12 @@ class DetailEditMixin {
     const e = this.detailEdit?.id === item.object_id ? this.detailEdit : (this.detailEdit = { id: item.object_id, value: item.object_id.split(".").slice(1).join("."), area: item.area_id || "", error: "" });
     const areas = (this.data.objects || []).filter(o => o.object_type === "area").sort((x, y) => String(x.name).localeCompare(String(y.name)));
     const now = this.areaName(item);
-    const rename = item.object_type === "entity" ? `<form class="polform" data-de-rename><label for="de-id"><strong>${this.t("deNewId")}</strong></label>
-        <span class="mono">${this.esc(item.object_id.split(".")[0])}.</span><input id="de-id" data-de-id value="${this.esc(e.value)}" autocomplete="off" spellcheck="false">
+    const rename = item.object_type === "entity" ? `<form class="deform" data-de-rename><label for="de-id"><strong>${this.t("deNewId")}</strong></label>
+        <span class="deid"><span class="mono">${this.esc(item.object_id.split(".")[0])}.</span><input id="de-id" data-de-id value="${this.esc(e.value)}" autocomplete="off" spellcheck="false"></span>
         <button type="submit" class="btn primary" data-de-rename-btn ${this.detailIdOk(item, e.value) && !this.planBusy ? "" : "disabled"}>${this.t("deRename")}</button>
         <small class="factnote">${this.t("deRenameNote")}</small></form>` : "";
     const suggest = !item.area_id;
-    const assign = areas.length ? `<form class="polform" data-de-area><label for="de-area"><strong>${this.t("deArea")}</strong></label>
+    const assign = areas.length ? `<form class="deform" data-de-area><label for="de-area"><strong>${this.t("deArea")}</strong></label>
         <select id="de-area" data-de-area-select>${suggest ? `<option value="">${this.t("areaSuggest")}</option>` : ""}${areas.map(a => `<option value="${this.esc(a.object_id)}" ${e.area === a.object_id ? "selected" : ""}>${this.esc(a.name)}</option>`).join("")}</select>
         <button type="submit" class="btn primary" data-de-area-btn ${(suggest || e.area !== item.area_id) && !this.planBusy ? "" : "disabled"}>${this.t("deAssign")}</button>
         <small class="factnote">${this.t("deAreaNow", { area: now || this.t("deNoArea") })}${suggest ? ` · ${this.t("areaNote")}` : ""}</small></form>` : `<small class="factnote">${this.t("areaNone")}</small>`;

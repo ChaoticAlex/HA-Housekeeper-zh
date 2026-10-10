@@ -11,7 +11,7 @@ class CounterMixin {
 
   // The reading before and after the repair around one glitch: original dashed, repaired solid.
   counterChart(series) {
-    if (!series || series.length < 3) return "";
+    if (!series || series.length < 3 || series.every(p => p[1] === p[2])) return ""; // nothing differs, so nothing to draw
     const w = 360, h = 90, pad = 4;
     const xs = series.map(p => p[0]), ys = series.flatMap(p => [p[1], p[2]]);
     const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
@@ -56,8 +56,10 @@ class CounterMixin {
     const range = c.range || action.range || {}, counts = c.counts || {}, avail = c.available || {}, d = c.detail || {};
     const line = text => `<small class="u-block">${this.esc(text)}</small>`;
     const warn = text => `<small class="u-amber u-block">${this.esc(text)}</small>`;
+    const idle = (action.reasons || []).length > 0 && action.reasons.every(r => NOTHING_REASONS.includes(r));
     const out = [line(this.t("rangeWhat", { kind: this.t(`rangeKind_${c.kind || "counter"}`), range: `${this.formatDate(range.from * 1000)} – ${this.formatDate(range.to * 1000)}`, mode: this.t(`rangeMode_${action.mode || "hold"}`) + (range.fixed != null ? ` (${n(range.fixed)})` : "") }))];
     if (c.bracket) out.push(line(this.t("rangeBracket", { before: n(c.bracket[1]), after: n(c.bracket[3]) })));
+    if (idle) return `<span class="u-pt6 u-block">${out.join("")}</span>`; // no tables, no chart: there is nothing to show
     out.push(line(this.t("rangeAvail", { states: this.formatNumber(avail.states || 0), short: this.formatNumber(avail.short_term || 0), long: this.formatNumber(avail.long_term || 0) })));
     for (const t of ["states", "short_term", "long_term"]) if (c.available && !avail[t]) out.push(warn(this.t("rangeGone", { table: this.t(`counterTable_${t}`) })));
     if (counts.estimated_long_term) out.push(warn(this.t("rangeEstimated", { count: this.formatNumber(counts.estimated_long_term) })));
@@ -217,7 +219,7 @@ Object.assign(TEXT.de, {
   counterNone: "Keine Ausreißer gefunden.", counterChecked: "{count} Sensoren geprüft.", counterPreview: "Vorschau erstellen", counterFix: "Diesen Fund bereinigen", rangePreview: "Zeitraum bereinigen",
   counterFound: "{range}: niedrigster Wert {low} {unit} statt etwa {good} {unit}", counterFinding: "{range}: Werte zwischen {low} und {high} {unit}; gute Werte davor {before} und danach {after} {unit}.",
   counterRows: "Geändert werden {states} Verlaufswerte, {short} 5-Minuten-Werte und {long} Stundenwerte; die Summe wird in {tail} späteren Statistikzeilen berichtigt.",
-  counterSkipped: "{table}: {count} Fund(e) nicht reparierbar (keine guten Werte davor oder danach).", counterTable_short_term: "5-Minuten-Werte", counterTable_long_term: "Stundenwerte",
+  counterSkipped: "{table}: {count} Fund(e) nicht reparierbar (keine guten Werte davor oder danach).", counterTable_states: "Verlaufswerte", counterTable_short_term: "5-Minuten-Werte", counterTable_long_term: "Stundenwerte",
   counterOriginal: "Original", counterRepaired: "repariert", counterChartLabel: "Verlauf vor und nach der Reparatur", counterUndone: "Die alten Werte sind wieder eingesetzt.",
   reason_counter_write: "Schreibt in die Recorder-Datenbank (Verlauf und Statistik). Ein Backup entsteht zuerst; die alten Werte lassen sich aus dem Journal zurückspielen.", reason_counter_partial: "Eine der Tabellen kann nicht repariert werden (zu wenig Werte davor oder danach); die anderen schon.",
   reason_no_counter_statistics: "Für diese ID gibt es keine Summenstatistik des Recorders.", reason_nothing_found: "Es gibt nichts zu ändern.", reason_too_many_rows: "Zu viele Zeilen für einen Lauf (mehr als 5000); den Zeitraum erst von Hand eingrenzen.",
@@ -237,7 +239,7 @@ Object.assign(TEXT.en, {
   counterNone: "No outliers found.", counterChecked: "{count} sensors checked.", counterPreview: "Create preview", counterFix: "Clean up this finding", rangePreview: "Clean up this range",
   counterFound: "{range}: lowest value {low} {unit} instead of about {good} {unit}", counterFinding: "{range}: values between {low} and {high} {unit}; good values before {before} and after {after} {unit}.",
   counterRows: "{states} history values, {short} 5-minute rows and {long} hourly rows change; the sum is corrected in {tail} later statistics rows.",
-  counterSkipped: "{table}: {count} finding(s) cannot be repaired (no good values before or after).", counterTable_short_term: "5-minute rows", counterTable_long_term: "Hourly rows",
+  counterSkipped: "{table}: {count} finding(s) cannot be repaired (no good values before or after).", counterTable_states: "History values", counterTable_short_term: "5-minute rows", counterTable_long_term: "Hourly rows",
   counterOriginal: "original", counterRepaired: "repaired", counterChartLabel: "Readings before and after the repair", counterUndone: "The old values are back.",
   reason_counter_write: "Writes into the recorder database (history and statistics). A backup is created first; the old values can be put back from the journal.", reason_counter_partial: "One of the tables cannot be repaired (too few values before or after); the others can.",
   reason_no_counter_statistics: "The recorder has no sum statistics for this ID.", reason_nothing_found: "There is nothing to change.", reason_too_many_rows: "Too many rows for one run (more than 5000); narrow the period down by hand first.",
@@ -254,7 +256,7 @@ Object.assign(TEXT.de, {
   rangeMode_hold: "Letzter guter Wert (empfohlen)", rangeMode_interpolate: "Gerade Linie zum nächsten guten Wert", rangeMode_fixed: "Fester Wert",
   rangeKind_counter: "Zähler", rangeKind_measurement: "Messwert",
   rangeWhat: "{kind}, Zeitraum {range}, ersetzt durch: {mode}.", rangeBracket: "Gute Werte davor {before} und danach {after}.",
-  rangeAvail: "Für den Zeitraum gibt es {states} Verlaufswerte (roh), {short} 5-Minuten-Werte und {long} Stundenwerte.", rangeGone: "{table}: für diesen Zeitraum nicht mehr vorhanden (Aufbewahrung abgelaufen); dort wird nichts angefasst.",
+  rangeAvail: "Für den Zeitraum gibt es {states} Verlaufswerte, {short} 5-Minuten-Werte und {long} Stundenwerte.", rangeGone: "{table}: für diesen Zeitraum nicht mehr vorhanden (Aufbewahrung abgelaufen); dort wird nichts angefasst.",
   rangeEstimated: "{count} Stundenwerte lassen sich ohne 5-Minuten-Werte nicht neu berechnen; sie bekommen den Ersatzwert als Schätzung.", rangeTail: "Die Summe wird in {short} späteren 5-Minuten-Zeilen und {long} späteren Stundenzeilen berichtigt.",
   rangeMoreRows: "… und {count} weitere Zeilen", rangeNothingHere: "In dieser Tabelle ändert sich nichts.",
   rangeCol_state: "Stand", rangeCol_sum: "Summe", rangeCol_mean: "Mittel", rangeCol_min: "Min", rangeCol_max: "Max",
@@ -269,7 +271,7 @@ Object.assign(TEXT.en, {
   rangeMode_hold: "Last good value (recommended)", rangeMode_interpolate: "Straight line to the next good value", rangeMode_fixed: "Fixed value",
   rangeKind_counter: "Counter", rangeKind_measurement: "Measurement",
   rangeWhat: "{kind}, period {range}, replaced by: {mode}.", rangeBracket: "Good values before {before} and after {after}.",
-  rangeAvail: "For the period there are {states} raw history values, {short} 5-minute rows and {long} hourly rows.", rangeGone: "{table}: no longer there for this period (retention expired); nothing is touched there.",
+  rangeAvail: "For the period there are {states} history values, {short} 5-minute rows and {long} hourly rows.", rangeGone: "{table}: no longer there for this period (retention expired); nothing is touched there.",
   rangeEstimated: "{count} hourly rows cannot be recalculated without 5-minute rows; they get the replacement value as an estimate.", rangeTail: "The sum is corrected in {short} later 5-minute rows and {long} later hourly rows.",
   rangeMoreRows: "… and {count} more rows", rangeNothingHere: "Nothing changes in this table.",
   rangeCol_state: "Reading", rangeCol_sum: "Sum", rangeCol_mean: "Mean", rangeCol_min: "Min", rangeCol_max: "Max",
