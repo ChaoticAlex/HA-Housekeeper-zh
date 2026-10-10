@@ -52,7 +52,8 @@ class StormsMixin {
     const chain = group.items.map(f => this.stormFollowers(f.followers)).find(Boolean);
     const used = chain ? `<li><span>${this.t("stormDependsLabel")}</span><span>${this.esc(chain)} ${this.t("stormDependsNote")}</span></li>` : "";
     const done = group.type === "entities" && (this.excludeSel.has(first.entity_id) || this.excludedIds().has(first.entity_id));
-    const actions = group.type === "entities" ? `<div class="stormactions"><button class="btn" data-object="entity:${this.esc(first.entity_id)}">${this.t("stormDetails")}</button><button class="btn quiet" data-storm-mark="${this.esc(first.entity_id)}" ${done ? "disabled" : ""}>${this.t("stormMarkExclude")}</button></div>` : "";
+    const entry = group.type === "integrations" && first.entry_id && this.findObject(`config_entry:${first.entry_id}`) ? `<div class="stormactions"><button class="btn" data-object="config_entry:${this.esc(first.entry_id)}">${this.t("stormDetails")}</button></div>` : "";
+    const actions = entry || (group.type === "entities" ? `<div class="stormactions"><button class="btn" data-object="entity:${this.esc(first.entity_id)}">${this.t("stormDetails")}</button><button class="btn quiet" data-storm-mark="${this.esc(first.entity_id)}" ${done ? "disabled" : ""}>${this.t("stormMarkExclude")}</button></div>` : "");
     return `<div class="stormgroup"><div class="stormtop"><div><strong>${this.esc(title)}</strong>${id}</div><span class="stormbadges">${badges}</span></div><ul class="stormfinds">${lines}${used}</ul>${actions}</div>`;
   }
 
