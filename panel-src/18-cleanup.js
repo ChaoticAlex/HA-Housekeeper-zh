@@ -1,4 +1,6 @@
 // CleanupMixin: methods of the panel element, mixed into the class in 99-register.js.
+const OPEN_DETAIL_KINDS = ["replace_references", "rename_entity", "migrate_meter"]; // their preview is the point of the row, so it stays open
+
 class CleanupMixin {
   // Days since an ISO timestamp, never negative.
   daysSince(value) {
@@ -116,23 +118,28 @@ class CleanupMixin {
     return `<div class="srclist"><small class="u-block">${this.t("replaceSummary", { count: total, sources: open.length })}</small>${shown.map(block).join("")}${foldedHtml}${byHand}</div>`;
   }
 
-  // What a meter change will do: copied hours, the shift of the total, the ID move, and the transition.
+  // What a meter change will do: the timeline of the two series, the facts behind it, the ID move and the transition.
   meterDetail(action) {
     const s = action.statistics || {}, lines = [];
-    const day = ts => this.formatDate(ts * 1000);
-    if (action.mode !== "id" && s.import_count) {
-      lines.push(this.t("meterCopy", { count: s.import_count, from: day(s.old_first), to: day(s.old_last) }));
-      if (s.switch) lines.push(this.t("meterSwitch", { date: day(s.switch) }));
-      if (s.offset !== null && s.offset !== undefined) lines.push(this.t("meterOffset", { offset: this.formatNumber(Math.round(s.offset * 1000) / 1000), unit: s.unit || "" }));
-      if (s.dropped_overlap) lines.push(this.t("meterOverlap", { count: s.dropped_overlap }));
-      if (s.gap_hours > 0) lines.push(this.t("meterGap", { hours: s.gap_hours }));
+    const day = ts => this.formatDate(ts * 1000).split(",")[0];
+    const join = action.mode !== "id" && s.import_count;
+    let timeline = "", facts = "";
+    if (join) {
+      const gap = s.gap_hours > 0;
+      timeline = `<div class="mtl"><div class="mtlbar"><div class="a">${this.t("meterTlOld")}</div>${gap ? `<div class="gap">${this.t("meterTlGap", { hours: s.gap_hours })}</div>` : ""}<div class="b">${this.t("meterTlNew")}</div></div><div class="mtlaxis"><span>${this.esc(day(s.old_first))}</span><span>${s.switch ? this.esc(day(s.switch)) : ""}</span><span>${this.t("meterTlNow")}</span></div></div>`;
+      const fact = (head, text) => `<div class="mfact"><b>${head}</b><small>${this.esc(text)}</small></div>`;
+      const list = [fact(this.t("meterFactCopy", { count: this.formatNumber(s.import_count) }), this.t("meterFactCopyText", { from: day(s.old_first), to: day(s.old_last) }))];
+      if (s.offset !== null && s.offset !== undefined) list.push(fact(`+${this.formatNumber(Math.round(s.offset * 1000) / 1000)} ${this.esc(s.unit || "")}`, this.t("meterFactOffset")));
+      if (s.dropped_overlap) list.push(fact(this.t("meterFactOverlap", { count: s.dropped_overlap }), this.t("meterFactOverlapText")));
+      if (s.gap_hours > 0) list.push(fact(this.t("meterFactGap", { hours: s.gap_hours }), this.t("meterFactGapText")));
+      facts = `<div class="mfacts">${list.join("")}</div>`;
     }
     if (action.mode !== "statistics" && action.alt_id) lines.push(this.t("meterIdMove", { old: action.object_id, alt: action.alt_id, new: action.target }));
     const before = (s.preview?.before || []), after = (s.preview?.after || []);
     const cell = row => `${this.esc(day(row.start))}: ${this.esc(this.formatNumber(Math.round((row.sum_after ?? row.sum ?? 0) * 1000) / 1000))}`;
-    const rows = before.length || after.length ? `<small class="u-dim u-block">${this.t("meterPreviewRows")}: ${[...before, ...after].map(cell).join(" · ")}</small>` : "";
+    const rows = before.length || after.length ? `<details class="rowdetails"><summary>${this.t("meterPreviewRows")}</summary><small class="u-dim u-block">${[...before, ...after].map(cell).join(" · ")}</small></details>` : "";
     const kept = action.result?.statistics_kept ? `<small class="u-block">${this.t("meterStatsKept")}</small>` : "";
-    return `<span class="u-pt6 u-block">${lines.map(l => `<small class="u-block">${this.esc(l)}</small>`).join("")}${rows}${kept}</span>`;
+    return `<span class="u-pt6 u-block">${timeline}${facts}${lines.map(l => `<small class="u-block">${this.esc(l)}</small>`).join("")}${rows}${kept}</span>`;
   }
 
   // Recorder purges are no plans and cannot be undone; the journal only notes them.
@@ -379,7 +386,7 @@ class CleanupMixin {
         ? `<span class="askrow"><span>${this.t("undoAskOne")}</span><button class="btn danger" data-undo-one-yes="${this.esc(a.object_id)}">${this.t("undoYes")}</button><button class="btn accent" data-undo-no>${this.t("cancelRun")}</button></span>`
         : `<button class="btn accent" data-undo-one="${this.esc(a.object_id)}"><ha-icon icon="mdi:undo-variant"></ha-icon>${this.t("undoOne")}</button>`;
       return `<div class="row planrow ${a.verdict === "blocked" ? "dim" : ""}"><span class="tile ${tone}"><ha-icon icon="${settled || idle || a.verdict === "ok" ? "mdi:check" : a.verdict === "review" ? "mdi:alert-outline" : "mdi:close-octagon-outline"}"></ha-icon></span>
-        <span class="row-text"><strong>${obj ? `<button class="link" data-object="${this.esc(`${type}:${a.object_id}`)}">${this.esc(a.name)}</button>` : this.esc(a.name)}</strong><small>${this.esc([sub, reasons, abort.replace(/^ · /, "")].filter(Boolean).join(" · "))}</small>${ack}${["replace_references", "rename_entity"].includes(a.kind) ? sources : ""}${(["replace_references", "rename_entity"].includes(a.kind) ? "" : sources) || uses ? `<details class="rowdetails"><summary>${this.t("planDetails")}</summary>${["replace_references", "rename_entity"].includes(a.kind) ? "" : sources}${uses ? `<span class="chips" style="padding:6px 0 0;border:0">${uses}${more}</span>` : ""}</details>` : ""}</span>
+        <span class="row-text"><strong>${obj ? `<button class="link" data-object="${this.esc(`${type}:${a.object_id}`)}">${this.esc(a.name)}</button>` : this.esc(a.name)}</strong><small>${this.esc([sub, reasons, abort.replace(/^ · /, "")].filter(Boolean).join(" · "))}</small>${ack}${OPEN_DETAIL_KINDS.includes(a.kind) ? sources : ""}${(OPEN_DETAIL_KINDS.includes(a.kind) ? "" : sources) || uses ? `<details class="rowdetails"><summary>${this.t("planDetails")}</summary>${OPEN_DETAIL_KINDS.includes(a.kind) ? "" : sources}${uses ? `<span class="chips" style="padding:6px 0 0;border:0">${uses}${more}</span>` : ""}</details>` : ""}</span>
         <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">${resultPill}${undo}${a.executable && (result || !(a.reasons || []).includes("irreversible")) ? this.undoBadge(a) : ""}${result ? "" : `<span class="pill ${tone}">${this.t(idle ? "verdictNothing" : a.verdict === "review" && (a.reasons || []).includes("irreversible") ? "verdictIrreversible" : `verdict_${a.verdict}`)}</span>`}</span></div>`;
     });
     const extra = [sm.uses ? this.t("planUses", { count: sm.uses }) : "", sm.statistics ? this.t("planStats", { count: sm.statistics }) : ""].filter(Boolean).join(" · ");
@@ -452,16 +459,32 @@ class CleanupMixin {
       ${hints}<div class="setrow planfoot"><small class="u-m0">${this.t("cleanupDryRun")}</small><button class="btn primary" data-plan-create ${ready ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("replacePreview")}</button></div></div>`;
   }
 
+  // The checks that the panel can make before any preview: unit, classes and statistics of the two meters.
+  meterChecks(old, nu) {
+    if (!old || !nu) return "";
+    const line = (tone, text) => `<div class="mcheck"><span class="${tone}-t">${tone === "ok" ? "✓" : "!"}</span><span>${text}</span></div>`;
+    const lines = [];
+    const same = (a, b) => (a ?? "") === (b ?? "");
+    lines.push(same(old.unit, nu.unit) && same(old.device_class, nu.device_class) && same(old.state_class, nu.state_class)
+      ? line("ok", this.t("meterCheckSame", { unit: this.esc(old.unit || "–"), cls: this.esc(old.state_class || "–") }))
+      : line("warn", this.t("meterCheckDiffer")));
+    lines.push(old.has_statistics ? line("ok", this.t("meterCheckStats")) : line("warn", this.t("meterCheckNoStats")));
+    lines.push(`<div class="mcheck"><span class="warn-t">!</span><span>${this.t("meterCheckRefs")} <button class="link" data-meter-refs>${this.t("meterCheckRefsGo")}</button></span></div>`);
+    return lines.join("");
+  }
+
   // Join a replaced meter's history to its successor and/or let the successor take over the ID.
   meterCard() {
     const entities = this.data.objects.filter(o => o.object_type === "entity");
     const byId = new Map(entities.map(o => [o.object_id, o]));
-    const modes = [["both", "meterModeBoth"], ["statistics", "meterModeStatistics"], ["id", "meterModeId"]];
+    const modes = ["both", "statistics", "id"];
     const ready = this.meterOld && this.meterNew && !this.cleanupBusy;
+    const cards = `<div class="modecards" role="radiogroup" aria-label="${this.esc(this.t("meterMode"))}">${modes.map(m => `<button class="modecard${this.meterMode === m ? " on" : ""}" role="radio" aria-checked="${this.meterMode === m}" data-meter-mode="${m}"><strong>${this.t(`meterCard_${m}`)}${m === "both" ? ` <span class="pill ok">${this.t("meterUsual")}</span>` : ""}</strong><small>${this.t(`meterCardHint_${m}`)}</small><small class="modefollow">${this.t(`meterCardFollow_${m}`)}</small></button>`).join("")}</div>`;
     return `<div class="panel" style="overflow:visible"><div class="panelhead"><div><h2>${this.t("meterTitle")}</h2><p>${this.t("meterHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
       <div class="setrow"><div><label>${this.t("meterOld")}</label></div>${this.pickerBox("meterOld", "sensor.old_meter")}</div>
       <div class="setrow"><div><label>${this.t("meterNew")}</label></div>${this.pickerBox("meterNew", "sensor.new_meter")}</div>
-      <div class="setrow"><div><label>${this.t("meterMode")}</label></div><select data-meter-mode style="max-width:460px">${modes.map(([value, label]) => `<option value="${value}" ${this.meterMode === value ? "selected" : ""}>${this.t(label)}</option>`).join("")}</select></div>
+      ${this.meterChecks(byId.get(this.meterOld), byId.get(this.meterNew))}
+      <div class="setrow"><div><label>${this.t("meterMode")}</label></div></div>${cards}
       ${this.successorHints(this.meterOld, byId.get(this.meterOld)?.unit, "data-meter-pick")}<div class="setrow planfoot"><small class="u-m0">${this.t("cleanupDryRun")}</small><button class="btn primary" data-plan-create ${ready ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("replacePreview")}</button></div></div>`;
   }
 

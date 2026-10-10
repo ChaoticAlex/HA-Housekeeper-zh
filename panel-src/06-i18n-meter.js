@@ -76,3 +76,29 @@ Object.assign(TEXT.en, {
   preflightAfterTitle: "Since the update: Home Assistant {from} → {to}", preflightAfterNone: "Nothing new has shown up since the saved state.",
   pfNewRepairs: "New repairs", pfNewFailed: "Newly failed integrations", pfNewBroken: "New missing references", pfNoRecord: "No starting state saved yet.",
 });
+Object.assign(TEXT.de, {
+  meterCard_both: "Statistik und ID", meterCard_statistics: "Nur Statistik", meterCard_id: "Nur ID", meterUsual: "üblich",
+  meterCardHint_both: "Die alte Statistik wird an die neue gehängt. Die neue Entität übernimmt die ID des alten Zählers.", meterCardHint_statistics: "Die Statistik wird verbunden, beide Entitäten behalten ihre IDs.", meterCardHint_id: "Die neue Entität übernimmt die ID, die Statistik bleibt getrennt.",
+  meterCardFollow_both: "Automationen laufen ohne Änderung weiter.", meterCardFollow_statistics: "Verweise müssen auf die neue Entität zeigen.", meterCardFollow_id: "Die Kurve springt beim Wechsel, die Statistik beginnt neu.",
+  meterCheckSame: "Gleiche Einheit ({unit}), gleiche Geräteklasse und gleiche Zustandsklasse ({cls})", meterCheckDiffer: "Einheit oder Klasse der beiden Zähler unterscheiden sich. Prüfe, ob der Wechsel sinnvoll ist.",
+  meterCheckStats: "Der alte Zähler hat Statistik, die fortgeführt werden kann", meterCheckNoStats: "Der alte Zähler hat keine Statistik: es gibt nichts zu verbinden",
+  meterCheckRefs: "Verweise in Automationen und Dashboards ändert dieser Schritt nicht.", meterCheckRefsGo: "Verweise ersetzen",
+  meterTlOld: "alter Zähler", meterTlNew: "neuer Zähler", meterTlGap: "Lücke {hours} h", meterTlNow: "heute",
+  meterFactCopy: "{count} Stunden", meterFactCopyText: "der alten Statistik ({from} bis {to}) werden vor die neue gehängt",
+  meterFactOffset: "Die Summe des neuen Zählers wird um diesen Wert gehoben, damit die Kurve nicht auf null fällt",
+  meterFactOverlap: "{count} Stunden doppelt", meterFactOverlapText: "Überlappende Werte des alten Zählers werden nicht kopiert; vorhandene Werte werden nie überschrieben",
+  meterFactGap: "Lücke von {hours} Stunden", meterFactGapText: "In dieser Zeit gibt es keine Werte; sie bleibt leer",
+});
+Object.assign(TEXT.en, {
+  meterCard_both: "Statistics and ID", meterCard_statistics: "Statistics only", meterCard_id: "ID only", meterUsual: "usual",
+  meterCardHint_both: "The old statistics are attached to the new ones. The new entity takes over the old meter's ID.", meterCardHint_statistics: "The statistics are joined, both entities keep their IDs.", meterCardHint_id: "The new entity takes over the ID, the statistics stay separate.",
+  meterCardFollow_both: "Automations keep working unchanged.", meterCardFollow_statistics: "References have to point at the new entity.", meterCardFollow_id: "The curve jumps at the switch, the statistics start anew.",
+  meterCheckSame: "Same unit ({unit}), same device class and same state class ({cls})", meterCheckDiffer: "Unit or class of the two meters differ. Check whether the switch makes sense.",
+  meterCheckStats: "The old meter has statistics that can be continued", meterCheckNoStats: "The old meter has no statistics: there is nothing to join",
+  meterCheckRefs: "This step does not change references in automations and dashboards.", meterCheckRefsGo: "Replace references",
+  meterTlOld: "old meter", meterTlNew: "new meter", meterTlGap: "gap {hours} h", meterTlNow: "today",
+  meterFactCopy: "{count} hourly values", meterFactCopyText: "of the old statistics ({from} to {to}) are put in front of the new ones",
+  meterFactOffset: "The new meter's total is raised by this value so the curve does not drop to zero",
+  meterFactOverlap: "{count} hours twice", meterFactOverlapText: "Overlapping values of the old meter are not copied; existing values are never overwritten",
+  meterFactGap: "Gap of {hours} hours", meterFactGapText: "There are no values in this time; it stays empty",
+});

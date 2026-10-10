@@ -689,6 +689,32 @@ Object.assign(TEXT.en, {
   preflightAfterTitle: "Since the update: Home Assistant {from} → {to}", preflightAfterNone: "Nothing new has shown up since the saved state.",
   pfNewRepairs: "New repairs", pfNewFailed: "Newly failed integrations", pfNewBroken: "New missing references", pfNoRecord: "No starting state saved yet.",
 });
+Object.assign(TEXT.de, {
+  meterCard_both: "Statistik und ID", meterCard_statistics: "Nur Statistik", meterCard_id: "Nur ID", meterUsual: "üblich",
+  meterCardHint_both: "Die alte Statistik wird an die neue gehängt. Die neue Entität übernimmt die ID des alten Zählers.", meterCardHint_statistics: "Die Statistik wird verbunden, beide Entitäten behalten ihre IDs.", meterCardHint_id: "Die neue Entität übernimmt die ID, die Statistik bleibt getrennt.",
+  meterCardFollow_both: "Automationen laufen ohne Änderung weiter.", meterCardFollow_statistics: "Verweise müssen auf die neue Entität zeigen.", meterCardFollow_id: "Die Kurve springt beim Wechsel, die Statistik beginnt neu.",
+  meterCheckSame: "Gleiche Einheit ({unit}), gleiche Geräteklasse und gleiche Zustandsklasse ({cls})", meterCheckDiffer: "Einheit oder Klasse der beiden Zähler unterscheiden sich. Prüfe, ob der Wechsel sinnvoll ist.",
+  meterCheckStats: "Der alte Zähler hat Statistik, die fortgeführt werden kann", meterCheckNoStats: "Der alte Zähler hat keine Statistik: es gibt nichts zu verbinden",
+  meterCheckRefs: "Verweise in Automationen und Dashboards ändert dieser Schritt nicht.", meterCheckRefsGo: "Verweise ersetzen",
+  meterTlOld: "alter Zähler", meterTlNew: "neuer Zähler", meterTlGap: "Lücke {hours} h", meterTlNow: "heute",
+  meterFactCopy: "{count} Stunden", meterFactCopyText: "der alten Statistik ({from} bis {to}) werden vor die neue gehängt",
+  meterFactOffset: "Die Summe des neuen Zählers wird um diesen Wert gehoben, damit die Kurve nicht auf null fällt",
+  meterFactOverlap: "{count} Stunden doppelt", meterFactOverlapText: "Überlappende Werte des alten Zählers werden nicht kopiert; vorhandene Werte werden nie überschrieben",
+  meterFactGap: "Lücke von {hours} Stunden", meterFactGapText: "In dieser Zeit gibt es keine Werte; sie bleibt leer",
+});
+Object.assign(TEXT.en, {
+  meterCard_both: "Statistics and ID", meterCard_statistics: "Statistics only", meterCard_id: "ID only", meterUsual: "usual",
+  meterCardHint_both: "The old statistics are attached to the new ones. The new entity takes over the old meter's ID.", meterCardHint_statistics: "The statistics are joined, both entities keep their IDs.", meterCardHint_id: "The new entity takes over the ID, the statistics stay separate.",
+  meterCardFollow_both: "Automations keep working unchanged.", meterCardFollow_statistics: "References have to point at the new entity.", meterCardFollow_id: "The curve jumps at the switch, the statistics start anew.",
+  meterCheckSame: "Same unit ({unit}), same device class and same state class ({cls})", meterCheckDiffer: "Unit or class of the two meters differ. Check whether the switch makes sense.",
+  meterCheckStats: "The old meter has statistics that can be continued", meterCheckNoStats: "The old meter has no statistics: there is nothing to join",
+  meterCheckRefs: "This step does not change references in automations and dashboards.", meterCheckRefsGo: "Replace references",
+  meterTlOld: "old meter", meterTlNew: "new meter", meterTlGap: "gap {hours} h", meterTlNow: "today",
+  meterFactCopy: "{count} hourly values", meterFactCopyText: "of the old statistics ({from} to {to}) are put in front of the new ones",
+  meterFactOffset: "The new meter's total is raised by this value so the curve does not drop to zero",
+  meterFactOverlap: "{count} hours twice", meterFactOverlapText: "Overlapping values of the old meter are not copied; existing values are never overwritten",
+  meterFactGap: "Gap of {hours} hours", meterFactGapText: "There are no values in this time; it stays empty",
+});
 
 // Texts for the backup protection card; merged into TEXT.
 Object.assign(TEXT.de, {
@@ -1243,7 +1269,7 @@ class StylesMixin {
       .headlink{all:unset;cursor:pointer;color:inherit;font:inherit}.headlink:hover{text-decoration:underline}.headlink:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px;border-radius:4px}#hk-todo-card:focus{outline:none}
       .wz .wzbtn{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;cursor:pointer;width:100%}.wz .wzbtn:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px;border-radius:4px}.xpbody{padding:14px 16px}.xpbody h3{margin:0 0 4px}.xpbody input[type=search]{width:100%;box-sizing:border-box}.xpbody .chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.xprow{cursor:pointer}.xpgrp{border:1px solid var(--hk-border);border-radius:8px;padding:10px 12px;margin:8px 0}.xpgrp>label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}.xpgrp small{display:block;color:var(--hk-muted)}.xpfmts{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.xpfmt{flex:1;min-width:150px;border:1px solid var(--hk-border);border-radius:8px;padding:10px 12px;cursor:pointer;display:grid;gap:2px}.xpfmt input{position:absolute;opacity:0;pointer-events:none}.xpfmt.on{border:2px solid var(--hk-blue);padding:9px 11px}.xpfmt:focus-within{outline:2px solid var(--hk-blue);outline-offset:2px}.xprowline{display:flex;gap:8px;margin-top:8px}.xprowline input{flex:1}.xpmeta{display:flex;justify-content:space-between;gap:8px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.xppre{max-height:320px;overflow:auto;white-space:pre-wrap}.xpact{display:flex;gap:8px}.chip.tpl{display:inline-flex;gap:4px;padding:0}.chip.tpl button{all:unset;cursor:pointer;padding:4px 8px}.chip.tpl button:focus-visible{outline:2px solid var(--hk-blue);border-radius:4px}
       .step.done{color:color-mix(in srgb,var(--hk-green) 60%,var(--hk-text))}.step.current{color:color-mix(in srgb,var(--hk-blue) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-blue) 10%,transparent)}.step.current .mark{background:var(--hk-blue);border-color:var(--hk-blue);color:var(--hk-on,#fff)}.step.failed{color:color-mix(in srgb,var(--hk-red) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-red) 9%,transparent)}.step.skipped{opacity:.85}
-      .qlight{display:none;gap:3px;margin-top:4px}.qlight i{width:9px;height:9px;border-radius:50%;background:var(--hk-muted)}.qlight i.ok{background:var(--hk-ok,#3f7d4e)}.qlight i.warn{background:var(--hk-warn,#b8860b)}.qlight i.red{background:var(--hk-red,#b3392f)}@media(max-width:700px){.qualitytable th:not(:first-child):not(:last-child),.qualitytable td:not(:first-child):not(:last-child){display:none}.qlight{display:flex}}.foldhead{width:100%}.foldbody{margin:0 0 6px 28px;border-left:2px solid var(--hk-line,rgba(128,128,128,.25))}.foldadvice{margin:6px 16px 2px}.foldhd,.expohd{margin:14px 16px 4px;font-size:calc(11px*var(--hk-fs,1));letter-spacing:.08em;text-transform:uppercase;color:var(--hk-muted)}.srclist{display:grid;gap:8px;margin-top:8px}.srcblock{border:1px solid var(--hk-border);border-radius:10px;padding:8px 10px;display:grid;gap:6px}.srchead{display:flex;gap:8px;align-items:center}.srchead small{display:block;color:var(--hk-muted)}.srcdiff{display:grid;gap:2px;font-size:calc(12.5px*var(--hk-fs,1))}.srcspot{margin-top:4px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.srcln{display:grid;grid-template-columns:18px minmax(0,1fr);padding:1px 8px;border-radius:4px;font-family:ui-monospace,monospace;overflow-wrap:anywhere}.srcln i{font-style:normal;font-weight:700}.srcln.del{background:color-mix(in srgb,var(--hk-red,#b3392f) 10%,transparent)}.srcln.add{background:color-mix(in srgb,var(--hk-ok,#3f7d4e) 12%,transparent)}.srchand{padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--hk-warn,#b8860b) 9%,transparent);font-size:calc(13px*var(--hk-fs,1))}.srchand ul{margin:4px 0 0;padding-left:18px;color:var(--hk-muted)}.rowdetails{margin-top:6px}.rowdetails summary{cursor:pointer;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}
+      .qlight{display:none;gap:3px;margin-top:4px}.qlight i{width:9px;height:9px;border-radius:50%;background:var(--hk-muted)}.qlight i.ok{background:var(--hk-ok,#3f7d4e)}.qlight i.warn{background:var(--hk-warn,#b8860b)}.qlight i.red{background:var(--hk-red,#b3392f)}@media(max-width:700px){.qualitytable th:not(:first-child):not(:last-child),.qualitytable td:not(:first-child):not(:last-child){display:none}.qlight{display:flex}}.foldhead{width:100%}.foldbody{margin:0 0 6px 28px;border-left:2px solid var(--hk-line,rgba(128,128,128,.25))}.foldadvice{margin:6px 16px 2px}.foldhd,.expohd{margin:14px 16px 4px;font-size:calc(11px*var(--hk-fs,1));letter-spacing:.08em;text-transform:uppercase;color:var(--hk-muted)}.srclist{display:grid;gap:8px;margin-top:8px}.srcblock{border:1px solid var(--hk-border);border-radius:10px;padding:8px 10px;display:grid;gap:6px}.srchead{display:flex;gap:8px;align-items:center}.srchead small{display:block;color:var(--hk-muted)}.srcdiff{display:grid;gap:2px;font-size:calc(12.5px*var(--hk-fs,1))}.srcspot{margin-top:4px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.srcln{display:grid;grid-template-columns:18px minmax(0,1fr);padding:1px 8px;border-radius:4px;font-family:ui-monospace,monospace;overflow-wrap:anywhere}.srcln i{font-style:normal;font-weight:700}.srcln.del{background:color-mix(in srgb,var(--hk-red,#b3392f) 10%,transparent)}.srcln.add{background:color-mix(in srgb,var(--hk-ok,#3f7d4e) 12%,transparent)}.srchand{padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--hk-warn,#b8860b) 9%,transparent);font-size:calc(13px*var(--hk-fs,1))}.srchand ul{margin:4px 0 0;padding-left:18px;color:var(--hk-muted)}.modecards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:4px 16px 12px}.modecard{text-align:left;font:inherit;color:inherit;background:var(--hk-surface);border:1px solid var(--hk-border);border-radius:12px;padding:12px;display:grid;gap:6px;align-content:start;cursor:pointer}.modecard.on{border-color:var(--hk-blue);box-shadow:0 0 0 2px color-mix(in srgb,var(--hk-blue) 25%,transparent)}.modecard small{color:var(--hk-muted)}.modecard .modefollow{font-weight:600}@media(max-width:700px){.modecards{grid-template-columns:1fr}}.mcheck{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;padding:4px 16px;font-size:calc(13px*var(--hk-fs,1));align-items:baseline}.mcheck .ok-t{color:var(--hk-ok,#3f7d4e);font-weight:700}.mcheck .warn-t{color:var(--hk-warn,#b8860b);font-weight:700}.mtl{display:grid;gap:4px;margin:6px 0}.mtlbar{display:flex;height:40px;border-radius:10px;overflow:hidden;border:1px solid var(--hk-border)}.mtlbar div{display:grid;place-items:center;font-size:calc(12.5px*var(--hk-fs,1));font-weight:600;padding:0 8px}.mtlbar .a{flex:5;background:color-mix(in srgb,var(--hk-blue) 18%,transparent)}.mtlbar .gap{flex:1;background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--hk-warn,#b8860b) 22%,transparent) 0 6px,transparent 6px 12px)}.mtlbar .b{flex:4;background:color-mix(in srgb,var(--hk-ok,#3f7d4e) 18%,transparent)}.mtlaxis{display:flex;justify-content:space-between;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.mfacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:6px 0}.mfacts .mfact{padding:8px 10px;border-radius:10px;background:var(--hk-soft);border:1px solid var(--hk-border)}.mfacts .mfact b{display:block}.mfacts .mfact small{color:var(--hk-muted)}.rowdetails{margin-top:6px}.rowdetails summary{cursor:pointer;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}
       .planrow{align-items:start}.planrow .row-text small{overflow:visible;white-space:normal;text-overflow:clip}
       .row.sel{background:color-mix(in srgb,var(--hk-blue) 10%,var(--hk-soft))}.row.rel .bar i{background:var(--hk-gray)}.row.sel .bar i{background:var(--hk-blue)}
       .row.rel:hover,button.row:hover{background:color-mix(in srgb,var(--hk-blue) 6%,var(--hk-soft))}
@@ -2480,6 +2506,8 @@ class SettingsMixin {
 }
 
 // CleanupMixin: methods of the panel element, mixed into the class in 99-register.js.
+const OPEN_DETAIL_KINDS = ["replace_references", "rename_entity", "migrate_meter"]; // their preview is the point of the row, so it stays open
+
 class CleanupMixin {
   // Days since an ISO timestamp, never negative.
   daysSince(value) {
@@ -2597,23 +2625,28 @@ class CleanupMixin {
     return `<div class="srclist"><small class="u-block">${this.t("replaceSummary", { count: total, sources: open.length })}</small>${shown.map(block).join("")}${foldedHtml}${byHand}</div>`;
   }
 
-  // What a meter change will do: copied hours, the shift of the total, the ID move, and the transition.
+  // What a meter change will do: the timeline of the two series, the facts behind it, the ID move and the transition.
   meterDetail(action) {
     const s = action.statistics || {}, lines = [];
-    const day = ts => this.formatDate(ts * 1000);
-    if (action.mode !== "id" && s.import_count) {
-      lines.push(this.t("meterCopy", { count: s.import_count, from: day(s.old_first), to: day(s.old_last) }));
-      if (s.switch) lines.push(this.t("meterSwitch", { date: day(s.switch) }));
-      if (s.offset !== null && s.offset !== undefined) lines.push(this.t("meterOffset", { offset: this.formatNumber(Math.round(s.offset * 1000) / 1000), unit: s.unit || "" }));
-      if (s.dropped_overlap) lines.push(this.t("meterOverlap", { count: s.dropped_overlap }));
-      if (s.gap_hours > 0) lines.push(this.t("meterGap", { hours: s.gap_hours }));
+    const day = ts => this.formatDate(ts * 1000).split(",")[0];
+    const join = action.mode !== "id" && s.import_count;
+    let timeline = "", facts = "";
+    if (join) {
+      const gap = s.gap_hours > 0;
+      timeline = `<div class="mtl"><div class="mtlbar"><div class="a">${this.t("meterTlOld")}</div>${gap ? `<div class="gap">${this.t("meterTlGap", { hours: s.gap_hours })}</div>` : ""}<div class="b">${this.t("meterTlNew")}</div></div><div class="mtlaxis"><span>${this.esc(day(s.old_first))}</span><span>${s.switch ? this.esc(day(s.switch)) : ""}</span><span>${this.t("meterTlNow")}</span></div></div>`;
+      const fact = (head, text) => `<div class="mfact"><b>${head}</b><small>${this.esc(text)}</small></div>`;
+      const list = [fact(this.t("meterFactCopy", { count: this.formatNumber(s.import_count) }), this.t("meterFactCopyText", { from: day(s.old_first), to: day(s.old_last) }))];
+      if (s.offset !== null && s.offset !== undefined) list.push(fact(`+${this.formatNumber(Math.round(s.offset * 1000) / 1000)} ${this.esc(s.unit || "")}`, this.t("meterFactOffset")));
+      if (s.dropped_overlap) list.push(fact(this.t("meterFactOverlap", { count: s.dropped_overlap }), this.t("meterFactOverlapText")));
+      if (s.gap_hours > 0) list.push(fact(this.t("meterFactGap", { hours: s.gap_hours }), this.t("meterFactGapText")));
+      facts = `<div class="mfacts">${list.join("")}</div>`;
     }
     if (action.mode !== "statistics" && action.alt_id) lines.push(this.t("meterIdMove", { old: action.object_id, alt: action.alt_id, new: action.target }));
     const before = (s.preview?.before || []), after = (s.preview?.after || []);
     const cell = row => `${this.esc(day(row.start))}: ${this.esc(this.formatNumber(Math.round((row.sum_after ?? row.sum ?? 0) * 1000) / 1000))}`;
-    const rows = before.length || after.length ? `<small class="u-dim u-block">${this.t("meterPreviewRows")}: ${[...before, ...after].map(cell).join(" · ")}</small>` : "";
+    const rows = before.length || after.length ? `<details class="rowdetails"><summary>${this.t("meterPreviewRows")}</summary><small class="u-dim u-block">${[...before, ...after].map(cell).join(" · ")}</small></details>` : "";
     const kept = action.result?.statistics_kept ? `<small class="u-block">${this.t("meterStatsKept")}</small>` : "";
-    return `<span class="u-pt6 u-block">${lines.map(l => `<small class="u-block">${this.esc(l)}</small>`).join("")}${rows}${kept}</span>`;
+    return `<span class="u-pt6 u-block">${timeline}${facts}${lines.map(l => `<small class="u-block">${this.esc(l)}</small>`).join("")}${rows}${kept}</span>`;
   }
 
   // Recorder purges are no plans and cannot be undone; the journal only notes them.
@@ -2860,7 +2893,7 @@ class CleanupMixin {
         ? `<span class="askrow"><span>${this.t("undoAskOne")}</span><button class="btn danger" data-undo-one-yes="${this.esc(a.object_id)}">${this.t("undoYes")}</button><button class="btn accent" data-undo-no>${this.t("cancelRun")}</button></span>`
         : `<button class="btn accent" data-undo-one="${this.esc(a.object_id)}"><ha-icon icon="mdi:undo-variant"></ha-icon>${this.t("undoOne")}</button>`;
       return `<div class="row planrow ${a.verdict === "blocked" ? "dim" : ""}"><span class="tile ${tone}"><ha-icon icon="${settled || idle || a.verdict === "ok" ? "mdi:check" : a.verdict === "review" ? "mdi:alert-outline" : "mdi:close-octagon-outline"}"></ha-icon></span>
-        <span class="row-text"><strong>${obj ? `<button class="link" data-object="${this.esc(`${type}:${a.object_id}`)}">${this.esc(a.name)}</button>` : this.esc(a.name)}</strong><small>${this.esc([sub, reasons, abort.replace(/^ · /, "")].filter(Boolean).join(" · "))}</small>${ack}${["replace_references", "rename_entity"].includes(a.kind) ? sources : ""}${(["replace_references", "rename_entity"].includes(a.kind) ? "" : sources) || uses ? `<details class="rowdetails"><summary>${this.t("planDetails")}</summary>${["replace_references", "rename_entity"].includes(a.kind) ? "" : sources}${uses ? `<span class="chips" style="padding:6px 0 0;border:0">${uses}${more}</span>` : ""}</details>` : ""}</span>
+        <span class="row-text"><strong>${obj ? `<button class="link" data-object="${this.esc(`${type}:${a.object_id}`)}">${this.esc(a.name)}</button>` : this.esc(a.name)}</strong><small>${this.esc([sub, reasons, abort.replace(/^ · /, "")].filter(Boolean).join(" · "))}</small>${ack}${OPEN_DETAIL_KINDS.includes(a.kind) ? sources : ""}${(OPEN_DETAIL_KINDS.includes(a.kind) ? "" : sources) || uses ? `<details class="rowdetails"><summary>${this.t("planDetails")}</summary>${OPEN_DETAIL_KINDS.includes(a.kind) ? "" : sources}${uses ? `<span class="chips" style="padding:6px 0 0;border:0">${uses}${more}</span>` : ""}</details>` : ""}</span>
         <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">${resultPill}${undo}${a.executable && (result || !(a.reasons || []).includes("irreversible")) ? this.undoBadge(a) : ""}${result ? "" : `<span class="pill ${tone}">${this.t(idle ? "verdictNothing" : a.verdict === "review" && (a.reasons || []).includes("irreversible") ? "verdictIrreversible" : `verdict_${a.verdict}`)}</span>`}</span></div>`;
     });
     const extra = [sm.uses ? this.t("planUses", { count: sm.uses }) : "", sm.statistics ? this.t("planStats", { count: sm.statistics }) : ""].filter(Boolean).join(" · ");
@@ -2933,16 +2966,32 @@ class CleanupMixin {
       ${hints}<div class="setrow planfoot"><small class="u-m0">${this.t("cleanupDryRun")}</small><button class="btn primary" data-plan-create ${ready ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("replacePreview")}</button></div></div>`;
   }
 
+  // The checks that the panel can make before any preview: unit, classes and statistics of the two meters.
+  meterChecks(old, nu) {
+    if (!old || !nu) return "";
+    const line = (tone, text) => `<div class="mcheck"><span class="${tone}-t">${tone === "ok" ? "✓" : "!"}</span><span>${text}</span></div>`;
+    const lines = [];
+    const same = (a, b) => (a ?? "") === (b ?? "");
+    lines.push(same(old.unit, nu.unit) && same(old.device_class, nu.device_class) && same(old.state_class, nu.state_class)
+      ? line("ok", this.t("meterCheckSame", { unit: this.esc(old.unit || "–"), cls: this.esc(old.state_class || "–") }))
+      : line("warn", this.t("meterCheckDiffer")));
+    lines.push(old.has_statistics ? line("ok", this.t("meterCheckStats")) : line("warn", this.t("meterCheckNoStats")));
+    lines.push(`<div class="mcheck"><span class="warn-t">!</span><span>${this.t("meterCheckRefs")} <button class="link" data-meter-refs>${this.t("meterCheckRefsGo")}</button></span></div>`);
+    return lines.join("");
+  }
+
   // Join a replaced meter's history to its successor and/or let the successor take over the ID.
   meterCard() {
     const entities = this.data.objects.filter(o => o.object_type === "entity");
     const byId = new Map(entities.map(o => [o.object_id, o]));
-    const modes = [["both", "meterModeBoth"], ["statistics", "meterModeStatistics"], ["id", "meterModeId"]];
+    const modes = ["both", "statistics", "id"];
     const ready = this.meterOld && this.meterNew && !this.cleanupBusy;
+    const cards = `<div class="modecards" role="radiogroup" aria-label="${this.esc(this.t("meterMode"))}">${modes.map(m => `<button class="modecard${this.meterMode === m ? " on" : ""}" role="radio" aria-checked="${this.meterMode === m}" data-meter-mode="${m}"><strong>${this.t(`meterCard_${m}`)}${m === "both" ? ` <span class="pill ok">${this.t("meterUsual")}</span>` : ""}</strong><small>${this.t(`meterCardHint_${m}`)}</small><small class="modefollow">${this.t(`meterCardFollow_${m}`)}</small></button>`).join("")}</div>`;
     return `<div class="panel" style="overflow:visible"><div class="panelhead"><div><h2>${this.t("meterTitle")}</h2><p>${this.t("meterHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
       <div class="setrow"><div><label>${this.t("meterOld")}</label></div>${this.pickerBox("meterOld", "sensor.old_meter")}</div>
       <div class="setrow"><div><label>${this.t("meterNew")}</label></div>${this.pickerBox("meterNew", "sensor.new_meter")}</div>
-      <div class="setrow"><div><label>${this.t("meterMode")}</label></div><select data-meter-mode style="max-width:460px">${modes.map(([value, label]) => `<option value="${value}" ${this.meterMode === value ? "selected" : ""}>${this.t(label)}</option>`).join("")}</select></div>
+      ${this.meterChecks(byId.get(this.meterOld), byId.get(this.meterNew))}
+      <div class="setrow"><div><label>${this.t("meterMode")}</label></div></div>${cards}
       ${this.successorHints(this.meterOld, byId.get(this.meterOld)?.unit, "data-meter-pick")}<div class="setrow planfoot"><small class="u-m0">${this.t("cleanupDryRun")}</small><button class="btn primary" data-plan-create ${ready ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("replacePreview")}</button></div></div>`;
   }
 
@@ -9911,7 +9960,8 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-purge-states]")?.addEventListener("change", e => { this.purgeStates = e.target.checked; this.render(); });
     root.querySelector("[data-purge-word]")?.addEventListener("input", e => { this.purgeWord = e.target.value; const b = root.querySelector("[data-purge-run]"); if (b) b.disabled = e.target.value.trim() !== this.t("purgeWord") || this.purgeBusy; });
     root.querySelector("[data-purge-run]")?.addEventListener("click", () => this.purgeRun());
-    root.querySelector("[data-meter-mode]")?.addEventListener("change", e => { this.meterMode = e.target.value; this.render(); });
+    root.querySelectorAll("[data-meter-mode]").forEach(el => el.onclick = () => { this.meterMode = el.dataset.meterMode; this.render(); });
+    root.querySelector("[data-meter-refs]")?.addEventListener("click", () => this.startCleanup("replace_references", () => { this.replOld = this.meterOld; this.replNew = this.meterNew; }));
     root.querySelector("[data-costs-load]")?.addEventListener("click", ev => this.loadCosts(ev.currentTarget.hasAttribute("data-refresh")));
     root.querySelectorAll("[data-cost-sort]").forEach(el => el.onclick = () => { this.costSort = el.dataset.costSort; this.render(); });
     root.querySelectorAll("[data-release]").forEach(el => el.onclick = () => { this.releaseConfirm = el.dataset.release; this.releaseMessage = ""; this.render(); });

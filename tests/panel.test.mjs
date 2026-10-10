@@ -1080,7 +1080,7 @@ test("the meter assistant offers the modes and sends the pair with the plan", as
   el.render();
   let html = shadow.innerHTML;
   assert.ok(html.includes("Meter change") && html.includes('data-picker="meterOld"'));
-  assert.ok(html.includes("Continue statistics and take over the ID") && /data-plan-create\s+disabled/.test(html));
+  assert.ok(html.includes("Statistics and ID") && /data-plan-create\s+disabled/.test(html));
   el.meterOld = "sensor.meter_old"; el.meterNew = "sensor.meter_new"; el.meterMode = "statistics";
   el.render();
   html = shadow.innerHTML;
@@ -1099,7 +1099,7 @@ test("a meter plan explains the copy, the shifted total and the ID move, and ask
   el.render();
   const html = shadow.innerHTML;
   assert.ok(html.includes("sensor.meter_old → sensor.meter_new") && html.includes("48 hourly values"));
-  assert.ok(html.includes("raised by 47 kWh") && html.includes("3 overlapping values") && html.includes("Gap without values: 24 hours"));
+  assert.ok(html.includes("+47 kWh") && html.includes("3 hours twice") && html.includes("Gap of 24 hours"));
   assert.ok(html.includes("sensor.meter_old → sensor.meter_old_alt, then sensor.meter_new → sensor.meter_old"));
   assert.ok(html.includes("Experimental: writes into the recorder database"));
   assert.equal(el.planWord(METER_PLAN), "MIGRATE");
@@ -1567,7 +1567,7 @@ test("the plan card shows the steps with text, marks undo kinds and folds the de
   assert.ok(html.includes("Created") && html.includes(el.t("backupRestoreHint")));
   assert.equal((html.match(/Undo by Housekeeper/g) || []).length, 1);
   assert.equal((html.match(/Backup only/g) || []).length, 1, "merged statistics can only be restored from the backup");
-  assert.equal((html.match(/<details class="rowdetails">/g) || []).length, 2, "the meter detail and the uses fold; the plain disable row has none");
+  assert.equal((html.match(/<details class="rowdetails">/g) || []).length, 1, "only the uses fold: the meter detail stays open; the plain disable row has none");
   const open = el.planCard(planOf("dry_run", [act("disable_entity")]));
   assert.equal((open.match(/aria-current="step"/g) || []).length, 1);
   assert.ok(open.includes('<span class="sr-only">: not needed</span>') && open.includes('<span class="sr-only">: current</span>') && open.includes('<span class="sr-only">: pending</span>'));
