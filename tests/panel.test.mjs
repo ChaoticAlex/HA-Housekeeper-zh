@@ -3561,6 +3561,20 @@ test("the status takes points off only for urgent topics, names its topics and e
   assert.equal(el.todoCount({ key: "integrations", count: 8 }), "8 integrations"); assert.equal(el.todoCount({ key: "quarantine", count: 1 }), "1 object");
 });
 
+test("batteries are named by their device: the tile, the rows and the search", () => {
+  const { el } = panel("en");
+  const device = { object_type: "device", object_id: "d1", name: "Kitchen window sensor", status: "active", area_id: "kitchen" };
+  const battery = { object_type: "entity", object_id: "sensor.kitchen_window_battery", name: "Battery", status: "active", device_class: "battery", unit: "%", state: "0", device_id: "d1" };
+  el.data = { ...DATA, objects: [...DATA.objects, device, battery, { object_type: "area", object_id: "kitchen", name: "Kitchen", status: "active" }] };
+  el._rev = (el._rev || 0) + 1;
+  el.batteryVoltRows = () => [];
+  const html = el.batteriesView();
+  assert.ok(html.includes("Lowest level") && html.includes("Kitchen window sensor · Kitchen") && html.includes('data-object="entity:sensor.kitchen_window_battery"'), "the tile names the device and opens the sensor");
+  assert.ok(/<strong>Kitchen window sensor<\/strong><small>[^<]*Battery/.test(html), "the row titles the device and keeps the entity below");
+  assert.equal(el.batteryName(battery).title, "Kitchen window sensor"); assert.equal(el.batteryName(battery).entity, "Battery");
+  assert.equal(el.batteryName({ ...battery, device_id: "" }).title, "Battery");
+});
+
 test("the journal names the end of a follow-up and the safety line counts the watched plans", () => {
   const { el, shadow } = panel("en");
   const plan = (id, followup) => ({ plan_id: id, created_at: "2026-10-10T10:00:00+00:00", status: "verified", executed: true, summary: { total: 1, ok: 1, review: 0, blocked: 0 }, followup, followup_until: followup === "watching" ? "2026-10-11T10:00:00+00:00" : null });
