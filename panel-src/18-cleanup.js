@@ -90,16 +90,30 @@ class CleanupMixin {
     return this.t(key, { count: key === "confirmedSummaryReplace" ? changes : count });
   }
 
-  // What a replacement will touch: every source with its change count, or why it stays manual.
+  // "trigger/0/entity_id" reads as "Trigger 1 · entity_id"; a path in another shape stays as it is.
+  sourceSpot(location) {
+    const m = /^(triggers?|conditions?|actions?|sequence)(?:\[(\d+)\]|\/(\d+))(?:[./](.*))?$/.exec(location || "");
+    if (!m) return location || "";
+    const word = { trigger: "srcTrigger", condition: "srcCondition", action: "srcAction", sequence: "srcAction" }[m[1].replace(/s$/, "")];
+    return `${this.t(word)} ${Number(m[2] ?? m[3]) + 1}${m[4] ? ` · ${m[4]}` : ""}`;
+  }
+
+  // What a replacement will touch: every source with what changes in it (old and new line), and what stays by hand.
   sourceList(action) {
-    if (!(action.sources || []).length) return `<small>${this.t("replaceNoSources")}</small>`;
-    const rows = action.sources.map(src => {
-      const state = src.writable ? this.t("replaceChanges", { count: src.change_count }) : this.t(`source_${src.reason}`);
-      const manual = src.manual?.length ? ` · ${this.t("replaceManual", { count: src.manual.length })}` : "";
-      const diff = (src.changes || []).slice(0, 5).map(c => `<small class="u-dim u-block">${this.esc(c.location)}: ${this.esc(c.from)} → ${this.esc(c.to)}</small>`).join("");
-      return `<span style="display:block;padding:4px 0"><small><ha-icon icon="${src.writable ? "mdi:file-edit-outline" : "mdi:file-lock-outline"}" class="u-ic14"></ha-icon> <b>${this.esc(src.name)}</b> (${this.esc(this.t(src.type))}) · ${this.esc(state)}${this.esc(manual)}</small>${src.undo_per_item ? `<small class="u-amber u-block"><ha-icon icon="mdi:alert-outline" class="u-ic14"></ha-icon> ${this.esc(this.t("sourceUndoPerItem"))}</small>` : ""}${diff}</span>`;
-    }).join("");
-    return `<span class="u-pt6 u-block"><small>${this.t("replaceSources")}:</small>${rows}</span>`;
+    const sources = action.sources || [];
+    if (!sources.length) return `<small>${this.t("replaceNoSources")}</small>`;
+    const open = sources.filter(src => src.writable && src.change_count);
+    const hand = sources.flatMap(src => (src.writable ? [] : [`${src.name} (${this.t(src.type)}): ${this.t(`source_${src.reason}`)}`]).concat((src.manual || []).map(path => `${src.name} (${this.t(src.type)}): ${path}`)));
+    const total = open.reduce((n, src) => n + src.change_count, 0);
+    const block = src => {
+      const lines = (src.changes || []).slice(0, 5).map(c => `<span class="srcspot">${this.esc(this.sourceSpot(c.location))}</span><span class="srcln del"><i>−</i><span>${this.esc(c.from)}</span></span><span class="srcln add"><i>+</i><span>${this.esc(c.to)}</span></span>`).join("");
+      const more = src.change_count > Math.min(5, (src.changes || []).length) ? `<small class="u-dim u-block">${this.t("replaceMoreChanges", { count: src.change_count - Math.min(5, (src.changes || []).length) })}</small>` : "";
+      return `<div class="srcblock"><div class="srchead"><ha-icon icon="${src.type === "energy" ? "mdi:lightning-bolt-outline" : "mdi:file-edit-outline"}"></ha-icon><span><strong>${this.esc(src.name)}</strong><small>${this.esc(this.t(src.type === "energy" ? "energyDashboard" : src.type))} · ${this.esc(this.t("replaceChanges", { count: src.change_count }))}</small></span></div>${src.undo_per_item ? `<small class="u-amber u-block"><ha-icon icon="mdi:alert-outline" class="u-ic14"></ha-icon> ${this.esc(this.t("sourceUndoPerItem"))}</small>` : ""}${lines ? `<div class="srcdiff">${lines}</div>` : ""}${more}</div>`;
+    };
+    const shown = open.slice(0, 3), folded = open.slice(3);
+    const foldedHtml = folded.length ? `<details class="rowdetails"><summary>${this.t("replaceMoreSources", { count: folded.length })}</summary>${folded.map(block).join("")}</details>` : "";
+    const byHand = hand.length ? `<div class="srchand"><strong>${this.t("replaceByHand", { count: hand.length })}</strong><ul>${hand.map(h => `<li>${this.esc(h)}</li>`).join("")}</ul></div>` : "";
+    return `<div class="srclist"><small class="u-block">${this.t("replaceSummary", { count: total, sources: open.length })}</small>${shown.map(block).join("")}${foldedHtml}${byHand}</div>`;
   }
 
   // What a meter change will do: copied hours, the shift of the total, the ID move, and the transition.
@@ -365,7 +379,7 @@ class CleanupMixin {
         ? `<span class="askrow"><span>${this.t("undoAskOne")}</span><button class="btn danger" data-undo-one-yes="${this.esc(a.object_id)}">${this.t("undoYes")}</button><button class="btn accent" data-undo-no>${this.t("cancelRun")}</button></span>`
         : `<button class="btn accent" data-undo-one="${this.esc(a.object_id)}"><ha-icon icon="mdi:undo-variant"></ha-icon>${this.t("undoOne")}</button>`;
       return `<div class="row planrow ${a.verdict === "blocked" ? "dim" : ""}"><span class="tile ${tone}"><ha-icon icon="${settled || idle || a.verdict === "ok" ? "mdi:check" : a.verdict === "review" ? "mdi:alert-outline" : "mdi:close-octagon-outline"}"></ha-icon></span>
-        <span class="row-text"><strong>${obj ? `<button class="link" data-object="${this.esc(`${type}:${a.object_id}`)}">${this.esc(a.name)}</button>` : this.esc(a.name)}</strong><small>${this.esc([sub, reasons, abort.replace(/^ · /, "")].filter(Boolean).join(" · "))}</small>${ack}${sources || uses ? `<details class="rowdetails"><summary>${this.t("planDetails")}</summary>${sources}${uses ? `<span class="chips" style="padding:6px 0 0;border:0">${uses}${more}</span>` : ""}</details>` : ""}</span>
+        <span class="row-text"><strong>${obj ? `<button class="link" data-object="${this.esc(`${type}:${a.object_id}`)}">${this.esc(a.name)}</button>` : this.esc(a.name)}</strong><small>${this.esc([sub, reasons, abort.replace(/^ · /, "")].filter(Boolean).join(" · "))}</small>${ack}${["replace_references", "rename_entity"].includes(a.kind) ? sources : ""}${(["replace_references", "rename_entity"].includes(a.kind) ? "" : sources) || uses ? `<details class="rowdetails"><summary>${this.t("planDetails")}</summary>${["replace_references", "rename_entity"].includes(a.kind) ? "" : sources}${uses ? `<span class="chips" style="padding:6px 0 0;border:0">${uses}${more}</span>` : ""}</details>` : ""}</span>
         <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">${resultPill}${undo}${a.executable && (result || !(a.reasons || []).includes("irreversible")) ? this.undoBadge(a) : ""}${result ? "" : `<span class="pill ${tone}">${this.t(idle ? "verdictNothing" : a.verdict === "review" && (a.reasons || []).includes("irreversible") ? "verdictIrreversible" : `verdict_${a.verdict}`)}</span>`}</span></div>`;
     });
     const extra = [sm.uses ? this.t("planUses", { count: sm.uses }) : "", sm.statistics ? this.t("planStats", { count: sm.statistics }) : ""].filter(Boolean).join(" · ");

@@ -1019,8 +1019,8 @@ test("the replace assistant previews sources and sends the new entity with the p
   assert.equal(JSON.stringify(sent[0]), JSON.stringify({ type: "ha_housekeeper/plan_create", actions: [{ kind: "replace_references", object_id: "sensor.old", target: "sensor.new" }] }));
   el.render();
   html = shadow.innerHTML;
-  assert.ok(html.includes("sensor.old → sensor.new") && html.includes("Heating") && html.includes("2 changes") && html.includes("trigger/0/entity_id: sensor.old → sensor.new"));
-  assert.ok(html.includes("check by hand: 1 templates") && html.includes("YAML dashboard") && html.includes("Rewrites configuration"));
+  assert.ok(html.includes("sensor.old → sensor.new") && html.includes("Heating") && html.includes("2 changes") && html.includes("Trigger 1 · entity_id") && html.includes("<span>sensor.old</span>") && html.includes("<span>sensor.new</span>"));
+  assert.ok(html.includes("To do by hand (2)") && html.includes("action/0/data/message") && html.includes("YAML dashboard") && html.includes("Rewrites configuration"));
   assert.equal(el.planWord(plan), "REPLACE");
   assert.ok(el.confirmSummary(plan, 1).startsWith("In 2 entity references"));
 });
