@@ -1567,7 +1567,7 @@ test("the plan card shows the steps with text, marks undo kinds and folds the de
   assert.ok(html.includes("Created") && html.includes(el.t("backupRestoreHint")));
   assert.equal((html.match(/Undo by Housekeeper/g) || []).length, 1);
   assert.equal((html.match(/Backup only/g) || []).length, 1, "merged statistics can only be restored from the backup");
-  assert.equal((html.match(/<details class="rowdetails">/g) || []).length, 1, "only the uses fold: the meter detail stays open; the plain disable row has none");
+  assert.equal((html.match(/<details class="rowdetails">/g) || []).length, 2, "the meter detail and the uses fold; the plain disable row has none");
   const open = el.planCard(planOf("dry_run", [act("disable_entity")]));
   assert.equal((open.match(/aria-current="step"/g) || []).length, 1);
   assert.ok(open.includes('<span class="sr-only">: not needed</span>') && open.includes('<span class="sr-only">: current</span>') && open.includes('<span class="sr-only">: pending</span>'));
@@ -2383,6 +2383,15 @@ test("an integration's loudest entities can be shown on their own and the filter
   el.stormEntry = "e1"; el.viewTab = { recload: "entities" };
   const html = el.stormsView();
   assert.ok(html.includes("sensor.in") && !html.includes("sensor.out") && html.includes("Only Cloud-Hub: 1 of 12") && html.includes("data-storm-entry-clear"));
+});
+
+test("a plan with several pairs sums up the changes and folds each row's details", () => {
+  const { el } = panel("en");
+  const src = (type, n) => ({ type, name: type, writable: true, change_count: n, changes: [], manual: [] });
+  const plan = { actions: [{ kind: "replace_references", sources: [src("automation", 3), src("energy", 1)] }, { kind: "migrate_meter" }, { kind: "replace_references", sources: [src("script", 2)] }] };
+  const html = el.exchangeSummary(plan);
+  assert.ok(html.includes("3 pairs") && html.includes("6 changes in 3 sources") && html.includes("1 meter switches") && html.includes("Energy dashboard"));
+  assert.equal(el.exchangeSummary({ actions: [plan.actions[0]] }), "", "a single action has no sum");
 });
 
 const DBH = {

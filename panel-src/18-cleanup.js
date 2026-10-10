@@ -366,6 +366,7 @@ class CleanupMixin {
     const open = plan.status === "dry_run";
     const rowList = plan.actions.map(a => {
       const settled = a.result?.state === "done";
+      const keepOpen = OPEN_DETAIL_KINDS.includes(a.kind) && plan.actions.length === 1; // a plan with many rows folds each one
       const idle = a.verdict === "blocked" && (a.reasons || []).length > 0 && a.reasons.every(r => NOTHING_REASONS.includes(r));
       const tone = settled ? "ok" : idle ? "mute" : { ok: "ok", review: "warn", blocked: "red" }[a.verdict] || "mute";
       const uses = (a.used_by || []).slice(0, 4).map(u => {
@@ -386,7 +387,7 @@ class CleanupMixin {
         ? `<span class="askrow"><span>${this.t("undoAskOne")}</span><button class="btn danger" data-undo-one-yes="${this.esc(a.object_id)}">${this.t("undoYes")}</button><button class="btn accent" data-undo-no>${this.t("cancelRun")}</button></span>`
         : `<button class="btn accent" data-undo-one="${this.esc(a.object_id)}"><ha-icon icon="mdi:undo-variant"></ha-icon>${this.t("undoOne")}</button>`;
       return `<div class="row planrow ${a.verdict === "blocked" ? "dim" : ""}"><span class="tile ${tone}"><ha-icon icon="${settled || idle || a.verdict === "ok" ? "mdi:check" : a.verdict === "review" ? "mdi:alert-outline" : "mdi:close-octagon-outline"}"></ha-icon></span>
-        <span class="row-text"><strong>${obj ? `<button class="link" data-object="${this.esc(`${type}:${a.object_id}`)}">${this.esc(a.name)}</button>` : this.esc(a.name)}</strong><small>${this.esc([sub, reasons, abort.replace(/^ · /, "")].filter(Boolean).join(" · "))}</small>${ack}${OPEN_DETAIL_KINDS.includes(a.kind) ? sources : ""}${(OPEN_DETAIL_KINDS.includes(a.kind) ? "" : sources) || uses ? `<details class="rowdetails"><summary>${this.t("planDetails")}</summary>${OPEN_DETAIL_KINDS.includes(a.kind) ? "" : sources}${uses ? `<span class="chips" style="padding:6px 0 0;border:0">${uses}${more}</span>` : ""}</details>` : ""}</span>
+        <span class="row-text"><strong>${obj ? `<button class="link" data-object="${this.esc(`${type}:${a.object_id}`)}">${this.esc(a.name)}</button>` : this.esc(a.name)}</strong><small>${this.esc([sub, reasons, abort.replace(/^ · /, "")].filter(Boolean).join(" · "))}</small>${ack}${keepOpen ? sources : ""}${(keepOpen ? "" : sources) || uses ? `<details class="rowdetails"><summary>${this.t("planDetails")}</summary>${keepOpen ? "" : sources}${uses ? `<span class="chips" style="padding:6px 0 0;border:0">${uses}${more}</span>` : ""}</details>` : ""}</span>
         <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end">${resultPill}${undo}${a.executable && (result || !(a.reasons || []).includes("irreversible")) ? this.undoBadge(a) : ""}${result ? "" : `<span class="pill ${tone}">${this.t(idle ? "verdictNothing" : a.verdict === "review" && (a.reasons || []).includes("irreversible") ? "verdictIrreversible" : `verdict_${a.verdict}`)}</span>`}</span></div>`;
     });
     const extra = [sm.uses ? this.t("planUses", { count: sm.uses }) : "", sm.statistics ? this.t("planStats", { count: sm.statistics }) : ""].filter(Boolean).join(" · ");
@@ -422,7 +423,7 @@ class CleanupMixin {
         <div class="outcome ${nothing ? "ok" : "warn"}" role="status"><ha-icon icon="${nothing ? "mdi:check-circle-outline" : "mdi:information-outline"}"></ha-icon><span><strong>${this.t(nothing ? "wzIdleNothingTitle" : "wzIdleTitle")}</strong><small>${this.esc(why)}</small></span></div>${rowList.join("")}${this.reportBlock(plan, `<button class="btn primary" data-plan-close>${this.t("planClose")}</button>`)}</section>`;
     }
     const rows = this.planRowsShown(plan, rowList);
-    const summary = `<p class="factnote">${this.t("planSummary", { total: sm.total ?? 0, ok: sm.ok ?? 0, review: sm.review ?? 0, blocked: sm.blocked ?? 0 })}${extra ? ` ${this.esc(extra)}` : ""}</p>`;
+    const summary = this.exchangeSummary(plan) + `<p class="factnote">${this.t("planSummary", { total: sm.total ?? 0, ok: sm.ok ?? 0, review: sm.review ?? 0, blocked: sm.blocked ?? 0 })}${extra ? ` ${this.esc(extra)}` : ""}</p>`;
     const flow = `<details class="rowdetails wzflow"><summary>${this.t("wzFlow")}</summary>${this.planStepper(plan, Boolean(conf))}</details>`;
     const body = stage === 0 ? `${summary}${this.simulationBlock(plan)}${rows}${control}`
       : stage === 1 ? `${summary}${this.simulationBlock(plan)}${rows}${control}`

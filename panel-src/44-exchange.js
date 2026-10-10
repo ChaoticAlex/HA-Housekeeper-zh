@@ -8,6 +8,8 @@ Object.assign(TEXT.de, {
   exChosen: "{count} Paare bestätigt", exCreate: "Vorschau für {count} Paare", exUnmatched: "Ohne Gegenstück am alten Gerät: {list}",
   exDisableOld: "Altes Gerät deaktivieren …", exDisableHint: "Erst nach dem Austausch. Das geht nur, wenn am alten Gerät nichts mehr funktioniert und nichts mehr darauf verweist.",
   exReason_same_class: "gleiche Geräteklasse", exReason_same_unit: "gleiche Einheit", exReason_same_state_class: "gleiche Zustandsklasse", exReason_same_area: "gleicher Bereich", exReason_similar_name: "ähnlicher Name", exReason_same_id_tail: "gleiche ID-Endung",
+  exSumPairs: "{count} Paare", exSumSuggest: "{count} mit Vorschlag", exSumNone: "{count} ohne Verwendung", exSumUses: "{count} Verwendungen insgesamt",
+  exPlanSummary: "{changes} Änderungen in {sources} Quellen", exPlanMeters: "{count} Zählerwechsel", exPlanEnergy: "Energie-Dashboard",
   fuWatching: "Nachkontrolle läuft bis {date}", fuClean: "Nachkontrolle bestanden: bis {date} nichts Neues", fuRegression: "Nachkontrolle: {count} neue Funde seit {date}", fuStopped: "Nachkontrolle beendet (Plan rückgängig gemacht)",
   fu_watching: "Beobachtet", fu_clean: "Sauber", fu_regression: "Rückfall", fu_stopped: "Beendet",
   fu_class_broken_reference: "defekte Referenz", fu_class_unavailable: "nicht verfügbar", fu_class_recurring: "Gerät kehrt wieder",
@@ -28,6 +30,8 @@ Object.assign(TEXT.en, {
   exChosen: "{count} pairs confirmed", exCreate: "Preview for {count} pairs", exUnmatched: "Without a counterpart on the old device: {list}",
   exDisableOld: "Disable old device …", exDisableHint: "Only after the exchange. It works only when nothing on the old device works any more and nothing refers to it.",
   exReason_same_class: "same device class", exReason_same_unit: "same unit", exReason_same_state_class: "same state class", exReason_same_area: "same area", exReason_similar_name: "similar name", exReason_same_id_tail: "same ID ending",
+  exSumPairs: "{count} pairs", exSumSuggest: "{count} with a proposal", exSumNone: "{count} unused", exSumUses: "{count} uses in total",
+  exPlanSummary: "{changes} changes in {sources} sources", exPlanMeters: "{count} meter switches", exPlanEnergy: "Energy dashboard",
   fuWatching: "Follow-up running until {date}", fuClean: "Follow-up passed: nothing new until {date}", fuRegression: "Follow-up: {count} new findings since {date}", fuStopped: "Follow-up ended (plan undone)",
   fu_watching: "Watching", fu_clean: "Clean", fu_regression: "Regression", fu_stopped: "Ended",
   fu_class_broken_reference: "broken reference", fu_class_unavailable: "unavailable", fu_class_recurring: "device came back",
@@ -101,14 +105,18 @@ class ExchangeMixin {
     }).join("");
     const locked = !pair.used && !pair.meter;
     const how = choice.target && pair.meter ? `<select data-ex-how="${this.esc(pair.object_id)}" aria-label="${this.t("exHow")}">${EXCHANGE_HOW.map(h => `<option value="${h}" ${(choice.how || "replace") === h ? "selected" : ""}>${this.t(`exHow_${h}`)}</option>`).join("")}</select>` : "";
-    return `<div class="row"><span class="row-text"><strong>${this.esc(pair.name)}</strong>${this.rowId(pair.object_id, pair.used ? this.t("exUsed", { count: pair.used }) : this.t("exUnused"))}</span>
+    const picked = pair.candidates.find(c => c.object_id === choice.target);
+    const tags = picked && picked.reasons.length ? `<span class="exptags">${picked.reasons.map(r => `<span class="tag">${this.esc(this.t(`exReason_${r}`))}</span>`).join("")}</span>` : "";
+    return `<div class="row"><span class="row-text"><strong>${this.esc(pair.name)}</strong>${this.rowId(pair.object_id, pair.used ? this.t("exUsed", { count: pair.used }) : this.t("exUnused"))}${tags}</span>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select data-ex-target="${this.esc(pair.object_id)}" aria-label="${this.esc(pair.name)}" ${locked ? "disabled" : ""}><option value="">${this.t("exNoTarget")}</option>${candidates}</select>${how}</span></div>`;
   }
 
   exchangeCard() {
     const ex = this.exchangeState(), chosen = this.exchangeActions().length;
     const planDone = ["executed", "verified"].includes(this.plan?.status) && ex.planned && ex.planned === ex.oldDev;
-    const rows = ex.result ? (ex.result.pairs.length ? ex.result.pairs.map(p => this.pairRow(p)).join("") : `<div class="emptymsg">${this.t("exNoPairs")}</div>`) : "";
+    const pairs = ex.result?.pairs || [];
+    const sum = pairs.length ? `<div class="exsum"><strong>${this.t("exSumPairs", { count: pairs.length })}</strong><span class="pill ok">${this.t("exSumSuggest", { count: pairs.filter(p => p.candidates[0]?.score > 0).length })}</span><span class="pill">${this.t("exSumNone", { count: pairs.filter(p => !p.used && !p.meter).length })}</span><span class="pill">${this.t("exSumUses", { count: pairs.reduce((n, p) => n + (p.used || 0), 0) })}</span></div>` : "";
+    const rows = ex.result ? (ex.result.pairs.length ? sum + ex.result.pairs.map(p => this.pairRow(p)).join("") : `<div class="emptymsg">${this.t("exNoPairs")}</div>`) : "";
     const unmatched = ex.result?.unmatched_new?.length ? `<p class="factnote">${this.t("exUnmatched", { list: this.esc(ex.result.unmatched_new.slice(0, 10).join(", ")) })}</p>` : "";
     const create = ex.result ? `<div class="setrow planfoot"><small class="u-m0">${this.t("exChosen", { count: chosen })} · ${this.t("cleanupDryRun")}</small><button class="btn primary" data-ex-create ${chosen && !this.cleanupBusy ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("exCreate", { count: chosen })}</button></div>` : "";
     const disable = planDone ? `<div class="setrow planfoot"><small class="u-m0">${this.t("exDisableHint")}</small><button class="btn" data-ex-disable>${this.t("exDisableOld")}</button></div>` : "";
@@ -130,6 +138,16 @@ class ExchangeMixin {
     root.querySelector("[data-report-names]")?.addEventListener("change", e => { this.reportClear = e.target.checked; if (this.report) this.loadReport(this.report.plan_id); else this.render(); });
     root.querySelector("[data-report-download]")?.addEventListener("click", () => this.downloadReport());
     root.querySelector("[data-report-copy]")?.addEventListener("click", () => this.copyReport());
+  }
+
+  // A plan with several pairs: the totals above the rows, whose details are folded.
+  exchangeSummary(plan) {
+    const acts = plan.actions || [];
+    if (acts.length < 2 || !acts.every(a => ["replace_references", "migrate_meter"].includes(a.kind))) return "";
+    const sources = acts.flatMap(a => (a.sources || []).filter(src => src.writable && src.change_count));
+    const changes = sources.reduce((n, src) => n + src.change_count, 0);
+    const meters = acts.filter(a => a.kind === "migrate_meter").length, energy = sources.some(src => src.type === "energy");
+    return `<div class="exsum"><strong>${this.t("exSumPairs", { count: acts.length })}</strong><span class="pill">${this.t("exPlanSummary", { changes: this.formatNumber(changes), sources: sources.length })}</span>${meters ? `<span class="pill">${this.t("exPlanMeters", { count: meters })}</span>` : ""}${energy ? `<span class="pill warn">${this.t("exPlanEnergy")}</span>` : ""}</div>`;
   }
 
   // -- follow-up --------------------------------------------------------------------------
