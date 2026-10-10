@@ -3506,6 +3506,21 @@ test("devices, integrations, automations and scripts sum up what is known in gro
   assert.ok(el.factsCard({ object_type: "scene", object_id: "scene.x", name: "S", status: "active" }, "scene:scene.x").includes(el.t("facts")));
 });
 
+test("the export started from a detail page returns to that page", () => {
+  const { el, shadow } = panel("en");
+  const item = { object_type: "entity", object_id: "sensor.a", name: "Sensor A", status: "active" };
+  el.data = { ...DATA, objects: [...DATA.objects.filter(o => o.object_id !== "sensor.a"), item] };
+  el._rev = (el._rev || 0) + 1;
+  el.selected = item; el.detailTab = "technical"; el.view = "overview"; el.render();
+  el.xpOpen(["sensor.a"]);
+  assert.equal(el.selected, null);
+  assert.ok(shadow.innerHTML.includes("data-xp-return") && shadow.innerHTML.includes("Back to Sensor A"));
+  el.xpClose();
+  assert.equal(el.selected, item); assert.equal(el.detailTab, "technical"); assert.equal(el.xp, null);
+  // started from a list, there is no way back to offer
+  el.selected = null; el.xpOpen(); assert.ok(!shadow.innerHTML.includes("data-xp-return"));
+});
+
 test("the journal names the end of a follow-up and the safety line counts the watched plans", () => {
   const { el, shadow } = panel("en");
   const plan = (id, followup) => ({ plan_id: id, created_at: "2026-10-10T10:00:00+00:00", status: "verified", executed: true, summary: { total: 1, ok: 1, review: 0, blocked: 0 }, followup, followup_until: followup === "watching" ? "2026-10-11T10:00:00+00:00" : null });

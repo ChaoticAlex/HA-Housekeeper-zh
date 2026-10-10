@@ -6,7 +6,7 @@ Object.assign(TEXT.de, {
   xpSelTitle: "Was soll in den Export?", xpSelHint: "Wähle Entitäten aus dem Bestand. Schnellwahlen setzen mehrere Häkchen auf einmal.",
   xpQuickAll: "Alle Entitäten ({n})", xpQuickFiltered: "Aktuelles Filterergebnis ({n})", xpQuickShown: "Suchtreffer ({n})", xpQuickClear: "Leeren",
   xpPickArea: "Bereich …", xpPickDomain: "Domain …", xpPickPlatform: "Integration …", xpSearch: "In den Entitäten suchen …",
-  xpSelected: "{n} ausgewählt", xpNeedOne: "Wähle mindestens eine Entität.", xpNone: "Keine Treffer.", xpNoEntities: "Dazu gibt es keine Entitäten zum Exportieren.",
+  xpBackTo: "Zurück zu {name}", xpSelected: "{n} ausgewählt", xpNeedOne: "Wähle mindestens eine Entität.", xpNone: "Keine Treffer.", xpNoEntities: "Dazu gibt es keine Entitäten zum Exportieren.",
   xpFieldsTitle: "Welche Angaben?", xpFieldsHint: "Pro Gruppe ein Häkchen. Eine Voreinstellung setzt sie für dich.",
   xpPresetMin: "Minimal", xpPresetDoc: "Dokumentation", xpPresetState: "Mit Zuständen", xpMyTemplates: "Meine Vorlagen", xpTplDelete: "Vorlage „{name}“ löschen",
   xpGBasis: "Basis", xpGBasisD: "Entity-ID, Name, Domain, Status", xpGZuord: "Zuordnung", xpGZuordD: "Bereich, Gerät, Integration, Geräteklasse, Einheit",
@@ -26,7 +26,7 @@ Object.assign(TEXT.en, {
   xpSelTitle: "What goes into the export?", xpSelHint: "Pick entities from the inventory. Quick picks tick several at once.",
   xpQuickAll: "All entities ({n})", xpQuickFiltered: "Current filter result ({n})", xpQuickShown: "Search hits ({n})", xpQuickClear: "Clear",
   xpPickArea: "Area …", xpPickDomain: "Domain …", xpPickPlatform: "Integration …", xpSearch: "Search the entities …",
-  xpSelected: "{n} selected", xpNeedOne: "Pick at least one entity.", xpNone: "No hits.", xpNoEntities: "There are no entities to export for this.",
+  xpBackTo: "Back to {name}", xpSelected: "{n} selected", xpNeedOne: "Pick at least one entity.", xpNone: "No hits.", xpNoEntities: "There are no entities to export for this.",
   xpFieldsTitle: "Which fields?", xpFieldsHint: "One tick per group. A preset sets them for you.",
   xpPresetMin: "Minimal", xpPresetDoc: "Documentation", xpPresetState: "With states", xpMyTemplates: "My templates", xpTplDelete: "Delete template “{name}”",
   xpGBasis: "Basics", xpGBasisD: "Entity ID, name, domain, status", xpGZuord: "Placement", xpGZuordD: "Area, device, integration, device class, unit",
@@ -58,9 +58,19 @@ class ExportMixin {
   }
 
   // Opens the wizard in the inventory view; `ids` are entities that are ticked from the start.
+  // Started from a detail page, it remembers that page, so the wizard can return to it.
   xpOpen(ids = []) {
     this.xp = this.xpFresh(ids);
+    if (this.selected) { this._tabOf.set(this.objectKey(this.selected), this.detailTab); this.xp.origin = { view: this.view, selected: this.selected, trail: this.trail, tab: this.detailTab, name: this.selected.name }; }
     this.view = "inventory"; this.selected = null; this.trail = [];
+    this.render();
+  }
+
+  // Closes the wizard and goes back to the page it was started from, if there was one.
+  xpClose() {
+    const origin = this.xp?.origin;
+    this.xp = null;
+    if (origin) { this.view = origin.view; this.selected = origin.selected; this.trail = origin.trail; this.detailTab = origin.tab; }
     this.render();
   }
 
@@ -215,7 +225,7 @@ class ExportMixin {
       <div class="chips"><button class="chip" data-xp-quick="all">${this.t("xpQuickAll", { n: this.formatNumber(all.length) })}</button><button class="chip" data-xp-quick="filtered">${this.t("xpQuickFiltered", { n: this.formatNumber(filtered.length) })}</button>${q ? `<button class="chip" data-xp-quick="shown">${this.t("xpQuickShown", { n: this.formatNumber(hits.length) })}</button>` : ""}<button class="chip" data-xp-quick="clear">${this.t("xpQuickClear")}</button><span class="pill xpcount ${x.sel.size ? "ok" : "mute"}" role="status"><ha-icon icon="mdi:check-circle-outline" class="u-ic14"></ha-icon>${this.t("xpSelected", { n: this.formatNumber(x.sel.size) })}</span></div>
       <div class="filters"><select data-xp-add="area" aria-label="${this.esc(this.t("xpPickArea"))}">${options(this.t("xpPickArea"), [...areas].sort(byName))}</select><select data-xp-add="domain" aria-label="${this.esc(this.t("xpPickDomain"))}">${options(this.t("xpPickDomain"), [...domains].sort().map(d => [d, d]))}</select><select data-xp-add="platform" aria-label="${this.esc(this.t("xpPickPlatform"))}">${options(this.t("xpPickPlatform"), [...platforms].sort().map(p => [p, p]))}</select></div>
       <input type="search" data-xp-q value="${this.esc(x.q)}" placeholder="${this.esc(this.t("xpSearch"))}">
-      ${rows || `<div class="emptymsg">${this.t("xpNone")}</div>`}`;
+      ${rows ? `<div class="xplist">${rows}</div>` : `<div class="emptymsg">${this.t("xpNone")}</div>`}`;
   }
 
   xpFieldsStep() {
@@ -254,7 +264,7 @@ class ExportMixin {
     const body = [() => this.xpPickStep(), () => this.xpFieldsStep(), () => this.xpFormatStep(), () => this.xpPreviewStep()][x.step]();
     const next = x.step < 3 ? `<button class="btn primary" data-xp-next>${this.t("xpNext")}</button>` : `<button class="btn" data-xp-download><ha-icon icon="mdi:download"></ha-icon>${this.t("xpDownload")}</button><button class="btn primary" data-xp-copy><ha-icon icon="mdi:content-copy"></ha-icon>${x.copied ? this.t("xpCopied") : this.t("xpCopy")}</button>`;
     const hint = x.msg && x.step === 0 ? x.msg : x.step === 0 ? this.t("xpSelected", { n: this.formatNumber(x.sel.size) }) : "";
-    return `<div class="stack"><div class="panel xpwiz"><div class="panelhead"><div><h2>${this.t("xpTitle")}</h2></div><button class="btn" data-xp-cancel>${this.t("xpCancel")}</button></div>${this.xpBar()}<div class="xpbody">${body}</div>
+    return `<div class="stack"><div class="panel xpwiz"><div class="panelhead"><div><h2>${this.t("xpTitle")}</h2></div><span class="xpclose">${x.origin ? `<button class="btn" data-xp-cancel data-xp-return><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("xpBackTo", { name: this.esc(x.origin.name) })}</button>` : ""}<button class="btn" data-xp-cancel>${this.t("xpCancel")}</button></span></div>${this.xpBar()}<div class="xpbody">${body}</div>
       <div class="setrow planfoot"><button class="btn" data-xp-back ${x.step === 0 ? "hidden" : ""}>${this.t("xpBack")}</button><small class="u-m0" role="status">${this.esc(hint)}</small><span class="xpact">${next}</span></div></div></div>`;
   }
 
@@ -268,7 +278,7 @@ class ExportMixin {
       x.step += 1; x.msg = ""; x.copied = false; go();
     });
     root.querySelector("[data-xp-back]")?.addEventListener("click", () => { x.step = Math.max(0, x.step - 1); x.msg = ""; go(); });
-    root.querySelector("[data-xp-cancel]")?.addEventListener("click", () => { this.xp = null; go(); });
+    root.querySelectorAll("[data-xp-cancel]").forEach(el => el.onclick = () => this.xpClose());
     root.querySelector("[data-xp-q]")?.addEventListener("input", ev => { x.q = ev.target.value; this.scheduleRender(); });
     root.querySelectorAll("[data-xp-pick]").forEach(el => el.onchange = () => { el.checked ? x.sel.add(el.dataset.xpPick) : x.sel.delete(el.dataset.xpPick); x.msg = ""; go(); });
     root.querySelectorAll("[data-xp-quick]").forEach(el => el.onclick = () => {
