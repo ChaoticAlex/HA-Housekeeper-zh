@@ -440,7 +440,7 @@ class HAHousekeeperPanel extends HTMLElement {
     // A view that throws shows a message under the top bar instead of freezing the panel on the last page.
     let page;
     try { page = this.selected && this.data ? this.detail() : `${this.heading()}${this.content()}`; } catch (err) { page = this.renderFailed(err); }
-    const shell = `<div class="shell${this.dense ? " dense" : ""}"><div class="stickyhead">${this.topbar()}${this.safetyBar()}</div><main class="main">${page}</main><div class="sr-only" role="status" aria-live="polite">${this.esc(this.liveStatus())}</div></div>`;
+    const shell = `<div class="shell${this.dense ? " dense" : ""}"><div class="stickyhead">${this.topbar()}${this.safetyBar()}</div><main class="main">${page}</main>${this.noteDialog()}<div class="sr-only" role="status" aria-live="polite">${this.esc(this.liveStatus())}</div></div>`;
     // The style sheet is only parsed again when the theme changed; otherwise just the page is replaced.
     const root = this.shadowRoot, css = this.themeCss(), current = root.querySelector?.(".shell");
     let swapped = false;

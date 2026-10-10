@@ -428,7 +428,7 @@ class CleanupMixin {
     const body = stage === 0 ? `${summary}${this.simulationBlock(plan)}${rows}${control}`
       : stage === 1 ? `${summary}${this.simulationBlock(plan)}${rows}${control}`
       : stage === 2 ? `${this.planOutcome(plan)}${this.planProgressBar()}${control}`
-      : `${this.planOutcome(plan)}${summary}${this.simulationBlock(plan)}${rows}${checks}${this.followupLine(plan)}${control}`;
+      : `${this.planOutcome(plan)}${this.logSuggestCard(plan)}${summary}${this.simulationBlock(plan)}${rows}${checks}${this.followupLine(plan)}${control}`;
     return `<section class="panel" data-plan-card><div class="panelhead"><div><h2>${this.t(plan.status === "dry_run" ? "planResult" : "planResultDone")} · <span class="pill ${plan.status === "verified" ? "ok" : plan.status === "dry_run" ? "mute" : "warn"}">${this.t(`plan_status_${plan.status}`)}</span></h2><p>${this.esc(this.formatDate(plan.created_at))}</p></div><button class="btn" data-plan-close>${this.t("planClose")}</button></div>
       ${this.wizardBar(stage)}${flow}${body}${this.reportBlock(plan)}</section>`;
   }

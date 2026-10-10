@@ -400,6 +400,8 @@ def websocket_battery_replaced(
         vol.Optional("at"): str,
         vol.Optional("target", default=""): str,
         vol.Optional("note", default=""): str,
+        vol.Optional("source"): vol.In(["me", "housekeeper"]),
+        vol.Optional("ref", default=""): str,
     }
 )
 @callback
@@ -410,7 +412,7 @@ def websocket_note_set(
     msg: dict[str, Any],
     scanner: InventoryScanner,
 ) -> None:
-    """Save or delete an entry of your own in the history. Only Housekeeper's own list changes."""
+    """Save or delete an entry of the logbook. Only Housekeeper's own list changes."""
     try:
         if msg["action"] == "save":
             scanner.notes.upsert(
@@ -420,6 +422,8 @@ def websocket_note_set(
                 msg["target"],
                 msg["note"],
                 datetime.now(UTC),
+                msg.get("source"),
+                msg["ref"],
             )
         else:
             scanner.notes.delete(msg.get("note_id", ""))

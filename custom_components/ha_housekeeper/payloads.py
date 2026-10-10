@@ -226,6 +226,8 @@ class Note(TypedDict):
     at: str  # ISO time with zone
     target: str
     note: str
+    source: str  # "me" or "housekeeper" (suggested after an action, accepted by the person)
+    ref: str  # the plan an entry of source "housekeeper" came from
 
 
 class PlanSummary(TypedDict):

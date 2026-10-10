@@ -22,10 +22,8 @@ class ChangesMixin {
       const inner = `<span class="tile ${selected ? "" : "mute"}"><ha-icon icon="${r.now ? "mdi:clock-check-outline" : "mdi:history"}"></ha-icon></span><span class="row-text"><strong>${label} · ${this.esc(this.formatDate(r.at))}</strong><small>${this.t("historyCounts", { objects: this.formatNumber(r.objects || 0), findings: this.formatNumber(r.findings || 0) })}</small><span class="bar" style="margin-top:4px"><i style="width:${Math.round(((r.findings || 0) / max) * 100)}%"></i></span></span>${pill}`;
       return { at: r.at, html: r.now ? `<div class="row rel">${inner}</div>` : `<button class="row rel ${selected ? "sel" : ""}" data-baseline="${this.esc(r.id)}">${inner}</button>` };
     });
-    const mine = this.notesList().map(n => ({ at: n.at, html: this.noteRow(n) }));
-    const timeline = [...scans, ...mine].sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0));
-    const pg = this.paginate("history", timeline.map(e => e.html));
-    return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("historyTitle")}</h2><p>${this.t("historyHint", { days: c.retention_days ?? 30 })}</p></div><div class="actions">${this.noteHeadButton()}</div></div>${this.noteForm()}${pg.rows.join("")}${pg.footer}</section>`;
+    const pg = this.paginate("history", scans.map(e => e.html));
+    return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("historyTitle")}</h2><p>${this.t("historyHint", { days: c.retention_days ?? 30 })}</p></div></div>${pg.rows.join("")}${pg.footer}</section>`;
   }
 
   // The report of the changes as Markdown, for the baseline closest to a week back (loaded first when another is set).
@@ -57,7 +55,14 @@ class ChangesMixin {
 
   changeRank(status) { return { active: 0, disabled: 1, empty: 1, unknown: 2, problem: 3, orphaned: 3, unavailable: 3 }[status] ?? 1; }
 
+  // Two tabs: the comparison of the scans and the logbook with the entries you and Housekeeper wrote.
   changesView() {
+    const tabs = [{ id: "compare", label: this.t("tabScans") }, { id: "logbook", label: this.t("logbook"), count: this.notesList().length }];
+    const open = this.viewTabOf("changes", tabs, "compare");
+    return `${this.viewTabBar("changes", tabs, open)}${open === "logbook" ? this.logbookView() : this.changesCompare()}`;
+  }
+
+  changesCompare() {
     const c = this.compare;
     if (!c) return `${this.skeleton("loading")}`;
     this.ensureCorrelations();

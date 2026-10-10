@@ -1,8 +1,10 @@
-"""Entries you write yourself in the history: "Zigbee stick replaced", "router updated".
+"""The logbook: entries you write yourself, "Zigbee stick replaced", "router updated".
 
 Housekeeper only keeps the title, the time, an optional note and an optional object the entry
-concerns. It changes nothing in Home Assistant. The entries show in the history of the changes and
+concerns. It changes nothing in Home Assistant. The entries show in the logbook under Changes and
 count as an event for the correlation, which words it as "at about the same time", never as a cause.
+An entry is "me" (written by the person) or "housekeeper" (suggested after an action and accepted
+by the person); the latter keeps the plan it came from in ``ref``.
 """
 
 from __future__ import annotations
@@ -21,6 +23,8 @@ MAX_ITEMS = 200
 TITLE_MAX = 80
 NOTE_MAX = 500
 TARGET_MAX = 300
+REF_MAX = 64
+SOURCES = ("me", "housekeeper")
 FUTURE_SLACK = timedelta(days=1)
 
 
@@ -62,6 +66,8 @@ class NoteStore:
                         "at": item["at"],
                         "target": str(item.get("target") or "")[:TARGET_MAX],
                         "note": str(item.get("note") or "")[:NOTE_MAX],
+                        "source": item["source"] if item.get("source") in SOURCES else "me",
+                        "ref": str(item.get("ref") or "")[:REF_MAX],
                     }
                 )
         del self.items[MAX_ITEMS:]
@@ -77,6 +83,8 @@ class NoteStore:
         target: str,
         note: str,
         now: datetime,
+        source: str | None = None,
+        ref: str = "",
     ) -> str:
         title = title.strip()
         if not title or len(title) > TITLE_MAX:
@@ -88,6 +96,10 @@ class NoteStore:
             raise NoteError("note")
         if len(target) > TARGET_MAX:
             raise NoteError("target")
+        if source is not None and source not in SOURCES:
+            raise NoteError("source")
+        if len(ref) > REF_MAX:
+            raise NoteError("ref")
         if item_id is None:
             if len(self.items) >= MAX_ITEMS:
                 raise NoteError("too_many")
@@ -97,6 +109,11 @@ class NoteStore:
         if item is None:
             raise NoteError("not_found")
         item.update(title=title, at=when.isoformat(), target=target, note=note.strip())
+        if source is not None:
+            item.update(source=source, ref=ref)
+        else:
+            item.setdefault("source", "me")
+            item.setdefault("ref", "")
         self._save()
         return item_id
 

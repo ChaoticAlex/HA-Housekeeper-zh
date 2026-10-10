@@ -34,6 +34,15 @@ async def test_notes_are_checked_kept_newest_first_and_feed_the_correlation(
     ):
         with pytest.raises(NoteError):
             store.upsert(None, title, at, "", "", NOW)
+    suggested = store.upsert(
+        None, "Replaced", "2026-10-09T20:15:00+00:00", "entity:sensor.x", "", NOW, "housekeeper", "p1"
+    )
+    entry = next(i for i in store.items if i["id"] == suggested)
+    assert entry["source"] == "housekeeper" and entry["ref"] == "p1"
+    assert next(i for i in store.items if i["id"] == first)["source"] == "me"
+    with pytest.raises(NoteError):
+        store.upsert(None, "x", "2026-10-09T20:15:00+00:00", "", "", NOW, "robot")
+    store.delete(suggested)
     with pytest.raises(NoteError):
         store.delete("missing")
     # a finding that began shortly after the entry is named with it, as an event of the log
