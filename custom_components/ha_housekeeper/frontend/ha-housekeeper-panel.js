@@ -1281,7 +1281,7 @@ class StylesMixin {
       .headlink{all:unset;cursor:pointer;color:inherit;font:inherit}.headlink:hover{text-decoration:underline}.headlink:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px;border-radius:4px}#hk-todo-card:focus{outline:none}
       .wz .wzbtn{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;cursor:pointer;width:100%}.wz .wzbtn:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px;border-radius:4px}.xpbody{padding:14px 16px}.xpbody h3{margin:0 0 4px}.xpbody input[type=search]{width:100%;box-sizing:border-box}.xpbody .chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.xprow{cursor:pointer}.xpgrp{border:1px solid var(--hk-border);border-radius:8px;padding:10px 12px;margin:8px 0}.xpgrp>label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}.xpgrp small{display:block;color:var(--hk-muted)}.xpfmts{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.xpfmt{flex:1;min-width:150px;border:1px solid var(--hk-border);border-radius:8px;padding:10px 12px;cursor:pointer;display:grid;gap:2px}.xpfmt input{position:absolute;opacity:0;pointer-events:none}.xpfmt.on{border:2px solid var(--hk-blue);padding:9px 11px}.xpfmt:focus-within{outline:2px solid var(--hk-blue);outline-offset:2px}.xprowline{display:flex;gap:8px;margin-top:8px}.xprowline input{flex:1}.xpmeta{display:flex;justify-content:space-between;gap:8px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.xppre{max-height:320px;overflow:auto;white-space:pre-wrap}.xpact{display:flex;gap:8px}.chip.tpl{display:inline-flex;gap:4px;padding:0}.chip.tpl button{all:unset;cursor:pointer;padding:4px 8px}.chip.tpl button:focus-visible{outline:2px solid var(--hk-blue);border-radius:4px}
       .step.done{color:color-mix(in srgb,var(--hk-green) 60%,var(--hk-text))}.step.current{color:color-mix(in srgb,var(--hk-blue) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-blue) 10%,transparent)}.step.current .mark{background:var(--hk-blue);border-color:var(--hk-blue);color:var(--hk-on,#fff)}.step.failed{color:color-mix(in srgb,var(--hk-red) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-red) 9%,transparent)}.step.skipped{opacity:.85}
-      .qlight{display:none;gap:3px;margin-top:4px}.qlight i{width:9px;height:9px;border-radius:50%;background:var(--hk-muted)}.qlight i.ok{background:var(--hk-ok,#3f7d4e)}.qlight i.warn{background:var(--hk-warn,#b8860b)}.qlight i.red{background:var(--hk-red,#b3392f)}@media(max-width:700px){.qualitytable th:not(:first-child):not(:last-child),.qualitytable td:not(:first-child):not(:last-child){display:none}.qlight{display:flex}}.foldhead{width:100%}.foldbody{margin:0 0 6px 28px;border-left:2px solid var(--hk-line,rgba(128,128,128,.25))}.foldadvice{margin:6px 16px 2px}.foldhd,.expohd{margin:14px 16px 4px;font-size:calc(11px*var(--hk-fs,1));letter-spacing:.08em;text-transform:uppercase;color:var(--hk-muted)}.srclist{display:grid;gap:8px;margin-top:8px}.srcblock{border:1px solid var(--hk-border);border-radius:10px;padding:8px 10px;display:grid;gap:6px}.srchead{display:flex;gap:8px;align-items:center}.srchead small{display:block;color:var(--hk-muted)}.srcdiff{display:grid;gap:2px;font-size:calc(12.5px*var(--hk-fs,1))}.srcspot{margin-top:4px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.srcln{display:grid;grid-template-columns:18px minmax(0,1fr);padding:1px 8px;border-radius:4px;font-family:ui-monospace,monospace;overflow-wrap:anywhere}.srcln i{font-style:normal;font-weight:700}.srcln.del{background:color-mix(in srgb,var(--hk-red,#b3392f) 10%,transparent)}.srcln.add{background:color-mix(in srgb,var(--hk-ok,#3f7d4e) 12%,transparent)}.srchand{padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--hk-warn,#b8860b) 9%,transparent);font-size:calc(13px*var(--hk-fs,1))}.srchand ul{margin:4px 0 0;padding-left:18px;color:var(--hk-muted)}.modecards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:4px 16px 12px}.modecard{text-align:left;font:inherit;color:inherit;background:var(--hk-surface);border:1px solid var(--hk-border);border-radius:12px;padding:12px;display:grid;gap:6px;align-content:start;cursor:pointer}.modecard.on{border-color:var(--hk-blue);box-shadow:0 0 0 2px color-mix(in srgb,var(--hk-blue) 25%,transparent)}.modecard small{color:var(--hk-muted)}.modecard .modefollow{font-weight:600}@media(max-width:700px){.modecards{grid-template-columns:1fr}}.setrow .mcheck{padding:4px 0}.mcheck{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;padding:4px 16px;font-size:calc(13px*var(--hk-fs,1));align-items:baseline}.mcheck .ok-t{color:var(--hk-ok,#3f7d4e);font-weight:700}.mcheck .bad-t{color:var(--hk-red,#b3392f);font-weight:700}.mcheck .warn-t{color:var(--hk-warn,#b8860b);font-weight:700}.mtl{display:grid;gap:4px;margin:6px 0}.mtlbar{display:flex;height:40px;border-radius:10px;overflow:hidden;border:1px solid var(--hk-border)}.mtlbar div{display:grid;place-items:center;font-size:calc(12.5px*var(--hk-fs,1));font-weight:600;padding:0 8px}.mtlbar .a{flex:5;background:color-mix(in srgb,var(--hk-blue) 18%,transparent)}.mtlbar .gap{flex:1;background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--hk-warn,#b8860b) 22%,transparent) 0 6px,transparent 6px 12px)}.mtlbar .b{flex:4;background:color-mix(in srgb,var(--hk-ok,#3f7d4e) 18%,transparent)}.mtlaxis{display:flex;justify-content:space-between;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.mfacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:6px 0}.mfacts .mfact{padding:8px 10px;border-radius:10px;background:var(--hk-soft);border:1px solid var(--hk-border)}.mfacts .mfact b{display:block}.mfacts .mfact small{color:var(--hk-muted)}.exsum{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.exptags{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.exptags .tag{padding:1px 8px;border-radius:8px;background:var(--hk-soft);border:1px solid var(--hk-border);font-size:calc(12px*var(--hk-fs,1))}.rowdetails{margin-top:6px}.rowdetails summary{cursor:pointer;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}
+      .qlight{display:none;gap:3px;margin-top:4px}.qlight i{width:9px;height:9px;border-radius:50%;background:var(--hk-muted)}.qlight i.ok{background:var(--hk-ok,#3f7d4e)}.qlight i.warn{background:var(--hk-warn,#b8860b)}.qlight i.red{background:var(--hk-red,#b3392f)}@media(max-width:700px){.qualitytable th:not(:first-child):not(:last-child),.qualitytable td:not(:first-child):not(:last-child){display:none}.qlight{display:flex}}.foldhead{width:100%}.foldbody{margin:0 0 6px 28px;border-left:2px solid var(--hk-line,rgba(128,128,128,.25))}.foldadvice{margin:6px 16px 2px}.foldhd,.expohd{margin:14px 16px 4px;font-size:calc(11px*var(--hk-fs,1));letter-spacing:.08em;text-transform:uppercase;color:var(--hk-muted)}.srclist{display:grid;gap:8px;margin-top:8px}.srcblock{border:1px solid var(--hk-border);border-radius:10px;padding:8px 10px;display:grid;gap:6px}.srchead{display:flex;gap:8px;align-items:center}.srchead small{display:block;color:var(--hk-muted)}.srcdiff{display:grid;gap:2px;font-size:calc(12.5px*var(--hk-fs,1))}.srcspot{margin-top:4px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.srcln{display:grid;grid-template-columns:18px minmax(0,1fr);padding:1px 8px;border-radius:4px;font-family:ui-monospace,monospace;overflow-wrap:anywhere}.srcln i{font-style:normal;font-weight:700}.srcln.del{background:color-mix(in srgb,var(--hk-red,#b3392f) 10%,transparent)}.srcln.add{background:color-mix(in srgb,var(--hk-ok,#3f7d4e) 12%,transparent)}.srchand{padding:8px 10px;border-radius:10px;background:color-mix(in srgb,var(--hk-warn,#b8860b) 9%,transparent);font-size:calc(13px*var(--hk-fs,1))}.srchand ul{margin:4px 0 0;padding-left:18px;color:var(--hk-muted)}.modecards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:4px 16px 12px}.modecard{text-align:left;font:inherit;color:inherit;background:var(--hk-surface);border:1px solid var(--hk-border);border-radius:12px;padding:12px;display:grid;gap:6px;align-content:start;cursor:pointer}.modecard.on{border-color:var(--hk-blue);box-shadow:0 0 0 2px color-mix(in srgb,var(--hk-blue) 25%,transparent)}.modecard small{color:var(--hk-muted)}.modecard .modefollow{font-weight:600}@media(max-width:700px){.modecards{grid-template-columns:1fr}}.setrow .mcheck{padding:4px 0}.mcheck{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;padding:4px 16px;font-size:calc(13px*var(--hk-fs,1));align-items:baseline}.mcheck .ok-t{color:var(--hk-ok,#3f7d4e);font-weight:700}.mcheck .bad-t{color:var(--hk-red,#b3392f);font-weight:700}.mcheck .warn-t{color:var(--hk-warn,#b8860b);font-weight:700}.mtl{display:grid;gap:4px;margin:6px 0}.mtlbar{display:flex;height:40px;border-radius:10px;overflow:hidden;border:1px solid var(--hk-border)}.mtlbar div{display:grid;place-items:center;font-size:calc(12.5px*var(--hk-fs,1));font-weight:600;padding:0 8px}.mtlbar .a{flex:5;background:color-mix(in srgb,var(--hk-blue) 18%,transparent)}.mtlbar .gap{flex:1;background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--hk-warn,#b8860b) 22%,transparent) 0 6px,transparent 6px 12px)}.mtlbar .b{flex:4;background:color-mix(in srgb,var(--hk-ok,#3f7d4e) 18%,transparent)}.mtlaxis{display:flex;justify-content:space-between;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.mfacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin:6px 0}.mfacts .mfact{padding:8px 10px;border-radius:10px;background:var(--hk-soft);border:1px solid var(--hk-border)}.mfacts .mfact b{display:block}.mfacts .mfact small{color:var(--hk-muted)}.exsum{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.exptags{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.exptags .tag{padding:1px 8px;border-radius:8px;background:var(--hk-soft);border:1px solid var(--hk-border);font-size:calc(12px*var(--hk-fs,1))}.etkinds{display:grid}.etkind{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:12px;align-items:start;padding:12px 16px;border-top:1px solid var(--hk-border);cursor:pointer}.etkind.none{opacity:.6;cursor:default}.etkind small{display:block;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.etnum{text-align:right;white-space:nowrap}.etnum b{display:block}.etbody{display:grid;gap:12px;padding:12px 16px;border-top:1px solid var(--hk-border)}.etdates{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.etdates input{font:inherit;padding:6px 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit}.etwarn{margin:0;padding:12px 16px;background:color-mix(in srgb,var(--hk-warn,#b8860b) 9%,transparent);border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.rowdetails{margin-top:6px}.rowdetails summary{cursor:pointer;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}
       .planrow{align-items:start}.planrow .row-text small{overflow:visible;white-space:normal;text-overflow:clip}
       .row.sel{background:color-mix(in srgb,var(--hk-blue) 10%,var(--hk-soft))}.row.rel .bar i{background:var(--hk-gray)}.row.sel .bar i{background:var(--hk-blue)}
       .row.rel:hover,button.row:hover{background:color-mix(in srgb,var(--hk-blue) 6%,var(--hk-soft))}
@@ -2720,7 +2720,7 @@ class CleanupMixin {
     try {
       const actions = plan.actions.map(a => {
         const r = { kind: a.kind, object_id: a.object_id };
-        for (const key of ["target", "mode", "range", "recorder", "fix", "values"]) if (a[key]) r[key] = a[key];
+        for (const key of ["target", "mode", "range", "recorder", "fix", "values", "tables"]) if (a[key]) r[key] = a[key];
         if (a.kind === "purge_statistics") r.states = Boolean(a.states);
         if (a.kind === "trim_history") r.keep_days = a.keep_days;
         return r;
@@ -2898,7 +2898,7 @@ class CleanupMixin {
       const result = a.result;
       const resultPill = result ? `<span class="pill ${{ done: "ok", undone: "mute" }[result.state] || "warn"}">${this.t(`result_${result.state === "done" ? DONE_RESULTS[a.kind] || "done" : result.state}`)}</span>` : "";
       const sub0 = a.kind === "set_area" ? `${a.object_id} → ${a.area_name || "?"}${a.suggested && a.area_name ? ` (${this.t("areaSuggested")})` : ""}` : a.kind === "add_label" ? `${a.object_id} + ${a.label_name || a.target || "?"}` : a.kind === "replace_references" || a.kind === "migrate_meter" || a.kind === "rename_entity" ? `${a.object_id} → ${a.target || "?"}` : type === "device" ? `${this.t("deviceEntities", { count: (a.entities || []).length })}` : a.object_id;
-      const sub = [sub0 === a.name ? "" : sub0, a.recorder ? this.t(`recChoice_${a.recorder}`) : "", a.kind === "delete_backup" ? [a.backup?.date ? this.formatDate(a.backup.date).split(",")[0] : "", this.formatBytes(a.backup?.size)].filter(Boolean).join(" · ") : "", a.kind === "trim_history" ? this.t("trimSub", { days: a.keep_days, rows: a.trim?.rows ?? "?" }) : ""].filter(Boolean).join(" · ");
+      const sub = [sub0 === a.name ? "" : sub0, a.recorder ? this.t(`recChoice_${a.recorder}`) : "", a.kind === "delete_backup" ? [a.backup?.date ? this.formatDate(a.backup.date).split(",")[0] : "", this.formatBytes(a.backup?.size)].filter(Boolean).join(" · ") : "", a.kind === "trim_history" ? this.trimPlanSub(a) : ""].filter(Boolean).join(" · ");
       const sources = a.kind === "delete_automation" ? this.deleteDiff(a) : a.kind === "replace_references" || a.kind === "rename_entity" ? this.sourceList(a) : a.kind === "refactor_automation" ? this.refactorDiff(a) : a.kind === "migrate_meter" ? this.meterDetail(a) : REPAIR_KINDS.includes(a.kind) ? this.counterDetail(a) : "";
       const abort = result?.state === "not_run" ? ` · ${this.t(`abort_${result.reason}`)}` : result?.stopped ? ` · ${this.t(`abort_${result.stopped}`)}` : "" + (result?.purge?.state === "failed" ? ` · ${this.t("result_purge_failed")}` : "");
       const ack = "";
@@ -4176,7 +4176,7 @@ class DiagnosisMixin {
       const cards = this.propertyCards(item);
       return `<div class="stack">${cards ? `<div class="propgrid">${cards}</div>` : `<section class="panel"><div class="panelhead"><h2>${this.t("registry")}</h2></div><div class="pad"><dl class="kv"><dt>${this.t("type")}</dt><dd>${this.t(item.object_type)}</dd>${fields.map(([k, v]) => `<dt>${this.esc(k)}</dt><dd>${this.esc(Array.isArray(v) ? v.join(", ") : v)}</dd>`).join("")}</dl></div></section>`}${automation}${this.detailLoading ? `<p class="sub">${this.t("loading")}</p>` : ""}</div>`;
     }
-    return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.actionsCard(item, key)}${this.detailEditCard(item)}${this.impactCard(item, key)}</div><div class="stack">${this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.staleCard(item)}${this.noteCard(item)}</div></div>`;
+    return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.actionsCard(item, key)}${this.detailEditCard(item)}${this.impactCard(item, key)}</div><div class="stack">${this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.entityTrimCard(item)}${this.staleCard(item)}${this.noteCard(item)}</div></div>`;
   }
 }
 
@@ -7899,6 +7899,130 @@ class PickerMixin {
   }
 }
 
+// "Trim history" on the page of one entity: states, short-term and long-term statistics, older than X days or a stretch of
+// states; mixed into the panel in 99-register.js. It makes the same plan action as the recorder's trim block (trim_history).
+Object.assign(TEXT.de, {
+  etTitle: "Verlauf kürzen", etHint: "Löscht gespeicherte Daten dieser Entität. Vorher siehst du, wie viele Zeilen wegfallen. Zurücknehmen geht nur mit dem Backup, das Housekeeper davor anlegt.",
+  etCount: "Erst zählen: Unter „Im Recorder“ steht, was gespeichert ist.", etNone: "Nichts gespeichert",
+  etStates: "Zustände", etStatesHint: "Jede Änderung der Entität, wie sie im Verlauf und im Logbuch steht. Das ist der größte Teil der Datenbank.",
+  etShort: "Kurzzeitstatistik", etShortHint: "Werte im 5-Minuten-Takt. Home Assistant hebt sie nur etwa 10 Tage auf und räumt sie selbst auf.",
+  etLong: "Langzeitstatistik", etLongHint: "Stundenwerte ohne Ablaufdatum. Energie-Dashboard, Diagramme und Summen lesen daraus.",
+  etRows: "{count} Zeilen", etOldest: "ältester Eintrag {date}",
+  etOlder: "Älter als", etRange: "Zeitraum", etKeep: "Behalten, was jünger ist als", etDays: "{days} Tage", etYear: "1 Jahr",
+  etFrom: "von", etTo: "bis", etRangeHint: "Nur Zustände. Ein Loch mitten in einer Statistik würde Summen und Diagramme verfälschen, deshalb gibt es den Zeitraum nur dafür.",
+  etGone: "Wird gelöscht", etGoneSub: "Gewählte Daten älter als {days} Tage", etStaySub: "die letzten {days} Tage", etStay: "Bleibt", etBefore: "davor", etAfter: "danach",
+  etWarnEnergy: "Das verändert Auswertungen. Diese Entität steht im Energie-Dashboard. Fehlen die ältesten Stunden, beginnen Diagramme und Summen später. Die Summen danach bleiben richtig. Es gibt keinen Weg zurück außer dem Backup.",
+  etWarnLong: "Das verändert Auswertungen. Fehlen die ältesten Stunden der Langzeitstatistik, beginnen Diagramme und Summen später. Die Summen danach bleiben richtig. Es gibt keinen Weg zurück außer dem Backup.",
+  etFoot: "Vor dem Löschen legt Housekeeper ein Home-Assistant-Backup mit Datenbank an. Die Zahl der Zeilen steht erst in der Vorschau fest.", etPreview: "Vorschau erstellen", etBusy: "Plan wird erstellt …",
+  etSubTables: "{tables}", etSubOlder: "älter als {days} Tage: {rows} Zeilen", etSubRange: "{from} bis {to}: {rows} Zeilen",
+  reason_trim_statistics: "Die Langzeitstatistik wird gekürzt: Diagramme und Summen beginnen später.", reason_bad_tables: "Die Auswahl der Daten ist ungültig.", reason_range_states_only: "Ein Zeitraum gilt nur für Zustände, nicht für Statistiken.",
+});
+Object.assign(TEXT.en, {
+  etTitle: "Trim history", etHint: "Deletes stored data of this entity. You see how many rows go before anything happens. Undoing needs the backup that Housekeeper makes first.",
+  etCount: "Count first: “In the recorder” shows what is stored.", etNone: "Nothing stored",
+  etStates: "States", etStatesHint: "Every change of the entity, as shown in the history and the logbook. This is the biggest part of the database.",
+  etShort: "Short-term statistics", etShortHint: "Values every 5 minutes. Home Assistant keeps them for about 10 days and cleans them up itself.",
+  etLong: "Long-term statistics", etLongHint: "Hourly values without an expiry. The Energy dashboard, charts and sums read from them.",
+  etRows: "{count} rows", etOldest: "oldest entry {date}",
+  etOlder: "Older than", etRange: "Period", etKeep: "Keep what is younger than", etDays: "{days} days", etYear: "1 year",
+  etFrom: "from", etTo: "to", etRangeHint: "States only. A hole in the middle of statistics would falsify sums and charts, so a period is offered for states only.",
+  etGone: "Will be deleted", etGoneSub: "Chosen data older than {days} days", etStaySub: "the last {days} days", etStay: "Stays", etBefore: "before", etAfter: "after",
+  etWarnEnergy: "This changes what is shown. This entity is in the Energy dashboard. Without the oldest hours, charts and sums begin later. The sums after that stay right. The only way back is the backup.",
+  etWarnLong: "This changes what is shown. Without the oldest hours of the long-term statistics, charts and sums begin later. The sums after that stay right. The only way back is the backup.",
+  etFoot: "Before deleting, Housekeeper makes a Home Assistant backup with the database. The number of rows is only known in the preview.", etPreview: "Create preview", etBusy: "Creating the plan …",
+  etSubTables: "{tables}", etSubOlder: "older than {days} days: {rows} rows", etSubRange: "{from} to {to}: {rows} rows",
+  reason_trim_statistics: "The long-term statistics are trimmed: charts and sums begin later.", reason_bad_tables: "The choice of data is not valid.", reason_range_states_only: "A period applies to states only, not to statistics.",
+});
+
+const ET_TABLES = [["states", "etStates", "etStatesHint", "states"], ["short_term", "etShort", "etShortHint", "short"], ["long_term", "etLong", "etLongHint", "long"]];
+const ET_DAYS = [7, 14, 30, 90, 365];
+
+class EntityTrimMixin {
+  entityTrimState(id) {
+    return this.etrim?.id === id ? this.etrim : (this.etrim = { id, tables: new Set(["states"]), mode: "older", days: 30, from: "", to: "", busy: false, error: "" });
+  }
+
+  // The window of a stretch in epoch seconds: the first day from 00:00, the last day to its end (exclusive end = next midnight).
+  entityTrimRange(e) {
+    if (!e.from || !e.to) return null;
+    const from = new Date(`${e.from}T00:00:00`).getTime() / 1000, to = new Date(`${e.to}T00:00:00`).getTime() / 1000 + 86400;
+    return from < to ? { from, to } : null;
+  }
+
+  entityTrimAction(item) {
+    const e = this.entityTrimState(item.object_id), tables = ET_TABLES.map(t => t[0]).filter(t => e.tables.has(t));
+    const action = { kind: "trim_history", object_id: item.object_id };
+    if (e.mode === "range") action.range = this.entityTrimRange(e);
+    else action.keep_days = e.days;
+    if (tables.join() !== "states") action.tables = tables;
+    return action;
+  }
+
+  entityTrimCard(item) {
+    if (item.object_type !== "entity" || !this.data.meta.recorder_available) return "";
+    const id = item.object_id, data = this.entityRec?.[id]?.data;
+    if (!data) return `<section class="panel"><div class="panelhead"><div><h2>${this.t("etTitle")}</h2><p>${this.t("etCount")}</p></div></div></section>`;
+    const e = this.entityTrimState(id), date = ts => this.esc(this.formatDate(new Date(ts * 1000).toISOString()).split(",")[0]);
+    const kinds = ET_TABLES.map(([table, label, hint, key]) => {
+      const part = data[key] || { rows: 0 }, none = !part.rows, on = e.tables.has(table) && !none;
+      return `<label class="etkind${none ? " none" : ""}"><input type="checkbox" data-et-table="${table}" ${on ? "checked" : ""} ${none ? "disabled" : ""}><span><strong>${this.t(label)}</strong><small>${this.t(hint)}</small></span><span class="etnum">${none ? this.t("etNone") : `<b>${this.t("etRows", { count: this.formatNumber(part.rows) })}</b><small>${this.t("etOldest", { date: date(part.first) })}</small>`}</span></label>`;
+    }).join("");
+    const only = [...e.tables].every(t => t === "states");
+    const mode = only ? `<span class="trimseg" role="radiogroup">${["older", "range"].map(m => `<button type="button" class="${e.mode === m ? "on" : ""}" data-et-mode="${m}" role="radio" aria-checked="${e.mode === m}">${this.t(m === "older" ? "etOlder" : "etRange")}</button>`).join("")}</span>` : "";
+    let timeline;
+    if (e.mode === "range" && only) {
+      timeline = `<span class="etdates"><label>${this.t("etFrom")} <input type="date" data-et-from value="${this.esc(e.from)}"></label><label>${this.t("etTo")} <input type="date" data-et-to value="${this.esc(e.to)}"></label></span><p class="factnote">${this.t("etRangeHint")}</p>`;
+    } else {
+      const seg = ET_DAYS.map(d => `<button type="button" class="${e.days === d ? "on" : ""}" data-et-days="${d}" role="radio" aria-checked="${e.days === d}">${this.t(d === 365 ? "etYear" : "etDays", { days: d })}</button>`).join("");
+      timeline = `<span class="trimsentence"><strong>${this.t("etKeep")}</strong><span class="trimseg" role="radiogroup">${seg}</span></span><div class="trimline"><div class="gone"><strong>${this.t("etGone")}</strong><small>${this.t("etGoneSub", { days: e.days })}</small></div><div class="stay"><strong>${this.t("etStay")}</strong><small>${this.t("etStaySub", { days: e.days })}</small></div></div>`;
+    }
+    const energy = this.usageTags(id).includes(this.t("energyDashboard"));
+    const warn = e.tables.has("long_term") ? `<p class="etwarn">${this.t(energy ? "etWarnEnergy" : "etWarnLong")}</p>` : "";
+    const ready = e.tables.size && (e.mode !== "range" || !only || this.entityTrimRange(e)) && !e.busy;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("etTitle")}</h2><p>${this.t("etHint")}</p></div></div>
+      <div class="etkinds">${kinds}</div><div class="etbody">${mode}${timeline}</div>${warn}${e.error ? `<div class="error">${this.esc(e.error)}</div>` : ""}
+      <div class="trimfoot"><p class="factnote">${this.t("etFoot")}</p><button class="btn primary" data-et-plan="${this.esc(id)}" ${ready ? "" : "disabled"}>${e.busy ? this.t("etBusy") : this.t("etPreview")}</button></div></section>`;
+  }
+
+  // The line a trim row shows in a plan: what is trimmed and how much.
+  trimPlanSub(a) {
+    const rows = a.trim?.rows === undefined ? "?" : a.trim.rows;
+    const names = { states: "etStates", short_term: "etShort", long_term: "etLong" };
+    const what = a.tables?.length ? `${a.tables.map(t => this.t(names[t])).join(", ")} · ` : "";
+    if (a.range) {
+      const day = ts => this.formatDate(new Date(ts * 1000).toISOString()).split(",")[0];
+      return what + this.t("etSubRange", { from: day(a.range.from), to: day(a.range.to - 86400), rows });
+    }
+    return what + this.t("etSubOlder", { days: a.keep_days, rows });
+  }
+
+  async entityTrimPlan(id) {
+    const e = this.entityTrimState(id), item = this.findObject(`entity:${id}`);
+    if (!item || e.busy) return;
+    e.busy = true; e.error = ""; this.render();
+    try {
+      const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_create", actions: [this.entityTrimAction(item)] });
+      this.openNewPlan(plan);
+    } catch (err) { e.error = err?.message || String(err); }
+    e.busy = false;
+    this.render();
+  }
+
+  bindEntityTrim(root) {
+    const e = () => this.etrim;
+    root.querySelectorAll("[data-et-table]").forEach(el => el.onchange = () => {
+      const s = e(); el.checked ? s.tables.add(el.dataset.etTable) : s.tables.delete(el.dataset.etTable);
+      if (![...s.tables].every(t => t === "states")) s.mode = "older";
+      this.render();
+    });
+    root.querySelectorAll("[data-et-mode]").forEach(el => el.onclick = () => { e().mode = el.dataset.etMode; this.render(); });
+    root.querySelectorAll("[data-et-days]").forEach(el => el.onclick = () => { e().days = Number(el.dataset.etDays) || 30; this.render(); });
+    root.querySelector("[data-et-from]")?.addEventListener("change", ev => { this.etrim.from = ev.target.value; this.render(); });
+    root.querySelector("[data-et-to]")?.addEventListener("change", ev => { this.etrim.to = ev.target.value; this.render(); });
+    root.querySelector("[data-et-plan]")?.addEventListener("click", ev => this.entityTrimPlan(ev.currentTarget.dataset.etPlan));
+  }
+}
+
 // "Stops reporting": the limit of one sensor and the texts of the finding; mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
   stale: "Meldet nicht mehr", staleIdle: "seit {hours} h keine neue Meldung (Limit {limit} h)",
@@ -9914,6 +10038,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.bindPlanWizard(root);
     this.bindExclude(root);
     this.bindEntityRecorder(root);
+    this.bindEntityTrim(root);
     this.bindGoals(root);
     this.bindExchange(root);
     this.bindDiagnostics(root);
@@ -10130,7 +10255,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, RenameMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, SparklineMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, RenameMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, SparklineMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }

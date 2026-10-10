@@ -92,11 +92,19 @@ from .cleanup import (
     judge_purge_action,
     judge_rename_action,
     registry_fingerprint,
+    trim_is_plain,
 )
 from .const import DOMAIN, MAX_FILE_BACKUP, MAX_PLAN_SNAPSHOTS
 from .meter import analyse, prepare_meter, read_series, recorder_ready
 from .protection import allows, allows_undo
-from .recorder_purge import count_older, delete_statistics, statistics_left, trim_states
+from .recorder_purge import (
+    count_older,
+    count_trim,
+    delete_statistics,
+    statistics_left,
+    trim_extra,
+    trim_states,
+)
 from .references import (
     ENERGY_PARTS,
     YAML_FILES,
@@ -785,6 +793,8 @@ class CleanupRunner:
     async def _trim_history(self, action: dict[str, Any]) -> dict[str, Any]:
         """Delete the state rows of one entity older than ``keep_days``; noted, never undone."""
         entity_id, keep_days = action["object_id"], action["keep_days"]
+        if not trim_is_plain(action):
+            return await self._trim_extra(action)
         left, error = await trim_states(self.hass, entity_id, keep_days)
         if error:
             raise StepAbort(error)
@@ -800,6 +810,36 @@ class CleanupRunner:
             "purge", _now(), requested=1, removed=0, skipped=0, states=True, rows=rows
         )
         return {"keep_days": keep_days, "rows": rows, "irreversible": True}
+
+    async def _trim_extra(self, action: dict[str, Any]) -> dict[str, Any]:
+        """Delete statistics older than ``keep_days`` and/or a stretch of states; noted, never undone."""
+        tables = action.get("tables") or ["states"]
+        deleted, error = await trim_extra(
+            self.hass, action["object_id"], action.get("keep_days"), action.get("range"), tables
+        )
+        if error or deleted is None:
+            raise StepAbort(error or "recorder_busy")
+        result: dict[str, Any] = {
+            "keep_days": action.get("keep_days"),
+            "tables": tables,
+            "deleted": deleted,
+            "irreversible": True,
+        }
+        if action.get("range"):
+            result["range"] = action["range"]
+        left = await count_trim(
+            self.hass, action["object_id"], action.get("keep_days"), action.get("range"), tables
+        )
+        if left is None:  # rows were deleted either way: the step stays done and the plan stops
+            raise StepAbort("trim_unverified", result)
+        if left["rows"]:
+            raise StepAbort("trim_left", {**result, "rows_left": left["rows"]})
+        self.scanner.replies.clear()
+        rows = sum(deleted.values())
+        self.scanner.events.record(
+            "purge", _now(), requested=1, removed=0, skipped=0, states="states" in tables, rows=rows
+        )
+        return {**result, "rows": rows}
 
     # -- counters --------------------------------------------------------------------------
 
@@ -1420,10 +1460,21 @@ class CleanupRunner:
                 return "now_blocked"
             return None if object_id in context["acknowledged"] else "needs_acknowledgement"
         if kind in TRIM_KINDS:
-            older = await count_older(self.hass, [object_id], action["keep_days"])
-            if older is None or not recorder_ready(self.hass):
+            if trim_is_plain(action):
+                older = await count_older(self.hass, [object_id], action["keep_days"])
+                rows = None if older is None else older[object_id]["rows"]
+            else:
+                found = await count_trim(
+                    self.hass,
+                    object_id,
+                    action.get("keep_days"),
+                    action.get("range"),
+                    action.get("tables") or ["states"],
+                )
+                rows = None if found is None else found["rows"]
+            if rows is None or not recorder_ready(self.hass):
                 return "no_recorder"
-            if not older[object_id]["rows"]:
+            if not rows:
                 return "now_blocked"
             return None if object_id in context["acknowledged"] else "needs_acknowledgement"
         if kind in PURGE_KINDS:
@@ -1628,8 +1679,18 @@ class CleanupRunner:
                     gone = True
                 checks.append({"check": "automation_gone", "object_id": object_id, "ok": gone})
             elif kind in TRIM_KINDS:
-                older = await count_older(self.hass, [object_id], action["keep_days"])
-                ok = older is not None and not older[object_id]["rows"]
+                if trim_is_plain(action):
+                    older = await count_older(self.hass, [object_id], action["keep_days"])
+                    ok = older is not None and not older[object_id]["rows"]
+                else:
+                    found = await count_trim(
+                        self.hass,
+                        object_id,
+                        action.get("keep_days"),
+                        action.get("range"),
+                        action.get("tables") or ["states"],
+                    )
+                    ok = found is not None and not found["rows"]
                 checks.append({"check": "history_trimmed", "object_id": object_id, "ok": ok})
             elif kind in PURGE_KINDS:
                 gone = object_id not in await statistics_left(self.hass, [object_id])

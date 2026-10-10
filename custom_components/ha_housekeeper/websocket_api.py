@@ -51,6 +51,7 @@ from .cleanup import (
     public_plan,
     refactor_key,
     registry_fingerprint,
+    trim_is_plain,
 )
 from .cleanup_exec import CleanupError, entity_restorable
 from .const import DOMAIN, OPTION_LIMITS
@@ -61,7 +62,7 @@ from .inventory import InventoryScanner
 from .meter import prepare_meter
 from .protection import MODES as PROTECTION_MODES
 from .recorder_purge import MAX_IDS as PURGE_MAX_IDS
-from .recorder_purge import TRIM_MAX_DAYS, count_history, count_older
+from .recorder_purge import TRIM_MAX_DAYS, TRIM_TABLES, count_history, count_older, count_trim
 from .references import preview_replacement
 from .window import SKIPPABLE, STEPS, WindowError, reload_targets
 from .writelock import WriteBusy, acquire_write, release_write, write_holder
@@ -356,17 +357,25 @@ async def _plan_from_requests(
             )
 
     trim_data: dict[tuple[str, int], dict[str, Any] | None] = {}
-    for days in {
-        a["keep_days"] for a in requests if a["kind"] in TRIM_KINDS and a.get("keep_days")
-    }:
+    plain_trims = [a for a in requests if a["kind"] in TRIM_KINDS and trim_is_plain(a)]
+    for days in {a["keep_days"] for a in plain_trims if a.get("keep_days")}:
         found = await count_older(
-            hass, [a["object_id"] for a in requests if a.get("keep_days") == days], days
+            hass, [a["object_id"] for a in plain_trims if a.get("keep_days") == days], days
         )
-        for a in requests:
-            if a["kind"] in TRIM_KINDS and a.get("keep_days") == days:
+        for a in plain_trims:
+            if a.get("keep_days") == days:
                 trim_data[(a["object_id"], days)] = (
                     None if found is None else found.get(a["object_id"])
                 )
+    for a in requests:  # statistics or a stretch of states: counted one by one
+        if a["kind"] in TRIM_KINDS and not trim_is_plain(a):
+            trim_data[(a["object_id"], a.get("keep_days") or 0)] = await count_trim(
+                hass,
+                a["object_id"],
+                a.get("keep_days"),
+                a.get("range"),
+                a.get("tables") or ["states"],
+            )
 
     def statistic_exists(statistic_id: str) -> bool:
         return registry.async_get(statistic_id) is not None or hass.states.get(statistic_id)
@@ -423,6 +432,7 @@ async def _plan_from_requests(
                     },
                     vol.Optional("states"): bool,
                     vol.Optional("keep_days"): vol.All(int, vol.Range(min=1, max=TRIM_MAX_DAYS)),
+                    vol.Optional("tables"): vol.All([vol.In(TRIM_TABLES)], vol.Length(min=1)),
                     vol.Optional("recorder"): vol.In(RECORDER_CHOICES),
                     vol.Optional("fix"): vol.In(refactor_module.FIXES),
                     vol.Optional("values"): {

@@ -248,3 +248,217 @@ async def trim_states(
         lock.release()
     store.get("query_cache", {}).clear()
     return left, None
+
+
+# -- trimming beyond "states older than X days": statistics, and a stretch of states ----------
+
+TRIM_TABLES = ("states", "short_term", "long_term")
+DELETE_BATCH = 2000  # state rows deleted per round of a range
+
+
+def _trim_window(
+    keep_days: int | None, rng: dict[str, Any] | None
+) -> tuple[float | None, float | None]:
+    """The half-open window ``[start, end)`` in epoch seconds a trim removes (start None: none)."""
+    from datetime import UTC, datetime, timedelta
+
+    if rng:
+        return float(rng["from"]), float(rng["to"])
+    cutoff = (datetime.now(UTC) - timedelta(days=keep_days or 0)).timestamp()
+    return None, cutoff
+
+
+def _count_trim(
+    hass: HomeAssistant,
+    entity_id: str,
+    keep_days: int | None,
+    rng: dict[str, Any] | None,
+    tables: list[str],
+) -> dict[str, dict[str, Any]]:
+    """Blocking: rows each chosen table would lose, with the oldest and the newest time."""
+    from homeassistant.components.recorder.db_schema import (
+        States,
+        StatesMeta,
+        Statistics,
+        StatisticsMeta,
+        StatisticsShortTerm,
+    )
+    from homeassistant.components.recorder.util import session_scope
+    from sqlalchemy import func, select
+
+    start, end = _trim_window(keep_days, rng)
+    found: dict[str, dict[str, Any]] = {
+        t: {"rows": 0, "oldest": None, "newest": None} for t in tables
+    }
+    with session_scope(hass=hass, read_only=True) as session:
+        if "states" in found:
+            meta = session.execute(
+                select(StatesMeta.metadata_id).where(StatesMeta.entity_id == entity_id)
+            ).scalar()
+            if meta is not None:
+                where = [States.metadata_id == meta, States.last_updated_ts < end]
+                if start is not None:
+                    where.append(States.last_updated_ts >= start)
+                rows, oldest, newest = session.execute(
+                    select(
+                        func.count(States.state_id),
+                        func.min(States.last_updated_ts),
+                        func.max(States.last_updated_ts),
+                    ).where(*where)
+                ).one()
+                found["states"] = {
+                    "rows": int(rows or 0),
+                    "oldest": None if oldest is None else float(oldest),
+                    "newest": None if newest is None else float(newest),
+                }
+        stat_meta = session.execute(
+            select(StatisticsMeta.id).where(
+                StatisticsMeta.statistic_id == entity_id, StatisticsMeta.source == "recorder"
+            )
+        ).scalar()
+        for name, model in (("short_term", StatisticsShortTerm), ("long_term", Statistics)):
+            if name not in found or stat_meta is None:
+                continue
+            rows, oldest, newest = session.execute(
+                select(func.count(model.id), func.min(model.start_ts), func.max(model.start_ts))
+                .where(model.metadata_id == stat_meta, model.start_ts < end)
+            ).one()
+            found[name] = {
+                "rows": int(rows or 0),
+                "oldest": None if oldest is None else float(oldest),
+                "newest": None if newest is None else float(newest),
+            }
+    return found
+
+
+async def count_trim(
+    hass: HomeAssistant,
+    entity_id: str,
+    keep_days: int | None,
+    rng: dict[str, Any] | None,
+    tables: list[str],
+    *,
+    locked: bool = False,
+) -> dict[str, Any] | None:
+    """What a trim of ``tables`` would delete: ``{"rows", "oldest", "tables": {...}}``.
+
+    ``rows`` is the sum over the chosen tables and ``oldest`` the earliest time among them. None
+    when it cannot be counted (lock taken for ``QUERY_WAIT`` seconds, recorder not ready).
+    """
+    from homeassistant.components.recorder import get_instance
+
+    lock: asyncio.Lock = hass.data.setdefault(DOMAIN, {}).setdefault(
+        "reliability_lock", asyncio.Lock()
+    )
+    if not locked:
+        try:
+            async with asyncio.timeout(QUERY_WAIT):
+                await lock.acquire()
+        except TimeoutError:
+            return None
+    try:
+        per_table = await get_instance(hass).async_add_executor_job(
+            _count_trim, hass, entity_id, keep_days, rng, list(tables)
+        )
+    except Exception:  # noqa: BLE001 - without the count the plan cannot judge, it says so
+        return None
+    finally:
+        if not locked:
+            lock.release()
+    oldest = [v["oldest"] for v in per_table.values() if v["oldest"] is not None]
+    return {
+        "rows": sum(v["rows"] for v in per_table.values()),
+        "oldest": min(oldest) if oldest else None,
+        "tables": per_table,
+    }
+
+
+def _delete_trim(
+    instance: Any,
+    entity_id: str,
+    keep_days: int | None,
+    rng: dict[str, Any] | None,
+    tables: list[str],
+) -> dict[str, int]:
+    """In the recorder thread: delete the rows of the chosen tables; returns rows deleted per table.
+
+    A stretch of states first lets the rows that point at it (``old_state_id``) forget it, as the
+    recorder's own purge does, then deletes in batches so no transaction grows without bound.
+    """
+    from homeassistant.components.recorder.db_schema import (
+        States,
+        StatesMeta,
+        Statistics,
+        StatisticsMeta,
+        StatisticsShortTerm,
+    )
+    from homeassistant.components.recorder.util import session_scope
+    from sqlalchemy import delete, select, update
+
+    start, end = _trim_window(keep_days, rng)
+    deleted = dict.fromkeys(tables, 0)
+    with session_scope(session=instance.get_session()) as session:
+        stat_meta = session.execute(
+            select(StatisticsMeta.id).where(
+                StatisticsMeta.statistic_id == entity_id, StatisticsMeta.source == "recorder"
+            )
+        ).scalar()
+        for name, model in (("short_term", StatisticsShortTerm), ("long_term", Statistics)):
+            if name in deleted and stat_meta is not None:
+                result = session.execute(
+                    delete(model).where(model.metadata_id == stat_meta, model.start_ts < end)
+                )
+                deleted[name] = int(result.rowcount or 0)
+        meta = session.execute(
+            select(StatesMeta.metadata_id).where(StatesMeta.entity_id == entity_id)
+        ).scalar()
+        if "states" in deleted and meta is not None:
+            where = [States.metadata_id == meta, States.last_updated_ts < end]
+            if start is not None:
+                where.append(States.last_updated_ts >= start)
+            while True:
+                ids = list(
+                    session.execute(
+                        select(States.state_id).where(*where).limit(DELETE_BATCH)
+                    ).scalars()
+                )
+                if not ids:
+                    break
+                session.execute(
+                    update(States).where(States.old_state_id.in_(ids)).values(old_state_id=None)
+                )
+                session.execute(delete(States).where(States.state_id.in_(ids)))
+                deleted["states"] += len(ids)
+                session.commit()
+    return deleted
+
+
+async def trim_extra(
+    hass: HomeAssistant,
+    entity_id: str,
+    keep_days: int | None,
+    rng: dict[str, Any] | None,
+    tables: list[str],
+) -> tuple[dict[str, int] | None, str | None]:
+    """Delete statistics older than ``keep_days`` and/or a stretch of states, as a recorder task.
+
+    Returns the rows deleted per table and ``recorder_busy`` when the shared recorder query lock
+    stayed taken (nothing was deleted then).
+    """
+    from .counter_repair import run_in_recorder
+
+    store = hass.data.setdefault(DOMAIN, {})
+    lock: asyncio.Lock = store.setdefault("reliability_lock", asyncio.Lock())
+    try:
+        async with asyncio.timeout(QUERY_WAIT):
+            await lock.acquire()
+    except TimeoutError:
+        return None, "recorder_busy"
+    try:
+        deleted = await run_in_recorder(
+            hass, lambda instance: _delete_trim(instance, entity_id, keep_days, rng, tables)
+        )
+    finally:
+        lock.release()
+    store.get("query_cache", {}).clear()
+    return deleted, None

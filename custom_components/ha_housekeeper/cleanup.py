@@ -335,6 +335,8 @@ BLOCKING_REASONS = frozenset(
         "file_too_large",
         "not_counted",
         "nothing_to_trim",
+        "bad_tables",
+        "range_states_only",
         "stats_unit_differs",
         "stats_type_differs",
         "stats_nothing_to_import",
@@ -676,18 +678,32 @@ def judge_purge_action(
     return action
 
 
+TRIM_STATES = ("states",)
+TRIM_TABLES = ("states", "short_term", "long_term")
+
+
+def trim_is_plain(action: dict[str, Any]) -> bool:
+    """True for the classic trim: the state rows older than ``keep_days``, nothing else."""
+    return not action.get("range") and tuple(action.get("tables") or TRIM_STATES) == TRIM_STATES
+
+
 def judge_trim_action(
     entity_id: str,
     keep_days: int,
     objects: dict[str, dict[str, Any]],
     counted: dict[str, Any] | None,
     recorder: bool,
+    *,
+    tables: list[str] | None = None,
+    rng: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Judge deleting the state rows of one entity that are older than ``keep_days`` days.
+    """Judge deleting recorder rows of one entity: older than ``keep_days`` days, or a stretch.
 
     ``counted`` is ``{"rows", "oldest"}`` from the recorder, None when it could not be counted.
-    Statistics are not touched. The deletion cannot be undone except from the backup, so a plan
-    that may run is always ``review``.
+    ``tables`` picks what goes: the state rows (default), the short-term and the long-term
+    statistics. A stretch (``rng``) is allowed for state rows only: a hole in a running sum would
+    falsify every chart that reads it. The deletion cannot be undone except from the backup, so a
+    plan that may run is always ``review``.
     """
     action: dict[str, Any] = {
         "kind": "trim_history",
@@ -701,15 +717,26 @@ def judge_trim_action(
         "has_statistics": False,
         "trim": counted,
     }
+    chosen = list(tables or TRIM_STATES)
+    if tables:
+        action["tables"] = chosen
+    if rng:
+        action["range"] = {"from": rng["from"], "to": rng["to"]}
     reasons = action["reasons"]
     if not recorder:
         reasons.append("no_recorder")
-    elif not TRIM_DAYS[0] <= keep_days <= TRIM_DAYS[1]:
+    elif not chosen or not set(chosen) <= set(TRIM_TABLES):
+        reasons.append("bad_tables")
+    elif rng and (chosen != list(TRIM_STATES) or not rng["from"] < rng["to"]):
+        reasons.append("bad_range" if chosen == list(TRIM_STATES) else "range_states_only")
+    elif not rng and not TRIM_DAYS[0] <= keep_days <= TRIM_DAYS[1]:
         reasons.append("bad_keep_days")
     elif counted is None:
         reasons.append("not_counted")
     elif not counted["rows"]:
         reasons.append("nothing_to_trim")
+    if "long_term" in chosen:
+        reasons.append("trim_statistics")  # charts and sums begin later; the sums after stay right
     reasons.append("irreversible")
     _verdict(action)
     return action
@@ -1129,6 +1156,8 @@ def build_plan(
                 objects,
                 (trim_data or {}).get((object_id, keep_days)),
                 bool(snapshot["meta"].get("recorder_available")),
+                tables=request.get("tables"),
+                rng=request.get("range"),
             )
             action["fingerprint"] = None
         elif kind in AREA_KINDS:
@@ -1276,6 +1305,8 @@ def merge_requests(
                 request["recorder"] = action["recorder"]
             if action["kind"] in TRIM_KINDS:
                 request["keep_days"] = action["keep_days"]
+                if action.get("tables"):
+                    request["tables"] = action["tables"]
             if action["kind"] in REFACTOR_KINDS:
                 request["fix"], request["values"] = action["fix"], action.get("values") or {}
             known = requests.get(request["object_id"])

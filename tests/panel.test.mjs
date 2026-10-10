@@ -2406,6 +2406,23 @@ test("the replace form checks the pair before any preview and keeps the button o
   assert.ok(html.includes("does not work") && /data-plan-create\s+disabled/.test(html));
 });
 
+test("the entity page trims history: tables and period become one plan action, a stretch only for states", () => {
+  const { el } = panel("en");
+  el.data = { ...DATA, meta: { ...DATA.meta, recorder_available: true }, objects: [{ object_type: "entity", object_id: "sensor.a", name: "A", status: "active" }] };
+  const item = el.findObject("entity:sensor.a");
+  assert.ok(!el.entityTrimCard(item).includes("data-et-table"), "no card body before the rows are counted");
+  el.entityRec = { "sensor.a": { data: { states: { rows: 900, first: 1_700_000_000 }, short: { rows: 0 }, long: { rows: 40, first: 1_700_000_000 } } } };
+  const html = el.entityTrimCard(item);
+  assert.ok(html.includes("900 rows") && html.includes("data-et-mode") && /data-et-table="short_term"[^>]*disabled/.test(html));
+  assert.equal(JSON.stringify(el.entityTrimAction(item)), JSON.stringify({ kind: "trim_history", object_id: "sensor.a", keep_days: 30 }));
+  const e = el.entityTrimState("sensor.a"); e.tables.add("long_term");
+  assert.equal(JSON.stringify(el.entityTrimAction(item)), JSON.stringify({ kind: "trim_history", object_id: "sensor.a", keep_days: 30, tables: ["states", "long_term"] }));
+  assert.ok(el.entityTrimCard(item).includes("long-term statistics") && !el.entityTrimCard(item).includes("data-et-mode"), "a stretch is not offered with statistics");
+  e.tables = new Set(["states"]); e.mode = "range"; e.from = "2026-03-01"; e.to = "2026-03-05";
+  const range = el.entityTrimAction(item).range;
+  assert.equal(range.to - range.from, 5 * 86400, "both days count: the end is the next midnight");
+});
+
 const DBH = {
   available: true, busy: false, cached: false, took_ms: 3200, supported: true, dialect: "sqlite", db_bytes: 11 * 1024 ** 3, wal_bytes: 3 * 1024 ** 3, growth: { known: true, per_day: 80 * 1024 ** 2 }, restart_gaps: 2,
   findings: [

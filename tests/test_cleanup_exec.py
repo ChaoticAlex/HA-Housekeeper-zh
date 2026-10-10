@@ -721,6 +721,23 @@ def test_judging_a_trim_names_what_blocks_it() -> None:
         assert judged["verdict"] == "blocked" and reason in judged["reasons"]
 
 
+def test_judging_a_trim_of_statistics_or_a_stretch() -> None:
+    from custom_components.ha_housekeeper.cleanup import judge_trim_action, trim_is_plain
+
+    found = {"rows": 3, "oldest": 1.0}
+    long_term = judge_trim_action("sensor.a", 30, {}, found, True, tables=["states", "long_term"])
+    assert long_term["verdict"] == "review" and "trim_statistics" in long_term["reasons"]
+    stretch = judge_trim_action("sensor.a", 0, {}, found, True, rng={"from": 1.0, "to": 5.0})
+    assert stretch["verdict"] == "review" and not trim_is_plain(stretch)
+    for tables, rng, reason in (
+        (["long_term"], {"from": 1.0, "to": 5.0}, "range_states_only"),
+        (None, {"from": 5.0, "to": 1.0}, "bad_range"),
+        (["other"], None, "bad_tables"),
+    ):
+        judged = judge_trim_action("sensor.a", 30, {}, found, True, tables=tables, rng=rng)
+        assert judged["verdict"] == "blocked" and reason in judged["reasons"]
+
+
 async def test_assigning_an_area_suggests_from_the_device_runs_and_undoes(
     hass: HomeAssistant,
 ) -> None:
