@@ -1482,6 +1482,7 @@ test("the detail page keeps a summary on top and builds only the open tab", () =
   assert.ok(/id="hk-tab-overview" aria-selected="true" aria-controls="hk-tabpanel" tabindex="0"/.test(html));
   assert.ok(/id="hk-tab-relations" aria-selected="false" aria-controls="hk-tabpanel" tabindex="-1"/.test(html), "roving tabindex");
   assert.ok(html.includes('class="panelhead"') && html.includes(el.t("knownTitle")), "overview: diagnosis and what is known");
+  assert.ok(html.includes(`<span class="pill mute">${el.t("entity")}</span>`) && !html.includes("data-xp-from"), "the header names the type and has no export button");
   assert.ok(!html.includes("zebra-77") && !html.includes("u-1"), "other tabs are not built");
 
   html = detailTabsHtml(el, shadow, "attributes");
