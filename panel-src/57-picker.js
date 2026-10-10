@@ -26,6 +26,15 @@ class PickerMixin {
           return o.status === "active" && o.object_id !== this.meterOld && this.sameDomain(o, this.meterOld) && (!unit || o.unit === unit);
         }, pick: o => { this.meterNew = o.object_id; },
       },
+      exOld: {
+        get: () => this.deviceText("old"), set: v => this.setDevice("old", "", v), min: 0, browse: true, types: ["device"], limit: 30, sub: o => this.deviceSub(o),
+        filter: o => o.object_id !== this.exchangeState().newDev, pick: o => this.setDevice("old", o.object_id, o.name),
+      },
+      exNew: {
+        get: () => this.deviceText("new"), set: v => this.setDevice("new", "", v), min: 0, browse: true, types: ["device"], limit: 30, sub: o => this.deviceSub(o),
+        filter: o => o.object_id !== this.exchangeState().oldDev, pick: o => this.setDevice("new", o.object_id, o.name),
+        rank: o => { const old = this.findObject(`device:${this.exchangeState().oldDev}`); return old && o.manufacturer && o.manufacturer === old.manufacturer ? 0 : 1; },
+      },
       note: {
         get: () => this.noteDraft?.targetText ?? "", set: v => { if (this.noteDraft) { this.noteDraft.targetText = v; this.noteDraft.target = ""; } }, min: 2, types: null, limit: 15,
         pick: o => { this.noteDraft.target = this.objectKey(o); this.noteDraft.targetText = o.name; },
@@ -53,7 +62,11 @@ class PickerMixin {
   pickerResults(name) {
     const def = this.pickerDef(name), q = def ? String(def.get()).trim() : "";
     if (!def || q.length < def.min) return [];
-    return this.searchObjects(q, { types: def.types, limit: def.limit || QUICK_LIMIT, filter: def.filter });
+    const limit = def.limit || QUICK_LIMIT;
+    const found = q || !def.browse ? this.searchObjects(q, { types: def.types, limit: def.rank ? 2000 : limit, filter: def.filter })
+      : this.data.objects.filter(o => def.types.includes(o.object_type) && (!def.filter || def.filter(o))).sort((x, y) => String(x.name).localeCompare(String(y.name)));
+    // A field may bring the likelier entries to the front (stable), e.g. the same manufacturer as the old device.
+    return (def.rank ? [...found.filter(o => def.rank(o) === 0), ...found.filter(o => def.rank(o) !== 0)] : found).slice(0, limit);
   }
 
   // The input plus, while it is open, the list of matches. `attrs` carries the field's own data attribute.
@@ -62,7 +75,7 @@ class PickerMixin {
     const open = this._picker?.name === name && this._picker.open && String(value).trim().length >= def.min;
     const results = open ? this.pickerResults(name) : [];
     const active = Math.min(this._picker?.index || 0, Math.max(results.length - 1, 0));
-    const sub = o => (def.types?.length === 1 ? o.object_id : `${this.t(o.object_type)} · ${o.object_id}`);
+    const sub = o => def.sub ? def.sub(o) : (def.types?.length === 1 ? o.object_id : `${this.t(o.object_type)} · ${o.object_id}`);
     const list = open ? `<ul class="quicklist" id="picker-${name}" role="listbox" aria-label="${this.esc(this.t("quickLabel"))}">${results.length
       ? results.map((o, i) => `<li role="option" id="picker-${name}-${i}" aria-selected="${i === active}" data-picker-item="${this.esc(this.objectKey(o))}" data-picker-name="${name}" class="${i === active ? "on" : ""}">${this.tile(o.object_type)}<span class="row-text"><strong>${this.esc(o.name)}</strong><small>${this.esc(sub(o))}</small></span></li>`).join("")
       : `<li class="none">${this.t("quickNone")}</li>`}</ul>` : "";
@@ -80,6 +93,7 @@ class PickerMixin {
     root.querySelectorAll("[data-picker]").forEach(input => {
       const name = input.dataset.picker;
       input.oninput = () => { this.pickerDef(name).set(input.value.trim()); this._picker = { name, open: true, index: 0 }; this.scheduleRender(); };
+      if (this.pickerDef(name)?.browse) input.onfocus = () => { if (!this._picker?.open || this._picker.name !== name) { this._picker = { name, open: true, index: 0 }; this.render(); } };
       input.onkeydown = ev => {
         const results = this._picker?.open ? this.pickerResults(name) : [];
         if ((ev.key === "ArrowDown" || ev.key === "ArrowUp") && results.length) {

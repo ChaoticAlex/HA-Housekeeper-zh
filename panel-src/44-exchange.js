@@ -47,9 +47,21 @@ class ExchangeMixin {
     return (this.ex ||= { oldDev: "", newDev: "", result: null, choices: {}, loading: false, error: "", planned: "" });
   }
 
-  deviceOptions(selected, skip) {
-    const devices = this.data.objects.filter(o => o.object_type === "device" && o.object_id !== skip).sort((a, b) => a.name.localeCompare(b.name)).slice(0, 2000);
-    return `<option value="">${this.t("exPick")}</option>${devices.map(o => `<option value="${this.esc(o.object_id)}" ${o.object_id === selected ? "selected" : ""}>${this.esc(o.name)}</option>`).join("")}`;
+  // The text a device field shows: what was typed, or the name of the chosen device.
+  deviceText(side) {
+    const ex = this.exchangeState();
+    return ex[`${side}Text`] ?? this.findObject(`device:${ex[`${side}Dev`]}`)?.name ?? "";
+  }
+
+  // Typing or picking changes the device; whatever was loaded for the old pair no longer fits.
+  setDevice(side, id, text) {
+    const ex = this.exchangeState();
+    ex[`${side}Dev`] = id; ex[`${side}Text`] = text;
+    ex.result = null; ex.choices = {};
+  }
+
+  deviceSub(o) {
+    return [[o.manufacturer, o.model].filter(Boolean).join(" "), this.areaName(o)].filter(Boolean).join(" · ") || this.t("device");
   }
 
   async loadPairs() {
@@ -100,17 +112,15 @@ class ExchangeMixin {
     const unmatched = ex.result?.unmatched_new?.length ? `<p class="factnote">${this.t("exUnmatched", { list: this.esc(ex.result.unmatched_new.slice(0, 10).join(", ")) })}</p>` : "";
     const create = ex.result ? `<div class="setrow planfoot"><small class="u-m0">${this.t("exChosen", { count: chosen })} · ${this.t("cleanupDryRun")}</small><button class="btn primary" data-ex-create ${chosen && !this.cleanupBusy ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("exCreate", { count: chosen })}</button></div>` : "";
     const disable = planDone ? `<div class="setrow planfoot"><small class="u-m0">${this.t("exDisableHint")}</small><button class="btn" data-ex-disable>${this.t("exDisableOld")}</button></div>` : "";
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("exTitle")}</h2><p>${this.t("exHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
-      <div class="setrow"><div><label>${this.t("exOld")}</label></div><select data-ex-old style="max-width:360px">${this.deviceOptions(ex.oldDev, ex.newDev)}</select></div>
-      <div class="setrow"><div><label>${this.t("exNew")}</label></div><select data-ex-new style="max-width:360px">${this.deviceOptions(ex.newDev, ex.oldDev)}</select></div>
+    return `<div class="panel" style="overflow:visible"><div class="panelhead"><div><h2>${this.t("exTitle")}</h2><p>${this.t("exHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
+      <div class="setrow"><div><label>${this.t("exOld")}</label></div>${this.pickerBox("exOld", this.t("exPick"))}</div>
+      <div class="setrow"><div><label>${this.t("exNew")}</label></div>${this.pickerBox("exNew", this.t("exPick"))}</div>
       <div class="setrow planfoot"><small class="u-m0">${this.esc(ex.error)}</small><button class="btn" data-ex-load ${ex.oldDev && ex.newDev && !ex.loading ? "" : "disabled"}>${ex.loading ? this.t("exLoading") : this.t("exLoad")}</button></div>
       ${rows}${unmatched}${create}${disable}</div>`;
   }
 
   bindExchange(root) {
     const ex = () => this.exchangeState();
-    root.querySelector("[data-ex-old]")?.addEventListener("change", e => { ex().oldDev = e.target.value; ex().result = null; ex().choices = {}; this.render(); });
-    root.querySelector("[data-ex-new]")?.addEventListener("change", e => { ex().newDev = e.target.value; ex().result = null; ex().choices = {}; this.render(); });
     root.querySelector("[data-ex-load]")?.addEventListener("click", () => this.loadPairs());
     root.querySelector("[data-ex-create]")?.addEventListener("click", () => this.createExchangePlan());
     root.querySelectorAll("[data-ex-target]").forEach(el => el.onchange = () => { const id = el.dataset.exTarget; ex().choices[id] = { ...(ex().choices[id] || {}), target: el.value }; this.render(); });

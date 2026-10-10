@@ -6043,9 +6043,21 @@ class ExchangeMixin {
     return (this.ex ||= { oldDev: "", newDev: "", result: null, choices: {}, loading: false, error: "", planned: "" });
   }
 
-  deviceOptions(selected, skip) {
-    const devices = this.data.objects.filter(o => o.object_type === "device" && o.object_id !== skip).sort((a, b) => a.name.localeCompare(b.name)).slice(0, 2000);
-    return `<option value="">${this.t("exPick")}</option>${devices.map(o => `<option value="${this.esc(o.object_id)}" ${o.object_id === selected ? "selected" : ""}>${this.esc(o.name)}</option>`).join("")}`;
+  // The text a device field shows: what was typed, or the name of the chosen device.
+  deviceText(side) {
+    const ex = this.exchangeState();
+    return ex[`${side}Text`] ?? this.findObject(`device:${ex[`${side}Dev`]}`)?.name ?? "";
+  }
+
+  // Typing or picking changes the device; whatever was loaded for the old pair no longer fits.
+  setDevice(side, id, text) {
+    const ex = this.exchangeState();
+    ex[`${side}Dev`] = id; ex[`${side}Text`] = text;
+    ex.result = null; ex.choices = {};
+  }
+
+  deviceSub(o) {
+    return [[o.manufacturer, o.model].filter(Boolean).join(" "), this.areaName(o)].filter(Boolean).join(" · ") || this.t("device");
   }
 
   async loadPairs() {
@@ -6096,17 +6108,15 @@ class ExchangeMixin {
     const unmatched = ex.result?.unmatched_new?.length ? `<p class="factnote">${this.t("exUnmatched", { list: this.esc(ex.result.unmatched_new.slice(0, 10).join(", ")) })}</p>` : "";
     const create = ex.result ? `<div class="setrow planfoot"><small class="u-m0">${this.t("exChosen", { count: chosen })} · ${this.t("cleanupDryRun")}</small><button class="btn primary" data-ex-create ${chosen && !this.cleanupBusy ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("exCreate", { count: chosen })}</button></div>` : "";
     const disable = planDone ? `<div class="setrow planfoot"><small class="u-m0">${this.t("exDisableHint")}</small><button class="btn" data-ex-disable>${this.t("exDisableOld")}</button></div>` : "";
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("exTitle")}</h2><p>${this.t("exHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
-      <div class="setrow"><div><label>${this.t("exOld")}</label></div><select data-ex-old style="max-width:360px">${this.deviceOptions(ex.oldDev, ex.newDev)}</select></div>
-      <div class="setrow"><div><label>${this.t("exNew")}</label></div><select data-ex-new style="max-width:360px">${this.deviceOptions(ex.newDev, ex.oldDev)}</select></div>
+    return `<div class="panel" style="overflow:visible"><div class="panelhead"><div><h2>${this.t("exTitle")}</h2><p>${this.t("exHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
+      <div class="setrow"><div><label>${this.t("exOld")}</label></div>${this.pickerBox("exOld", this.t("exPick"))}</div>
+      <div class="setrow"><div><label>${this.t("exNew")}</label></div>${this.pickerBox("exNew", this.t("exPick"))}</div>
       <div class="setrow planfoot"><small class="u-m0">${this.esc(ex.error)}</small><button class="btn" data-ex-load ${ex.oldDev && ex.newDev && !ex.loading ? "" : "disabled"}>${ex.loading ? this.t("exLoading") : this.t("exLoad")}</button></div>
       ${rows}${unmatched}${create}${disable}</div>`;
   }
 
   bindExchange(root) {
     const ex = () => this.exchangeState();
-    root.querySelector("[data-ex-old]")?.addEventListener("change", e => { ex().oldDev = e.target.value; ex().result = null; ex().choices = {}; this.render(); });
-    root.querySelector("[data-ex-new]")?.addEventListener("change", e => { ex().newDev = e.target.value; ex().result = null; ex().choices = {}; this.render(); });
     root.querySelector("[data-ex-load]")?.addEventListener("click", () => this.loadPairs());
     root.querySelector("[data-ex-create]")?.addEventListener("click", () => this.createExchangePlan());
     root.querySelectorAll("[data-ex-target]").forEach(el => el.onchange = () => { const id = el.dataset.exTarget; ex().choices[id] = { ...(ex().choices[id] || {}), target: el.value }; this.render(); });
@@ -7568,6 +7578,15 @@ class PickerMixin {
           return o.status === "active" && o.object_id !== this.meterOld && this.sameDomain(o, this.meterOld) && (!unit || o.unit === unit);
         }, pick: o => { this.meterNew = o.object_id; },
       },
+      exOld: {
+        get: () => this.deviceText("old"), set: v => this.setDevice("old", "", v), min: 0, browse: true, types: ["device"], limit: 30, sub: o => this.deviceSub(o),
+        filter: o => o.object_id !== this.exchangeState().newDev, pick: o => this.setDevice("old", o.object_id, o.name),
+      },
+      exNew: {
+        get: () => this.deviceText("new"), set: v => this.setDevice("new", "", v), min: 0, browse: true, types: ["device"], limit: 30, sub: o => this.deviceSub(o),
+        filter: o => o.object_id !== this.exchangeState().oldDev, pick: o => this.setDevice("new", o.object_id, o.name),
+        rank: o => { const old = this.findObject(`device:${this.exchangeState().oldDev}`); return old && o.manufacturer && o.manufacturer === old.manufacturer ? 0 : 1; },
+      },
       note: {
         get: () => this.noteDraft?.targetText ?? "", set: v => { if (this.noteDraft) { this.noteDraft.targetText = v; this.noteDraft.target = ""; } }, min: 2, types: null, limit: 15,
         pick: o => { this.noteDraft.target = this.objectKey(o); this.noteDraft.targetText = o.name; },
@@ -7595,7 +7614,11 @@ class PickerMixin {
   pickerResults(name) {
     const def = this.pickerDef(name), q = def ? String(def.get()).trim() : "";
     if (!def || q.length < def.min) return [];
-    return this.searchObjects(q, { types: def.types, limit: def.limit || QUICK_LIMIT, filter: def.filter });
+    const limit = def.limit || QUICK_LIMIT;
+    const found = q || !def.browse ? this.searchObjects(q, { types: def.types, limit: def.rank ? 2000 : limit, filter: def.filter })
+      : this.data.objects.filter(o => def.types.includes(o.object_type) && (!def.filter || def.filter(o))).sort((x, y) => String(x.name).localeCompare(String(y.name)));
+    // A field may bring the likelier entries to the front (stable), e.g. the same manufacturer as the old device.
+    return (def.rank ? [...found.filter(o => def.rank(o) === 0), ...found.filter(o => def.rank(o) !== 0)] : found).slice(0, limit);
   }
 
   // The input plus, while it is open, the list of matches. `attrs` carries the field's own data attribute.
@@ -7604,7 +7627,7 @@ class PickerMixin {
     const open = this._picker?.name === name && this._picker.open && String(value).trim().length >= def.min;
     const results = open ? this.pickerResults(name) : [];
     const active = Math.min(this._picker?.index || 0, Math.max(results.length - 1, 0));
-    const sub = o => (def.types?.length === 1 ? o.object_id : `${this.t(o.object_type)} · ${o.object_id}`);
+    const sub = o => def.sub ? def.sub(o) : (def.types?.length === 1 ? o.object_id : `${this.t(o.object_type)} · ${o.object_id}`);
     const list = open ? `<ul class="quicklist" id="picker-${name}" role="listbox" aria-label="${this.esc(this.t("quickLabel"))}">${results.length
       ? results.map((o, i) => `<li role="option" id="picker-${name}-${i}" aria-selected="${i === active}" data-picker-item="${this.esc(this.objectKey(o))}" data-picker-name="${name}" class="${i === active ? "on" : ""}">${this.tile(o.object_type)}<span class="row-text"><strong>${this.esc(o.name)}</strong><small>${this.esc(sub(o))}</small></span></li>`).join("")
       : `<li class="none">${this.t("quickNone")}</li>`}</ul>` : "";
@@ -7622,6 +7645,7 @@ class PickerMixin {
     root.querySelectorAll("[data-picker]").forEach(input => {
       const name = input.dataset.picker;
       input.oninput = () => { this.pickerDef(name).set(input.value.trim()); this._picker = { name, open: true, index: 0 }; this.scheduleRender(); };
+      if (this.pickerDef(name)?.browse) input.onfocus = () => { if (!this._picker?.open || this._picker.name !== name) { this._picker = { name, open: true, index: 0 }; this.render(); } };
       input.onkeydown = ev => {
         const results = this._picker?.open ? this.pickerResults(name) : [];
         if ((ev.key === "ArrowDown" || ev.key === "ArrowUp") && results.length) {
