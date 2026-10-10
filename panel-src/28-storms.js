@@ -30,13 +30,42 @@ class StormsMixin {
     return this.t("stormEvent", { count: n(f.count), type: f.event_type });
   }
 
-  stormFindingRow(f) {
-    const tone = f.kind === "storm" || f.kind === "integration_share" ? "red" : "warn";
-    const title = f.kind === "event_burst" ? f.event_type : f.kind === "integration_share" ? f.title : f.name || f.entity_id;
-    const id = f.entity_id && f.entity_id !== title ? this.rowId(f.entity_id) : "";
-    const chain = this.stormFollowers(f.followers);
-    const inner = `<span class="tile ${tone}"><ha-icon icon="mdi:chart-bell-curve"></ha-icon></span><span class="row-text"><strong>${this.esc(title)}</strong>${id}<small>${this.esc(this.stormFindingText(f))}</small>${chain ? `<small>${this.esc(chain)}</small>` : ""}</span><span class="pill ${tone}">${this.t(`stormKind_${f.kind}`)}</span>`;
-    return f.entity_id ? `<button class="row" data-object="entity:${this.esc(f.entity_id)}">${inner}</button>` : `<div class="row">${inner}</div>`;
+  // One card per entity with all its findings; an integration and an event type stand alone. The findings come sorted by kind and rate.
+  stormGroups(r) {
+    const map = new Map(), groups = [];
+    for (const f of r?.findings || []) {
+      const type = f.kind === "integration_share" ? "integrations" : f.kind === "event_burst" ? "events" : "entities";
+      const key = `${type}:${f.entity_id || f.title || f.event_type}`;
+      let group = map.get(key);
+      if (!group) { group = { key, type, items: [] }; map.set(key, group); groups.push(group); }
+      group.items.push(f);
+    }
+    return groups;
+  }
+
+  stormGroupCard(group) {
+    const first = group.items[0], tone = f => (f.kind === "storm" ? "red" : f.kind === "integration_share" || f.kind === "event_burst" ? "blue" : "warn");
+    const title = group.type === "events" ? first.event_type : group.type === "integrations" ? first.title : first.name || first.entity_id;
+    const id = group.type === "entities" && first.entity_id !== title ? this.rowId(first.entity_id) : "";
+    const badges = group.items.map(f => `<span class="pill ${tone(f)}">${this.t(`stormKind_${f.kind}`)}</span>`).join("");
+    const lines = group.items.map(f => `<li><span>${this.t(`stormKind_${f.kind}`)}</span><span>${this.esc(this.stormFindingText(f))}</span></li>`).join("");
+    const chain = group.items.map(f => this.stormFollowers(f.followers)).find(Boolean);
+    const used = chain ? `<li><span>${this.t("stormDependsLabel")}</span><span>${this.esc(chain)} ${this.t("stormDependsNote")}</span></li>` : "";
+    const done = group.type === "entities" && (this.excludeSel.has(first.entity_id) || this.excludedIds().has(first.entity_id));
+    const actions = group.type === "entities" ? `<div class="stormactions"><button class="btn" data-object="entity:${this.esc(first.entity_id)}">${this.t("stormDetails")}</button><button class="btn quiet" data-storm-mark="${this.esc(first.entity_id)}" ${done ? "disabled" : ""}>${this.t("stormMarkExclude")}</button></div>` : "";
+    return `<div class="stormgroup"><div class="stormtop"><div><strong>${this.esc(title)}</strong>${id}</div><span class="stormbadges">${badges}</span></div><ul class="stormfinds">${lines}${used}</ul>${actions}</div>`;
+  }
+
+  stormLegend(r) {
+    const th = r.thresholds || {}, n = v => this.formatNumber(v);
+    const row = (kind, text) => `<div><span class="pill ${kind === "storm" ? "red" : kind === "integration_share" || kind === "event_burst" ? "blue" : "warn"}">${this.t(`stormKind_${kind}`)}</span><span>${this.esc(text)}</span></div>`;
+    return `<details class="howto"><summary>${this.t("stormLegendTitle")}</summary><div class="stormlegend">${[
+      row("storm", this.t("stormLegStorm", { peak: n(th.storm_peak_rows ?? 3600), day: n(th.storm_rows_per_day ?? 50000) })),
+      row("attribute_flood", this.t("stormLegFlood", { kb: n(Math.round((th.flood_attr_bytes ?? 4096) / 1024)), min: n(th.flood_min_rows_per_day ?? 1000) })),
+      row("no_new_state", this.t("stormLegNoNew", { share: n(Math.round((th.no_new_state_share ?? 0.8) * 100)), min: n(th.no_new_state_min_rows_per_day ?? 1000) })),
+      row("integration_share", this.t("stormLegShare", { share: n(th.share_percent ?? 25), min: n(th.share_min_rows_per_day ?? 10000) })),
+      row("event_burst", this.t("stormLegBurst", { count: n(th.event_burst ?? 100000) })),
+    ].join("")}</div></details>`;
   }
 
   stormEntityRow(item) {
@@ -62,7 +91,7 @@ class StormsMixin {
     const st = this.storms?.available && !this.storms.busy ? this.storms : null;
     const db = this.dbHealth?.available && !this.dbHealth.busy ? this.dbHealth : null;
     const meta = this.data?.meta?.database;
-    const stormFindings = st ? st.findings.length : 0;
+    const stormFindings = st ? this.stormGroups(st).length : 0;
     const dbFindings = db ? db.findings.length : 0;
     const dbTone = !db ? "mute" : db.findings.some(f => f.level === "problem") ? "red" : dbFindings ? "warn" : "ok";
     const stormTone = !st ? "mute" : st.findings.some(f => f.kind === "storm" || f.kind === "integration_share") ? "red" : stormFindings ? "warn" : "ok";
@@ -91,9 +120,13 @@ class StormsMixin {
     if (!r.available) return `<div class="panel">${head}<p class="factnote">${this.t("relNoRecorder")}</p></div>`;
     if (r.busy) return `<div class="panel">${head}${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p></div>`;
     const loading = this.stormsLoading ? `<p class="factnote">${this.t("stormLoading")}</p>` : "";
-    const foundFindings = this.searchList("stormfind", r.findings, f => [f.name, f.entity_id, f.title, f.event_type].join(" "));
+    const groups = this.stormGroups(r), kinds = [["all", "stormFilterAll"], ["entities", "stormGroupEntities"], ["integrations", "stormGroupIntegrations"], ["events", "stormGroupEvents"]].filter(([id]) => id === "all" || groups.some(g => g.type === id));
+    const kind = kinds.some(([id]) => id === this.stormFind) ? this.stormFind : "all";
+    const filter = `<div class="stormfilter">${kinds.map(([id, key]) => `<button class="chip ${kind === id ? "active" : ""}" data-storm-find="${id}" aria-pressed="${kind === id}">${this.t(key)} ${id === "all" ? groups.length : groups.filter(g => g.type === id).length}</button>`).join("")}</div>`;
+    const shownGroups = kind === "all" ? groups : groups.filter(g => g.type === kind);
+    const foundFindings = this.searchList("stormfind", shownGroups, g => g.items.flatMap(f => [f.name, f.entity_id, f.title, f.event_type]).join(" "));
     const findingPage = this.paginate("stormfind", foundFindings.rows);
-    const attention = r.findings.length ? foundFindings.bar + foundFindings.none + findingPage.rows.map(f => this.stormFindingRow(f)).join("") + findingPage.footer : `<div class="emptymsg">${this.t("stormNone")}</div>`;
+    const attention = groups.length ? `<p class="factnote">${this.t("stormGroupHint")}</p>${this.stormLegend(r)}${filter}${foundFindings.bar}${foundFindings.none}${findingPage.rows.map(g => this.stormGroupCard(g)).join("")}${findingPage.footer}<p class="factnote">${this.t("stormWhatToDo")}</p>` : `<div class="emptymsg">${this.t("stormNone")}</div>`;
     const summary = `<p class="factnote">${this.t("stormSummary", { rows: this.formatNumber(r.total_rows), perDay: this.formatNumber(r.per_day), entities: this.formatNumber(r.entity_count), events: this.formatNumber(r.event_total) })}</p>`;
     const shownEntities = this.exOnlySug ? r.entities.filter(item => this.excludeInfo(item.entity_id, item.per_day, item.excluded).suggest) : r.entities;
     const foundEntities = this.searchList("stormentities", shownEntities, item => [item.name, item.entity_id].join(" "));
@@ -113,7 +146,7 @@ class StormsMixin {
     // The sections are tabs, so the lower ones are not hidden far down the page.
     const warn = r.findings.some(f => f.kind === "storm" || f.kind === "integration_share");
     const tabs = [
-      { id: "findings", label: this.t("stormTabFindings"), count: r.findings.length, tone: warn ? "red" : r.findings.length ? "warn" : "ok" },
+      { id: "findings", label: this.t("stormTabFindings"), count: groups.length, tone: warn ? "red" : groups.length ? "warn" : "ok" },
       r.entities.length ? { id: "entities", label: this.t("stormTabEntities"), count: r.entities.length } : null,
       r.integrations.length ? { id: "shares", label: this.t("stormTabIntegrations"), count: r.integrations.length } : null,
       r.events.length ? { id: "events", label: this.t("stormTabEvents"), count: r.events.length } : null,

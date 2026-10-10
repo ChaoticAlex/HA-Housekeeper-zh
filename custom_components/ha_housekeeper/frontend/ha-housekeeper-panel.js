@@ -896,7 +896,12 @@ Object.assign(TEXT.de, {
   recorder: "Recorder", recorderSubtitle: "Was den Recorder am meisten beschreibt, was die Datenbank füllt und wie gesund sie ist. Liest nur den Recorder.",
   stormTitle: "Last im Recorder", stormHint: "Gezählt werden geschriebene Zeilen, nicht Aufrufe", stormLoading: "Der Recorder wird ausgewertet. Das kann bei einer großen Datenbank einige Sekunden dauern …",
   stormNone: "Nichts schreibt auffällig viel.", stormSummary: "Im Zeitraum: {rows} Zeilen ({perDay} pro Tag) von {entities} Entitäten und {events} Ereignisse.",
-  stormKind_storm: "Sturm", stormKind_attribute_flood: "Attribute", stormKind_no_new_state: "ohne neuen Zustand", stormKind_integration_share: "Anteil", stormKind_event_burst: "Ereignisse",
+  stormKind_storm: "Sturm", stormKind_attribute_flood: "Große Zeilen", stormKind_no_new_state: "Nur Attribute", stormKind_integration_share: "Großer Anteil", stormKind_event_burst: "Ereignisflut",
+  stormGroupHint: "Hier steht, was die Datenbank ungewöhnlich stark füllt. Eine Entität steht nur einmal da, auch wenn mehrere Gründe zutreffen.", stormLegendTitle: "Was bedeuten die Markierungen?",
+  stormLegStorm: "Sehr viele Zeilen: ab {peak} in einer Stunde oder ab {day} an einem Tag.", stormLegFlood: "Jede Zeile trägt viele Attribute mit (im Mittel ab {kb} KB), bei mindestens {min} Zeilen pro Tag.",
+  stormLegNoNew: "Der Wert bleibt gleich, nur Attribute ändern sich: bei mindestens {share} % der Zeilen und {min} Zeilen pro Tag.", stormLegShare: "Eine Integration verursacht mindestens {share} % aller Zeilen (ab {min} pro Tag).", stormLegBurst: "Ein Ereignistyp (außer state_changed) kommt mindestens {count} Mal vor.",
+  stormFilterAll: "Alle", stormGroupEntities: "Entitäten", stormGroupIntegrations: "Integrationen", stormGroupEvents: "Ereignisse", stormDependsLabel: "Wird gebraucht", stormDependsNote: "Ein Ausschluss nimmt dort den Verlauf.", stormMarkExclude: "Für Ausschluss vormerken", stormDetails: "Details öffnen",
+  stormWhatToDo: "Was kann ich tun? Ausschließen (Text für die configuration.yaml, Housekeeper schreibt nichts), die Aktualisierung der Quelle selten stellen oder den Verlauf kürzen. „Für Ausschluss vormerken“ hakt die Entität unter „Lauteste Entitäten“ an.",
   stormStorm: "{perDay} Zeilen pro Tag, in der lautesten Stunde {peak}.", stormFlood: "{perDay} Zeilen am letzten Tag, im Mittel {kb} KB Attribute je Zeile.",
   stormNoNew: "{share} % der Zeilen sind Updates ohne neuen Zustand ({perDay} pro Tag): nur Attribute ändern sich.", stormShare: "Etwa {share} % der Last im Recorder ({perDay} Zeilen pro Tag).",
   stormEvent: "{count} Ereignisse vom Typ {type} im Zeitraum.", stormFollowers: "Daran hängen: {list}.",
@@ -916,7 +921,12 @@ Object.assign(TEXT.en, {
   recorder: "Recorder", recorderSubtitle: "What writes the most to the recorder, what fills the database and how healthy it is. Only reads the recorder.",
   stormTitle: "Recorder load", stormHint: "Rows written are counted, not calls", stormLoading: "Evaluating the recorder. On a large database this can take a few seconds …",
   stormNone: "Nothing writes unusually much.", stormSummary: "In the period: {rows} rows ({perDay} a day) from {entities} entities and {events} events.",
-  stormKind_storm: "Storm", stormKind_attribute_flood: "Attributes", stormKind_no_new_state: "no new state", stormKind_integration_share: "Share", stormKind_event_burst: "Events",
+  stormKind_storm: "Storm", stormKind_attribute_flood: "Large rows", stormKind_no_new_state: "Attributes only", stormKind_integration_share: "Large share", stormKind_event_burst: "Event flood",
+  stormGroupHint: "This is what fills the database unusually fast. An entity appears only once, even when several reasons apply.", stormLegendTitle: "What do the marks mean?",
+  stormLegStorm: "Very many rows: from {peak} in one hour or from {day} on one day.", stormLegFlood: "Each row carries many attributes (on average from {kb} KB), at {min} rows a day or more.",
+  stormLegNoNew: "The value stays the same, only attributes change: in at least {share} % of the rows and {min} rows a day.", stormLegShare: "One integration causes at least {share} % of all rows (from {min} a day).", stormLegBurst: "An event type (other than state_changed) occurs at least {count} times.",
+  stormFilterAll: "All", stormGroupEntities: "Entities", stormGroupIntegrations: "Integrations", stormGroupEvents: "Events", stormDependsLabel: "In use", stormDependsNote: "An exclusion takes the history away there.", stormMarkExclude: "Mark for exclusion", stormDetails: "Open details",
+  stormWhatToDo: "What can I do? Exclude (text for configuration.yaml, Housekeeper writes nothing), set the source to update less often, or trim the history. “Mark for exclusion” ticks the entity under “Loudest entities”.",
   stormStorm: "{perDay} rows a day, {peak} in the busiest hour.", stormFlood: "{perDay} rows on the last day, {kb} KB of attributes per row on average.",
   stormNoNew: "{share} % of the rows are updates without a new state ({perDay} a day): only attributes change.", stormShare: "About {share} % of the recorder load ({perDay} rows a day).",
   stormEvent: "{count} events of type {type} in the period.", stormFollowers: "Depending on it: {list}.",
@@ -1193,6 +1203,7 @@ class StylesMixin {
       .finding{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.finding strong{display:block;font-weight:600}.planfoot{display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap}.planfoot>:first-child{flex:1 1 280px;min-width:0}.planfoot>.factnote{border:0;padding:0}.planfoot>.btn,.planfoot>span,.planfoot>div:last-child{flex:0 0 auto}.simbox{margin:12px 16px;padding:12px 16px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-soft)}.simbox summary{cursor:pointer;font-weight:600;font-size:calc(13px*var(--hk-fs,1))}.simlist{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:6px;font-size:calc(13px*var(--hk-fs,1))}.simlist li{position:relative;padding-left:18px}.simlist li:before{content:"";position:absolute;left:4px;top:.55em;width:6px;height:6px;border-radius:50%;background:var(--hk-blue)}.simlimits{margin:10px 0 0;padding-top:10px;border-top:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.step{align-items:center}.fmeta{display:flex!important;flex-wrap:wrap;align-items:center;gap:4px 8px}.nw{white-space:nowrap}
       .finding:has(.polform){flex-wrap:wrap}.finding .polform{flex:1 1 100%;display:grid;grid-template-columns:minmax(150px,200px) minmax(180px,1fr) minmax(130px,170px) auto auto;gap:8px;align-items:center}.finding .polform .error{grid-column:1/-1}.finding .polform input,.finding .polform select{min-height:40px;box-sizing:border-box}@media(max-width:860px){.finding .polform{grid-template-columns:1fr 1fr}.finding .polform input{grid-column:1/-1}}
       .deform{display:grid;grid-template-columns:6rem minmax(0,1fr) 13rem;gap:6px 14px;align-items:center}.deform+.deform{margin-top:18px;padding-top:18px;border-top:1px solid var(--hk-border)}.deform .factnote{grid-column:2/-1;margin:0;padding:0;border:0}.deform select,.deform .deid{min-height:40px;box-sizing:border-box;width:100%;min-width:0;padding:0 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit;font:inherit}.deform .deid{display:flex;align-items:center;gap:2px}.deform .deid .mono{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1))}.deform .deid input{flex:1;min-width:0;padding:0;border:0;outline:0;background:transparent;color:inherit;font:inherit}.deform .deid:focus-within{border-color:var(--hk-blue)}.deform .btn{min-height:40px;box-sizing:border-box;justify-content:center;width:100%}.deform .btn:disabled{background:var(--hk-soft);border-color:var(--hk-border);color:var(--hk-muted);box-shadow:none;opacity:1}@media(max-width:600px){.deform{grid-template-columns:1fr}.deform .factnote{grid-column:1}}
+      .stormfilter{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px}.stormgroup{display:grid;gap:8px;padding:14px 16px;border-top:1px solid var(--hk-border)}.stormtop{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}.stormbadges{display:flex;gap:6px;flex-wrap:wrap}.stormfinds{display:grid;gap:6px;margin:0;padding:0;list-style:none}.stormfinds li{display:grid;grid-template-columns:130px minmax(0,1fr);gap:10px;font-size:calc(13px*var(--hk-fs,1));align-items:baseline}.stormfinds li span:first-child{color:var(--hk-muted)}.stormactions{display:flex;gap:8px;flex-wrap:wrap}.stormlegend{display:grid;gap:8px;padding:8px 0}.stormlegend>div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:baseline;font-size:calc(13px*var(--hk-fs,1))}.pill.blue{color:var(--hk-blue-text);background:color-mix(in srgb,var(--hk-blue) 14%,transparent)}@media(max-width:600px){.stormfinds li,.stormlegend>div{grid-template-columns:1fr}}
       .evrow .bar{max-width:420px}.evnum{text-align:right;white-space:nowrap}.evnum strong{display:block}.evnum small{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}
       .trimbox{display:grid;gap:14px}.trimhead{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}.trimhead .factnote,.trimfoot .factnote{padding:0;border:0;margin:4px 0 0}.trimsentence{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.trimseg{display:inline-flex;border:1px solid var(--hk-border);border-radius:10px;overflow:hidden;background:var(--hk-surface)}.trimseg button{font:inherit;font-weight:600;padding:8px 16px;border:0;border-left:1px solid var(--hk-border);background:none;color:var(--hk-muted);cursor:pointer}.trimseg button:first-child{border-left:0}.trimseg button.on{background:var(--hk-blue-solid);color:var(--hk-on,#fff)}.trimline{display:grid;grid-template-columns:2fr 1fr;border:1px solid var(--hk-border);border-radius:10px;overflow:hidden}.trimline>div{padding:10px 14px}.trimline strong,.trimfacts strong{display:block}.trimline small,.trimfacts small{color:var(--hk-muted)}.trimline .gone{background:color-mix(in srgb,var(--hk-red) 11%,transparent)}.trimline .stay{background:color-mix(in srgb,var(--hk-green) 12%,transparent);border-left:2px solid var(--hk-surface)}.trimaxis{display:flex;justify-content:space-between;margin-top:4px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.trimfacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.trimfacts>div{padding:10px 12px;border-radius:10px;background:var(--hk-soft);border:1px solid var(--hk-border)}.trimfoot{display:flex;gap:16px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:12px 14px;border-radius:10px;background:var(--hk-soft)}.trimfoot .factnote{max-width:520px;margin:0}
       .btn.quiet.on{background:var(--hk-soft);border-color:var(--hk-blue)}.extags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center;flex:0 0 15rem}.rowwrap .bar{max-width:420px}.rowwrap.exsug{box-shadow:inset 3px 0 0 var(--hk-amber)}.exwhy{display:block;margin-top:2px;color:var(--hk-muted)}.exrule{padding:6px 16px 10px;border:0}@media(max-width:860px){.extags{flex:1 1 100%;justify-content:flex-start}}
@@ -4825,13 +4836,42 @@ class StormsMixin {
     return this.t("stormEvent", { count: n(f.count), type: f.event_type });
   }
 
-  stormFindingRow(f) {
-    const tone = f.kind === "storm" || f.kind === "integration_share" ? "red" : "warn";
-    const title = f.kind === "event_burst" ? f.event_type : f.kind === "integration_share" ? f.title : f.name || f.entity_id;
-    const id = f.entity_id && f.entity_id !== title ? this.rowId(f.entity_id) : "";
-    const chain = this.stormFollowers(f.followers);
-    const inner = `<span class="tile ${tone}"><ha-icon icon="mdi:chart-bell-curve"></ha-icon></span><span class="row-text"><strong>${this.esc(title)}</strong>${id}<small>${this.esc(this.stormFindingText(f))}</small>${chain ? `<small>${this.esc(chain)}</small>` : ""}</span><span class="pill ${tone}">${this.t(`stormKind_${f.kind}`)}</span>`;
-    return f.entity_id ? `<button class="row" data-object="entity:${this.esc(f.entity_id)}">${inner}</button>` : `<div class="row">${inner}</div>`;
+  // One card per entity with all its findings; an integration and an event type stand alone. The findings come sorted by kind and rate.
+  stormGroups(r) {
+    const map = new Map(), groups = [];
+    for (const f of r?.findings || []) {
+      const type = f.kind === "integration_share" ? "integrations" : f.kind === "event_burst" ? "events" : "entities";
+      const key = `${type}:${f.entity_id || f.title || f.event_type}`;
+      let group = map.get(key);
+      if (!group) { group = { key, type, items: [] }; map.set(key, group); groups.push(group); }
+      group.items.push(f);
+    }
+    return groups;
+  }
+
+  stormGroupCard(group) {
+    const first = group.items[0], tone = f => (f.kind === "storm" ? "red" : f.kind === "integration_share" || f.kind === "event_burst" ? "blue" : "warn");
+    const title = group.type === "events" ? first.event_type : group.type === "integrations" ? first.title : first.name || first.entity_id;
+    const id = group.type === "entities" && first.entity_id !== title ? this.rowId(first.entity_id) : "";
+    const badges = group.items.map(f => `<span class="pill ${tone(f)}">${this.t(`stormKind_${f.kind}`)}</span>`).join("");
+    const lines = group.items.map(f => `<li><span>${this.t(`stormKind_${f.kind}`)}</span><span>${this.esc(this.stormFindingText(f))}</span></li>`).join("");
+    const chain = group.items.map(f => this.stormFollowers(f.followers)).find(Boolean);
+    const used = chain ? `<li><span>${this.t("stormDependsLabel")}</span><span>${this.esc(chain)} ${this.t("stormDependsNote")}</span></li>` : "";
+    const done = group.type === "entities" && (this.excludeSel.has(first.entity_id) || this.excludedIds().has(first.entity_id));
+    const actions = group.type === "entities" ? `<div class="stormactions"><button class="btn" data-object="entity:${this.esc(first.entity_id)}">${this.t("stormDetails")}</button><button class="btn quiet" data-storm-mark="${this.esc(first.entity_id)}" ${done ? "disabled" : ""}>${this.t("stormMarkExclude")}</button></div>` : "";
+    return `<div class="stormgroup"><div class="stormtop"><div><strong>${this.esc(title)}</strong>${id}</div><span class="stormbadges">${badges}</span></div><ul class="stormfinds">${lines}${used}</ul>${actions}</div>`;
+  }
+
+  stormLegend(r) {
+    const th = r.thresholds || {}, n = v => this.formatNumber(v);
+    const row = (kind, text) => `<div><span class="pill ${kind === "storm" ? "red" : kind === "integration_share" || kind === "event_burst" ? "blue" : "warn"}">${this.t(`stormKind_${kind}`)}</span><span>${this.esc(text)}</span></div>`;
+    return `<details class="howto"><summary>${this.t("stormLegendTitle")}</summary><div class="stormlegend">${[
+      row("storm", this.t("stormLegStorm", { peak: n(th.storm_peak_rows ?? 3600), day: n(th.storm_rows_per_day ?? 50000) })),
+      row("attribute_flood", this.t("stormLegFlood", { kb: n(Math.round((th.flood_attr_bytes ?? 4096) / 1024)), min: n(th.flood_min_rows_per_day ?? 1000) })),
+      row("no_new_state", this.t("stormLegNoNew", { share: n(Math.round((th.no_new_state_share ?? 0.8) * 100)), min: n(th.no_new_state_min_rows_per_day ?? 1000) })),
+      row("integration_share", this.t("stormLegShare", { share: n(th.share_percent ?? 25), min: n(th.share_min_rows_per_day ?? 10000) })),
+      row("event_burst", this.t("stormLegBurst", { count: n(th.event_burst ?? 100000) })),
+    ].join("")}</div></details>`;
   }
 
   stormEntityRow(item) {
@@ -4857,7 +4897,7 @@ class StormsMixin {
     const st = this.storms?.available && !this.storms.busy ? this.storms : null;
     const db = this.dbHealth?.available && !this.dbHealth.busy ? this.dbHealth : null;
     const meta = this.data?.meta?.database;
-    const stormFindings = st ? st.findings.length : 0;
+    const stormFindings = st ? this.stormGroups(st).length : 0;
     const dbFindings = db ? db.findings.length : 0;
     const dbTone = !db ? "mute" : db.findings.some(f => f.level === "problem") ? "red" : dbFindings ? "warn" : "ok";
     const stormTone = !st ? "mute" : st.findings.some(f => f.kind === "storm" || f.kind === "integration_share") ? "red" : stormFindings ? "warn" : "ok";
@@ -4886,9 +4926,13 @@ class StormsMixin {
     if (!r.available) return `<div class="panel">${head}<p class="factnote">${this.t("relNoRecorder")}</p></div>`;
     if (r.busy) return `<div class="panel">${head}${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p></div>`;
     const loading = this.stormsLoading ? `<p class="factnote">${this.t("stormLoading")}</p>` : "";
-    const foundFindings = this.searchList("stormfind", r.findings, f => [f.name, f.entity_id, f.title, f.event_type].join(" "));
+    const groups = this.stormGroups(r), kinds = [["all", "stormFilterAll"], ["entities", "stormGroupEntities"], ["integrations", "stormGroupIntegrations"], ["events", "stormGroupEvents"]].filter(([id]) => id === "all" || groups.some(g => g.type === id));
+    const kind = kinds.some(([id]) => id === this.stormFind) ? this.stormFind : "all";
+    const filter = `<div class="stormfilter">${kinds.map(([id, key]) => `<button class="chip ${kind === id ? "active" : ""}" data-storm-find="${id}" aria-pressed="${kind === id}">${this.t(key)} ${id === "all" ? groups.length : groups.filter(g => g.type === id).length}</button>`).join("")}</div>`;
+    const shownGroups = kind === "all" ? groups : groups.filter(g => g.type === kind);
+    const foundFindings = this.searchList("stormfind", shownGroups, g => g.items.flatMap(f => [f.name, f.entity_id, f.title, f.event_type]).join(" "));
     const findingPage = this.paginate("stormfind", foundFindings.rows);
-    const attention = r.findings.length ? foundFindings.bar + foundFindings.none + findingPage.rows.map(f => this.stormFindingRow(f)).join("") + findingPage.footer : `<div class="emptymsg">${this.t("stormNone")}</div>`;
+    const attention = groups.length ? `<p class="factnote">${this.t("stormGroupHint")}</p>${this.stormLegend(r)}${filter}${foundFindings.bar}${foundFindings.none}${findingPage.rows.map(g => this.stormGroupCard(g)).join("")}${findingPage.footer}<p class="factnote">${this.t("stormWhatToDo")}</p>` : `<div class="emptymsg">${this.t("stormNone")}</div>`;
     const summary = `<p class="factnote">${this.t("stormSummary", { rows: this.formatNumber(r.total_rows), perDay: this.formatNumber(r.per_day), entities: this.formatNumber(r.entity_count), events: this.formatNumber(r.event_total) })}</p>`;
     const shownEntities = this.exOnlySug ? r.entities.filter(item => this.excludeInfo(item.entity_id, item.per_day, item.excluded).suggest) : r.entities;
     const foundEntities = this.searchList("stormentities", shownEntities, item => [item.name, item.entity_id].join(" "));
@@ -4908,7 +4952,7 @@ class StormsMixin {
     // The sections are tabs, so the lower ones are not hidden far down the page.
     const warn = r.findings.some(f => f.kind === "storm" || f.kind === "integration_share");
     const tabs = [
-      { id: "findings", label: this.t("stormTabFindings"), count: r.findings.length, tone: warn ? "red" : r.findings.length ? "warn" : "ok" },
+      { id: "findings", label: this.t("stormTabFindings"), count: groups.length, tone: warn ? "red" : groups.length ? "warn" : "ok" },
       r.entities.length ? { id: "entities", label: this.t("stormTabEntities"), count: r.entities.length } : null,
       r.integrations.length ? { id: "shares", label: this.t("stormTabIntegrations"), count: r.integrations.length } : null,
       r.events.length ? { id: "events", label: this.t("stormTabEvents"), count: r.events.length } : null,
@@ -9836,6 +9880,8 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-runs-refresh]")?.addEventListener("click", () => this.loadRuns());
     root.querySelector("[data-rel-compare]")?.addEventListener("click", () => { this.relCompare = !this.relCompare; this.reliability = null; this.loadReliability(); });
     root.querySelectorAll("[data-rel-window]").forEach(el => el.onclick = () => { this.relWindow = Number(el.dataset.relWindow); this.reliability = null; this.pages.relentries = 1; this.pages.relunstable = 1; this.loadReliability(); });
+    root.querySelectorAll("[data-storm-find]").forEach(el => el.onclick = () => { this.stormFind = el.dataset.stormFind; this.pages.stormfind = 1; this.render(); });
+    root.querySelectorAll("[data-storm-mark]").forEach(el => el.onclick = () => { this.excludeSel.add(el.dataset.stormMark); (this.viewTab ||= {}).recload = "entities"; this.render(); });
     root.querySelectorAll("[data-storm-window]").forEach(el => el.onclick = () => { this.stormsWindow = Number(el.dataset.stormWindow); this.storms = null; this.pages.stormfind = 1; this.pages.stormentities = 1; this.loadStorms(); });
     root.querySelector("[data-storm-refresh]")?.addEventListener("click", () => this.loadStorms(true));
     root.querySelector("[data-rel-refresh]")?.addEventListener("click", () => this.loadReliability(true));
