@@ -8,12 +8,15 @@ class PropertiesMixin {
 
   propChips(names) { return names.length ? `<span class="chips" style="padding:0;border:0">${names.map(n => `<span class="chip">${this.esc(n)}</span>`).join("")}</span>` : ""; }
 
-  propTime(value) { return value ? `${this.esc(this.formatDate(value))} <small>${this.esc(this.relTime(value))}</small>` : ""; }
+  // The registry gives 1970 for objects created before it recorded the time; that is "unknown", not a date.
+  realTime(value) { return value && Date.parse(value) >= Date.UTC(2000, 0, 1) ? value : ""; }
+
+  propTime(value) { return this.realTime(value) ? `${this.esc(this.formatDate(value))} <small>${this.esc(this.relTime(value))}</small>` : ""; }
 
   propCard(title, icon, rows) {
     const shown = rows.filter(r => r && r[1] !== "" && r[1] !== null && r[1] !== undefined);
     if (!shown.length) return "";
-    return `<section class="panel"><div class="panelhead"><h2><ha-icon icon="${icon}" style="--mdc-icon-size:18px;vertical-align:-3px;margin-right:6px;color:var(--hk-muted)"></ha-icon>${this.esc(title)}</h2></div><div class="pad"><dl class="kv">${shown.map(([k, v]) => `<dt>${this.esc(k)}</dt><dd>${v}</dd>`).join("")}</dl></div></section>`;
+    return `<section class="panel"><div class="panelhead"><h2 class="proph"><ha-icon icon="${icon}"></ha-icon>${this.esc(title)}</h2></div><div class="pad"><dl class="kv">${shown.map(([k, v]) => `<dt>${this.esc(k)}</dt><dd>${v}</dd>`).join("")}</dl></div></section>`;
   }
 
   propCode(value) { return value ? `<code>${this.esc(value)}</code>` : ""; }

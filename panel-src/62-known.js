@@ -190,7 +190,7 @@ class KnownMixin {
     const again = (this.data.recurring_devices || []).find(r => r.device_id === id);
     if (again) care.push(this.knownLine("warn", t("knownAgain"), t("knownAgainText", { date: this.esc(this.formatDate(again.forgotten_at)) }), "knownSrcJournal"));
     const hist = [];
-    if (item.created_at) hist.push(this.knownLine("mute", t("knownCreated"), `${this.esc(this.formatDate(item.created_at))}${item.modified_at ? `<small>${t("knownModified")}: ${this.esc(this.formatDate(item.modified_at))}</small>` : ""}`, "knownSrcScan"));
+    if (this.realTime(item.created_at)) hist.push(this.knownLine("mute", t("knownCreated"), `${this.esc(this.formatDate(item.created_at))}${this.realTime(item.modified_at) ? `<small>${t("knownModified")}: ${this.esc(this.formatDate(item.modified_at))}</small>` : ""}`, "knownSrcScan"));
     if (life?.steps?.length) hist.push(this.knownLine("mute", t("knownLife"), t("knownLifeText", { n: life.steps.length }), "knownSrcJournal"));
     hist.push(...this.knownLogLines(key));
     return [["knownState", state], ["knownGroupDevice", dev], ["knownUse", use], ["knownCare", care], ["knownHistory", hist]];
@@ -211,7 +211,7 @@ class KnownMixin {
     const origin = [];
     const kind = [item.custom ? t("knownCustom") : t("knownCore"), item.integration_version ? t("knownVersion", { v: this.esc(item.integration_version) }) : ""].filter(Boolean).join(" · ");
     origin.push(this.knownLine("mute", t("knownKind"), kind, "knownSrcScan"));
-    if (item.created_at) origin.push(this.knownLine("mute", t("knownCreated"), `${this.esc(this.formatDate(item.created_at))}${item.modified_at ? `<small>${t("knownModified")}: ${this.esc(this.formatDate(item.modified_at))}</small>` : ""}`, "knownSrcScan"));
+    if (this.realTime(item.created_at)) origin.push(this.knownLine("mute", t("knownCreated"), `${this.esc(this.formatDate(item.created_at))}${this.realTime(item.modified_at) ? `<small>${t("knownModified")}: ${this.esc(this.formatDate(item.modified_at))}</small>` : ""}`, "knownSrcScan"));
     const scope = [this.knownLine("mute", t("knownScope"), `${t("knownScopeText", { d: this.formatNumber(item.device_count ?? 0), e: this.formatNumber(item.entity_count ?? ents.length) })}${bad ? `<small>${t("knownScopeBad", { n: bad })}</small>` : ""}`, "knownSrcRelations")];
     const used = this.knownUsageOf(ents.map(o => this.objectKey(o)));
     scope.push(this.knownLine("mute", t("knownUsedIn"), used || t("knownUsedNone"), "knownSrcRelations"));

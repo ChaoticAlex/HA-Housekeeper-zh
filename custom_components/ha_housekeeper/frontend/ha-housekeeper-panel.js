@@ -1278,7 +1278,7 @@ class StylesMixin {
       .nav em{font-weight:600}.nav.active em{color:var(--hk-blue-text);background:color-mix(in srgb,var(--hk-blue) 6%,transparent)}
       .panelhead>div:first-child{flex:1 1 0;min-width:0}.panelhead>.actions{flex:0 0 auto;flex-wrap:nowrap;justify-content:flex-end;align-items:center}.panelhead>.actions .btn{white-space:nowrap}@media(max-width:640px){.panelhead:has(>.actions){flex-wrap:wrap}.panelhead>.actions{flex:1 1 100%;flex-wrap:wrap;justify-content:stretch}.panelhead>.actions .btn{flex:1 1 auto}}.panelhead{background:linear-gradient(180deg,color-mix(in srgb,var(--hk-soft) 60%,transparent),transparent)}.panelhead h2{letter-spacing:-.005em}
       .taskgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;padding:16px}.taskcard{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-surface);padding:14px;cursor:pointer;color:var(--hk-text);font:inherit}.taskcard:hover,.taskcard.on{background:var(--hk-soft)}.taskcard.on{border-color:var(--hk-blue)}.compactgrid{padding:0 0 14px}.setgrid{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}.setgrid .taskcard{display:grid;grid-template-rows:auto auto 24px 1fr;align-content:start;justify-items:start}.setpill{min-height:24px;display:flex;align-items:center}.compactgrid .taskcard{padding:12px}.taskcard ha-icon{--mdc-icon-size:22px;color:var(--hk-blue)}.taskcard strong{font-size:calc(14px*var(--hk-fs,1));font-weight:600}.taskcard small{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));line-height:1.45}.repairhead{font-size:calc(16px*var(--hk-fs,1));font-weight:600;margin:10px 0 6px}
-      .propgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start}.propgrid>.wide{grid-column:1/-1}.propgrid .panel{margin:0}.propgrid .kv{grid-template-columns:120px minmax(0,1fr)}.propgrid .kv dd small{display:block}
+      .propgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}@media(max-width:860px){.propgrid{grid-template-columns:minmax(0,1fr)}}.proph{display:flex;align-items:center;gap:8px}.proph ha-icon{--mdc-icon-size:18px;color:var(--hk-muted);flex:none}.kv{align-items:baseline}.kv dd .link{display:inline;padding:0;text-align:left;font-size:inherit}.propgrid>.wide{grid-column:1/-1}.propgrid .panel{margin:0}.propgrid .kv{grid-template-columns:120px minmax(0,1fr)}.propgrid .kv dd small{display:block}
       .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;list-style:none;margin:0;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.step{display:flex;gap:9px;align-items:flex-start;padding:8px 10px;border-radius:8px;color:var(--hk-muted)}.step .mark{flex:none;width:22px;height:22px;display:grid;place-items:center;border:1.5px solid currentColor;border-radius:50%;font-size:calc(11px*var(--hk-fs,1));font-weight:700}.steptext{display:grid;gap:2px;min-width:0}.steptext b{font-size:calc(12px*var(--hk-fs,1));font-weight:600;overflow-wrap:break-word;hyphens:auto}.steptext small{font-size:calc(11px*var(--hk-fs,1));overflow-wrap:anywhere}
       .wz{display:flex;gap:6px;list-style:none;margin:0;padding:14px 16px;border-bottom:1px solid var(--hk-border)}.wz li{flex:1;display:flex;flex-direction:column;gap:6px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);min-width:0}.wz li i{display:block;height:3px;border-radius:2px;background:var(--hk-border)}.wz li.done i{background:var(--hk-green)}.wz li.cur{color:var(--hk-text);font-weight:600}.wz li.cur i{background:var(--hk-blue)}@media (max-width:520px){.wz li:not(.cur){font-size:0}.wz li:not(.cur) i{margin-top:0}}.wzflow{margin:8px 16px}.wzprog{height:8px;border-radius:4px;background:var(--hk-border);overflow:hidden;margin:12px 16px}.wzprog i{display:block;height:100%;background:var(--hk-blue);transition:width .3s}
       .noteform{display:grid;gap:10px}.noteform label{display:block;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);margin-bottom:4px}.noteform input,.noteform textarea{width:100%;box-sizing:border-box}.notetwo{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media (max-width:560px){.notetwo{grid-template-columns:1fr}}.noteact{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.noteact span{display:flex;gap:8px}
@@ -4175,12 +4175,15 @@ class PropertiesMixin {
 
   propChips(names) { return names.length ? `<span class="chips" style="padding:0;border:0">${names.map(n => `<span class="chip">${this.esc(n)}</span>`).join("")}</span>` : ""; }
 
-  propTime(value) { return value ? `${this.esc(this.formatDate(value))} <small>${this.esc(this.relTime(value))}</small>` : ""; }
+  // The registry gives 1970 for objects created before it recorded the time; that is "unknown", not a date.
+  realTime(value) { return value && Date.parse(value) >= Date.UTC(2000, 0, 1) ? value : ""; }
+
+  propTime(value) { return this.realTime(value) ? `${this.esc(this.formatDate(value))} <small>${this.esc(this.relTime(value))}</small>` : ""; }
 
   propCard(title, icon, rows) {
     const shown = rows.filter(r => r && r[1] !== "" && r[1] !== null && r[1] !== undefined);
     if (!shown.length) return "";
-    return `<section class="panel"><div class="panelhead"><h2><ha-icon icon="${icon}" style="--mdc-icon-size:18px;vertical-align:-3px;margin-right:6px;color:var(--hk-muted)"></ha-icon>${this.esc(title)}</h2></div><div class="pad"><dl class="kv">${shown.map(([k, v]) => `<dt>${this.esc(k)}</dt><dd>${v}</dd>`).join("")}</dl></div></section>`;
+    return `<section class="panel"><div class="panelhead"><h2 class="proph"><ha-icon icon="${icon}"></ha-icon>${this.esc(title)}</h2></div><div class="pad"><dl class="kv">${shown.map(([k, v]) => `<dt>${this.esc(k)}</dt><dd>${v}</dd>`).join("")}</dl></div></section>`;
   }
 
   propCode(value) { return value ? `<code>${this.esc(value)}</code>` : ""; }
@@ -8970,7 +8973,7 @@ class KnownMixin {
     const again = (this.data.recurring_devices || []).find(r => r.device_id === id);
     if (again) care.push(this.knownLine("warn", t("knownAgain"), t("knownAgainText", { date: this.esc(this.formatDate(again.forgotten_at)) }), "knownSrcJournal"));
     const hist = [];
-    if (item.created_at) hist.push(this.knownLine("mute", t("knownCreated"), `${this.esc(this.formatDate(item.created_at))}${item.modified_at ? `<small>${t("knownModified")}: ${this.esc(this.formatDate(item.modified_at))}</small>` : ""}`, "knownSrcScan"));
+    if (this.realTime(item.created_at)) hist.push(this.knownLine("mute", t("knownCreated"), `${this.esc(this.formatDate(item.created_at))}${this.realTime(item.modified_at) ? `<small>${t("knownModified")}: ${this.esc(this.formatDate(item.modified_at))}</small>` : ""}`, "knownSrcScan"));
     if (life?.steps?.length) hist.push(this.knownLine("mute", t("knownLife"), t("knownLifeText", { n: life.steps.length }), "knownSrcJournal"));
     hist.push(...this.knownLogLines(key));
     return [["knownState", state], ["knownGroupDevice", dev], ["knownUse", use], ["knownCare", care], ["knownHistory", hist]];
@@ -8991,7 +8994,7 @@ class KnownMixin {
     const origin = [];
     const kind = [item.custom ? t("knownCustom") : t("knownCore"), item.integration_version ? t("knownVersion", { v: this.esc(item.integration_version) }) : ""].filter(Boolean).join(" · ");
     origin.push(this.knownLine("mute", t("knownKind"), kind, "knownSrcScan"));
-    if (item.created_at) origin.push(this.knownLine("mute", t("knownCreated"), `${this.esc(this.formatDate(item.created_at))}${item.modified_at ? `<small>${t("knownModified")}: ${this.esc(this.formatDate(item.modified_at))}</small>` : ""}`, "knownSrcScan"));
+    if (this.realTime(item.created_at)) origin.push(this.knownLine("mute", t("knownCreated"), `${this.esc(this.formatDate(item.created_at))}${this.realTime(item.modified_at) ? `<small>${t("knownModified")}: ${this.esc(this.formatDate(item.modified_at))}</small>` : ""}`, "knownSrcScan"));
     const scope = [this.knownLine("mute", t("knownScope"), `${t("knownScopeText", { d: this.formatNumber(item.device_count ?? 0), e: this.formatNumber(item.entity_count ?? ents.length) })}${bad ? `<small>${t("knownScopeBad", { n: bad })}</small>` : ""}`, "knownSrcRelations")];
     const used = this.knownUsageOf(ents.map(o => this.objectKey(o)));
     scope.push(this.knownLine("mute", t("knownUsedIn"), used || t("knownUsedNone"), "knownSrcRelations"));
