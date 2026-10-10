@@ -310,7 +310,7 @@ class DiagnosisMixin {
   // Only the open tab is built, so large attributes and relations cost nothing until they are asked for.
   detailPanel(tab, item, key) {
     if (tab === "actions") return this.actionsTab(item, key);
-    if (tab === "relations") return `<div class="stack">${this.markCard(item)}${this.relationsCard(key)}</div>`;
+    if (tab === "relations") return `<div class="stack">${this.relationsCard(key)}</div>`;
     if (tab === "flow") return this.flowCard(item, key);
     if (tab === "life") return this.lifeCard(item);
     if (tab === "runs") return this.runsDetailCard(this.runsRow(item));

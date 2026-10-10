@@ -54,7 +54,7 @@ class DetailActionsMixin {
     for (const it of items) recommended.push(this.actRow(it.label, this.t(it.hint), `<button class="btn${it.finding ? " primary" : ""}" ${it.attr}>${this.t("actOpen")}</button>`));
     if (items.length) recommended.push(`<div class="actblock"><small class="factnote">${this.t("actPreviewOnly")}${broken ? ` ${this.t("actEditInHa")}` : ""}</small></div>`);
     const labelControls = this.labelParts(item);
-    const name = [...this.detailEditRows(item), labelControls ? this.actRow(this.t("actLabelTitle"), this.t("actLabelHint"), labelControls) : ""];
+    const name = [...this.detailEditRows(item), ...this.markRows(item), labelControls ? this.actRow(this.t("actLabelTitle"), this.t("actLabelHint"), labelControls) : ""];
     const record = [...this.entityTrimRows(item), this.staleRow(item)];
     const group = (title, rows) => { const html = rows.filter(Boolean).join(""); return html ? `<div class="actsec">${this.t(title)}</div>${html}` : ""; };
     const body = [group("actGroupRecommended", recommended), group("actGroupName", name), group("actGroupRecord", record)].join("");

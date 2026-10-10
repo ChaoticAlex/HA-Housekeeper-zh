@@ -125,6 +125,7 @@ class KnownMixin {
     if (area) use.push(this.knownLine("mute", t("knownArea"), this.esc(area.name), "knownSrcScan"));
     // Rules and care
     const care = [this.knownLine(finding ? "warn" : "ok", t("finding"), finding ? `${this.pill(finding.classification)}<small>${t("certainty")}: ${Math.round(finding.confidence * 100)} %</small>` : t("noFinding"), "knownSrcRules")];
+    if (item.mark) care.push(this.knownMarkLine(item));
     if (finding?.ignored) care.push(this.knownLine("mute", t("knownIgnored"), t("knownIgnoredYes"), "knownSrcDecisions"));
     const quarantined = this.quarantineOf(id);
     if (quarantined) care.push(this.knownLine("warn", t("quarantine"), `${t("quarantineFact", { date: this.formatDate(quarantined.since), days: this.daysSince(quarantined.since) })}<span class="factaction">${this.releaseControl(quarantined)}</span>`, "knownSrcDecisions"));
@@ -147,6 +148,10 @@ class KnownMixin {
     const counts = {};
     for (const type of sources.values()) counts[type] = (counts[type] || 0) + 1;
     return Object.entries(counts).map(([type, n]) => `${this.formatNumber(n)} ${this.t(type)}`).join(", ");
+  }
+
+  knownMarkLine(item) {
+    return this.knownLine(item.mark_due ? "warn" : "mute", this.t("markTitle"), `${this.esc(this.t(`mark_${item.mark.kind}`))}<small>${this.esc(this.markLine(item.mark))}${item.mark_due ? ` · ${this.t("markDue")}` : ""}</small>`, "knownSrcDecisions");
   }
 
   knownFindingsLine(key) {
@@ -185,6 +190,7 @@ class KnownMixin {
       use.push(this.knownLine("mute", t("knownUsedIn"), used ? `${used}<small>${t("knownUsedViaEntities")}</small>` : t("knownUsedNone"), "knownSrcRelations"));
     }
     const care = [this.knownFindingsLine(key)];
+    if (item.mark) care.push(this.knownMarkLine(item));
     const quarantined = this.quarantineOf(id);
     if (quarantined) care.push(this.knownLine("warn", t("quarantine"), `${t("quarantineFact", { date: this.formatDate(quarantined.since), days: this.daysSince(quarantined.since) })}<span class="factaction">${this.releaseControl(quarantined)}</span>`, "knownSrcDecisions"));
     const again = (this.data.recurring_devices || []).find(r => r.device_id === id);

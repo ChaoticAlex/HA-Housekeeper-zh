@@ -3521,6 +3521,21 @@ test("the export started from a detail page returns to that page", () => {
   el.selected = null; el.xpOpen(); assert.ok(!shadow.innerHTML.includes("data-xp-return"));
 });
 
+test("the mark is a row of the Actions tab and a line of what is known, no longer a card under the dependencies", () => {
+  const { el } = panel("en");
+  const item = { object_type: "entity", object_id: "sensor.m", name: "M", status: "unavailable", state: "unavailable", mark: { kind: "seasonal", reason: "winter", until: "2026-12-12T00:00:00+00:00" } };
+  el.data = { ...DATA, objects: [...DATA.objects, item], findings: [] };
+  el._rev = (el._rev || 0) + 1;
+  const key = "entity:sensor.m";
+  const actions = el.detailPanel("actions", item, key);
+  assert.ok(actions.includes("Mark: Seasonal") && actions.includes('data-mark-open="entity:sensor.m"') && actions.includes('data-mark-clear="entity:sensor.m"'));
+  assert.ok(el.knownCard(item, key).includes("Seasonal") && el.knownCard(item, key).includes("Mark"));
+  assert.ok(!el.detailPanel("relations", item, key).includes("data-mark-open"), "the dependencies show only relations");
+  el.markForm = { key, kind: "seasonal", reason: "", days: 0, target: "", error: "" };
+  assert.ok(el.detailPanel("actions", item, key).includes("data-mark-form"), "the form opens below the row");
+  assert.ok(el.markRows({ object_type: "automation", object_id: "automation.x" }).length === 0);
+});
+
 test("the journal names the end of a follow-up and the safety line counts the watched plans", () => {
   const { el, shadow } = panel("en");
   const plan = (id, followup) => ({ plan_id: id, created_at: "2026-10-10T10:00:00+00:00", status: "verified", executed: true, summary: { total: 1, ok: 1, review: 0, blocked: 0 }, followup, followup_until: followup === "watching" ? "2026-10-11T10:00:00+00:00" : null });
