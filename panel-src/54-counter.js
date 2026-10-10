@@ -10,7 +10,7 @@ class CounterMixin {
   }
 
   // The reading before and after the repair around one glitch: original dashed, repaired solid.
-  counterChart(series) {
+  counterChart(series, unit = "") {
     if (!series || series.length < 3 || series.every(p => p[1] === p[2])) return ""; // nothing differs, so nothing to draw
     const w = 360, h = 90, pad = 4;
     const xs = series.map(p => p[0]), ys = series.flatMap(p => [p[1], p[2]]);
@@ -18,7 +18,11 @@ class CounterMixin {
     const sx = x => pad + ((x - x0) / Math.max(1, x1 - x0)) * (w - 2 * pad);
     const sy = y => h - pad - ((y - y0) / Math.max(1e-9, y1 - y0)) * (h - 2 * pad);
     const line = i => series.map(p => `${sx(p[0]).toFixed(1)},${sy(p[i]).toFixed(1)}`).join(" ");
-    return `<svg class="rangechart" role="img" aria-label="${this.esc(this.t("counterChartLabel"))}" viewBox="0 0 ${w} ${h}" width="100%" style="max-width:${w}px;display:block;margin:6px 0">${[1, 2, 3].map(k => `<line class="grid" x1="${pad}" x2="${w - pad}" y1="${(k * h) / 4}" y2="${(k * h) / 4}"/>`).join("")}<polyline fill="none" stroke="var(--hk-red)" stroke-width="1.5" stroke-dasharray="4 3" points="${line(1)}"/><polyline fill="none" stroke="var(--hk-green)" stroke-width="2" points="${line(2)}"/></svg><small class="u-dim u-block"><span style="color:var(--hk-red)">- - -</span> ${this.t("counterOriginal")} · <span style="color:var(--hk-green)">───</span> ${this.t("counterRepaired")}</small>`;
+    const v = y => `${this.formatNumber(Math.round(y * 100) / 100)}${unit ? ` ${unit}` : ""}`;
+    const svg = `<svg class="rangechart" role="img" aria-label="${this.esc(this.t("counterChartLabel"))}" viewBox="0 0 ${w} ${h}" width="100%" style="max-width:${w}px;display:block;margin:6px 0">${[1, 2, 3].map(k => `<line class="grid" x1="${pad}" x2="${w - pad}" y1="${(k * h) / 4}" y2="${(k * h) / 4}"/>`).join("")}<polyline fill="none" stroke="var(--hk-red)" stroke-width="1.5" stroke-dasharray="4 3" points="${line(1)}"/><polyline fill="none" stroke="var(--hk-green)" stroke-width="2" points="${line(2)}"/></svg>`;
+    const legend = `<small class="u-dim u-block"><span style="color:var(--hk-red)">- - -</span> ${this.t("counterOriginal")} · <span style="color:var(--hk-green)">───</span> ${this.t("counterRepaired")}</small>`;
+    // The axes are text around the drawing: highest and lowest value on the left, first and last time below.
+    return `<div class="chartaxes"><span class="chartY"><span>${this.esc(v(y1))}</span><span>${this.esc(v(y0))}</span></span>${svg}<span class="chartX"><span>${this.esc(this.formatDate(x0 * 1000))}</span><span>${this.esc(this.formatDate(x1 * 1000))}</span></span></div>${legend}`;
   }
 
   counterRange(f) {
@@ -35,7 +39,7 @@ class CounterMixin {
     const rows = this.t("counterRows", { states: this.formatNumber(counts.states || 0), short: this.formatNumber(counts.short_term || 0), long: this.formatNumber(counts.long_term || 0), tail: this.formatNumber((counts.tail_long_term || 0) + (counts.tail_short_term || 0)) });
     const skipped = Object.entries(c.skipped || {}).map(([table, list]) => this.t("counterSkipped", { table: this.t(`counterTable_${table}`), count: list.length })).join(" ");
     const undone = action.result?.state === "undone" ? `<small class="u-block">${this.t("counterUndone")}</small>` : "";
-    const charts = (c.findings || []).slice(0, 3).map(f => this.counterChart(f.series)).join("");
+    const charts = (c.findings || []).slice(0, 3).map(f => this.counterChart(f.series, unit)).join("");
     return `<span class="u-pt6 u-block"><strong class="u-block">${this.t("rangeChecked")}</strong>${lines.map(l => `<small class="u-block">${this.esc(l)}</small>`).join("")}<small class="u-block">${this.esc(rows)}</small>${skipped ? `<small class="u-amber u-block">${this.esc(skipped)}</small>` : ""}${charts}${undone}</span>`;
   }
 
@@ -74,7 +78,7 @@ class CounterMixin {
     const undone = action.result?.state === "undone" ? line(this.t("counterUndone")) : "";
     const avails = line(this.t("rangeAvail", { states: this.formatNumber(avail.states || 0), short: this.formatNumber(avail.short_term || 0), long: this.formatNumber(avail.long_term || 0) }));
     // What happens and what to watch out for stays in view; the rows themselves are for whoever wants to check.
-    return `<span class="u-pt6 u-block"><strong class="u-block">${this.t("rangeChecked")}</strong>${out.join("")}${this.counterChart(c.series)}${undone}<details class="rowdetails"><summary>${this.t("rangeTech")}</summary>${avails}${line(this.t("rangeColHint"))}${tables}</details></span>`;
+    return `<span class="u-pt6 u-block"><strong class="u-block">${this.t("rangeChecked")}</strong>${out.join("")}${this.counterChart(c.series, c.unit || "")}${undone}<details class="rowdetails"><summary>${this.t("rangeTech")}</summary>${avails}${line(this.t("rangeColHint"))}${tables}</details></span>`;
   }
 
   saveRange(root) {
