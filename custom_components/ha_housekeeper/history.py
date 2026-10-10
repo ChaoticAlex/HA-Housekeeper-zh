@@ -13,6 +13,12 @@ from .hygiene import finding_key as _finding_key
 
 SAVE_DELAY = 10
 LIST_LIMIT = 500  # entries per section sent to the panel; totals stay exact
+PIN_LIMIT = 10  # own scan points; the daily clean-up never touches them
+PIN_NAME_MAX = 60
+
+
+class PinError(Exception):
+    """A scan point was not accepted; the message names the reason."""
 
 
 def _valid_checkpoint(value: Any) -> dict[str, Any] | None:
@@ -138,7 +144,7 @@ def _age_cutoff(at: str, days: int) -> str:
 
 
 class ScanHistory:
-    """Persist the previous scan and the last scan of each earlier day, for a set number of days."""
+    """Persist the previous scan, the last scan of each earlier day and the scan points you set yourself."""
 
     def __init__(self, hass: HomeAssistant) -> None:
         self.retention_days = DEFAULT_HISTORY_DAYS
@@ -146,6 +152,7 @@ class ScanHistory:
         self._latest: dict[str, Any] | None = None
         self._previous: dict[str, Any] | None = None
         self._daily: list[dict[str, Any]] = []
+        self._pinned: list[dict[str, Any]] = []
 
     async def async_load(self) -> None:
         """Load stored checkpoints."""
@@ -158,6 +165,12 @@ class ScanHistory:
         self._daily = (
             [cp for cp in daily if _valid_checkpoint(cp)] if isinstance(daily, list) else []
         )
+        pinned = data.get("pinned")
+        self._pinned = [
+            {**cp, "name": str(cp.get("name") or "")[:PIN_NAME_MAX]}
+            for cp in (pinned if isinstance(pinned, list) else [])
+            if _valid_checkpoint(cp)
+        ][:PIN_LIMIT]
 
     def record(self, snapshot: dict[str, Any]) -> None:
         """Remember a finished scan; the last one becomes the 'previous' baseline."""
@@ -173,7 +186,35 @@ class ScanHistory:
         self._store.async_delay_save(self._as_dict, SAVE_DELAY)
 
     def _as_dict(self) -> dict[str, Any]:
-        return {"latest": self._latest, "previous": self._previous, "daily": self._daily}
+        return {
+            "latest": self._latest,
+            "previous": self._previous,
+            "daily": self._daily,
+            "pinned": self._pinned,
+        }
+
+    def pin(self, snapshot: dict[str, Any], name: str) -> None:
+        """Keep this scan as a comparison point until it is deleted."""
+        if snapshot["meta"].get("preliminary"):
+            raise PinError("preliminary")
+        name = name.strip()
+        if len(name) > PIN_NAME_MAX:
+            raise PinError("name")
+        checkpoint = make_checkpoint(snapshot)
+        if any(cp["at"] == checkpoint["at"] for cp in self._pinned):
+            raise PinError("exists")
+        if len(self._pinned) >= PIN_LIMIT:
+            raise PinError("too_many")
+        self._pinned.append({**checkpoint, "name": name})
+        self._store.async_delay_save(self._as_dict, SAVE_DELAY)
+
+    def unpin(self, baseline: str) -> None:
+        """Delete a scan point by its id (``pin:<time>``)."""
+        before = len(self._pinned)
+        self._pinned = [cp for cp in self._pinned if f"pin:{cp['at']}" != baseline]
+        if len(self._pinned) == before:
+            raise PinError("not_found")
+        self._store.async_delay_save(self._as_dict, SAVE_DELAY)
 
     def baselines(self) -> list[dict[str, str]]:
         """List selectable comparison points, newest first."""
@@ -182,6 +223,10 @@ class ScanHistory:
             options.append(
                 {"id": "previous", "at": self._previous["at"], **checkpoint_counts(self._previous)}
             )
+        options.extend(
+            {"id": f"pin:{cp['at']}", "at": cp["at"], "name": cp["name"], "pinned": True, **checkpoint_counts(cp)}
+            for cp in sorted(self._pinned, key=lambda c: c["at"], reverse=True)
+        )
         options.extend(
             {"id": cp["at"], "at": cp["at"], **checkpoint_counts(cp)}
             for cp in reversed(self._daily)
@@ -218,11 +263,12 @@ class ScanHistory:
 
     def compare(self, snapshot: dict[str, Any], baseline: str = "previous") -> dict[str, Any]:
         """Compare the current snapshot with a baseline; an empty result if none exists."""
-        base = (
-            self._previous
-            if baseline == "previous"
-            else next((cp for cp in self._daily if cp["at"] == baseline), None)
-        )
+        if baseline == "previous":
+            base = self._previous
+        elif isinstance(baseline, str) and baseline.startswith("pin:"):
+            base = next((cp for cp in self._pinned if f"pin:{cp['at']}" == baseline), None)
+        else:
+            base = next((cp for cp in self._daily if cp["at"] == baseline), None)
         result: dict[str, Any] = {
             "baselines": self.baselines(),
             "baseline": baseline,

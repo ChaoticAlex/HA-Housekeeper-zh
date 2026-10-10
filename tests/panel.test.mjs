@@ -3400,6 +3400,31 @@ test("the logbook has its own tab, entries are written in a dialog, an action ca
   assert.ok(el.corrText({ kind: "note", title: "Zigbee <i>" }).includes("Zigbee &lt;i&gt;"));
 });
 
+test("an own scan point sits in the history of the scans with its name, is set through a dialog after a scan and deleted after asking", async () => {
+  const { el, shadow } = panel("en");
+  const sent = [];
+  el._hass.callWS = async msg => { sent.push(msg); return msg.type === "ha_housekeeper/scan" ? el.data : { baselines: [] }; };
+  const pin = { id: "pin:2026-10-07T18:02:00+00:00", at: "2026-10-07T18:02:00+00:00", name: "Before the <rebuild>", pinned: true, objects: 5, findings: 3 };
+  el.compare = { ...COMPARE, baselines: [{ id: "previous", at: "2026-10-09T23:20:00+00:00", objects: 6, findings: 2 }, pin], current: { objects: 6, findings: 1 }, retention_days: 30 };
+  el.view = "changes"; el.render();
+  let html = shadow.innerHTML;
+  assert.ok(html.includes("Before the &lt;rebuild&gt;") && html.includes("Own point") && html.includes(`data-baseline="${pin.id}"`) && !html.includes("<rebuild>"), "the point shows by its name, escaped");
+  assert.ok(html.indexOf("Previous scan") < html.indexOf("Before the &lt;rebuild&gt;"), "newest first");
+  el.pinOpen(); el.render();
+  assert.ok(shadow.innerHTML.includes("data-pin-modal") && shadow.innerHTML.includes("data-pin-chip"));
+  el.pinDraft.name = "Before the update";
+  el.load = async fresh => { sent.push({ type: fresh ? "ha_housekeeper/scan" : "ha_housekeeper/inventory" }); };
+  await el.pinSave();
+  assert.deepEqual(sent.map(m => m.type), ["ha_housekeeper/scan", "ha_housekeeper/scan_point", "ha_housekeeper/compare"]);
+  assert.equal(sent[1].action, "save"); assert.equal(sent[1].name, "Before the update");
+  el.compare = { ...COMPARE, baselines: [{ id: "previous", at: "2026-10-09T23:20:00+00:00", objects: 6, findings: 2 }, pin], current: { objects: 6, findings: 1 }, retention_days: 30 };
+  el.pinAsk = pin.id; el.render();
+  assert.ok(shadow.innerHTML.includes("data-pin-del-yes"));
+  el.compareBaseline = pin.id;
+  await el.pinDelete(pin.id);
+  assert.equal(sent.at(-2).action, "delete"); assert.equal(sent.at(-2).baseline, pin.id); assert.equal(el.compareBaseline, "previous");
+});
+
 test("the journal names the end of a follow-up and the safety line counts the watched plans", () => {
   const { el, shadow } = panel("en");
   const plan = (id, followup) => ({ plan_id: id, created_at: "2026-10-10T10:00:00+00:00", status: "verified", executed: true, summary: { total: 1, ok: 1, review: 0, blocked: 0 }, followup, followup_until: followup === "watching" ? "2026-10-11T10:00:00+00:00" : null });

@@ -172,3 +172,32 @@ def test_series_carries_open_findings_classes_and_the_share_for_the_sparklines(h
         "unused": 1,
         "broken_reference": 1,
     }
+
+
+def test_a_pinned_scan_point_is_named_compared_kept_beyond_the_retention_and_deleted(hass) -> None:
+    from custom_components.ha_housekeeper.history import PIN_LIMIT, PinError
+
+    history = ScanHistory(hass)
+    history.retention_days = 2
+    early = _snapshot("2026-10-01T08:00:00+00:00", [("entity", "x.a", "active")])
+    history.record(early)
+    history.pin(early, "  Before the rebuild ")
+    with pytest.raises(PinError):
+        history.pin(early, "again")
+    with pytest.raises(PinError):
+        history.pin({**early, "meta": {"scanned_at": "2026-10-02T08:00:00+00:00", "preliminary": True}}, "")
+    for day in range(2, 8):
+        history.record(_snapshot(f"2026-10-0{day}T08:00:00+00:00", [("entity", "x.a", "active")]))
+
+    pinned = [o for o in history.baselines() if o.get("pinned")]
+    assert [(o["id"], o["name"]) for o in pinned] == [("pin:2026-10-01T08:00:00+00:00", "Before the rebuild")]
+    now = _snapshot("2026-10-08T09:00:00+00:00", [("entity", "x.a", "unavailable")])
+    assert history.compare(now, pinned[0]["id"])["status_changes"]["total"] == 1
+    history.unpin(pinned[0]["id"])
+    with pytest.raises(PinError):
+        history.unpin(pinned[0]["id"])
+    assert history.compare(now, pinned[0]["id"])["available"] is False
+    for day in range(PIN_LIMIT):
+        history.pin(_snapshot(f"2026-11-{day + 1:02d}T08:00:00+00:00", []), str(day))
+    with pytest.raises(PinError):
+        history.pin(_snapshot("2026-12-01T08:00:00+00:00", []), "one too many")

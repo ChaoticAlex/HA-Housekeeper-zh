@@ -12,18 +12,22 @@ class ChangesMixin {
 
   // One row per stored scan (newest first) with its totals; a click picks it as the comparison base.
   historyTimeline(c, baselines) {
-    const rows = baselines.length >= 2 ? [{ id: "", at: this.data?.meta?.scanned_at, ...c.current, now: true }, ...baselines] : [];
+    const rows = baselines.length >= 2 || baselines.some(b => b.pinned) ? [{ id: "", at: this.data?.meta?.scanned_at, ...c.current, now: true }, ...[...baselines].sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0))] : [];
     const max = Math.max(1, ...rows.map(r => r.findings || 0));
     const scans = rows.map((r, i) => {
       const older = rows[i + 1], delta = older ? (r.findings || 0) - (older.findings || 0) : 0;
       const pill = delta ? `<span class="pill ${delta > 0 ? "red" : "ok"}">${delta > 0 ? "+" : ""}${delta}</span>` : "";
       const selected = !r.now && r.id === this.compareBaseline;
-      const label = r.now ? this.t("currentScan") : r.id === "previous" ? this.t("previousScan") : this.t("storedScan");
-      const inner = `<span class="tile ${selected ? "" : "mute"}"><ha-icon icon="${r.now ? "mdi:clock-check-outline" : "mdi:history"}"></ha-icon></span><span class="row-text"><strong>${label} · ${this.esc(this.formatDate(r.at))}</strong><small>${this.t("historyCounts", { objects: this.formatNumber(r.objects || 0), findings: this.formatNumber(r.findings || 0) })}</small><span class="bar" style="margin-top:4px"><i style="width:${Math.round(((r.findings || 0) / max) * 100)}%"></i></span></span>${pill}`;
-      return { at: r.at, html: r.now ? `<div class="row rel">${inner}</div>` : `<button class="row rel ${selected ? "sel" : ""}" data-baseline="${this.esc(r.id)}">${inner}</button>` };
+      const label = r.now ? this.t("currentScan") : r.pinned ? this.pinLabel(r) : r.id === "previous" ? this.t("previousScan") : this.t("storedScan");
+      const when = r.pinned ? this.formatDate(r.at) : label;
+      const title = r.now || !r.pinned ? `${label} · ${this.esc(this.formatDate(r.at))}` : `${this.esc(label)}`;
+      const inner = `<span class="tile ${selected ? "" : "mute"}"><ha-icon icon="${r.now ? "mdi:clock-check-outline" : r.pinned ? "mdi:pin-outline" : "mdi:history"}"></ha-icon></span><span class="row-text"><strong>${title}</strong><small>${r.pinned ? `${this.t("storedPin")} · ${this.esc(when)} · ` : ""}${this.t("historyCounts", { objects: this.formatNumber(r.objects || 0), findings: this.formatNumber(r.findings || 0) })}</small><span class="bar" style="margin-top:4px"><i style="width:${Math.round(((r.findings || 0) / max) * 100)}%"></i></span></span>${r.pinned ? this.pinActions(r) : pill}`;
+      if (r.now) return { at: r.at, html: `<div class="row rel">${inner}</div>` };
+      if (r.pinned) return { at: r.at, html: `<div class="row rel ${selected ? "sel" : ""}" role="button" tabindex="0" data-baseline="${this.esc(r.id)}">${inner}</div>` };
+      return { at: r.at, html: `<button class="row rel ${selected ? "sel" : ""}" data-baseline="${this.esc(r.id)}">${inner}</button>` };
     });
     const pg = this.paginate("history", scans.map(e => e.html));
-    return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("historyTitle")}</h2><p>${this.t("historyHint", { days: c.retention_days ?? 30 })}</p></div></div>${pg.rows.join("")}${pg.footer}</section>`;
+    return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("historyTitle")}</h2><p>${this.t("historyHint", { days: c.retention_days ?? 30 })}</p></div><div class="actions">${this.pinHeadButton()}</div></div>${pg.rows.join("")}${pg.footer}</section>`;
   }
 
   // The report of the changes as Markdown, for the baseline closest to a week back (loaded first when another is set).
@@ -67,7 +71,7 @@ class ChangesMixin {
     if (!c) return `${this.skeleton("loading")}`;
     this.ensureCorrelations();
     const baselines = c.baselines || [];
-    const options = baselines.map(b => `<option value="${this.esc(b.id)}" ${b.id === this.compareBaseline ? "selected" : ""}>${b.id === "previous" ? `${this.t("previousScan")} · ` : ""}${this.esc(this.formatDate(b.at))}</option>`).join("");
+    const options = baselines.map(b => `<option value="${this.esc(b.id)}" ${b.id === this.compareBaseline ? "selected" : ""}>${b.id === "previous" ? `${this.t("previousScan")} · ` : b.pinned ? `${this.esc(this.t("storedPin"))}: ${this.esc(b.name || "")} · ` : ""}${this.esc(this.formatDate(b.at))}</option>`).join("");
     const hint = baselines.length <= 1 ? `<p class="factnote" style="margin:10px 0 0">${this.t("historyBuilding", { days: c.retention_days ?? 30 })}</p>` : "";
     const picker = options ? `<div class="panel u-mb14"><div class="filters" style="grid-template-columns:auto minmax(220px,360px)"><label style="align-self:center;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))">${this.t("compareWith")}</label><select id="baseline">${options}</select></div>${hint}</div>` : "";
     if (!c.available) {

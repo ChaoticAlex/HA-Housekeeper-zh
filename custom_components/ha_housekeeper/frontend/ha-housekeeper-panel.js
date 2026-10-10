@@ -66,7 +66,7 @@ const TEXT = {
     impactScope: "Betrachtet werden das Objekt und {count} zugehörige Entitäten.", impactScopeOne: "Betrachtet wird nur dieses Objekt.",
     impactLimits: "Nicht geprüft: automatisch erzeugte Dashboards, die Zustandshistorie im Recorder und externe Systeme.",
     changes: "Änderungen", changesSubtitle: "Was sich verändert hat: seit einem früheren Scan und was du im Logbuch festgehalten hast.", compareWith: "Vergleichen mit", previousScan: "Letzter Scan davor",
-    historyTitle: "Verlauf der Scans", historyHint: "Je Tag bleibt der letzte Scan {days} Tage erhalten. Ein Klick wählt ihn als Vergleichsbasis.", historyBuilding: "Der Verlauf baut sich auf: Housekeeper speichert den letzten Scan jedes Tages {days} Tage lang (einstellbar unter Einstellungen). Weitere Vergleichspunkte erscheinen mit jedem neuen Tag.", currentScan: "Aktueller Scan", storedScan: "Gespeicherter Scan", historyCounts: "{objects} Objekte · {findings} Befunde", optHistoryDays: "Scan-Verlauf aufbewahren (Tage)",
+    historyTitle: "Verlauf der Scans", historyHint: "Je Tag bleibt der letzte Scan {days} Tage erhalten. Eigene Punkte bleiben, bis du sie löschst. Ein Klick wählt einen Punkt als Vergleichsbasis.", historyBuilding: "Der Verlauf baut sich auf: Housekeeper speichert den letzten Scan jedes Tages {days} Tage lang (einstellbar unter Einstellungen). Weitere Vergleichspunkte erscheinen mit jedem neuen Tag.", currentScan: "Aktueller Scan", storedScan: "Gespeicherter Scan", historyCounts: "{objects} Objekte · {findings} Befunde", optHistoryDays: "Scan-Verlauf aufbewahren (Tage)",
     noChanges: "Keine Änderungen seit diesem Scan.",
     statusChanges: "Statuswechsel", newFindings: "Neue Befunde", resolvedFindings: "Behobene Befunde", newObjects: "Neue Objekte", removedObjects: "Entfernte Objekte",
     worsened: "Verschlechtert", changedLabel: "Geändert", improved: "Verbessert", gone: "Nicht mehr vorhanden", comparedWith: "Vergleich mit dem Scan vom",
@@ -245,7 +245,7 @@ const TEXT = {
     impactScope: "Covers this object and {count} related entities.", impactScopeOne: "Covers only this object.",
     impactLimits: "Not checked: auto-generated dashboards, the state history in the recorder, and external systems.",
     changes: "Changes", changesSubtitle: "What changed: since an earlier scan, and what you noted in the logbook.", compareWith: "Compare with", previousScan: "Previous scan",
-    historyTitle: "Scan history", historyHint: "The last scan of each day is kept for {days} days. Click one to use it as the comparison base.", historyBuilding: "The history is building up: Housekeeper keeps the last scan of each day for {days} days (adjustable in Settings). More comparison points appear with each new day.", currentScan: "Current scan", storedScan: "Stored scan", historyCounts: "{objects} objects · {findings} findings", optHistoryDays: "Keep scan history for (days)",
+    historyTitle: "Scan history", historyHint: "The last scan of each day is kept for {days} days. Your own points stay until you delete them. Click one to use it as the comparison base.", historyBuilding: "The history is building up: Housekeeper keeps the last scan of each day for {days} days (adjustable in Settings). More comparison points appear with each new day.", currentScan: "Current scan", storedScan: "Stored scan", historyCounts: "{objects} objects · {findings} findings", optHistoryDays: "Keep scan history for (days)",
     noChanges: "No changes since this scan.",
     statusChanges: "Status changes", newFindings: "New findings", resolvedFindings: "Resolved findings", newObjects: "New objects", removedObjects: "Removed objects",
     worsened: "Worse", changedLabel: "Changed", improved: "Better", gone: "No longer present", comparedWith: "Compared with the scan from",
@@ -2212,18 +2212,22 @@ class ChangesMixin {
 
   // One row per stored scan (newest first) with its totals; a click picks it as the comparison base.
   historyTimeline(c, baselines) {
-    const rows = baselines.length >= 2 ? [{ id: "", at: this.data?.meta?.scanned_at, ...c.current, now: true }, ...baselines] : [];
+    const rows = baselines.length >= 2 || baselines.some(b => b.pinned) ? [{ id: "", at: this.data?.meta?.scanned_at, ...c.current, now: true }, ...[...baselines].sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0))] : [];
     const max = Math.max(1, ...rows.map(r => r.findings || 0));
     const scans = rows.map((r, i) => {
       const older = rows[i + 1], delta = older ? (r.findings || 0) - (older.findings || 0) : 0;
       const pill = delta ? `<span class="pill ${delta > 0 ? "red" : "ok"}">${delta > 0 ? "+" : ""}${delta}</span>` : "";
       const selected = !r.now && r.id === this.compareBaseline;
-      const label = r.now ? this.t("currentScan") : r.id === "previous" ? this.t("previousScan") : this.t("storedScan");
-      const inner = `<span class="tile ${selected ? "" : "mute"}"><ha-icon icon="${r.now ? "mdi:clock-check-outline" : "mdi:history"}"></ha-icon></span><span class="row-text"><strong>${label} · ${this.esc(this.formatDate(r.at))}</strong><small>${this.t("historyCounts", { objects: this.formatNumber(r.objects || 0), findings: this.formatNumber(r.findings || 0) })}</small><span class="bar" style="margin-top:4px"><i style="width:${Math.round(((r.findings || 0) / max) * 100)}%"></i></span></span>${pill}`;
-      return { at: r.at, html: r.now ? `<div class="row rel">${inner}</div>` : `<button class="row rel ${selected ? "sel" : ""}" data-baseline="${this.esc(r.id)}">${inner}</button>` };
+      const label = r.now ? this.t("currentScan") : r.pinned ? this.pinLabel(r) : r.id === "previous" ? this.t("previousScan") : this.t("storedScan");
+      const when = r.pinned ? this.formatDate(r.at) : label;
+      const title = r.now || !r.pinned ? `${label} · ${this.esc(this.formatDate(r.at))}` : `${this.esc(label)}`;
+      const inner = `<span class="tile ${selected ? "" : "mute"}"><ha-icon icon="${r.now ? "mdi:clock-check-outline" : r.pinned ? "mdi:pin-outline" : "mdi:history"}"></ha-icon></span><span class="row-text"><strong>${title}</strong><small>${r.pinned ? `${this.t("storedPin")} · ${this.esc(when)} · ` : ""}${this.t("historyCounts", { objects: this.formatNumber(r.objects || 0), findings: this.formatNumber(r.findings || 0) })}</small><span class="bar" style="margin-top:4px"><i style="width:${Math.round(((r.findings || 0) / max) * 100)}%"></i></span></span>${r.pinned ? this.pinActions(r) : pill}`;
+      if (r.now) return { at: r.at, html: `<div class="row rel">${inner}</div>` };
+      if (r.pinned) return { at: r.at, html: `<div class="row rel ${selected ? "sel" : ""}" role="button" tabindex="0" data-baseline="${this.esc(r.id)}">${inner}</div>` };
+      return { at: r.at, html: `<button class="row rel ${selected ? "sel" : ""}" data-baseline="${this.esc(r.id)}">${inner}</button>` };
     });
     const pg = this.paginate("history", scans.map(e => e.html));
-    return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("historyTitle")}</h2><p>${this.t("historyHint", { days: c.retention_days ?? 30 })}</p></div></div>${pg.rows.join("")}${pg.footer}</section>`;
+    return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("historyTitle")}</h2><p>${this.t("historyHint", { days: c.retention_days ?? 30 })}</p></div><div class="actions">${this.pinHeadButton()}</div></div>${pg.rows.join("")}${pg.footer}</section>`;
   }
 
   // The report of the changes as Markdown, for the baseline closest to a week back (loaded first when another is set).
@@ -2267,7 +2271,7 @@ class ChangesMixin {
     if (!c) return `${this.skeleton("loading")}`;
     this.ensureCorrelations();
     const baselines = c.baselines || [];
-    const options = baselines.map(b => `<option value="${this.esc(b.id)}" ${b.id === this.compareBaseline ? "selected" : ""}>${b.id === "previous" ? `${this.t("previousScan")} · ` : ""}${this.esc(this.formatDate(b.at))}</option>`).join("");
+    const options = baselines.map(b => `<option value="${this.esc(b.id)}" ${b.id === this.compareBaseline ? "selected" : ""}>${b.id === "previous" ? `${this.t("previousScan")} · ` : b.pinned ? `${this.esc(this.t("storedPin"))}: ${this.esc(b.name || "")} · ` : ""}${this.esc(this.formatDate(b.at))}</option>`).join("");
     const hint = baselines.length <= 1 ? `<p class="factnote" style="margin:10px 0 0">${this.t("historyBuilding", { days: c.retention_days ?? 30 })}</p>` : "";
     const picker = options ? `<div class="panel u-mb14"><div class="filters" style="grid-template-columns:auto minmax(220px,360px)"><label style="align-self:center;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))">${this.t("compareWith")}</label><select id="baseline">${options}</select></div>${hint}</div>` : "";
     if (!c.available) {
@@ -8144,6 +8148,88 @@ class EntityRecorderMixin {
   }
 }
 
+// Scan points you set yourself ("before the rebuild"): a scan kept under a name until you delete it, as a base for the comparison.
+// They have nothing to do with the logbook. Mixed into the panel in 99-register.js.
+Object.assign(TEXT.de, {
+  pinSet: "Scan-Punkt setzen", pinDialogTitle: "Scan-Punkt setzen", pinDialogHint: "Housekeeper scannt jetzt und merkt sich diesen Zustand, bis du ihn löschst.",
+  pinName: "Name (optional)", pinNamePh: "z. B. Vor dem Umbau", pinChipRebuild: "Vor dem Umbau", pinChipUpdate: "Vor dem Update", pinChipOk: "Alles läuft",
+  pinNote: "Es ändert nichts in Home Assistant. Ohne Namen heißt der Punkt wie der Zeitpunkt.", pinGo: "Scannen und merken", pinCancel: "Abbrechen",
+  pinMine: "Eigener Punkt", pinDelete: "Löschen", pinDeleteAsk: "Punkt löschen?", pinDeleteYes: "Ja, löschen", pinDeleteNo: "Abbrechen",
+  pinFailed: "Der Scan-Punkt konnte nicht gespeichert werden: {reason}", storedPin: "Eigener Scan-Punkt",
+});
+Object.assign(TEXT.en, {
+  pinSet: "Set scan point", pinDialogTitle: "Set scan point", pinDialogHint: "Housekeeper scans now and keeps this state until you delete it.",
+  pinName: "Name (optional)", pinNamePh: "e.g. Before the rebuild", pinChipRebuild: "Before the rebuild", pinChipUpdate: "Before the update", pinChipOk: "All is running",
+  pinNote: "It changes nothing in Home Assistant. Without a name the point is called by its time.", pinGo: "Scan and keep", pinCancel: "Cancel",
+  pinMine: "Own point", pinDelete: "Delete", pinDeleteAsk: "Delete the point?", pinDeleteYes: "Yes, delete", pinDeleteNo: "Cancel",
+  pinFailed: "The scan point could not be saved: {reason}", storedPin: "Own scan point",
+});
+
+class ScanPointsMixin {
+  pinOpen() { this.pinDraft = { name: "" }; this._pinFocus = true; }
+
+  pinDialog() {
+    const d = this.pinDraft;
+    if (!d) return "";
+    const chips = ["Rebuild", "Update", "Ok"].map(k => `<button type="button" class="chip" data-pin-chip="${this.esc(this.t(`pinChip${k}`))}">${this.t(`pinChip${k}`)}</button>`).join("");
+    return `<div class="hkmodal" data-pin-modal><form class="hkdialog" role="dialog" aria-modal="true" aria-labelledby="hk-pin-head" data-pin-form>
+      <div class="dhead"><h2 id="hk-pin-head">${this.t("pinDialogTitle")}</h2><p class="factnote u-m0">${this.t("pinDialogHint")}</p></div>
+      <div class="dbody"><div><label for="hk-pin-name">${this.t("pinName")}</label><input id="hk-pin-name" type="text" maxlength="60" data-pin-name value="${this.esc(d.name)}" placeholder="${this.esc(this.t("pinNamePh"))}" autocomplete="off"><div class="notechips">${chips}</div></div>
+        <small class="factnote u-m0">${this.t("pinNote")}</small></div>
+      <div class="dfoot"><span class="dbtns"><button type="button" class="btn" data-pin-cancel>${this.t("pinCancel")}</button><button type="submit" class="btn primary">${this.t("pinGo")}</button></span></div></form></div>`;
+  }
+
+  pinHeadButton() {
+    return `<button class="btn primary" data-pin-add ${this.busy || this.cleanupRunning() ? "disabled" : ""}><ha-icon icon="mdi:pin-outline"></ha-icon>${this.t("pinSet")}</button>`;
+  }
+
+  // The name of a stored scan point, or its time when it has none.
+  pinLabel(b) { return b.name || this.formatDate(b.at); }
+
+  pinActions(b) {
+    if (this.pinAsk === b.id) return `<span class="askrow"><span>${this.t("pinDeleteAsk")}</span><button class="btn danger" data-pin-del-yes="${this.esc(b.id)}">${this.t("pinDeleteYes")}</button><button class="btn" data-pin-del-no>${this.t("pinDeleteNo")}</button></span>`;
+    return `<span class="pill pin">${this.t("pinMine")}</span><button class="link" data-pin-del="${this.esc(b.id)}">${this.t("pinDelete")}</button>`;
+  }
+
+  async pinSave() {
+    const name = this.pinDraft?.name || "";
+    this.pinDraft = null; this.render();
+    await this.load(true);
+    if (!this.data || this.error) return;
+    try {
+      await this._hass.callWS({ type: "ha_housekeeper/scan_point", action: "save", name });
+    } catch (err) { this.toast(this.t("pinFailed", { reason: err?.message || String(err) })); }
+    this.compare = null; this.render(); this.loadCompare();
+  }
+
+  async pinDelete(id) {
+    this.pinAsk = null;
+    try {
+      await this._hass.callWS({ type: "ha_housekeeper/scan_point", action: "delete", baseline: id });
+      if (this.compareBaseline === id) this.compareBaseline = "previous";
+    } catch (err) { this.failed(err); }
+    this.loadCompare();
+  }
+
+  bindScanPoints(root) {
+    root.querySelector("[data-pin-add]")?.addEventListener("click", () => { this.pinOpen(); this.render(); });
+    root.querySelectorAll("[data-pin-chip]").forEach(el => el.onclick = () => { this.pinDraft.name = el.dataset.pinChip; this._pinFocus = true; this.render(); });
+    root.querySelector("[data-pin-name]")?.addEventListener("input", ev => { this.pinDraft.name = ev.target.value; });
+    root.querySelector("[data-pin-cancel]")?.addEventListener("click", () => { this.pinDraft = null; this.render(); });
+    root.querySelector("[data-pin-form]")?.addEventListener("submit", ev => { ev.preventDefault(); this.pinSave(); });
+    root.querySelectorAll("[data-pin-del]").forEach(el => el.onclick = ev => { ev.stopPropagation(); this.pinAsk = el.dataset.pinDel; this.render(); });
+    root.querySelectorAll("[data-pin-del-yes]").forEach(el => el.onclick = ev => { ev.stopPropagation(); this.pinDelete(el.dataset.pinDelYes); });
+    root.querySelectorAll("[data-pin-del-no]").forEach(el => el.onclick = ev => { ev.stopPropagation(); this.pinAsk = null; this.render(); });
+    root.querySelectorAll("div[data-baseline]").forEach(el => el.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); el.click(); } }));
+    const modal = root.querySelector("[data-pin-modal]");
+    if (modal) {
+      modal.addEventListener("mousedown", ev => { if (ev.target === modal) { this.pinDraft = null; this.render(); } });
+      modal.addEventListener("keydown", ev => { if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); this.pinDraft = null; this.render(); } });
+      if (this._pinFocus) { this._pinFocus = false; modal.querySelector("[data-pin-name]")?.focus(); }
+    }
+  }
+}
+
 // Pick entities in the recorder views and get the exclusion for configuration.yaml; Housekeeper never writes it.
 // Mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
@@ -9814,7 +9900,7 @@ class HAHousekeeperPanel extends HTMLElement {
     // A view that throws shows a message under the top bar instead of freezing the panel on the last page.
     let page;
     try { page = this.selected && this.data ? this.detail() : `${this.heading()}${this.content()}`; } catch (err) { page = this.renderFailed(err); }
-    const shell = `<div class="shell${this.dense ? " dense" : ""}"><div class="stickyhead">${this.topbar()}${this.safetyBar()}</div><main class="main">${page}</main>${this.noteDialog()}<div class="sr-only" role="status" aria-live="polite">${this.esc(this.liveStatus())}</div></div>`;
+    const shell = `<div class="shell${this.dense ? " dense" : ""}"><div class="stickyhead">${this.topbar()}${this.safetyBar()}</div><main class="main">${page}</main>${this.noteDialog()}${this.pinDialog()}<div class="sr-only" role="status" aria-live="polite">${this.esc(this.liveStatus())}</div></div>`;
     // The style sheet is only parsed again when the theme changed; otherwise just the page is replaced.
     const root = this.shadowRoot, css = this.themeCss(), current = root.querySelector?.(".shell");
     let swapped = false;
@@ -10123,6 +10209,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.bindExclude(root);
     this.bindEntityRecorder(root);
     this.bindEntityTrim(root);
+    this.bindScanPoints(root);
     this.bindGoals(root);
     this.bindExchange(root);
     this.bindDiagnostics(root);
@@ -10339,7 +10426,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, RenameMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, SparklineMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, RenameMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, ScanPointsMixin, SparklineMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }

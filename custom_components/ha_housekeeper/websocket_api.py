@@ -56,6 +56,7 @@ from .cleanup import (
 from .cleanup_exec import CleanupError, entity_restorable
 from .const import DOMAIN, OPTION_LIMITS
 from .device_pairs import pair_devices
+from .history import PinError
 from .ignored import KINDS as IGNORE_KINDS
 from .ignored import REASON_LIMIT as IGNORE_REASON_LIMIT
 from .inventory import InventoryScanner
@@ -173,6 +174,35 @@ async def websocket_history_series(
 ) -> None:
     """Totals per day from the scan history, for the sparklines. Reads only."""
     connection.send_result(msg["id"], scanner.history.series())
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): f"{DOMAIN}/scan_point",
+        vol.Required("action"): vol.In(["save", "delete"]),
+        vol.Optional("name", default=""): str,
+        vol.Optional("baseline"): str,
+    }
+)
+@websocket_api.async_response
+@with_scanner
+async def websocket_scan_point(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """Keep the latest scan as a named comparison point, or delete one. Only Housekeeper's history."""
+    try:
+        if msg["action"] == "save":
+            scanner.history.pin(await scanner.async_get_snapshot(), msg["name"])
+        else:
+            scanner.history.unpin(msg.get("baseline", ""))
+    except PinError as err:
+        connection.send_error(msg["id"], "invalid_format", f"Not accepted: {err}")
+        return
+    connection.send_result(msg["id"], _versioned({"baselines": scanner.history.baselines()}))
 
 
 @websocket_api.require_admin
@@ -1052,6 +1082,7 @@ def async_register(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_status)
     websocket_api.async_register_command(hass, websocket_detail)
     websocket_api.async_register_command(hass, websocket_compare)
+    websocket_api.async_register_command(hass, websocket_scan_point)
     websocket_api.async_register_command(hass, websocket_history_series)
     websocket_api.async_register_command(hass, websocket_ignore)
     websocket_api.async_register_command(hass, websocket_set_options)
