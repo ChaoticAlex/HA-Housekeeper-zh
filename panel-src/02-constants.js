@@ -72,6 +72,9 @@ const SEARCH_DEBOUNCE_MS = 150;
 const ACTION_TYPES = ["entity", "device", "config_entry", "automation", "script", "scene"];
 // Objects whose overview sums up what is known in groups ("Known about …"); scenes keep the facts card.
 const KNOWN_TYPES = ["entity", "device", "config_entry", "automation", "script"];
+// The ring of the status: points off for each urgent topic, and the most that can come off.
+const HEALTH_PENALTY_URGENT = 10;
+const HEALTH_PENALTY_MAX = 30;
 const LABEL_TYPES = ["entity", "automation", "script", "scene"];
 
 const NAV = [

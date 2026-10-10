@@ -435,6 +435,9 @@ const SEARCH_DEBOUNCE_MS = 150;
 const ACTION_TYPES = ["entity", "device", "config_entry", "automation", "script", "scene"];
 // Objects whose overview sums up what is known in groups ("Known about …"); scenes keep the facts card.
 const KNOWN_TYPES = ["entity", "device", "config_entry", "automation", "script"];
+// The ring of the status: points off for each urgent topic, and the most that can come off.
+const HEALTH_PENALTY_URGENT = 10;
+const HEALTH_PENALTY_MAX = 30;
 const LABEL_TYPES = ["entity", "automation", "script", "scene"];
 
 const NAV = [
@@ -1339,6 +1342,7 @@ class StylesMixin {
       .pill.xpcount{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;font-size:calc(13px*var(--hk-fs,1));font-weight:700}
       .xpbody .filters{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:0;margin:0 0 10px;border-bottom:0}@media(max-width:700px){.xpbody .filters{grid-template-columns:minmax(0,1fr)}}.xpbody input[type=search]{margin:0 0 10px}.xpbody .factnote{margin:0 0 8px}.xpbody .chips{padding:0;border:0;margin:10px 0}.xplist{border:1px solid var(--hk-border);border-radius:10px;overflow:hidden}.xplist .row:last-child{border-bottom:0}.xplist .tablefoot{border-radius:0}
       .xpclose{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+      button.ring{border:0;padding:0;cursor:pointer;color:inherit;font:inherit}button.ring:focus-visible{outline:2px solid var(--hk-blue);outline-offset:3px}.healthwhy{display:grid;gap:6px;max-width:560px;margin:-4px 0 14px;padding:14px 16px;border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-soft)}.healthwhy .row{display:flex;justify-content:space-between;gap:16px;padding:0;border:0;background:transparent}.healthwhy .row.minus{color:var(--hk-muted)}.healthwhy .row.total{border-top:1px solid var(--hk-border);padding-top:6px;font-weight:700}.healthwhy small{color:var(--hk-muted)}.healthwhy .btn{justify-self:start}
       .btn.small{padding:5px 11px;font-size:calc(13px*var(--hk-fs,1))}.notehint{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 16px}.notehint small{display:block;color:var(--hk-muted)}.row.seeall{justify-content:flex-start;color:var(--hk-blue-text);font-weight:600}.logfilters{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.logfilters .chip{cursor:pointer}.logfilters .chip.on{border-color:var(--hk-blue);color:var(--hk-blue-text)}.logsuggest{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:12px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 9%,transparent)}
       ${this.themeCss()}
     </style>`;
@@ -1791,19 +1795,47 @@ class OverviewMixin {
     return `<div class="pad"><small>${this.t("goalsLine", { met: r.met, total: r.met + r.missed })} · <button class="link" data-goals-settings>${this.t("goalsAdjust")}</button></small></div>`;
   }
 
+  // "1 topic urgent, 4 more open": what the headline counts are topics (rows of the list), not objects.
+  statusHeadline(health) {
+    const urgent = health.red === 1 ? this.t("statusUrgentOne") : this.t("statusUrgent", { n: this.formatNumber(health.red) });
+    if (health.red && health.later) return `${urgent}, ${this.t("statusMoreOpen", { n: this.formatNumber(health.later) })}`;
+    if (health.red) return urgent;
+    return health.later === 1 ? this.t("statusOpenOne") : this.t("statusOpen", { n: this.formatNumber(health.later) });
+  }
+
+  statusSubline(health) {
+    const topics = health.penalty ? this.t("statusTopicsCost", { n: health.penalty }) : this.t("statusTopicsFree");
+    return `${this.t("statusObjects", { share: health.share, affected: this.formatNumber(health.affected), base: this.formatNumber(health.base) })} · ${topics} · <button type="button" class="link" data-health-why>${this.t("healthWhy")}</button>`;
+  }
+
+  // The calculation behind the ring: the share without a finding, minus the urgent topics.
+  healthWhyCard(health) {
+    const row = (label, value, cls = "") => `<div class="row ${cls}"><span>${label}</span><span>${value}</span></div>`;
+    const lines = [row(this.t("whyShare"), `${health.share} %`)];
+    if (health.red) lines.push(row(this.t(health.red === 1 ? "whyUrgentOne" : "whyUrgent", { n: this.formatNumber(health.red), points: HEALTH_PENALTY_URGENT }), `− ${health.penalty}`, "minus"));
+    lines.push(row(this.t("whyTotal"), `${health.percent} %`, "total"));
+    return `<div class="healthwhy" role="region" aria-label="${this.esc(this.t("healthWhy"))}">${lines.join("")}<small>${this.t("whyNote", { max: HEALTH_PENALTY_MAX })}</small><button type="button" class="btn" data-todo-jump>${this.t("whyToList")}</button></div>`;
+  }
+
+  // A number with its noun, so that the rows count what they say: "8 integrations".
+  todoCount(it) {
+    const unit = ({ integrations: "integrations", causes: "causes", followup: "followup", reminders: "reminders", criteria: "criteria", critical: "critical", backup: "backup", quarantine: "quarantine" })[it.key];
+    return unit ? `${this.formatNumber(it.count)} ${this.t(`unit_${unit}_${it.count === 1 ? "1" : "n"}`)}` : this.formatNumber(it.count);
+  }
+
   todoCard() {
     const items = this.todoItems();
     const row = it => {
       const inner = `<span class="tile ${it.tone}"><ha-icon icon="${it.icon}"></ha-icon></span><span class="row-text"><strong>${this.esc(it.text || this.t(it.label))}</strong>${it.hint || it.hintText ? `<small>${this.esc(it.hintText || this.t(it.hint))}</small>` : ""}</span>`;
       if (it.scan) return `<div class="row todo" data-todo="${it.key}">${inner}<button class="btn" data-action="scan">${this.t("scan")}</button></div>`;
       const target = `data-jump="${it.view}"${it.filter !== undefined ? ` data-filter="${it.filter}"` : ""}${it.type ? ` data-type="${it.type}"` : ""}${it.status ? ` data-status="${it.status}"` : ""}`;
-      return `<button class="row todo" data-todo="${it.key}" ${target}>${inner}${it.count !== undefined ? `<span class="pill ${it.tone}">${this.formatNumber(it.count)}</span>` : ""}</button>`;
+      return `<button class="row todo" data-todo="${it.key}" ${target}>${inner}${it.count !== undefined ? `<span class="pill ${it.tone}">${this.todoCount(it)}</span>` : ""}</button>`;
     };
     // Red items first and open; the rest is a fold of its own once both kinds exist.
     const urgent = items.filter(i => i.tone === "red"), later = items.filter(i => i.tone !== "red");
     const grouped = urgent.length && later.length;
     const body = items.length ? (grouped
-      ? `<h3 class="foldhd">${this.t("actNow")}</h3>${urgent.map(row).join("")}${this.fold("todo_later", { tone: "warn", title: this.t("actSoon"), sub: this.t("actSoonSub"), pill: this.formatNumber(later.length) }, later.map(row).join(""), false)}`
+      ? `<h3 class="foldhd">${this.t("actNow")}</h3>${urgent.map(row).join("")}${this.fold("todo_later", { tone: "warn", title: this.t("actSoon"), sub: this.t("actSoonSub"), pill: this.t(later.length === 1 ? "topicsOne" : "topicsN", { n: this.formatNumber(later.length) }) }, later.map(row).join(""), false)}`
       : items.map(row).join(""))
       : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.esc(this.t("actNone", { date: this.formatDate(this.data.meta.scanned_at) }))}</div>`;
     return `<section class="panel u-mb14" aria-labelledby="hk-todo" id="hk-todo-card" tabindex="-1"><div class="panelhead"><div><h2 id="hk-todo">${this.t("actTitle")}</h2><p>${this.t("actSub")}</p></div></div>${body}${this.goalsLine()}</section>`;
@@ -1871,10 +1903,11 @@ class OverviewMixin {
     this.ensureSeries();
     this.ensureBackup();
     const kpi = ([label, value, tone, view, status, key, rising]) => `<button class="kpi ${tone}" data-jump="${view}" data-status="${status || ""}"><small>${this.t(label)}</small><strong>${this.formatNumber(value)}</strong>${this.series ? `<span class="spark-row">${this.sparkline(key, rising)}</span>` : ""}</button>`;
-    const headline = health.tasks ? `<button type="button" class="headlink" data-todo-jump title="${this.esc(this.t("statusTasksJump"))}">${this.t("statusTasks", { count: this.formatNumber(health.tasks) })}</button>` : this.t("statusAllGood");
-    return `<section class="statushead" title="${this.esc(this.t("healthTip", { affected: health.affected, base: health.base }))}"><span class="ring ${health.tone}" style="--p:${health.percent}"><b>${health.percent}<small>%</small></b></span>
-      <div class="statustext"><h2>${headline}</h2><p>${this.t("health")} · ${this.t(`healthWord_${health.tone}`)} · ${this.t("healthAffected", { affected: this.formatNumber(health.affected), base: this.formatNumber(health.base) })}</p></div>
-      <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>
+    const headline = health.tasks ? `<button type="button" class="headlink" data-todo-jump title="${this.esc(this.t("statusTasksJump"))}">${this.esc(this.statusHeadline(health))}</button>` : this.t("statusAllGood");
+    const why = this.healthWhy ? this.healthWhyCard(health) : "";
+    return `<section class="statushead" title="${this.esc(this.t("healthTip", { affected: health.affected, base: health.base }))}"><button type="button" class="ring ${health.tone}" style="--p:${health.percent}" data-health-why aria-expanded="${Boolean(this.healthWhy)}" aria-label="${this.esc(this.t("healthWhy"))}"><b>${health.percent}<small>%</small></b></button>
+      <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p></div>
+      <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
       ${this.sinceVisitLine()}${this.actionTiles()}${this.todoCard()}<div class="grid2"><div class="stack">${this.inventoryStatusCard()}<div class="panel"><div class="panelhead"><div><h2>${this.t("needsAttention")}</h2><p>${this.t("sortedBySure")}</p></div><button class="link" data-jump="findingsNav">${this.t("allFindings")} (${findings.length}) <ha-icon icon="mdi:chevron-right"></ha-icon></button></div>
       ${findings.length ? findings.filter(f => !f.cause_id).slice(0, 8).map(f => this.findingRow(f)).join("") : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("noFindings")}</div>`}</div>${this.integrationProblems()}</div>
       <div class="stack">${this.databaseCard()}${this.trendCard()}${this.cleanupCard()}
@@ -1990,11 +2023,12 @@ class FindingsMixin {
     this.ensureBackup?.(); this.ensureTrend?.();
     const open = this.todoItems().filter(i => i.key !== "db"), red = open.filter(i => i.tone === "red").length, tasks = open.length;
     const byShare = share >= 95 ? "ok" : share >= 80 ? "warn" : "red";
-    // The number takes the open tasks off the share: 4 points for each, 10 for an urgent one.
-    const percent = Math.max(0, share - open.reduce((sum, item) => sum + (item.tone === "red" ? 10 : 4), 0));
+    // Only urgent topics take points off the share, 10 each and at most 30; the other topics turn the ring amber and are named in the headline.
+    const penalty = Math.min(HEALTH_PENALTY_MAX, red * HEALTH_PENALTY_URGENT);
+    const percent = Math.max(0, share - penalty);
     const tone = red || byShare === "red" ? "red" : tasks || byShare === "warn" ? "warn" : "ok";
     const label = tone === "ok" ? "healthGood" : tone === "warn" ? "healthCheck" : "healthBad";
-    return { percent, share, tone, label, affected: affected.size, base, tasks, red };
+    return { percent, share, tone, label, affected: affected.size, base, tasks, red, later: tasks - red, penalty };
   }
 
   findingRow(finding) {
@@ -7762,6 +7796,11 @@ Object.assign(TEXT.de, {
   repeatPlan: "Plan wiederholen", repeatHint: "Es wurde nichts geändert. Das erstellt eine neue Vorschau mit denselben Objekten.",
   planResultDone: "Plan", undoYes: "Ja, rückgängig machen", undoAskOne: "Diese Änderung zurücksetzen?", undoAskAll: "Alles rückgängig machen?",
   undoAskAllHint: "Housekeeper stellt zurück, was dieser Plan geändert hat, soweit es unverändert ist.", undoAllHint: "Housekeeper kann zurückstellen, was dieser Plan geändert hat, solange es unverändert ist.", reportTitle: "Prüfbericht",
+  statusUrgentOne: "1 Thema dringend", statusUrgent: "{n} Themen dringend", statusMoreOpen: "{n} weitere offen", statusOpenOne: "1 Thema offen", statusOpen: "{n} Themen offen",
+  statusObjects: "Objekte: {share} % ohne Befund ({affected} von {base} betroffen)", statusTopicsCost: "Themen: Abzug {n} Punkte", statusTopicsFree: "Themen: kein Abzug", healthWhy: "Wie entsteht die Zahl?",
+  whyShare: "Objekte ohne Befund", whyUrgentOne: "1 dringendes Thema ({points} Punkte)", whyUrgent: "{n} dringende Themen ({points} Punkte je Thema)", whyTotal: "Zustand", whyNote: "Zählt Entitäten, Automationen, Skripte und Szenen. Nur dringende Themen ziehen Punkte ab, höchstens {max}. Die anderen Themen färben den Ring gelb. Ausgeblendete Befunde und die Datenbankprüfung zählen nicht. „Offene Befunde“ rechts zählt alle Befunde.", whyToList: "Zur Themenliste",
+  topicsOne: "1 Thema", topicsN: "{n} Themen",
+  unit_integrations_1: "Integration", unit_integrations_n: "Integrationen", unit_causes_1: "Ursache", unit_causes_n: "Ursachen", unit_followup_1: "Plan", unit_followup_n: "Pläne", unit_reminders_1: "Erinnerung", unit_reminders_n: "Erinnerungen", unit_criteria_1: "Ziel", unit_criteria_n: "Ziele", unit_critical_1: "Befund", unit_critical_n: "Befunde", unit_backup_1: "Problem", unit_backup_n: "Probleme", unit_quarantine_1: "Objekt", unit_quarantine_n: "Objekte",
   statusTasks: "{count} Aufgaben warten auf dich", statusTasksJump: "Zur Liste der Aufgaben springen", statusAllGood: "Alles in Ordnung",
   counterNoneSub: "{count} Sensoren sehen unauffällig aus.", counterNotChecked: "Noch nicht geprüft", counterNotCheckedSub: "Housekeeper sucht falsche Werte in Zählern und Messwerten. Starte die Prüfung mit „Sensoren prüfen“.",
   stepChoose: "Auswahl", stepSetup: "Einstellen", stepPreview: "Vorschau",
@@ -7775,7 +7814,7 @@ Object.assign(TEXT.de, {
   err_cleanup_busy: "Ein Plan läuft gerade. Housekeeper lädt die Ansicht neu, sobald er fertig ist.", tilesTitle: "Was möchtest du tun?", tilesCleanupHint: "Verwaiste Entitäten und Geräte deaktivieren oder entfernen.", tilesRepairHint: "Sensorfehler, Zähler, Verweise und Geräte in Ordnung bringen.", tilesMaintenanceHint: "Backups, Update-Preflight, Blueprints und Wartungsziele.", tilesFindingsHint: "Alle Auffälligkeiten durchgehen und entscheiden.",
   tilesReady: "{count} bereit", tilesMissed: "{count} Ziele verfehlt", tilesOpen: "{count} offen",
   goalMissedTitle: "{goal}: Ziel verfehlt", goalsLine: "Wartungsziele: {met} von {total} erfüllt", hintsTitle: "Hinweise",
-  healthScore: "{percent} % der Objekte ohne Befund", healthTasks: "{count} Aufgaben offen", healthNoTasks: "keine offenen Aufgaben", healthTip: "{affected} von {base} bewerteten Objekten sind betroffen; gezählt werden Objekte, nicht einzelne Befunde. Der Status ist so gut wie der schlechtere von zwei Werten: der Anteil der Objekte ohne Befund und die offenen Aufgaben (kaputte Integrationen, verfehlte Wartungsziele, Backup-Probleme). Datenbankprobleme stehen in der Liste, zählen aber nicht mit, weil die Prüfung den Recorder liest und erst in Wartung läuft. Ausgeblendete Befunde zählen nicht. Die Zahl im Ring ist der abgerundete Anteil ohne Befund, minus 4 Punkte je offener Aufgabe und 10 je dringender.",
+  healthScore: "{percent} % der Objekte ohne Befund", healthTasks: "{count} Aufgaben offen", healthNoTasks: "keine offenen Aufgaben", healthTip: "{affected} von {base} bewerteten Objekten sind betroffen; gezählt werden Objekte, nicht einzelne Befunde. Die Zahl im Ring ist der abgerundete Anteil ohne Befund, minus 10 Punkte je dringendes Thema (höchstens 30): kaputte Integrationen, neue kritische Befunde, Backup-Probleme. Die übrigen Themen färben den Ring nur gelb. Ausgeblendete Befunde und die Datenbankprüfung zählen nicht. Mehr per Klick auf den Ring.",
   repair: "Reparieren", repairSubtitle: "Bestehende Daten und Verweise korrigieren oder auf etwas Neues umstellen. Housekeeper zeigt erst eine Vorschau; geschrieben wird erst nach deiner Bestätigung.", repairDryRun: "Nichts wird geändert, bis du die Vorschau bestätigst.",
   journalSubtitle: "Alle Pläne aus Aufräumen und Reparieren: was geändert wurde, was geprüft wurde und was sich rückgängig machen lässt.",
  relTileIntHint: "Verfügbarkeit {avail} in {window}", relTilePill: "{n} auffällig", relTileUnstableHint: "Entitäten, die oft zwischen Zuständen wechseln", recTileLoadRows: "{n} Einträge pro Tag ({window})", recTileLoadHint: "Welche Entitäten den Recorder füllen", recTileCostsTop: "Größter Posten: {name} ({share} %)", recTileCostsHint: "Wer wie viel Platz belegt", recTileDbHint: "Größe, Wachstum und Aufbewahrung", polTileRulesHint: "{on} eingeschaltet", polTileViolationsHint: "Verstöße gegen eingeschaltete Regeln", polTileHidden: "{n} ausgeblendet", expoTileFindingsHint: "Was du prüfen oder wissen solltest", expoTileSourceHint: "{n} Entitäten freigegeben", runsTileRunsHint: "Gezählte Läufe von Automationen und Skripten", runsTileQualityHint: "Sieben Blickwinkel je Automation",
@@ -7799,6 +7838,11 @@ Object.assign(TEXT.en, {
   repeatPlan: "Repeat plan", repeatHint: "Nothing was changed. This creates a new preview with the same objects.",
   planResultDone: "Plan", undoYes: "Yes, undo", undoAskOne: "Undo this change?", undoAskAll: "Undo everything?",
   undoAskAllHint: "Housekeeper puts back what this plan changed, as far as it is still unchanged.", undoAllHint: "Housekeeper can put back what this plan changed, as long as it is unchanged.", reportTitle: "Audit report",
+  statusUrgentOne: "1 topic urgent", statusUrgent: "{n} topics urgent", statusMoreOpen: "{n} more open", statusOpenOne: "1 topic open", statusOpen: "{n} topics open",
+  statusObjects: "Objects: {share}% without a finding ({affected} of {base} affected)", statusTopicsCost: "Topics: {n} points off", statusTopicsFree: "Topics: nothing off", healthWhy: "How is this number made?",
+  whyShare: "Objects without a finding", whyUrgentOne: "1 urgent topic ({points} points)", whyUrgent: "{n} urgent topics ({points} points each)", whyTotal: "Status", whyNote: "Counts entities, automations, scripts and scenes. Only urgent topics take points off, at most {max}. The other topics turn the ring amber. Hidden findings and the database check do not count. “Open findings” on the right counts all findings.", whyToList: "To the list of topics",
+  topicsOne: "1 topic", topicsN: "{n} topics",
+  unit_integrations_1: "integration", unit_integrations_n: "integrations", unit_causes_1: "cause", unit_causes_n: "causes", unit_followup_1: "plan", unit_followup_n: "plans", unit_reminders_1: "reminder", unit_reminders_n: "reminders", unit_criteria_1: "goal", unit_criteria_n: "goals", unit_critical_1: "finding", unit_critical_n: "findings", unit_backup_1: "problem", unit_backup_n: "problems", unit_quarantine_1: "object", unit_quarantine_n: "objects",
   statusTasks: "{count} tasks are waiting for you", statusTasksJump: "Jump to the list of tasks", statusAllGood: "All good",
   counterNoneSub: "{count} sensors look fine.", counterNotChecked: "Not checked yet", counterNotCheckedSub: "Housekeeper looks for wrong values in counters and measurements. Start the check with “Check sensors”.",
   stepChoose: "Choose", stepSetup: "Set up", stepPreview: "Preview",
@@ -7812,7 +7856,7 @@ Object.assign(TEXT.en, {
   err_cleanup_busy: "A plan is running. Housekeeper reloads the view as soon as it has finished.", tilesTitle: "What would you like to do?", tilesCleanupHint: "Disable or remove orphaned entities and devices.", tilesRepairHint: "Fix sensor errors, meters, references and devices.", tilesMaintenanceHint: "Backups, update preflight, blueprints and maintenance goals.", tilesFindingsHint: "Go through every finding and decide.",
   tilesReady: "{count} ready", tilesMissed: "{count} goals missed", tilesOpen: "{count} open",
   goalMissedTitle: "{goal}: goal missed", goalsLine: "Maintenance goals: {met} of {total} met", hintsTitle: "Hints",
-  healthScore: "{percent}% of objects without a finding", healthTasks: "{count} tasks open", healthNoTasks: "no open tasks", healthTip: "{affected} of {base} rated objects are affected; objects are counted, not single findings. The status is the worse of two readings: the share of objects without a finding, and the open tasks (broken integrations, missed maintenance goals, backup problems). Database problems are listed but do not count, because that check reads the recorder and only runs in Maintenance. Hidden findings do not count. The number in the ring is the share without a finding, rounded down, minus 4 points for each open task and 10 for an urgent one.",
+  healthScore: "{percent}% of objects without a finding", healthTasks: "{count} tasks open", healthNoTasks: "no open tasks", healthTip: "{affected} of {base} rated objects are affected; objects are counted, not single findings. The number in the ring is the share without a finding, rounded down, minus 10 points for each urgent topic (at most 30): broken integrations, new critical findings, backup problems. The other topics only turn the ring amber. Hidden findings and the database check do not count. More with a click on the ring.",
   repair: "Repair", repairSubtitle: "Correct existing data and references, or switch them over to something new. Housekeeper shows a preview first; nothing is written until you confirm.", repairDryRun: "Nothing is changed until you confirm the preview.",
   journalSubtitle: "Every plan from Tidy up and Repair: what changed, what was checked and what can be undone.",
  relTileIntHint: "Availability {avail} over {window}", relTilePill: "{n} need a look", relTileUnstableHint: "Entities that often change between states", recTileLoadRows: "{n} rows a day ({window})", recTileLoadHint: "Which entities fill the recorder", recTileCostsTop: "Biggest item: {name} ({share} %)", recTileCostsHint: "Who takes how much space", recTileDbHint: "Size, growth and retention", polTileRulesHint: "{on} switched on", polTileViolationsHint: "Violations of the rules that are on", polTileHidden: "{n} hidden", expoTileFindingsHint: "What you should check or know", expoTileSourceHint: "{n} entities exposed", runsTileRunsHint: "Counted runs of automations and scripts", runsTileQualityHint: "Seven views of each automation",
@@ -10581,6 +10625,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.bindMarks(root);
     this.bindStale(root);
     this.bindNotes(root);
+    root.querySelectorAll("[data-health-why]").forEach(el => el.onclick = () => { this.healthWhy = !this.healthWhy; this.render(); });
     root.querySelector("[data-todo-jump]")?.addEventListener("click", () => { const card = root.querySelector("#hk-todo-card"); card?.scrollIntoView?.({ block: "start", behavior: "smooth" }); card?.focus?.({ preventScroll: true }); });
     this.bindExport(root);
     this.bindPlanWizard(root);

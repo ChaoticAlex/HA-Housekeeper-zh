@@ -32,11 +32,12 @@ class FindingsMixin {
     this.ensureBackup?.(); this.ensureTrend?.();
     const open = this.todoItems().filter(i => i.key !== "db"), red = open.filter(i => i.tone === "red").length, tasks = open.length;
     const byShare = share >= 95 ? "ok" : share >= 80 ? "warn" : "red";
-    // The number takes the open tasks off the share: 4 points for each, 10 for an urgent one.
-    const percent = Math.max(0, share - open.reduce((sum, item) => sum + (item.tone === "red" ? 10 : 4), 0));
+    // Only urgent topics take points off the share, 10 each and at most 30; the other topics turn the ring amber and are named in the headline.
+    const penalty = Math.min(HEALTH_PENALTY_MAX, red * HEALTH_PENALTY_URGENT);
+    const percent = Math.max(0, share - penalty);
     const tone = red || byShare === "red" ? "red" : tasks || byShare === "warn" ? "warn" : "ok";
     const label = tone === "ok" ? "healthGood" : tone === "warn" ? "healthCheck" : "healthBad";
-    return { percent, share, tone, label, affected: affected.size, base, tasks, red };
+    return { percent, share, tone, label, affected: affected.size, base, tasks, red, later: tasks - red, penalty };
   }
 
   findingRow(finding) {

@@ -2941,8 +2941,8 @@ test("the health card names the score and the count; the safety line shows backu
   ];
   el.render();
   const html = shadow.innerHTML;
-  assert.ok(html.includes("class=\"statushead\"") && /tasks are waiting for you|All good/.test(html));
-  assert.ok(html.includes("of 3 rated objects affected"));
+  assert.ok(html.includes("class=\"statushead\"") && /topics? (urgent|open)|All good/.test(html));
+  assert.ok(html.includes("of 3 affected"));
   assert.ok(html.includes("Last backup: 5 h ago") && html.includes("Undo available") && html.includes("1 plan is being watched") && html.includes("1 regression after a change"));
   el.journal = [{ plan_id: "c", status: "verified", finished_at: "2026-10-08T10:00:00+00:00", undoable: false }];
   assert.ok(el.safetyBar().includes("backup restore only"));
@@ -3190,7 +3190,7 @@ test("the overview starts with task tiles; a missed goal is a to-do row, not a c
   const html = el.overview();
   for (const view of ["cleanup", "repair", "maintenance", "findingsNav"]) assert.ok(new RegExp(`class="taskcard t-\\w+" data-jump="${view}"`).test(html), view);
   assert.ok(html.includes("Broken references: goal missed") && html.includes("Maintenance goals: 3 of 3 met".replace("3 of 3", "2 of 3")) && html.includes("data-goals-settings"));
-  assert.ok(!html.includes('aria-labelledby="hk-goals"') && html.includes("Housekeeping status"));
+  assert.ok(!html.includes('aria-labelledby="hk-goals"') && html.includes("without a finding"));
   assert.ok(el.health().tasks >= 1 && el.health().tone !== "ok"); // a missed goal is an open task: the status is not "all good"
   el.data = { ...DATA, objects: [], findings: [], regressions: [], criteria_alerts: [] };
   el.goals = { met: 3, missed: 0, goals: [] };
@@ -3534,6 +3534,31 @@ test("the mark is a row of the Actions tab and a line of what is known, no longe
   el.markForm = { key, kind: "seasonal", reason: "", days: 0, target: "", error: "" };
   assert.ok(el.detailPanel("actions", item, key).includes("data-mark-form"), "the form opens below the row");
   assert.ok(el.markRows({ object_type: "automation", object_id: "automation.x" }).length === 0);
+});
+
+test("the status takes points off only for urgent topics, names its topics and explains the number on a click", () => {
+  const { el, shadow } = panel("en");
+  el.data = { ...DATA };
+  const items = [{ tone: "red", key: "integrations", count: 8 }, { tone: "warn", key: "quarantine", count: 2 }, { tone: "warn", key: "reminders", count: 1 }];
+  el.todoItems = () => items;
+  let h = el.health();
+  assert.equal(h.red, 1); assert.equal(h.later, 2); assert.equal(h.penalty, 10); assert.equal(h.percent, h.share - 10, "the other topics cost nothing");
+  assert.equal(el.statusHeadline(h), "1 topic urgent, 2 more open");
+  items.splice(0, 3, ...Array.from({ length: 5 }, () => ({ tone: "red", key: "x" })));
+  h = el.health();
+  assert.equal(h.penalty, 30, "at most 30 points");
+  assert.equal(el.statusHeadline(h), "5 topics urgent");
+  items.splice(0, 5, { tone: "warn", key: "quarantine" });
+  h = el.health();
+  assert.equal(h.percent, h.share); assert.equal(el.statusHeadline(h), "1 topic open");
+  // the calculation opens from the ring
+  el.todoItems = () => [{ tone: "red", key: "integrations", count: 8 }];
+  el.view = "overview"; el.render();
+  assert.ok(shadow.innerHTML.includes("data-health-why") && !shadow.innerHTML.includes('class="healthwhy"'));
+  el.healthWhy = true; el.render();
+  assert.ok(shadow.innerHTML.includes('class="healthwhy"') && shadow.innerHTML.includes("− 10"));
+  // the rows say what they count
+  assert.equal(el.todoCount({ key: "integrations", count: 8 }), "8 integrations"); assert.equal(el.todoCount({ key: "quarantine", count: 1 }), "1 object");
 });
 
 test("the journal names the end of a follow-up and the safety line counts the watched plans", () => {
