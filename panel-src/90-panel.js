@@ -853,7 +853,6 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-plan-repeat]").forEach(el => el.addEventListener("click", () => this.repeatPlan([this.plan, ...(this.journal || [])].find(x => x?.plan_id === el.dataset.planRepeat))));
     root.querySelectorAll("[data-plan-repeat-full]").forEach(el => el.addEventListener("click", () => this.repeatPlan([this.plan, ...(this.journal || [])].find(x => x?.plan_id === el.dataset.planRepeatFull), true)));
     root.querySelector("[data-plan-create]")?.addEventListener("click", () => this.createPlan());
-    root.querySelector("[data-repl-old]")?.addEventListener("change", e => { this.replOld = e.target.value.trim(); if (this.replNew && this.replNew.split(".")[0] !== this.replOld.split(".")[0]) this.replNew = ""; this.render(); });
     root.querySelectorAll("[data-repl-pick]").forEach(el => el.onclick = () => { this.replNew = el.dataset.replPick; this.render(); });
     root.querySelectorAll("[data-meter-pick]").forEach(el => el.onclick = () => { this.meterNew = el.dataset.meterPick; this.render(); });
     root.querySelectorAll("[data-psel]").forEach(el => el.onchange = () => { this.pickRows("psel", el.dataset.psel, el.checked, this.purgeSel, this._purgePage); this.render(); });
@@ -865,9 +864,6 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-purge-states]")?.addEventListener("change", e => { this.purgeStates = e.target.checked; this.render(); });
     root.querySelector("[data-purge-word]")?.addEventListener("input", e => { this.purgeWord = e.target.value; const b = root.querySelector("[data-purge-run]"); if (b) b.disabled = e.target.value.trim() !== this.t("purgeWord") || this.purgeBusy; });
     root.querySelector("[data-purge-run]")?.addEventListener("click", () => this.purgeRun());
-    root.querySelector("[data-repl-new]")?.addEventListener("change", e => { this.replNew = e.target.value.trim(); this.render(); });
-    root.querySelector("[data-meter-old]")?.addEventListener("change", e => { this.meterOld = e.target.value.trim(); if (this.meterNew && this.meterNew.split(".")[0] !== this.meterOld.split(".")[0]) this.meterNew = ""; this.render(); });
-    root.querySelector("[data-meter-new]")?.addEventListener("change", e => { this.meterNew = e.target.value.trim(); this.render(); });
     root.querySelector("[data-meter-mode]")?.addEventListener("change", e => { this.meterMode = e.target.value; this.render(); });
     root.querySelector("[data-costs-load]")?.addEventListener("click", ev => this.loadCosts(ev.currentTarget.hasAttribute("data-refresh")));
     root.querySelectorAll("[data-cost-sort]").forEach(el => el.onclick = () => { this.costSort = el.dataset.costSort; this.render(); });

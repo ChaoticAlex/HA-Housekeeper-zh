@@ -7,6 +7,25 @@ class PickerMixin {
         get: () => this.counterId || "", set: v => { this.counterId = v; }, min: 1, types: ["entity"],
         filter: o => o.has_statistics && o.object_id.startsWith("sensor."), pick: o => { this.counterId = o.object_id; },
       },
+      replOld: {
+        get: () => this.replOld || "", set: v => this.setPair("repl", "Old", v), min: 1, types: ["entity"], limit: 30,
+        filter: o => this.edgeIndex().used.has(`entity:${o.object_id}`), pick: o => this.setPair("repl", "Old", o.object_id),
+      },
+      replNew: {
+        get: () => this.replNew || "", set: v => { this.replNew = v; }, min: 1, types: ["entity"], limit: 30,
+        filter: o => o.status === "active" && o.object_id !== this.replOld && this.sameDomain(o, this.replOld), pick: o => { this.replNew = o.object_id; },
+      },
+      meterOld: {
+        get: () => this.meterOld || "", set: v => this.setPair("meter", "Old", v), min: 1, types: ["entity"], limit: 30,
+        filter: o => o.has_statistics && o.object_id.startsWith("sensor."), pick: o => this.setPair("meter", "Old", o.object_id),
+      },
+      meterNew: {
+        get: () => this.meterNew || "", set: v => { this.meterNew = v; }, min: 1, types: ["entity"], limit: 30,
+        filter: o => {
+          const unit = this.findObject(`entity:${this.meterOld}`)?.unit;
+          return o.status === "active" && o.object_id !== this.meterOld && this.sameDomain(o, this.meterOld) && (!unit || o.unit === unit);
+        }, pick: o => { this.meterNew = o.object_id; },
+      },
       note: {
         get: () => this.noteDraft?.targetText ?? "", set: v => { if (this.noteDraft) { this.noteDraft.targetText = v; this.noteDraft.target = ""; } }, min: 2, types: null, limit: 15,
         pick: o => { this.noteDraft.target = this.objectKey(o); this.noteDraft.targetText = o.name; },
@@ -16,6 +35,19 @@ class PickerMixin {
         pick: o => { this.noteGraphStep(o); this.graphSelected = o; this.graphQuery = ""; this.graphLimit = GRAPH_NODE_STEP; },
       },
     }[name];
+  }
+
+  // The new entity must come from the same domain as the old one.
+  sameDomain(o, oldId) {
+    const domain = String(oldId || "").split(".")[0];
+    return !domain || o.object_id.startsWith(`${domain}.`);
+  }
+
+  // Sets the old entity of a pair; a new one from another domain no longer fits and is cleared.
+  setPair(prefix, side, value) {
+    this[`${prefix}${side}`] = value;
+    const other = this[`${prefix}New`];
+    if (other && value.includes(".") && other.split(".")[0] !== value.split(".")[0]) this[`${prefix}New`] = "";
   }
 
   pickerResults(name) {

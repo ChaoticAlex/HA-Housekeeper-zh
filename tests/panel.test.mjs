@@ -1001,12 +1001,14 @@ test("the replace assistant previews sources and sends the new entity with the p
   el.data = data; el.journal = []; el.view = "repair"; el.repairTask = "replace_references"; el.cleanupKind = "replace_references";
   el.render();
   let html = shadow.innerHTML;
-  assert.ok(html.includes("Replace references") && html.includes('<option value="sensor.old">') && html.includes("data-repl-old"));
+  assert.ok(html.includes("Replace references") && html.includes('data-picker="replOld"'));
   assert.ok(/data-plan-create\s+disabled/.test(html));
-  el.replOld = "sensor.old"; el.replNew = "sensor.new";
+  el.replOld = "sensor.old"; el.replNew = "sensor.";
   el.render();
   html = shadow.innerHTML;
-  assert.ok(html.includes('<option value="sensor.new">') && !html.includes('<option value="light.live">') && !/data-plan-create\s+disabled/.test(html));
+  const offered = el.pickerResults("replNew").map(o => o.object_id);
+  assert.ok(offered.includes("sensor.new") && !offered.includes("light.live") && !/data-plan-create\s+disabled/.test(html));
+  el.replNew = "sensor.new";
   const sent = [];
   const plan = { plan_id: "r1", created_at: "2026-10-07T10:00:00+00:00", status: "dry_run", executed: false, summary: { total: 1, ok: 0, review: 1, blocked: 0 },
     actions: [{ kind: "replace_references", object_type: "entity", object_id: "sensor.old", target: "sensor.new", name: "sensor.old", verdict: "review", executable: true, reasons: ["config_rewrite", "source_manual"], used_by: [],
@@ -1077,12 +1079,13 @@ test("the meter assistant offers the modes and sends the pair with the plan", as
   el.data = data; el.journal = []; el.view = "repair"; el.repairTask = "migrate_meter"; el.cleanupKind = "migrate_meter";
   el.render();
   let html = shadow.innerHTML;
-  assert.ok(html.includes("Meter change") && html.includes("data-meter-old") && html.includes('<option value="sensor.meter_old">'));
+  assert.ok(html.includes("Meter change") && html.includes('data-picker="meterOld"'));
   assert.ok(html.includes("Continue statistics and take over the ID") && /data-plan-create\s+disabled/.test(html));
   el.meterOld = "sensor.meter_old"; el.meterNew = "sensor.meter_new"; el.meterMode = "statistics";
   el.render();
   html = shadow.innerHTML;
-  assert.ok(html.includes('<option value="sensor.meter_new">') && !html.includes('<option value="sensor.other_unit">'), "only new meters with the same unit");
+  const offeredMeters = el.pickerResults("meterNew").map(o => o.object_id);
+  assert.ok(offeredMeters.includes("sensor.meter_new") && !offeredMeters.includes("sensor.other_unit"), "only new meters with the same unit");
   const sent = [];
   el._hass = { language: "en", callWS: async msg => { sent.push(msg); return METER_PLAN; } };
   await el.createPlan();
@@ -3126,7 +3129,7 @@ test("the repair view offers its tasks as tiles; one opens its assistant and the
   assert.ok(shadow.innerHTML.includes("none found"));
   el.repairTask = "migrate_meter"; el.cleanupKind = "migrate_meter"; el.render();
   html = shadow.innerHTML;
-  assert.ok(html.includes("data-repair-back") && html.includes("data-meter-old") && !html.includes("data-repair-task="));
+  assert.ok(html.includes("data-repair-back") && html.includes('data-picker="meterOld"') && !html.includes("data-repair-task="));
 });
 
 test("the overview starts with task tiles; a missed goal is a to-do row, not a card of its own", () => {

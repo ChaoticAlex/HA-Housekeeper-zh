@@ -2888,18 +2888,11 @@ class CleanupMixin {
   }
 
   replaceCard() {
-    const usage = new Set([...this.edgeIndex().used].filter(target => target.startsWith("entity:")).map(target => target.slice(7)));
-    const entities = new Map(this.data.objects.filter(o => o.object_type === "entity").map(o => [o.object_id, o]));
-    const label = id => `${entities.get(id)?.name || id}`;
-    const oldOptions = [...usage].sort().map(id => `<option value="${this.esc(id)}">${this.esc(label(id))}</option>`).join("");
-    const domain = (this.replOld || "").split(".")[0];
-    const newOptions = [...entities.values()].filter(o => o.status === "active" && (!domain || o.object_id.startsWith(`${domain}.`)) && o.object_id !== this.replOld).sort((a, b) => a.object_id.localeCompare(b.object_id)).slice(0, 2000)
-      .map(o => `<option value="${this.esc(o.object_id)}">${this.esc(o.name)}</option>`).join("");
     const ready = this.replOld && this.replNew && !this.cleanupBusy;
     const hints = this.successorHints(this.replOld, this.entityUnit(this.replOld), "data-repl-pick");
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("replaceTitle")}</h2><p>${this.t("replaceHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
-      <div class="setrow"><div><label>${this.t("replaceOld")}</label></div><input type="text" list="hk-repl-old" data-repl-old value="${this.esc(this.replOld || "")}" placeholder="sensor.old_entity" autocomplete="off" style="max-width:360px"><datalist id="hk-repl-old">${oldOptions}</datalist></div>
-      <div class="setrow"><div><label>${this.t("replaceNew")}</label></div><input type="text" list="hk-repl-new" data-repl-new value="${this.esc(this.replNew || "")}" placeholder="sensor.new_entity" autocomplete="off" style="max-width:360px"><datalist id="hk-repl-new">${newOptions}</datalist></div>
+    return `<div class="panel" style="overflow:visible"><div class="panelhead"><div><h2>${this.t("replaceTitle")}</h2><p>${this.t("replaceHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
+      <div class="setrow"><div><label>${this.t("replaceOld")}</label></div>${this.pickerBox("replOld", "sensor.old_entity")}</div>
+      <div class="setrow"><div><label>${this.t("replaceNew")}</label></div>${this.pickerBox("replNew", "sensor.new_entity")}</div>
       ${hints}<div class="setrow planfoot"><small class="u-m0">${this.t("cleanupDryRun")}</small><button class="btn primary" data-plan-create ${ready ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("replacePreview")}</button></div></div>`;
   }
 
@@ -2907,16 +2900,11 @@ class CleanupMixin {
   meterCard() {
     const entities = this.data.objects.filter(o => o.object_type === "entity");
     const byId = new Map(entities.map(o => [o.object_id, o]));
-    const oldOptions = entities.filter(o => o.has_statistics && o.object_id.startsWith("sensor.")).sort((a, b) => a.object_id.localeCompare(b.object_id)).slice(0, 2000)
-      .map(o => `<option value="${this.esc(o.object_id)}">${this.esc(o.name)}</option>`).join("");
-    const domain = (this.meterOld || "").split(".")[0], unit = byId.get(this.meterOld)?.unit;
-    const newOptions = entities.filter(o => o.status === "active" && (!domain || o.object_id.startsWith(`${domain}.`)) && o.object_id !== this.meterOld && (!unit || o.unit === unit)).sort((a, b) => a.object_id.localeCompare(b.object_id)).slice(0, 2000)
-      .map(o => `<option value="${this.esc(o.object_id)}">${this.esc(o.name)}</option>`).join("");
     const modes = [["both", "meterModeBoth"], ["statistics", "meterModeStatistics"], ["id", "meterModeId"]];
     const ready = this.meterOld && this.meterNew && !this.cleanupBusy;
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("meterTitle")}</h2><p>${this.t("meterHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
-      <div class="setrow"><div><label>${this.t("meterOld")}</label></div><input type="text" list="hk-meter-old" data-meter-old value="${this.esc(this.meterOld || "")}" placeholder="sensor.old_meter" autocomplete="off" style="max-width:360px"><datalist id="hk-meter-old">${oldOptions}</datalist></div>
-      <div class="setrow"><div><label>${this.t("meterNew")}</label></div><input type="text" list="hk-meter-new" data-meter-new value="${this.esc(this.meterNew || "")}" placeholder="sensor.new_meter" autocomplete="off" style="max-width:360px"><datalist id="hk-meter-new">${newOptions}</datalist></div>
+    return `<div class="panel" style="overflow:visible"><div class="panelhead"><div><h2>${this.t("meterTitle")}</h2><p>${this.t("meterHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
+      <div class="setrow"><div><label>${this.t("meterOld")}</label></div>${this.pickerBox("meterOld", "sensor.old_meter")}</div>
+      <div class="setrow"><div><label>${this.t("meterNew")}</label></div>${this.pickerBox("meterNew", "sensor.new_meter")}</div>
       <div class="setrow"><div><label>${this.t("meterMode")}</label></div><select data-meter-mode style="max-width:460px">${modes.map(([value, label]) => `<option value="${value}" ${this.meterMode === value ? "selected" : ""}>${this.t(label)}</option>`).join("")}</select></div>
       ${this.successorHints(this.meterOld, byId.get(this.meterOld)?.unit, "data-meter-pick")}<div class="setrow planfoot"><small class="u-m0">${this.t("cleanupDryRun")}</small><button class="btn primary" data-plan-create ${ready ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("replacePreview")}</button></div></div>`;
   }
@@ -7561,6 +7549,25 @@ class PickerMixin {
         get: () => this.counterId || "", set: v => { this.counterId = v; }, min: 1, types: ["entity"],
         filter: o => o.has_statistics && o.object_id.startsWith("sensor."), pick: o => { this.counterId = o.object_id; },
       },
+      replOld: {
+        get: () => this.replOld || "", set: v => this.setPair("repl", "Old", v), min: 1, types: ["entity"], limit: 30,
+        filter: o => this.edgeIndex().used.has(`entity:${o.object_id}`), pick: o => this.setPair("repl", "Old", o.object_id),
+      },
+      replNew: {
+        get: () => this.replNew || "", set: v => { this.replNew = v; }, min: 1, types: ["entity"], limit: 30,
+        filter: o => o.status === "active" && o.object_id !== this.replOld && this.sameDomain(o, this.replOld), pick: o => { this.replNew = o.object_id; },
+      },
+      meterOld: {
+        get: () => this.meterOld || "", set: v => this.setPair("meter", "Old", v), min: 1, types: ["entity"], limit: 30,
+        filter: o => o.has_statistics && o.object_id.startsWith("sensor."), pick: o => this.setPair("meter", "Old", o.object_id),
+      },
+      meterNew: {
+        get: () => this.meterNew || "", set: v => { this.meterNew = v; }, min: 1, types: ["entity"], limit: 30,
+        filter: o => {
+          const unit = this.findObject(`entity:${this.meterOld}`)?.unit;
+          return o.status === "active" && o.object_id !== this.meterOld && this.sameDomain(o, this.meterOld) && (!unit || o.unit === unit);
+        }, pick: o => { this.meterNew = o.object_id; },
+      },
       note: {
         get: () => this.noteDraft?.targetText ?? "", set: v => { if (this.noteDraft) { this.noteDraft.targetText = v; this.noteDraft.target = ""; } }, min: 2, types: null, limit: 15,
         pick: o => { this.noteDraft.target = this.objectKey(o); this.noteDraft.targetText = o.name; },
@@ -7570,6 +7577,19 @@ class PickerMixin {
         pick: o => { this.noteGraphStep(o); this.graphSelected = o; this.graphQuery = ""; this.graphLimit = GRAPH_NODE_STEP; },
       },
     }[name];
+  }
+
+  // The new entity must come from the same domain as the old one.
+  sameDomain(o, oldId) {
+    const domain = String(oldId || "").split(".")[0];
+    return !domain || o.object_id.startsWith(`${domain}.`);
+  }
+
+  // Sets the old entity of a pair; a new one from another domain no longer fits and is cleared.
+  setPair(prefix, side, value) {
+    this[`${prefix}${side}`] = value;
+    const other = this[`${prefix}New`];
+    if (other && value.includes(".") && other.split(".")[0] !== value.split(".")[0]) this[`${prefix}New`] = "";
   }
 
   pickerResults(name) {
@@ -9737,7 +9757,6 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-plan-repeat]").forEach(el => el.addEventListener("click", () => this.repeatPlan([this.plan, ...(this.journal || [])].find(x => x?.plan_id === el.dataset.planRepeat))));
     root.querySelectorAll("[data-plan-repeat-full]").forEach(el => el.addEventListener("click", () => this.repeatPlan([this.plan, ...(this.journal || [])].find(x => x?.plan_id === el.dataset.planRepeatFull), true)));
     root.querySelector("[data-plan-create]")?.addEventListener("click", () => this.createPlan());
-    root.querySelector("[data-repl-old]")?.addEventListener("change", e => { this.replOld = e.target.value.trim(); if (this.replNew && this.replNew.split(".")[0] !== this.replOld.split(".")[0]) this.replNew = ""; this.render(); });
     root.querySelectorAll("[data-repl-pick]").forEach(el => el.onclick = () => { this.replNew = el.dataset.replPick; this.render(); });
     root.querySelectorAll("[data-meter-pick]").forEach(el => el.onclick = () => { this.meterNew = el.dataset.meterPick; this.render(); });
     root.querySelectorAll("[data-psel]").forEach(el => el.onchange = () => { this.pickRows("psel", el.dataset.psel, el.checked, this.purgeSel, this._purgePage); this.render(); });
@@ -9749,9 +9768,6 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-purge-states]")?.addEventListener("change", e => { this.purgeStates = e.target.checked; this.render(); });
     root.querySelector("[data-purge-word]")?.addEventListener("input", e => { this.purgeWord = e.target.value; const b = root.querySelector("[data-purge-run]"); if (b) b.disabled = e.target.value.trim() !== this.t("purgeWord") || this.purgeBusy; });
     root.querySelector("[data-purge-run]")?.addEventListener("click", () => this.purgeRun());
-    root.querySelector("[data-repl-new]")?.addEventListener("change", e => { this.replNew = e.target.value.trim(); this.render(); });
-    root.querySelector("[data-meter-old]")?.addEventListener("change", e => { this.meterOld = e.target.value.trim(); if (this.meterNew && this.meterNew.split(".")[0] !== this.meterOld.split(".")[0]) this.meterNew = ""; this.render(); });
-    root.querySelector("[data-meter-new]")?.addEventListener("change", e => { this.meterNew = e.target.value.trim(); this.render(); });
     root.querySelector("[data-meter-mode]")?.addEventListener("change", e => { this.meterMode = e.target.value; this.render(); });
     root.querySelector("[data-costs-load]")?.addEventListener("click", ev => this.loadCosts(ev.currentTarget.hasAttribute("data-refresh")));
     root.querySelectorAll("[data-cost-sort]").forEach(el => el.onclick = () => { this.costSort = el.dataset.costSort; this.render(); });

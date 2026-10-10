@@ -430,18 +430,11 @@ class CleanupMixin {
   }
 
   replaceCard() {
-    const usage = new Set([...this.edgeIndex().used].filter(target => target.startsWith("entity:")).map(target => target.slice(7)));
-    const entities = new Map(this.data.objects.filter(o => o.object_type === "entity").map(o => [o.object_id, o]));
-    const label = id => `${entities.get(id)?.name || id}`;
-    const oldOptions = [...usage].sort().map(id => `<option value="${this.esc(id)}">${this.esc(label(id))}</option>`).join("");
-    const domain = (this.replOld || "").split(".")[0];
-    const newOptions = [...entities.values()].filter(o => o.status === "active" && (!domain || o.object_id.startsWith(`${domain}.`)) && o.object_id !== this.replOld).sort((a, b) => a.object_id.localeCompare(b.object_id)).slice(0, 2000)
-      .map(o => `<option value="${this.esc(o.object_id)}">${this.esc(o.name)}</option>`).join("");
     const ready = this.replOld && this.replNew && !this.cleanupBusy;
     const hints = this.successorHints(this.replOld, this.entityUnit(this.replOld), "data-repl-pick");
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("replaceTitle")}</h2><p>${this.t("replaceHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
-      <div class="setrow"><div><label>${this.t("replaceOld")}</label></div><input type="text" list="hk-repl-old" data-repl-old value="${this.esc(this.replOld || "")}" placeholder="sensor.old_entity" autocomplete="off" style="max-width:360px"><datalist id="hk-repl-old">${oldOptions}</datalist></div>
-      <div class="setrow"><div><label>${this.t("replaceNew")}</label></div><input type="text" list="hk-repl-new" data-repl-new value="${this.esc(this.replNew || "")}" placeholder="sensor.new_entity" autocomplete="off" style="max-width:360px"><datalist id="hk-repl-new">${newOptions}</datalist></div>
+    return `<div class="panel" style="overflow:visible"><div class="panelhead"><div><h2>${this.t("replaceTitle")}</h2><p>${this.t("replaceHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
+      <div class="setrow"><div><label>${this.t("replaceOld")}</label></div>${this.pickerBox("replOld", "sensor.old_entity")}</div>
+      <div class="setrow"><div><label>${this.t("replaceNew")}</label></div>${this.pickerBox("replNew", "sensor.new_entity")}</div>
       ${hints}<div class="setrow planfoot"><small class="u-m0">${this.t("cleanupDryRun")}</small><button class="btn primary" data-plan-create ${ready ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("replacePreview")}</button></div></div>`;
   }
 
@@ -449,16 +442,11 @@ class CleanupMixin {
   meterCard() {
     const entities = this.data.objects.filter(o => o.object_type === "entity");
     const byId = new Map(entities.map(o => [o.object_id, o]));
-    const oldOptions = entities.filter(o => o.has_statistics && o.object_id.startsWith("sensor.")).sort((a, b) => a.object_id.localeCompare(b.object_id)).slice(0, 2000)
-      .map(o => `<option value="${this.esc(o.object_id)}">${this.esc(o.name)}</option>`).join("");
-    const domain = (this.meterOld || "").split(".")[0], unit = byId.get(this.meterOld)?.unit;
-    const newOptions = entities.filter(o => o.status === "active" && (!domain || o.object_id.startsWith(`${domain}.`)) && o.object_id !== this.meterOld && (!unit || o.unit === unit)).sort((a, b) => a.object_id.localeCompare(b.object_id)).slice(0, 2000)
-      .map(o => `<option value="${this.esc(o.object_id)}">${this.esc(o.name)}</option>`).join("");
     const modes = [["both", "meterModeBoth"], ["statistics", "meterModeStatistics"], ["id", "meterModeId"]];
     const ready = this.meterOld && this.meterNew && !this.cleanupBusy;
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("meterTitle")}</h2><p>${this.t("meterHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
-      <div class="setrow"><div><label>${this.t("meterOld")}</label></div><input type="text" list="hk-meter-old" data-meter-old value="${this.esc(this.meterOld || "")}" placeholder="sensor.old_meter" autocomplete="off" style="max-width:360px"><datalist id="hk-meter-old">${oldOptions}</datalist></div>
-      <div class="setrow"><div><label>${this.t("meterNew")}</label></div><input type="text" list="hk-meter-new" data-meter-new value="${this.esc(this.meterNew || "")}" placeholder="sensor.new_meter" autocomplete="off" style="max-width:360px"><datalist id="hk-meter-new">${newOptions}</datalist></div>
+    return `<div class="panel" style="overflow:visible"><div class="panelhead"><div><h2>${this.t("meterTitle")}</h2><p>${this.t("meterHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
+      <div class="setrow"><div><label>${this.t("meterOld")}</label></div>${this.pickerBox("meterOld", "sensor.old_meter")}</div>
+      <div class="setrow"><div><label>${this.t("meterNew")}</label></div>${this.pickerBox("meterNew", "sensor.new_meter")}</div>
       <div class="setrow"><div><label>${this.t("meterMode")}</label></div><select data-meter-mode style="max-width:460px">${modes.map(([value, label]) => `<option value="${value}" ${this.meterMode === value ? "selected" : ""}>${this.t(label)}</option>`).join("")}</select></div>
       ${this.successorHints(this.meterOld, byId.get(this.meterOld)?.unit, "data-meter-pick")}<div class="setrow planfoot"><small class="u-m0">${this.t("cleanupDryRun")}</small><button class="btn primary" data-plan-create ${ready ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("replacePreview")}</button></div></div>`;
   }
