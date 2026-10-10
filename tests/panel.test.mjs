@@ -3457,6 +3457,8 @@ test("an entity has an Actions tab that holds what changes something; the overvi
   assert.ok(overview.includes("Next step") && !overview.includes("data-de-rename") && !overview.includes("data-stale-form"), "no forms on the overview");
   const actions = el.detailPanel("actions", ghost, key);
   assert.ok(actions.includes("Recommended") && actions.includes("Name and classify") && actions.includes("data-de-rename"));
+  assert.ok(actions.includes('class="actrow"') && actions.includes(">Open</button>") && (actions.match(/<section class="panel/g) || []).length === 1, "the forms are rows of one card");
+  assert.ok(actions.includes("data-de-area-select") && !actions.includes('class="deform" data-de-rename><label'), "the controls sit on the right, the label is the row title");
   // a healthy entity has no next step
   assert.equal(el.nextStepBand({ ...ghost, status: "active" }, "entity:sensor.fine"), "");
 });

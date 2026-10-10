@@ -20,18 +20,32 @@ class StaleMixin {
     return this.t("staleIdle", { hours: this.formatNumber(ev.idle_hours ?? 0), limit: this.formatNumber(ev.limit_hours ?? 0) });
   }
 
-  staleCard(item) {
-    if (item.object_type !== "entity" || item.status !== "active") return "";
+  // The state line and the form of the stale threshold; null when it does not apply.
+  staleParts(item) {
+    if (item.object_type !== "entity" || item.status !== "active") return null;
     const own = item.stale_override, hours = item.stale_limit_hours;
     const state = own === 0 ? this.t("staleStateOff") : own != null ? this.t("staleStateOwn", { hours }) : hours ? this.t("staleStateDefault", { hours }) : this.t("staleStateNone");
     const last = item.stale_last_activity ? ` · ${this.t("staleLast", { date: this.formatDate(item.stale_last_activity) })}` : "";
     const id = this.esc(item.object_id);
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("staleTitle")}</h2><p>${this.t("staleHint")}</p></div></div>
-      <form class="pad polform" data-stale-form="${id}"><span class="factnote">${this.esc(state)}${this.esc(last)}</span>
-      <input type="number" min="1" max="8760" data-stale-hours value="${this.esc(own || hours || 48)}" aria-label="${this.esc(this.t("staleHours"))}">
+    const controls = `<input type="number" min="1" max="8760" data-stale-hours value="${this.esc(own || hours || 48)}" aria-label="${this.esc(this.t("staleHours"))}">
       <button type="submit" class="btn primary">${this.t("staleSet")}</button>
       <button type="button" class="btn" data-stale-off="${id}">${this.t("staleOff")}</button>
-      ${own != null ? `<button type="button" class="btn quiet" data-stale-default="${id}">${this.t("staleDefault")}</button>` : ""}</form></section>`;
+      ${own != null ? `<button type="button" class="btn quiet" data-stale-default="${id}">${this.t("staleDefault")}</button>` : ""}`;
+    return { state: `${this.esc(state)}${this.esc(last)}`, controls, id };
+  }
+
+  staleCard(item) {
+    const p = this.staleParts(item);
+    if (!p) return "";
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("staleTitle")}</h2><p>${this.t("staleHint")}</p></div></div>
+      <form class="pad polform" data-stale-form="${p.id}"><span class="factnote">${p.state}</span>
+      ${p.controls}</form></section>`;
+  }
+
+  staleRow(item) {
+    const p = this.staleParts(item);
+    if (!p) return "";
+    return this.actRow(this.t("staleTitle"), `${this.t("staleHint")} ${p.state}`, `<form class="polform" data-stale-form="${p.id}">${p.controls}</form>`);
   }
 
   async setStaleLimit(entityId, hours) {

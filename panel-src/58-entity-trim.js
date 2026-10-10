@@ -57,10 +57,10 @@ class EntityTrimMixin {
     return action;
   }
 
-  entityTrimCard(item) {
-    if (item.object_type !== "entity" || !this.data.meta.recorder_available) return "";
+  // The form to trim the history of one entity, or null while the rows are not counted yet.
+  entityTrimBody(item) {
     const id = item.object_id, data = this.entityRec?.[id]?.data;
-    if (!data) return `<section class="panel"><div class="panelhead"><div><h2>${this.t("etTitle")}</h2><p>${this.t("etCount")}</p></div></div></section>`;
+    if (!data) return null;
     const e = this.entityTrimState(id), date = ts => this.esc(this.formatDate(new Date(ts * 1000).toISOString()).split(",")[0]);
     const kinds = ET_TABLES.map(([table, label, hint, key]) => {
       const part = data[key] || { rows: 0 }, none = !part.rows, on = e.tables.has(table) && !none;
@@ -78,9 +78,22 @@ class EntityTrimMixin {
     const energy = this.usageTags(id).includes(this.t("energyDashboard"));
     const warn = e.tables.has("long_term") ? `<p class="etwarn">${this.t(energy ? "etWarnEnergy" : "etWarnLong")}</p>` : "";
     const ready = e.tables.size && (e.mode !== "range" || !only || this.entityTrimRange(e)) && !e.busy;
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("etTitle")}</h2><p>${this.t("etHint")}</p></div></div>
-      <div class="etkinds">${kinds}</div><div class="etbody">${mode}${timeline}</div>${warn}${e.error ? `<div class="error">${this.esc(e.error)}</div>` : ""}
-      <div class="trimfoot"><p class="factnote">${this.t("etFoot")}</p><button class="btn primary" data-et-plan="${this.esc(id)}" ${ready ? "" : "disabled"}>${e.busy ? this.t("etBusy") : this.t("etPreview")}</button></div></section>`;
+    return `<div class="etkinds">${kinds}</div><div class="etbody">${mode}${timeline}</div>${warn}${e.error ? `<div class="error">${this.esc(e.error)}</div>` : ""}
+      <div class="trimfoot"><p class="factnote">${this.t("etFoot")}</p><button class="btn primary" data-et-plan="${this.esc(id)}" ${ready ? "" : "disabled"}>${e.busy ? this.t("etBusy") : this.t("etPreview")}</button></div>`;
+  }
+
+  entityTrimCard(item) {
+    if (item.object_type !== "entity" || !this.data.meta.recorder_available) return "";
+    const body = this.entityTrimBody(item);
+    if (body === null) return `<section class="panel"><div class="panelhead"><div><h2>${this.t("etTitle")}</h2><p>${this.t("etCount")}</p></div></div></section>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("etTitle")}</h2><p>${this.t("etHint")}</p></div></div>${body}</section>`;
+  }
+
+  // The same as rows of the tab "Actions": the title with its explanation, and the form below it once the rows are counted.
+  entityTrimRows(item) {
+    if (item.object_type !== "entity" || !this.data.meta.recorder_available) return [];
+    const body = this.entityTrimBody(item);
+    return [this.actRow(this.t("etTitle"), this.t(body === null ? "etCount" : "etHint"), ""), body === null ? "" : `<div class="actblock">${body}</div>`];
   }
 
   // The line a trim row shows in a plan: what is trimmed and how much.

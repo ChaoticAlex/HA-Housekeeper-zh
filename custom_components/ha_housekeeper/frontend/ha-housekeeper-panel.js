@@ -1334,6 +1334,7 @@ class StylesMixin {
       .hkmodal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(10,14,20,.55)}.hkdialog{width:min(520px,100%);max-height:calc(100vh - 32px);overflow:auto;border:1px solid var(--hk-border);border-radius:16px;background:var(--hk-surface);box-shadow:0 14px 40px rgba(0,0,0,.35)}.hkdialog .dhead{padding:16px 18px 4px}.hkdialog .dhead h2{margin:0}.hkdialog .dbody{display:grid;gap:12px;padding:10px 18px 14px}.hkdialog .dbody label{display:block;margin-bottom:4px;font-weight:600;font-size:calc(12.5px*var(--hk-fs,1))}.hkdialog .dbody input[type=text],.hkdialog .dbody input[type=datetime-local],.hkdialog .dbody textarea{width:100%;box-sizing:border-box}.hkdialog .dfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--hk-border);background:var(--hk-soft)}.hkdialog .dbtns,.logsuggest .dbtns{display:flex;gap:8px;margin-left:auto}.hkdialog .dquestion{font-weight:600}.hkdialog .danger-t{color:var(--hk-red)}.notechips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.notechips .chip{cursor:pointer}.notetwo{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.notetwo{grid-template-columns:1fr}}
       .kngrp{padding:9px 16px 4px;border-top:1px solid var(--hk-border);background:var(--hk-soft);color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:700;letter-spacing:.05em;text-transform:uppercase}.kngrp:first-child{border-top:0}.knline{display:grid;grid-template-columns:20px minmax(110px,170px) minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 16px;border-top:1px solid var(--hk-border)}.kngrp+.knline{border-top:0}.knline .kk{color:var(--hk-muted)}.knline .kv small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.knline .ksrc{padding:1px 6px;border:1px solid var(--hk-border);border-radius:6px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));white-space:nowrap}.kdot{font-weight:700;text-align:center}.k-ok{color:var(--hk-green)}.k-warn{color:var(--hk-amber)}.k-red{color:var(--hk-red)}.k-mute{color:var(--hk-muted)}@media(max-width:640px){.knline{grid-template-columns:20px minmax(0,1fr)}.knline .kv{grid-column:2}.knline .ksrc{display:none}}
       .nextstep{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:12px 16px;background:color-mix(in srgb,var(--hk-blue) 9%,transparent)}.nextstep small{display:block;margin-top:2px;color:var(--hk-muted)}.nextstep .dbtns{display:flex;gap:8px;margin-left:auto}.actgrp{margin:6px 0 -4px;color:var(--hk-muted);font-size:calc(11.5px*var(--hk-fs,1));font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+      .actpanel .actsec{padding:9px 16px 4px;border-top:1px solid var(--hk-border);background:var(--hk-soft);color:var(--hk-muted);font-size:calc(11.5px*var(--hk-fs,1));font-weight:700;letter-spacing:.05em;text-transform:uppercase}.actpanel .actsec:first-child{border-top:0}.actrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 16px;border-top:1px solid var(--hk-border)}.actsec+.actrow{border-top:0}.actrow .acttext small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(12.5px*var(--hk-fs,1))}.actctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.actctl form{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin:0}.actctl .deform{display:flex;padding:0;border:0}.actblock{padding:10px 16px;border-top:1px solid var(--hk-border)}.actsec+.actblock{border-top:0}@media(max-width:640px){.actrow{grid-template-columns:1fr}.actctl,.actctl form{justify-content:flex-start}}
       .btn.small{padding:5px 11px;font-size:calc(13px*var(--hk-fs,1))}.notehint{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 16px}.notehint small{display:block;color:var(--hk-muted)}.row.seeall{justify-content:flex-start;color:var(--hk-blue-text);font-weight:600}.logfilters{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.logfilters .chip{cursor:pointer}.logfilters .chip.on{border-color:var(--hk-blue);color:var(--hk-blue-text)}.logsuggest{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:12px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 9%,transparent)}
       ${this.themeCss()}
     </style>`;
@@ -7633,27 +7634,36 @@ class DetailActionsMixin {
     return Boolean(this.findingRows(key) || this.fixItems(item, key).items.length || this.labelForm(item) || this.detailEditCard(item) || this.entityTrimCard(item) || this.staleCard(item));
   }
 
-  // The tab "Actions" of an object: everything that changes something, grouped by purpose; the cards keep their own forms.
+  // The tab "Actions" of an object: everything that changes something as rows in one card, grouped by purpose.
   actionsTab(item, key) {
-    const group = (title, cards) => { const html = cards.filter(Boolean).join(""); return html ? `<div class="actgrp">${this.t(title)}</div>${html}` : ""; };
-    const label = this.labelForm(item);
-    const labelCard = label ? `<section class="panel"><div class="pad actpad">${label}</div></section>` : "";
-    const body = [
-      group("actGroupRecommended", [this.actionsCard(item, key, false)]),
-      group("actGroupName", [this.detailEditCard(item), labelCard]),
-      group("actGroupRecord", [this.entityTrimCard(item), this.staleCard(item)]),
-    ].join("");
-    return `<div class="stack">${body || `<p class="factnote">${this.t("actNone")}</p>`}</div>`;
+    const findings = this.findingRows(key);
+    const { items, broken } = this.fixItems(item, key);
+    const recommended = [];
+    if (findings) recommended.push(`<div class="actblock">${findings}</div>`);
+    for (const it of items) recommended.push(this.actRow(it.label, this.t(it.hint), `<button class="btn${it.finding ? " primary" : ""}" ${it.attr}>${this.t("actOpen")}</button>`));
+    if (items.length) recommended.push(`<div class="actblock"><small class="factnote">${this.t("actPreviewOnly")}${broken ? ` ${this.t("actEditInHa")}` : ""}</small></div>`);
+    const labelControls = this.labelParts(item);
+    const name = [...this.detailEditRows(item), labelControls ? this.actRow(this.t("actLabelTitle"), this.t("actLabelHint"), labelControls) : ""];
+    const record = [...this.entityTrimRows(item), this.staleRow(item)];
+    const group = (title, rows) => { const html = rows.filter(Boolean).join(""); return html ? `<div class="actsec">${this.t(title)}</div>${html}` : ""; };
+    const body = [group("actGroupRecommended", recommended), group("actGroupName", name), group("actGroupRecord", record)].join("");
+    return body ? `<section class="panel actpanel">${body}</section>` : `<p class="factnote">${this.t("actNone")}</p>`;
+  }
+
+  // The label list and its button; null when the object cannot take a label or no label exists.
+  labelParts(item) {
+    if (!LABEL_TYPES.includes(item.object_type)) return null;
+    const labels = (this.data.objects || []).filter(o => o.object_type === "label").sort((x, y) => String(x.name).localeCompare(String(y.name)));
+    if (!labels.length) return null;
+    const chosen = this.actLabel && labels.some(l => l.object_id === this.actLabel) ? this.actLabel : labels[0].object_id;
+    return `<select data-act-label aria-label="${this.esc(this.t("labelChoose"))}">${labels.map(l => `<option value="${this.esc(l.object_id)}" ${chosen === l.object_id ? "selected" : ""}>${this.esc(l.name)}</option>`).join("")}</select>
+      <button class="btn primary" data-act-label-plan="${this.esc(item.object_id)}" ${this.planBusy ? "disabled" : ""}>${this.t("actLabelPreview")}</button>`;
   }
 
   labelForm(item) {
-    if (!LABEL_TYPES.includes(item.object_type)) return "";
-    const labels = (this.data.objects || []).filter(o => o.object_type === "label").sort((x, y) => String(x.name).localeCompare(String(y.name)));
-    if (!labels.length) return "";
-    const chosen = this.actLabel && labels.some(l => l.object_id === this.actLabel) ? this.actLabel : labels[0].object_id;
-    return `<div class="labelbox"><span class="tile"><ha-icon icon="mdi:label-outline"></ha-icon></span><div class="labeltext"><strong>${this.t("actLabelTitle")}</strong><small>${this.t("actLabelHint")}</small></div>
-      <select data-act-label aria-label="${this.esc(this.t("labelChoose"))}">${labels.map(l => `<option value="${this.esc(l.object_id)}" ${chosen === l.object_id ? "selected" : ""}>${this.esc(l.name)}</option>`).join("")}</select>
-      <button class="btn primary" data-act-label-plan="${this.esc(item.object_id)}" ${this.planBusy ? "disabled" : ""}>${this.t("actLabelPreview")}</button></div>`;
+    const controls = this.labelParts(item);
+    if (!controls) return "";
+    return `<div class="labelbox"><span class="tile"><ha-icon icon="mdi:label-outline"></ha-icon></span><div class="labeltext"><strong>${this.t("actLabelTitle")}</strong><small>${this.t("actLabelHint")}</small></div>${controls}</div>`;
   }
 
   actionsCard(item, key, withLabel = true) {
@@ -7663,6 +7673,11 @@ class DetailActionsMixin {
     if (!rows && !buttons && !label) return "";
     const fix = buttons || label ? `<div class="pad actpad"><small class="factnote">${this.t("actPreviewOnly")}</small>${buttons ? `<div class="taskgrid compactgrid">${buttons}</div>` : ""}${label}${broken ? `<small class="factnote">${this.t("actEditInHa")}</small>` : ""}</div>` : "";
     return `<section class="panel"><div class="panelhead"><h2>${this.t("actionsTitle")}</h2></div>${rows}${fix}</section>`;
+  }
+
+  // One row of the tab "Actions": the name with its explanation, and the control.
+  actRow(title, hint, control) {
+    return `<div class="actrow"><span class="acttext"><strong>${title}</strong>${hint ? `<small>${hint}</small>` : ""}</span>${control ? `<span class="actctl">${control}</span>` : ""}</div>`;
   }
 
   // The Cleanup view takes over from here: the assistant is filled in, the person looks at the preview and confirms.
@@ -7700,14 +7715,14 @@ class DetailActionsMixin {
   }
 }
 Object.assign(TEXT.de, {
-  tabActions: "Aktionen", nextStep: "Nächster Schritt", moreActions: "Weitere Aktionen", actGroupRecommended: "Empfohlen", actGroupName: "Benennen und einordnen", actGroupRecord: "Aufzeichnung und Überwachung", actNone: "Hier gibt es nichts zu tun.",
+  actOpen: "Öffnen", tabActions: "Aktionen", nextStep: "Nächster Schritt", moreActions: "Weitere Aktionen", actGroupRecommended: "Empfohlen", actGroupName: "Benennen und einordnen", actGroupRecord: "Aufzeichnung und Überwachung", actNone: "Hier gibt es nichts zu tun.",
   actionsTitle: "Was möchtest du tun?", actReplace: "Ersetzen:", actReplaceThis: "Durch andere Entität ersetzen", actDisable: "Deaktivieren planen",
   actLabelTitle: "Label ergänzen", actLabelHint: "Fügt ein vorhandenes Label hinzu, zum Beispiel zum Filtern. Du siehst zuerst eine Vorschau.", actLabelPreview: "Vorschau erstellen",
   actPreviewOnly: "Hier startest du nur eine Vorschau. Geändert wird erst, wenn du sie bestätigst.",
   actEditInHa: "Eine einzelne Referenz entfernt Housekeeper nicht selbst. Öffne die Automation in Home Assistant und bearbeite sie dort.",
 });
 Object.assign(TEXT.en, {
-  tabActions: "Actions", nextStep: "Next step", moreActions: "More actions", actGroupRecommended: "Recommended", actGroupName: "Name and classify", actGroupRecord: "Recording and monitoring", actNone: "There is nothing to do here.",
+  actOpen: "Open", tabActions: "Actions", nextStep: "Next step", moreActions: "More actions", actGroupRecommended: "Recommended", actGroupName: "Name and classify", actGroupRecord: "Recording and monitoring", actNone: "There is nothing to do here.",
   actionsTitle: "What would you like to do?", actReplace: "Replace:", actReplaceThis: "Replace by another entity", actDisable: "Plan to disable",
   actLabelTitle: "Add a label", actLabelHint: "Adds an existing label, for example for filtering. You see a preview first.", actLabelPreview: "Create preview",
   actPreviewOnly: "This only starts a preview. Nothing changes until you confirm it.",
@@ -7977,10 +7992,10 @@ class EntityTrimMixin {
     return action;
   }
 
-  entityTrimCard(item) {
-    if (item.object_type !== "entity" || !this.data.meta.recorder_available) return "";
+  // The form to trim the history of one entity, or null while the rows are not counted yet.
+  entityTrimBody(item) {
     const id = item.object_id, data = this.entityRec?.[id]?.data;
-    if (!data) return `<section class="panel"><div class="panelhead"><div><h2>${this.t("etTitle")}</h2><p>${this.t("etCount")}</p></div></div></section>`;
+    if (!data) return null;
     const e = this.entityTrimState(id), date = ts => this.esc(this.formatDate(new Date(ts * 1000).toISOString()).split(",")[0]);
     const kinds = ET_TABLES.map(([table, label, hint, key]) => {
       const part = data[key] || { rows: 0 }, none = !part.rows, on = e.tables.has(table) && !none;
@@ -7998,9 +8013,22 @@ class EntityTrimMixin {
     const energy = this.usageTags(id).includes(this.t("energyDashboard"));
     const warn = e.tables.has("long_term") ? `<p class="etwarn">${this.t(energy ? "etWarnEnergy" : "etWarnLong")}</p>` : "";
     const ready = e.tables.size && (e.mode !== "range" || !only || this.entityTrimRange(e)) && !e.busy;
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("etTitle")}</h2><p>${this.t("etHint")}</p></div></div>
-      <div class="etkinds">${kinds}</div><div class="etbody">${mode}${timeline}</div>${warn}${e.error ? `<div class="error">${this.esc(e.error)}</div>` : ""}
-      <div class="trimfoot"><p class="factnote">${this.t("etFoot")}</p><button class="btn primary" data-et-plan="${this.esc(id)}" ${ready ? "" : "disabled"}>${e.busy ? this.t("etBusy") : this.t("etPreview")}</button></div></section>`;
+    return `<div class="etkinds">${kinds}</div><div class="etbody">${mode}${timeline}</div>${warn}${e.error ? `<div class="error">${this.esc(e.error)}</div>` : ""}
+      <div class="trimfoot"><p class="factnote">${this.t("etFoot")}</p><button class="btn primary" data-et-plan="${this.esc(id)}" ${ready ? "" : "disabled"}>${e.busy ? this.t("etBusy") : this.t("etPreview")}</button></div>`;
+  }
+
+  entityTrimCard(item) {
+    if (item.object_type !== "entity" || !this.data.meta.recorder_available) return "";
+    const body = this.entityTrimBody(item);
+    if (body === null) return `<section class="panel"><div class="panelhead"><div><h2>${this.t("etTitle")}</h2><p>${this.t("etCount")}</p></div></div></section>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("etTitle")}</h2><p>${this.t("etHint")}</p></div></div>${body}</section>`;
+  }
+
+  // The same as rows of the tab "Actions": the title with its explanation, and the form below it once the rows are counted.
+  entityTrimRows(item) {
+    if (item.object_type !== "entity" || !this.data.meta.recorder_available) return [];
+    const body = this.entityTrimBody(item);
+    return [this.actRow(this.t("etTitle"), this.t(body === null ? "etCount" : "etHint"), ""), body === null ? "" : `<div class="actblock">${body}</div>`];
   }
 
   // The line a trim row shows in a plan: what is trimmed and how much.
@@ -8064,18 +8092,32 @@ class StaleMixin {
     return this.t("staleIdle", { hours: this.formatNumber(ev.idle_hours ?? 0), limit: this.formatNumber(ev.limit_hours ?? 0) });
   }
 
-  staleCard(item) {
-    if (item.object_type !== "entity" || item.status !== "active") return "";
+  // The state line and the form of the stale threshold; null when it does not apply.
+  staleParts(item) {
+    if (item.object_type !== "entity" || item.status !== "active") return null;
     const own = item.stale_override, hours = item.stale_limit_hours;
     const state = own === 0 ? this.t("staleStateOff") : own != null ? this.t("staleStateOwn", { hours }) : hours ? this.t("staleStateDefault", { hours }) : this.t("staleStateNone");
     const last = item.stale_last_activity ? ` · ${this.t("staleLast", { date: this.formatDate(item.stale_last_activity) })}` : "";
     const id = this.esc(item.object_id);
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("staleTitle")}</h2><p>${this.t("staleHint")}</p></div></div>
-      <form class="pad polform" data-stale-form="${id}"><span class="factnote">${this.esc(state)}${this.esc(last)}</span>
-      <input type="number" min="1" max="8760" data-stale-hours value="${this.esc(own || hours || 48)}" aria-label="${this.esc(this.t("staleHours"))}">
+    const controls = `<input type="number" min="1" max="8760" data-stale-hours value="${this.esc(own || hours || 48)}" aria-label="${this.esc(this.t("staleHours"))}">
       <button type="submit" class="btn primary">${this.t("staleSet")}</button>
       <button type="button" class="btn" data-stale-off="${id}">${this.t("staleOff")}</button>
-      ${own != null ? `<button type="button" class="btn quiet" data-stale-default="${id}">${this.t("staleDefault")}</button>` : ""}</form></section>`;
+      ${own != null ? `<button type="button" class="btn quiet" data-stale-default="${id}">${this.t("staleDefault")}</button>` : ""}`;
+    return { state: `${this.esc(state)}${this.esc(last)}`, controls, id };
+  }
+
+  staleCard(item) {
+    const p = this.staleParts(item);
+    if (!p) return "";
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("staleTitle")}</h2><p>${this.t("staleHint")}</p></div></div>
+      <form class="pad polform" data-stale-form="${p.id}"><span class="factnote">${p.state}</span>
+      ${p.controls}</form></section>`;
+  }
+
+  staleRow(item) {
+    const p = this.staleParts(item);
+    if (!p) return "";
+    return this.actRow(this.t("staleTitle"), `${this.t("staleHint")} ${p.state}`, `<form class="polform" data-stale-form="${p.id}">${p.controls}</form>`);
   }
 
   async setStaleLimit(entityId, hours) {
@@ -9694,21 +9736,38 @@ const DETAIL_ID_RULE = /^[a-z0-9_]+$/;
 
 class DetailEditMixin {
   // The card on the overview tab of an entity or a device; empty for every other kind of object.
-  detailEditCard(item) {
-    if (!["entity", "device"].includes(item.object_type)) return "";
+  // The pieces of the edit forms: the state of the form, the areas and the controls of the rename and the area form.
+  detailEditParts(item) {
     const e = this.detailEdit?.id === item.object_id ? this.detailEdit : (this.detailEdit = { id: item.object_id, value: item.object_id.split(".").slice(1).join("."), area: item.area_id || "", error: "" });
     const areas = (this.data.objects || []).filter(o => o.object_type === "area").sort((x, y) => String(x.name).localeCompare(String(y.name)));
-    const now = this.areaName(item);
-    const rename = item.object_type === "entity" ? `<form class="deform" data-de-rename><label for="de-id"><strong>${this.t("deNewId")}</strong></label>
-        <span class="deid"><span class="mono">${this.esc(item.object_id.split(".")[0])}.</span><input id="de-id" data-de-id value="${this.esc(e.value)}" autocomplete="off" spellcheck="false"></span>
-        <button type="submit" class="btn primary" data-de-rename-btn ${this.detailIdOk(item, e.value) && !this.planBusy ? "" : "disabled"}>${this.t("deRename")}</button>
+    const now = this.areaName(item), suggest = !item.area_id;
+    const renameControls = item.object_type === "entity" ? `<span class="deid"><span class="mono">${this.esc(item.object_id.split(".")[0])}.</span><input id="de-id" data-de-id value="${this.esc(e.value)}" autocomplete="off" spellcheck="false" aria-label="${this.esc(this.t("deNewId"))}"></span>
+        <button type="submit" class="btn primary" data-de-rename-btn ${this.detailIdOk(item, e.value) && !this.planBusy ? "" : "disabled"}>${this.t("deRename")}</button>` : "";
+    const areaControls = areas.length ? `<select id="de-area" data-de-area-select aria-label="${this.esc(this.t("deArea"))}">${suggest ? `<option value="">${this.t("areaSuggest")}</option>` : ""}${areas.map(a => `<option value="${this.esc(a.object_id)}" ${e.area === a.object_id ? "selected" : ""}>${this.esc(a.name)}</option>`).join("")}</select>
+        <button type="submit" class="btn primary" data-de-area-btn ${(suggest || e.area !== item.area_id) && !this.planBusy ? "" : "disabled"}>${this.t("deAssign")}</button>` : "";
+    return { e, now, suggest, renameControls, areaControls, hasAreas: areas.length > 0 };
+  }
+
+  detailEditCard(item) {
+    if (!["entity", "device"].includes(item.object_type)) return "";
+    const { e, now, suggest, renameControls, areaControls, hasAreas } = this.detailEditParts(item);
+    const rename = renameControls ? `<form class="deform" data-de-rename><label for="de-id"><strong>${this.t("deNewId")}</strong></label>${renameControls}
         <small class="factnote">${this.t("deRenameNote")}</small></form>` : "";
-    const suggest = !item.area_id;
-    const assign = areas.length ? `<form class="deform" data-de-area><label for="de-area"><strong>${this.t("deArea")}</strong><small class="denow${now ? "" : " none"}">${this.t("deAreaNow", { area: now || this.t("deNoArea") })}</small></label>
-        <select id="de-area" data-de-area-select>${suggest ? `<option value="">${this.t("areaSuggest")}</option>` : ""}${areas.map(a => `<option value="${this.esc(a.object_id)}" ${e.area === a.object_id ? "selected" : ""}>${this.esc(a.name)}</option>`).join("")}</select>
-        <button type="submit" class="btn primary" data-de-area-btn ${(suggest || e.area !== item.area_id) && !this.planBusy ? "" : "disabled"}>${this.t("deAssign")}</button>
+    const assign = hasAreas ? `<form class="deform" data-de-area><label for="de-area"><strong>${this.t("deArea")}</strong><small class="denow${now ? "" : " none"}">${this.t("deAreaNow", { area: now || this.t("deNoArea") })}</small></label>${areaControls}
         ${suggest ? `<small class="factnote">${this.t("areaNote")}</small>` : ""}</form>` : `<small class="factnote">${this.t("areaNone")}</small>`;
     return `<section class="panel"><div class="panelhead"><h2>${this.t("deTitle")}</h2></div><div class="pad">${rename}${assign}${e.error ? `<small class="error" role="alert">${this.esc(this.t(e.error))}</small>` : ""}</div></section>`;
+  }
+
+  // The same forms as rows of the tab "Actions": the name and the explanation on the left, the controls on the right.
+  detailEditRows(item) {
+    if (!["entity", "device"].includes(item.object_type)) return [];
+    const { e, now, suggest, renameControls, areaControls, hasAreas } = this.detailEditParts(item);
+    const rows = [];
+    if (renameControls) rows.push(this.actRow(this.t("deNewId"), this.t("deRenameNote"), `<form class="deform" data-de-rename>${renameControls}</form>`));
+    const areaHint = [this.t("deAreaNow", { area: now || this.t("deNoArea") }), suggest && hasAreas ? this.t("areaNote") : ""].filter(Boolean).join(" ");
+    rows.push(hasAreas ? this.actRow(this.t("deArea"), areaHint, `<form class="deform" data-de-area>${areaControls}</form>`) : this.actRow(this.t("deArea"), this.t("areaNone"), ""));
+    if (e.error) rows.push(`<div class="actblock"><small class="error" role="alert">${this.esc(this.t(e.error))}</small></div>`);
+    return rows;
   }
 
   // The part after the dot must change and keep to what an ID may hold; whether it is free is the plan's business.

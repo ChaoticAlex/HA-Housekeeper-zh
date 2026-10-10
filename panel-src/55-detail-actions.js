@@ -45,27 +45,36 @@ class DetailActionsMixin {
     return Boolean(this.findingRows(key) || this.fixItems(item, key).items.length || this.labelForm(item) || this.detailEditCard(item) || this.entityTrimCard(item) || this.staleCard(item));
   }
 
-  // The tab "Actions" of an object: everything that changes something, grouped by purpose; the cards keep their own forms.
+  // The tab "Actions" of an object: everything that changes something as rows in one card, grouped by purpose.
   actionsTab(item, key) {
-    const group = (title, cards) => { const html = cards.filter(Boolean).join(""); return html ? `<div class="actgrp">${this.t(title)}</div>${html}` : ""; };
-    const label = this.labelForm(item);
-    const labelCard = label ? `<section class="panel"><div class="pad actpad">${label}</div></section>` : "";
-    const body = [
-      group("actGroupRecommended", [this.actionsCard(item, key, false)]),
-      group("actGroupName", [this.detailEditCard(item), labelCard]),
-      group("actGroupRecord", [this.entityTrimCard(item), this.staleCard(item)]),
-    ].join("");
-    return `<div class="stack">${body || `<p class="factnote">${this.t("actNone")}</p>`}</div>`;
+    const findings = this.findingRows(key);
+    const { items, broken } = this.fixItems(item, key);
+    const recommended = [];
+    if (findings) recommended.push(`<div class="actblock">${findings}</div>`);
+    for (const it of items) recommended.push(this.actRow(it.label, this.t(it.hint), `<button class="btn${it.finding ? " primary" : ""}" ${it.attr}>${this.t("actOpen")}</button>`));
+    if (items.length) recommended.push(`<div class="actblock"><small class="factnote">${this.t("actPreviewOnly")}${broken ? ` ${this.t("actEditInHa")}` : ""}</small></div>`);
+    const labelControls = this.labelParts(item);
+    const name = [...this.detailEditRows(item), labelControls ? this.actRow(this.t("actLabelTitle"), this.t("actLabelHint"), labelControls) : ""];
+    const record = [...this.entityTrimRows(item), this.staleRow(item)];
+    const group = (title, rows) => { const html = rows.filter(Boolean).join(""); return html ? `<div class="actsec">${this.t(title)}</div>${html}` : ""; };
+    const body = [group("actGroupRecommended", recommended), group("actGroupName", name), group("actGroupRecord", record)].join("");
+    return body ? `<section class="panel actpanel">${body}</section>` : `<p class="factnote">${this.t("actNone")}</p>`;
+  }
+
+  // The label list and its button; null when the object cannot take a label or no label exists.
+  labelParts(item) {
+    if (!LABEL_TYPES.includes(item.object_type)) return null;
+    const labels = (this.data.objects || []).filter(o => o.object_type === "label").sort((x, y) => String(x.name).localeCompare(String(y.name)));
+    if (!labels.length) return null;
+    const chosen = this.actLabel && labels.some(l => l.object_id === this.actLabel) ? this.actLabel : labels[0].object_id;
+    return `<select data-act-label aria-label="${this.esc(this.t("labelChoose"))}">${labels.map(l => `<option value="${this.esc(l.object_id)}" ${chosen === l.object_id ? "selected" : ""}>${this.esc(l.name)}</option>`).join("")}</select>
+      <button class="btn primary" data-act-label-plan="${this.esc(item.object_id)}" ${this.planBusy ? "disabled" : ""}>${this.t("actLabelPreview")}</button>`;
   }
 
   labelForm(item) {
-    if (!LABEL_TYPES.includes(item.object_type)) return "";
-    const labels = (this.data.objects || []).filter(o => o.object_type === "label").sort((x, y) => String(x.name).localeCompare(String(y.name)));
-    if (!labels.length) return "";
-    const chosen = this.actLabel && labels.some(l => l.object_id === this.actLabel) ? this.actLabel : labels[0].object_id;
-    return `<div class="labelbox"><span class="tile"><ha-icon icon="mdi:label-outline"></ha-icon></span><div class="labeltext"><strong>${this.t("actLabelTitle")}</strong><small>${this.t("actLabelHint")}</small></div>
-      <select data-act-label aria-label="${this.esc(this.t("labelChoose"))}">${labels.map(l => `<option value="${this.esc(l.object_id)}" ${chosen === l.object_id ? "selected" : ""}>${this.esc(l.name)}</option>`).join("")}</select>
-      <button class="btn primary" data-act-label-plan="${this.esc(item.object_id)}" ${this.planBusy ? "disabled" : ""}>${this.t("actLabelPreview")}</button></div>`;
+    const controls = this.labelParts(item);
+    if (!controls) return "";
+    return `<div class="labelbox"><span class="tile"><ha-icon icon="mdi:label-outline"></ha-icon></span><div class="labeltext"><strong>${this.t("actLabelTitle")}</strong><small>${this.t("actLabelHint")}</small></div>${controls}</div>`;
   }
 
   actionsCard(item, key, withLabel = true) {
@@ -75,6 +84,11 @@ class DetailActionsMixin {
     if (!rows && !buttons && !label) return "";
     const fix = buttons || label ? `<div class="pad actpad"><small class="factnote">${this.t("actPreviewOnly")}</small>${buttons ? `<div class="taskgrid compactgrid">${buttons}</div>` : ""}${label}${broken ? `<small class="factnote">${this.t("actEditInHa")}</small>` : ""}</div>` : "";
     return `<section class="panel"><div class="panelhead"><h2>${this.t("actionsTitle")}</h2></div>${rows}${fix}</section>`;
+  }
+
+  // One row of the tab "Actions": the name with its explanation, and the control.
+  actRow(title, hint, control) {
+    return `<div class="actrow"><span class="acttext"><strong>${title}</strong>${hint ? `<small>${hint}</small>` : ""}</span>${control ? `<span class="actctl">${control}</span>` : ""}</div>`;
   }
 
   // The Cleanup view takes over from here: the assistant is filled in, the person looks at the preview and confirms.
@@ -112,14 +126,14 @@ class DetailActionsMixin {
   }
 }
 Object.assign(TEXT.de, {
-  tabActions: "Aktionen", nextStep: "Nächster Schritt", moreActions: "Weitere Aktionen", actGroupRecommended: "Empfohlen", actGroupName: "Benennen und einordnen", actGroupRecord: "Aufzeichnung und Überwachung", actNone: "Hier gibt es nichts zu tun.",
+  actOpen: "Öffnen", tabActions: "Aktionen", nextStep: "Nächster Schritt", moreActions: "Weitere Aktionen", actGroupRecommended: "Empfohlen", actGroupName: "Benennen und einordnen", actGroupRecord: "Aufzeichnung und Überwachung", actNone: "Hier gibt es nichts zu tun.",
   actionsTitle: "Was möchtest du tun?", actReplace: "Ersetzen:", actReplaceThis: "Durch andere Entität ersetzen", actDisable: "Deaktivieren planen",
   actLabelTitle: "Label ergänzen", actLabelHint: "Fügt ein vorhandenes Label hinzu, zum Beispiel zum Filtern. Du siehst zuerst eine Vorschau.", actLabelPreview: "Vorschau erstellen",
   actPreviewOnly: "Hier startest du nur eine Vorschau. Geändert wird erst, wenn du sie bestätigst.",
   actEditInHa: "Eine einzelne Referenz entfernt Housekeeper nicht selbst. Öffne die Automation in Home Assistant und bearbeite sie dort.",
 });
 Object.assign(TEXT.en, {
-  tabActions: "Actions", nextStep: "Next step", moreActions: "More actions", actGroupRecommended: "Recommended", actGroupName: "Name and classify", actGroupRecord: "Recording and monitoring", actNone: "There is nothing to do here.",
+  actOpen: "Open", tabActions: "Actions", nextStep: "Next step", moreActions: "More actions", actGroupRecommended: "Recommended", actGroupName: "Name and classify", actGroupRecord: "Recording and monitoring", actNone: "There is nothing to do here.",
   actionsTitle: "What would you like to do?", actReplace: "Replace:", actReplaceThis: "Replace by another entity", actDisable: "Plan to disable",
   actLabelTitle: "Add a label", actLabelHint: "Adds an existing label, for example for filtering. You see a preview first.", actLabelPreview: "Create preview",
   actPreviewOnly: "This only starts a preview. Nothing changes until you confirm it.",
