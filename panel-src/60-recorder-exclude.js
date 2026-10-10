@@ -6,7 +6,7 @@ Object.assign(TEXT.de, {
   exCount: "{count} ausgewählt", exNone: "Nichts ausgewählt", exNoneSug: "Nichts ausgewählt · {count} Vorschläge", exPickSuggested: "Alle Vorgeschlagenen wählen", exClear: "Leeren", exCopy: "YAML kopieren",
   exStepsTitle: "So geht es weiter", exStep1: "Einfügen in die configuration.yaml. Gibt es dort schon einen recorder:-Abschnitt, trage nur die Zeilen unter entities: in dessen exclude:-Liste ein, nicht noch einmal recorder:.",
   exStep2: "Prüfen unter Entwicklerwerkzeuge → YAML → Konfiguration prüfen.", exStep3: "Neu starten. Der Recorder liest den Ausschluss nur beim Start. Danach steht die Entität hier als „bereits ausgeschlossen“.",
-  exSuggest: "Ausschluss möglich", exHasStats: "Statistik vorhanden", exUsedBy: "{count} Verwendungen",
+  exSuggest: "Empfohlen: ausschließen", exWhy: "Nicht verwendet, keine Statistik, {perDay} Zeilen pro Tag", exRule: "Empfohlen ist, was nirgends verwendet wird, keine Statistik hat und mindestens {min} Zeilen pro Tag schreibt.", exHasStats: "Statistik vorhanden", exUsedBy: "{count} Verwendungen",
   trimTitle: "Alten Verlauf der Auswahl kürzen", trimHint: "Der Ausschluss wirkt nur für neue Daten. Hier löschst du die bereits gespeicherten Zustände der Auswahl, die älter sind als die gewählte Zeit. Statistiken bleiben. Daraus wird ein Plan unter Aufräumen: Vorschau mit Zeilenzahl, Bestätigung, Backup, Nachprüfung.",
   trimKeep: "Behalten", trimDays: "{days} Tage", trimPreview: "Plan für das Kürzen erstellen", trimBusy: "Plan wird erstellt …", trimFailed: "Der Plan konnte nicht erstellt werden: {detail}",
   trimSub: "älter als {days} Tage: {rows} Zeilen", reason_bad_keep_days: "Die Zeit zum Behalten ist ungültig.", reason_not_counted: "Die Zeilen ließen sich nicht zählen.", reason_nothing_to_trim: "Nichts zu löschen: Es gibt keine so alten Zustände.",
@@ -19,7 +19,7 @@ Object.assign(TEXT.en, {
   exCount: "{count} selected", exNone: "Nothing selected", exNoneSug: "Nothing selected · {count} suggestions", exPickSuggested: "Select all suggested", exClear: "Clear", exCopy: "Copy YAML",
   exStepsTitle: "What to do next", exStep1: "Paste it into configuration.yaml. If there is a recorder: section already, add only the lines under entities: to its exclude: list, not recorder: again.",
   exStep2: "Check under Developer tools → YAML → Check configuration.", exStep3: "Restart. The recorder reads the exclusion only at start. Afterwards the entity shows here as “already excluded”.",
-  exSuggest: "can be excluded", exHasStats: "has statistics", exUsedBy: "{count} uses",
+  exSuggest: "Recommended: exclude", exWhy: "Not used, no statistics, {perDay} rows per day", exRule: "Recommended means: used nowhere, no statistics and at least {min} rows per day.", exHasStats: "has statistics", exUsedBy: "{count} uses",
   trimTitle: "Trim the old history of the selection", trimHint: "The exclusion only works for new data. Here you delete the states already stored for the selection that are older than the chosen time. Statistics stay. This becomes a plan under Cleanup: preview with row count, confirmation, backup, check afterwards.",
   trimKeep: "Keep", trimDays: "{days} days", trimPreview: "Create a plan to trim", trimBusy: "Creating the plan …", trimFailed: "The plan could not be created: {detail}",
   trimSub: "older than {days} days: {rows} rows", reason_bad_keep_days: "The time to keep is not valid.", reason_not_counted: "The rows could not be counted.", reason_nothing_to_trim: "Nothing to delete: there are no states that old.",
@@ -39,7 +39,7 @@ class ExcludeMixin {
     const uses = this.edgesTo(`entity:${entityId}`).filter(e => USAGE_RELATIONS.includes(e.relation)).length;
     const suggest = !uses && !obj.has_statistics && perDay >= EXCLUDE_MIN_PER_DAY;
     const tags = suggest ? tag("warn", this.t("exSuggest")) : [obj.has_statistics ? tag("mute", this.t("exHasStats")) : "", uses ? tag("mute", this.t("exUsedBy", { count: uses })) : ""].join("");
-    return { suggest, tags };
+    return { suggest, tags, why: suggest ? this.t("exWhy", { perDay: this.formatNumber(Math.round(perDay)) }) : "" };
   }
 
   // What the recorder keeps out already, from the lists in view.
@@ -79,7 +79,8 @@ class ExcludeMixin {
     const any = n || trim;
     const bar = `<div class="toolbar exbar${any ? "" : " nosel"}"><span class="date" title="${this.esc(this.t("exclHint"))}">${label}</span>${sug ? `<button class="btn quiet" data-ex-suggested>${this.t("exPickSuggested")}</button>` : ""}${any ? `<button class="btn quiet" data-ex-clear>${this.t("exClear")}</button>` : ""}${n ? `<button class="btn primary" data-copy-snippet title="${this.esc(this.t("exclHint"))}">${this.snippetCopied ? this.t("recorderCopied") : this.t("exCopy")}</button>` : ""}${leftNote}</div>`;
     const steps = `<div class="exsteps"><strong>${this.t("exStepsTitle")}</strong><ol><li>${this.t("exStep1")}</li><li>${this.t("exStep2")}</li><li>${this.t("exStep3")}</li></ol></div>`;
-    return `${bar}${n ? `<pre class="code exblock">${this.esc(this.excludeSnippet())}</pre>${steps}` : ""}${any ? this.trimBlock() : ""}`;
+    const rule = `<p class="factnote exrule">${this.t("exRule", { min: EXCLUDE_MIN_PER_DAY })}</p>`;
+    return `${bar}${rule}${n ? `<pre class="code exblock">${this.esc(this.excludeSnippet())}</pre>${steps}` : ""}${any ? this.trimBlock() : ""}`;
   }
 
   // Deleting the states stored before: the exclusion alone leaves them. Made as an ordinary plan.

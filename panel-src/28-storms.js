@@ -45,7 +45,7 @@ class StormsMixin {
     if (item.attr_bytes !== null && item.attr_bytes !== undefined) parts.push(this.t("stormAttr", { kb: this.formatNumber(Math.round(item.attr_bytes / 102.4) / 10) }));
     if (item.peak_hour) parts.push(this.t("stormPeak", { n: this.formatNumber(item.peak_hour) }));
     const info = this.excludeInfo(item.entity_id, item.per_day, item.excluded);
-    return `<div class="rowwrap${item.excluded ? " exdone" : ""}">${this.excludeBox(item.entity_id)}<button class="row" data-object="entity:${this.esc(item.entity_id)}"><span class="tile mute"><ha-icon icon="mdi:database-clock-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(item.name || item.entity_id)}</strong>${this.rowId(item.entity_id, parts.join(" · "))}</span><span class="pill mute">${this.formatNumber(item.per_day)} ${this.t("stormPerDay")}</span>${info.tags}</button></div>`;
+    return `<div class="rowwrap${item.excluded ? " exdone" : ""}${info.suggest ? " exsug" : ""}">${this.excludeBox(item.entity_id)}<button class="row" data-object="entity:${this.esc(item.entity_id)}"><span class="tile ${info.suggest ? "warn" : "mute"}"><ha-icon icon="mdi:database-clock-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(item.name || item.entity_id)}</strong>${this.rowId(item.entity_id, parts.join(" · "))}${info.why ? `<small class="exwhy">${this.esc(info.why)}</small>` : ""}</span><span class="extags">${info.tags}<span class="pill mute">${this.formatNumber(item.per_day)} ${this.t("stormPerDay")}</span></span></button></div>`;
   }
 
   // A bar needs a text next to it: the percentage stands in the row, the bar is decoration.

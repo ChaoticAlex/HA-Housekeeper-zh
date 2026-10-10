@@ -54,16 +54,19 @@ class MaintenanceMixin {
     const took = c.computed_at && (c.stale || c.age_seconds >= 60) ? this.tookNote(c) : c.took_ms === null || c.took_ms === undefined ? "" : ` · ${this.t(c.cached ? "recorderCached" : "recorderTook", { ms: this.formatNumber(c.took_ms) })}`;
     const summary = this.t("recorderSummary", { states: this.formatNumber(c.total_states), size: this.formatBytes(c.size_bytes), days: c.keep_days ?? "—", stats: this.formatNumber(c.statistics_total) }) + took;
     const sortButtons = ["recent", "total"].map(key => `<button class="btn ${this.costSort === key ? "primary" : ""}" data-cost-sort="${key}" aria-pressed="${this.costSort === key}">${this.t(key === "recent" ? "recorderSortRecent" : "recorderSortTotal")}</button>`).join("");
-    const costRows = this.costRanking().map(e => {
+    const ranking = this.costRanking(), topShare = Math.max(...ranking.map(e => e.share), 0.1); // the bars are scaled to the largest entry
+    const costRows = ranking.map(e => {
       const obj = this.findObject(`entity:${e.entity_id}`);
+      const suggested = e.suggest_exclude && !e.excluded;
       const tags = [
+        suggested ? `<span class="pill warn">${this.t("recorderSuggest")}</span>` : "",
         `<span class="pill ${e.used ? "ok" : "mute"}">${e.used ? this.t("recorderUsed", { count: e.used }) : this.t("recorderUnused")}</span>`,
         e.excluded ? `<span class="pill ok">${this.t("recorderExcluded")}</span>` : "",
-        e.suggest_exclude && !e.excluded ? `<span class="pill warn">${this.t("recorderSuggest")}</span>` : "",
       ].join("");
-      const inner = `<span class="tile ${e.suggest_exclude && !e.excluded ? "warn" : "mute"}"><ha-icon icon="mdi:database-clock-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(e.name)}</strong>${this.rowId(e.entity_id, `${this.formatNumber(e.states)} · ${this.t("recorderWindows", { day: this.formatNumber(e.states_24h ?? 0), week: this.formatNumber(e.states_7d ?? 0), avg: this.formatNumber(e.per_day_avg ?? e.per_day) })} · ${this.t("recorderShare", { share: e.share })}`)}<span class="bar" style="margin-top:4px"><i style="width:${Math.min(100, Math.round(e.share))}%"></i></span></span><span style="display:flex;gap:6px;flex-wrap:wrap">${tags}</span>`;
+      const why = suggested ? `<small class="exwhy">${this.esc(this.t("exWhy", { perDay: this.formatNumber(Math.round(e.per_day_avg ?? e.per_day ?? 0)) }))}</small>` : "";
+      const inner = `<span class="tile ${suggested ? "warn" : "mute"}"><ha-icon icon="mdi:database-clock-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(e.name)}</strong>${this.rowId(e.entity_id, `${this.formatNumber(e.states)} · ${this.t("recorderWindows", { day: this.formatNumber(e.states_24h ?? 0), week: this.formatNumber(e.states_7d ?? 0), avg: this.formatNumber(e.per_day_avg ?? e.per_day) })} · ${this.t("recorderShare", { share: e.share })}`)}${why}<span class="bar" style="margin-top:4px"><i style="width:${Math.min(100, Math.round((e.share / topShare) * 100))}%"></i></span></span><span class="extags">${tags}</span>`;
       const open = obj ? `<button class="row rel" data-object="${this.esc(`entity:${e.entity_id}`)}">${inner}</button>` : `<div class="row rel">${inner}</div>`;
-      return `<div class="rowwrap${e.excluded ? " exdone" : ""}">${this.excludeBox(e.entity_id)}${open}</div>`;
+      return `<div class="rowwrap${e.excluded ? " exdone" : ""}${suggested ? " exsug" : ""}">${this.excludeBox(e.entity_id)}${open}</div>`;
     });
     const costPage = this.paginate("costs", costRows), rows = costPage.rows.join("") + costPage.footer;
     const statRows = (c.statistics || []).slice(0, 10).map(s => `<div class="row rel"><span class="tile mute"><ha-icon icon="mdi:chart-line"></ha-icon></span><span class="row-text"><strong>${this.esc(s.statistic_id)}</strong><small>${this.formatNumber(s.rows)}</small></span></div>`).join("");
