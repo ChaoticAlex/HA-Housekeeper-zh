@@ -7665,7 +7665,13 @@ class PickerMixin {
       exNew: {
         get: () => this.deviceText("new"), set: v => this.setDevice("new", "", v), min: 0, browse: true, types: ["device"], limit: 30, sub: o => this.deviceSub(o),
         filter: o => o.object_id !== this.exchangeState().oldDev, pick: o => this.setDevice("new", o.object_id, o.name),
-        rank: o => { const old = this.findObject(`device:${this.exchangeState().oldDev}`); return old && o.manufacturer && o.manufacturer === old.manufacturer ? 0 : 1; },
+        // Without a typed search the likelier replacements come first: same maker and model, same maker, same integration entry.
+        rank: o => {
+          const old = this.findObject(`device:${this.exchangeState().oldDev}`);
+          if (!old) return 3;
+          if (o.manufacturer && o.manufacturer === old.manufacturer) return o.model && o.model === old.model ? 0 : 1;
+          return (o.config_entry_ids || []).some(id => (old.config_entry_ids || []).includes(id)) ? 2 : 3;
+        },
       },
       note: {
         get: () => this.noteDraft?.targetText ?? "", set: v => { if (this.noteDraft) { this.noteDraft.targetText = v; this.noteDraft.target = ""; } }, min: 2, types: null, limit: 15,
@@ -7695,10 +7701,10 @@ class PickerMixin {
     const def = this.pickerDef(name), q = def ? String(def.get()).trim() : "";
     if (!def || q.length < def.min) return [];
     const limit = def.limit || QUICK_LIMIT;
-    const found = q || !def.browse ? this.searchObjects(q, { types: def.types, limit: def.rank ? 2000 : limit, filter: def.filter })
-      : this.data.objects.filter(o => def.types.includes(o.object_type) && (!def.filter || def.filter(o))).sort((x, y) => String(x.name).localeCompare(String(y.name)));
-    // A field may bring the likelier entries to the front (stable), e.g. the same manufacturer as the old device.
-    return (def.rank ? [...found.filter(o => def.rank(o) === 0), ...found.filter(o => def.rank(o) !== 0)] : found).slice(0, limit);
+    if (q || !def.browse) return this.searchObjects(q, { types: def.types, limit, filter: def.filter });
+    // Nothing typed yet: everything the field may offer, the likelier entries first (sort is stable, so the rest stays by name).
+    const all = this.data.objects.filter(o => def.types.includes(o.object_type) && (!def.filter || def.filter(o))).sort((x, y) => String(x.name).localeCompare(String(y.name)));
+    return (def.rank ? all.sort((x, y) => def.rank(x) - def.rank(y)) : all).slice(0, limit);
   }
 
   // The input plus, while it is open, the list of matches. `attrs` carries the field's own data attribute.
