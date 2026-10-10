@@ -1329,6 +1329,7 @@ class StylesMixin {
       @media(max-width:640px){.navtiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.navtiles .taskcard{grid-template-rows:auto auto;padding:10px}.navtiles .taskcard>ha-icon,.navtiles .taskcard>small{display:none}.toolbar.nosel [data-fsel-clear],.toolbar.nosel [data-sel-clear],.toolbar.nosel [data-sel-only],.toolbar.nosel .fbtns{display:none}}
       .hkmodal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(10,14,20,.55)}.hkdialog{width:min(520px,100%);max-height:calc(100vh - 32px);overflow:auto;border:1px solid var(--hk-border);border-radius:16px;background:var(--hk-surface);box-shadow:0 14px 40px rgba(0,0,0,.35)}.hkdialog .dhead{padding:16px 18px 4px}.hkdialog .dhead h2{margin:0}.hkdialog .dbody{display:grid;gap:12px;padding:10px 18px 14px}.hkdialog .dbody label{display:block;margin-bottom:4px;font-weight:600;font-size:calc(12.5px*var(--hk-fs,1))}.hkdialog .dbody input[type=text],.hkdialog .dbody input[type=datetime-local],.hkdialog .dbody textarea{width:100%;box-sizing:border-box}.hkdialog .dfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--hk-border);background:var(--hk-soft)}.hkdialog .dbtns,.logsuggest .dbtns{display:flex;gap:8px;margin-left:auto}.hkdialog .dquestion{font-weight:600}.hkdialog .danger-t{color:var(--hk-red)}.notechips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.notechips .chip{cursor:pointer}.notetwo{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.notetwo{grid-template-columns:1fr}}
       .kngrp{padding:9px 16px 4px;border-top:1px solid var(--hk-border);background:var(--hk-soft);color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:700;letter-spacing:.05em;text-transform:uppercase}.kngrp:first-child{border-top:0}.knline{display:grid;grid-template-columns:20px minmax(110px,170px) minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 16px;border-top:1px solid var(--hk-border)}.kngrp+.knline{border-top:0}.knline .kk{color:var(--hk-muted)}.knline .kv small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.knline .ksrc{padding:1px 6px;border:1px solid var(--hk-border);border-radius:6px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));white-space:nowrap}.kdot{font-weight:700;text-align:center}.k-ok{color:var(--hk-green)}.k-warn{color:var(--hk-amber)}.k-red{color:var(--hk-red)}.k-mute{color:var(--hk-muted)}@media(max-width:640px){.knline{grid-template-columns:20px minmax(0,1fr)}.knline .kv{grid-column:2}.knline .ksrc{display:none}}
+      .nextstep{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:12px 16px;background:color-mix(in srgb,var(--hk-blue) 9%,transparent)}.nextstep small{display:block;margin-top:2px;color:var(--hk-muted)}.nextstep .dbtns{display:flex;gap:8px;margin-left:auto}.actgrp{margin:6px 0 -4px;color:var(--hk-muted);font-size:calc(11.5px*var(--hk-fs,1));font-weight:700;letter-spacing:.05em;text-transform:uppercase}
       .btn.small{padding:5px 11px;font-size:calc(13px*var(--hk-fs,1))}.notehint{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 16px}.notehint small{display:block;color:var(--hk-muted)}.row.seeall{justify-content:flex-start;color:var(--hk-blue-text);font-weight:600}.logfilters{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.logfilters .chip{cursor:pointer}.logfilters .chip.on{border-color:var(--hk-blue);color:var(--hk-blue-text)}.logsuggest{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:12px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 9%,transparent)}
       ${this.themeCss()}
     </style>`;
@@ -4115,6 +4116,7 @@ class DiagnosisMixin {
   // Tabs offered for one object; "attributes" only when it has some, so an empty tab never shows.
   detailTabs(item, key) {
     const tabs = [["overview", "tabOverview"], ["relations", "tabRelations", this.edgesTo(key).length + this.edgesFrom(key).length], ["technical", "tabTechnical"]];
+    if (item.object_type === "entity") tabs.splice(1, 0, ["actions", "tabActions", this.fixItems(item, key).items.length]);
     if (item.attributes && Object.keys(item.attributes).length) tabs.push(["attributes", "tabAttributes"]);
     if (["automation", "script"].includes(item.object_type) && (item.actions?.length || item.triggers?.length)) tabs.push(["flow", "flowTab"]);
     if (item.object_type === "device") tabs.push(["life", "lifeTab"]);
@@ -4148,6 +4150,7 @@ class DiagnosisMixin {
 
   // Only the open tab is built, so large attributes and relations cost nothing until they are asked for.
   detailPanel(tab, item, key) {
+    if (tab === "actions") return this.actionsTab(item, key);
     if (tab === "relations") return `<div class="stack">${this.markCard(item)}${this.relationsCard(key)}</div>`;
     if (tab === "flow") return this.flowCard(item, key);
     if (tab === "life") return this.lifeCard(item);
@@ -4165,7 +4168,8 @@ class DiagnosisMixin {
       const cards = this.propertyCards(item);
       return `<div class="stack">${cards ? `<div class="propgrid">${cards}</div>` : `<section class="panel"><div class="panelhead"><h2>${this.t("registry")}</h2></div><div class="pad"><dl class="kv"><dt>${this.t("type")}</dt><dd>${this.t(item.object_type)}</dd>${fields.map(([k, v]) => `<dt>${this.esc(k)}</dt><dd>${this.esc(Array.isArray(v) ? v.join(", ") : v)}</dd>`).join("")}</dl></div></section>`}${automation}${this.detailLoading ? `<p class="sub">${this.t("loading")}</p>` : ""}</div>`;
     }
-    return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.actionsCard(item, key)}${this.detailEditCard(item)}${this.impactCard(item, key)}</div><div class="stack">${item.object_type === "entity" ? this.knownCard(item, key) : this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.entityTrimCard(item)}${this.staleCard(item)}${this.noteCard(item)}</div></div>`;
+    if (item.object_type === "entity") return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.nextStepBand(item, key)}${this.impactCard(item, key)}</div><div class="stack">${this.knownCard(item, key)}${this.entityRecorderCard(item)}${this.noteCard(item)}</div></div>`;
+    return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.actionsCard(item, key)}${this.detailEditCard(item)}${this.impactCard(item, key)}</div><div class="stack">${this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.entityTrimCard(item)}${this.staleCard(item)}${this.noteCard(item)}</div></div>`;
   }
 }
 
@@ -7600,22 +7604,49 @@ class DetailActionsMixin {
     return [...new Set(this.data.findings.filter(f => !f.ignored && this.findingKey(f) === key && f.classification === "broken_reference" && f.rule_id.endsWith("_entity") && String(f.affected_object).includes(".")).map(f => f.affected_object))];
   }
 
-  fixButtons(item, key) {
+  // The buttons this object offers; `finding` marks those that answer an open finding (the first one becomes the next step).
+  fixItems(item, key) {
     const open = this.data.findings.filter(f => !f.ignored && this.findingKey(f) === key);
-    const tile = (attr, icon, label, hint) => `<button class="taskcard" ${attr}><ha-icon icon="${icon}"></ha-icon><strong>${label}</strong><small>${this.t(hint)}</small></button>`;
-    const out = this.missingEntities(key).map(id => tile(`data-act-replace="${this.esc(id)}"`, "mdi:swap-horizontal", `${this.t("actReplace")} ${this.esc(id)}`, "actHintReplace"));
+    const out = this.missingEntities(key).map(id => ({ attr: `data-act-replace="${this.esc(id)}"`, icon: "mdi:swap-horizontal", label: `${this.t("actReplace")} ${this.esc(id)}`, hint: "actHintReplace", finding: true }));
     const broken = open.some(f => f.classification === "broken_reference");
     if (item.object_type === "entity" && open.some(f => f.rule_id.startsWith("entity.") && ["orphaned", "unavailable"].includes(f.classification))) {
-      out.push(tile(`data-act-replace="${this.esc(item.object_id)}"`, "mdi:swap-horizontal", this.t("actReplaceThis"), "actHintReplace"));
-      if (item.status !== "disabled") out.push(tile(`data-act-disable="${this.esc(item.object_id)}"`, "mdi:cancel", this.t("actDisable"), "actHintDisable"));
+      out.push({ attr: `data-act-replace="${this.esc(item.object_id)}"`, icon: "mdi:swap-horizontal", label: this.t("actReplaceThis"), hint: "actHintReplace", finding: true });
+      if (item.status !== "disabled") out.push({ attr: `data-act-disable="${this.esc(item.object_id)}"`, icon: "mdi:cancel", label: this.t("actDisable"), hint: "actHintDisable", finding: true });
     }
     // A sensor with long-term statistics can have wrong values repaired or be swapped for a new meter.
     if (item.object_type === "entity" && item.has_statistics && item.object_id.startsWith("sensor.")) {
-      out.push(tile(`data-act-repair="${this.esc(item.object_id)}"`, "mdi:chart-line", this.t("actRepairValues"), "actHintRepair"));
-      out.push(tile(`data-act-meter="${this.esc(item.object_id)}"`, "mdi:gauge", this.t("actMeter"), "actHintMeter"));
+      out.push({ attr: `data-act-repair="${this.esc(item.object_id)}"`, icon: "mdi:chart-line", label: this.t("actRepairValues"), hint: "actHintRepair" });
+      out.push({ attr: `data-act-meter="${this.esc(item.object_id)}"`, icon: "mdi:gauge", label: this.t("actMeter"), hint: "actHintMeter" });
     }
-    if (item.object_type === "device") out.push(tile(`data-act-exchange="${this.esc(item.object_id)}"`, "mdi:devices", this.t("actExchange"), "actHintExchange"));
-    return { buttons: out.join(""), broken };
+    if (item.object_type === "device") out.push({ attr: `data-act-exchange="${this.esc(item.object_id)}"`, icon: "mdi:devices", label: this.t("actExchange"), hint: "actHintExchange" });
+    return { items: out, broken };
+  }
+
+  fixTile(it) { return `<button class="taskcard" ${it.attr}><ha-icon icon="${it.icon}"></ha-icon><strong>${it.label}</strong><small>${this.t(it.hint)}</small></button>`; }
+
+  fixButtons(item, key) {
+    const { items, broken } = this.fixItems(item, key);
+    return { buttons: items.map(it => this.fixTile(it)).join(""), broken };
+  }
+
+  // On the overview of an entity: the one step that answers its open finding, with a way to the other actions.
+  nextStepBand(item, key) {
+    const first = this.fixItems(item, key).items.find(it => it.finding);
+    if (!first) return "";
+    return `<section class="panel"><div class="nextstep"><span><strong>${this.t("nextStep")}:</strong> ${first.label}<small>${this.t(first.hint)}</small></span><span class="dbtns"><button class="btn quiet" data-detail-tab="actions">${this.t("moreActions")}</button><button class="btn primary" ${first.attr}>${first.label}</button></span></div></section>`;
+  }
+
+  // The tab "Actions" of an entity: everything that changes something, grouped by purpose; the cards keep their own forms.
+  actionsTab(item, key) {
+    const group = (title, cards) => { const html = cards.filter(Boolean).join(""); return html ? `<div class="actgrp">${this.t(title)}</div>${html}` : ""; };
+    const label = this.labelForm(item);
+    const labelCard = label ? `<section class="panel"><div class="pad actpad">${label}</div></section>` : "";
+    const body = [
+      group("actGroupRecommended", [this.actionsCard(item, key, false)]),
+      group("actGroupName", [this.detailEditCard(item), labelCard]),
+      group("actGroupRecord", [this.entityTrimCard(item), this.staleCard(item)]),
+    ].join("");
+    return `<div class="stack">${body || `<p class="factnote">${this.t("actNone")}</p>`}</div>`;
   }
 
   labelForm(item) {
@@ -7628,10 +7659,10 @@ class DetailActionsMixin {
       <button class="btn primary" data-act-label-plan="${this.esc(item.object_id)}" ${this.planBusy ? "disabled" : ""}>${this.t("actLabelPreview")}</button></div>`;
   }
 
-  actionsCard(item, key) {
+  actionsCard(item, key, withLabel = true) {
     const rows = this.findingRows(key);
     const { buttons, broken } = this.fixButtons(item, key);
-    const label = this.labelForm(item);
+    const label = withLabel ? this.labelForm(item) : "";
     if (!rows && !buttons && !label) return "";
     const fix = buttons || label ? `<div class="pad actpad"><small class="factnote">${this.t("actPreviewOnly")}</small>${buttons ? `<div class="taskgrid compactgrid">${buttons}</div>` : ""}${label}${broken ? `<small class="factnote">${this.t("actEditInHa")}</small>` : ""}</div>` : "";
     return `<section class="panel"><div class="panelhead"><h2>${this.t("actionsTitle")}</h2></div>${rows}${fix}</section>`;
@@ -7672,12 +7703,14 @@ class DetailActionsMixin {
   }
 }
 Object.assign(TEXT.de, {
+  tabActions: "Aktionen", nextStep: "Nächster Schritt", moreActions: "Weitere Aktionen", actGroupRecommended: "Empfohlen", actGroupName: "Benennen und einordnen", actGroupRecord: "Aufzeichnung und Überwachung", actNone: "Für diese Entität gibt es nichts zu tun.",
   actionsTitle: "Was möchtest du tun?", actReplace: "Ersetzen:", actReplaceThis: "Durch andere Entität ersetzen", actDisable: "Deaktivieren planen",
   actLabelTitle: "Label ergänzen", actLabelHint: "Fügt ein vorhandenes Label hinzu, zum Beispiel zum Filtern. Du siehst zuerst eine Vorschau.", actLabelPreview: "Vorschau erstellen",
   actPreviewOnly: "Hier startest du nur eine Vorschau. Geändert wird erst, wenn du sie bestätigst.",
   actEditInHa: "Eine einzelne Referenz entfernt Housekeeper nicht selbst. Öffne die Automation in Home Assistant und bearbeite sie dort.",
 });
 Object.assign(TEXT.en, {
+  tabActions: "Actions", nextStep: "Next step", moreActions: "More actions", actGroupRecommended: "Recommended", actGroupName: "Name and classify", actGroupRecord: "Recording and monitoring", actNone: "There is nothing to do for this entity.",
   actionsTitle: "What would you like to do?", actReplace: "Replace:", actReplaceThis: "Replace by another entity", actDisable: "Plan to disable",
   actLabelTitle: "Add a label", actLabelHint: "Adds an existing label, for example for filtering. You see a preview first.", actLabelPreview: "Create preview",
   actPreviewOnly: "This only starts a preview. Nothing changes until you confirm it.",

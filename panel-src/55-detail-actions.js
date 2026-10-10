@@ -7,22 +7,49 @@ class DetailActionsMixin {
     return [...new Set(this.data.findings.filter(f => !f.ignored && this.findingKey(f) === key && f.classification === "broken_reference" && f.rule_id.endsWith("_entity") && String(f.affected_object).includes(".")).map(f => f.affected_object))];
   }
 
-  fixButtons(item, key) {
+  // The buttons this object offers; `finding` marks those that answer an open finding (the first one becomes the next step).
+  fixItems(item, key) {
     const open = this.data.findings.filter(f => !f.ignored && this.findingKey(f) === key);
-    const tile = (attr, icon, label, hint) => `<button class="taskcard" ${attr}><ha-icon icon="${icon}"></ha-icon><strong>${label}</strong><small>${this.t(hint)}</small></button>`;
-    const out = this.missingEntities(key).map(id => tile(`data-act-replace="${this.esc(id)}"`, "mdi:swap-horizontal", `${this.t("actReplace")} ${this.esc(id)}`, "actHintReplace"));
+    const out = this.missingEntities(key).map(id => ({ attr: `data-act-replace="${this.esc(id)}"`, icon: "mdi:swap-horizontal", label: `${this.t("actReplace")} ${this.esc(id)}`, hint: "actHintReplace", finding: true }));
     const broken = open.some(f => f.classification === "broken_reference");
     if (item.object_type === "entity" && open.some(f => f.rule_id.startsWith("entity.") && ["orphaned", "unavailable"].includes(f.classification))) {
-      out.push(tile(`data-act-replace="${this.esc(item.object_id)}"`, "mdi:swap-horizontal", this.t("actReplaceThis"), "actHintReplace"));
-      if (item.status !== "disabled") out.push(tile(`data-act-disable="${this.esc(item.object_id)}"`, "mdi:cancel", this.t("actDisable"), "actHintDisable"));
+      out.push({ attr: `data-act-replace="${this.esc(item.object_id)}"`, icon: "mdi:swap-horizontal", label: this.t("actReplaceThis"), hint: "actHintReplace", finding: true });
+      if (item.status !== "disabled") out.push({ attr: `data-act-disable="${this.esc(item.object_id)}"`, icon: "mdi:cancel", label: this.t("actDisable"), hint: "actHintDisable", finding: true });
     }
     // A sensor with long-term statistics can have wrong values repaired or be swapped for a new meter.
     if (item.object_type === "entity" && item.has_statistics && item.object_id.startsWith("sensor.")) {
-      out.push(tile(`data-act-repair="${this.esc(item.object_id)}"`, "mdi:chart-line", this.t("actRepairValues"), "actHintRepair"));
-      out.push(tile(`data-act-meter="${this.esc(item.object_id)}"`, "mdi:gauge", this.t("actMeter"), "actHintMeter"));
+      out.push({ attr: `data-act-repair="${this.esc(item.object_id)}"`, icon: "mdi:chart-line", label: this.t("actRepairValues"), hint: "actHintRepair" });
+      out.push({ attr: `data-act-meter="${this.esc(item.object_id)}"`, icon: "mdi:gauge", label: this.t("actMeter"), hint: "actHintMeter" });
     }
-    if (item.object_type === "device") out.push(tile(`data-act-exchange="${this.esc(item.object_id)}"`, "mdi:devices", this.t("actExchange"), "actHintExchange"));
-    return { buttons: out.join(""), broken };
+    if (item.object_type === "device") out.push({ attr: `data-act-exchange="${this.esc(item.object_id)}"`, icon: "mdi:devices", label: this.t("actExchange"), hint: "actHintExchange" });
+    return { items: out, broken };
+  }
+
+  fixTile(it) { return `<button class="taskcard" ${it.attr}><ha-icon icon="${it.icon}"></ha-icon><strong>${it.label}</strong><small>${this.t(it.hint)}</small></button>`; }
+
+  fixButtons(item, key) {
+    const { items, broken } = this.fixItems(item, key);
+    return { buttons: items.map(it => this.fixTile(it)).join(""), broken };
+  }
+
+  // On the overview of an entity: the one step that answers its open finding, with a way to the other actions.
+  nextStepBand(item, key) {
+    const first = this.fixItems(item, key).items.find(it => it.finding);
+    if (!first) return "";
+    return `<section class="panel"><div class="nextstep"><span><strong>${this.t("nextStep")}:</strong> ${first.label}<small>${this.t(first.hint)}</small></span><span class="dbtns"><button class="btn quiet" data-detail-tab="actions">${this.t("moreActions")}</button><button class="btn primary" ${first.attr}>${first.label}</button></span></div></section>`;
+  }
+
+  // The tab "Actions" of an entity: everything that changes something, grouped by purpose; the cards keep their own forms.
+  actionsTab(item, key) {
+    const group = (title, cards) => { const html = cards.filter(Boolean).join(""); return html ? `<div class="actgrp">${this.t(title)}</div>${html}` : ""; };
+    const label = this.labelForm(item);
+    const labelCard = label ? `<section class="panel"><div class="pad actpad">${label}</div></section>` : "";
+    const body = [
+      group("actGroupRecommended", [this.actionsCard(item, key, false)]),
+      group("actGroupName", [this.detailEditCard(item), labelCard]),
+      group("actGroupRecord", [this.entityTrimCard(item), this.staleCard(item)]),
+    ].join("");
+    return `<div class="stack">${body || `<p class="factnote">${this.t("actNone")}</p>`}</div>`;
   }
 
   labelForm(item) {
@@ -35,10 +62,10 @@ class DetailActionsMixin {
       <button class="btn primary" data-act-label-plan="${this.esc(item.object_id)}" ${this.planBusy ? "disabled" : ""}>${this.t("actLabelPreview")}</button></div>`;
   }
 
-  actionsCard(item, key) {
+  actionsCard(item, key, withLabel = true) {
     const rows = this.findingRows(key);
     const { buttons, broken } = this.fixButtons(item, key);
-    const label = this.labelForm(item);
+    const label = withLabel ? this.labelForm(item) : "";
     if (!rows && !buttons && !label) return "";
     const fix = buttons || label ? `<div class="pad actpad"><small class="factnote">${this.t("actPreviewOnly")}</small>${buttons ? `<div class="taskgrid compactgrid">${buttons}</div>` : ""}${label}${broken ? `<small class="factnote">${this.t("actEditInHa")}</small>` : ""}</div>` : "";
     return `<section class="panel"><div class="panelhead"><h2>${this.t("actionsTitle")}</h2></div>${rows}${fix}</section>`;
@@ -79,12 +106,14 @@ class DetailActionsMixin {
   }
 }
 Object.assign(TEXT.de, {
+  tabActions: "Aktionen", nextStep: "Nächster Schritt", moreActions: "Weitere Aktionen", actGroupRecommended: "Empfohlen", actGroupName: "Benennen und einordnen", actGroupRecord: "Aufzeichnung und Überwachung", actNone: "Für diese Entität gibt es nichts zu tun.",
   actionsTitle: "Was möchtest du tun?", actReplace: "Ersetzen:", actReplaceThis: "Durch andere Entität ersetzen", actDisable: "Deaktivieren planen",
   actLabelTitle: "Label ergänzen", actLabelHint: "Fügt ein vorhandenes Label hinzu, zum Beispiel zum Filtern. Du siehst zuerst eine Vorschau.", actLabelPreview: "Vorschau erstellen",
   actPreviewOnly: "Hier startest du nur eine Vorschau. Geändert wird erst, wenn du sie bestätigst.",
   actEditInHa: "Eine einzelne Referenz entfernt Housekeeper nicht selbst. Öffne die Automation in Home Assistant und bearbeite sie dort.",
 });
 Object.assign(TEXT.en, {
+  tabActions: "Actions", nextStep: "Next step", moreActions: "More actions", actGroupRecommended: "Recommended", actGroupName: "Name and classify", actGroupRecord: "Recording and monitoring", actNone: "There is nothing to do for this entity.",
   actionsTitle: "What would you like to do?", actReplace: "Replace:", actReplaceThis: "Replace by another entity", actDisable: "Plan to disable",
   actLabelTitle: "Add a label", actLabelHint: "Adds an existing label, for example for filtering. You see a preview first.", actLabelPreview: "Create preview",
   actPreviewOnly: "This only starts a preview. Nothing changes until you confirm it.",

@@ -1478,7 +1478,7 @@ test("the detail page keeps a summary on top and builds only the open tab", () =
   for (const text of ["Integration", "hue", "Device", "Küchenlampe", "Area", "Küche (Raum)", "Risk when removed"]) assert.ok(summary.includes(text), text);
   assert.ok(html.includes('role="tablist"') && html.includes('role="tabpanel"'));
   const tabs = [...html.matchAll(/data-detail-tab="(\w+)"/g)].map(m => m[1]);
-  assert.equal(JSON.stringify(tabs), JSON.stringify(["overview", "relations", "technical", "attributes"]));
+  assert.equal(JSON.stringify(tabs), JSON.stringify(["overview", "actions", "relations", "technical", "attributes"]));
   assert.ok(/id="hk-tab-overview" aria-selected="true" aria-controls="hk-tabpanel" tabindex="0"/.test(html));
   assert.ok(/id="hk-tab-relations" aria-selected="false" aria-controls="hk-tabpanel" tabindex="-1"/.test(html), "roving tabindex");
   assert.ok(html.includes('class="panelhead"') && html.includes(el.t("knownTitle")), "overview: diagnosis and what is known");
@@ -3441,6 +3441,24 @@ test("the entity page sums up what is known in groups with the source of each li
   assert.ok(html.includes("120 records a day") && html.includes("Rank 2 of the loudest") && html.includes("12 % of all records") && !html.includes("Load recorder values"));
   el.storms.entities[1].excluded = true;
   assert.ok(el.knownCard(light, "entity:sensor.power").includes("Not recorded (recorder filter)"));
+});
+
+test("an entity has an Actions tab that holds what changes something; the overview only shows the next step of an open finding", () => {
+  const { el } = panel("en");
+  const ghost = { object_type: "entity", object_id: "sensor.ghost", name: "Ghost", status: "unavailable", state: "unavailable", reason: "state_unavailable" };
+  const finding = { key: "k1", rule_id: "entity.state_unavailable", object_id: "sensor.ghost", classification: "unavailable", confidence: 0.9 };
+  el.data = { ...DATA, objects: [...DATA.objects, ghost], findings: [finding] };
+  el._rev = (el._rev || 0) + 1;
+  const key = "entity:sensor.ghost";
+  assert.ok(el.detailTabs(ghost, key).some(([id, , n]) => id === "actions" && n >= 1), "the tab counts what is offered");
+  const band = el.nextStepBand(ghost, key);
+  assert.ok(band.includes("Next step") && band.includes("data-act-replace") && band.includes('data-detail-tab="actions"'));
+  const overview = el.detailPanel("overview", ghost, key);
+  assert.ok(overview.includes("Next step") && !overview.includes("data-de-rename") && !overview.includes("data-stale-form"), "no forms on the overview");
+  const actions = el.detailPanel("actions", ghost, key);
+  assert.ok(actions.includes("Recommended") && actions.includes("Name and classify") && actions.includes("data-de-rename"));
+  // a healthy entity has no next step
+  assert.equal(el.nextStepBand({ ...ghost, status: "active" }, "entity:sensor.fine"), "");
 });
 
 test("the journal names the end of a follow-up and the safety line counts the watched plans", () => {
