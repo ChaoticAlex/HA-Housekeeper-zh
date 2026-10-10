@@ -59,8 +59,8 @@ class CounterMixin {
     const idle = (action.reasons || []).length > 0 && action.reasons.every(r => NOTHING_REASONS.includes(r));
     const out = [line(this.t("rangeWhat", { kind: this.t(`rangeKind_${c.kind || "counter"}`), range: `${this.formatDate(range.from * 1000)} – ${this.formatDate(range.to * 1000)}`, mode: this.t(`rangeMode_${action.mode || "hold"}`) + (range.fixed != null ? ` (${n(range.fixed)})` : "") }))];
     if (c.bracket) out.push(line(this.t("rangeBracket", { before: n(c.bracket[1]), after: n(c.bracket[3]) })));
-    if (idle) return `<span class="u-pt6 u-block">${out.join("")}</span>`; // no tables, no chart: there is nothing to show
-    out.push(line(this.t("rangeAvail", { states: this.formatNumber(avail.states || 0), short: this.formatNumber(avail.short_term || 0), long: this.formatNumber(avail.long_term || 0) })));
+    if (idle) return `<span class="u-pt6 u-block"><strong class="u-block">${this.t("rangeChecked")}</strong>${out.join("")}</span>`; // no tables, no chart: there is nothing to show
+    out.push(line(this.t("rangeChanges", { states: this.formatNumber(counts.states || 0), short: this.formatNumber(counts.short_term || 0), long: this.formatNumber(counts.long_term || 0) })));
     for (const t of ["states", "short_term", "long_term"]) if (c.available && !avail[t]) out.push(warn(this.t("rangeGone", { table: this.t(`counterTable_${t}`) })));
     if (counts.estimated_long_term) out.push(warn(this.t("rangeEstimated", { count: this.formatNumber(counts.estimated_long_term) })));
     if (counts.tail_short_term || counts.tail_long_term) out.push(line(this.t("rangeTail", { short: this.formatNumber(counts.tail_short_term || 0), long: this.formatNumber(counts.tail_long_term || 0) })));
@@ -72,7 +72,9 @@ class CounterMixin {
       this.rangeTable("long_term", d.long_term?.rows || [], d.long_term?.cols, counts.long_term || 0),
     ].join("");
     const undone = action.result?.state === "undone" ? line(this.t("counterUndone")) : "";
-    return `<span class="u-pt6 u-block">${out.join("")}${this.counterChart(c.series)}${tables}${undone}</span>`;
+    const avails = line(this.t("rangeAvail", { states: this.formatNumber(avail.states || 0), short: this.formatNumber(avail.short_term || 0), long: this.formatNumber(avail.long_term || 0) }));
+    // What happens and what to watch out for stays in view; the rows themselves are for whoever wants to check.
+    return `<span class="u-pt6 u-block"><strong class="u-block">${this.t("rangeChecked")}</strong>${out.join("")}${this.counterChart(c.series)}${undone}<details class="rowdetails"><summary>${this.t("rangeTech")}</summary>${avails}${line(this.t("rangeColHint"))}${tables}</details></span>`;
   }
 
   saveRange(root) {
@@ -258,6 +260,8 @@ Object.assign(TEXT.de, {
   rangeWhat: "{kind}, Zeitraum {range}, ersetzt durch: {mode}.", rangeBracket: "Gute Werte davor {before} und danach {after}.",
   rangeAvail: "Für den Zeitraum gibt es {states} Verlaufswerte, {short} 5-Minuten-Werte und {long} Stundenwerte.", rangeGone: "{table}: für diesen Zeitraum nicht mehr vorhanden (Aufbewahrung abgelaufen); dort wird nichts angefasst.",
   rangeEstimated: "{count} Stundenwerte lassen sich ohne 5-Minuten-Werte nicht neu berechnen; sie bekommen den Ersatzwert als Schätzung.", rangeTail: "Die Summe wird in {short} späteren 5-Minuten-Zeilen und {long} späteren Stundenzeilen berichtigt.",
+  rangeChecked: "Was Housekeeper geprüft hat", rangeChanges: "Geändert werden {states} Verlaufswerte, {short} 5-Minuten-Werte und {long} Stundenwerte.", rangeTech: "Technische Details",
+  rangeColHint: "Stand ist der Wert des Zählers oder Messwerts, Summe die aufsummierte Zahl eines Zählers. Mittel, Min und Max gelten für die Stunde bzw. die 5 Minuten.",
   rangeMoreRows: "… und {count} weitere Zeilen", rangeNothingHere: "In dieser Tabelle ändert sich nichts.",
   rangeCol_state: "Stand", rangeCol_sum: "Summe", rangeCol_mean: "Mittel", rangeCol_min: "Min", rangeCol_max: "Max",
   reason_no_range_statistics: "Für diese ID gibt es keine Zähler- oder Mittelwert-Statistik des Recorders.", reason_bad_range: "Der Zeitraum ist ungültig (Von nach Bis, in der Zukunft, länger als 31 Tage oder fester Wert fehlt).",
@@ -273,6 +277,8 @@ Object.assign(TEXT.en, {
   rangeWhat: "{kind}, period {range}, replaced by: {mode}.", rangeBracket: "Good values before {before} and after {after}.",
   rangeAvail: "For the period there are {states} history values, {short} 5-minute rows and {long} hourly rows.", rangeGone: "{table}: no longer there for this period (retention expired); nothing is touched there.",
   rangeEstimated: "{count} hourly rows cannot be recalculated without 5-minute rows; they get the replacement value as an estimate.", rangeTail: "The sum is corrected in {short} later 5-minute rows and {long} later hourly rows.",
+  rangeChecked: "What Housekeeper checked", rangeChanges: "{states} history values, {short} 5-minute rows and {long} hourly rows change.", rangeTech: "Technical details",
+  rangeColHint: "Reading is the value of the counter or measurement, sum the accumulated number of a counter. Mean, min and max apply to the hour or the 5 minutes.",
   rangeMoreRows: "… and {count} more rows", rangeNothingHere: "Nothing changes in this table.",
   rangeCol_state: "Reading", rangeCol_sum: "Sum", rangeCol_mean: "Mean", rangeCol_min: "Min", rangeCol_max: "Max",
   reason_no_range_statistics: "The recorder has no counter or mean statistics for this ID.", reason_bad_range: "The period is invalid (From after To, in the future, longer than 31 days or the fixed value is missing).",
