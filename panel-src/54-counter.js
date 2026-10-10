@@ -32,11 +32,11 @@ class CounterMixin {
     const n = v => this.formatNumber(Math.round(v * 1000) / 1000);
     const lines = (c.findings || []).map(f => `${this.t("counterFinding", { range: this.counterRange(f), low: n(f.low), high: n(f.high), before: n(f.good_before), after: n(f.good_after), unit })}`);
     const counts = c.counts || {};
-    const rows = this.t("counterRows", { states: counts.states || 0, short: counts.short_term || 0, long: counts.long_term || 0, tail: (counts.tail_long_term || 0) + (counts.tail_short_term || 0) });
+    const rows = this.t("counterRows", { states: this.formatNumber(counts.states || 0), short: this.formatNumber(counts.short_term || 0), long: this.formatNumber(counts.long_term || 0), tail: this.formatNumber((counts.tail_long_term || 0) + (counts.tail_short_term || 0)) });
     const skipped = Object.entries(c.skipped || {}).map(([table, list]) => this.t("counterSkipped", { table: this.t(`counterTable_${table}`), count: list.length })).join(" ");
     const undone = action.result?.state === "undone" ? `<small class="u-block">${this.t("counterUndone")}</small>` : "";
     const charts = (c.findings || []).slice(0, 3).map(f => this.counterChart(f.series)).join("");
-    return `<span class="u-pt6 u-block">${lines.map(l => `<small class="u-block">${this.esc(l)}</small>`).join("")}<small class="u-block">${this.esc(rows)}</small>${skipped ? `<small class="u-amber u-block">${this.esc(skipped)}</small>` : ""}${charts}${undone}</span>`;
+    return `<span class="u-pt6 u-block"><strong class="u-block">${this.t("rangeChecked")}</strong>${lines.map(l => `<small class="u-block">${this.esc(l)}</small>`).join("")}<small class="u-block">${this.esc(rows)}</small>${skipped ? `<small class="u-amber u-block">${this.esc(skipped)}</small>` : ""}${charts}${undone}</span>`;
   }
 
   // One table of a range cleanup: the first rows with the old and the new value.
@@ -219,7 +219,7 @@ Object.assign(TEXT.de, {
   counterMode_hold: "Letzter guter Wert (empfohlen)", counterMode_interpolate: "Gerade Linie zum nächsten guten Wert",
   counterScan: "Sensoren prüfen", counterScanning: "Wird geprüft …", counterScanNote: "Liest nur. Bei vielen Zählern kann das einen Moment dauern.", counterNoRecorder: "Ohne Recorder gibt es nichts zu prüfen.",
   counterNone: "Keine Ausreißer gefunden.", counterChecked: "{count} Sensoren geprüft.", counterPreview: "Vorschau erstellen", counterFix: "Diesen Fund bereinigen", rangePreview: "Zeitraum bereinigen",
-  counterFound: "{range}: niedrigster Wert {low} {unit} statt etwa {good} {unit}", counterFinding: "{range}: Werte zwischen {low} und {high} {unit}; gute Werte davor {before} und danach {after} {unit}.",
+  counterFound: "{range}: niedrigster Wert {low} {unit} statt etwa {good} {unit}", counterFinding: "Fehlerhafte Werte {range}: zwischen {low} und {high} {unit}. Gute Werte davor {before} und danach {after} {unit}.",
   counterRows: "Geändert werden {states} Verlaufswerte, {short} 5-Minuten-Werte und {long} Stundenwerte; die Summe wird in {tail} späteren Statistikzeilen berichtigt.",
   counterSkipped: "{table}: {count} Fund(e) nicht reparierbar (keine guten Werte davor oder danach).", counterTable_states: "Verlaufswerte", counterTable_short_term: "5-Minuten-Werte", counterTable_long_term: "Stundenwerte",
   counterOriginal: "Original", counterRepaired: "repariert", counterChartLabel: "Verlauf vor und nach der Reparatur", counterUndone: "Die alten Werte sind wieder eingesetzt.",
@@ -239,7 +239,7 @@ Object.assign(TEXT.en, {
   counterMode_hold: "Last good value (recommended)", counterMode_interpolate: "Straight line to the next good value",
   counterScan: "Check sensors", counterScanning: "Checking …", counterScanNote: "Only reads. With many counters this can take a moment.", counterNoRecorder: "There is nothing to check without a recorder.",
   counterNone: "No outliers found.", counterChecked: "{count} sensors checked.", counterPreview: "Create preview", counterFix: "Clean up this finding", rangePreview: "Clean up this range",
-  counterFound: "{range}: lowest value {low} {unit} instead of about {good} {unit}", counterFinding: "{range}: values between {low} and {high} {unit}; good values before {before} and after {after} {unit}.",
+  counterFound: "{range}: lowest value {low} {unit} instead of about {good} {unit}", counterFinding: "Faulty values {range}: between {low} and {high} {unit}. Good values before {before} and after {after} {unit}.",
   counterRows: "{states} history values, {short} 5-minute rows and {long} hourly rows change; the sum is corrected in {tail} later statistics rows.",
   counterSkipped: "{table}: {count} finding(s) cannot be repaired (no good values before or after).", counterTable_states: "History values", counterTable_short_term: "5-minute rows", counterTable_long_term: "Hourly rows",
   counterOriginal: "original", counterRepaired: "repaired", counterChartLabel: "Readings before and after the repair", counterUndone: "The old values are back.",
