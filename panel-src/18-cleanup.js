@@ -463,14 +463,15 @@ class CleanupMixin {
   }
 
   // What can be said before any preview: where the old entity is used, and whether the new one fits and works.
-  // `bad` is true when the plan would be blocked anyway, so the button stays off.
+  // `used` sits under the old field, `fit` under the new one; `bad` is true when the plan would be blocked anyway, so the button stays off.
   replaceChecks(oldId, newId) {
     const old = oldId && this.findObject(`entity:${oldId}`), nu = newId && this.findObject(`entity:${newId}`);
     const rows = [], mark = (tone, text) => `<div class="mcheck"><span class="${tone}-t">${{ ok: "✓", warn: "!", bad: "✕" }[tone]}</span><span>${text}</span></div>`;
     let bad = false;
+    let used = "";
     if (oldId) {
       const tags = this.usageTags(oldId);
-      rows.push(`<div class="mcheck"><span></span><span><strong>${this.t(tags.length ? "replUsedHere" : "replUsedNowhere")}</strong>${tags.length ? `<span class="exptags">${tags.map(x => `<span class="tag">${this.esc(x)}</span>`).join("")}</span>` : ""}</span></div>`);
+      used = `<div class="mcheck"><span></span><span><strong>${this.t(tags.length ? "replUsedHere" : "replUsedNowhere")}</strong>${tags.length ? `<span class="exptags">${tags.map(x => `<span class="tag">${this.esc(x)}</span>`).join("")}</span>` : ""}</span></div>`;
     }
     if (old && nu) {
       const same = (a, b) => (a ?? "") === (b ?? "");
@@ -483,7 +484,7 @@ class CleanupMixin {
       }
       if (!bad && old.has_statistics) rows.push(`<div class="mcheck"><span class="warn-t">!</span><span>${this.t("replStats")} <button class="link" data-repl-meter>${this.t("replStatsGo")}</button></span></div>`);
     }
-    return { html: rows.join(""), bad };
+    return { used, fit: rows.join(""), bad };
   }
 
   replaceCard() {
@@ -491,9 +492,9 @@ class CleanupMixin {
     const ready = this.replOld && this.replNew && !this.cleanupBusy && !checks.bad;
     const hints = this.successorHints(this.replOld, this.entityUnit(this.replOld), "data-repl-pick");
     return `<div class="panel" style="overflow:visible"><div class="panelhead"><div><h2>${this.t("replaceTitle")}</h2><p>${this.t("replaceHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
-      <div class="setrow"><div><label>${this.t("replaceOld")}</label></div>${this.pickerBox("replOld", "sensor.old_entity")}</div>
-      <div class="setrow"><div><label>${this.t("replaceNew")}</label></div>${this.pickerBox("replNew", "sensor.new_entity")}</div>
-      ${checks.html}${hints}<div class="setrow planfoot"><small class="u-m0">${this.t("repairDryRun")}</small><button class="btn primary" data-plan-create ${ready ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("replacePreview")}</button></div></div>`;
+      <div class="setrow"><div><label>${this.t("replaceOld")}</label></div><div>${this.pickerBox("replOld", "sensor.old_entity")}${checks.used}</div></div>
+      <div class="setrow"><div><label>${this.t("replaceNew")}</label></div><div>${this.pickerBox("replNew", "sensor.new_entity")}${checks.fit}</div></div>
+      ${hints}<div class="setrow planfoot"><small class="u-m0">${this.t("repairDryRun")}</small><button class="btn primary" data-plan-create ${ready ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("replacePreview")}</button></div></div>`;
   }
 
   // The checks that the panel can make before any preview: unit, classes and statistics of the two meters.
