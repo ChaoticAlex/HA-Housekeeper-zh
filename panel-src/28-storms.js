@@ -48,7 +48,7 @@ class StormsMixin {
     const title = group.type === "events" ? first.event_type : group.type === "integrations" ? first.title : first.name || first.entity_id;
     const id = group.type === "entities" && first.entity_id !== title ? this.rowId(first.entity_id) : "";
     const badges = group.items.map(f => `<span class="pill ${tone(f)}">${this.t(`stormKind_${f.kind}`)}</span>`).join("");
-    const lines = group.items.map(f => `<li><span>${this.t(`stormKind_${f.kind}`)}</span><span>${this.esc(this.stormFindingText(f))}</span></li>`).join("");
+    const lines = group.items.map(f => group.items.length === 1 ? `<li class="solo"><span>${this.esc(this.stormFindingText(f))}</span></li>` : `<li><span>${this.t(`stormKind_${f.kind}`)}</span><span>${this.esc(this.stormFindingText(f))}</span></li>`).join(""); // one reason: the badge already names it
     const chain = group.items.map(f => this.stormFollowers(f.followers)).find(Boolean);
     const used = chain ? `<li><span>${this.t("stormDependsLabel")}</span><span>${this.esc(chain)} ${this.t("stormDependsNote")}</span></li>` : "";
     const done = group.type === "entities" && (this.excludeSel.has(first.entity_id) || this.excludedIds().has(first.entity_id));
