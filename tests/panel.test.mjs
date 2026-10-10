@@ -2374,6 +2374,17 @@ test("the load view loads once per window, asks the backend with the right argum
   assert.equal(calls.length, before, "no repeated load");
 });
 
+test("an integration's loudest entities can be shown on their own and the filter can be cleared", () => {
+  const { el } = panel("en");
+  el.data = { ...DATA }; el._stormsRequested = 1;
+  el.storms = { ...STORMS, entities: [{ entity_id: "sensor.in", name: "In", entry_id: "e1", rows: 5, per_day: 5, no_new_state: 0, attr_bytes: null, peak_hour: null }, { entity_id: "sensor.out", name: "Out", entry_id: "e2", rows: 4, per_day: 4, no_new_state: 0, attr_bytes: null, peak_hour: null }] };
+  el.viewTab = { recload: "shares" };
+  assert.ok(el.stormsView().includes('data-storm-entry="e1"'));
+  el.stormEntry = "e1"; el.viewTab = { recload: "entities" };
+  const html = el.stormsView();
+  assert.ok(html.includes("sensor.in") && !html.includes("sensor.out") && html.includes("Only Cloud-Hub: 1 of 12") && html.includes("data-storm-entry-clear"));
+});
+
 const DBH = {
   available: true, busy: false, cached: false, took_ms: 3200, supported: true, dialect: "sqlite", db_bytes: 11 * 1024 ** 3, wal_bytes: 3 * 1024 ** 3, growth: { known: true, per_day: 80 * 1024 ** 2 }, restart_gaps: 2,
   findings: [
