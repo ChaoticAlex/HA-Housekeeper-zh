@@ -195,19 +195,6 @@ class DiagnosisMixin {
     }
     const quarantined = ["entity", "device"].includes(item.object_type) ? this.quarantineOf(item.object_id) : null;
     if (quarantined) facts.push([this.t("quarantine"), `${this.t("quarantineFact", { date: this.formatDate(quarantined.since), days: this.daysSince(quarantined.since) })}<span class="factaction">${this.releaseControl(quarantined)}</span>`]);
-    if (["automation", "script"].includes(item.object_type) && this.runs) {
-      const row = this.runsRow(item);
-      if (!row) facts.push([this.t("runsTab"), this.t("runsFactNone")]);
-      else {
-        facts.push([this.t("runsColRuns"), `${this.formatNumber(row.runs)}${row.lower_bound ? "+" : ""}<small>${this.t("runsColErrors")}: ${this.formatNumber(row.errors)} · ${this.t("runsColConditions")}: ${this.formatNumber(row.conditions)}</small>`]);
-        facts.push([this.t("runsColDuration"), `${this.runsDuration(row.mean_ms)} / ${this.runsDuration(row.max_ms)}`]);
-        facts.push([this.t("runsColTrend"), this.runsTrend(row)]);
-      }
-    }
-    if (item.object_type === "config_entry" && this.reliability?.available) {
-      const row = this.reliabilityRow(item);
-      if (row && row.availability !== null && row.availability !== undefined) facts.push([this.t("relFactAvail", { days: this.reliability.window_days }), `${this.formatNumber(row.availability)} %<small>${this.t("relEntities", { n: row.entities })}${row.shared_outages ? ` · ${this.t(row.shared_outages === 1 ? "relSharedOne" : "relShared", { n: row.shared_outages, longest: this.relDuration(row.longest_outage) })}` : ""}</small>`]);
-    }
     const note = item.status === "unavailable" && !finding && min > 0 ? `<p class="factnote">${this.t("belowThreshold", { days: min })}</p>` : "";
     return `<section class="panel"><div class="panelhead"><h2>${this.t("facts")}</h2></div><div class="facts">${facts.map(([k, v]) => `<div class="fact"><span>${k}</span><b>${v}</b></div>`).join("")}</div>${note}</section>`;
   }
@@ -340,7 +327,7 @@ class DiagnosisMixin {
       const cards = this.propertyCards(item);
       return `<div class="stack">${cards ? `<div class="propgrid">${cards}</div>` : `<section class="panel"><div class="panelhead"><h2>${this.t("registry")}</h2></div><div class="pad"><dl class="kv"><dt>${this.t("type")}</dt><dd>${this.t(item.object_type)}</dd>${fields.map(([k, v]) => `<dt>${this.esc(k)}</dt><dd>${this.esc(Array.isArray(v) ? v.join(", ") : v)}</dd>`).join("")}</dl></div></section>`}${automation}${this.detailLoading ? `<p class="sub">${this.t("loading")}</p>` : ""}</div>`;
     }
-    if (ACTION_TYPES.includes(item.object_type)) return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.nextStepBand(item, key)}${this.impactCard(item, key)}</div><div class="stack">${item.object_type === "entity" ? this.knownCard(item, key) : this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.noteCard(item)}</div></div>`;
+    if (ACTION_TYPES.includes(item.object_type)) return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.nextStepBand(item, key)}${this.impactCard(item, key)}</div><div class="stack">${KNOWN_TYPES.includes(item.object_type) ? this.knownCard(item, key) : this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.noteCard(item)}</div></div>`;
     return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.actionsCard(item, key)}${this.detailEditCard(item)}${this.impactCard(item, key)}</div><div class="stack">${this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.entityTrimCard(item)}${this.staleCard(item)}${this.noteCard(item)}</div></div>`;
   }
 }

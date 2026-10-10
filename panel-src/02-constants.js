@@ -70,6 +70,8 @@ const SEARCH_DEBOUNCE_MS = 150;
 // What can carry a label: everything with an entry in the entity registry.
 // Objects whose page keeps reading on the overview and puts everything that changes something under the tab "Actions".
 const ACTION_TYPES = ["entity", "device", "config_entry", "automation", "script", "scene"];
+// Objects whose overview sums up what is known in groups ("Known about …"); scenes keep the facts card.
+const KNOWN_TYPES = ["entity", "device", "config_entry", "automation", "script"];
 const LABEL_TYPES = ["entity", "automation", "script", "scene"];
 
 const NAV = [

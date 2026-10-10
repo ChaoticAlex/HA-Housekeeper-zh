@@ -1973,7 +1973,7 @@ test("reliability rows open the integration, and its detail page shows the numbe
   const html = shadow.innerHTML;
   assert.ok(html.includes('data-detail-tab="reliability"'));
   for (const text of ["Entities with downtime (20)", "Lamp &lt;i&gt;A&lt;/i&gt;", "91.2 %", 'data-object="entity:light.a"', "Showing the 1 with the lowest availability of 20"]) assert.ok(html.includes(text), text);
-  const facts = el.factsCard(entry, "config_entry:e1");
+  const facts = el.knownCard(entry, "config_entry:e1");
   assert.ok(facts.includes("Availability (7 days)") && facts.includes("93.4 %"));
   el.selected = { ...entry, object_id: "e3" }; el.detailTab = "reliability"; el.render();
   assert.ok(!shadow.innerHTML.includes('data-detail-tab="reliability"'), "no tab without numbers");
@@ -3477,6 +3477,30 @@ test("devices, automations and integrations share the layout: the overview reads
   const actions = el.detailPanel("actions", device, "device:d1");
   assert.ok(actions.includes("data-act-exchange") && actions.includes("data-de-area") && actions.includes("Name and classify"));
   assert.ok(el.detailPanel("actions", auto, "automation:a1").includes("data-act-label-plan"));
+});
+
+test("devices, integrations, automations and scripts sum up what is known in groups with the source of each line", () => {
+  const { el } = panel("en");
+  const device = { object_type: "device", object_id: "d1", name: "Plug", status: "active", manufacturer: "Shelly", model: "Plug S", sw_version: "1.14.0", area_id: "living", config_entry_ids: ["c1"], created_at: "2026-03-14T10:00:00+00:00" };
+  const entry = { object_type: "config_entry", object_id: "c1", name: "Shelly", status: "active", state: "loaded", integration_version: "2026.10.1", device_count: 7, entity_count: 2 };
+  const auto = { object_type: "automation", object_id: "automation.evening", name: "Evening", status: "active", state: "on", mode: "single", trigger_count: 2, condition_count: 1, action_count: 3, last_triggered: "2026-10-10T19:02:00+00:00" };
+  const e1 = { object_type: "entity", object_id: "sensor.a", name: "A", status: "active", device_id: "d1", config_entry_id: "c1" };
+  const e2 = { object_type: "entity", object_id: "sensor.b", name: "B", status: "unavailable", device_id: "d1", config_entry_id: "c1" };
+  el.data = { ...DATA, meta: { ...DATA.meta, recorder_available: true }, objects: [...DATA.objects, device, entry, auto, e1, e2, { object_type: "area", object_id: "living", name: "Living", status: "active" }],
+    edges: [{ source: "automation:automation.evening", target: "entity:sensor.a", relation: "TRIGGERS_ON", confidence: "certain" }, { source: "automation:automation.evening", target: "entity:sensor.gone", relation: "TRIGGERS_ON", confidence: "certain" }, { source: "script:script.night", target: "automation:automation.evening", relation: "CALLS", confidence: "certain" }], notes: [] };
+  el._rev = (el._rev || 0) + 1;
+  const dev = el.knownCard(device, "device:d1");
+  for (const text of ["Known about this device", "1 of 2 entities unavailable", "Shelly Plug S", "Firmware 1.14.0", "Living", "1 Automation"]) assert.ok(dev.includes(text), text);
+  el.storms = { available: true, per_day: 1000, entities: [{ entity_id: "sensor.a", entry_id: "c1", per_day: 150 }] };
+  el.reliability = { available: true, window_days: 7, entries: [{ entry_id: "c1", availability: 98.7, shared_outages: 3, longest_outage: 2460 }] };
+  const ent = el.knownCard(entry, "config_entry:c1");
+  for (const text of ["Known about this integration", "Loaded", "Availability (7 days)", "98.7 %", "Version 2026.10.1", "7 devices · 2 entities", "at least 150 records a day", "15 % of all records"]) assert.ok(ent.includes(text), text);
+  el.runs = { items: [{ entity_id: "automation.evening", runs: 212, errors: 9, conditions: 61, mean_ms: 1200, max_ms: 8400, per_day: [1, 2], findings: [] }] };
+  const aut = el.knownCard(auto, "automation:automation.evening");
+  for (const text of ["Known about this automation", "212 runs, 9 with an error", "2 triggers, 1 conditions, 3 actions", "2 objects", "1 of them missing", "sensor.gone", "Called by", "Last triggered"]) assert.ok(aut.includes(text), text);
+  assert.ok(aut.includes('class="ksrc">Runs'), "the runs are named as the source");
+  // the facts card keeps scenes and other objects
+  assert.ok(el.factsCard({ object_type: "scene", object_id: "scene.x", name: "S", status: "active" }, "scene:scene.x").includes(el.t("facts")));
 });
 
 test("the journal names the end of a follow-up and the safety line counts the watched plans", () => {
