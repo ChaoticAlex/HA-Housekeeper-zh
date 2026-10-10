@@ -750,6 +750,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.bindEntityRecorder(root);
     this.bindEntityTrim(root);
     this.bindScanPoints(root);
+    this.bindKnown(root);
     this.bindGoals(root);
     this.bindExchange(root);
     this.bindDiagnostics(root);

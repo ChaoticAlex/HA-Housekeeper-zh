@@ -1328,6 +1328,7 @@ class StylesMixin {
       .bkcsum{padding:14px 16px 0}.bkcsum .sumtiles{margin-bottom:0}.bkcrule{display:grid;gap:8px;margin:14px 16px;padding:12px 14px;border-radius:12px;background:var(--hk-soft)}.bkcrule .line{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.bkcrule input{width:76px}.bkcrule .line .btn{margin-left:auto}.bkcrule p,.bkcfoot small{display:block;margin:0;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));line-height:1.5}.bkcwarn{display:flex;gap:6px;align-items:flex-start;margin-top:4px;color:var(--hk-amber)}.bkcwarn ha-icon{--mdc-icon-size:14px;flex:none;margin-top:1px}.bkcfoot{display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;padding:14px 16px;border-top:1px solid var(--hk-border)}.bkcfoot>div{flex:1 1 260px;min-width:0}.bkcerr{margin:6px 0 0;color:var(--hk-red);font-size:calc(12px*var(--hk-fs,1))}@media(max-width:640px){.bkcrow{grid-auto-flow:row}.bkcrow>.pill{grid-column:2;justify-self:start}}
       @media(max-width:640px){.navtiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.navtiles .taskcard{grid-template-rows:auto auto;padding:10px}.navtiles .taskcard>ha-icon,.navtiles .taskcard>small{display:none}.toolbar.nosel [data-fsel-clear],.toolbar.nosel [data-sel-clear],.toolbar.nosel [data-sel-only],.toolbar.nosel .fbtns{display:none}}
       .hkmodal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(10,14,20,.55)}.hkdialog{width:min(520px,100%);max-height:calc(100vh - 32px);overflow:auto;border:1px solid var(--hk-border);border-radius:16px;background:var(--hk-surface);box-shadow:0 14px 40px rgba(0,0,0,.35)}.hkdialog .dhead{padding:16px 18px 4px}.hkdialog .dhead h2{margin:0}.hkdialog .dbody{display:grid;gap:12px;padding:10px 18px 14px}.hkdialog .dbody label{display:block;margin-bottom:4px;font-weight:600;font-size:calc(12.5px*var(--hk-fs,1))}.hkdialog .dbody input[type=text],.hkdialog .dbody input[type=datetime-local],.hkdialog .dbody textarea{width:100%;box-sizing:border-box}.hkdialog .dfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--hk-border);background:var(--hk-soft)}.hkdialog .dbtns,.logsuggest .dbtns{display:flex;gap:8px;margin-left:auto}.hkdialog .dquestion{font-weight:600}.hkdialog .danger-t{color:var(--hk-red)}.notechips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.notechips .chip{cursor:pointer}.notetwo{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.notetwo{grid-template-columns:1fr}}
+      .kngrp{padding:9px 16px 4px;border-top:1px solid var(--hk-border);background:var(--hk-soft);color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:700;letter-spacing:.05em;text-transform:uppercase}.kngrp:first-child{border-top:0}.knline{display:grid;grid-template-columns:20px minmax(110px,170px) minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 16px;border-top:1px solid var(--hk-border)}.kngrp+.knline{border-top:0}.knline .kk{color:var(--hk-muted)}.knline .kv small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.knline .ksrc{padding:1px 6px;border:1px solid var(--hk-border);border-radius:6px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));white-space:nowrap}.kdot{font-weight:700;text-align:center}.k-ok{color:var(--hk-green)}.k-warn{color:var(--hk-amber)}.k-red{color:var(--hk-red)}.k-mute{color:var(--hk-muted)}@media(max-width:640px){.knline{grid-template-columns:20px minmax(0,1fr)}.knline .kv{grid-column:2}.knline .ksrc{display:none}}
       .btn.small{padding:5px 11px;font-size:calc(13px*var(--hk-fs,1))}.notehint{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 16px}.notehint small{display:block;color:var(--hk-muted)}.row.seeall{justify-content:flex-start;color:var(--hk-blue-text);font-weight:600}.logfilters{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.logfilters .chip{cursor:pointer}.logfilters .chip.on{border-color:var(--hk-blue);color:var(--hk-blue-text)}.logsuggest{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:12px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 9%,transparent)}
       ${this.themeCss()}
     </style>`;
@@ -4013,31 +4014,14 @@ class DiagnosisMixin {
 
   factsCard(item, key) {
     const finding = this.data.findings.find(f => this.findingKey(f) === key);
-    const usage = this.edgesTo(key).filter(e => USAGE_RELATIONS.includes(e.relation)).length;
     const min = this.data.meta.min_unavailable_days || 0;
     const facts = [];
     if (item.status_since) facts.push([this.t("since"), `${this.formatDate(item.status_since)}<small>${this.esc(this.relTime(item.status_since))} · ${this.t("firstSeenNote")}</small>`]);
-    if (item.object_type === "entity") {
-      const when = value => `${this.esc(this.formatDate(value))}<small>${this.esc(this.relTime(value))}</small>`;
-      if (item.last_changed) {
-        facts.push([this.t("propLastChanged"), when(item.last_changed)]);
-        facts.push([this.t("propLastReported"), when(item.last_reported || item.last_updated)]);
-      } else facts.push([this.t("propLastChanged"), this.t("noState")]);
-    }
     if (["entity", "automation", "script", "scene", "dashboard"].includes(item.object_type)) {
       facts.push([this.t("finding"), finding ? `${this.pill(finding.classification)}<small>${this.t("certainty")}: ${Math.round(finding.confidence * 100)} %</small>` : this.t("noFinding")]);
     }
-    if (item.object_type === "entity") facts.push([this.t("refCount"), this.formatNumber(usage)]);
     const quarantined = ["entity", "device"].includes(item.object_type) ? this.quarantineOf(item.object_id) : null;
     if (quarantined) facts.push([this.t("quarantine"), `${this.t("quarantineFact", { date: this.formatDate(quarantined.since), days: this.daysSince(quarantined.since) })}<span class="factaction">${this.releaseControl(quarantined)}</span>`]);
-    if (item.object_type === "entity" && this.data.meta.recorder_available) {
-      if (item.has_statistics) this.ensureStatLast(item.object_id);
-      const last = this.statLast?.[item.object_id];
-      const lastLine = item.has_statistics && last ? `<small>${this.t("statLastEntry")}: ${this.esc(this.formatDate(new Date(last * 1000).toISOString()))} · ${this.esc(this.relTime(new Date(last * 1000).toISOString()))}</small>` : "";
-      const span = this.statSpan?.[item.object_id];
-      const spanLine = item.has_statistics && span?.first ? `<small>${this.t("statFirstEntry")}: ${this.esc(this.formatDate(new Date(span.first * 1000).toISOString()))} · ${this.t("statRows", { count: this.formatNumber(span.rows) })}</small>` : "";
-      facts.push([this.t("longTermStats"), `${this.t(item.has_statistics ? "yes" : "no")}${spanLine}${lastLine}`]);
-    }
     if (["automation", "script"].includes(item.object_type) && this.runs) {
       const row = this.runsRow(item);
       if (!row) facts.push([this.t("runsTab"), this.t("runsFactNone")]);
@@ -4050,12 +4034,6 @@ class DiagnosisMixin {
     if (item.object_type === "config_entry" && this.reliability?.available) {
       const row = this.reliabilityRow(item);
       if (row && row.availability !== null && row.availability !== undefined) facts.push([this.t("relFactAvail", { days: this.reliability.window_days }), `${this.formatNumber(row.availability)} %<small>${this.t("relEntities", { n: row.entities })}${row.shared_outages ? ` · ${this.t(row.shared_outages === 1 ? "relSharedOne" : "relShared", { n: row.shared_outages, longest: this.relDuration(row.longest_outage) })}` : ""}</small>`]);
-    }
-    if (item.object_type === "entity") {
-      const stable = this.stabilityOf(item);
-      if (stable?.missing) facts.push([this.t("stability"), this.t("stabilityMissing")]);
-      else if (stable?.info) facts.push([this.t("stability"), `<span class="pill ${stable.info.level === "flapping" ? "red" : "warn"}">${this.t(stable.info.level === "flapping" ? "relFlapping" : "relUnstable")}</span>${this.unstableLines(stable.info, stable.r.window_days).map(line => `<small>${line}</small>`).join("")}`]);
-      else if (stable) facts.push([this.t("stability"), `${this.t("stabilityOk")}<small>${this.t(stable.r.window_days === 1 ? "relWindow1" : "relWindow7")}</small>`]);
     }
     const note = item.status === "unavailable" && !finding && min > 0 ? `<p class="factnote">${this.t("belowThreshold", { days: min })}</p>` : "";
     return `<section class="panel"><div class="panelhead"><h2>${this.t("facts")}</h2></div><div class="facts">${facts.map(([k, v]) => `<div class="fact"><span>${k}</span><b>${v}</b></div>`).join("")}</div>${note}</section>`;
@@ -4187,7 +4165,7 @@ class DiagnosisMixin {
       const cards = this.propertyCards(item);
       return `<div class="stack">${cards ? `<div class="propgrid">${cards}</div>` : `<section class="panel"><div class="panelhead"><h2>${this.t("registry")}</h2></div><div class="pad"><dl class="kv"><dt>${this.t("type")}</dt><dd>${this.t(item.object_type)}</dd>${fields.map(([k, v]) => `<dt>${this.esc(k)}</dt><dd>${this.esc(Array.isArray(v) ? v.join(", ") : v)}</dd>`).join("")}</dl></div></section>`}${automation}${this.detailLoading ? `<p class="sub">${this.t("loading")}</p>` : ""}</div>`;
     }
-    return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.actionsCard(item, key)}${this.detailEditCard(item)}${this.impactCard(item, key)}</div><div class="stack">${this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.entityTrimCard(item)}${this.staleCard(item)}${this.noteCard(item)}</div></div>`;
+    return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.actionsCard(item, key)}${this.detailEditCard(item)}${this.impactCard(item, key)}</div><div class="stack">${item.object_type === "entity" ? this.knownCard(item, key) : this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.entityTrimCard(item)}${this.staleCard(item)}${this.noteCard(item)}</div></div>`;
   }
 }
 
@@ -8728,6 +8706,131 @@ class ExportMixin {
   }
 }
 
+// "Known about this entity": everything Housekeeper knows about one entity in one card, grouped, with the source of each line.
+// It replaces the facts card for entities; the recorder values come on request (the same load as the recorder view). Mixed into the panel in 99-register.js.
+Object.assign(TEXT.de, {
+  knownTitle: "Bekannt über diese Entität", knownHint: "Was Housekeeper aus Scan, Recorder, Freigaben und Logbuch weiß. Zeilen ohne Wissen fehlen.",
+  knownLoad: "Recorder-Werte laden", knownLoading: "Lädt …",
+  knownState: "Zustand", knownRecorder: "Recorder", knownUse: "Nutzung", knownCare: "Regeln und Pflege", knownHistory: "Verlauf",
+  knownSrcScan: "Scan", knownSrcRecorder: "Recorder", knownSrcRelations: "Beziehungen", knownSrcRules: "Regeln", knownSrcReliability: "Zuverlässigkeit", knownSrcLog: "Logbuch", knownSrcCorr: "Korrelation", knownSrcExposure: "Freigaben", knownSrcDecisions: "Entscheidungen",
+  knownRunning: "Zustand", knownDevice: "Gerät", knownAttrs: "Eigenschaften", knownUnit: "Einheit", knownClass: "Geräteklasse", knownStateClass: "Zustandsklasse",
+  knownWriteRate: "Schreibrate", knownRate: "{n} Einträge pro Tag", knownRank: "Platz {n} der lautesten", knownShare: "etwa {share} % aller Einträge", knownExcluded: "Wird nicht aufgezeichnet (Recorder-Filter)", knownQuiet: "Nicht unter den {n} lautesten Entitäten",
+  knownUsedIn: "Verwendet in", knownUsedNone: "Nirgends verwendet", knownAssist: "Für Assistenten", knownAssistYes: "Freigegeben für {list}", knownAssistNo: "Nicht freigegeben",
+  knownArea: "Bereich", knownIgnored: "Ignoriert", knownIgnoredYes: "Der Befund ist ausgeblendet", knownLog: "Logbuch", knownLogLine: "{n} Einträge, zuletzt „{title}“ am {date}", knownLogOne: "„{title}“ am {date}", knownCorr: "Zeitlicher Zusammenhang",
+});
+Object.assign(TEXT.en, {
+  knownTitle: "Known about this entity", knownHint: "What Housekeeper knows from the scan, the recorder, the exposure and the logbook. Lines without knowledge are left out.",
+  knownLoad: "Load recorder values", knownLoading: "Loading …",
+  knownState: "State", knownRecorder: "Recorder", knownUse: "Use", knownCare: "Rules and care", knownHistory: "History",
+  knownSrcScan: "Scan", knownSrcRecorder: "Recorder", knownSrcRelations: "Relations", knownSrcRules: "Rules", knownSrcReliability: "Reliability", knownSrcLog: "Logbook", knownSrcCorr: "Correlation", knownSrcExposure: "Exposure", knownSrcDecisions: "Decisions",
+  knownRunning: "State", knownDevice: "Device", knownAttrs: "Properties", knownUnit: "Unit", knownClass: "Device class", knownStateClass: "State class",
+  knownWriteRate: "Write rate", knownRate: "{n} records a day", knownRank: "Rank {n} of the loudest", knownShare: "about {share} % of all records", knownExcluded: "Not recorded (recorder filter)", knownQuiet: "Not among the {n} loudest entities",
+  knownUsedIn: "Used in", knownUsedNone: "Used nowhere", knownAssist: "For assistants", knownAssistYes: "Exposed to {list}", knownAssistNo: "Not exposed",
+  knownArea: "Area", knownIgnored: "Ignored", knownIgnoredYes: "The finding is hidden", knownLog: "Logbook", knownLogLine: "{n} entries, latest “{title}” on {date}", knownLogOne: "“{title}” on {date}", knownCorr: "Connection in time",
+});
+
+class KnownMixin {
+  // One line: tone dot, label, value (HTML), source tag. `tone` is ok, warn, red or mute.
+  knownLine(tone, label, value, source) {
+    const dot = { ok: "✓", warn: "!", red: "✕", mute: "·" }[tone] || "·";
+    return `<div class="knline"><span class="kdot k-${tone}">${dot}</span><span class="kk">${label}</span><span class="kv">${value}</span><span class="ksrc">${this.t(source)}</span></div>`;
+  }
+
+  knownGroup(title, lines) {
+    const rows = lines.filter(Boolean);
+    return rows.length ? `<div class="kngrp">${this.t(title)}</div>${rows.join("")}` : "";
+  }
+
+  // What hangs on the entity, by type: "3 automations, 1 script".
+  knownUsage(key) {
+    const counts = {};
+    for (const e of this.edgesTo(key)) if (USAGE_RELATIONS.includes(e.relation)) { const type = e.source.split(":")[0]; counts[type] = (counts[type] || 0) + 1; }
+    return Object.entries(counts).map(([type, n]) => `${this.formatNumber(n)} ${this.t(type)}`).join(", ");
+  }
+
+  knownLoadRecorder(id) {
+    if (!this.storms && !this.stormsLoading) this.loadStorms();
+    if (!this.entityRec?.[id]?.data && !this.entityRec?.[id]?.loading) this.loadEntityRecorder(id);
+  }
+
+  knownCard(item, key) {
+    const id = item.object_id, t = (k, v) => this.t(k, v);
+    const when = value => `${this.esc(this.formatDate(value))}<small>${this.esc(this.relTime(value))}</small>`;
+    const finding = this.data.findings.find(f => this.findingKey(f) === key);
+    this.ensureExposure();
+    // State
+    const device = item.device_id ? this.findObject(`device:${item.device_id}`) : null;
+    const entry = item.config_entry_id ? this.findObject(`config_entry:${item.config_entry_id}`) : null;
+    const stable = this.stabilityOf(item);
+    const state = [];
+    if (item.state !== null && item.state !== undefined) {
+      const tone = item.state === "unavailable" ? "red" : item.state === "unknown" ? "warn" : "ok";
+      const shown = item.state === "unavailable" || item.state === "unknown" ? t(item.state) : item.unit ? `${item.state} ${item.unit}` : item.state;
+      state.push(this.knownLine(tone, t("knownRunning"), `${this.esc(shown)}${item.status_since ? `<small>${t("since")}: ${this.esc(this.formatDate(item.status_since))} · ${this.esc(this.relTime(item.status_since))} · ${t("firstSeenNote")}</small>` : ""}`, "knownSrcScan"));
+    } else state.push(this.knownLine("mute", t("knownRunning"), t("noState"), "knownSrcScan"));
+    if (item.last_changed) state.push(this.knownLine("mute", t("propLastChanged"), when(item.last_changed), "knownSrcScan"), this.knownLine("mute", t("propLastReported"), when(item.last_reported || item.last_updated), "knownSrcScan"));
+    if (stable?.missing) state.push(this.knownLine("mute", t("stability"), t("stabilityMissing"), "knownSrcReliability"));
+    else if (stable?.info) state.push(this.knownLine(stable.info.level === "flapping" ? "red" : "warn", t("stability"), `<span class="pill ${stable.info.level === "flapping" ? "red" : "warn"}">${t(stable.info.level === "flapping" ? "relFlapping" : "relUnstable")}</span>${this.unstableLines(stable.info, stable.r.window_days).map(line => `<small>${line}</small>`).join("")}`, "knownSrcReliability"));
+    else if (stable) state.push(this.knownLine("ok", t("stability"), `${t("stabilityOk")}<small>${t(stable.r.window_days === 1 ? "relWindow1" : "relWindow7")}</small>`, "knownSrcReliability"));
+    const where = [device ? `${t("knownDevice")}: ${this.esc(device.name)}` : "", entry ? `${t("integration")}: ${this.esc(entry.name)}` : ""].filter(Boolean).join(" · ");
+    if (where) state.push(this.knownLine("mute", t("knownDevice"), where, "knownSrcScan"));
+    // Recorder
+    const rec = [];
+    const attrs = [item.unit && `${t("knownUnit")}: ${this.esc(item.unit)}`, item.device_class && `${t("knownClass")}: ${this.esc(item.device_class)}`, item.state_class && `${t("knownStateClass")}: ${this.esc(item.state_class)}`].filter(Boolean);
+    if (attrs.length) rec.push(this.knownLine("mute", t("knownAttrs"), attrs.join(" · "), "knownSrcScan"));
+    const recorder = this.data.meta.recorder_available;
+    if (recorder) {
+      if (item.has_statistics) this.ensureStatLast(id);
+      const last = this.statLast?.[id], span = this.statSpan?.[id];
+      const fmt = ts => this.esc(this.formatDate(new Date(ts * 1000).toISOString()));
+      const lines = [item.has_statistics && span?.first ? `<small>${t("statFirstEntry")}: ${fmt(span.first)} · ${t("statRows", { count: this.formatNumber(span.rows) })}</small>` : "", item.has_statistics && last ? `<small>${t("statLastEntry")}: ${fmt(last)} · ${this.esc(this.relTime(new Date(last * 1000).toISOString()))}</small>` : ""].join("");
+      rec.push(this.knownLine(item.has_statistics ? "ok" : "mute", t("longTermStats"), `${t(item.has_statistics ? "yes" : "no")}${lines}`, "knownSrcRecorder"));
+      const storms = this.storms?.available && !this.storms.busy ? this.storms : null;
+      if (storms) {
+        const idx = (storms.entities || []).findIndex(e => e.entity_id === id), row = storms.entities?.[idx];
+        if (row?.excluded) rec.push(this.knownLine("mute", t("knownWriteRate"), t("knownExcluded"), "knownSrcRecorder"));
+        else if (row) {
+          const share = storms.per_day ? Math.round((1000 * row.per_day) / storms.per_day) / 10 : null;
+          rec.push(this.knownLine(idx < 10 ? "warn" : "mute", t("knownWriteRate"), `${t("knownRate", { n: this.formatNumber(row.per_day) })}<small>${t("knownRank", { n: idx + 1 })}${share !== null ? ` · ${t("knownShare", { share: this.formatNumber(share) })}` : ""}</small>`, "knownSrcRecorder"));
+        } else if ((storms.entities || []).length >= 100) rec.push(this.knownLine("ok", t("knownWriteRate"), t("knownQuiet", { n: 100 }), "knownSrcRecorder"));
+      }
+    }
+    // Use
+    const used = this.knownUsage(key);
+    const use = [this.knownLine("mute", t("knownUsedIn"), used || t("knownUsedNone"), "knownSrcRelations")];
+    const expo = this.exposure;
+    if (expo && !this.exposureError) {
+      const hit = (expo.exposed_entities || []).find(e => e.entity_id === id);
+      if (hit) use.push(this.knownLine("mute", t("knownAssist"), t("knownAssistYes", { list: this.esc(hit.assistants.map(a => this.expoAssistantName(a)).join(", ")) }), "knownSrcExposure"));
+      else if ((expo.exposed_total || 0) <= (expo.exposed_entities || []).length) use.push(this.knownLine("mute", t("knownAssist"), t("knownAssistNo"), "knownSrcExposure"));
+    }
+    const areaId = item.area_id || device?.area_id, area = areaId ? this.findObject(`area:${areaId}`) : null;
+    if (area) use.push(this.knownLine("mute", t("knownArea"), this.esc(area.name), "knownSrcScan"));
+    // Rules and care
+    const care = [this.knownLine(finding ? "warn" : "ok", t("finding"), finding ? `${this.pill(finding.classification)}<small>${t("certainty")}: ${Math.round(finding.confidence * 100)} %</small>` : t("noFinding"), "knownSrcRules")];
+    if (finding?.ignored) care.push(this.knownLine("mute", t("knownIgnored"), t("knownIgnoredYes"), "knownSrcDecisions"));
+    const quarantined = this.quarantineOf(id);
+    if (quarantined) care.push(this.knownLine("warn", t("quarantine"), `${t("quarantineFact", { date: this.formatDate(quarantined.since), days: this.daysSince(quarantined.since) })}<span class="factaction">${this.releaseControl(quarantined)}</span>`, "knownSrcDecisions"));
+    // History
+    const mine = this.notesList().filter(n => n.target === key);
+    const hist = [];
+    if (mine.length) {
+      const n = mine[0], vars = { n: this.formatNumber(mine.length), title: this.esc(n.title), date: this.esc(this.formatDate(n.at)) };
+      hist.push(this.knownLine("mute", t("knownLog"), t(mine.length > 1 ? "knownLogLine" : "knownLogOne", vars), "knownSrcLog"));
+    }
+    const corr = finding ? this.corrLine(finding.key) : "";
+    if (corr) hist.push(this.knownLine("mute", t("knownCorr"), this.esc(corr), "knownSrcCorr"));
+    const note = item.status === "unavailable" && !finding && (this.data.meta.min_unavailable_days || 0) > 0 ? `<p class="factnote">${t("belowThreshold", { days: this.data.meta.min_unavailable_days })}</p>` : "";
+    const needLoad = recorder && !this.storms?.available && !this.stormsError;
+    const head = needLoad ? `<button class="btn" data-known-load="${this.esc(id)}" ${this.stormsLoading ? "disabled" : ""}>${t(this.stormsLoading ? "knownLoading" : "knownLoad")}</button>` : "";
+    return `<section class="panel"><div class="panelhead"><div><h2>${t("knownTitle")}</h2><p>${t("knownHint")}</p></div>${head}</div><div class="known">${this.knownGroup("knownState", state)}${this.knownGroup("knownRecorder", rec)}${this.knownGroup("knownUse", use)}${this.knownGroup("knownCare", care)}${this.knownGroup("knownHistory", hist)}</div>${note}</section>`;
+  }
+
+  bindKnown(root) {
+    root.querySelectorAll("[data-known-load]").forEach(el => el.onclick = () => this.knownLoadRecorder(el.dataset.knownLoad));
+  }
+}
+
 // The logbook: entries you write yourself in "Zigbee stick replaced", or accept as a suggestion after an action; mixed into the panel in 99-register.js.
 // They are kept by Housekeeper only and count as an event for the correlation, always worded "at about the same time".
 Object.assign(TEXT.de, {
@@ -10210,6 +10313,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.bindEntityRecorder(root);
     this.bindEntityTrim(root);
     this.bindScanPoints(root);
+    this.bindKnown(root);
     this.bindGoals(root);
     this.bindExchange(root);
     this.bindDiagnostics(root);
@@ -10426,7 +10530,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, RenameMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, ScanPointsMixin, SparklineMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, RenameMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }

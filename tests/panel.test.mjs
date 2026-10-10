@@ -1481,7 +1481,7 @@ test("the detail page keeps a summary on top and builds only the open tab", () =
   assert.equal(JSON.stringify(tabs), JSON.stringify(["overview", "relations", "technical", "attributes"]));
   assert.ok(/id="hk-tab-overview" aria-selected="true" aria-controls="hk-tabpanel" tabindex="0"/.test(html));
   assert.ok(/id="hk-tab-relations" aria-selected="false" aria-controls="hk-tabpanel" tabindex="-1"/.test(html), "roving tabindex");
-  assert.ok(html.includes('class="panelhead"') && html.includes(el.t("facts")), "overview: diagnosis and facts");
+  assert.ok(html.includes('class="panelhead"') && html.includes(el.t("knownTitle")), "overview: diagnosis and what is known");
   assert.ok(!html.includes("zebra-77") && !html.includes("u-1"), "other tabs are not built");
 
   html = detailTabsHtml(el, shadow, "attributes");
@@ -3423,6 +3423,24 @@ test("an own scan point sits in the history of the scans with its name, is set t
   el.compareBaseline = pin.id;
   await el.pinDelete(pin.id);
   assert.equal(sent.at(-2).action, "delete"); assert.equal(sent.at(-2).baseline, pin.id); assert.equal(el.compareBaseline, "previous");
+});
+
+test("the entity page sums up what is known in groups with the source of each line; recorder values come on request", () => {
+  const { el } = panel("en");
+  const light = { object_type: "entity", object_id: "sensor.power", name: "Power", status: "active", state: "412", unit: "W", device_class: "power", state_class: "measurement", has_statistics: true, last_changed: "2026-10-10T10:00:00+00:00", last_reported: "2026-10-10T10:01:00+00:00" };
+  el.data = { ...DATA, meta: { ...DATA.meta, recorder_available: true }, objects: [...DATA.objects, light], edges: [{ source: "automation:a1", target: "entity:sensor.power", relation: "TRIGGERED_BY", confidence: "certain" }], notes: [{ id: "n1", title: "Stick replaced", at: "2026-10-08T18:05:00+00:00", target: "entity:sensor.power", note: "", source: "me", ref: "" }] };
+  el._rev = (el._rev || 0) + 1;
+  el.exposure = { exposed_entities: [{ entity_id: "sensor.power", assistants: ["cloud.alexa"] }], exposed_total: 1 };
+  el.ensureExposure = () => {};
+  let html = el.knownCard(light, "entity:sensor.power");
+  for (const text of ["Known about this entity", "412 W", "Last state change", "Long-term statistics", "Unit: W", "Used in", "Stick replaced", "Load recorder values"]) assert.ok(html.includes(text), text);
+  assert.ok(html.includes('class="ksrc">Scan') && html.includes('class="ksrc">Recorder') && html.includes('class="ksrc">Logbook'), "each line names its source");
+  assert.ok(!html.includes("Write rate"), "no rate before the recorder values are loaded");
+  el.storms = { available: true, per_day: 1000, entities: [{ entity_id: "sensor.other", per_day: 500 }, { entity_id: "sensor.power", per_day: 120 }] };
+  html = el.knownCard(light, "entity:sensor.power");
+  assert.ok(html.includes("120 records a day") && html.includes("Rank 2 of the loudest") && html.includes("12 % of all records") && !html.includes("Load recorder values"));
+  el.storms.entities[1].excluded = true;
+  assert.ok(el.knownCard(light, "entity:sensor.power").includes("Not recorded (recorder filter)"));
 });
 
 test("the journal names the end of a follow-up and the safety line counts the watched plans", () => {
