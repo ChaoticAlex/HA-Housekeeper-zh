@@ -3365,7 +3365,8 @@ test("the selection can be trimmed: a plan with a day count for each entity, and
   el.excludeSel.add("sensor.hue");
   el.excludeSel.add("sensor.hue2");
   el.trimDays = 30;
-  assert.ok(el.excludeCard([]).includes("Trim the old history of the selection"));
+  const card = el.excludeCard([]);
+  assert.ok(card.includes("Trim the old history") && card.includes("2 entities selected") && card.includes("Create preview for 2 entities"));
   let sent;
   el._hass.callWS = async msg => {
     sent = msg;

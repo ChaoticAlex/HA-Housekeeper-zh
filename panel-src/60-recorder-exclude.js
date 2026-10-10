@@ -7,8 +7,10 @@ Object.assign(TEXT.de, {
   exStepsTitle: "So geht es weiter", exStep1: "Einfügen in die configuration.yaml. Gibt es dort schon einen recorder:-Abschnitt, trage nur die Zeilen unter entities: in dessen exclude:-Liste ein, nicht noch einmal recorder:.",
   exStep2: "Prüfen unter Entwicklerwerkzeuge → YAML → Konfiguration prüfen.", exStep3: "Neu starten. Der Recorder liest den Ausschluss nur beim Start. Danach steht die Entität hier als „bereits ausgeschlossen“.",
   exSuggest: "Empfohlen", exOnlySug: "Nur Vorschläge", exWhy: "Nicht verwendet, keine Statistik, {perDay} Zeilen pro Tag", exRule: "Empfohlen ist, was nirgends verwendet wird, keine Statistik hat und mindestens {min} Zeilen pro Tag schreibt.", exHasStats: "Statistik vorhanden", exUsedBy: "{count} Verwendungen",
-  trimTitle: "Alten Verlauf der Auswahl kürzen", trimHint: "Der Ausschluss wirkt nur für neue Daten. Hier löschst du die bereits gespeicherten Zustände der Auswahl, die älter sind als die gewählte Zeit. Statistiken bleiben. Daraus wird ein Plan unter Aufräumen: Vorschau mit Zeilenzahl, Bestätigung, Backup, Nachprüfung.",
-  trimKeep: "Behalten", trimDays: "{days} Tage", trimPreview: "Plan für das Kürzen erstellen", trimBusy: "Plan wird erstellt …", trimFailed: "Der Plan konnte nicht erstellt werden: {detail}",
+  trimTitle: "Alten Verlauf kürzen", trimHint: "Der Ausschluss gilt nur für neue Daten. Schon gespeicherte Zustände bleiben, bis du sie hier löschst.", trimChosen: "{count} Entitäten ausgewählt", trimChosenOne: "1 Entität ausgewählt",
+  trimKeep: "Zustände behalten, die jünger sind als", trimDays: "{days} Tage", trimGone: "Wird gelöscht", trimGoneSub: "Zustände älter als {days} Tage", trimStay: "Bleibt", trimStaySub: "die letzten {days} Tage", trimEarlier: "früher", trimAgo: "vor {days} Tagen", trimToday: "heute",
+  trimFactStats: "Statistiken bleiben", trimFactStatsSub: "Energie-Dashboard und Langzeitdiagramme ändern sich nicht.", trimFactRows: "Zeilenzahl erst in der Vorschau", trimFactRowsSub: "Du siehst pro Entität, wie viele Zeilen wegfallen, bevor etwas passiert.",
+  trimFoot: "Vor dem Löschen legt Housekeeper ein Home-Assistant-Backup mit Datenbank an. Zurücknehmen geht nur mit diesem Backup.", trimPreview: "Vorschau für {count} Entitäten erstellen", trimPreviewOne: "Vorschau für 1 Entität erstellen", trimBusy: "Plan wird erstellt …", trimFailed: "Der Plan konnte nicht erstellt werden: {detail}",
   trimSub: "älter als {days} Tage: {rows} Zeilen", reason_bad_keep_days: "Die Zeit zum Behalten ist ungültig.", reason_not_counted: "Die Zeilen ließen sich nicht zählen.", reason_nothing_to_trim: "Nichts zu löschen: Es gibt keine so alten Zustände.",
   check_history_trimmed: "Alter Verlauf ist gelöscht", abort_trim_unverified: "Gelöscht, aber die übrigen Zeilen ließen sich nicht zählen.", abort_trim_left: "Nach dem Löschen gab es noch ältere Zeilen.",
   confirmedSummaryTrim: "Der alte Verlauf von {count} Entitäten wird gelöscht. Vorher legt Housekeeper ein Home-Assistant-Backup an, einschließlich der Datenbank. Das lässt sich nur mit dem Backup zurücknehmen.",
@@ -20,8 +22,10 @@ Object.assign(TEXT.en, {
   exStepsTitle: "What to do next", exStep1: "Paste it into configuration.yaml. If there is a recorder: section already, add only the lines under entities: to its exclude: list, not recorder: again.",
   exStep2: "Check under Developer tools → YAML → Check configuration.", exStep3: "Restart. The recorder reads the exclusion only at start. Afterwards the entity shows here as “already excluded”.",
   exSuggest: "Recommended", exOnlySug: "Only suggestions", exWhy: "Not used, no statistics, {perDay} rows per day", exRule: "Recommended means: used nowhere, no statistics and at least {min} rows per day.", exHasStats: "has statistics", exUsedBy: "{count} uses",
-  trimTitle: "Trim the old history of the selection", trimHint: "The exclusion only works for new data. Here you delete the states already stored for the selection that are older than the chosen time. Statistics stay. This becomes a plan under Cleanup: preview with row count, confirmation, backup, check afterwards.",
-  trimKeep: "Keep", trimDays: "{days} days", trimPreview: "Create a plan to trim", trimBusy: "Creating the plan …", trimFailed: "The plan could not be created: {detail}",
+  trimTitle: "Trim the old history", trimHint: "The exclusion only applies to new data. States already stored stay until you delete them here.", trimChosen: "{count} entities selected", trimChosenOne: "1 entity selected",
+  trimKeep: "Keep states that are younger than", trimDays: "{days} days", trimGone: "Will be deleted", trimGoneSub: "States older than {days} days", trimStay: "Stays", trimStaySub: "the last {days} days", trimEarlier: "earlier", trimAgo: "{days} days ago", trimToday: "today",
+  trimFactStats: "Statistics stay", trimFactStatsSub: "The Energy dashboard and long-term charts do not change.", trimFactRows: "Row count comes with the preview", trimFactRowsSub: "You see per entity how many rows go before anything happens.",
+  trimFoot: "Before deleting, Housekeeper creates a Home Assistant backup including the database. It can only be undone with that backup.", trimPreview: "Create preview for {count} entities", trimPreviewOne: "Create preview for 1 entity", trimBusy: "Creating the plan …", trimFailed: "The plan could not be created: {detail}",
   trimSub: "older than {days} days: {rows} rows", reason_bad_keep_days: "The time to keep is not valid.", reason_not_counted: "The rows could not be counted.", reason_nothing_to_trim: "Nothing to delete: there are no states that old.",
   check_history_trimmed: "Old history is deleted", abort_trim_unverified: "Deleted, but the rows left could not be counted.", abort_trim_left: "Older rows were still there after deleting.",
   confirmedSummaryTrim: "The old history of {count} entities will be deleted. Housekeeper creates a Home Assistant backup first, including the database. It can only be taken back with that backup.",
@@ -85,9 +89,14 @@ class ExcludeMixin {
 
   // Deleting the states stored before: the exclusion alone leaves them. Made as an ordinary plan.
   trimBlock() {
-    const days = this.trimDays || 14, n = Math.min(this.excludeSel.size, MAX_PLAN_ACTIONS);
-    const options = [7, 14, 30, 90].map(d => `<option value="${d}" ${d === days ? "selected" : ""}>${this.t("trimDays", { days: d })}</option>`).join("");
-    return `<div class="trimbox"><h3>${this.t("trimTitle")}</h3><p class="factnote">${this.t("trimHint")}</p><div class="actions"><label class="factnote" for="hk-trim-days">${this.t("trimKeep")}</label><select id="hk-trim-days" data-trim-days>${options}</select><button class="btn accent" data-trim-plan ${this.trimBusy ? "disabled" : ""}>${this.trimBusy ? this.t("trimBusy") : `${this.t("trimPreview")} (${n})`}</button></div>${this.trimError ? `<p class="factnote" role="alert">${this.esc(this.t("trimFailed", { detail: this.trimError }))}</p>` : ""}</div>`;
+    const days = this.trimDays || 14, n = Math.min(this.excludeSel.size, MAX_PLAN_ACTIONS), all = this.excludeSel.size;
+    const seg = [7, 14, 30, 90].map(d => `<button type="button" class="${d === days ? "on" : ""}" data-trim-days="${d}" role="radio" aria-checked="${d === days}">${this.t("trimDays", { days: d })}</button>`).join("");
+    const timeline = all > 1 ? `<div><div class="trimline"><div class="gone"><strong>${this.t("trimGone")}</strong><small>${this.t("trimGoneSub", { days })}</small></div><div class="stay"><strong>${this.t("trimStay")}</strong><small>${this.t("trimStaySub", { days })}</small></div></div>
+        <div class="trimaxis"><span>${this.t("trimEarlier")}</span><span>${this.t("trimAgo", { days })}</span><span>${this.t("trimToday")}</span></div></div>
+      <div class="trimfacts"><div><strong>${this.t("trimFactStats")}</strong><small>${this.t("trimFactStatsSub")}</small></div><div><strong>${this.t("trimFactRows")}</strong><small>${this.t("trimFactRowsSub")}</small></div></div>` : "";
+    return `<div class="trimbox"><div class="trimhead"><div><h3>${this.t("trimTitle")}</h3><p class="factnote">${this.t("trimHint")}</p></div><span class="pill mute">${all === 1 ? this.t("trimChosenOne") : this.t("trimChosen", { count: all })}</span></div>
+      <div class="trimsentence"><strong>${this.t("trimKeep")}</strong><span class="trimseg" role="radiogroup">${seg}</span></div>${timeline}
+      <div class="trimfoot"><p class="factnote">${this.t("trimFoot")}</p><button class="btn primary" data-trim-plan ${this.trimBusy ? "disabled" : ""}>${this.trimBusy ? this.t("trimBusy") : n === 1 ? this.t("trimPreviewOne") : this.t("trimPreview", { count: n })}</button></div>${this.trimError ? `<p class="factnote" role="alert">${this.esc(this.t("trimFailed", { detail: this.trimError }))}</p>` : ""}</div>`;
   }
 
   async trimPlan() {
@@ -103,7 +112,7 @@ class ExcludeMixin {
   }
 
   bindExclude(root) {
-    root.querySelector("[data-trim-days]")?.addEventListener("change", e => { this.trimDays = Number(e.target.value) || 14; this.render(); });
+    root.querySelectorAll("[data-trim-days]").forEach(el => el.onclick = () => { this.trimDays = Number(el.dataset.trimDays) || 14; this.render(); });
     root.querySelector("[data-trim-plan]")?.addEventListener("click", () => this.trimPlan());
     root.querySelectorAll("[data-exsel]").forEach(el => el.onchange = () => { el.checked ? this.excludeSel.add(el.dataset.exsel) : this.excludeSel.delete(el.dataset.exsel); this.render(); });
     root.querySelector("[data-ex-suggested]")?.addEventListener("click", () => { (this._exSuggested || []).forEach(id => this.excludeSel.add(id)); this.render(); });
