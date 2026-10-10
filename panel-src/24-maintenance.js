@@ -54,7 +54,8 @@ class MaintenanceMixin {
     const took = c.computed_at && (c.stale || c.age_seconds >= 60) ? this.tookNote(c) : c.took_ms === null || c.took_ms === undefined ? "" : ` · ${this.t(c.cached ? "recorderCached" : "recorderTook", { ms: this.formatNumber(c.took_ms) })}`;
     const summary = this.t("recorderSummary", { states: this.formatNumber(c.total_states), size: this.formatBytes(c.size_bytes), days: c.keep_days ?? "—", stats: this.formatNumber(c.statistics_total) }) + took;
     const sortButtons = ["recent", "total"].map(key => `<button class="btn ${this.costSort === key ? "primary" : ""}" data-cost-sort="${key}" aria-pressed="${this.costSort === key}">${this.t(key === "recent" ? "recorderSortRecent" : "recorderSortTotal")}</button>`).join("");
-    const ranking = this.costRanking(), topShare = Math.max(...ranking.map(e => e.share), 0.1); // the bars are scaled to the largest entry
+    const all = this.costRanking(), topShare = Math.max(...all.map(e => e.share), 0.1); // the bars are scaled to the largest entry
+    const ranking = this.exOnlySug ? all.filter(e => e.suggest_exclude && !e.excluded) : all;
     const costRows = ranking.map(e => {
       const obj = this.findObject(`entity:${e.entity_id}`);
       const suggested = e.suggest_exclude && !e.excluded;

@@ -95,7 +95,8 @@ class StormsMixin {
     const findingPage = this.paginate("stormfind", foundFindings.rows);
     const attention = r.findings.length ? foundFindings.bar + foundFindings.none + findingPage.rows.map(f => this.stormFindingRow(f)).join("") + findingPage.footer : `<div class="emptymsg">${this.t("stormNone")}</div>`;
     const summary = `<p class="factnote">${this.t("stormSummary", { rows: this.formatNumber(r.total_rows), perDay: this.formatNumber(r.per_day), entities: this.formatNumber(r.entity_count), events: this.formatNumber(r.event_total) })}</p>`;
-    const foundEntities = this.searchList("stormentities", r.entities, item => [item.name, item.entity_id].join(" "));
+    const shownEntities = this.exOnlySug ? r.entities.filter(item => this.excludeInfo(item.entity_id, item.per_day, item.excluded).suggest) : r.entities;
+    const foundEntities = this.searchList("stormentities", shownEntities, item => [item.name, item.entity_id].join(" "));
     const entityPage = this.paginate("stormentities", foundEntities.rows);
     const table = r.entities.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormLoudest")}</h2><p>${this.t("stormLoudestHint")}</p></div></div>${this.excludeCard(r.entities.filter(item => this.excludeInfo(item.entity_id, item.per_day, item.excluded).suggest).map(item => item.entity_id))}${foundEntities.bar}${foundEntities.none}${entityPage.rows.map(item => this.stormEntityRow(item)).join("")}${entityPage.footer}</div>` : "";
     const foundShares = this.searchList("stormshares", r.integrations, item => [item.title, item.domain].join(" "));

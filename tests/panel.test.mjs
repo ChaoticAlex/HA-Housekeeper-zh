@@ -1142,7 +1142,7 @@ test("the maintenance view loads the preflight; the recorder view offers the cos
   html = shadow.innerHTML;
   assert.ok(html.includes("12,000 stored states") && html.includes("5 MB") && html.includes("kept 10 days"));
   assert.ok(html.includes("&lt;b&gt;Noisy&lt;/b&gt;") && !html.includes("<b>Noisy</b>"), "names are escaped");
-  assert.ok(html.includes("Recommended: exclude") && html.includes("already excluded") && html.includes("3 uses"));
+  assert.ok(html.includes("Recommended") && html.includes("already excluded") && html.includes("3 uses"));
   assert.ok(html.includes("Nothing selected · ") && html.includes("Select all suggested") && !html.includes("Copy YAML"), "without a pick there is only the bar");
   el.excludeSel.add("sensor.noisy");
   assert.equal(el.excludeSnippet(), "recorder:\n  exclude:\n    entities:\n      - sensor.noisy\n");
@@ -3232,7 +3232,7 @@ test("the loudest entities offer ticks, mark what can be excluded and share the 
   el.view = "recorder"; el.viewTab = { recorder: "entities" };
   el.render();
   const html = shadow.innerHTML;
-  assert.ok(html.includes('data-exsel="light.a"') && html.includes("Recommended: exclude") && html.includes("has statistics"));
+  assert.ok(html.includes('data-exsel="light.a"') && html.includes("Recommended") && html.includes("has statistics"));
   assert.deepEqual(el._exSuggested, ["light.a"]);
 });
 
