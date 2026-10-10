@@ -2855,8 +2855,8 @@ class CleanupMixin {
       const blocked = plan.actions.filter(a => a.verdict === "blocked").length;
       const nothing = plan.actions.length > 0 && plan.actions.every(a => a.verdict === "blocked" && (a.reasons || []).length > 0 && a.reasons.every(r => NOTHING_REASONS.includes(r)));
       const why = nothing ? this.t("wzIdleNothing") : blocked && blocked === plan.actions.length ? this.t(blocked === 1 ? "wzIdleBlockedOne" : "wzIdleBlocked", { n: blocked }) : this.t("wzIdleNone");
-      return `<section class="panel" data-plan-card data-plan-idle><div class="panelhead"><div><h2>${this.t("plan_status_dry_run")}</h2><p>${this.esc(this.formatDate(plan.created_at))}</p></div><button class="btn" data-plan-close>${this.t("planClose")}</button></div>
-        <div class="outcome ${nothing ? "ok" : "warn"}" role="status"><ha-icon icon="${nothing ? "mdi:check-circle-outline" : "mdi:information-outline"}"></ha-icon><span><strong>${this.t(nothing ? "wzIdleNothingTitle" : "wzIdleTitle")}</strong><small>${this.esc(why)}</small></span></div>${rowList.join("")}${this.reportBlock(plan)}</section>`;
+      return `<section class="panel" data-plan-card data-plan-idle><div class="panelhead"><div><h2>${this.t("plan_status_dry_run")}</h2><p>${this.esc(this.formatDate(plan.created_at))}</p></div></div>
+        <div class="outcome ${nothing ? "ok" : "warn"}" role="status"><ha-icon icon="${nothing ? "mdi:check-circle-outline" : "mdi:information-outline"}"></ha-icon><span><strong>${this.t(nothing ? "wzIdleNothingTitle" : "wzIdleTitle")}</strong><small>${this.esc(why)}</small></span></div>${rowList.join("")}${this.reportBlock(plan, `<button class="btn primary" data-plan-close>${this.t("planClose")}</button>`)}</section>`;
     }
     const rows = this.planRowsShown(plan, rowList);
     const summary = `<p class="factnote">${this.t("planSummary", { total: sm.total ?? 0, ok: sm.ok ?? 0, review: sm.review ?? 0, blocked: sm.blocked ?? 0 })}${extra ? ` ${this.esc(extra)}` : ""}</p>`;
@@ -6165,10 +6165,11 @@ class ExchangeMixin {
     this.render();
   }
 
-  reportBlock(plan) {
+  // `extra` adds a button after the report button, e.g. "Close" on a preview with nothing to run.
+  reportBlock(plan, extra = "") {
     const shown = this.report?.plan_id === plan.plan_id ? this.report : null;
     const body = shown ? `<div class="reportbox"><div class="reporthead"><strong><ha-icon icon="mdi:file-document-outline"></ha-icon>${this.t("reportTitle")}</strong><span class="reportbtns"><button class="btn accent" data-report-copy><ha-icon icon="mdi:content-copy"></ha-icon>${this.t("reportCopy")}</button><button class="btn accent" data-report-download><ha-icon icon="mdi:download"></ha-icon>${this.t("reportDownload")}</button></span></div><pre class="reportpre">${this.esc(shown.markdown)}</pre>${shown.anonymized || this.reportMessage ? `<p class="reportnote">${this.esc(shown.anonymized ? this.t("reportAnonymous") : "")} ${this.esc(this.reportMessage || "")}</p>` : ""}</div>` : (this.reportMessage ? `<small class="error">${this.esc(this.reportMessage)}</small>` : "");
-    return `<div class="setrow planfoot"><label class="factnote reportopt"><input type="checkbox" data-report-names ${this.reportClear ? "checked" : ""}><span><strong>${this.t("reportNames")}</strong><small>${this.t("reportNamesHint")}</small></span></label><button class="btn accent" data-report="${this.esc(plan.plan_id)}"><ha-icon icon="mdi:${shown ? "chevron-up" : "file-document-outline"}"></ha-icon>${this.t("reportButton")}</button></div>${body}`;
+    return `<div class="setrow planfoot"><label class="factnote reportopt"><input type="checkbox" data-report-names ${this.reportClear ? "checked" : ""}><span><strong>${this.t("reportNames")}</strong><small>${this.t("reportNamesHint")}</small></span></label>${extra ? `<span style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">` : ""}<button class="btn accent" data-report="${this.esc(plan.plan_id)}"><ha-icon icon="mdi:${shown ? "chevron-up" : "file-document-outline"}"></ha-icon>${this.t("reportButton")}</button>${extra ? `${extra}</span>` : ""}</div>${body}`;
   }
 
   // -- end state simulation ---------------------------------------------------------------
