@@ -102,3 +102,15 @@ Object.assign(TEXT.en, {
   meterFactOverlap: "{count} hours twice", meterFactOverlapText: "Overlapping values of the old meter are not copied; existing values are never overwritten",
   meterFactGap: "Gap of {hours} hours", meterFactGapText: "There are no values in this time; it stays empty",
 });
+Object.assign(TEXT.de, {
+  replUsedHere: "Hier wird sie verwendet", replUsedNowhere: "Die alte Entität wird nirgends verwendet: Es gibt nichts zu ersetzen.",
+  replSameEntity: "Alt und neu sind dieselbe Entität.", replOtherDomain: "Andere Art: Eine Entität lässt sich nur durch eine derselben Art ersetzen.", replNotWorking: "Die neue Entität läuft nicht (deaktiviert, nicht verfügbar oder verwaist).", replWorking: "Die neue Entität läuft",
+  replFits: "Gleiche Einheit ({unit}) und gleiche Geräteklasse", replFitsNoUnit: "Beide ohne Einheit, gleiche Geräteklasse", replDiffers: "Einheit oder Geräteklasse unterscheiden sich. Prüfe, ob der Ersatz sinnvoll ist.",
+  replStats: "Die alte Entität hat Statistik. Dieser Schritt verbindet sie nicht mit der neuen.", replStatsGo: "Zähler wechseln",
+});
+Object.assign(TEXT.en, {
+  replUsedHere: "Where it is used", replUsedNowhere: "The old entity is used nowhere: there is nothing to replace.",
+  replSameEntity: "Old and new are the same entity.", replOtherDomain: "Another kind: an entity can only be replaced by one of the same kind.", replNotWorking: "The new entity does not work (disabled, unavailable or orphaned).", replWorking: "The new entity works",
+  replFits: "Same unit ({unit}) and same device class", replFitsNoUnit: "Both without a unit, same device class", replDiffers: "Unit or device class differ. Check whether the replacement makes sense.",
+  replStats: "The old entity has statistics. This step does not join them to the new one.", replStatsGo: "Switch meter",
+});

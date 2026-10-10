@@ -2394,6 +2394,18 @@ test("a plan with several pairs sums up the changes and folds each row's details
   assert.equal(el.exchangeSummary({ actions: [plan.actions[0]] }), "", "a single action has no sum");
 });
 
+test("the replace form checks the pair before any preview and keeps the button off for a plan that would be blocked", () => {
+  const { el } = panel("en");
+  const ent = (id, extra = {}) => ({ object_type: "entity", object_id: id, name: id, status: "active", unit: "kWh", ...extra });
+  el.data = { ...DATA, objects: [ent("sensor.a", { has_statistics: true }), ent("sensor.b"), ent("sensor.c", { unit: "W" }), ent("sensor.d", { status: "disabled" })], edges: [{ source: "automation:automation.x", target: "entity:sensor.a", relation: "TRIGGERS_ON" }, { source: "dashboard:energy", target: "entity:sensor.a", relation: "SHOWS" }] };
+  el.replOld = "sensor.a"; el.replNew = "sensor.b";
+  let html = el.replaceCard();
+  assert.ok(html.includes("Automation") && html.includes("Energy dashboard") && html.includes("The new entity works") && html.includes("Same unit (kWh)") && html.includes("data-repl-meter") && !/data-plan-create\s+disabled/.test(html));
+  el.replNew = "sensor.c"; assert.ok(el.replaceCard().includes("Unit or device class differ"));
+  el.replNew = "sensor.d"; html = el.replaceCard();
+  assert.ok(html.includes("does not work") && /data-plan-create\s+disabled/.test(html));
+});
+
 const DBH = {
   available: true, busy: false, cached: false, took_ms: 3200, supported: true, dialect: "sqlite", db_bytes: 11 * 1024 ** 3, wal_bytes: 3 * 1024 ** 3, growth: { known: true, per_day: 80 * 1024 ** 2 }, restart_gaps: 2,
   findings: [

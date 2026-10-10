@@ -451,13 +451,49 @@ class CleanupMixin {
     return `<div class="setrow planfoot"><small class="u-m0">${this.t("successorHint")}</small><span class="chips">${found.map(o => `<button class="chip" ${attr}="${this.esc(o.object_id)}" title="${this.esc(o.name)}">${this.esc(o.object_id)}</button>`).join("")}</span></div>`;
   }
 
+  // Where an entity is used, from the relation graph: "Automation × 3". The Energy dashboard has its own tag.
+  usageTags(entityId) {
+    const counts = new Map();
+    for (const e of this.edgesTo(`entity:${entityId}`)) {
+      if (!USAGE_RELATIONS.includes(e.relation)) continue;
+      const label = e.source === "dashboard:energy" ? this.t("energyDashboard") : this.t(String(e.source).split(":")[0]);
+      counts.set(label, (counts.get(label) || 0) + 1);
+    }
+    return [...counts].map(([label, n]) => (n > 1 ? `${label} × ${n}` : label));
+  }
+
+  // What can be said before any preview: where the old entity is used, and whether the new one fits and works.
+  // `bad` is true when the plan would be blocked anyway, so the button stays off.
+  replaceChecks(oldId, newId) {
+    const old = oldId && this.findObject(`entity:${oldId}`), nu = newId && this.findObject(`entity:${newId}`);
+    const rows = [], mark = (tone, text) => `<div class="mcheck"><span class="${tone}-t">${{ ok: "✓", warn: "!", bad: "✕" }[tone]}</span><span>${text}</span></div>`;
+    let bad = false;
+    if (oldId) {
+      const tags = this.usageTags(oldId);
+      rows.push(`<div class="mcheck"><span></span><span><strong>${this.t(tags.length ? "replUsedHere" : "replUsedNowhere")}</strong>${tags.length ? `<span class="exptags">${tags.map(x => `<span class="tag">${this.esc(x)}</span>`).join("")}</span>` : ""}</span></div>`);
+    }
+    if (old && nu) {
+      const same = (a, b) => (a ?? "") === (b ?? "");
+      if (nu.object_id === old.object_id) { bad = true; rows.push(mark("bad", this.t("replSameEntity"))); }
+      else if (nu.object_id.split(".")[0] !== old.object_id.split(".")[0]) { bad = true; rows.push(mark("bad", this.t("replOtherDomain"))); }
+      else {
+        if (nu.status !== "active") { bad = true; rows.push(mark("bad", this.t("replNotWorking"))); }
+        else rows.push(mark("ok", this.t("replWorking")));
+        rows.push(same(old.unit, nu.unit) && same(old.device_class, nu.device_class) ? mark("ok", this.t(old.unit ? "replFits" : "replFitsNoUnit", { unit: this.esc(old.unit || "") })) : mark("warn", this.t("replDiffers")));
+      }
+      if (!bad && old.has_statistics) rows.push(`<div class="mcheck"><span class="warn-t">!</span><span>${this.t("replStats")} <button class="link" data-repl-meter>${this.t("replStatsGo")}</button></span></div>`);
+    }
+    return { html: rows.join(""), bad };
+  }
+
   replaceCard() {
-    const ready = this.replOld && this.replNew && !this.cleanupBusy;
+    const checks = this.replaceChecks(this.replOld, this.replNew);
+    const ready = this.replOld && this.replNew && !this.cleanupBusy && !checks.bad;
     const hints = this.successorHints(this.replOld, this.entityUnit(this.replOld), "data-repl-pick");
     return `<div class="panel" style="overflow:visible"><div class="panelhead"><div><h2>${this.t("replaceTitle")}</h2><p>${this.t("replaceHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
       <div class="setrow"><div><label>${this.t("replaceOld")}</label></div>${this.pickerBox("replOld", "sensor.old_entity")}</div>
       <div class="setrow"><div><label>${this.t("replaceNew")}</label></div>${this.pickerBox("replNew", "sensor.new_entity")}</div>
-      ${hints}<div class="setrow planfoot"><small class="u-m0">${this.t("repairDryRun")}</small><button class="btn primary" data-plan-create ${ready ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("replacePreview")}</button></div></div>`;
+      ${checks.html}${hints}<div class="setrow planfoot"><small class="u-m0">${this.t("repairDryRun")}</small><button class="btn primary" data-plan-create ${ready ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("replacePreview")}</button></div></div>`;
   }
 
   // The checks that the panel can make before any preview: unit, classes and statistics of the two meters.
