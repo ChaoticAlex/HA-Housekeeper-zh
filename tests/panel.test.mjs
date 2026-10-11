@@ -2974,6 +2974,24 @@ test("removing offers the recorder choice and sends it with the plan only when i
   assert.equal(created()[1].actions[0].recorder, "statistics");
 });
 
+test("a removal chooses the recorder data per entity: its own choice, the default, and never for the Energy dashboard", async () => {
+  const calls = [];
+  const { el } = panel("en");
+  const ent = (id, stats) => ({ object_type: "entity", object_id: id, name: id, status: "unavailable", has_statistics: stats });
+  el.data = { ...DATA, meta: { ...DATA.meta, recorder_available: true }, objects: [...DATA.objects, ent("sensor.a", true), ent("sensor.b", false), ent("sensor.e", true)], edges: [{ source: "dashboard:energy", target: "entity:sensor.e", relation: "SHOWS", confidence: "certain" }] };
+  el._rev = (el._rev || 0) + 1;
+  el._hass = { language: "en", callWS: async msg => { calls.push(msg); return { plan_id: "p", actions: [], status: "dry_run" }; } };
+  el.cleanupKind = "remove_entity"; el.cleanupSel = new Set(["sensor.a", "sensor.b", "sensor.e"]);
+  assert.ok(el.recorderOwn(el.findObject("entity:sensor.a")).includes("+ History") && !el.recorderOwn(el.findObject("entity:sensor.a")).includes(">Delete history<"), "an entity with statistics: keep, statistics, + history");
+  assert.ok(el.recorderOwn(el.findObject("entity:sensor.b")).includes(">Delete history<"), "without statistics only the history can go");
+  assert.ok(el.recorderOwn(el.findObject("entity:sensor.e")).includes("Energy dashboard uses it"));
+  el.cleanupRecorder = "statistics"; el.cleanupRecorderOwn = { "sensor.a": "keep", "sensor.b": "states" };
+  await el.createPlan();
+  assert.equal(JSON.stringify(calls.find(c => c.type === "ha_housekeeper/plan_create").actions), JSON.stringify([{ kind: "remove_entity", object_id: "sensor.a" }, { kind: "remove_entity", object_id: "sensor.b", recorder: "states" }, { kind: "remove_entity", object_id: "sensor.e" }]));
+  const sum = el.recorderSummary({ actions: [{ kind: "remove_entity", recorder: "states", used_by: [] }, { kind: "remove_entity", used_by: [] }, { kind: "remove_entity", used_by: [{ source: "dashboard:energy" }] }] });
+  assert.ok(sum.includes("1 delete statistics and history") && sum.includes("1 keep their data") && sum.includes("1 data locked (Energy)"));
+});
+
 test("the protection mode shows in the safety line and the settings, and is set through the server", async () => {
   const calls = [];
   const { el, shadow } = panel("en");

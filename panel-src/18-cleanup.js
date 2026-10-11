@@ -171,11 +171,43 @@ class CleanupMixin {
     this.render();
   }
 
-  // Removing an entity can also delete its recorder data; the default keeps it, and the choice holds for the whole plan.
+  // Removing an entity can also delete its recorder data: a default for the whole plan, and for each entity its own
+  // choice (a removal of devices keeps the one choice). The Energy dashboard's entities keep their data.
   recorderChoice(removal) {
     if (!removal || !this.data?.meta?.recorder_available) return "";
     const value = this.cleanupRecorder || "keep";
-    return `<label class="recchoice"><span>${this.t("recChoiceLabel")}</span><select data-recorder-choice aria-label="${this.esc(this.t("recChoiceLabel"))}">${["keep", "statistics", "states"].map(k => `<option value="${k}" ${value === k ? "selected" : ""}>${this.t(`recChoice_${k}`)}</option>`).join("")}</select></label>${value !== "keep" ? `<small class="recwarn">${this.t("recChoiceWarn")}</small>` : ""}`;
+    const perEntity = this.cleanupKind === "remove_entity";
+    const label = this.t(perEntity ? "recChoiceDefault" : "recChoiceLabel");
+    const anyDelete = value !== "keep" || (perEntity && [...this.cleanupSel].some(id => (this.cleanupRecorderOwn || {})[id] && this.cleanupRecorderOwn[id] !== "keep"));
+    return `<label class="recchoice"><span>${label}</span><select data-recorder-choice aria-label="${this.esc(label)}">${["keep", "statistics", "states"].map(k => `<option value="${k}" ${value === k ? "selected" : ""}>${this.t(`recChoice_${k}`)}</option>`).join("")}</select></label>${anyDelete ? `<small class="recwarn">${this.t(perEntity ? "recChoiceWarnOwn" : "recChoiceWarn")}</small>` : ""}`;
+  }
+
+  energyLocked(id) { return this.edgesTo(`entity:${id}`).some(e => e.source === "dashboard:energy" && USAGE_RELATIONS.includes(e.relation)); }
+
+  // What happens to the recorder data of one removed entity: its own choice, else the default; never for the Energy dashboard.
+  recorderFor(id) {
+    if (this.energyLocked(id)) return "keep";
+    return (this.cleanupRecorderOwn || {})[id] || this.cleanupRecorder || "keep";
+  }
+
+  // The choice of one row of the removal list; only entities that have a say: statistics, or at least a history to delete.
+  recorderOwn(item) {
+    if (this.cleanupKind !== "remove_entity" || item.object_type !== "entity" || !this.data?.meta?.recorder_available) return "";
+    if (this.energyLocked(item.object_id)) return `<span class="recown lock">${this.t("recOwnLock")}</span>`;
+    const value = this.recorderFor(item.object_id), id = this.esc(item.object_id);
+    const options = item.has_statistics ? [["keep", "recOwnKeep"], ["statistics", "recOwnStats"], ["states", "recOwnStates"]] : [["keep", "recOwnKeep"], ["states", "recOwnStatesOnly"]];
+    return `<span class="recown"><span class="trimseg" role="radiogroup" aria-label="${this.esc(this.t("recChoiceLabel"))}">${options.map(([v, k]) => `<button type="button" class="${value === v ? "on" : ""}" role="radio" aria-checked="${value === v}" data-rec-own="${id}|${v}">${this.t(k)}</button>`).join("")}</span><small>${item.has_statistics ? this.t("recOwnHasStats") : this.t("recOwnNoStats")}</small></span>`;
+  }
+
+  // The plan: how many removals delete what (statistics, statistics and history), keep their data, or are locked by the Energy dashboard.
+  recorderSummary(plan) {
+    const removals = (plan.actions || []).filter(a => REMOVAL_KINDS.includes(a.kind));
+    if (!removals.length || !this.data?.meta?.recorder_available) return "";
+    const count = f => removals.filter(f).length;
+    const energy = a => (a.used_by || []).some(u => u.source === "dashboard:energy");
+    const tags = [[count(a => a.recorder === "statistics"), "recSumStats", true], [count(a => a.recorder === "states"), "recSumStates", true], [count(a => !a.recorder && !energy(a)), "recSumKeep", false], [count(a => !a.recorder && energy(a)), "recSumEnergy", false]]
+      .filter(([n]) => n).map(([n, k, red]) => `<span class="pill ${red ? "warn" : "mute"}">${this.t(k, { n })}</span>`);
+    return tags.length ? `<p class="factnote recsum">${tags.join(" ")}</p>` : "";
   }
 
   async createPlan() {
@@ -187,7 +219,7 @@ class CleanupMixin {
       const actions = this.cleanupKind === "replace_references" ? [{ kind: "replace_references", object_id: this.replOld, target: this.replNew }]
         : this.cleanupKind === "migrate_meter" ? [{ kind: "migrate_meter", object_id: this.meterOld, target: this.meterNew, mode: this.meterMode }]
         : this.cleanupKind === "repair_counter" ? [this.counterRangeReq ? { kind: "repair_range", object_id: this.counterSel, mode: this.counterRangeReq.mode, range: this.counterRangeReq.range } : { kind: "repair_counter", object_id: this.counterSel, mode: this.counterMode || "hold" }]
-        : [...this.cleanupSel].map(object_id => ({ kind: this.cleanupKind, object_id, ...(REMOVAL_KINDS.includes(this.cleanupKind) && this.cleanupRecorder && this.cleanupRecorder !== "keep" ? { recorder: this.cleanupRecorder } : {}) }));
+        : [...this.cleanupSel].map(object_id => ({ kind: this.cleanupKind, object_id, ...(REMOVAL_KINDS.includes(this.cleanupKind) && this.recorderFor(object_id) !== "keep" ? { recorder: this.recorderFor(object_id) } : {}) }));
       const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_create", actions });
       this.openNewPlan(plan, null); this.toast(this.t("previewReady"));
     } catch (err) { this.cleanupError = err?.message || String(err); }
@@ -423,7 +455,7 @@ class CleanupMixin {
         <div class="outcome ${nothing ? "ok" : "warn"}" role="status"><ha-icon icon="${nothing ? "mdi:check-circle-outline" : "mdi:information-outline"}"></ha-icon><span><strong>${this.t(nothing ? "wzIdleNothingTitle" : "wzIdleTitle")}</strong><small>${this.esc(why)}</small></span></div>${rowList.join("")}${this.reportBlock(plan, `<button class="btn primary" data-plan-close>${this.t("planClose")}</button>`)}</section>`;
     }
     const rows = this.planRowsShown(plan, rowList);
-    const summary = this.exchangeSummary(plan) + `<p class="factnote">${this.t("planSummary", { total: sm.total ?? 0, ok: sm.ok ?? 0, review: sm.review ?? 0, blocked: sm.blocked ?? 0 })}${extra ? ` ${this.esc(extra)}` : ""}</p>`;
+    const summary = this.exchangeSummary(plan) + `<p class="factnote">${this.t("planSummary", { total: sm.total ?? 0, ok: sm.ok ?? 0, review: sm.review ?? 0, blocked: sm.blocked ?? 0 })}${extra ? ` ${this.esc(extra)}` : ""}</p>${this.recorderSummary(plan)}`;
     const flow = `<details class="rowdetails wzflow"><summary>${this.t("wzFlow")}</summary>${this.planStepper(plan, Boolean(conf))}</details>`;
     const body = stage === 0 ? `${summary}${this.simulationBlock(plan)}${rows}${control}`
       : stage === 1 ? `${summary}${this.simulationBlock(plan)}${rows}${control}`
@@ -588,7 +620,7 @@ class CleanupMixin {
       const badge = finding ? this.pill(finding.classification) : quarantine ? `<span class="pill ${left > 0 ? "mute" : "ok"}">${left > 0 ? this.t("daysLeftShort", { days: left }) : this.t("removalReady")}</span>` : `<span class="pill mute">${this.t("deviceEntities", { count: r.count })}</span>`;
       const sub = item.object_type === "device" ? [item.manufacturer, item.model].filter(Boolean).join(" ") || item.object_id : item.object_id;
       return `<div class="row"><input type="checkbox" data-sel="${this.esc(item.object_id)}" ${this.cleanupSel.has(item.object_id) ? "checked" : ""} ${left > 0 ? "disabled" : ""} aria-label="${this.esc(item.name)}">
-      <button class="row-text link" style="text-align:left" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong><small>${this.esc(sub)}</small></button>${badge}${quarantine ? this.releaseControl(quarantine) : ""}</div>`;
+      <button class="row-text link" style="text-align:left" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong><small>${this.esc(sub)}</small></button>${badge}${quarantine ? this.releaseControl(quarantine) : ""}${this.recorderOwn(item)}</div>`;
     };
     const n = this.cleanupSel.size;
     const candidates = `<div class="panel"><div class="panelhead"><div><h2>${this.t("cleanupCandidates")} (${all.length})</h2><p>${device ? this.t(removal ? "removalDeviceHint" : "deviceCandidatesHint", { days: limit }) : removal ? this.t("removalCandidatesHint", { days: limit }) : this.t("cleanupCandidatesHint")}</p></div></div>

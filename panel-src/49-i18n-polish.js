@@ -18,12 +18,12 @@ Object.assign(TEXT.en, {
   diagSecDims: "Assessment", diagSecCriteria: "Success criteria", diagSecMore: "Coverage, comparison and test run",
 });
 Object.assign(TEXT.de, {
-  recChoiceLabel: "Recorder-Daten", recChoice_keep: "Behalten", recChoice_statistics: "Statistik löschen", recChoice_states: "Statistik und Verlauf löschen",
+  recChoiceLabel: "Recorder-Daten", recChoice_keep: "Behalten", recChoice_statistics: "Statistik löschen", recChoice_states: "Statistik und Verlauf löschen", recChoiceDefault: "Standard für Recorder-Daten", recChoiceWarnOwn: "Gilt für Entitäten ohne eigene Wahl. Gelöschte Recorder-Daten lassen sich nur mit dem Backup zurückholen, auch wenn du das Entfernen rückgängig machst.", recOwnKeep: "Behalten", recOwnStats: "Statistik", recOwnStates: "+ Verlauf", recOwnStatesOnly: "Verlauf löschen", recOwnLock: "Daten bleiben, das Energie-Dashboard nutzt sie", recOwnHasStats: "mit Statistik", recOwnNoStats: "ohne Statistik", recSumStats: "{n} mit Statistik löschen", recSumStates: "{n} mit Statistik und Verlauf löschen", recSumKeep: "{n} behalten ihre Daten", recSumEnergy: "{n} Daten gesperrt (Energie)",
   recChoiceWarn: "Gilt für alle ausgewählten Entfernungen im Plan. Gelöschte Recorder-Daten lassen sich nur mit dem Backup zurückholen, auch wenn du das Entfernen rückgängig machst.",
   result_purge_failed: "Entfernt, Recorder-Daten nicht gelöscht",
 });
 Object.assign(TEXT.en, {
-  recChoiceLabel: "Recorder data", recChoice_keep: "Keep", recChoice_statistics: "Delete statistics", recChoice_states: "Delete statistics and history",
+  recChoiceLabel: "Recorder data", recChoice_keep: "Keep", recChoice_statistics: "Delete statistics", recChoice_states: "Delete statistics and history", recChoiceDefault: "Default for recorder data", recChoiceWarnOwn: "Applies to entities without a choice of their own. Deleted recorder data can only be restored from the backup, even if you undo the removal.", recOwnKeep: "Keep", recOwnStats: "Statistics", recOwnStates: "+ History", recOwnStatesOnly: "Delete history", recOwnLock: "Data stays, the Energy dashboard uses it", recOwnHasStats: "with statistics", recOwnNoStats: "without statistics", recSumStats: "{n} delete statistics", recSumStates: "{n} delete statistics and history", recSumKeep: "{n} keep their data", recSumEnergy: "{n} data locked (Energy)",
   recChoiceWarn: "Applies to every removal in the plan. Deleted recorder data can only be restored from the backup, even if you undo the removal.",
   result_purge_failed: "Removed, recorder data not deleted",
 });

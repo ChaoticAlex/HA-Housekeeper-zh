@@ -1344,6 +1344,7 @@ class StylesMixin {
       .actpanel .actsec{padding:9px 16px 4px;border-top:1px solid var(--hk-border);background:var(--hk-soft);color:var(--hk-muted);font-size:calc(11.5px*var(--hk-fs,1));font-weight:700;letter-spacing:.05em;text-transform:uppercase}.actpanel .actsec:first-child{border-top:0}.actrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 16px;border-top:1px solid var(--hk-border)}.actsec+.actrow{border-top:0}.actrow .acttext small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(12.5px*var(--hk-fs,1))}.actctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.actctl form{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin:0}.actctl .deform{display:flex;padding:0;border:0}.actblock{padding:10px 16px;border-top:1px solid var(--hk-border)}.actsec+.actblock{border-top:0}@media(max-width:640px){.actrow{grid-template-columns:1fr}.actctl,.actctl form{justify-content:flex-start}}
       .actpanel .actsec small{display:block;margin-top:2px;text-transform:none;letter-spacing:0;font-weight:400;font-size:calc(12.5px*var(--hk-fs,1))}.actrow .acttext small.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.actrow .acttext small.clamp.open{display:block;overflow:visible}.actrow .morebtn{margin-top:2px;font-size:calc(12.5px*var(--hk-fs,1));color:var(--hk-blue-text)}.unitfield{display:flex;align-items:center;flex:1;min-width:7rem;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);overflow:hidden}.unitfield input{flex:1;min-width:0;width:4rem;border:0;outline:0;background:transparent;color:inherit;font:inherit;padding:0 4px 0 10px;min-height:38px}.unitfield span{padding:0 10px;color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1))}.unitfield:focus-within{border-color:var(--hk-blue)}
       .propgrid{align-items:start}.propcol{display:grid;gap:16px;align-content:start;min-width:0}.propgrid .pad{padding:0}.propgrid .kv{grid-template-columns:11rem minmax(0,1fr);gap:0;font-size:calc(14px*var(--hk-fs,1))}.propgrid .kv dt{padding:10px 0 10px 18px}.propgrid .kv dd{padding:10px 18px 10px 14px}.propgrid .kv dt:not(:first-of-type),.propgrid .kv dt:not(:first-of-type)+dd{border-top:1px solid var(--hk-border)}.propgrid .kv dd .rel{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));white-space:nowrap}.propgrid .kv .chip{padding:1px 10px;font-size:calc(13px*var(--hk-fs,1))}
+      .row .recown{display:grid;gap:2px;justify-items:end;justify-self:end}.row .recown small{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.row .recown.lock{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));max-width:16rem;text-align:right}.row .recown .trimseg button{padding:5px 10px;font-size:calc(13px*var(--hk-fs,1))}.recsum{display:flex;flex-wrap:wrap;gap:6px}
       @media(max-width:700px){.propgrid .kv{grid-template-columns:minmax(0,1fr)}.propgrid .kv dt{padding:10px 18px 0}.propgrid .kv dd{padding:2px 18px 10px}.propgrid .kv dt:not(:first-of-type)+dd{border-top:0}.propgrid .kv dd .rel{white-space:normal}}
       .trimseg{width:max-content;max-width:100%;justify-self:start;align-self:start}.trimseg button:not(.on):hover{background:var(--hk-soft);color:var(--hk-text)}
       @media(min-width:761px){.actrow{grid-template-columns:minmax(0,1fr) minmax(0,380px)}.actctl,.actctl form,.actctl .deform{flex-wrap:nowrap;justify-content:flex-end}.actctl select,.actctl .deid{flex:1;width:auto}.actctl .deform .btn,.actctl .btn{width:auto}.actctl form{flex-wrap:wrap}}
@@ -2755,11 +2756,43 @@ class CleanupMixin {
     this.render();
   }
 
-  // Removing an entity can also delete its recorder data; the default keeps it, and the choice holds for the whole plan.
+  // Removing an entity can also delete its recorder data: a default for the whole plan, and for each entity its own
+  // choice (a removal of devices keeps the one choice). The Energy dashboard's entities keep their data.
   recorderChoice(removal) {
     if (!removal || !this.data?.meta?.recorder_available) return "";
     const value = this.cleanupRecorder || "keep";
-    return `<label class="recchoice"><span>${this.t("recChoiceLabel")}</span><select data-recorder-choice aria-label="${this.esc(this.t("recChoiceLabel"))}">${["keep", "statistics", "states"].map(k => `<option value="${k}" ${value === k ? "selected" : ""}>${this.t(`recChoice_${k}`)}</option>`).join("")}</select></label>${value !== "keep" ? `<small class="recwarn">${this.t("recChoiceWarn")}</small>` : ""}`;
+    const perEntity = this.cleanupKind === "remove_entity";
+    const label = this.t(perEntity ? "recChoiceDefault" : "recChoiceLabel");
+    const anyDelete = value !== "keep" || (perEntity && [...this.cleanupSel].some(id => (this.cleanupRecorderOwn || {})[id] && this.cleanupRecorderOwn[id] !== "keep"));
+    return `<label class="recchoice"><span>${label}</span><select data-recorder-choice aria-label="${this.esc(label)}">${["keep", "statistics", "states"].map(k => `<option value="${k}" ${value === k ? "selected" : ""}>${this.t(`recChoice_${k}`)}</option>`).join("")}</select></label>${anyDelete ? `<small class="recwarn">${this.t(perEntity ? "recChoiceWarnOwn" : "recChoiceWarn")}</small>` : ""}`;
+  }
+
+  energyLocked(id) { return this.edgesTo(`entity:${id}`).some(e => e.source === "dashboard:energy" && USAGE_RELATIONS.includes(e.relation)); }
+
+  // What happens to the recorder data of one removed entity: its own choice, else the default; never for the Energy dashboard.
+  recorderFor(id) {
+    if (this.energyLocked(id)) return "keep";
+    return (this.cleanupRecorderOwn || {})[id] || this.cleanupRecorder || "keep";
+  }
+
+  // The choice of one row of the removal list; only entities that have a say: statistics, or at least a history to delete.
+  recorderOwn(item) {
+    if (this.cleanupKind !== "remove_entity" || item.object_type !== "entity" || !this.data?.meta?.recorder_available) return "";
+    if (this.energyLocked(item.object_id)) return `<span class="recown lock">${this.t("recOwnLock")}</span>`;
+    const value = this.recorderFor(item.object_id), id = this.esc(item.object_id);
+    const options = item.has_statistics ? [["keep", "recOwnKeep"], ["statistics", "recOwnStats"], ["states", "recOwnStates"]] : [["keep", "recOwnKeep"], ["states", "recOwnStatesOnly"]];
+    return `<span class="recown"><span class="trimseg" role="radiogroup" aria-label="${this.esc(this.t("recChoiceLabel"))}">${options.map(([v, k]) => `<button type="button" class="${value === v ? "on" : ""}" role="radio" aria-checked="${value === v}" data-rec-own="${id}|${v}">${this.t(k)}</button>`).join("")}</span><small>${item.has_statistics ? this.t("recOwnHasStats") : this.t("recOwnNoStats")}</small></span>`;
+  }
+
+  // The plan: how many removals delete what (statistics, statistics and history), keep their data, or are locked by the Energy dashboard.
+  recorderSummary(plan) {
+    const removals = (plan.actions || []).filter(a => REMOVAL_KINDS.includes(a.kind));
+    if (!removals.length || !this.data?.meta?.recorder_available) return "";
+    const count = f => removals.filter(f).length;
+    const energy = a => (a.used_by || []).some(u => u.source === "dashboard:energy");
+    const tags = [[count(a => a.recorder === "statistics"), "recSumStats", true], [count(a => a.recorder === "states"), "recSumStates", true], [count(a => !a.recorder && !energy(a)), "recSumKeep", false], [count(a => !a.recorder && energy(a)), "recSumEnergy", false]]
+      .filter(([n]) => n).map(([n, k, red]) => `<span class="pill ${red ? "warn" : "mute"}">${this.t(k, { n })}</span>`);
+    return tags.length ? `<p class="factnote recsum">${tags.join(" ")}</p>` : "";
   }
 
   async createPlan() {
@@ -2771,7 +2804,7 @@ class CleanupMixin {
       const actions = this.cleanupKind === "replace_references" ? [{ kind: "replace_references", object_id: this.replOld, target: this.replNew }]
         : this.cleanupKind === "migrate_meter" ? [{ kind: "migrate_meter", object_id: this.meterOld, target: this.meterNew, mode: this.meterMode }]
         : this.cleanupKind === "repair_counter" ? [this.counterRangeReq ? { kind: "repair_range", object_id: this.counterSel, mode: this.counterRangeReq.mode, range: this.counterRangeReq.range } : { kind: "repair_counter", object_id: this.counterSel, mode: this.counterMode || "hold" }]
-        : [...this.cleanupSel].map(object_id => ({ kind: this.cleanupKind, object_id, ...(REMOVAL_KINDS.includes(this.cleanupKind) && this.cleanupRecorder && this.cleanupRecorder !== "keep" ? { recorder: this.cleanupRecorder } : {}) }));
+        : [...this.cleanupSel].map(object_id => ({ kind: this.cleanupKind, object_id, ...(REMOVAL_KINDS.includes(this.cleanupKind) && this.recorderFor(object_id) !== "keep" ? { recorder: this.recorderFor(object_id) } : {}) }));
       const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_create", actions });
       this.openNewPlan(plan, null); this.toast(this.t("previewReady"));
     } catch (err) { this.cleanupError = err?.message || String(err); }
@@ -3007,7 +3040,7 @@ class CleanupMixin {
         <div class="outcome ${nothing ? "ok" : "warn"}" role="status"><ha-icon icon="${nothing ? "mdi:check-circle-outline" : "mdi:information-outline"}"></ha-icon><span><strong>${this.t(nothing ? "wzIdleNothingTitle" : "wzIdleTitle")}</strong><small>${this.esc(why)}</small></span></div>${rowList.join("")}${this.reportBlock(plan, `<button class="btn primary" data-plan-close>${this.t("planClose")}</button>`)}</section>`;
     }
     const rows = this.planRowsShown(plan, rowList);
-    const summary = this.exchangeSummary(plan) + `<p class="factnote">${this.t("planSummary", { total: sm.total ?? 0, ok: sm.ok ?? 0, review: sm.review ?? 0, blocked: sm.blocked ?? 0 })}${extra ? ` ${this.esc(extra)}` : ""}</p>`;
+    const summary = this.exchangeSummary(plan) + `<p class="factnote">${this.t("planSummary", { total: sm.total ?? 0, ok: sm.ok ?? 0, review: sm.review ?? 0, blocked: sm.blocked ?? 0 })}${extra ? ` ${this.esc(extra)}` : ""}</p>${this.recorderSummary(plan)}`;
     const flow = `<details class="rowdetails wzflow"><summary>${this.t("wzFlow")}</summary>${this.planStepper(plan, Boolean(conf))}</details>`;
     const body = stage === 0 ? `${summary}${this.simulationBlock(plan)}${rows}${control}`
       : stage === 1 ? `${summary}${this.simulationBlock(plan)}${rows}${control}`
@@ -3172,7 +3205,7 @@ class CleanupMixin {
       const badge = finding ? this.pill(finding.classification) : quarantine ? `<span class="pill ${left > 0 ? "mute" : "ok"}">${left > 0 ? this.t("daysLeftShort", { days: left }) : this.t("removalReady")}</span>` : `<span class="pill mute">${this.t("deviceEntities", { count: r.count })}</span>`;
       const sub = item.object_type === "device" ? [item.manufacturer, item.model].filter(Boolean).join(" ") || item.object_id : item.object_id;
       return `<div class="row"><input type="checkbox" data-sel="${this.esc(item.object_id)}" ${this.cleanupSel.has(item.object_id) ? "checked" : ""} ${left > 0 ? "disabled" : ""} aria-label="${this.esc(item.name)}">
-      <button class="row-text link" style="text-align:left" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong><small>${this.esc(sub)}</small></button>${badge}${quarantine ? this.releaseControl(quarantine) : ""}</div>`;
+      <button class="row-text link" style="text-align:left" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong><small>${this.esc(sub)}</small></button>${badge}${quarantine ? this.releaseControl(quarantine) : ""}${this.recorderOwn(item)}</div>`;
     };
     const n = this.cleanupSel.size;
     const candidates = `<div class="panel"><div class="panelhead"><div><h2>${this.t("cleanupCandidates")} (${all.length})</h2><p>${device ? this.t(removal ? "removalDeviceHint" : "deviceCandidatesHint", { days: limit }) : removal ? this.t("removalCandidatesHint", { days: limit }) : this.t("cleanupCandidatesHint")}</p></div></div>
@@ -6825,12 +6858,12 @@ Object.assign(TEXT.en, {
   diagSecDims: "Assessment", diagSecCriteria: "Success criteria", diagSecMore: "Coverage, comparison and test run",
 });
 Object.assign(TEXT.de, {
-  recChoiceLabel: "Recorder-Daten", recChoice_keep: "Behalten", recChoice_statistics: "Statistik löschen", recChoice_states: "Statistik und Verlauf löschen",
+  recChoiceLabel: "Recorder-Daten", recChoice_keep: "Behalten", recChoice_statistics: "Statistik löschen", recChoice_states: "Statistik und Verlauf löschen", recChoiceDefault: "Standard für Recorder-Daten", recChoiceWarnOwn: "Gilt für Entitäten ohne eigene Wahl. Gelöschte Recorder-Daten lassen sich nur mit dem Backup zurückholen, auch wenn du das Entfernen rückgängig machst.", recOwnKeep: "Behalten", recOwnStats: "Statistik", recOwnStates: "+ Verlauf", recOwnStatesOnly: "Verlauf löschen", recOwnLock: "Daten bleiben, das Energie-Dashboard nutzt sie", recOwnHasStats: "mit Statistik", recOwnNoStats: "ohne Statistik", recSumStats: "{n} mit Statistik löschen", recSumStates: "{n} mit Statistik und Verlauf löschen", recSumKeep: "{n} behalten ihre Daten", recSumEnergy: "{n} Daten gesperrt (Energie)",
   recChoiceWarn: "Gilt für alle ausgewählten Entfernungen im Plan. Gelöschte Recorder-Daten lassen sich nur mit dem Backup zurückholen, auch wenn du das Entfernen rückgängig machst.",
   result_purge_failed: "Entfernt, Recorder-Daten nicht gelöscht",
 });
 Object.assign(TEXT.en, {
-  recChoiceLabel: "Recorder data", recChoice_keep: "Keep", recChoice_statistics: "Delete statistics", recChoice_states: "Delete statistics and history",
+  recChoiceLabel: "Recorder data", recChoice_keep: "Keep", recChoice_statistics: "Delete statistics", recChoice_states: "Delete statistics and history", recChoiceDefault: "Default for recorder data", recChoiceWarnOwn: "Applies to entities without a choice of their own. Deleted recorder data can only be restored from the backup, even if you undo the removal.", recOwnKeep: "Keep", recOwnStats: "Statistics", recOwnStates: "+ History", recOwnStatesOnly: "Delete history", recOwnLock: "Data stays, the Energy dashboard uses it", recOwnHasStats: "with statistics", recOwnNoStats: "without statistics", recSumStats: "{n} delete statistics", recSumStates: "{n} delete statistics and history", recSumKeep: "{n} keep their data", recSumEnergy: "{n} data locked (Energy)",
   recChoiceWarn: "Applies to every removal in the plan. Deleted recorder data can only be restored from the backup, even if you undo the removal.",
   result_purge_failed: "Removed, recorder data not deleted",
 });
@@ -11101,6 +11134,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-sel-page]")?.addEventListener("click", () => { (this._cleanupVisible || []).forEach(id => this.cleanupSel.add(id)); this.render(); });
     root.querySelector("[data-sel-clear]")?.addEventListener("click", () => { this.cleanupSel.clear(); this.render(); });
     root.querySelector("[data-recorder-choice]")?.addEventListener("change", ev => { this.cleanupRecorder = ev.target.value; this.render(); });
+    root.querySelectorAll("[data-rec-own]").forEach(el => el.addEventListener("click", () => { const [id, value] = el.dataset.recOwn.split("|"); this.cleanupRecorderOwn = { ...(this.cleanupRecorderOwn || {}), [id]: value }; this.render(); }));
     root.querySelectorAll("[data-qtype]").forEach(el => el.onclick = () => { this.quarantineType = el.dataset.qtype; this.cleanupKind = el.dataset.qtype === "device" ? "remove_device" : "remove_entity"; this.cleanupSel = new Set(); if (this.lv.cleanup) this.lv.cleanup.f = {}; this.pages = {}; this.render(); });
     const kind = root.querySelector("[data-cleanup-kind]"); if (kind) kind.onchange = () => { this.cleanupKind = kind.value; this.cleanupSel = new Set(); if (this.lv.cleanup) this.lv.cleanup.f = {}; this.pages = {}; this.render(); };
     root.querySelectorAll("[data-repair-task]").forEach(el => el.onclick = () => { this.repairTask = el.dataset.repairTask; this.cleanupKind = this.repairTask; this.cleanupSel = new Set(); this.plan = null; this.render(); });
