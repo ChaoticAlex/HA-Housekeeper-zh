@@ -127,8 +127,14 @@ class BatteryCareMixin {
       this.render();
     }));
     root.querySelectorAll("[data-rem-done]").forEach(el => el.addEventListener("click", () => this.reminderCall({ action: "done", reminder_id: el.dataset.remDone })));
-    root.querySelectorAll("[data-rem-hdel]").forEach(el => el.addEventListener("click", () => { const [id, day] = el.dataset.remHdel.split("|"); this.reminderCall({ action: "history_delete", reminder_id: id, day }); }));
-    root.querySelectorAll("[data-rem-del]").forEach(el => el.addEventListener("click", () => this.reminderCall({ action: "delete", reminder_id: el.dataset.remDel })));
+    root.querySelectorAll("[data-rem-hdel]").forEach(el => el.addEventListener("click", () => {
+      const [id, day] = el.dataset.remHdel.split("|"), r = (this.data.reminders || []).find(x => x.id === id);
+      this.confirmAsk(this.t("confirmRemDay", { date: this.remDay(day), name: r?.name || "" }), () => this.reminderCall({ action: "history_delete", reminder_id: id, day }));
+    }));
+    root.querySelectorAll("[data-rem-del]").forEach(el => el.addEventListener("click", () => {
+      const id = el.dataset.remDel, r = (this.data.reminders || []).find(x => x.id === id);
+      this.confirmAsk(this.t("confirmRem", { name: r?.name || "" }), () => this.reminderCall({ action: "delete", reminder_id: id }));
+    }));
   }
 }
 Object.assign(TEXT.de, {

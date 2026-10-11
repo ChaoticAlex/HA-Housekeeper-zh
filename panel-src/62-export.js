@@ -299,7 +299,7 @@ class ExportMixin {
     root.querySelectorAll("[data-xp-g]").forEach(el => el.onchange = () => { x.g[el.dataset.xpG] = el.checked; if (el.dataset.xpG === "attr" && !el.checked) x.attrs = new Set(); go(); });
     root.querySelectorAll("[data-xp-attr]").forEach(el => el.onclick = () => { x.attrs.has(el.dataset.xpAttr) ? x.attrs.delete(el.dataset.xpAttr) : x.attrs.add(el.dataset.xpAttr); go(); });
     root.querySelectorAll("[data-xp-tpl]").forEach(el => el.onclick = () => { const t = this.xpTemplates()[Number(el.dataset.xpTpl)]; if (t) this.xpApplyTemplate(t); go(); });
-    root.querySelectorAll("[data-xp-tpl-del]").forEach(el => el.onclick = () => { const list = this.xpTemplates(); list.splice(Number(el.dataset.xpTplDel), 1); this.xpSaveTemplates(list); go(); });
+    root.querySelectorAll("[data-xp-tpl-del]").forEach(el => el.onclick = () => { const i = Number(el.dataset.xpTplDel); this.confirmAsk(this.t("confirmTpl", { name: this.xpTemplates()[i]?.name || "" }), () => { const list = this.xpTemplates(); list.splice(i, 1); this.xpSaveTemplates(list); go(); }); });
     root.querySelectorAll("[data-xp-fmt]").forEach(el => el.onchange = () => { x.fmt = el.dataset.xpFmt; go(); });
     root.querySelector("[data-xp-ph]")?.addEventListener("change", ev => { x.ph = ev.target.checked; go(); });
     root.querySelector("[data-xp-sort]")?.addEventListener("change", ev => { x.sort = ev.target.checked; go(); });

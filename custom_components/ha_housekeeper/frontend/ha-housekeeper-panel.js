@@ -7231,8 +7231,14 @@ class BatteryCareMixin {
       this.render();
     }));
     root.querySelectorAll("[data-rem-done]").forEach(el => el.addEventListener("click", () => this.reminderCall({ action: "done", reminder_id: el.dataset.remDone })));
-    root.querySelectorAll("[data-rem-hdel]").forEach(el => el.addEventListener("click", () => { const [id, day] = el.dataset.remHdel.split("|"); this.reminderCall({ action: "history_delete", reminder_id: id, day }); }));
-    root.querySelectorAll("[data-rem-del]").forEach(el => el.addEventListener("click", () => this.reminderCall({ action: "delete", reminder_id: el.dataset.remDel })));
+    root.querySelectorAll("[data-rem-hdel]").forEach(el => el.addEventListener("click", () => {
+      const [id, day] = el.dataset.remHdel.split("|"), r = (this.data.reminders || []).find(x => x.id === id);
+      this.confirmAsk(this.t("confirmRemDay", { date: this.remDay(day), name: r?.name || "" }), () => this.reminderCall({ action: "history_delete", reminder_id: id, day }));
+    }));
+    root.querySelectorAll("[data-rem-del]").forEach(el => el.addEventListener("click", () => {
+      const id = el.dataset.remDel, r = (this.data.reminders || []).find(x => x.id === id);
+      this.confirmAsk(this.t("confirmRem", { name: r?.name || "" }), () => this.reminderCall({ action: "delete", reminder_id: id }));
+    }));
   }
 }
 Object.assign(TEXT.de, {
@@ -8943,7 +8949,7 @@ class ExportMixin {
     root.querySelectorAll("[data-xp-g]").forEach(el => el.onchange = () => { x.g[el.dataset.xpG] = el.checked; if (el.dataset.xpG === "attr" && !el.checked) x.attrs = new Set(); go(); });
     root.querySelectorAll("[data-xp-attr]").forEach(el => el.onclick = () => { x.attrs.has(el.dataset.xpAttr) ? x.attrs.delete(el.dataset.xpAttr) : x.attrs.add(el.dataset.xpAttr); go(); });
     root.querySelectorAll("[data-xp-tpl]").forEach(el => el.onclick = () => { const t = this.xpTemplates()[Number(el.dataset.xpTpl)]; if (t) this.xpApplyTemplate(t); go(); });
-    root.querySelectorAll("[data-xp-tpl-del]").forEach(el => el.onclick = () => { const list = this.xpTemplates(); list.splice(Number(el.dataset.xpTplDel), 1); this.xpSaveTemplates(list); go(); });
+    root.querySelectorAll("[data-xp-tpl-del]").forEach(el => el.onclick = () => { const i = Number(el.dataset.xpTplDel); this.confirmAsk(this.t("confirmTpl", { name: this.xpTemplates()[i]?.name || "" }), () => { const list = this.xpTemplates(); list.splice(i, 1); this.xpSaveTemplates(list); go(); }); });
     root.querySelectorAll("[data-xp-fmt]").forEach(el => el.onchange = () => { x.fmt = el.dataset.xpFmt; go(); });
     root.querySelector("[data-xp-ph]")?.addEventListener("change", ev => { x.ph = ev.target.checked; go(); });
     root.querySelector("[data-xp-sort]")?.addEventListener("change", ev => { x.sort = ev.target.checked; go(); });
@@ -10357,6 +10363,37 @@ class HistoryTabMixin {
   }
 }
 
+// ConfirmMixin: one dialog for every deletion of something you made yourself (a reminder, a plan, a saved view, a template).
+// The buttons open `confirmAsk`; nothing is deleted before "Delete". Mixed into the panel in 99-register.js.
+Object.assign(TEXT.de, { confirmTitle: "Wirklich löschen?", confirmDelete: "Löschen", confirmCancel: "Abbrechen", confirmRem: "Die Erinnerung „{name}“ und ihre Historie werden gelöscht.", confirmRemDay: "Der Eintrag vom {date} wird aus der Historie von „{name}“ gelöscht. Die Fälligkeit bleibt.", confirmPlan: "Der Plan vom {date} wird aus dem Journal gelöscht. Ein bereits ausgeführter Plan bleibt in Home Assistant wirksam; ein Rückgängig ist danach nicht mehr möglich.", confirmView: "Die gespeicherte Ansicht „{name}“ wird gelöscht.", confirmTpl: "Die Vorlage „{name}“ wird gelöscht." });
+Object.assign(TEXT.en, { confirmTitle: "Really delete?", confirmDelete: "Delete", confirmCancel: "Cancel", confirmRem: "The reminder “{name}” and its history will be deleted.", confirmRemDay: "The entry of {date} will be deleted from the history of “{name}”. The due day stays.", confirmPlan: "The plan of {date} will be deleted from the journal. A plan that already ran stays in effect in Home Assistant; undoing it is no longer possible afterwards.", confirmView: "The saved view “{name}” will be deleted.", confirmTpl: "The template “{name}” will be deleted." });
+
+class ConfirmMixin {
+  // `run` is called only after "Delete"; `text` is the sentence of the dialog.
+  confirmAsk(text, run) { this.confirmState = { text, run }; this._confirmFocus = true; this.render(); }
+
+  confirmClose() { this.confirmState = null; this.render(); }
+
+  confirmDialog() {
+    const c = this.confirmState;
+    if (!c) return "";
+    return `<div class="hkmodal" data-confirm-modal><div class="hkdialog" role="alertdialog" aria-modal="true" aria-labelledby="hk-confirm-head" aria-describedby="hk-confirm-text">
+      <div class="dhead"><h2 id="hk-confirm-head">${this.t("confirmTitle")}</h2></div>
+      <div class="dbody"><p id="hk-confirm-text" class="u-m0">${this.esc(c.text)}</p></div>
+      <div class="dfoot"><span></span><span class="dbtns"><button type="button" class="btn" data-confirm-no>${this.t("confirmCancel")}</button><button type="button" class="btn danger" data-confirm-yes>${this.t("confirmDelete")}</button></span></div></div></div>`;
+  }
+
+  bindConfirm(root) {
+    const modal = root.querySelector("[data-confirm-modal]");
+    if (!modal) return;
+    modal.querySelector("[data-confirm-no]").onclick = () => this.confirmClose();
+    modal.querySelector("[data-confirm-yes]").onclick = () => { const run = this.confirmState?.run; this.confirmState = null; this.render(); run?.(); };
+    modal.addEventListener("mousedown", ev => { if (ev.target === modal) this.confirmClose(); });
+    modal.addEventListener("keydown", ev => { if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); this.confirmClose(); } });
+    if (this._confirmFocus) { this._confirmFocus = false; modal.querySelector("[data-confirm-no]")?.focus(); }
+  }
+}
+
 class HAHousekeeperPanel extends HTMLElement {
   constructor() {
     super();
@@ -10799,7 +10836,7 @@ class HAHousekeeperPanel extends HTMLElement {
     // A view that throws shows a message under the top bar instead of freezing the panel on the last page.
     let page;
     try { page = this.selected && this.data ? this.detail() : `${this.heading()}${this.content()}`; } catch (err) { page = this.renderFailed(err); }
-    const shell = `<div class="shell${this.dense ? " dense" : ""}"><div class="stickyhead">${this.topbar()}${this.safetyBar()}</div><main class="main">${page}</main>${this.noteDialog()}${this.pinDialog()}<div class="sr-only" role="status" aria-live="polite">${this.esc(this.liveStatus())}</div></div>`;
+    const shell = `<div class="shell${this.dense ? " dense" : ""}"><div class="stickyhead">${this.topbar()}${this.safetyBar()}</div><main class="main">${page}</main>${this.noteDialog()}${this.pinDialog()}${this.confirmDialog()}<div class="sr-only" role="status" aria-live="polite">${this.esc(this.liveStatus())}</div></div>`;
     // The style sheet is only parsed again when the theme changed; otherwise just the page is replaced.
     const root = this.shadowRoot, css = this.themeCss(), current = root.querySelector?.(".shell");
     let swapped = false;
@@ -11103,6 +11140,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.bindMarks(root);
     this.bindStale(root);
     this.bindNotes(root);
+    this.bindConfirm(root);
     root.querySelectorAll("[data-health-why]").forEach(el => el.onclick = () => { this.healthWhy = !this.healthWhy; this.render(); });
     root.querySelector("[data-todo-jump]")?.addEventListener("click", () => { const card = root.querySelector("#hk-todo-card"); card?.scrollIntoView?.({ block: "start", behavior: "smooth" }); card?.focus?.({ preventScroll: true }); });
     this.bindExport(root);
@@ -11274,7 +11312,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-plan-open]").forEach(el => el.onclick = () => this.openPlan(el.dataset.planOpen));
     root.querySelectorAll("[data-merge-sel]").forEach(el => el.onchange = () => { this.mergeSel = new Set(this.mergeSel || []); el.checked ? this.mergeSel.add(el.dataset.mergeSel) : this.mergeSel.delete(el.dataset.mergeSel); this.render(); });
     root.querySelector("[data-merge]")?.addEventListener("click", () => this.mergePlans());
-    root.querySelectorAll("[data-plan-delete]").forEach(el => el.onclick = () => this.deletePlan(el.dataset.planDelete));
+    root.querySelectorAll("[data-plan-delete]").forEach(el => el.onclick = () => { const id = el.dataset.planDelete, plan = (this.journal || []).find(p => p.plan_id === id) || this.plan; this.confirmAsk(this.t("confirmPlan", { date: this.formatDate(plan?.created_at) }), () => this.deletePlan(id)); });
     root.querySelector("[data-opts-save]")?.addEventListener("click", () => this.saveOptions());
     // Saving stays off until a threshold differs from the saved one; typing must not rebuild the page.
     const optInputs = [...root.querySelectorAll("[data-opt]")];
@@ -11315,7 +11353,7 @@ class HAHousekeeperPanel extends HTMLElement {
       el.onkeydown = ev => { if (ev.key === "Escape") { ev.preventDefault(); this.cancelView(el.dataset.lviewName); } };
     });
     root.querySelectorAll("[data-lview-cancel]").forEach(el => el.onclick = () => this.cancelView(el.dataset.lviewCancel));
-    root.querySelectorAll("[data-lview-delete]").forEach(el => el.onclick = () => this.deleteView(el.dataset.lviewDelete));
+    root.querySelectorAll("[data-lview-delete]").forEach(el => el.onclick = () => { const id = el.dataset.lviewDelete; this.confirmAsk(this.t("confirmView", { name: this.lv[id]?.view || "" }), () => this.deleteView(id)); });
     root.querySelectorAll("[data-lf]").forEach(el => el.onchange = () => { const [id, name] = el.dataset.lf.split("|"); this.lv[id].f[name] = el.value; this.persistLv(id); this.pages = {}; this.render(); });
     root.querySelectorAll("[data-ls]").forEach(el => el.onchange = () => { const st = this.lv[el.dataset.ls]; st.sort = el.value; st.dir = this.lvDirs[el.dataset.ls][el.value] || "asc"; this.persistLv(el.dataset.ls); this.pages = {}; this.render(); });
     root.querySelectorAll("[data-lsort]").forEach(el => el.onclick = () => {
@@ -11331,7 +11369,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }

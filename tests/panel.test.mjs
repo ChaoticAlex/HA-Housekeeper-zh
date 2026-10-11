@@ -3011,6 +3011,20 @@ test("the History tab holds the logbook, the plans of the journal that named the
   assert.ok(el.detailTabs({ object_type: "dashboard", object_id: "x", name: "x" }, "dashboard:x").every(([id]) => id !== "history"), "kinds without a logbook have no tab");
 });
 
+test("deleting asks in a dialog first; the deletion runs only from its confirmation", async () => {
+  const { el } = panel("en");
+  let ran = 0;
+  assert.equal(el.confirmDialog(), "");
+  el.confirmAsk(el.t("confirmRem", { name: "Filter" }), () => { ran += 1; });
+  const html = el.confirmDialog();
+  assert.ok(html.includes("Really delete?") && html.includes("The reminder “Filter” and its history will be deleted.") && html.includes("data-confirm-yes") && html.includes("data-confirm-no"));
+  assert.equal(ran, 0, "nothing runs before the confirmation");
+  el.confirmClose();
+  assert.equal(el.confirmState, null);
+  assert.equal(ran, 0, "cancel deletes nothing");
+  assert.ok(el.t("confirmPlan", { date: "x" }).includes("no longer possible") && el.t("confirmRemDay", { date: "d", name: "n" }).includes("due day stays"));
+});
+
 test("the protection mode shows in the safety line and the settings, and is set through the server", async () => {
   const calls = [];
   const { el, shadow } = panel("en");
