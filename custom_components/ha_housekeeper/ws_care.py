@@ -13,7 +13,7 @@ from homeassistant.core import HomeAssistant, callback
 
 from . import battery_trend, battery_voltage
 from .backup_health import ATTEST_KINDS, backup_health
-from .battery_care import BatteryError
+from .battery_care import BatteryError, noted_types
 from .battery_kind import excluded
 from .const import DOMAIN
 from .db_health import growth
@@ -303,7 +303,10 @@ async def websocket_battery_trend(
                 "busy": False,
                 **result,
                 "voltage": voltage,
-                "types": scanner.batteries.types,
+                "types": {
+                    **noted_types(snapshot["objects"], wanted),
+                    **scanner.batteries.types,
+                },
             }
         ),
     )

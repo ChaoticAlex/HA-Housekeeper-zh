@@ -282,6 +282,6 @@ class UnusedMixin {
     const head = `<div class="panelhead"><div><h2>${this.t("btTitle")}</h2><p>${this.t("btHint")}</p></div><div class="actions"><button class="btn" data-bt-refresh ${this.batteryTrendLoading ? "disabled" : ""}>${this.t("backupRefresh")}</button></div></div>`;
     const body = list.length ? this.batteryTable(list) : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t(all.length ? "noMatches" : "noBatteries")}</div>`;
     this.ensureBatteryTrend();
-    return `<div class="stack">${chips}${this.batteryNeed()}<div class="panel">${head}${bar}${body}${notes}</div>${this.batteryKindCard()}</div>`;
+    return `<div class="stack">${chips}${this.batteryNeed()}${this.batteryForecastCard(all)}<div class="panel">${head}${bar}${body}${notes}</div>${this.batteryKindCard()}</div>`;
   }
 }

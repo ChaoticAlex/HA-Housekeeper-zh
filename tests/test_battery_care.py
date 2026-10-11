@@ -7,7 +7,7 @@ from datetime import UTC, date, datetime, timedelta
 import pytest
 from homeassistant.core import HomeAssistant
 
-from custom_components.ha_housekeeper.battery_care import BatteryError, BatteryStore
+from custom_components.ha_housekeeper.battery_care import BatteryError, BatteryStore, noted_types
 from custom_components.ha_housekeeper.battery_trend import DAY, build, detect_replacement
 from custom_components.ha_housekeeper.criteria import CriteriaStore
 
@@ -141,3 +141,19 @@ def test_a_fall_further_away_than_ninety_days_is_not_given_a_number() -> None:
     assert estimate(slow, 20)["state"] == "far" and estimate(slow, 20)["days_left"] is None
     near = [((NOW - timedelta(days=9 - i)).timestamp(), 100 - 2 * i) for i in range(10)]
     assert estimate(near, 20)["state"] == "falling"
+
+
+def test_noted_types_come_from_the_battery_notes_sensor_of_the_device() -> None:
+    def entity(object_id: str, device: str, **extra: object) -> dict:
+        return {"object_type": "entity", "object_id": object_id, "device_id": device, **extra}
+
+    objects = [
+        entity("sensor.a_battery", "d1"),
+        entity("sensor.a_t", "d1", platform="battery_notes",
+               unique_id="a_battery_type", state="2× AAA"),
+        entity("sensor.b_battery", "d2"),
+        entity("sensor.b_t", "d2", platform="battery_notes",
+               unique_id="b_battery_type", state="unknown"),
+    ]
+    found = noted_types(objects, ["sensor.a_battery", "sensor.b_battery"])
+    assert found == {"sensor.a_battery": "2× AAA"}

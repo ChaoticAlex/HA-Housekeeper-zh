@@ -22,6 +22,28 @@ TYPE_MAX = 30
 ENTITY = re.compile(r"^[a-z0-9_]+\.[a-z0-9_]+$")
 
 
+def noted_types(objects: list[dict[str, Any]], entity_ids: Any) -> dict[str, str]:
+    """The battery type the integration Battery Notes keeps as a sensor of the same device.
+
+    Only for the given battery sensors, and only when the sensor has a value; Housekeeper's own
+    type is applied over it by the caller.
+    """
+    by_device: dict[str, str] = {}
+    devices: dict[str, str] = {}
+    wanted = set(entity_ids)
+    for o in objects:
+        if o.get("object_type") != "entity" or not o.get("device_id"):
+            continue
+        is_type = str(o.get("unique_id") or "").endswith("_battery_type")
+        if o.get("platform") == "battery_notes" and is_type:
+            value = str(o.get("state") or "").strip()
+            if value and value.lower() not in ("unknown", "unavailable", "none"):
+                by_device[o["device_id"]] = value[:TYPE_MAX]
+        if o["object_id"] in wanted:
+            devices[o["object_id"]] = o["device_id"]
+    return {e: by_device[d] for e, d in devices.items() if d in by_device}
+
+
 class BatteryError(Exception):
     """The input was not accepted; the message names the field."""
 
