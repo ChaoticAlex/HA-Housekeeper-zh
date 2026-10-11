@@ -7117,7 +7117,8 @@ Object.assign(TEXT.en, {
 class BatteryCareMixin {
   async loadBatteryTrend(refresh = false) {
     this.batteryTrendLoading = true; this.render();
-    try { this.batteryTrend = await this._hass.callWS({ type: "ha_housekeeper/battery_trend", refresh }); this.batteryTrendError = ""; }
+    const epoch = this._btEpoch || 0;
+    try { const reply = await this._hass.callWS({ type: "ha_housekeeper/battery_trend", refresh }); if (epoch === (this._btEpoch || 0)) { this.batteryTrend = reply; this._btRequested = true; } else this._btRequested = false; this.batteryTrendError = ""; }
     catch (err) { this.batteryTrendError = err?.message || String(err); }
     this.batteryTrendLoading = false; this.render();
   }
@@ -9950,7 +9951,7 @@ class BatteryKindMixin {
   batteryKindItems() {
     const mine = [], proposed = [];
     for (const o of this.data.objects) {
-      if (o.object_type !== "entity" || o.device_class !== "battery" || o.status !== "active") continue;
+      if (o.object_type !== "entity" || (o.device_class !== "battery" && !o.battery_kind) || o.status !== "active") continue;
       if (BATTERY_KINDS.includes(o.battery_kind)) mine.push(o);
       else if (!o.battery_kind && o.battery_suggest) proposed.push(o);
     }
@@ -9996,6 +9997,7 @@ class BatteryKindMixin {
 
   async batterySetKinds(items) {
     this.bkMessage = ""; this.bkAsk = false;
+    this._btEpoch = (this._btEpoch || 0) + 1;  // a forecast that is still on its way was asked for before and is dropped
     try {
       await this._hass.callWS({ type: "ha_housekeeper/battery_kind_set", items });
       this.bkEdit = "";

@@ -2,7 +2,8 @@
 class BatteryCareMixin {
   async loadBatteryTrend(refresh = false) {
     this.batteryTrendLoading = true; this.render();
-    try { this.batteryTrend = await this._hass.callWS({ type: "ha_housekeeper/battery_trend", refresh }); this.batteryTrendError = ""; }
+    const epoch = this._btEpoch || 0;
+    try { const reply = await this._hass.callWS({ type: "ha_housekeeper/battery_trend", refresh }); if (epoch === (this._btEpoch || 0)) { this.batteryTrend = reply; this._btRequested = true; } else this._btRequested = false; this.batteryTrendError = ""; }
     catch (err) { this.batteryTrendError = err?.message || String(err); }
     this.batteryTrendLoading = false; this.render();
   }

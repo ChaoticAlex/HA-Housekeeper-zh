@@ -164,3 +164,12 @@ def test_battery_notes_entities_never_count_as_a_battery() -> None:
 
     assert excluded({"platform": "battery_notes", "device_class": "battery"})
     assert not excluded({"platform": "zha", "device_class": "battery"})
+
+
+def test_a_decided_volt_sensor_gets_its_kind_although_its_class_is_voltage() -> None:
+    from custom_components.ha_housekeeper.battery_kind import apply_battery_kinds, excluded
+
+    volt = {"object_type": "entity", "object_id": "sensor.starter_voltage", "device_class": "voltage"}
+    other = {"object_type": "entity", "object_id": "sensor.mains", "device_class": "voltage"}
+    apply_battery_kinds([volt, other], {"sensor.starter_voltage": "other"})
+    assert excluded(volt) and "battery_kind" not in other

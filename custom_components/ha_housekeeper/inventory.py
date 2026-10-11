@@ -1068,6 +1068,8 @@ class InventoryScanner:
         if not snapshot:
             return
         apply_battery_kinds(snapshot["objects"], self.batteries.kinds)
+        # The forecast was read for the sensors of the time before; the next one reads them anew.
+        self.hass.data.get(DOMAIN, {}).get("query_cache", {}).pop("battery_trend", None)
         entities = [o for o in snapshot["objects"] if o["object_type"] == "entity"]
         snapshot["meta"]["low_batteries"] = len(low_battery_ids(entities, self.low_battery_percent))
         async_dispatcher_send(self.hass, SIGNAL_SCAN_COMPLETE)

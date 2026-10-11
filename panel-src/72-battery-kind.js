@@ -34,7 +34,7 @@ class BatteryKindMixin {
   batteryKindItems() {
     const mine = [], proposed = [];
     for (const o of this.data.objects) {
-      if (o.object_type !== "entity" || o.device_class !== "battery" || o.status !== "active") continue;
+      if (o.object_type !== "entity" || (o.device_class !== "battery" && !o.battery_kind) || o.status !== "active") continue;
       if (BATTERY_KINDS.includes(o.battery_kind)) mine.push(o);
       else if (!o.battery_kind && o.battery_suggest) proposed.push(o);
     }
@@ -80,6 +80,7 @@ class BatteryKindMixin {
 
   async batterySetKinds(items) {
     this.bkMessage = ""; this.bkAsk = false;
+    this._btEpoch = (this._btEpoch || 0) + 1;  // a forecast that is still on its way was asked for before and is dropped
     try {
       await this._hass.callWS({ type: "ha_housekeeper/battery_kind_set", items });
       this.bkEdit = "";
