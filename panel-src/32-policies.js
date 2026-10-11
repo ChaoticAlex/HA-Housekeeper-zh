@@ -58,7 +58,7 @@ class PoliciesMixin {
     return this.changePolicy({ type: "ha_housekeeper/set_policy_limit", limit });
   }
 
-  polItemRow(item) {
+  polItemRow(item, compact = false) {
     const pill = item.ignored ? `<span class="pill mute">${this.t(item.by === "label" ? "polByLabel" : "polHiddenLabel")}</span>` : "";
     const due = item.resurfaced ? `<span class="pill warn">${this.t("dueLabel")}</span>` : "";
     const button = item.by === "label" ? ""
@@ -66,14 +66,26 @@ class PoliciesMixin {
       : `<button class="btn" data-decide-open="${this.esc(item.key)}">${this.t("polHide")}</button>`;
     const decision = item.ignored && item.by === "user" ? `<small>${this.esc(this.decisionLabel(item))}</small>` : "";
     const form = this.decide?.key === item.key ? this.decideForm(item) : "";
-    const box = this.polSelBox(item);
+    const box = compact ? "" : this.polSelBox(item);
     const open = this.polIsOpen(item), main = this.polMainAction(item);
     const label = this.esc(this.t(open ? "polCloseRow" : "polOpenRow"));
     const chev = `<span class="tile mute"><button type="button" class="chevbtn" data-pol-open="${this.esc(item.key)}" aria-expanded="${open}" aria-label="${label}" title="${label}"><ha-icon icon="mdi:chevron-${open ? "down" : "right"}"></ha-icon></button></span>`;
     // A row with a fix offers it as its button (it folds the row open); the other rows keep their hide button.
     const act = main ? (open ? "" : `<button class="btn" data-pol-open="${this.esc(item.key)}">${this.t(main)}</button>`) : button;
     const detail = open ? this.polDetail(item, !!main) : "";
-    return `${box ? `<div class="rowwrap">${box}` : ""}<div class="row politem${open ? " open" : ""}" data-pol-row="${this.esc(item.key)}">${chev}<span class="row-text">${item.object_type === "recorder" ? `<strong>${this.esc(item.name)}</strong>` : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong></button>`}${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}${detail}</span>${due}${pill}${act}</div>${box ? "</div>" : ""}${form}`;
+    return `${box ? `<div class="rowwrap">${box}` : ""}<div class="row politem${open ? " open" : ""}" data-pol-row="${this.esc(item.key)}">${chev}<span class="row-text">${item.object_type === "recorder" || compact ? `<strong>${this.esc(item.name)}</strong>` : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong></button>`}${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}${detail}</span>${due}${pill}${act}</div>${box ? "</div>" : ""}${form}`;
+  }
+
+  // The violations of one object, on its overview: the same rows as in the policies view, so a fix can be made here.
+  // Nothing at all when the object breaks no rule (or the rules are not loaded yet); hidden violations stay out.
+  polObjectCard(item) {
+    this.ensurePolicies();
+    const items = (this.policies?.rules || []).filter(rule => rule.enabled)
+      .flatMap(rule => rule.items.map(i => ({ ...i, rule: rule.id })))
+      .filter(i => !i.ignored && i.object_type === item.object_type && i.object_id === item.object_id);
+    if (!items.length) return "";
+    const title = this.t(items.length === 1 ? "polObjTitleOne" : "polObjTitle", { n: this.formatNumber(items.length) });
+    return `<section class="panel"><div class="panelhead"><div><h2>${title}</h2><p>${this.t("polObjHint")}</p></div><div class="actions"><button class="btn" data-view="policies">${this.t("polObjAll")}</button></div></div>${items.map(i => this.polItemRow(i, true)).join("")}</section>`;
   }
 
   // One rule on the "Rules" tab: what it checks, how many violations, and its switch.

@@ -2787,6 +2787,16 @@ test("follow-up findings of a cause stay folded until asked for, and the export 
   assert.equal(el.todoItems().some(i => i.key === "causes"), true);
 });
 
+test("an object shows the rules it breaks on its overview, and nothing when there are none", () => {
+  const { el } = panel("en", { setTimeout: () => 0 });
+  const mk = (id, ignored) => ({ object_type: "entity", object_id: id, name: id, key: `policy.entity_area|${id}|`, ignored, by: null });
+  el.policies = { rules: [{ id: "entity_area", enabled: true, count: 2, ignored: 1, items: [mk("light.a", false), mk("light.b", true)] }] };
+  const html = el.polObjectCard({ object_type: "entity", object_id: "light.a" });
+  assert.ok(html.includes("Policies · 1 violation") && html.includes('data-pol-row="policy.entity_area|light.a|"') && html.includes('data-view="policies"') && !html.includes("data-pol-sel"));
+  assert.equal(el.polObjectCard({ object_type: "entity", object_id: "light.b" }), "");
+  assert.equal(el.polObjectCard({ object_type: "entity", object_id: "light.c" }), "");
+});
+
 test("a policy violation takes the same decisions as a finding and reloads the rules", async () => {
   const calls = [];
   const { el, shadow } = panel("en", { setTimeout: () => 0 });
