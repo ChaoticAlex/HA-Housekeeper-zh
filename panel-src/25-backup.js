@@ -73,9 +73,9 @@ class BackupMixin {
     const icon = { ok: "mdi:check", note: "mdi:alert-outline", problem: "mdi:close-octagon-outline", unknown: "mdi:help-circle-outline" }[c.level] || "mdi:help-circle-outline";
     const attest = c.id === "emergency_kit" || c.id === "restore_test";
     const open = attest && this.bhForm === c.id;
-    // One neutral button in the row opens the form; it names the step by the state of the confirmation.
-    const opener = attest ? `<button class="btn small" data-bh-open="${c.id}" aria-expanded="${open}">${this.t(c.values?.at ? "bhAttestAgain" : "bhAttestMark")}</button>` : "";
-    const row = `<div class="row rel bh${open ? " open" : ""}"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`bh_${c.id}`)}</strong><small>${this.bhText(c)}</small></span><span class="pill ${tone}">${this.t(`bhLevel_${c.level}`)}</span>${opener}</div>`;
+    // One neutral button under the text of the row opens the form (the pills stay in one line at the right); it names the step by the state of the confirmation.
+    const opener = attest ? `<button class="btn small bhopen" data-bh-open="${c.id}" aria-expanded="${open}">${this.t(c.values?.at ? "bhAttestAgain" : "bhAttestMark")}</button>` : "";
+    const row = `<div class="row rel bh${open ? " open" : ""}"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`bh_${c.id}`)}</strong><small>${this.bhText(c)}</small>${opener}</span><span class="pill ${tone}">${this.t(`bhLevel_${c.level}`)}</span></div>`;
     if (!open) return row;
     const today = new Date().toISOString().slice(0, 10);
     const clear = c.values?.at ? `<button class="bhtake" data-bh-clear="${c.id}">${this.t("bhAttestClear")}</button>` : "";

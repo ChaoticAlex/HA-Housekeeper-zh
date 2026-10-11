@@ -1299,7 +1299,7 @@ class StylesMixin {
       .btn.primary{box-shadow:0 1px 3px color-mix(in srgb,var(--hk-blue) 40%,transparent)}.btn.primary:hover{filter:brightness(1.06);background:var(--hk-blue)}
       .scanago{color:var(--hk-muted);font-size:calc(12.5px*var(--hk-fs,1))}
       .head-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-      @media(max-width:860px){.heading{flex-direction:column;align-items:stretch}.head-actions{justify-content:flex-start}}
+      @media(max-width:860px){.heading{flex-direction:column;align-items:stretch}.head-actions{justify-content:flex-start}}.row .row-text .bhopen{display:inline-flex;margin-top:6px}@media(max-width:640px){.head-actions{gap:6px 10px}.head-actions .scanago{flex:1 1 0;min-width:0}.head-actions .btn.primary{min-height:40px;padding:4px 14px}}
       /* Look of the Zeitarchiv app: larger radius, soft shadow, calm tables, bold headings, Plex Mono for ids. */
       .card,.panel{border-radius:14px;box-shadow:0 1px 2px rgba(19,28,23,.06),0 1px 1px rgba(19,28,23,.04)}
       h1{font-size:calc(28px*var(--hk-fs,1));font-weight:700;letter-spacing:-.01em}
@@ -4589,9 +4589,9 @@ class BackupMixin {
     const icon = { ok: "mdi:check", note: "mdi:alert-outline", problem: "mdi:close-octagon-outline", unknown: "mdi:help-circle-outline" }[c.level] || "mdi:help-circle-outline";
     const attest = c.id === "emergency_kit" || c.id === "restore_test";
     const open = attest && this.bhForm === c.id;
-    // One neutral button in the row opens the form; it names the step by the state of the confirmation.
-    const opener = attest ? `<button class="btn small" data-bh-open="${c.id}" aria-expanded="${open}">${this.t(c.values?.at ? "bhAttestAgain" : "bhAttestMark")}</button>` : "";
-    const row = `<div class="row rel bh${open ? " open" : ""}"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`bh_${c.id}`)}</strong><small>${this.bhText(c)}</small></span><span class="pill ${tone}">${this.t(`bhLevel_${c.level}`)}</span>${opener}</div>`;
+    // One neutral button under the text of the row opens the form (the pills stay in one line at the right); it names the step by the state of the confirmation.
+    const opener = attest ? `<button class="btn small bhopen" data-bh-open="${c.id}" aria-expanded="${open}">${this.t(c.values?.at ? "bhAttestAgain" : "bhAttestMark")}</button>` : "";
+    const row = `<div class="row rel bh${open ? " open" : ""}"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`bh_${c.id}`)}</strong><small>${this.bhText(c)}</small>${opener}</span><span class="pill ${tone}">${this.t(`bhLevel_${c.level}`)}</span></div>`;
     if (!open) return row;
     const today = new Date().toISOString().slice(0, 10);
     const clear = c.values?.at ? `<button class="bhtake" data-bh-clear="${c.id}">${this.t("bhAttestClear")}</button>` : "";

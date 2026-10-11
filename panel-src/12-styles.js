@@ -150,7 +150,7 @@ class StylesMixin {
       .btn.primary{box-shadow:0 1px 3px color-mix(in srgb,var(--hk-blue) 40%,transparent)}.btn.primary:hover{filter:brightness(1.06);background:var(--hk-blue)}
       .scanago{color:var(--hk-muted);font-size:calc(12.5px*var(--hk-fs,1))}
       .head-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-      @media(max-width:860px){.heading{flex-direction:column;align-items:stretch}.head-actions{justify-content:flex-start}}
+      @media(max-width:860px){.heading{flex-direction:column;align-items:stretch}.head-actions{justify-content:flex-start}}.row .row-text .bhopen{display:inline-flex;margin-top:6px}@media(max-width:640px){.head-actions{gap:6px 10px}.head-actions .scanago{flex:1 1 0;min-width:0}.head-actions .btn.primary{min-height:40px;padding:4px 14px}}
       /* Look of the Zeitarchiv app: larger radius, soft shadow, calm tables, bold headings, Plex Mono for ids. */
       .card,.panel{border-radius:14px;box-shadow:0 1px 2px rgba(19,28,23,.06),0 1px 1px rgba(19,28,23,.04)}
       h1{font-size:calc(28px*var(--hk-fs,1));font-weight:700;letter-spacing:-.01em}
