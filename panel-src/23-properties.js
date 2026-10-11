@@ -11,12 +11,12 @@ class PropertiesMixin {
   // The registry gives 1970 for objects created before it recorded the time; that is "unknown", not a date.
   realTime(value) { return value && Date.parse(value) >= Date.UTC(2000, 0, 1) ? value : ""; }
 
-  propTime(value) { return this.realTime(value) ? `${this.esc(this.formatDate(value))} <small>${this.esc(this.relTime(value))}</small>` : ""; }
+  propTime(value) { return this.realTime(value) ? `${this.esc(this.formatDate(value))} <span class="rel">· ${this.esc(this.relTime(value))}</span>` : ""; }
 
   propCard(title, icon, rows) {
     const shown = rows.filter(r => r && r[1] !== "" && r[1] !== null && r[1] !== undefined);
     if (!shown.length) return "";
-    return `<section class="panel"><div class="panelhead"><h2 class="proph"><ha-icon icon="${icon}"></ha-icon>${this.esc(title)}</h2></div><div class="pad"><dl class="kv">${shown.map(([k, v]) => `<dt>${this.esc(k)}</dt><dd>${v}</dd>`).join("")}</dl></div></section>`;
+    return `<section class="panel"><div class="panelhead"><h2 class="proph"><ha-icon icon="${icon}"></ha-icon>${this.esc(title)}</h2></div><div class="pad"><dl class="kv">${shown.map(([k, v, tip]) => `<dt${tip ? ` title="${this.esc(tip)}"` : ""}>${this.esc(k)}</dt><dd>${v}</dd>`).join("")}</dl></div></section>`;
   }
 
   propCode(value) { return value ? `<code>${this.esc(value)}</code>` : ""; }
@@ -59,9 +59,10 @@ class PropertiesMixin {
     ]);
     const times = this.propCard(t("propTimes"), "mdi:clock-outline", [
       [t("propCreated"), this.propTime(item.created_at)], [t("propModified"), this.propTime(item.modified_at)],
-      [t("propLastChanged"), this.propTime(item.last_changed)], [t("propLastUpdated"), this.propTime(item.last_updated)],
+      [t("propLastChangedShort"), this.propTime(item.last_changed), t("propLastChanged")], [t("propLastUpdatedShort"), this.propTime(item.last_updated), t("propLastUpdated")],
     ]);
-    return assignment + properties + technical + times;
+    // Two columns, each card as high as its content: assignment and ids on the left, properties and times on the right.
+    return `<div class="propcol">${assignment}${technical}</div><div class="propcol">${properties}${times}</div>`;
   }
 
   deviceCards(item) {
