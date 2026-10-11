@@ -695,6 +695,7 @@ class HAHousekeeperPanel extends HTMLElement {
         this.shadowRoot.querySelector(`[data-detail-tab="${next}"]`)?.focus();
       };
     });
+    root.querySelectorAll("[data-goto-tab]").forEach(el => el.onclick = () => { this.detailTab = el.dataset.gotoTab; this.render(); });
     root.querySelectorAll("[data-graph-open]").forEach(el => el.onclick = () => this.openGraph(this.findObject(el.dataset.graphOpen)));
     root.querySelectorAll("[data-safe]").forEach(el => el.onclick = () => {
       if (el.dataset.safeKey === "mode") this.settingsTab = "protection";

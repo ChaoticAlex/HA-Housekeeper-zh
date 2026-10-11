@@ -9075,12 +9075,7 @@ class KnownMixin {
     const quarantined = this.quarantineOf(id);
     if (quarantined) care.push(this.knownLine("warn", t("quarantine"), `${t("quarantineFact", { date: this.formatDate(quarantined.since), days: this.daysSince(quarantined.since) })}<span class="factaction">${this.releaseControl(quarantined)}</span>`, "knownSrcDecisions"));
     // History
-    const mine = this.notesList().filter(n => n.target === key);
-    const hist = [];
-    if (mine.length) {
-      const n = mine[0], vars = { n: this.formatNumber(mine.length), title: this.esc(n.title), date: this.esc(this.formatDate(n.at)) };
-      hist.push(this.knownLine("mute", t("knownLog"), t(mine.length > 1 ? "knownLogLine" : "knownLogOne", vars), "knownSrcLog"));
-    }
+    const hist = [this.knownHistoryLink(item, key)];
     const corr = finding ? this.corrLine(finding.key) : "";
     if (corr) hist.push(this.knownLine("mute", t("knownCorr"), this.esc(corr), "knownSrcCorr"));
     return [["knownTimes", state], ["knownUse", use], ["knownCare", care], ["knownHistory", hist]];
@@ -9104,13 +9099,6 @@ class KnownMixin {
     const scan = this.data.findings.filter(f => !f.ignored && this.findingKey(f) === key);
     const names = [...scan.map(f => this.findingTitle(f)), ...(runRow?.findings || []).map(f => this.t((RUN_FINDINGS[f.kind] || ["rfLabelFailing"])[0]))];
     return this.knownLine(names.length ? "warn" : "ok", this.t("knownFindings"), names.length ? `${this.t("knownFindingsOpen", { n: names.length })}<small>${names.slice(0, 3).map(n => this.esc(n)).join(" · ")}</small>` : this.t("knownFindingsNone"), "knownSrcRules");
-  }
-
-  knownLogLines(key) {
-    const mine = this.notesList().filter(n => n.target === key);
-    if (!mine.length) return [];
-    const n = mine[0], vars = { n: this.formatNumber(mine.length), title: this.esc(n.title), date: this.esc(this.formatDate(n.at)) };
-    return [this.knownLine("mute", this.t("knownLog"), this.t(mine.length > 1 ? "knownLogLine" : "knownLogOne", vars), "knownSrcLog")];
   }
 
   knownDevice(item, key) {
@@ -9142,10 +9130,7 @@ class KnownMixin {
     if (quarantined) care.push(this.knownLine("warn", t("quarantine"), `${t("quarantineFact", { date: this.formatDate(quarantined.since), days: this.daysSince(quarantined.since) })}<span class="factaction">${this.releaseControl(quarantined)}</span>`, "knownSrcDecisions"));
     const again = (this.data.recurring_devices || []).find(r => r.device_id === id);
     if (again) care.push(this.knownLine("warn", t("knownAgain"), t("knownAgainText", { date: this.esc(this.formatDate(again.forgotten_at)) }), "knownSrcJournal"));
-    const hist = [];
-    if (this.realTime(item.created_at)) hist.push(this.knownLine("mute", t("knownCreated"), `${this.esc(this.formatDate(item.created_at))}${this.realTime(item.modified_at) ? `<small>${t("knownModified")}: ${this.esc(this.formatDate(item.modified_at))}</small>` : ""}`, "knownSrcScan"));
-    if (life?.steps?.length) hist.push(this.knownLine("mute", t("knownLife"), t("knownLifeText", { n: life.steps.length }), "knownSrcJournal"));
-    hist.push(...this.knownLogLines(key));
+    const hist = [this.knownHistoryLink(item, key)];
     return [["knownState", state], ["knownGroupDevice", dev], ["knownUse", use], ["knownCare", care], ["knownHistory", hist]];
   }
 
@@ -9177,7 +9162,7 @@ class KnownMixin {
         rec.push(this.knownLine(share >= 10 ? "warn" : "mute", t("knownRecShare"), `${t("knownRecText", { n: this.formatNumber(perDay) })}${share !== null ? `<small>${t("knownRecShareOf", { share: this.formatNumber(share) })}</small>` : ""}`, "knownSrcRecorder"));
       }
     }
-    const hist = this.knownLogLines(key);
+    const hist = [this.knownHistoryLink(item, key)];
     return [["knownState", state], ["knownGroupOrigin", origin], ["knownGroupScope", scope], ["knownRecorder", rec], ["knownCare", [this.knownFindingsLine(key, row)]], ["knownHistory", hist]];
   }
 
@@ -9204,7 +9189,7 @@ class KnownMixin {
     if (called) use.push(this.knownLine("mute", t("knownCalledBy"), called, "knownSrcRelations"));
     const hist = [];
     if (item.last_triggered) hist.push(this.knownLine("mute", t("knownLastTriggered"), `${this.esc(this.formatDate(item.last_triggered))}<small>${this.esc(this.relTime(item.last_triggered))}</small>`, "knownSrcScan"));
-    hist.push(...this.knownLogLines(key));
+    hist.push(this.knownHistoryLink(item, key));
     return [["knownState", state], ["knownGroupBuild", build], ["knownUse", use], ["knownCare", [this.knownFindingsLine(key)]], ["knownHistory", hist]];
   }
 
@@ -10305,11 +10290,13 @@ class PolicyRowMixin {
 // device, its life. Mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
   tabHistory: "Verlauf", histPlans: "Pläne zu diesem Objekt", histPlansHint: "Bestätigte und geplante Änderungen aus dem Journal, die dieses Objekt betrafen.", histPlansNone: "Bisher kein Plan zu diesem Objekt.", histPlansLoading: "Journal wird geladen …",
-  lifeTitle: "Lebenslauf",
+  lifeTitle: "Lebenslauf", histNoticed: "Von Housekeeper bemerkt", histNoticedHint: "Was Housekeeper aus Scan, Registry und Zuverlässigkeit zu diesem Objekt weiß, neueste zuerst.", histNoticedNone: "Noch nichts bemerkt.",
+  histSeen: "Beobachtet seit", histFinding: "Befund erkannt: {kind}", histQuarantine: "In Quarantäne seit {days} Tagen", histOpenNow: "Zurzeit", histUnstable: "Instabil im Zeitfenster der Zuverlässigkeit", histFlapping: "Flatternd im Zeitfenster der Zuverlässigkeit", histOpen: "Verlauf ansehen ({n})",
 });
 Object.assign(TEXT.en, {
   tabHistory: "History", histPlans: "Plans for this object", histPlansHint: "Confirmed and planned changes from the journal that concerned this object.", histPlansNone: "No plan for this object so far.", histPlansLoading: "Loading the journal …",
-  lifeTitle: "Life",
+  lifeTitle: "Life", histNoticed: "Noticed by Housekeeper", histNoticedHint: "What Housekeeper knows about this object from the scan, the registry and the reliability, newest first.", histNoticedNone: "Nothing noticed yet.",
+  histSeen: "Observed since", histFinding: "Finding detected: {kind}", histQuarantine: "In quarantine for {days} days", histOpenNow: "Right now", histUnstable: "Unstable in the reliability window", histFlapping: "Flapping in the reliability window", histOpen: "Show history ({n})",
 });
 
 class HistoryTabMixin {
@@ -10329,8 +10316,43 @@ class HistoryTabMixin {
     return `<section class="panel">${head}${rows || `<div class="emptymsg"><ha-icon icon="mdi:clipboard-text-outline"></ha-icon>${this.t("histPlansNone")}</div>`}</section>`;
   }
 
-  historyTab(item) {
-    const right = `${item.object_type === "device" ? this.lifeCard(item) : ""}${this.plansCard(item)}`;
+  // What the scan, the registry and the reliability say about the object over time: dated lines newest first, the undated ones on top.
+  noticedLines(item, key) {
+    const t = (k, v) => this.t(k, v), device = item.object_type === "device", dated = [], open = [];
+    const add = (at, text, src) => { if (at) dated.push({ at, text, src }); };
+    if (!device) add(item.status_since, t("histSeen"), "knownSrcScan");
+    const finding = this.data.findings.find(f => this.findingKey(f) === key);
+    if (finding?.first_detected_at) add(finding.first_detected_at, t("histFinding", { kind: t(finding.classification) }), "knownSrcRules");
+    const quarantined = device ? null : this.quarantineOf(item.object_id);
+    if (quarantined) add(quarantined.since, t("histQuarantine", { days: this.daysSince(quarantined.since) }), "knownSrcDecisions");
+    if (this.realTime(item.created_at)) add(item.created_at, t("propCreated"), "knownSrcScan");
+    if (this.realTime(item.modified_at)) add(item.modified_at, t("propModified"), "knownSrcScan");
+    if (item.object_type === "entity") {
+      add(item.last_changed, t("propLastChanged"), "knownSrcScan");
+      add(item.last_reported || item.last_updated, t("propLastReported"), "knownSrcScan");
+      const stable = this.stabilityOf(item);
+      if (stable?.info) open.push({ text: t(stable.info.level === "flapping" ? "histFlapping" : "histUnstable"), src: "knownSrcReliability", tone: stable.info.level === "flapping" ? "red" : "warn" });
+    }
+    const again = device ? (this.data.recurring_devices || []).find(r => r.device_id === item.object_id) : null;
+    if (again) add(again.forgotten_at, t("knownAgainText", { date: this.formatDate(again.forgotten_at) }), "knownSrcJournal");
+    dated.sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
+    return [...open, ...dated];
+  }
+
+  noticedCard(item, key) {
+    const lines = this.noticedLines(item, key);
+    const head = `<div class="panelhead"><div><h2>${this.t("histNoticed")}</h2><p>${this.t("histNoticedHint")}</p></div></div>`;
+    const rows = lines.map(l => `<div class="row rel"><span class="tile ${l.tone || "mute"}"><ha-icon icon="${l.at ? "mdi:clock-outline" : "mdi:alert-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(l.text)}</strong><small>${l.at ? `${this.esc(this.formatDate(l.at))} · ${this.esc(this.relTime(l.at))}` : this.esc(this.t("histOpenNow"))}</small></span><span class="pill mute">${this.t(l.src)}</span></div>`).join("");
+    return `<section class="panel">${head}${rows || `<div class="emptymsg"><ha-icon icon="mdi:eye-outline"></ha-icon>${this.t("histNoticedNone")}</div>`}</section>`;
+  }
+
+  // The line in "Known about …" that sends to the tab.
+  knownHistoryLink(item, key) {
+    return this.knownLine("mute", this.t("knownHistory"), `<button type="button" class="link" data-goto-tab="history">${this.t("histOpen", { n: this.formatNumber(this.historyCount(item)) })}</button>`, "knownSrcLog");
+  }
+
+  historyTab(item, key = this.objectKey(item)) {
+    const right = `${this.noticedCard(item, key)}${item.object_type === "device" ? this.lifeCard(item) : ""}${this.plansCard(item)}`;
     return `<div class="detailgrid"><div class="stack">${this.noteCard(item)}</div><div class="stack">${right}</div></div>`;
   }
 }
@@ -11032,6 +11054,7 @@ class HAHousekeeperPanel extends HTMLElement {
         this.shadowRoot.querySelector(`[data-detail-tab="${next}"]`)?.focus();
       };
     });
+    root.querySelectorAll("[data-goto-tab]").forEach(el => el.onclick = () => { this.detailTab = el.dataset.gotoTab; this.render(); });
     root.querySelectorAll("[data-graph-open]").forEach(el => el.onclick = () => this.openGraph(this.findObject(el.dataset.graphOpen)));
     root.querySelectorAll("[data-safe]").forEach(el => el.onclick = () => {
       if (el.dataset.safeKey === "mode") this.settingsTab = "protection";

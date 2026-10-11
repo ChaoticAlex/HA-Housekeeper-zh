@@ -98,12 +98,7 @@ class KnownMixin {
     const quarantined = this.quarantineOf(id);
     if (quarantined) care.push(this.knownLine("warn", t("quarantine"), `${t("quarantineFact", { date: this.formatDate(quarantined.since), days: this.daysSince(quarantined.since) })}<span class="factaction">${this.releaseControl(quarantined)}</span>`, "knownSrcDecisions"));
     // History
-    const mine = this.notesList().filter(n => n.target === key);
-    const hist = [];
-    if (mine.length) {
-      const n = mine[0], vars = { n: this.formatNumber(mine.length), title: this.esc(n.title), date: this.esc(this.formatDate(n.at)) };
-      hist.push(this.knownLine("mute", t("knownLog"), t(mine.length > 1 ? "knownLogLine" : "knownLogOne", vars), "knownSrcLog"));
-    }
+    const hist = [this.knownHistoryLink(item, key)];
     const corr = finding ? this.corrLine(finding.key) : "";
     if (corr) hist.push(this.knownLine("mute", t("knownCorr"), this.esc(corr), "knownSrcCorr"));
     return [["knownTimes", state], ["knownUse", use], ["knownCare", care], ["knownHistory", hist]];
@@ -127,13 +122,6 @@ class KnownMixin {
     const scan = this.data.findings.filter(f => !f.ignored && this.findingKey(f) === key);
     const names = [...scan.map(f => this.findingTitle(f)), ...(runRow?.findings || []).map(f => this.t((RUN_FINDINGS[f.kind] || ["rfLabelFailing"])[0]))];
     return this.knownLine(names.length ? "warn" : "ok", this.t("knownFindings"), names.length ? `${this.t("knownFindingsOpen", { n: names.length })}<small>${names.slice(0, 3).map(n => this.esc(n)).join(" · ")}</small>` : this.t("knownFindingsNone"), "knownSrcRules");
-  }
-
-  knownLogLines(key) {
-    const mine = this.notesList().filter(n => n.target === key);
-    if (!mine.length) return [];
-    const n = mine[0], vars = { n: this.formatNumber(mine.length), title: this.esc(n.title), date: this.esc(this.formatDate(n.at)) };
-    return [this.knownLine("mute", this.t("knownLog"), this.t(mine.length > 1 ? "knownLogLine" : "knownLogOne", vars), "knownSrcLog")];
   }
 
   knownDevice(item, key) {
@@ -165,10 +153,7 @@ class KnownMixin {
     if (quarantined) care.push(this.knownLine("warn", t("quarantine"), `${t("quarantineFact", { date: this.formatDate(quarantined.since), days: this.daysSince(quarantined.since) })}<span class="factaction">${this.releaseControl(quarantined)}</span>`, "knownSrcDecisions"));
     const again = (this.data.recurring_devices || []).find(r => r.device_id === id);
     if (again) care.push(this.knownLine("warn", t("knownAgain"), t("knownAgainText", { date: this.esc(this.formatDate(again.forgotten_at)) }), "knownSrcJournal"));
-    const hist = [];
-    if (this.realTime(item.created_at)) hist.push(this.knownLine("mute", t("knownCreated"), `${this.esc(this.formatDate(item.created_at))}${this.realTime(item.modified_at) ? `<small>${t("knownModified")}: ${this.esc(this.formatDate(item.modified_at))}</small>` : ""}`, "knownSrcScan"));
-    if (life?.steps?.length) hist.push(this.knownLine("mute", t("knownLife"), t("knownLifeText", { n: life.steps.length }), "knownSrcJournal"));
-    hist.push(...this.knownLogLines(key));
+    const hist = [this.knownHistoryLink(item, key)];
     return [["knownState", state], ["knownGroupDevice", dev], ["knownUse", use], ["knownCare", care], ["knownHistory", hist]];
   }
 
@@ -200,7 +185,7 @@ class KnownMixin {
         rec.push(this.knownLine(share >= 10 ? "warn" : "mute", t("knownRecShare"), `${t("knownRecText", { n: this.formatNumber(perDay) })}${share !== null ? `<small>${t("knownRecShareOf", { share: this.formatNumber(share) })}</small>` : ""}`, "knownSrcRecorder"));
       }
     }
-    const hist = this.knownLogLines(key);
+    const hist = [this.knownHistoryLink(item, key)];
     return [["knownState", state], ["knownGroupOrigin", origin], ["knownGroupScope", scope], ["knownRecorder", rec], ["knownCare", [this.knownFindingsLine(key, row)]], ["knownHistory", hist]];
   }
 
@@ -227,7 +212,7 @@ class KnownMixin {
     if (called) use.push(this.knownLine("mute", t("knownCalledBy"), called, "knownSrcRelations"));
     const hist = [];
     if (item.last_triggered) hist.push(this.knownLine("mute", t("knownLastTriggered"), `${this.esc(this.formatDate(item.last_triggered))}<small>${this.esc(this.relTime(item.last_triggered))}</small>`, "knownSrcScan"));
-    hist.push(...this.knownLogLines(key));
+    hist.push(this.knownHistoryLink(item, key));
     return [["knownState", state], ["knownGroupBuild", build], ["knownUse", use], ["knownCare", [this.knownFindingsLine(key)]], ["knownHistory", hist]];
   }
 

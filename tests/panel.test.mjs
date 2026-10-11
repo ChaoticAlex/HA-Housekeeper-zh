@@ -3003,6 +3003,11 @@ test("the History tab holds the logbook, the plans of the journal that named the
   const html = el.historyTab(ent);
   assert.ok(html.includes("Stick replaced") && html.includes('data-plan-open="p1"') && !html.includes('data-plan-open="p2"') && html.includes("data-note-add-for"));
   assert.ok(el.detailTabs(ent, "entity:sensor.h").some(([id, , n]) => id === "history" && n === 2));
+  const seen = { ...ent, status_since: "2026-10-01T10:00:00+00:00", last_changed: "2026-10-10T10:00:00+00:00", created_at: "2025-08-05T12:16:00+00:00" };
+  const lines = el.noticedLines(seen, "entity:sensor.h");
+  assert.equal(JSON.stringify(lines.map(l => l.text)), JSON.stringify(["Last state change", "Observed since", "Created"]), "dated lines, newest first");
+  assert.ok(el.noticedCard(seen, "entity:sensor.h").includes("Noticed by Housekeeper") && el.historyTab(seen).includes("Noticed by Housekeeper"));
+  assert.ok(el.knownHistoryLink(seen, "entity:sensor.h").includes('data-goto-tab="history"'));
   assert.ok(el.detailTabs({ object_type: "dashboard", object_id: "x", name: "x" }, "dashboard:x").every(([id]) => id !== "history"), "kinds without a logbook have no tab");
 });
 
@@ -3478,7 +3483,7 @@ test("the entity page sums up what is known in groups with the source of each li
   el.exposure = { exposed_entities: [{ entity_id: "sensor.power", assistants: ["cloud.alexa"] }], exposed_total: 1 };
   el.ensureExposure = () => {};
   let html = el.knownCard(light, "entity:sensor.power");
-  for (const text of ["Known about this entity", "Times", "Last state change", "Used in", "Stick replaced"]) assert.ok(html.includes(text), text);
+  for (const text of ["Known about this entity", "Times", "Last state change", "Used in", "Show history (1)"]) assert.ok(html.includes(text), text);
   for (const text of ["412 W", "Long-term statistics", "Unit: W", "Load recorder values", "Write rate"]) assert.ok(!html.includes(text), `${text} is in the diagnosis or in "In the recorder"`);
   assert.ok(html.includes('class="ksrc">Scan') && html.includes('class="ksrc">Logbook'), "each line names its source");
   const rows = { states: { rows: 10, first: 1760000000, last: 1760100000 }, short: { rows: 0 }, long: { rows: 5, first: 1750000000, last: 1760000000 } };
