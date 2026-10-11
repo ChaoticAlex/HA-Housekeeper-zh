@@ -26,7 +26,8 @@ Object.assign(TEXT.en, {
 
 class BatteryKindMixin {
   batteryExcluded(o) {
-    return BATTERY_KINDS.includes(o.battery_kind) || (!o.battery_kind && !!o.battery_suggest);
+    // Battery Notes repeats the real battery sensor; only its type is used (73-battery-table.js).
+    return o.platform === "battery_notes" || BATTERY_KINDS.includes(o.battery_kind) || (!o.battery_kind && !!o.battery_suggest);
   }
 
   // The battery sensors that are left out of the counts: confirmed ones and proposals.

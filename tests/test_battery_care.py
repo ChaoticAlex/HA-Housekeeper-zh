@@ -157,3 +157,10 @@ def test_noted_types_come_from_the_battery_notes_sensor_of_the_device() -> None:
     ]
     found = noted_types(objects, ["sensor.a_battery", "sensor.b_battery"])
     assert found == {"sensor.a_battery": "2× AAA"}
+
+
+def test_battery_notes_entities_never_count_as_a_battery() -> None:
+    from custom_components.ha_housekeeper.battery_kind import excluded
+
+    assert excluded({"platform": "battery_notes", "device_class": "battery"})
+    assert not excluded({"platform": "zha", "device_class": "battery"})

@@ -17,11 +17,18 @@ SIGNAL_CLASSES = frozenset(
     {"power", "energy", "energy_storage", "current", "battery_charging", "plug"}
 )
 SIGNAL_DOMAINS = frozenset({"lawn_mower", "vacuum"})
+NOTES_PLATFORM = "battery_notes"
 CHARGING = frozenset({"battery_charging", "plug"})
 
 
 def excluded(item: dict[str, Any]) -> bool:
-    """True when the sensor does not count as a replaceable battery (confirmed or proposed)."""
+    """True when the sensor does not count as a replaceable battery (confirmed or proposed).
+
+    The sensors of Battery Notes (level copy, low flag, last change) repeat the real battery sensor;
+    only its battery type is of use (battery_care.noted_types), so they never count.
+    """
+    if item.get("platform") == NOTES_PLATFORM:
+        return True
     kind = item.get("battery_kind")
     return kind in KINDS or (kind is None and bool(item.get("battery_suggest")))
 
