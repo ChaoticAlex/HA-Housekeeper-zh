@@ -1,0 +1,66 @@
+"""WebSocket commands for storage and system, and for system access and data flow. Read-only."""
+
+from __future__ import annotations
+
+import asyncio
+from typing import Any
+
+import voluptuous as vol
+from homeassistant.components import websocket_api
+from homeassistant.core import HomeAssistant, callback
+
+from .access import access_report
+from .const import DOMAIN
+from .inventory import InventoryScanner
+from .system_usage import system_usage
+from .ws_common import _versioned, with_scanner
+
+SYSTEM_TIMEOUT = 90  # seconds; the Supervisor's disk walk and the size of www can take a while
+ACCESS_TIMEOUT = 45  # the Supervisor answers for every app
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/system_usage"})
+@websocket_api.async_response
+@with_scanner
+async def websocket_system_usage(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """Disk, memory, CPU and the largest consumers of space. Read-only."""
+    try:
+        async with asyncio.timeout(SYSTEM_TIMEOUT):
+            result = await system_usage(hass)
+    except Exception as err:
+        connection.send_error(msg["id"], "system_failed", f"{type(err).__name__}: {err}")
+        return
+    connection.send_result(msg["id"], _versioned(result))
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/access"})
+@websocket_api.async_response
+@with_scanner
+async def websocket_access(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """System access and data flow of the integrations, rights of the apps. Read-only."""
+    try:
+        async with asyncio.timeout(ACCESS_TIMEOUT):
+            result = await access_report(hass)
+    except Exception as err:
+        connection.send_error(msg["id"], "access_failed", f"{type(err).__name__}: {err}")
+        return
+    connection.send_result(msg["id"], _versioned(result))
+
+
+@callback
+def async_register(hass: HomeAssistant) -> None:
+    """Register the storage and access commands."""
+    websocket_api.async_register_command(hass, websocket_system_usage)
+    websocket_api.async_register_command(hass, websocket_access)

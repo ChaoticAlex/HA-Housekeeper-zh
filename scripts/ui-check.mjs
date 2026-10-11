@@ -50,7 +50,7 @@ const VIEWPORTS = { desktop: [1280, 1000], tablet: [768, 1100], mobile: [375, 17
 const VIEWS = {
   overview: "view=overview", findings: "view=findingsNav", inventory: "view=inventory", changes: "view=changes",
   graph: "view=graph&graph=1&gobj=automation%3Aautomation.a1", detail: "object=entity%3Asensor.beispiel_7&tab=overview",
-  attributes: "object=entity%3Asensor.beispiel_7&tab=technical", cleanup: "view=cleanup&plan=running", plan: "view=cleanup&plan=preview", repair: "view=repair", maintenance: "view=maintenance", reliability: "view=reliability", runs: "view=runs", recorder: "view=recorder", exposure: "view=exposure", policies: "view=policies", settings: "view=settings", batteries: "view=batteries", unreferenced: "view=unreferenced",
+  attributes: "object=entity%3Asensor.beispiel_7&tab=technical", cleanup: "view=cleanup&plan=running", plan: "view=cleanup&plan=preview", repair: "view=repair", maintenance: "view=maintenance", reliability: "view=reliability", runs: "view=runs", recorder: "view=recorder", exposure: "view=exposure", policies: "view=policies", storage: "view=storage", dataflow: "view=dataflow", settings: "view=settings", batteries: "view=batteries", unreferenced: "view=unreferenced",
 };
 const SCHEMES = ["light", "dark"];
 
@@ -120,8 +120,10 @@ const PAGE = `<!doctype html><html lang="${language}"><head><meta charset="utf-8
     attest: { emergency_kit: null, restore_test: ago(24 * 37) } };
   const data = await (await fetch("/data.json")).json(), trend = await (await fetch("/trend.json")).json();
   const el = document.createElement("ha-housekeeper-panel");
+  el.narrow = innerWidth <= 870; // as Home Assistant hands it to a panel when its sidebar becomes a drawer
   document.body.appendChild(el);
-  el.hass = { language: "${language}", themes: { darkMode: q.get("scheme") === "dark" }, locale: { language: "${language}" },
+  const GB = 1024 ** 3;
+  el.hass = { language: "${language}", themes: { darkMode: q.get("scheme") === "dark" }, locale: { language: "${language}" }, dockedSidebar: q.get("sidebar") === "hidden" ? "always_hidden" : "docked",
     callWS: async msg => { const t = msg.type;
       if (t.endsWith("/inventory") || t.endsWith("/scan")) return data;
       if (t.endsWith("/status")) return { running: false };
@@ -161,6 +163,26 @@ const PAGE = `<!doctype html><html lang="${language}"><head><meta charset="utf-8
         { entry_id: "e1", title: "Cloud-Hub", domain: "hue", state: "setup_retry", reauth: true, entities: 12, permanent: 2, availability: 93.4, shared_outages: 3, longest_outage: 7200, layer: "cloud", last_disruption: { end: 1791470000, seconds: 3600, shared: true } },
         { entry_id: "e2", title: "Zigbee", domain: "zha", state: "loaded", reauth: false, entities: 40, permanent: 0, availability: 98.2, shared_outages: 1, longest_outage: 900, layer: "local", last_disruption: { end: 1791400000, seconds: 900, shared: true } },
         { entry_id: "e3", title: "${language === "en" ? "Weather station" : "Wetterstation"}", domain: "ecowitt", state: "loaded", reauth: false, entities: 8, permanent: 0, availability: 100, shared_outages: 0, longest_outage: 0, layer: null, last_disruption: null }] };
+      if (t.endsWith("/system_usage")) return { schema: 1, supervisor: true, cpu: { percent: 9.8, count: 4 }, load: { "1m": 0.16, "5m": 0.26, "15m": 0.3 },
+        ram: { total: 7.6 * GB, used: 2.4 * GB, percent: 31.4 }, swap: { total: 2.5 * GB, used: 376 * MB, percent: 14.6 },
+        disk: { total: 47.5 * GB, used: 36.8 * GB, free: 8.8 * GB, percent: 77.5, source: "supervisor" },
+        categories: { total: 47.5 * GB, used: 36.8 * GB, children: [{ id: "system", label: "System", bytes: 24.8 * GB }, { id: "addons_data", label: "apps_data", bytes: 8 * GB }, { id: "homeassistant", label: "homeassistant", bytes: 5.9 * GB }, { id: "media", label: "media", bytes: 11 * MB }, { id: "share", label: "share", bytes: 1.9 * MB }] },
+        breakdown: [{ id: "recorder_db", path: "home-assistant_v2.db", bytes: 5.1 * GB }, { id: "www", path: "www", bytes: 401 * MB }, { id: "custom_components", path: "custom_components", bytes: 191 * MB }, { id: "custom_cards", path: "www", bytes: 100 * MB }, { id: "image", path: "image", bytes: 33 * MB }, { id: "blueprints", path: "blueprints", bytes: 883 * 1024 }],
+        custom_integrations: [{ domain: "hacs", bytes: 61 * MB }, { domain: "alexa_media", bytes: 12 * MB }, { domain: "dreame_vacuum", bytes: 9 * MB }],
+        apps: [{ slug: "core_mosquitto", name: "Mosquitto broker", state: "started", cpu_percent: 0.3, memory_usage: 21 * MB, memory_limit: 7.6 * GB, size_bytes: 2 * MB }, { slug: "a0d7b954_vscode", name: "Studio Code Server", state: "stopped", cpu_percent: null, memory_usage: null, memory_limit: null, size_bytes: 610 * MB }],
+        apps_memory: 21 * MB, cards_total: 100 * MB,
+        cards: [{ id: "1", type: "module", url: "/hacsfiles/button-card/button-card.js?hacstag=1", bytes: 1.2 * MB, scope: "folder" }, { id: "2", type: "module", url: "/local/my-card.js", bytes: 40 * 1024, scope: "file" }, { id: "3", type: "module", url: "https://cdn.example.org/x.js", bytes: null, scope: null }],
+        blueprints: [{ domain: "automation", path: "homeassistant/motion_light.yaml", name: "Motion-activated Light", author: "Home Assistant", bytes: 1800 }, { domain: "script", path: "homeassistant/confirmable_notification.yaml", name: "Confirmable Notification", author: "Home Assistant", bytes: 2400 }] };
+      if (t.endsWith("/access")) return { schema: 1, with_access: 3, external: 3, high: 3, entries: [
+        { entry_id: "e4", domain: "hassio", title: "Supervisor", iot_class: "local_polling", disabled: false, access: [{ kind: "system_root", detail: "Supervisor" }], flows: ["local", "system"], gps: false, camera: false, external: false, risk: "high" },
+        { entry_id: "e5", domain: "mobile_app", title: "Pixel", iot_class: "local_push", disabled: false, access: [{ kind: "location", detail: "Companion App" }], flows: ["external", "gps", "local"], gps: true, camera: false, external: true, risk: "high" },
+        { entry_id: "e6", domain: "zha", title: "Zigbee", iot_class: "local_polling", disabled: false, access: [{ kind: "radio", detail: "Zigbee" }], flows: [], gps: false, camera: false, external: false, risk: "high" },
+        { entry_id: "e7", domain: "alexa_media", title: "Alexa", iot_class: "cloud_polling", disabled: false, access: [{ kind: "cloud_api", detail: "Amazon" }], flows: ["cloud", "external"], gps: false, camera: false, external: true, risk: "medium" },
+        { entry_id: "e8", domain: "dwd_weather", title: "${language === "en" ? "Weather map" : "Wetterkarte"}", iot_class: "cloud_polling", disabled: false, access: [], flows: [], gps: false, camera: false, external: true, risk: "medium" }],
+        apps_available: true, apps: [
+          { slug: "a0d7b954_ssh", name: "Advanced SSH & Web Terminal", state: "started", version: "21.0.0", checked: true, risk: "high", access: [{ kind: "full_access", detail: null, level: "high" }, { kind: "privileged", detail: "SYS_ADMIN, NET_ADMIN", level: "high" }, { kind: "supervisor_api", detail: "manager", level: "high" }, { kind: "host_network", detail: null, level: "medium" }, { kind: "apparmor_off", detail: null, level: "medium" }] },
+          { slug: "core_mosquitto", name: "Mosquitto broker", state: "started", version: "6.5.1", checked: true, risk: "medium", access: [{ kind: "supervisor_api", detail: "default", level: "medium" }, { kind: "auth_api", detail: null, level: "medium" }] },
+          { slug: "core_zwave_js", name: "Z-Wave JS", state: "stopped", version: "0.9.0", checked: true, risk: "low", access: [{ kind: "devices", detail: "/dev/ttyUSB0", level: "low" }] }] };
       if (t.endsWith("/preflight")) return { state: { ha_version: "2026.10.0", backup: { available: true, configured: true, newest: "x", age_hours: 5 }, repairs: [], failed_entries: [], broken: [], pending_updates: [] }, checks: [{ check: "backup", level: "ok" }, { check: "repairs", level: "ok", count: 0 }, { check: "failed_entries", level: "ok", count: 0 }, { check: "broken", level: "ok", count: 0 }], record: null, after: null };
       return {}; } };
   for (let i = 0; i < 50 && !el.data; i++) await wait(100);

@@ -56,13 +56,37 @@ class HAHousekeeperPanel extends HTMLElement {
   }
 
   set hass(value) {
-    const first = !this._hass, wasDark = this._hass?.themes?.darkMode;
+    const first = !this._hass, wasDark = this._hass?.themes?.darkMode, wasDocked = this._hass?.dockedSidebar;
     this._hass = value;
     if (first) { this.load(false); this.loadUserPrefs(); }
-    else if (this.prefs.mode === "auto" && wasDark !== value?.themes?.darkMode) this.render();
+    else if ((this.prefs.mode === "auto" && wasDark !== value?.themes?.darkMode) || wasDocked !== value?.dockedSidebar) this.render();
   }
 
   get hass() { return this._hass; }
+
+  // Home Assistant sets `narrow` on a custom panel when its own sidebar turns into a drawer.
+  set narrow(value) {
+    const next = Boolean(value), changed = next !== Boolean(this._narrow);
+    this._narrow = next;
+    if (changed && this._hass) this.render();
+  }
+
+  get narrow() { return Boolean(this._narrow); }
+
+  // Without a visible Home Assistant sidebar (phone, tablet, or "always hidden" in the profile) a
+  // full-screen panel has no way back: the menu button opens the sidebar like on HA's own pages.
+  haSidebarHidden() {
+    return Boolean(this._narrow) || this._hass?.dockedSidebar === "always_hidden";
+  }
+
+  haMenuButton() {
+    if (!this.haSidebarHidden()) return "";
+    return `<button type="button" class="hamenu" data-ha-menu title="${this.esc(this.t("haMenu"))}" aria-label="${this.esc(this.t("haMenu"))}"><ha-icon icon="mdi:menu"></ha-icon></button>`;
+  }
+
+  toggleHaSidebar() {
+    this.dispatchEvent?.(new Event("hass-toggle-menu", { bubbles: true, composed: true }));
+  }
 
   connectedCallback() {
     this._gone = false;
@@ -513,7 +537,7 @@ class HAHousekeeperPanel extends HTMLElement {
       const sum = views.reduce((n, v) => n + (typeof counts[v] === "number" && v !== "inventory" ? counts[v] : 0), 0);
       return `<div class="navmenu${open ? " open" : ""}"><button class="nav menubtn ${views.includes(this.view) ? "group-active" : ""}" data-menu="${label}" aria-expanded="${open}" aria-controls="menu-${label}"><span>${this.t(label)}</span>${sum ? `<em aria-label="${this.esc(this.t("groupOpen", { count: sum }))}">${sum}</em>` : ""}<ha-icon class="caret" icon="mdi:chevron-down"></ha-icon></button><div class="navpop" id="menu-${label}" role="group" aria-label="${this.esc(this.t(label))}"><p class="navhead" aria-hidden="true">${this.t(label)}</p>${views.map(item).join("")}</div></div>`;
     };
-    return `<header class="top${this.navOpen ? " open" : ""}"><div class="brand"><span class="brandmark"><img src="/ha_housekeeper/logo.png" alt="" onerror="this.parentNode.classList.add('nologo');this.remove()"><ha-icon icon="mdi:broom"></ha-icon></span><strong>${this.t("title")}</strong></div>
+    return `<header class="top${this.navOpen ? " open" : ""}">${this.haMenuButton()}<div class="brand"><span class="brandmark"><img src="/ha_housekeeper/logo.png" alt="" onerror="this.parentNode.classList.add('nologo');this.remove()"><ha-icon icon="mdi:broom"></ha-icon></span><strong>${this.t("title")}</strong></div>
       <button class="navtoggle" data-navtoggle aria-expanded="${Boolean(this.navOpen)}" aria-controls="topnav"><ha-icon icon="mdi:menu"></ha-icon><span>${this.t("navMenu")}</span></button>
       <nav class="topnav" id="topnav" aria-label="${this.esc(this.t("navMain"))}">${direct[1].map(item).join("")}${menus.map(menu).join("")}<div class="navend">${this.quickSearchBox()}${item("settings")}</div></nav></header>`;
   }
@@ -575,6 +599,8 @@ class HAHousekeeperPanel extends HTMLElement {
       recorder: [this.t("recorder"), this.t("recorderSubtitle")],
       exposure: [this.t("exposure"), this.t("exposureSubtitle")],
       policies: [this.t("policies"), this.t("policiesSubtitle")],
+      storage: [this.t("storage"), this.t("storageSubtitle")],
+      dataflow: [this.t("dataflow"), this.t("dataflowSubtitle")],
     };
     const [title, sub] = titles[this.view] || titles.overview;
     const writes = ["cleanup", "repair", "maintenance", "policies"].includes(this.view);
@@ -609,6 +635,8 @@ class HAHousekeeperPanel extends HTMLElement {
     if (this.view === "exposure") return this.exposureView();
     if (this.view === "policies") return this.policiesView();
     if (this.view === "runs") return this.runsView();
+    if (this.view === "storage") return this.storageView();
+    if (this.view === "dataflow") return this.dataflowView();
     if (this.view === "graph") return this.graph();
     return this.overview();
   }
@@ -766,6 +794,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.bindPolicyRow(root);
     this.bindCounter(root);
     this.bindPicker(root);
+    this.bindSystem(root);
     root.querySelectorAll("[data-decide-open]").forEach(el => el.onclick = () => this.openDecide(el.dataset.decideOpen, el.dataset.decidePreset));
     root.querySelectorAll("[data-decide-form]").forEach(form => {
       form.onsubmit = ev => { ev.preventDefault(); this.commitDecide(); };

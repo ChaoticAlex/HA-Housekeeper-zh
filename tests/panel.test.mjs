@@ -3926,3 +3926,130 @@ test("broken references of one dashboard card form one row with a readable place
   assert.equal(diag.rows.filter(r => r.tone === "red").length, 1, "one diagnosis row per card");
   assert.ok(diag.hint.includes("custom:charger-card") && diag.hint.includes("3 of 4"), "the diagnosis names the abandoned card");
 });
+
+// ---------------------------------------------------------------- Storage & system, access & data flow
+
+const SYSTEM = {
+  supervisor: true,
+  cpu: { percent: 9.8, count: 4 }, load: { "1m": 0.16, "5m": 0.26, "15m": 0.3 },
+  ram: { total: 8e9, used: 2.5e9, percent: 31.4 }, swap: { total: 2.5e9, used: 3.7e8, percent: 14.6 },
+  disk: { total: 47.5e9, used: 36.8e9, free: 8.8e9, percent: 96, source: "supervisor" },
+  categories: { children: [{ id: "system", label: "System", bytes: 24.8e9 }, { id: "addons_data", label: "<b>apps</b>", bytes: 8e9 }] },
+  breakdown: [{ id: "recorder_db", path: "home-assistant_v2.db", bytes: 5.1e9 }, { id: "custom_cards", path: "www", bytes: 1e8 }],
+  custom_integrations: [{ domain: "hacs", bytes: 1e7 }],
+  apps: [{ slug: "core_ssh", name: "SSH", state: "started", cpu_percent: 0.4, memory_usage: 3e7, memory_limit: 8e9, size_bytes: 1e6 }],
+  apps_memory: 3e7,
+  cards: [{ id: "1", type: "module", url: "/hacsfiles/card/card.js?hacstag=1", bytes: 4e5, scope: "folder" }],
+  cards_total: 4e5,
+  blueprints: [{ domain: "automation", path: "me/a.yaml", name: "Motion light", author: "me", bytes: 2048 }],
+};
+const ACCESS = {
+  with_access: 1, external: 1, high: 1,
+  entries: [
+    { entry_id: "E2", domain: "zha", title: "Zigbee", iot_class: "local_polling", disabled: false, access: [{ kind: "radio", detail: "Zigbee" }], flows: [], gps: false, camera: false, external: false, risk: "high" },
+    { entry_id: "E3", domain: "dwd_weather", title: "Weather", iot_class: "cloud_polling", disabled: false, access: [], flows: [], gps: false, camera: false, external: true, risk: "medium" },
+    { entry_id: "E4", domain: "hue", title: "Hue", iot_class: "local_push", disabled: false, access: [], flows: [], gps: false, camera: false, external: false, risk: "low" },
+  ],
+};
+
+function systemPanel(lang = "en") {
+  const env = panel(lang);
+  const calls = [];
+  env.el._hass = { language: lang, callWS: async msg => { calls.push(msg); throw new Error("unexpected"); } };
+  env.el._sys = {
+    storage: { data: SYSTEM, requested: true, loading: false, error: "", at: null },
+    dataflow: { data: ACCESS, requested: true, loading: false, error: "", at: null },
+  };
+  return { ...env, calls };
+}
+
+test("the three new pages sit under Explore and render in both languages", () => {
+  const { NAV_GROUPS, TEXT } = loadPanel();
+  const explore = NAV_GROUPS.find(([label]) => label === "navGroupExplore")[1];
+  for (const view of ["storage", "dataflow"]) {
+    assert.ok(explore.includes(view), view);
+    for (const lang of ["de", "en"]) assert.ok(TEXT[lang][view] && TEXT[lang][`${view}Subtitle`], `${lang} ${view}`);
+  }
+  for (const lang of ["de", "en"]) {
+    const { el, shadow } = systemPanel(lang);
+    for (const view of ["storage", "dataflow"]) {
+      el.view = view;
+      el.render();
+      assert.ok(shadow.innerHTML.includes(el.t(`${view}Subtitle`)), `${lang} ${view} heading`);
+      assert.ok(!shadow.innerHTML.includes(el.t("renderError")), `${lang} ${view} renders`);
+    }
+  }
+});
+
+test("storage shows the key figures, a red disk at 96 % and the Supervisor categories escaped", () => {
+  const { el, shadow } = systemPanel("de");
+  el.view = "storage";
+  el.render();
+  const html = shadow.innerHTML;
+  assert.ok(html.includes('class="sumtile red"'), "a disk this full is red");
+  assert.ok(html.includes("Speicher belegt") && html.includes("4 Kerne") && html.includes("Swap:"));
+  assert.ok(html.includes("&lt;b&gt;apps&lt;/b&gt;") && !html.includes("<b>apps</b>"), "Supervisor labels are escaped");
+  el.viewTab = { storage: "cards" };
+  el.render();
+  assert.ok(shadow.innerHTML.includes("card.js") && shadow.innerHTML.includes("Ordner"));
+});
+
+test("without a Supervisor the categories and apps tiles are switched off and the consumers open", () => {
+  const { el, shadow } = systemPanel();
+  el._sys.storage.data = { ...SYSTEM, supervisor: false, categories: {}, apps: [] };
+  el.view = "storage";
+  el.render();
+  const html = shadow.innerHTML;
+  assert.equal((html.match(/taskcard t-mute off/g) || []).length, 2);
+  assert.ok(html.includes("Recorder database"), "the consumers under /config are the first list");
+});
+
+test("access and data flow show system access and the cloud on one page", () => {
+  const { el, shadow } = systemPanel();
+  el.view = "dataflow";
+  el.render();
+  const html = shadow.innerHTML;
+  assert.ok(html.includes("System access & data flow") && html.includes("Cloud data flow"));
+  assert.ok(html.includes("Radio/device (Zigbee)") && html.includes('class="pill red">High'));
+  assert.ok(html.includes("cloud, polls"), "the IoT class is translated");
+  assert.ok(!html.includes("Hue</strong>"), "an integration without access or cloud is not listed");
+});
+
+test("the rights of the apps show under access and data flow, or why they are missing", () => {
+  const { el, shadow } = systemPanel("de");
+  el._sys.dataflow.data = { ...ACCESS, apps_available: true, apps: [
+    { slug: "core_ssh", name: "<b>SSH</b>", state: "started", checked: true, risk: "high", access: [{ kind: "full_access", detail: null, level: "high" }, { kind: "supervisor_api", detail: "manager", level: "high" }] },
+    { slug: "x", name: "X", state: "stopped", checked: false, risk: null, access: [] },
+  ] };
+  el.view = "dataflow";
+  el.render();
+  let html = shadow.innerHTML;
+  assert.ok(html.includes("Voller Hardwarezugriff") && html.includes("Supervisor-API (manager)"));
+  assert.ok(html.includes("&lt;b&gt;SSH&lt;/b&gt;") && !html.includes("<b>SSH</b>"), "app names are escaped");
+  assert.ok(html.includes('data-ha-path="/hassio/addon/core_ssh/info"'), "a row opens the app in Home Assistant");
+  assert.ok(html.includes("nicht prüfbar"), "an app without an answer is not called safe");
+  assert.ok(html.includes("Apps mit hohem Risiko"));
+  el._sys.dataflow.data = { ...ACCESS, apps_available: false, apps: [] };
+  el.render();
+  html = shadow.innerHTML;
+  assert.ok(html.includes("Apps gibt es nur mit Home Assistant OS oder Supervised.") && !html.includes("Apps mit hohem Risiko"));
+});
+
+test("the menu button for Home Assistant's sidebar shows when the sidebar is hidden", () => {
+  const Event = class { constructor(type, init) { this.type = type; Object.assign(this, init); } };
+  const { el, shadow } = panel("en", { Event });
+  el.render();
+  assert.ok(!shadow.innerHTML.includes("data-ha-menu"), "a docked sidebar needs no button");
+  el.narrow = true;
+  el.render();
+  assert.ok(shadow.innerHTML.includes("data-ha-menu"), "narrow screen");
+  el.narrow = false;
+  el._hass = { language: "en", dockedSidebar: "always_hidden" };
+  el.render();
+  assert.ok(shadow.innerHTML.includes("data-ha-menu"), "sidebar hidden in the profile");
+  const events = [];
+  el.dispatchEvent = ev => events.push(ev);
+  el.toggleHaSidebar();
+  assert.equal(events[0].type, "hass-toggle-menu");
+  assert.ok(events[0].bubbles && events[0].composed, "the event leaves the shadow root");
+});

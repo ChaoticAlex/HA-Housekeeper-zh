@@ -451,6 +451,8 @@ const NAV = [
   ["cleanup", "mdi:broom"],
   ["repair", "mdi:tools"],
   ["journal", "mdi:clipboard-text-clock-outline"],
+  ["storage", "mdi:harddisk"],
+  ["dataflow", "mdi:transit-connection-variant"],
   ["maintenance", "mdi:wrench-clock"],
   ["exposure", "mdi:shield-search"],
   ["policies", "mdi:clipboard-check-outline"],
@@ -467,7 +469,7 @@ const NAV_GROUPS = [
   ["navGroupActions", ["overview", "findingsNav", "cleanup", "repair"]],
   ["navGroupMaintain", ["maintenance", "batteries", "reminders", "policies", "exposure"]],
   ["navGroupOperation", ["reliability", "runs", "recorder"]],
-  ["navGroupExplore", ["inventory", "graph", "changes", "journal"]],
+  ["navGroupExplore", ["inventory", "graph", "changes", "journal", "storage", "dataflow"]],
 ];
 const BUSY_RETRIES = 12, BUSY_WAIT_MS = 8000; // another recorder query holds the lock: ask again by itself
 const NAV_ICONS = { ...Object.fromEntries(NAV), unreferenced: "mdi:link-variant-off" };
@@ -1358,6 +1360,7 @@ class StylesMixin {
       .xpclose{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
       button.ring{border:0;padding:0;cursor:pointer;color:inherit;font:inherit}button.ring:focus-visible{outline:2px solid var(--hk-blue);outline-offset:3px}.healthwhy{display:grid;gap:6px;max-width:560px;margin:-4px 0 14px;padding:14px 16px;border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-soft)}.healthwhy .row{display:flex;justify-content:space-between;gap:16px;padding:0;border:0;background:transparent}.healthwhy .row.minus{color:var(--hk-muted)}.healthwhy .row.total{border-top:1px solid var(--hk-border);padding-top:6px;font-weight:700}.healthwhy small{color:var(--hk-muted)}.healthwhy .btn{justify-self:start}
       .btn.small{padding:5px 11px;font-size:calc(13px*var(--hk-fs,1))}.notehint{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 16px}.notehint small{display:block;color:var(--hk-muted)}.row.seeall{justify-content:flex-start;color:var(--hk-blue-text);font-weight:600}.logfilters{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.logfilters .chip{cursor:pointer}.logfilters .chip.on{border-color:var(--hk-blue);color:var(--hk-blue-text)}.logsuggest{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:12px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 9%,transparent)}
+      .hamenu{display:grid;place-items:center;flex:none;width:40px;height:40px;margin:0 -10px 0 -6px;padding:0;border:0;border-radius:50%;background:none;color:inherit}.hamenu:hover{background:var(--hk-soft)}.hamenu:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px}.hamenu ha-icon{--mdc-icon-size:24px}.sysmeter{display:block;height:6px;margin-top:6px;border-radius:99px;background:var(--hk-soft);overflow:hidden}.sysmeter i{display:block;height:100%;border-radius:99px;background:var(--hk-green)}.sysmeter.warn i{background:var(--hk-amber)}.sysmeter.red i{background:var(--hk-red)}.sysmeter.mute i{background:var(--hk-gray)}.sysshare{display:block;width:100%;min-width:120px;height:8px;margin-top:2px;border-radius:99px;background:var(--hk-soft);overflow:hidden}.sysshare i{display:block;height:100%;border-radius:99px;background:var(--hk-green)}.tablewrap.lt.acc td{white-space:normal}.pills{display:flex;flex-wrap:wrap;gap:4px}@media(min-width:641px){.sysnav .navtiles{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(min-width:1300px){.sysnav .navtiles{grid-template-columns:repeat(6,minmax(0,1fr))}}
       ${this.themeCss()}
     </style>`;
   }
@@ -10020,6 +10023,80 @@ class BatteryKindMixin {
   }
 }
 
+// Texts for storage and system, access and data flow, and the sidebar button; merged into TEXT.
+Object.assign(TEXT.de, {
+  haMenu: "Seitenleiste von Home Assistant öffnen",
+  storage: "Speicher & System", storageSubtitle: "Belegung von Datenträger, Arbeitsspeicher und CPU und die größten Speicherverbraucher. Liest nur; es wird nichts geändert und nichts gespeichert.",
+  dataflow: "Zugriffe & Datenfluss", dataflowSubtitle: "Welche Integrationen auf System, Funk, Kameras oder den Standort zugreifen, welche Daten ins Internet schicken und welche Rechte die Apps haben. Liest nur.",
+  sysRefresh: "Neu lesen", sysAsOf: "Stand: {time}",
+
+  sysTitle: "Speicher & System", sysHint: "Datenträger, Arbeitsspeicher und CPU", sysLoading: "Speicher und System werden gelesen …",
+  sysIntro: "Hier siehst du, wie voll Datenträger und Arbeitsspeicher sind und wofür der Platz draufgeht. Ein Klick auf eine Kachel zeigt die Liste dazu.",
+  sysDiskUsed: "Speicher belegt", sysDiskFree: "Speicher frei", sysRam: "RAM", sysCpu: "CPU", sysOf: "{used} von {total}", sysAppsRam: "Apps: {n}", sysCores: "{n} Kerne", sysLoad: "Last {a} / {b} / {c}",
+  sysSrc_supervisor: "Quelle: Supervisor (Datenträger des Hosts)", sysSrc_filesystem: "Quelle: Dateisystem von /config", sysUnknown: "nicht messbar",
+  sysSwap: "Swap: {used} von {total} ({pct})", sysSwapHint: "Auslagerungsspeicher: ein Teil des Datenträgers, den das System als Reserve nutzt, wenn der RAM knapp wird. Er ist deutlich langsamer als RAM; viel Swap bei hoher RAM-Auslastung kann das System bremsen.",
+  sysTabCategories: "Systemspeicher nach Kategorie", sysTabCategoriesHint: "vom Supervisor gemessen", sysTabConsumers: "Größte Verbraucher", sysTabConsumersHint: "unter /config", sysTabCustom: "Custom-Integrationen", sysTabCustomHint: "Platz je Integration",
+  sysTabApps: "Apps", sysTabAppsHint: "CPU, RAM und Daten je App", sysTabCards: "Custom Cards", sysTabCardsHint: "Dashboard-Ressourcen", sysTabBlueprints: "Blueprints", sysTabBlueprintsHint: "Größe der Dateien", sysNoSupervisor: "nur mit Supervisor",
+  sysColCategory: "Kategorie", sysColPlace: "Bereich", sysColSize: "Größe", sysColShare: "Anteil", sysColIntegration: "Integration", sysColApp: "App", sysColState: "Status", sysColCpu: "CPU", sysColRam: "RAM", sysColData: "Daten",
+  sysColUrl: "Ressource", sysColType: "Typ", sysColName: "Name", sysColDomain: "Art", sysColAuthor: "Autor",
+  sysTarget_recorder_db: "Recorder-Datenbank", sysTarget_backups: "Backups", sysTarget_custom_components: "Custom Components", sysTarget_media: "Medien", sysTarget_www: "www (lokale Web-Dateien)", sysTarget_image: "Bilder-Upload", sysTarget_tts: "TTS-Cache", sysTarget_blueprints: "Blueprints", sysTarget_themes: "Themes", sysTarget_deps: "Python-Abhängigkeiten (deps)", sysTarget_custom_cards: "Custom Cards",
+  sysFolder: "Ordner", sysFolderHint: "Gezählt wird der ganze Ordner der Karte.", sysExternal: "extern oder nicht gefunden", sysAppRunning: "läuft", sysAppStopped: "gestoppt",
+  sysNoCategories: "Der Supervisor hat keine Aufteilung geliefert.", sysNoConsumers: "Unter /config wurde nichts Messbares gefunden.", sysNoCustom: "Keine Custom-Integrationen installiert.", sysNoApps: "Keine Apps installiert.", sysNoCards: "Keine Dashboard-Ressourcen eingetragen.", sysNoBlueprints: "Keine Blueprints vorhanden.",
+  sysFootnote: "Datenträger, Kategorien und Apps kommen unter Home Assistant OS und Supervised vom Supervisor, sonst steht dort das Dateisystem, auf dem /config liegt. Die Größen unter /config zählt Housekeeper selbst, ohne Verknüpfungen zu folgen; die Recorder-Datenbank zählt mit ihren -wal- und -shm-Dateien. Eine Custom Card aus HACS zählt mit ihrem ganzen Ordner und wird aus „www“ herausgerechnet, damit nichts doppelt zählt. Die CPU-Last ist ein Mittel über 0,4 Sekunden. Es wird nichts geändert und nichts gespeichert.",
+
+  accTitle: "Zugriffe & Datenfluss", accHint: "Systemzugriffe und Cloud-Datenfluss der Integrationen, Rechte der Apps", accLoading: "Die Integrationen werden eingeordnet …",
+  accIntro: "Hier siehst du, welche Integrationen auf System, Funkstick, Hardware, Kameras oder den Standort zugreifen und welche Daten mit Diensten im Internet austauschen, und welche Rechte deine Apps haben. Ein Klick auf eine Zeile öffnet die Integration oder App.",
+  accSumTotal: "Integrationen geprüft", accSumAccess: "Mit Systemzugriff", accSumHigh: "Hohes Risiko", accSumExternal: "Cloud-Datenfluss",
+  accSysTitle: "Systemzugriffe & Datenfluss", accSysHint: "Integrationen mit Zugriff auf System, Funk, Hardware, Kamera oder Standort", accCloudTitle: "Cloud-Datenfluss", accCloudHint: "Diese Integrationen tauschen Daten mit externen oder Cloud-Diensten aus.",
+  accColIntegration: "Integration", accColAccess: "Systemzugriff", accColFlow: "Datenfluss", accColRisk: "Risiko", accColTarget: "Ziel", accColIot: "IoT-Klasse", accAllRisks: "Alle Risiken",
+  accRisk_high: "Hoch", accRisk_medium: "Mittel", accRisk_low: "Niedrig",
+  accKind_system_root: "System/Root-Zugriff", accKind_shell: "Shell-Ausführung", accKind_radio: "Funk/Gerät", accKind_hardware: "Hardware", accKind_network: "Netzwerk", accKind_database: "Datenbank", accKind_camera: "Kamera", accKind_location: "GPS/Standort", accKind_geocoding: "Geocoding", accKind_weather: "Wetter (standortabhängig)", accKind_cloud_api: "Cloud-API", accKind_cloud: "Cloud",
+  accFlow_local: "lokal", accFlow_external: "extern", accFlow_cloud: "Cloud", accFlow_system: "System", accFlow_database: "Datenbank", accFlow_network: "Netzwerk", accFlow_gps: "GPS", accFlow_storage: "Speicher", accFlow_phone: "Telefon", accFlow_push: "Push",
+  accIot_cloud_polling: "Cloud, fragt ab", accIot_cloud_push: "Cloud, meldet selbst", accIot_local_polling: "lokal, fragt ab", accIot_local_push: "lokal, meldet selbst", accIot_calculated: "berechnet", accIot_assumed_state: "angenommener Zustand",
+  accSumApps: "Apps mit hohem Risiko", accSumAppsSub: "von {n} Apps", accAppsTitle: "Apps", accAppsHint: "Rechte der installierten Apps, wie der Supervisor sie beschreibt", accColApp: "App", accColRights: "Rechte",
+  accAppsNoSupervisor: "Apps gibt es nur mit Home Assistant OS oder Supervised.", accNoneApps: "Keine Apps installiert.", accAppNoRights: "keine besonderen Rechte", accAppUnchecked: "Der Supervisor hat zu dieser App nicht geantwortet.", accAppUncheckedShort: "nicht prüfbar",
+  accApp_full_access: "Voller Hardwarezugriff", accApp_privileged: "Privilegiert", accApp_host_pid: "Host-Prozesse (PID)", accApp_docker_api: "Docker-API (wie Root)", accApp_host_ipc: "Host-IPC", accApp_host_dbus: "Host-D-Bus", accApp_host_network: "Host-Netzwerk", accApp_supervisor_api: "Supervisor-API", accApp_ha_api: "Home-Assistant-API", accApp_auth_api: "Login-Prüfung (Auth-API)", accApp_gpio: "GPIO", accApp_usb: "USB", accApp_devices: "Geräte", accApp_apparmor_off: "AppArmor aus",
+  accExternal: "extern", accGps: "Standort (Tracker)", accCamera: "Kamera-Entitäten", accDisabled: "deaktiviert",
+  accNoneSys: "Keine Integration mit Systemzugriff erkannt.", accNoneCloud: "Kein Datenfluss zu externen Diensten erkannt.",
+  accFootnote: "Systemzugriff und Datenfluss leitet Housekeeper aus dem Namen der Integration ab (zha → Zigbee-Funk, mobile_app → Standort), einen Cloud-Datenfluss außerdem aus der IoT-Klasse cloud_polling oder cloud_push; Tracker- und Kamera-Entitäten zählen als Standort und Kamera. Die Einordnung ist ein Hinweis, kein Beweis. Hoch: Zugriff auf System, Shell oder Funk, Kameras oder Standort. Mittel: Daten gehen nach außen oder ein anderer Zugriff. Ignorierte Funde fehlen. Die Rechte der Apps meldet der Supervisor; hoch ist, was auf dem Host Root gleichkommt (voller Hardwarezugriff, Privilegien, Docker-API, Host-Prozesse, Supervisor-Rolle admin oder manager), mittel sind Host-Netzwerk, Zugriff auf Home Assistant oder Logins und ein abgeschaltetes AppArmor. Ein Klick auf eine App öffnet sie in Home Assistant. Es wird nichts geändert und nichts gespeichert.",
+});
+Object.assign(TEXT.en, {
+  haMenu: "Open the Home Assistant sidebar",
+  storage: "Storage & system", storageSubtitle: "Use of disk, memory and CPU and the largest consumers of space. Only reads; nothing is changed and nothing is stored.",
+  dataflow: "Access & data flow", dataflowSubtitle: "Which integrations reach the system, radios, cameras or the location, which send data to the internet and which rights the apps have. Only reads.",
+  sysRefresh: "Read again", sysAsOf: "As of {time}",
+
+  sysTitle: "Storage & system", sysHint: "Disk, memory and CPU", sysLoading: "Reading storage and system …",
+  sysIntro: "Here you see how full the disk and the memory are and what takes up the space. A click on a tile shows its list.",
+  sysDiskUsed: "Storage used", sysDiskFree: "Storage free", sysRam: "RAM", sysCpu: "CPU", sysOf: "{used} of {total}", sysAppsRam: "Apps: {n}", sysCores: "{n} cores", sysLoad: "Load {a} / {b} / {c}",
+  sysSrc_supervisor: "Source: Supervisor (host disk)", sysSrc_filesystem: "Source: file system of /config", sysUnknown: "cannot be measured",
+  sysSwap: "Swap: {used} of {total} ({pct})", sysSwapHint: "Swap space: part of the disk the system uses as a reserve when RAM runs low. It is much slower than RAM; a lot of swap together with high RAM use can slow the system down.",
+  sysTabCategories: "System storage by category", sysTabCategoriesHint: "measured by the Supervisor", sysTabConsumers: "Largest consumers", sysTabConsumersHint: "under /config", sysTabCustom: "Custom integrations", sysTabCustomHint: "space per integration",
+  sysTabApps: "Apps", sysTabAppsHint: "CPU, RAM and data per app", sysTabCards: "Custom cards", sysTabCardsHint: "dashboard resources", sysTabBlueprints: "Blueprints", sysTabBlueprintsHint: "size of the files", sysNoSupervisor: "only with a Supervisor",
+  sysColCategory: "Category", sysColPlace: "Area", sysColSize: "Size", sysColShare: "Share", sysColIntegration: "Integration", sysColApp: "App", sysColState: "State", sysColCpu: "CPU", sysColRam: "RAM", sysColData: "Data",
+  sysColUrl: "Resource", sysColType: "Type", sysColName: "Name", sysColDomain: "Kind", sysColAuthor: "Author",
+  sysTarget_recorder_db: "Recorder database", sysTarget_backups: "Backups", sysTarget_custom_components: "Custom components", sysTarget_media: "Media", sysTarget_www: "www (local web files)", sysTarget_image: "Image upload", sysTarget_tts: "TTS cache", sysTarget_blueprints: "Blueprints", sysTarget_themes: "Themes", sysTarget_deps: "Python dependencies (deps)", sysTarget_custom_cards: "Custom cards",
+  sysFolder: "Folder", sysFolderHint: "The whole folder of the card is counted.", sysExternal: "external or not found", sysAppRunning: "running", sysAppStopped: "stopped",
+  sysNoCategories: "The Supervisor did not send a breakdown.", sysNoConsumers: "Nothing measurable was found under /config.", sysNoCustom: "No custom integrations installed.", sysNoApps: "No apps installed.", sysNoCards: "No dashboard resources registered.", sysNoBlueprints: "No blueprints.",
+  sysFootnote: "On Home Assistant OS and Supervised, the disk, the categories and the apps come from the Supervisor; otherwise the file system /config lies on is shown. Housekeeper counts the sizes under /config itself without following links; the recorder database counts with its -wal and -shm files. A custom card from HACS counts with its whole folder and is taken out of \"www\" so nothing counts twice. The CPU load is an average over 0.4 seconds. Nothing is changed and nothing is stored.",
+
+  accTitle: "Access & data flow", accHint: "System access and cloud data flow of the integrations, rights of the apps", accLoading: "Classifying the integrations …",
+  accIntro: "Here you see which integrations reach the system, a radio stick, hardware, cameras or the location, and which exchange data with services on the internet, and which rights your apps have. A click on a row opens the integration or app.",
+  accSumTotal: "Integrations checked", accSumAccess: "With system access", accSumHigh: "High risk", accSumExternal: "Cloud data flow",
+  accSysTitle: "System access & data flow", accSysHint: "Integrations that reach the system, radios, hardware, cameras or the location", accCloudTitle: "Cloud data flow", accCloudHint: "These integrations exchange data with external or cloud services.",
+  accColIntegration: "Integration", accColAccess: "System access", accColFlow: "Data flow", accColRisk: "Risk", accColTarget: "Target", accColIot: "IoT class", accAllRisks: "All risks",
+  accRisk_high: "High", accRisk_medium: "Medium", accRisk_low: "Low",
+  accKind_system_root: "System/root access", accKind_shell: "Shell commands", accKind_radio: "Radio/device", accKind_hardware: "Hardware", accKind_network: "Network", accKind_database: "Database", accKind_camera: "Camera", accKind_location: "GPS/location", accKind_geocoding: "Geocoding", accKind_weather: "Weather (location based)", accKind_cloud_api: "Cloud API", accKind_cloud: "Cloud",
+  accFlow_local: "local", accFlow_external: "external", accFlow_cloud: "cloud", accFlow_system: "system", accFlow_database: "database", accFlow_network: "network", accFlow_gps: "GPS", accFlow_storage: "storage", accFlow_phone: "phone", accFlow_push: "push",
+  accIot_cloud_polling: "cloud, polls", accIot_cloud_push: "cloud, pushes", accIot_local_polling: "local, polls", accIot_local_push: "local, pushes", accIot_calculated: "calculated", accIot_assumed_state: "assumed state",
+  accSumApps: "Apps with high risk", accSumAppsSub: "of {n} apps", accAppsTitle: "Apps", accAppsHint: "Rights of the installed apps as the Supervisor describes them", accColApp: "App", accColRights: "Rights",
+  accAppsNoSupervisor: "Apps exist only with Home Assistant OS or Supervised.", accNoneApps: "No apps installed.", accAppNoRights: "no special rights", accAppUnchecked: "The Supervisor did not answer for this app.", accAppUncheckedShort: "cannot be checked",
+  accApp_full_access: "Full hardware access", accApp_privileged: "Privileged", accApp_host_pid: "Host processes (PID)", accApp_docker_api: "Docker API (like root)", accApp_host_ipc: "Host IPC", accApp_host_dbus: "Host D-Bus", accApp_host_network: "Host network", accApp_supervisor_api: "Supervisor API", accApp_ha_api: "Home Assistant API", accApp_auth_api: "Login check (Auth API)", accApp_gpio: "GPIO", accApp_usb: "USB", accApp_devices: "Devices", accApp_apparmor_off: "AppArmor off",
+  accExternal: "external", accGps: "Location (trackers)", accCamera: "Camera entities", accDisabled: "disabled",
+  accNoneSys: "No integration with system access found.", accNoneCloud: "No data flow to external services found.",
+  accFootnote: "Housekeeper derives system access and data flow from the name of the integration (zha → Zigbee radio, mobile_app → location) and a cloud data flow also from the IoT class cloud_polling or cloud_push; tracker and camera entities count as location and camera. The classification is a hint, not a proof. High: access to the system, shell or radio, cameras or the location. Medium: data goes outside or another access. Ignored discoveries are left out. The rights of the apps come from the Supervisor; high is what equals root on the host (full hardware access, privileges, Docker API, host processes, Supervisor role admin or manager), medium is the host network, access to Home Assistant or logins, and AppArmor switched off. A click on an app opens it in Home Assistant. Nothing is changed and nothing is stored.",
+});
+
 // The Batteries view as one table: level, type and forecast side by side, and the need of the next 30 days above it.
 // The forecast comes from ha_housekeeper/battery_trend (loaded in the background, 53-battery-care.js); a battery without
 // one still has its row. Mixed into the panel in 99-register.js.
@@ -10204,6 +10281,336 @@ class BatteryTableMixin {
     const sub = this.t(soon.length === 1 ? "needSub1" : "needSub", { n: this.formatNumber(soon.length), limit: this.formatNumber(limit) });
     const body = soon.length ? `<div class="needgrid">${tiles.join("")}</div><div class="needsplit">${list("needSoon", near)}${list("needLater", later)}</div>` : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t("needNone")}</div>`;
     return `<div class="panel"><div class="panelhead"><div><h2>${this.t("needTitle")}</h2>${soon.length ? `<p>${this.esc(sub)}</p>` : ""}</div></div>${this.batterySuggestions()}${body}<p class="factnote">${this.t("needNote")}</p></div>`;
+  }
+}
+
+// SystemMixin: the pages "Storage & system" and "Access & data flow" under Explore; mixed in by 99-register.js.
+// All three only read. A page loads on its first visit; its refresh button reads again.
+// Page and WebSocket command; another page can add itself (see 75-credentials.js).
+const SYS_COMMANDS = { storage: "system_usage", dataflow: "access" };
+const SYS_WARN_PERCENT = 85, SYS_RED_PERCENT = 95;
+
+class SystemMixin {
+  sysState(name) {
+    return ((this._sys ||= {})[name] ||= { data: null, loading: false, error: "", requested: false, at: null });
+  }
+
+  async sysLoad(name) {
+    const st = this.sysState(name);
+    st.loading = true; st.error = ""; st.requested = true; this.render();
+    try {
+      st.data = await this._hass.callWS({ type: `ha_housekeeper/${SYS_COMMANDS[name]}` });
+      st.at = new Date().toISOString();
+    } catch (err) { st.error = this.errText(err); }
+    st.loading = false;
+    this.render();
+  }
+
+  // Loads on the first visit only; later visits show what was read until the person refreshes.
+  sysEnsure(name) {
+    const st = this.sysState(name);
+    if (!st.loading && !st.requested) { st.requested = true; setTimeout(() => this.sysLoad(name), 0); }
+    return st;
+  }
+
+  sysHead(name, title, hint) {
+    const st = this.sysState(name);
+    const at = st.at ? `<span class="scanago">${this.esc(this.t("sysAsOf", { time: this.formatDate(st.at) }))}</span>` : "";
+    return `<div class="panelhead"><div><h2>${this.t(title)}</h2><p>${this.t(hint)}</p></div><div class="actions">${at}<button class="btn" data-sys-refresh="${name}" ${st.loading ? "disabled" : ""}><ha-icon icon="mdi:refresh"></ha-icon>${this.t("sysRefresh")}</button></div></div>`;
+  }
+
+  // Loading, error or the page: the frame every one of the three pages shares.
+  sysFrame(name, title, hint, loading, build) {
+    const st = this.sysEnsure(name), head = this.sysHead(name, title, hint);
+    if (st.error) return `<div class="panel">${head}<div class="error">${this.esc(st.error)}</div></div>`;
+    if (!st.data) return `<div class="panel">${head}${this.skeleton(loading)}</div>`;
+    return build(st.data, head);
+  }
+
+  sysTone(percent) {
+    if (percent === null || percent === undefined) return "mute";
+    return percent >= SYS_RED_PERCENT ? "red" : percent >= SYS_WARN_PERCENT ? "warn" : "ok";
+  }
+
+  sysPercent(value) {
+    return value === null || value === undefined ? "–" : `${this.formatNumber(Math.round(value * 10) / 10)} %`;
+  }
+
+  // A thin bar under a key figure.
+  sysMeter(percent) {
+    if (percent === null || percent === undefined) return "";
+    const width = Math.max(0, Math.min(100, Number(percent) || 0));
+    return `<span class="sysmeter ${this.sysTone(percent)}" role="img" aria-label="${this.esc(this.sysPercent(percent))}"><i style="width:${width}%"></i></span>`;
+  }
+
+  // The share of a row against the largest one of its list, as a bar.
+  sysShare(value, max) {
+    const width = max > 0 && value > 0 ? Math.max(1, Math.round((value / max) * 100)) : 0;
+    return `<span class="sysshare" role="img" aria-label="${width} %"><i style="width:${width}%"></i></span>`;
+  }
+
+  // One sortable, searchable list with paging and CSV export: the way every list of Housekeeper works.
+  // opt: { sort, dir, sorts, text, tie, filters, filterFns, columns, exportName, header, rows, empty, cls, rowAttrs }
+  sysList(id, items, opt) {
+    this.lvState(id, opt.sort, opt.dir || "asc");
+    if (opt.exportName) this.setExporter(id, opt.exportName, opt.header, () => refined.map(opt.rows));
+    const bar = items.length >= 6 || this.lv[id].q || Object.values(this.lv[id].f).some(Boolean) ? this.listBar(id, { sorts: opt.sorts, filters: opt.filters || [] }) : "";
+    const refined = this.refine(id, items, { text: opt.text, filters: opt.filterFns || {}, sorts: opt.sorts, tie: opt.tie });
+    const pg = this.paginate(id, refined);
+    const table = refined.length
+      ? this.listTable(id, opt.columns, pg.rows, { cls: opt.cls || "", rowAttrs: opt.rowAttrs || (() => 'class="static"') })
+      : `<div class="emptymsg">${items.length ? this.noMatches(id) : `<ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t(opt.empty)}`}</div>`;
+    return `${bar}${table}${pg.footer}`;
+  }
+
+  // ---------------------------------------------------------------- Storage & system
+
+  storageView() {
+    return this.sysFrame("storage", "sysTitle", "sysHint", "sysLoading", (r, head) => {
+      const disk = r.disk || {}, ram = r.ram || {}, cpu = r.cpu || {}, swap = r.swap || {}, load = r.load;
+      const of = (used, total) => this.esc(this.t("sysOf", { used: this.formatBytes(used), total: this.formatBytes(total) }));
+      const ramSub = [ram.total ? of(ram.used, ram.total) : "", r.apps_memory ? this.esc(this.t("sysAppsRam", { n: this.formatBytes(r.apps_memory) })) : ""].filter(Boolean).join(" · ");
+      const cpuSub = [cpu.count ? this.esc(this.t("sysCores", { n: cpu.count })) : "", load ? this.esc(this.t("sysLoad", { a: this.formatNumber(load["1m"]), b: this.formatNumber(load["5m"]), c: this.formatNumber(load["15m"]) })) : ""].filter(Boolean).join(" · ");
+      const tiles = this.sumTiles([
+        { label: this.t("sysDiskUsed"), value: this.esc(this.sysPercent(disk.percent)), sub: disk.total ? of(disk.used, disk.total) : this.esc(this.t("sysUnknown")), tone: this.sysTone(disk.percent), spark: this.sysMeter(disk.percent) },
+        { label: this.t("sysDiskFree"), value: disk.free !== undefined && disk.free !== null ? this.esc(this.formatBytes(disk.free)) : "–", sub: disk.source ? this.esc(this.t(`sysSrc_${disk.source}`)) : "", tone: this.sysTone(disk.percent) },
+        { label: this.t("sysRam"), value: this.esc(this.sysPercent(ram.percent)), sub: ramSub || this.esc(this.t("sysUnknown")), tone: this.sysTone(ram.percent), spark: this.sysMeter(ram.percent) },
+        { label: this.t("sysCpu"), value: this.esc(this.sysPercent(cpu.percent)), sub: cpuSub || this.esc(this.t("sysUnknown")), tone: this.sysTone(cpu.percent), spark: this.sysMeter(cpu.percent) },
+      ]);
+      const swapLine = swap.total ? `<p class="factnote">${this.esc(this.t("sysSwap", { used: this.formatBytes(swap.used), total: this.formatBytes(swap.total), pct: this.sysPercent(swap.percent) }))}<br><small>${this.t("sysSwapHint")}</small></p>` : "";
+      const cats = r.categories?.children || [];
+      const sup = Boolean(r.supervisor);
+      const noSup = { disabled: true, hint: this.t("sysNoSupervisor") };
+      const tabs = [
+        { id: "categories", icon: "mdi:chart-donut", label: this.t("sysTabCategories"), hint: this.t("sysTabCategoriesHint"), count: cats.length, ...(sup ? {} : noSup) },
+        { id: "consumers", icon: "mdi:folder-outline", label: this.t("sysTabConsumers"), hint: this.t("sysTabConsumersHint"), count: r.breakdown.length },
+        { id: "custom", icon: "mdi:puzzle-outline", label: this.t("sysTabCustom"), hint: this.t("sysTabCustomHint"), count: r.custom_integrations.length },
+        { id: "apps", icon: "mdi:package-variant-closed", label: this.t("sysTabApps"), hint: this.t("sysTabAppsHint"), count: r.apps.length, ...(sup ? {} : noSup) },
+        { id: "cards", icon: "mdi:cards-outline", label: this.t("sysTabCards"), hint: this.t("sysTabCardsHint"), count: r.cards.length },
+        { id: "blueprints", icon: "mdi:floor-plan", label: this.t("sysTabBlueprints"), hint: this.t("sysTabBlueprintsHint"), count: r.blueprints.length },
+      ];
+      const open = this.viewTabOf("storage", tabs.filter(x => !x.disabled), sup && cats.length ? "categories" : "consumers");
+      const tab = tabs.find(x => x.id === open);
+      const body = { categories: () => this.sysCategories(cats), consumers: () => this.sysConsumers(r.breakdown), custom: () => this.sysCustom(r.custom_integrations), apps: () => this.sysApps(r.apps), cards: () => this.sysCards(r.cards), blueprints: () => this.sysBlueprints(r.blueprints) }[open]();
+      return `<div class="stack"><div class="panel">${head}<div class="pad"><p class="factnote">${this.t("sysIntro")}</p></div></div>${tiles}${swapLine ? `<div class="panel"><div class="pad">${swapLine}</div></div>` : ""}<div class="sysnav">${this.navTiles("storage", tabs, open, this.t("storage"))}</div><div class="panel"><div class="panelhead"><div><h2>${this.esc(tab.label)}</h2><p>${this.esc(tab.hint)}</p></div></div>${body}${this.howCounted("sysFootnote")}</div></div>`;
+    });
+  }
+
+  sysSizeColumns(max) {
+    return [
+      { key: "size", label: "sysColSize", dir: "desc", cell: x => (x.bytes === null || x.bytes === undefined ? `<span class="muted">${this.t("sysExternal")}</span>` : this.esc(this.formatBytes(x.bytes))) },
+      { key: "share", label: "sysColShare", sortable: false, cell: x => this.sysShare(x.bytes || 0, max) },
+    ];
+  }
+
+  sysBySize() { return [{ key: "size", label: "sysColSize", dir: "desc", get: x => x.bytes ?? null }]; }
+
+  sysCategories(cats) {
+    const max = Math.max(0, ...cats.map(c => c.bytes));
+    return this.sysList("syscat", cats, {
+      sort: "size", dir: "desc", sorts: [...this.sysBySize(), { key: "name", label: "sysColCategory", dir: "asc", get: c => c.label }],
+      text: c => `${c.label} ${c.id}`, tie: c => c.id, empty: "sysNoCategories",
+      columns: [{ key: "name", label: "sysColCategory", cell: c => this.nameCell(c.label, c.id !== c.label ? c.id : "") }, ...this.sysSizeColumns(max)],
+      exportName: "storage-categories", header: [this.t("sysColCategory"), "ID", "Bytes"], rows: c => [c.label, c.id, c.bytes],
+    });
+  }
+
+  sysConsumers(items) {
+    const max = Math.max(0, ...items.map(x => x.bytes));
+    const name = x => this.t(`sysTarget_${x.id}`);
+    return this.sysList("syscons", items, {
+      sort: "size", dir: "desc", sorts: [...this.sysBySize(), { key: "name", label: "sysColPlace", dir: "asc", get: name }],
+      text: x => `${name(x)} ${x.path}`, tie: x => x.id, empty: "sysNoConsumers",
+      columns: [{ key: "name", label: "sysColPlace", cell: x => this.nameCell(name(x), `/config/${x.path}`) }, ...this.sysSizeColumns(max)],
+      exportName: "storage-consumers", header: [this.t("sysColPlace"), "Path", "Bytes"], rows: x => [name(x), `/config/${x.path}`, x.bytes],
+    });
+  }
+
+  // The integration's name as Housekeeper's inventory knows it, for a custom_components folder.
+  sysIntegrationName(domain) {
+    const names = this.memo("sysNames", [], () => {
+      const map = new Map();
+      for (const o of this.data?.objects || []) if (o.object_type === "config_entry" && o.integration_name && !map.has(o.domain)) map.set(o.domain, o.integration_name);
+      return map;
+    });
+    return names.get(domain) || domain;
+  }
+
+  sysCustom(items) {
+    const max = Math.max(0, ...items.map(x => x.bytes));
+    return this.sysList("syscustom", items, {
+      sort: "size", dir: "desc", sorts: [...this.sysBySize(), { key: "name", label: "sysColIntegration", dir: "asc", get: x => this.sysIntegrationName(x.domain) }],
+      text: x => `${this.sysIntegrationName(x.domain)} ${x.domain}`, tie: x => x.domain, empty: "sysNoCustom",
+      columns: [{ key: "name", label: "sysColIntegration", cell: x => this.nameCell(this.sysIntegrationName(x.domain), `custom_components/${x.domain}`) }, ...this.sysSizeColumns(max)],
+      exportName: "storage-custom-integrations", header: [this.t("sysColIntegration"), "Domain", "Bytes"], rows: x => [this.sysIntegrationName(x.domain), x.domain, x.bytes],
+    });
+  }
+
+  sysApps(apps) {
+    const max = Math.max(0, ...apps.map(a => a.size_bytes || 0));
+    const ram = a => (a.memory_usage === null || a.memory_usage === undefined ? "–" : `${this.formatBytes(a.memory_usage)}${a.memory_limit ? ` / ${this.formatBytes(a.memory_limit)}` : ""}`);
+    const cpu = a => (a.cpu_percent === null || a.cpu_percent === undefined ? "–" : `${this.formatNumber(Math.round(a.cpu_percent * 10) / 10)} %`);
+    const running = a => a.state === "started";
+    return this.sysList("sysapps", apps, {
+      sort: "ram", dir: "desc",
+      sorts: [{ key: "ram", label: "sysColRam", dir: "desc", get: a => a.memory_usage ?? null }, { key: "cpu", label: "sysColCpu", dir: "desc", get: a => a.cpu_percent ?? null }, { key: "size", label: "sysColData", dir: "desc", get: a => a.size_bytes ?? null }, { key: "name", label: "sysColApp", dir: "asc", get: a => a.name }],
+      filters: [{ name: "state", all: this.t("sysColState"), options: [["on", this.t("sysAppRunning")], ["off", this.t("sysAppStopped")]] }],
+      filterFns: { state: (a, v) => running(a) === (v === "on") },
+      text: a => `${a.name} ${a.slug}`, tie: a => a.slug, empty: "sysNoApps",
+      columns: [
+        { key: "name", label: "sysColApp", cell: a => this.nameCell(a.name, a.slug) },
+        { key: "state", label: "sysColState", sortable: false, cell: a => `<span class="pill ${running(a) ? "ok" : "mute"}">${this.t(running(a) ? "sysAppRunning" : "sysAppStopped")}</span>` },
+        { key: "cpu", label: "sysColCpu", dir: "desc", cell: a => this.esc(cpu(a)) },
+        { key: "ram", label: "sysColRam", dir: "desc", cell: a => this.esc(ram(a)) },
+        { key: "size", label: "sysColData", dir: "desc", cell: a => (a.size_bytes === null || a.size_bytes === undefined ? "–" : `${this.esc(this.formatBytes(a.size_bytes))}${this.sysShare(a.size_bytes, max)}`) },
+      ],
+      exportName: "storage-apps", header: [this.t("sysColApp"), "Slug", this.t("sysColState"), "CPU %", "RAM bytes", "RAM limit", "Data bytes"], rows: a => [a.name, a.slug, a.state || "", a.cpu_percent ?? "", a.memory_usage ?? "", a.memory_limit ?? "", a.size_bytes ?? ""],
+    });
+  }
+
+  sysCards(cards) {
+    const max = Math.max(0, ...cards.map(c => c.bytes || 0));
+    const file = c => (String(c.url).split("?")[0].split("/").filter(Boolean).pop() || c.url);
+    const cols = this.sysSizeColumns(max);
+    cols[0] = { ...cols[0], cell: c => (c.bytes === null || c.bytes === undefined ? `<span class="muted">${this.t("sysExternal")}</span>` : `${this.esc(this.formatBytes(c.bytes))}${c.scope === "folder" ? ` <span class="pill mute" title="${this.esc(this.t("sysFolderHint"))}">${this.t("sysFolder")}</span>` : ""}`) };
+    return this.sysList("syscards", cards, {
+      sort: "size", dir: "desc", sorts: [...this.sysBySize(), { key: "name", label: "sysColUrl", dir: "asc", get: file }],
+      text: c => `${c.url} ${c.type}`, tie: c => c.url, empty: "sysNoCards",
+      columns: [{ key: "name", label: "sysColUrl", cell: c => this.nameCell(file(c), c.url) }, { key: "type", label: "sysColType", sortable: false, cell: c => `<span class="pill mute">${this.esc(c.type || "–")}</span>` }, ...cols],
+      exportName: "storage-custom-cards", header: [this.t("sysColUrl"), this.t("sysColType"), "Bytes"], rows: c => [c.url, c.type, c.bytes ?? ""],
+    });
+  }
+
+  sysBlueprints(items) {
+    const max = Math.max(0, ...items.map(b => b.bytes || 0));
+    return this.sysList("sysbp", items, {
+      sort: "size", dir: "desc",
+      sorts: [...this.sysBySize(), { key: "name", label: "sysColName", dir: "asc", get: b => b.name }, { key: "author", label: "sysColAuthor", dir: "asc", get: b => b.author }],
+      filters: [{ name: "domain", all: this.t("sysColDomain"), options: [...new Set(items.map(b => b.domain))].sort().map(d => [d, d]) }],
+      filterFns: { domain: (b, v) => b.domain === v },
+      text: b => `${b.name} ${b.path} ${b.author || ""}`, tie: b => `${b.domain}/${b.path}`, empty: "sysNoBlueprints",
+      columns: [
+        { key: "name", label: "sysColName", cell: b => this.nameCell(b.name, `${b.domain}/${b.path}`) },
+        { key: "domain", label: "sysColDomain", sortable: false, cell: b => `<span class="pill mute">${this.esc(b.domain)}</span>` },
+        { key: "author", label: "sysColAuthor", cell: b => this.esc(b.author || "–") },
+        ...this.sysSizeColumns(max),
+      ],
+      exportName: "storage-blueprints", header: [this.t("sysColName"), this.t("sysColDomain"), "Path", this.t("sysColAuthor"), "Bytes"], rows: b => [b.name, b.domain, b.path, b.author || "", b.bytes ?? ""],
+    });
+  }
+
+  // ---------------------------------------------------------------- Access & data flow
+
+  accPills(list, tone = "") { return `<span class="pills">${list.map(text => `<span class="pill ${tone}">${this.esc(text)}</span>`).join("")}</span>`; }
+
+  accAccessLabels(e) {
+    const labels = e.access.map(a => `${this.t(`accKind_${a.kind}`)}${a.detail ? ` (${a.detail})` : ""}`);
+    if (e.gps && !e.access.some(a => a.kind === "location")) labels.push(this.t("accGps"));
+    if (e.camera && !e.access.some(a => a.kind === "camera")) labels.push(this.t("accCamera"));
+    return labels;
+  }
+
+  accRiskPill(risk) { return `<span class="pill ${{ high: "red", medium: "warn", low: "ok" }[risk] || "mute"}">${this.t(`accRisk_${risk}`)}</span>`; }
+
+  accIntegrationCell(e) {
+    const disabled = e.disabled ? ` <span class="pill mute">${this.t("accDisabled")}</span>` : "";
+    return `${this.nameCell(e.title || e.domain, e.domain)}${disabled}`;
+  }
+
+  // A row opens the integration's page in Housekeeper when the inventory knows it.
+  accRowAttrs(e) {
+    const key = `config_entry:${e.entry_id}`;
+    return this.findObject(key) ? `data-object="${this.esc(key)}" tabindex="0" role="button" aria-label="${this.esc(e.title || e.domain)}"` : 'class="static"';
+  }
+
+  dataflowView() {
+    return this.sysFrame("dataflow", "accTitle", "accHint", "accLoading", (r, head) => {
+      const entries = r.entries || [];
+      const sys = entries.filter(e => e.access.length || e.gps || e.camera);
+      const cloud = entries.filter(e => e.external);
+      const high = entries.filter(e => e.risk === "high").length;
+      const tiles = this.sumTiles([
+        { label: this.t("accSumTotal"), value: this.esc(this.formatNumber(entries.length)), tone: "mute" },
+        { label: this.t("accSumAccess"), value: this.esc(this.formatNumber(sys.length)), tone: sys.length ? "warn" : "ok" },
+        { label: this.t("accSumHigh"), value: this.esc(this.formatNumber(high)), tone: high ? "red" : "ok" },
+        { label: this.t("accSumExternal"), value: this.esc(this.formatNumber(cloud.length)), tone: cloud.length ? "warn" : "ok" },
+        r.apps_available ? { label: this.t("accSumApps"), value: this.esc(this.formatNumber((r.apps || []).filter(a => a.risk === "high").length)), sub: this.esc(this.t("accSumAppsSub", { n: this.formatNumber((r.apps || []).length) })), tone: (r.apps || []).some(a => a.risk === "high") ? "red" : "ok" } : null,
+      ]);
+      const risks = [["high", this.t("accRisk_high")], ["medium", this.t("accRisk_medium")], ["low", this.t("accRisk_low")]];
+      const riskOrder = { high: 0, medium: 1, low: 2 };
+      const flows = e => e.flows.map(f => this.t(`accFlow_${f}`));
+      const base = {
+        tie: e => e.entry_id, rowAttrs: e => this.accRowAttrs(e), cls: "acc",
+        filters: [{ name: "risk", all: this.t("accAllRisks"), options: risks }], filterFns: { risk: (e, v) => e.risk === v },
+        text: e => `${e.domain} ${e.title} ${this.accAccessLabels(e).join(" ")} ${flows(e).join(" ")}`,
+      };
+      const sorts = [{ key: "risk", label: "accColRisk", dir: "asc", get: e => riskOrder[e.risk] }, { key: "name", label: "accColIntegration", dir: "asc", get: e => `${e.domain} ${e.title}` }];
+      const sysTable = this.sysList("accsys", sys, {
+        ...base, sort: "risk", sorts, empty: "accNoneSys",
+        columns: [
+          { key: "name", label: "accColIntegration", cell: e => this.accIntegrationCell(e) },
+          { key: "access", label: "accColAccess", sortable: false, cell: e => this.accPills(this.accAccessLabels(e), "warn") },
+          { key: "flow", label: "accColFlow", sortable: false, cell: e => this.accPills(flows(e)) },
+          { key: "risk", label: "accColRisk", cell: e => this.accRiskPill(e.risk) },
+        ],
+        exportName: "system-access", header: [this.t("accColIntegration"), "Domain", this.t("accColAccess"), this.t("accColFlow"), this.t("accColRisk")], rows: e => [e.title, e.domain, this.accAccessLabels(e).join("; "), flows(e).join("; "), this.t(`accRisk_${e.risk}`)],
+      });
+      const target = e => {
+        const named = e.access.filter(a => a.kind === "cloud_api" || a.kind === "cloud").map(a => `${this.t(`accKind_${a.kind}`)}${a.detail ? ` (${a.detail})` : ""}`);
+        return named.length ? named : [this.t("accExternal")];
+      };
+      const iot = e => (e.iot_class ? (TEXT[this.lang][`accIot_${e.iot_class}`] ? this.t(`accIot_${e.iot_class}`) : e.iot_class) : "–");
+      const cloudTable = this.sysList("acccloud", cloud, {
+        ...base, sort: "name", sorts, empty: "accNoneCloud",
+        columns: [
+          { key: "name", label: "accColIntegration", cell: e => this.accIntegrationCell(e) },
+          { key: "target", label: "accColTarget", sortable: false, cell: e => this.accPills(target(e)) },
+          { key: "iot", label: "accColIot", sortable: false, cell: e => this.esc(iot(e)) },
+          { key: "flow", label: "accColFlow", sortable: false, cell: e => this.accPills(flows(e), "mute") },
+          { key: "risk", label: "accColRisk", cell: e => this.accRiskPill(e.risk) },
+        ],
+        exportName: "cloud-data-flow", header: [this.t("accColIntegration"), "Domain", this.t("accColTarget"), this.t("accColIot"), this.t("accColFlow"), this.t("accColRisk")], rows: e => [e.title, e.domain, target(e).join("; "), iot(e), flows(e).join("; "), this.t(`accRisk_${e.risk}`)],
+      });
+      const panel = (title, hint, body) => `<div class="panel"><div class="panelhead"><div><h2>${this.t(title)}</h2><p>${this.t(hint)}</p></div></div>${body}</div>`;
+      const apps = r.apps_available ? this.accAppsTable(r.apps || [], risks, sorts.find(x => x.key === "risk")) : `<div class="emptymsg">${this.t("accAppsNoSupervisor")}</div>`;
+      return `<div class="stack"><div class="panel">${head}<div class="pad"><p class="factnote">${this.t("accIntro")}</p></div></div>${tiles}${panel("accSysTitle", "accSysHint", sysTable)}${panel("accCloudTitle", "accCloudHint", cloudTable)}${panel("accAppsTitle", "accAppsHint", apps)}<div class="panel">${this.howCounted("accFootnote")}</div></div>`;
+    });
+  }
+
+  // The rights of the installed apps (add-ons), as the Supervisor describes them. A row opens the app in Home Assistant.
+  accAppRight(a) { return `${this.t(`accApp_${a.kind}`)}${a.detail ? ` (${a.detail})` : ""}`; }
+
+  accAppsTable(apps, risks, riskSort) {
+    const order = { high: 0, medium: 1, low: 2 };
+    const tone = { high: "red", medium: "warn", low: "mute" };
+    const rights = a => `<span class="pills">${a.access.map(x => `<span class="pill ${tone[x.level] || "mute"}">${this.esc(this.accAppRight(x))}</span>`).join("") || `<span class="muted">${this.t(a.checked ? "accAppNoRights" : "accAppUnchecked")}</span>`}</span>`;
+    const running = a => a.state === "started";
+    return this.sysList("accapps", apps, {
+      sort: "risk", dir: "asc", cls: "acc",
+      sorts: [{ ...riskSort, get: a => order[a.risk] ?? 3 }, { key: "name", label: "accColApp", dir: "asc", get: a => a.name }],
+      filters: [{ name: "risk", all: this.t("accAllRisks"), options: risks }], filterFns: { risk: (a, v) => a.risk === v },
+      text: a => `${a.name} ${a.slug} ${a.access.map(x => this.accAppRight(x)).join(" ")}`, tie: a => a.slug, empty: "accNoneApps",
+      rowAttrs: a => `data-ha-path="${this.esc(`/hassio/addon/${encodeURIComponent(a.slug)}/info`)}" tabindex="0" role="link" aria-label="${this.esc(a.name)}"`,
+      columns: [
+        { key: "name", label: "accColApp", cell: a => this.nameCell(a.name, a.slug) },
+        { key: "state", label: "sysColState", sortable: false, cell: a => `<span class="pill ${running(a) ? "ok" : "mute"}">${this.t(running(a) ? "sysAppRunning" : "sysAppStopped")}</span>` },
+        { key: "rights", label: "accColRights", sortable: false, cell: rights },
+        { key: "risk", label: "accColRisk", cell: a => (a.risk ? this.accRiskPill(a.risk) : `<span class="pill mute">${this.t("accAppUncheckedShort")}</span>`) },
+      ],
+      exportName: "app-rights", header: [this.t("accColApp"), "Slug", this.t("sysColState"), this.t("accColRights"), this.t("accColRisk")], rows: a => [a.name, a.slug, a.state || "", a.access.map(x => this.accAppRight(x)).join("; "), a.risk ? this.t(`accRisk_${a.risk}`) : ""],
+    });
+  }
+
+  // ---------------------------------------------------------------- bindings
+
+  bindSystem(root) {
+    root.querySelectorAll("[data-sys-refresh]").forEach(el => el.onclick = () => this.sysLoad(el.dataset.sysRefresh));
+    root.querySelector("[data-ha-menu]")?.addEventListener("click", () => this.toggleHaSidebar());
+    // Rows that lead into Home Assistant (apps) open with Enter and Space like the other rows.
+    root.querySelectorAll("tr[data-ha-path]").forEach(el => el.onkeydown = ev => {
+      if (ev.target !== el || (ev.key !== "Enter" && ev.key !== " ")) return;
+      ev.preventDefault(); this.navigateHA(el.dataset.haPath);
+    });
   }
 }
 
@@ -10583,13 +10990,37 @@ class HAHousekeeperPanel extends HTMLElement {
   }
 
   set hass(value) {
-    const first = !this._hass, wasDark = this._hass?.themes?.darkMode;
+    const first = !this._hass, wasDark = this._hass?.themes?.darkMode, wasDocked = this._hass?.dockedSidebar;
     this._hass = value;
     if (first) { this.load(false); this.loadUserPrefs(); }
-    else if (this.prefs.mode === "auto" && wasDark !== value?.themes?.darkMode) this.render();
+    else if ((this.prefs.mode === "auto" && wasDark !== value?.themes?.darkMode) || wasDocked !== value?.dockedSidebar) this.render();
   }
 
   get hass() { return this._hass; }
+
+  // Home Assistant sets `narrow` on a custom panel when its own sidebar turns into a drawer.
+  set narrow(value) {
+    const next = Boolean(value), changed = next !== Boolean(this._narrow);
+    this._narrow = next;
+    if (changed && this._hass) this.render();
+  }
+
+  get narrow() { return Boolean(this._narrow); }
+
+  // Without a visible Home Assistant sidebar (phone, tablet, or "always hidden" in the profile) a
+  // full-screen panel has no way back: the menu button opens the sidebar like on HA's own pages.
+  haSidebarHidden() {
+    return Boolean(this._narrow) || this._hass?.dockedSidebar === "always_hidden";
+  }
+
+  haMenuButton() {
+    if (!this.haSidebarHidden()) return "";
+    return `<button type="button" class="hamenu" data-ha-menu title="${this.esc(this.t("haMenu"))}" aria-label="${this.esc(this.t("haMenu"))}"><ha-icon icon="mdi:menu"></ha-icon></button>`;
+  }
+
+  toggleHaSidebar() {
+    this.dispatchEvent?.(new Event("hass-toggle-menu", { bubbles: true, composed: true }));
+  }
 
   connectedCallback() {
     this._gone = false;
@@ -11040,7 +11471,7 @@ class HAHousekeeperPanel extends HTMLElement {
       const sum = views.reduce((n, v) => n + (typeof counts[v] === "number" && v !== "inventory" ? counts[v] : 0), 0);
       return `<div class="navmenu${open ? " open" : ""}"><button class="nav menubtn ${views.includes(this.view) ? "group-active" : ""}" data-menu="${label}" aria-expanded="${open}" aria-controls="menu-${label}"><span>${this.t(label)}</span>${sum ? `<em aria-label="${this.esc(this.t("groupOpen", { count: sum }))}">${sum}</em>` : ""}<ha-icon class="caret" icon="mdi:chevron-down"></ha-icon></button><div class="navpop" id="menu-${label}" role="group" aria-label="${this.esc(this.t(label))}"><p class="navhead" aria-hidden="true">${this.t(label)}</p>${views.map(item).join("")}</div></div>`;
     };
-    return `<header class="top${this.navOpen ? " open" : ""}"><div class="brand"><span class="brandmark"><img src="/ha_housekeeper/logo.png" alt="" onerror="this.parentNode.classList.add('nologo');this.remove()"><ha-icon icon="mdi:broom"></ha-icon></span><strong>${this.t("title")}</strong></div>
+    return `<header class="top${this.navOpen ? " open" : ""}">${this.haMenuButton()}<div class="brand"><span class="brandmark"><img src="/ha_housekeeper/logo.png" alt="" onerror="this.parentNode.classList.add('nologo');this.remove()"><ha-icon icon="mdi:broom"></ha-icon></span><strong>${this.t("title")}</strong></div>
       <button class="navtoggle" data-navtoggle aria-expanded="${Boolean(this.navOpen)}" aria-controls="topnav"><ha-icon icon="mdi:menu"></ha-icon><span>${this.t("navMenu")}</span></button>
       <nav class="topnav" id="topnav" aria-label="${this.esc(this.t("navMain"))}">${direct[1].map(item).join("")}${menus.map(menu).join("")}<div class="navend">${this.quickSearchBox()}${item("settings")}</div></nav></header>`;
   }
@@ -11102,6 +11533,8 @@ class HAHousekeeperPanel extends HTMLElement {
       recorder: [this.t("recorder"), this.t("recorderSubtitle")],
       exposure: [this.t("exposure"), this.t("exposureSubtitle")],
       policies: [this.t("policies"), this.t("policiesSubtitle")],
+      storage: [this.t("storage"), this.t("storageSubtitle")],
+      dataflow: [this.t("dataflow"), this.t("dataflowSubtitle")],
     };
     const [title, sub] = titles[this.view] || titles.overview;
     const writes = ["cleanup", "repair", "maintenance", "policies"].includes(this.view);
@@ -11136,6 +11569,8 @@ class HAHousekeeperPanel extends HTMLElement {
     if (this.view === "exposure") return this.exposureView();
     if (this.view === "policies") return this.policiesView();
     if (this.view === "runs") return this.runsView();
+    if (this.view === "storage") return this.storageView();
+    if (this.view === "dataflow") return this.dataflowView();
     if (this.view === "graph") return this.graph();
     return this.overview();
   }
@@ -11293,6 +11728,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.bindPolicyRow(root);
     this.bindCounter(root);
     this.bindPicker(root);
+    this.bindSystem(root);
     root.querySelectorAll("[data-decide-open]").forEach(el => el.onclick = () => this.openDecide(el.dataset.decideOpen, el.dataset.decidePreset));
     root.querySelectorAll("[data-decide-form]").forEach(form => {
       form.onsubmit = ev => { ev.preventDefault(); this.commitDecide(); };
@@ -11500,7 +11936,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin, BrokenCardsMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin, BrokenCardsMixin, SystemMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }
