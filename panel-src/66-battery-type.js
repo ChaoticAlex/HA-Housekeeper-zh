@@ -2,8 +2,6 @@
 // Mixed into the panel in 99-register.js. Only Housekeeper's own list changes.
 Object.assign(TEXT.de, {
   btTypeSet: "Typ", btTypeNone: "Typ fehlt", btTypeSave: "Speichern", btTypeCustom: "Eigener Text …", btTypeLabel: "Batterietyp für {name}", btTypeHint: "Gespeichert nur in Housekeeper.",
-  btShopTitle: "Einkaufsliste für die nächsten 30 Tage", btShopNone: "Keine Batterie wird in den nächsten 30 Tagen leer.", btShopUntyped: "{count} Geräte ohne Typ", btShopUntyped1: "1 Gerät ohne Typ",
-  btShopHint: "Gezählt werden Geräte, die laut Prognose innerhalb von 30 Tagen unter die Schwelle fallen.",
   btReplTitle: "Wechsel erkannt", btReplHint: "Der Ladestand sprang um mindestens 15 Punkte nach oben. Das ist ein Hinweis, kein Beweis: Ein Sensor kann auch neu kalibrieren.",
   btReplLine: "{name}: vermutlich neue Batterie am {date}", btReplLevels: "Stand {from} % → {to} %", btReplEnter: "Eintragen", btReplDismiss: "Kein Wechsel",
   btReplNote: "„Eintragen“ macht einen Eintrag in „Änderungen“ und setzt „zuletzt erledigt“ in Erinnerungen, deren Name den Gerätenamen enthält. Es wird nichts angelegt.",
@@ -11,8 +9,6 @@ Object.assign(TEXT.de, {
 });
 Object.assign(TEXT.en, {
   btTypeSet: "Type", btTypeNone: "Type missing", btTypeSave: "Save", btTypeCustom: "Own text …", btTypeLabel: "Battery type for {name}", btTypeHint: "Stored only in Housekeeper.",
-  btShopTitle: "Shopping list for the next 30 days", btShopNone: "No battery runs out in the next 30 days.", btShopUntyped: "{count} devices without a type", btShopUntyped1: "1 device without a type",
-  btShopHint: "Counted are devices that fall below the limit within 30 days according to the forecast.",
   btReplTitle: "Replacement detected", btReplHint: "The level jumped up by at least 15 points. That is a hint, not proof: a sensor can also recalibrate.",
   btReplLine: "{name}: probably a new battery on {date}", btReplLevels: "Level {from} % → {to} %", btReplEnter: "Enter", btReplDismiss: "No replacement",
   btReplNote: "“Enter” adds an entry to “Changes” and sets “last done” on reminders whose name contains the device name. Nothing is created.",
@@ -36,26 +32,6 @@ class BatteryTypeMixin {
       return `<span class="btedit"><label class="factnote" for="hk-bt-type">${this.t("btTypeLabel", { name: this.esc(this.batteryLabel(entityId)) })}</label><select id="hk-bt-type" data-bt-type-select><option value="">–</option>${options}<option value="__custom" ${known ? "" : "selected"}>${this.t("btTypeCustom")}</option></select><input type="text" maxlength="30" data-bt-type-custom value="${this.esc(known ? "" : type)}" ${known ? "hidden" : ""} aria-label="${this.t("btTypeCustom")}"><button class="btn accent" data-bt-type-save="${this.esc(entityId)}">${this.t("btTypeSave")}</button><button class="btn quiet" data-bt-type-cancel>${this.t("cancelRun")}</button></span>`;
     }
     return `<span class="btctl">${type ? `<span class="pill">${this.esc(type)}</span>` : `<span class="pill mute">${this.t("btTypeNone")}</span>`}<button class="btn quiet" data-bt-type="${this.esc(entityId)}">${this.t("btTypeSet")}</button></span>`;
-  }
-
-  // The batteries that run low within 30 days, counted by type: "4× AAA, 2× CR2032".
-  batteryShopping() {
-    const b = this.batteryTrend;
-    if (!b?.rows) return "";
-    const soon = b.rows.filter(r => r.state === "low" || (r.days_left !== null && r.days_left <= 30));
-    const counts = new Map();
-    let untyped = 0;
-    for (const r of soon) {
-      const type = b.types?.[r.entity_id];
-      if (!type) { untyped++; continue; }
-      const match = /^(\d+)\s*[×x]\s*(.+)$/i.exec(type);
-      const [n, name] = match ? [Number(match[1]), match[2].trim()] : [1, type];
-      counts.set(name, (counts.get(name) || 0) + n);
-    }
-    const list = [...counts].sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0])).map(([name, n]) => `${n}× ${name}`).join(" · ");
-    const miss = untyped ? (untyped === 1 ? this.t("btShopUntyped1") : this.t("btShopUntyped", { count: untyped })) : "";
-    const text = [list, miss].filter(Boolean).join(" · ") || this.t("btShopNone");
-    return `<div class="btcart"><strong>${this.t("btShopTitle")}</strong>${this.esc(text)}<div class="factnote">${this.t("btShopHint")}</div></div>`;
   }
 
   batterySuggestions() {

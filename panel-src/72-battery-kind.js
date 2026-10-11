@@ -54,7 +54,7 @@ class BatteryKindMixin {
 
   // One small button after a row of the battery list; it opens the form below the row.
   batteryKindControl(o) {
-    if (this.bkEdit !== o.object_id) return `<button class="btn quiet" data-bk-open="${this.esc(o.object_id)}">${this.t("bkSet")}</button>`;
+    if (this.bkEdit !== o.object_id) return `<button class="btn quiet iconbtn" data-bk-open="${this.esc(o.object_id)}" title="${this.esc(this.t("bkSet"))}" aria-label="${this.esc(this.t("bkSet"))}"><ha-icon icon="mdi:battery-off-outline"></ha-icon></button>`;
     return "";
   }
 

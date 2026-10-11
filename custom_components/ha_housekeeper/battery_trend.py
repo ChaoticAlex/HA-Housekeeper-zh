@@ -17,7 +17,7 @@ WINDOW_DAYS = 35
 MIN_POINTS = 7
 REPLACED_JUMP = 15.0  # a rise this big between two days means the battery was changed
 FLAT = 0.03  # percent per day: a slower fall counts as stable
-FAR = 730  # days: further away is not worth a number
+FAR = 90  # days: a line through five weeks says nothing about what is further away
 GROUP_DAYS = 14
 MAX_ROWS = 200
 REPLACED_DAYS = 21  # a jump this recent is offered as a replacement
@@ -57,7 +57,7 @@ def estimate(
         return {**base, "state": "stable", "days_left": None}
     days = (level - limit) / -slope
     if days > FAR:
-        return {**base, "state": "stable", "days_left": None}
+        return {**base, "state": "far", "days_left": None}
     return {**base, "state": "falling", "days_left": round(days)}
 
 

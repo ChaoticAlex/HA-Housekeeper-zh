@@ -132,3 +132,12 @@ async def test_battery_kinds_are_checked_and_kept(hass: HomeAssistant) -> None:
         with pytest.raises(BatteryError):
             store.set_kinds(bad)
     assert store.kinds == {"sensor.b": "keep"}
+
+
+def test_a_fall_further_away_than_ninety_days_is_not_given_a_number() -> None:
+    from custom_components.ha_housekeeper.battery_trend import estimate
+
+    slow = [((NOW - timedelta(days=9 - i)).timestamp(), 100 - 0.3 * i) for i in range(10)]
+    assert estimate(slow, 20)["state"] == "far" and estimate(slow, 20)["days_left"] is None
+    near = [((NOW - timedelta(days=9 - i)).timestamp(), 100 - 2 * i) for i in range(10)]
+    assert estimate(near, 20)["state"] == "falling"

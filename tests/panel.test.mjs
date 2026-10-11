@@ -468,7 +468,7 @@ test("batteries and unreferenced lists filter by area and sort", () => {
     ent("sensor.a", "Zeta", "kitchen", { state: "40" }), ent("sensor.b", "Alpha", "hall", { state: "90" }), ent("sensor.c", "Mid", "kitchen", { state: "10" }),
   ], edges: [] };
   el.view = "batteries"; el.batteryFilter = "all"; el.render();
-  const read = () => { el.render(); return el.shadowRoot.innerHTML.match(/<strong>(Zeta|Alpha|Mid)<\/strong>/g).map(m => m.replace(/<\/?strong>/g, "")).join(","); };
+  const read = () => { el.render(); return el.shadowRoot.innerHTML.match(/<strong class="cut">(Zeta|Alpha|Mid)<\/strong>/g).map(m => m.replace(/<[^>]+>/g, "")).join(","); };
   assert.equal(read(), "Mid,Zeta,Alpha"); // lowest level first
   el.lv.batteries.dir = "desc";
   assert.equal(read(), "Alpha,Zeta,Mid");
@@ -2991,8 +2991,8 @@ test("the batteries view shows the forecast with groups and the reminders, which
   el.batteryTrend = { available: true, busy: false, unknown: 2, groups: [{ from_days: 14, to_days: 27, entity_ids: ["sensor.a", "sensor.b"] }], rows: [{ entity_id: "sensor.a", name: "Door", level: 40, slope: -1, days_left: 20, state: "falling", points: 12 }] };
   el._btRequested = true;
   el._hass = { language: "en", callWS: async msg => { calls.push(msg); return { reminders: [] }; } };
-  const forecast = el.batteryTrendCard();
-  assert.ok(forecast.includes("in about 20 days") && forecast.includes("In 14 to 27 days") && forecast.includes("Door"));
+  const forecast = el.batteryNeed();
+  assert.ok(forecast.includes("Batteries needed in the next 30 days") && forecast.includes("20 days"));
   const reminders = el.remindersCard();
   assert.ok(reminders.includes("Water filter") && reminders.includes("10 days overdue"));
   assert.ok(el.todoItems().some(i => i.key === "reminders"));
@@ -3573,7 +3573,7 @@ test("batteries are named by their device: the tile, the rows and the search", (
   el.batteryVoltRows = () => [];
   const html = el.batteriesView();
   assert.ok(html.includes("Lowest level") && html.includes("Kitchen window sensor · Kitchen") && html.includes('data-object="entity:sensor.kitchen_window_battery"'), "the tile names the device and opens the sensor");
-  assert.ok(/<strong>Kitchen window sensor<\/strong><small>[^<]*Battery/.test(html), "the row titles the device and keeps the entity below");
+  assert.ok(/<strong class="cut">Kitchen window sensor<\/strong><span class="id cut">Battery/.test(html), "the row titles the device and keeps the entity below");
   assert.equal(el.batteryName(battery).title, "Kitchen window sensor"); assert.equal(el.batteryName(battery).entity, "Battery");
   assert.equal(el.batteryName({ ...battery, device_id: "" }).title, "Battery");
 });
@@ -3626,6 +3626,7 @@ test("the selection can be trimmed: a plan with a day count for each entity, and
 test("batteries: the shopping list counts the types, a detected replacement is offered, the goal history and finding read well", () => {
   const { el } = panel("en");
   el.batteryTrend = {
+    available: true, busy: false,
     types: { "sensor.a": "2× AAA", "sensor.b": "2× AAA", "sensor.c": "CR2032" },
     rows: [
       { entity_id: "sensor.a", state: "low", days_left: 0 },
@@ -3636,9 +3637,10 @@ test("batteries: the shopping list counts the types, a detected replacement is o
     ],
     replaced: [{ entity_id: "sensor.a", day: "2026-10-09", from: 9, to: 100 }],
   };
-  const cart = el.batteryShopping();
-  assert.ok(cart.includes("4× AAA · 1× CR2032 · 1 device without a type"));
+  const cart = el.batteryNeed();
+  assert.ok(cart.includes("4×") && cart.includes("AAA") && cart.includes("1×") && cart.includes("CR2032") && cart.includes("no type"));
   assert.ok(!cart.includes("sensor.e"));
+  assert.equal((cart.match(/class="needtile/g) || []).length, 3, "one tile per type, all of one kind");
   const offer = el.batterySuggestions();
   assert.ok(offer.includes("probably a new battery") && offer.includes("Level 9 % → 100 %") && offer.includes("data-bt-enter"));
   assert.ok(el.batteryTypeControls("sensor.z").includes("Type missing"));

@@ -84,7 +84,7 @@ const TEXT = {
     cause_helper_broken: "Dieser Helfer baut auf {count} Entität/Entitäten auf, die nicht mehr existieren.", hint_helper_broken: "Den Helfer bearbeiten und die fehlenden Quellen ersetzen.",
     hideFinding: "Befund ausblenden", showFinding: "Wieder einblenden", ignoredLabel: "Ausgeblendet", showIgnored: "Ausgeblendete anzeigen",
     ignoredByLabel: "Ausgeblendet durch das Label housekeeper_ignore", findingsOfObject: "Befunde zu diesem Objekt",
-    batteries: "Batterien", batteriesSubtitle: "Batterie-Entitäten, die niedrigsten Werte zuerst.", batteryLow: "Niedrig", batteryAll: "Alle",
+    batteries: "Batterien", batteriesSubtitle: "Stand, Bedarf und Prognose deiner Batterien.", batteryLow: "Niedrig", batteryAll: "Alle",
     settings: "Einstellungen", settingsSubtitle: "Infos zu Housekeeper und Anpassung der Darstellung.", about: "Über Housekeeper", version: "Version", haVersion: "Home Assistant",
     mode: "Betriebsart", readOnlyValue: "Liest und analysiert; ändert nur nach ausdrücklicher Bestätigung", scanInterval: "Automatischer Scan", unavailableAfter: "Nicht verfügbar gilt als Befund nach", unusedAfter: "Ungenutzte Automationen nach", lowBatteryAt: "Schwache Batterie ab",
     daysValue: "{n} Tage", hoursValue: "alle {n} Stunden", offValue: "Aus", immediately: "sofort", openOptions: "Optionen öffnen", reportIssue: "Fehler melden", changelog: "Änderungsprotokoll", repository: "GitHub", copyInfo: "Info kopieren", copied: "Kopiert",
@@ -263,7 +263,7 @@ const TEXT = {
     cause_helper_broken: "This helper builds on {count} entity/entities that no longer exist.", hint_helper_broken: "Edit the helper and replace the missing sources.",
     hideFinding: "Hide finding", showFinding: "Show again", ignoredLabel: "Hidden", showIgnored: "Show hidden",
     ignoredByLabel: "Hidden by the label housekeeper_ignore", findingsOfObject: "Findings for this object",
-    batteries: "Batteries", batteriesSubtitle: "Battery entities, lowest values first.", batteryLow: "Low", batteryAll: "All",
+    batteries: "Batteries", batteriesSubtitle: "Level, need and forecast of your batteries.", batteryLow: "Low", batteryAll: "All",
     settings: "Settings", settingsSubtitle: "About Housekeeper and appearance options.", about: "About Housekeeper", version: "Version", haVersion: "Home Assistant",
     mode: "Mode", readOnlyValue: "Reads and analyzes; changes only after explicit confirmation", scanInterval: "Automatic scan", unavailableAfter: "Unavailable becomes a finding after", unusedAfter: "Unused automations after", lowBatteryAt: "Low battery at",
     daysValue: "{n} days", hoursValue: "every {n} hours", offValue: "Off", immediately: "immediately", openOptions: "Open options", reportIssue: "Report an issue", changelog: "Changelog", repository: "GitHub", copyInfo: "Copy info", copied: "Copied",
@@ -1232,7 +1232,7 @@ class StylesMixin {
       .detailhead{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:16px;padding:18px 20px;margin-bottom:14px}.detailhead .tile{width:48px;height:48px}.detailhead h1{margin:6px 0 2px;font-size:calc(22px*var(--hk-fs,1))}.actions{display:flex;flex-wrap:wrap;gap:8px}
       .sumline{display:flex;flex-wrap:wrap;gap:10px 26px;padding:12px 18px;margin-bottom:14px}.sumline span{display:grid;gap:3px;align-content:start}.sumline small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.sumline b{font-size:calc(13px*var(--hk-fs,1));font-weight:600}
       .tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--hk-border);overflow-x:auto;background:linear-gradient(to right,var(--hk-bg),transparent) left/36px 100% no-repeat local,linear-gradient(to left,var(--hk-bg),transparent) right/36px 100% no-repeat local,linear-gradient(to right,rgba(0,0,0,.16),transparent) left/10px 100% no-repeat scroll,linear-gradient(to left,rgba(0,0,0,.16),transparent) right/10px 100% no-repeat scroll}.tab{flex:none;padding:10px 14px;border:0;border-bottom:2px solid transparent;background:none;color:var(--hk-muted);white-space:nowrap}.tab em{font-style:normal;font-size:calc(11px*var(--hk-fs,1));padding:1px 6px;border-radius:10px;background:var(--hk-soft)}.tab[aria-selected="true"]{color:var(--hk-blue-text);border-bottom-color:var(--hk-blue);font-weight:600}
-      .bkedit{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 16px 12px 62px;background:var(--hk-soft);border-bottom:1px solid var(--hk-border)}.bkedit select,.bkrow select{padding:5px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit;font-size:calc(13px*var(--hk-fs,1))}.bkcancel{border:0;background:none;padding:4px 2px;font:inherit;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);cursor:pointer;text-decoration:underline}.bkrow{gap:8px;padding-right:12px;flex-wrap:wrap}.bkall,.bkask{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--hk-border)}.bkask{background:var(--hk-soft)}.rowwrap{display:flex;align-items:center;border-bottom:1px solid var(--hk-border)}.rowwrap:last-child{border-bottom:0}.rowwrap .row{border-bottom:0;flex:1;min-width:0}.selbox{margin:0 0 0 16px;flex:none}.statcell{display:flex;gap:10px;align-items:flex-start}.outcome{display:flex;gap:12px;align-items:center;margin:14px 16px 4px;padding:14px 16px;border-radius:12px;--oc:var(--hk-gray);color:color-mix(in srgb,var(--oc) 55%,var(--hk-text));background:color-mix(in srgb,var(--oc) 13%,transparent);border:1px solid color-mix(in srgb,var(--oc) 30%,transparent)}.outcome ha-icon{--mdc-icon-size:26px;flex:none}.outcome.ok{--oc:var(--hk-green)}.outcome.warn{--oc:var(--hk-amber)}.outcome.red{--oc:var(--hk-red)}.namecell{position:relative}.copybtn{position:absolute;right:0;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;padding:4px;border:1px solid var(--hk-border);border-radius:6px;background:var(--hk-surface);color:var(--hk-muted);cursor:pointer;opacity:0;--mdc-icon-size:14px}tr:hover .copybtn,.copybtn:focus-visible,.namecell:hover .copybtn{opacity:1}.copybtn.done{color:var(--hk-green);opacity:1}@media (hover:none){.copybtn{opacity:.7}}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;padding:10px 16px;border-radius:10px;background:var(--hk-text);color:var(--hk-bg);font-weight:600;box-shadow:var(--hk-sh2);pointer-events:none}.toast.bad{border-left:5px solid var(--hk-red);max-width:min(560px,calc(100vw - 32px))}.modepill{display:inline-flex;align-items:center;gap:5px;--mdc-icon-size:14px}.outcome small{display:block;font-weight:400;margin-top:2px}.visitline{display:flex;gap:8px;align-items:center;margin:0 0 12px}.visitline ha-icon{--mdc-icon-size:16px}.headsel{display:flex;gap:10px;align-items:center}.statcell .selbox{margin:3px 0 0}.statcell>div{min-width:0}.btcart,.btsuggest{margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 10%,transparent);border:1px solid color-mix(in srgb,var(--hk-blue) 30%,transparent)}.btcart strong{display:block;margin-bottom:2px}.btsuggest{background:color-mix(in srgb,var(--hk-green) 11%,transparent);border-color:color-mix(in srgb,var(--hk-green) 30%,transparent)}.btsuggest h3{margin:0 0 4px}.btrepl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}.btrepl .row-text{flex:1;min-width:200px}.btctl,.btedit{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 16px 0 8px}.btedit{flex-basis:100%;margin:0;padding:8px 16px 12px}.rowwrap:has(.btedit){flex-wrap:wrap}.chcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;padding:0 16px}.chcols>div{padding:8px 0}.chcols .big{font-size:22px;font-weight:700}.chbars{display:flex;gap:3px;align-items:flex-end;height:54px;padding:8px 16px 4px}.chbars i{flex:1;max-width:14px;min-width:3px;border-radius:3px 3px 0 0;background:var(--hk-green);display:block}.chbars i.m{background:var(--hk-red)}.chaxis{display:flex;justify-content:space-between;padding:0 16px 12px;color:var(--hk-muted);font-size:12px}.trimbox{margin:14px 16px 0;padding-top:14px;border-top:1px solid var(--hk-border)}.trimbox .actions{margin-top:8px}
+      .needgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:16px}.needtile{display:flex;flex-direction:column;justify-content:center;gap:4px;height:92px;padding:0 16px;border:1px solid var(--hk-border);border-radius:14px;background:var(--hk-soft);min-width:0}.needtile b{font-size:calc(28px*var(--hk-fs,1));line-height:1;font-variant-numeric:tabular-nums}.needtile span{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.needtile.miss{border-style:dashed}.needtile.miss b{color:var(--hk-amber)}.needsplit{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--hk-border)}.needsplit>div{padding:12px 16px;min-width:0}.needsplit>div+div{border-left:1px solid var(--hk-border)}.needsplit:empty{display:none}.needsplit h3{margin:0 0 6px;font-size:calc(12px*var(--hk-fs,1));letter-spacing:.04em;text-transform:uppercase;color:var(--hk-muted)}.needsplit ul{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:calc(14px*var(--hk-fs,1))}.needsplit li span,.needsplit li.muted{color:var(--hk-muted)}.needsplit li span::before{content:"· "}.tablewrap.lt.batt .iconbtn{padding:3px 6px;margin-left:4px;--mdc-icon-size:16px}.linkbtn{border:0;background:none;padding:0;font:inherit;color:var(--hk-text);cursor:pointer;text-decoration:underline;text-decoration-color:var(--hk-border)}.linkbtn:hover{text-decoration-color:currentColor}.tablewrap.lt.batt .lvl{display:flex;align-items:center;gap:8px;min-width:130px}.tablewrap.lt.batt .lvl .bar{flex:1;height:7px;border-radius:4px;background:var(--hk-border);overflow:hidden;min-width:48px}.tablewrap.lt.batt .lvl .bar i{display:block;height:100%}.tablewrap.lt.batt .red{color:var(--hk-red)}.tablewrap.lt.batt .amber{color:var(--hk-amber)}.tablewrap.lt.batt .green{color:var(--hk-green)}.tablewrap.lt.batt td .btedit{display:flex;flex-wrap:wrap;gap:6px;white-space:normal}.tablewrap.lt.batt .btedit label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.tablewrap.lt.batt .bkedit{padding:0;background:none;border:0}.tablewrap.lt.batt .bkedit .factnote{display:none}.tablewrap.lt.batt .btn.miss{border-style:dashed;color:var(--hk-amber)}.tablewrap.lt.batt td:last-child{text-align:right}@media(max-width:700px){.needsplit{grid-template-columns:1fr}.needsplit>div+div{border-left:0;border-top:1px solid var(--hk-border)}}.bkedit{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 16px 12px 62px;background:var(--hk-soft);border-bottom:1px solid var(--hk-border)}.bkedit select,.bkrow select{padding:5px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit;font-size:calc(13px*var(--hk-fs,1))}.bkcancel{border:0;background:none;padding:4px 2px;font:inherit;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);cursor:pointer;text-decoration:underline}.bkrow{gap:8px;padding-right:12px;flex-wrap:wrap}.bkall,.bkask{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--hk-border)}.bkask{background:var(--hk-soft)}.rowwrap{display:flex;align-items:center;border-bottom:1px solid var(--hk-border)}.rowwrap:last-child{border-bottom:0}.rowwrap .row{border-bottom:0;flex:1;min-width:0}.selbox{margin:0 0 0 16px;flex:none}.statcell{display:flex;gap:10px;align-items:flex-start}.outcome{display:flex;gap:12px;align-items:center;margin:14px 16px 4px;padding:14px 16px;border-radius:12px;--oc:var(--hk-gray);color:color-mix(in srgb,var(--oc) 55%,var(--hk-text));background:color-mix(in srgb,var(--oc) 13%,transparent);border:1px solid color-mix(in srgb,var(--oc) 30%,transparent)}.outcome ha-icon{--mdc-icon-size:26px;flex:none}.outcome.ok{--oc:var(--hk-green)}.outcome.warn{--oc:var(--hk-amber)}.outcome.red{--oc:var(--hk-red)}.namecell{position:relative}.copybtn{position:absolute;right:0;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;padding:4px;border:1px solid var(--hk-border);border-radius:6px;background:var(--hk-surface);color:var(--hk-muted);cursor:pointer;opacity:0;--mdc-icon-size:14px}tr:hover .copybtn,.copybtn:focus-visible,.namecell:hover .copybtn{opacity:1}.copybtn.done{color:var(--hk-green);opacity:1}@media (hover:none){.copybtn{opacity:.7}}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;padding:10px 16px;border-radius:10px;background:var(--hk-text);color:var(--hk-bg);font-weight:600;box-shadow:var(--hk-sh2);pointer-events:none}.toast.bad{border-left:5px solid var(--hk-red);max-width:min(560px,calc(100vw - 32px))}.modepill{display:inline-flex;align-items:center;gap:5px;--mdc-icon-size:14px}.outcome small{display:block;font-weight:400;margin-top:2px}.visitline{display:flex;gap:8px;align-items:center;margin:0 0 12px}.visitline ha-icon{--mdc-icon-size:16px}.headsel{display:flex;gap:10px;align-items:center}.statcell .selbox{margin:3px 0 0}.statcell>div{min-width:0}.btcart,.btsuggest{margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 10%,transparent);border:1px solid color-mix(in srgb,var(--hk-blue) 30%,transparent)}.btcart strong{display:block;margin-bottom:2px}.btsuggest{background:color-mix(in srgb,var(--hk-green) 11%,transparent);border-color:color-mix(in srgb,var(--hk-green) 30%,transparent)}.btsuggest h3{margin:0 0 4px}.btrepl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}.btrepl .row-text{flex:1;min-width:200px}.btctl,.btedit{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 16px 0 8px}.btedit{flex-basis:100%;margin:0;padding:8px 16px 12px}.rowwrap:has(.btedit){flex-wrap:wrap}.chcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;padding:0 16px}.chcols>div{padding:8px 0}.chcols .big{font-size:22px;font-weight:700}.chbars{display:flex;gap:3px;align-items:flex-end;height:54px;padding:8px 16px 4px}.chbars i{flex:1;max-width:14px;min-width:3px;border-radius:3px 3px 0 0;background:var(--hk-green);display:block}.chbars i.m{background:var(--hk-red)}.chaxis{display:flex;justify-content:space-between;padding:0 16px 12px;color:var(--hk-muted);font-size:12px}.trimbox{margin:14px 16px 0;padding-top:14px;border-top:1px solid var(--hk-border)}.trimbox .actions{margin-top:8px}
       .sumtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.sumtile{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border:1px solid var(--hk-border);border-left:4px solid var(--hk-gray);border-radius:12px;background:var(--hk-surface);text-align:left;font:inherit;color:inherit}button.sumtile{cursor:pointer}button.sumtile:hover{background:var(--hk-soft)}.sumtile.ok{border-left-color:var(--hk-green)}.sumtile.warn{border-left-color:var(--hk-amber)}.sumtile.red{border-left-color:var(--hk-red)}.sumlabel{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.sumvalue{font-size:calc(22px*var(--hk-fs,1));font-weight:600;line-height:1.2;overflow-wrap:anywhere}.sumtile small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));overflow-wrap:anywhere}.tabdot{display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:50%;background:var(--hk-gray)}.tabdot.warn{background:var(--hk-amber)}.tabdot.red{background:var(--hk-red)}
       .detailgrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:14px;align-items:start}.pad{padding:16px}
       .facts{display:grid}.fact{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.fact:first-child{border-top:0}.fact span{color:var(--hk-muted)}.fact b{font-weight:600;text-align:right}.fact small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:400}
@@ -3846,33 +3846,33 @@ class UnusedMixin {
   lowBatteries() { return this.data ? [...this.batteryRows(), ...this.batteryVoltRows()].filter(r => r.low) : []; }
 
   batteriesView() {
-    const all = [...this.batteryRows(), ...this.batteryVoltRows()], low = all.filter(r => r.low);
-    this.lvState("batteries", "level", "asc");
+    const all = this.batteryTableRows(), low = all.filter(r => r.low);
+    this.lvState("batteries", "left", "asc");
     const areas = [...new Set(all.map(r => this.areaName(r.item)).filter(Boolean))].sort();
-    const bar = this.listBar("batteries", { sorts: this.batterySorts(), filters: [{ name: "area", all: this.t("allAreas"), options: areas.map(a => [a, a]) }] });
+    const types = [...new Set(all.map(r => r.type).filter(Boolean))].sort();
+    const need = this.data.meta.low_battery_percent ?? 20;
+    const bar = this.listBar("batteries", { sorts: this.batteryTableSorts(), filters: [
+      { name: "soon", all: this.t("batteryAll"), options: [["soon", this.t("btFilterSoon")], ["untyped", this.t("btFilterUntyped")]] },
+      { name: "type", all: this.t("btAllTypes"), options: types.map(x => [x, x]) },
+      { name: "area", all: this.t("allAreas"), options: areas.map(a => [a, a]) },
+    ] });
     const list = this.refine("batteries", this.batteryFilter === "low" ? low : all, {
-      text: r => [this.batteryName(r.item).title, r.item.name, r.item.object_id, this.areaName(r.item)].join(" "),
-      filters: { area: (r, v) => this.areaName(r.item) === v }, sorts: this.batterySorts(), tie: r => r.item.object_id,
+      text: r => [this.batteryName(r.item).title, r.item.name, r.item.object_id, this.areaName(r.item), r.type].join(" "),
+      filters: { area: (r, v) => this.areaName(r.item) === v, type: (r, v) => r.type === v, soon: (r, v) => (v === "soon" ? r.low || (r.days !== null && r.days <= 30) : !r.type) },
+      sorts: this.batteryTableSorts(), tie: r => r.item.object_id,
     });
-    const limit = this.data.meta.low_battery_percent ?? 20;
-    const levels = all.map(r => r.level).filter(x => x !== null && x !== undefined);
     const lowest = all.filter(r => !r.volt && r.level !== null && r.level !== undefined).sort((x, y) => x.level - y.level)[0];
     const chips = this.sumTiles([
       { label: this.t("batteryAll"), value: this.formatNumber(all.length), tone: "mute", attr: ["data-battery-filter", "all"], active: this.batteryFilter !== "low" },
-      { label: this.t("batteryLow"), value: this.formatNumber(low.length), sub: this.t("batterySumLimit", { n: limit }), tone: low.length ? "red" : "ok", attr: ["data-battery-filter", "low"], active: this.batteryFilter === "low" },
+      { label: this.t("batteryLow"), value: this.formatNumber(low.length), sub: this.t("batterySumLimit", { n: need }), tone: low.length ? "red" : "ok", attr: ["data-battery-filter", "low"], active: this.batteryFilter === "low" },
       lowest ? { label: this.t("batterySumLowest"), value: `${this.formatNumber(lowest.level)} %`, sub: this.esc([this.batteryName(lowest.item).title, this.areaName(lowest.item)].filter(Boolean).join(" · ")), tone: lowest.low ? "warn" : "mute", attr: ["data-object", this.objectKey(lowest.item)] } : null,
     ]);
-    const row = ({ item, level, low: isLow, volt }) => {
-      const device = item.device_id ? this.findObject(`device:${item.device_id}`) : null;
-      const area = this.findObject(`area:${item.area_id || device?.area_id}`);
-      const tone = volt ? (isLow ? "red" : volt.days_left !== null && volt.days_left <= 30 ? "warn" : "ok") : isLow ? (level !== null && level <= limit / 2 ? "red" : "warn") : "ok";
-      const names = this.batteryName(item);
-      const sub = volt ? [area?.name, names.entity, this.t("bvLine", { now: this.voltNum(level), kind: this.t(`bvType_${volt.type}`), limit: this.voltNum(volt.limit) })] : [area?.name, names.entity, item.object_id];
-      const pill = volt ? this.voltNum(level) : level !== null ? `${Math.round(level)} ${item.unit || "%"}` : this.t("batteryLow");
-      return `<div class="rowwrap"><button class="row rel" data-object="${this.esc(this.objectKey(item))}"><span class="tile ${tone === "ok" ? "ok" : tone}"><ha-icon icon="${isLow ? "mdi:battery-alert-variant-outline" : "mdi:battery-high"}"></ha-icon></span><span class="row-text"><strong>${this.esc(names.title)}</strong><small>${this.esc(sub.filter(Boolean).join(" · "))}</small></span><span class="pill ${tone}">${this.esc(pill)}</span></button>${this.batteryKindControl(item)}</div>${this.batteryKindForm(item)}`;
-    };
-    const pg = this.paginate(`batteries-${this.batteryFilter}`, list);
-    return `<div class="stack">${chips}${this.batteryTrendCard()}<div class="panel">${bar}${list.length ? pg.rows.map(row).join("") : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t(all.length ? "noMatches" : "noBatteries")}</div>`}${pg.footer}${this.voltNote()}</div>${this.batteryKindCard()}</div>`;
+    const unknown = this.batteryTrend?.unknown;
+    const notes = `${this.batteryTrend?.available && unknown !== undefined ? `<p class="factnote">${this.t("btTableNote", { unknown: this.formatNumber(unknown) })}</p>` : ""}${this.voltNote()}`;
+    const head = `<div class="panelhead"><div><h2>${this.t("btTitle")}</h2><p>${this.t("btHint")}</p></div><div class="actions"><button class="btn" data-bt-refresh ${this.batteryTrendLoading ? "disabled" : ""}>${this.t("backupRefresh")}</button></div></div>`;
+    const body = list.length ? this.batteryTable(list) : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t(all.length ? "noMatches" : "noBatteries")}</div>`;
+    this.ensureBatteryTrend();
+    return `<div class="stack">${chips}${this.batteryNeed()}<div class="panel">${head}${bar}${body}${notes}</div>${this.batteryKindCard()}</div>`;
   }
 }
 
@@ -7067,37 +7067,6 @@ class BatteryCareMixin {
     setTimeout(() => this.loadBatteryTrend(), 0);
   }
 
-  batteryTrendCard() {
-    this.ensureBatteryTrend();
-    const head = `<div class="panelhead"><div><h2>${this.t("btTitle")}</h2><p>${this.t("btHint")}</p></div><div class="actions"><button class="btn" data-bt-refresh ${this.batteryTrendLoading ? "disabled" : ""}>${this.t("backupRefresh")}</button></div></div>`;
-    if (this.batteryTrendError) return `<div class="panel">${head}<div class="error">${this.esc(this.batteryTrendError)}</div></div>`;
-    const b = this.batteryTrend;
-    if (!b) return `<div class="panel">${head}${this.skeleton("btLoading")}</div>`;
-    if (!b.available) return `<div class="panel">${head}<div class="emptymsg">${this.t("btNoRecorder")}</div></div>`;
-    if (b.busy) return `<div class="panel">${head}<p class="factnote">${this.t("relBusy")}</p></div>`;
-    const falling = b.rows.filter(r => r.days_left !== null);
-    const row = r => {
-      const tone = r.state === "low" ? "red" : r.days_left <= 30 ? "warn" : "ok";
-      const text = r.state === "low" ? this.t("btLow") : this.t("btIn", { n: r.days_left });
-      const item = this.findObject(`entity:${r.entity_id}`);
-      const device = (item?.device_id ? this.findObject(`device:${item.device_id}`)?.name : "") || "";
-      const title = device && !String(r.name).toLowerCase().includes(device.toLowerCase()) ? `${device} – ${r.name}` : r.name;
-      const empty = r.state === "low" ? "" : this.formatDate(new Date(Date.now() + r.days_left * 86400000).toISOString()).split(",")[0];
-      const area = item ? this.areaName(item) : "";
-      const bits = [area, this.t("btNow", { n: this.formatNumber(r.level) }), empty ? this.t("btEmptyOn", { date: empty }) : ""].filter(Boolean).join(" · ");
-      return `<div class="rowwrap"><button class="row rel" data-object="entity:${this.esc(r.entity_id)}"><span class="tile ${tone}"><ha-icon icon="mdi:battery-clock-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(title)}</strong><small>${this.esc(bits)}</small></span><span class="pill ${tone}">${this.esc(text)}</span></button>${this.batteryTypeControls(r.entity_id)}</div>`;
-    };
-    // Batteries that run low in the same fortnight sit in one fold, the nearest one open: change them together.
-    const slots = [...b.groups].sort((x, y) => x.from_days - y.from_days);
-    const body = falling.length ? slots.map((g, index) => {
-      const rows = g.entity_ids.map(id => falling.find(r => r.entity_id === id)).filter(Boolean);
-      if (!rows.length) return "";
-      const tone = g.from_days <= 13 ? "red" : g.from_days <= 41 ? "warn" : "ok";
-      return this.fold(`bt_${g.from_days}`, { tone, title: this.t("btWindow", { from: g.from_days, to: g.to_days }), sub: rows.length > 1 ? this.t("btTogether") : "", pill: this.formatNumber(rows.length) }, rows.map(row).join(""), index === 0);
-    }).join("") : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t("btNone")}</div>`;
-    return `<div class="panel">${head}${this.batterySuggestions()}${this.batteryShopping()}${body}<p class="factnote">${this.t("btNote", { unknown: this.formatNumber(b.unknown) })}</p></div>`;
-  }
-
   // Batteries that report volts, as rows of the same list: the type is guessed from the full voltage, the limit comes from the type.
   batteryVoltRows() {
     return (this.batteryTrend?.voltage?.rows || []).map(v => {
@@ -7153,9 +7122,7 @@ Object.assign(TEXT.de, {
   bvTitle: "Batterien mit Spannung", bvHint: "Sensoren, die Volt statt Prozent melden. Housekeeper schätzt den Typ aus der höchsten Spannung der letzten Wochen und nimmt dessen Grenze.", bvStable: "stabil",
   bvLine: "Jetzt {now} · erkannt als {kind} · Grenze {limit}", bvNote: "Der Typ ist eine Schätzung; liegt er falsch, ist auch die Grenze falsch. Ohne Angabe: {unknown} (zu wenige Tage oder eine Spannung, die zu keinem Typ passt).",
   bvType_cell15: "Einzelzelle 1,5 V (AA/AAA, Alkaline oder NiMH)", bvType_coin3: "3-V-Zelle (z. B. CR2032 oder 2 × AA)", bvType_lithium: "Lithium-Ionen-Zelle", bvType_cells3: "3 Zellen in Reihe (4,5 V)", bvType_cells4: "4 Zellen in Reihe (6 V)", bvType_block9: "9-V-Block", bvType_lead12: "12-V-Akku",
-  btTitle: "Batterieprognose", btHint: "Wann eine Batterie voraussichtlich die Grenze erreicht, aus dem Verlauf der letzten fünf Wochen. Eine Schätzung, keine Zusage.", btLoading: "Prognose wird berechnet …", btNoRecorder: "Ohne Recorder gibt es keine Prognose.",
-  btNone: "Keine Batterie fällt erkennbar auf die Grenze zu.", btIn: "in etwa {n} Tagen", btLow: "schon unter der Grenze", btLevel: "Jetzt {n} %, fällt um {slope} Prozentpunkte pro Tag", btMore: "{n} weitere nicht gezeigt.",
-  btWindow: "In {from} bis {to} Tagen", btTogether: "Gemeinsam wechseln", btNow: "Jetzt {n} %", btEmptyOn: "Grenze etwa am {date}", btNote: "Nur Batteriesensoren mit Langzeitstatistik. Ohne Prognose: {unknown} (zu wenige Tage, stabil oder steigend). Nach einem Wechsel zählt nur der Verlauf danach.",
+  btTitle: "Alle Batterien", btHint: "Stand, Verbrauch und die Prognose, wann eine Batterie die Grenze erreicht (bis 90 Tage).", btLoading: "Prognose wird berechnet …", btNoRecorder: "Ohne Recorder gibt es keine Prognose.",
   remTitle: "Wartungserinnerungen", remHint: "Filter, Entkalken, Batteriewechsel: du trägst Name, Abstand und letztes Datum ein, Housekeeper sagt, wann es wieder fällig ist. Es ändert nichts in Home Assistant.", remNone: "Noch keine Erinnerung.",
   remName: "Name (z. B. Wasserfilter)", remEvery: "alle", remDays: "Tage", remLast: "zuletzt am", remNote: "Notiz (z. B. Batterietyp CR2032)", remAdd: "Hinzufügen", remDone: "Erledigt", remDelete: "Löschen",
   remLine: "Alle {interval} Tage · zuletzt {last} · fällig {due}", remOverdue: "{n} Tage überfällig", remIn: "in {n} Tagen", remInvalid: "Nicht gespeichert, bitte prüfen: {field}",
@@ -7167,9 +7134,7 @@ Object.assign(TEXT.en, {
   bvTitle: "Batteries in volts", bvHint: "Sensors that report volts instead of percent. Housekeeper guesses the type from the highest voltage of the last weeks and uses its limit.", bvStable: "stable",
   bvLine: "Now {now} · recognised as {kind} · limit {limit}", bvNote: "The type is a guess; if it is wrong, so is the limit. Without a result: {unknown} (too few days or a voltage that fits no type).",
   bvType_cell15: "single 1.5 V cell (AA/AAA, alkaline or NiMH)", bvType_coin3: "3 V cell (e.g. CR2032 or 2 × AA)", bvType_lithium: "lithium-ion cell", bvType_cells3: "3 cells in series (4.5 V)", bvType_cells4: "4 cells in series (6 V)", bvType_block9: "9 V block", bvType_lead12: "12 V battery",
-  btTitle: "Battery forecast", btHint: "When a battery will probably reach the limit, from the last five weeks. An estimate, not a promise.", btLoading: "Calculating the forecast …", btNoRecorder: "There is no forecast without a recorder.",
-  btNone: "No battery is visibly heading for the limit.", btIn: "in about {n} days", btLow: "already below the limit", btLevel: "Now {n} %, falling {slope} points per day", btMore: "{n} more not shown.",
-  btWindow: "In {from} to {to} days", btTogether: "Change them together", btNow: "Now {n} %", btEmptyOn: "limit around {date}", btNote: "Only battery sensors with long-term statistics. No forecast for {unknown} (too few days, stable or rising). After a change only the time since counts.",
+  btTitle: "All batteries", btHint: "Level, drain and the forecast of when a battery reaches the limit (up to 90 days).", btLoading: "Calculating the forecast …", btNoRecorder: "There is no forecast without a recorder.",
   remTitle: "Maintenance reminders", remHint: "Filter, descaling, battery change: you enter a name, an interval and the last date, Housekeeper tells you when it is due again. It changes nothing in Home Assistant.", remNone: "No reminder yet.",
   remName: "Name (e.g. water filter)", remEvery: "every", remDays: "days", remLast: "last done", remNote: "Note (e.g. battery type CR2032)", remAdd: "Add", remDone: "Done", remDelete: "Delete",
   remLine: "Every {interval} days · last {last} · due {due}", remOverdue: "{n} days overdue", remIn: "in {n} days", remInvalid: "Not saved, please check: {field}",
@@ -9407,8 +9372,6 @@ Object.assign(TEXT.en, {
 // Mixed into the panel in 99-register.js. Only Housekeeper's own list changes.
 Object.assign(TEXT.de, {
   btTypeSet: "Typ", btTypeNone: "Typ fehlt", btTypeSave: "Speichern", btTypeCustom: "Eigener Text …", btTypeLabel: "Batterietyp für {name}", btTypeHint: "Gespeichert nur in Housekeeper.",
-  btShopTitle: "Einkaufsliste für die nächsten 30 Tage", btShopNone: "Keine Batterie wird in den nächsten 30 Tagen leer.", btShopUntyped: "{count} Geräte ohne Typ", btShopUntyped1: "1 Gerät ohne Typ",
-  btShopHint: "Gezählt werden Geräte, die laut Prognose innerhalb von 30 Tagen unter die Schwelle fallen.",
   btReplTitle: "Wechsel erkannt", btReplHint: "Der Ladestand sprang um mindestens 15 Punkte nach oben. Das ist ein Hinweis, kein Beweis: Ein Sensor kann auch neu kalibrieren.",
   btReplLine: "{name}: vermutlich neue Batterie am {date}", btReplLevels: "Stand {from} % → {to} %", btReplEnter: "Eintragen", btReplDismiss: "Kein Wechsel",
   btReplNote: "„Eintragen“ macht einen Eintrag in „Änderungen“ und setzt „zuletzt erledigt“ in Erinnerungen, deren Name den Gerätenamen enthält. Es wird nichts angelegt.",
@@ -9416,8 +9379,6 @@ Object.assign(TEXT.de, {
 });
 Object.assign(TEXT.en, {
   btTypeSet: "Type", btTypeNone: "Type missing", btTypeSave: "Save", btTypeCustom: "Own text …", btTypeLabel: "Battery type for {name}", btTypeHint: "Stored only in Housekeeper.",
-  btShopTitle: "Shopping list for the next 30 days", btShopNone: "No battery runs out in the next 30 days.", btShopUntyped: "{count} devices without a type", btShopUntyped1: "1 device without a type",
-  btShopHint: "Counted are devices that fall below the limit within 30 days according to the forecast.",
   btReplTitle: "Replacement detected", btReplHint: "The level jumped up by at least 15 points. That is a hint, not proof: a sensor can also recalibrate.",
   btReplLine: "{name}: probably a new battery on {date}", btReplLevels: "Level {from} % → {to} %", btReplEnter: "Enter", btReplDismiss: "No replacement",
   btReplNote: "“Enter” adds an entry to “Changes” and sets “last done” on reminders whose name contains the device name. Nothing is created.",
@@ -9441,26 +9402,6 @@ class BatteryTypeMixin {
       return `<span class="btedit"><label class="factnote" for="hk-bt-type">${this.t("btTypeLabel", { name: this.esc(this.batteryLabel(entityId)) })}</label><select id="hk-bt-type" data-bt-type-select><option value="">–</option>${options}<option value="__custom" ${known ? "" : "selected"}>${this.t("btTypeCustom")}</option></select><input type="text" maxlength="30" data-bt-type-custom value="${this.esc(known ? "" : type)}" ${known ? "hidden" : ""} aria-label="${this.t("btTypeCustom")}"><button class="btn accent" data-bt-type-save="${this.esc(entityId)}">${this.t("btTypeSave")}</button><button class="btn quiet" data-bt-type-cancel>${this.t("cancelRun")}</button></span>`;
     }
     return `<span class="btctl">${type ? `<span class="pill">${this.esc(type)}</span>` : `<span class="pill mute">${this.t("btTypeNone")}</span>`}<button class="btn quiet" data-bt-type="${this.esc(entityId)}">${this.t("btTypeSet")}</button></span>`;
-  }
-
-  // The batteries that run low within 30 days, counted by type: "4× AAA, 2× CR2032".
-  batteryShopping() {
-    const b = this.batteryTrend;
-    if (!b?.rows) return "";
-    const soon = b.rows.filter(r => r.state === "low" || (r.days_left !== null && r.days_left <= 30));
-    const counts = new Map();
-    let untyped = 0;
-    for (const r of soon) {
-      const type = b.types?.[r.entity_id];
-      if (!type) { untyped++; continue; }
-      const match = /^(\d+)\s*[×x]\s*(.+)$/i.exec(type);
-      const [n, name] = match ? [Number(match[1]), match[2].trim()] : [1, type];
-      counts.set(name, (counts.get(name) || 0) + n);
-    }
-    const list = [...counts].sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0])).map(([name, n]) => `${n}× ${name}`).join(" · ");
-    const miss = untyped ? (untyped === 1 ? this.t("btShopUntyped1") : this.t("btShopUntyped", { count: untyped })) : "";
-    const text = [list, miss].filter(Boolean).join(" · ") || this.t("btShopNone");
-    return `<div class="btcart"><strong>${this.t("btShopTitle")}</strong>${this.esc(text)}<div class="factnote">${this.t("btShopHint")}</div></div>`;
   }
 
   batterySuggestions() {
@@ -9955,7 +9896,7 @@ class BatteryKindMixin {
 
   // One small button after a row of the battery list; it opens the form below the row.
   batteryKindControl(o) {
-    if (this.bkEdit !== o.object_id) return `<button class="btn quiet" data-bk-open="${this.esc(o.object_id)}">${this.t("bkSet")}</button>`;
+    if (this.bkEdit !== o.object_id) return `<button class="btn quiet iconbtn" data-bk-open="${this.esc(o.object_id)}" title="${this.esc(this.t("bkSet"))}" aria-label="${this.esc(this.t("bkSet"))}"><ha-icon icon="mdi:battery-off-outline"></ha-icon></button>`;
     return "";
   }
 
@@ -10008,6 +9949,153 @@ class BatteryKindMixin {
       const items = [...root.querySelectorAll("[data-bk-proposal]")].map(s => ({ entity_id: s.dataset.bkProposal, kind: s.value }));
       this.batterySetKinds(items);
     });
+  }
+}
+
+// The Batteries view as one table: level, type and forecast side by side, and the need of the next 30 days above it.
+// The forecast comes from ha_housekeeper/battery_trend (loaded in the background, 53-battery-care.js); a battery without
+// one still has its row. Mixed into the panel in 99-register.js.
+const BATTERY_NEED_DAYS = 30;
+const BATTERY_SOON_DAYS = 14;
+const BATTERY_FAR_DAYS = 90;
+
+Object.assign(TEXT.de, {
+  btColName: "Gerät", btColArea: "Bereich", btColType: "Typ", btColLevel: "Stand", btColSlope: "Verbrauch", btColLeft: "Leer in", btColAct: "Aktion", btTypeChange: "Typ ändern", btLevelOk: "in Ordnung",
+  btSlopeDay: "{n} %/Tag", btVoltDay: "{n} V/Tag", btSlopeStable: "stabil", btLeftLow: "darunter", btLeftDays: "{n} Tage", btLeftFar: "> {n} Tage", btLeftStable: "stabil",
+  btFilterSoon: "Bald leer", btFilterUntyped: "Ohne Typ", btAllTypes: "Alle Typen",
+  needTitle: "Benötigte Batterien in den nächsten 30 Tagen", needSub: "{n} Geräte fallen laut Prognose in 30 Tagen unter die Grenze von {limit} %.", needSub1: "1 Gerät fällt laut Prognose in 30 Tagen unter die Grenze von {limit} %.",
+  needNone: "Keine Batterie wird in den nächsten 30 Tagen leer.", needUntyped: "ohne Typ", needUntypedHint: "Typ in der Tabelle setzen", needSoon: "In den nächsten 14 Tagen", needLater: "In 15 bis 30 Tagen", needMore: "… {n} weitere in der Tabelle",
+  needNote: "Gezählt werden Geräte, die laut Prognose innerhalb von 30 Tagen unter die Grenze fallen. Der Typ kommt von dir.",
+  btTableNote: "Prognose nur bis 90 Tage, aus den letzten fünf Wochen: eine Schätzung, keine Zusage. Ohne Prognose: {unknown} (zu wenige Tage oder stabil). Nach einem Wechsel zählt nur der Verlauf danach.",
+  btFarMore: "{n} halten laut Prognose länger als 90 Tage.",
+});
+Object.assign(TEXT.en, {
+  btColName: "Device", btColArea: "Area", btColType: "Type", btColLevel: "Level", btColSlope: "Drain", btColLeft: "Empty in", btColAct: "Action", btTypeChange: "Change type", btLevelOk: "ok",
+  btSlopeDay: "{n} %/day", btVoltDay: "{n} V/day", btSlopeStable: "stable", btLeftLow: "below", btLeftDays: "{n} days", btLeftFar: "> {n} days", btLeftStable: "stable",
+  btFilterSoon: "Empty soon", btFilterUntyped: "No type", btAllTypes: "All types",
+  needTitle: "Batteries needed in the next 30 days", needSub: "{n} devices will fall below the limit of {limit} % within 30 days, by the forecast.", needSub1: "1 device will fall below the limit of {limit} % within 30 days, by the forecast.",
+  needNone: "No battery runs out in the next 30 days.", needUntyped: "no type", needUntypedHint: "set the type in the table", needSoon: "In the next 14 days", needLater: "In 15 to 30 days", needMore: "… {n} more in the table",
+  needNote: "Counted are devices that fall below the limit within 30 days by the forecast. The type comes from you.",
+  btTableNote: "Forecast only up to 90 days, from the last five weeks: an estimate, not a promise. No forecast for {unknown} (too few days or stable). After a change only the time since counts.",
+  btFarMore: "{n} last longer than 90 days by the forecast.",
+});
+
+class BatteryTableMixin {
+  // The forecast of one row: from the percent trend, or the one of a battery that reports volts.
+  batteryForecast(row) {
+    if (row.volt) return { state: row.volt.state, days: row.volt.days_left, slope: row.volt.slope, unit: "V" };
+    const f = (this.batteryTrend?.rows || []).find(r => r.entity_id === row.item.object_id);
+    return f ? { state: f.state, days: f.days_left, slope: f.slope, unit: "%" } : null;
+  }
+
+  // The battery type of a row: yours, or for volts the guess from the voltage.
+  batteryTypeOf(row) { return this.batteryTrend?.types?.[row.item.object_id] || ""; }
+
+  // Rows with the forecast joined on, for the table, the filters and the sorting.
+  batteryTableRows() {
+    return [...this.batteryRows(), ...this.batteryVoltRows()].map(row => {
+      const fc = this.batteryForecast(row);
+      return { ...row, fc, type: this.batteryTypeOf(row), days: row.low ? 0 : fc?.state === "falling" ? fc.days : null };
+    });
+  }
+
+  batteryTableSorts() {
+    const left = r => (r.low ? 0 : r.days ?? 1e5) * 1000 + (r.level ?? 999) / 1000 + (r.volt ? 0.5 : 0);
+    return [
+      { key: "left", label: "btColLeft", dir: "asc", get: left },
+      { key: "level", label: "btColLevel", dir: "asc", get: r => (r.low ? 0 : 1e6) + (r.volt ? 1000 : 0) + (r.level ?? -1) },
+      { key: "slope", label: "btColSlope", dir: "asc", get: r => r.fc && r.fc.slope !== null && r.fc.slope !== undefined ? r.fc.slope : 1e6 },
+      { key: "name", label: "btColName", dir: "asc", get: r => this.batteryName(r.item).title },
+      { key: "area", label: "btColArea", dir: "asc", get: r => this.areaName(r.item) },
+      { key: "type", label: "btColType", dir: "asc", get: r => r.type || "~" },
+    ];
+  }
+
+  batteryLevelCell(row, limit) {
+    const { item, level, low, volt } = row;
+    if (volt) return `<span class="${low ? "red" : ""}">${this.esc(this.voltNum(level))}</span>`;
+    if (level === null || level === undefined) return `<span class="pill ${low ? "red" : "mute"}">${this.t(low ? "batteryLow" : "btLevelOk")}</span>`;
+    const tone = low ? (level <= limit / 2 ? "red" : "amber") : level <= limit * 2 ? "amber" : "green";
+    const width = Math.max(2, Math.min(100, level));
+    return `<div class="lvl"><div class="bar"><i style="width:${width}%;background:var(--hk-${tone})"></i></div><span class="lvlnum ${low ? "red" : ""}">${this.esc(`${Math.round(level)} ${item.unit || "%"}`)}</span></div>`;
+  }
+
+  batterySlopeCell(row) {
+    const fc = row.fc;
+    if (!fc || fc.slope === null || fc.slope === undefined) return `<span class="muted">—</span>`;
+    if (fc.state === "stable") return `<span class="muted">${this.t("btSlopeStable")}</span>`;
+    const digits = fc.unit === "V" ? 3 : 1, n = new Intl.NumberFormat(this.lang, { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(fc.slope).replace("-", "−");
+    return this.t(fc.unit === "V" ? "btVoltDay" : "btSlopeDay", { n });
+  }
+
+  batteryLeftCell(row) {
+    const fc = row.fc;
+    if (row.low) return `<b class="red">${this.t("btLeftLow")}</b>`;
+    if (!fc) return `<span class="muted">—</span>`;
+    if (fc.state === "falling") return `<b class="${fc.days <= BATTERY_SOON_DAYS ? "red" : fc.days <= BATTERY_NEED_DAYS ? "amber" : ""}">${this.t("btLeftDays", { n: fc.days })}</b>`;
+    if (fc.state === "far") return `<span class="muted">${this.t("btLeftFar", { n: BATTERY_FAR_DAYS })}</span>`;
+    return `<span class="muted">${this.t("btLeftStable")}</span>`;
+  }
+
+  batteryTypeCell(row) {
+    const id = row.item.object_id;
+    if (this.btEdit === id) return this.batteryTypeControls(id);
+    if (row.type) return `<span class="btctl"><span class="pill">${this.esc(row.type)}</span><button class="btn quiet iconbtn" data-bt-type="${this.esc(id)}" title="${this.esc(this.t("btTypeChange"))}" aria-label="${this.esc(this.t("btTypeLabel", { name: this.batteryName(row.item).title }))}"><ha-icon icon="mdi:pencil-outline"></ha-icon></button></span>`;
+    if (row.volt) return `<span class="muted" title="${this.esc(this.t("bvLine", { now: this.voltNum(row.level), kind: this.t(`bvType_${row.volt.type}`), limit: this.voltNum(row.volt.limit) }))}">${this.esc(this.t(`bvType_${row.volt.type}`).split(" (")[0])}</span><button class="btn quiet iconbtn" data-bt-type="${this.esc(id)}" title="${this.t("btTypeChange")}" aria-label="${this.t("btTypeChange")}"><ha-icon icon="mdi:pencil-outline"></ha-icon></button>`;
+    return `<button class="btn quiet miss" data-bt-type="${this.esc(id)}">${this.t("btTypeNone")}</button>`;
+  }
+
+  // The table: one row per battery. A row opens the device; the buttons inside it do not (90-panel.js ignores their clicks).
+  batteryTable(rows) {
+    const limit = this.data.meta.low_battery_percent ?? 20;
+    this.lvState("batteries", "left", "asc");
+    const pg = this.paginate(`batteries-${this.batteryFilter}`, rows);
+    const columns = [
+      { key: "name", label: "btColName", dir: "asc", cell: r => { const n = this.batteryName(r.item); return this.nameCell(n.title, n.entity || r.item.object_id); } },
+      { key: "area", label: "btColArea", dir: "asc", cell: r => this.esc(this.areaName(r.item) || "—") },
+      { key: "type", label: "btColType", dir: "asc", cell: r => this.batteryTypeCell(r) },
+      { key: "level", label: "btColLevel", dir: "asc", cell: r => this.batteryLevelCell(r, limit) },
+      { key: "slope", label: "btColSlope", dir: "asc", cell: r => this.batterySlopeCell(r) },
+      { key: "left", label: "btColLeft", dir: "asc", cell: r => this.batteryLeftCell(r) },
+      { key: "act", label: "btColAct", sortable: false, cell: r => `${this.batteryKindControl(r.item)}${this.batteryKindForm(r.item)}` },
+    ];
+    const table = this.listTable("batteries", columns, pg.rows, { cls: "batt", rowAttrs: r => `data-object="${this.esc(this.objectKey(r.item))}" tabindex="0" role="button" aria-label="${this.esc(this.batteryName(r.item).title)}"` });
+    return `${table}${pg.footer}`;
+  }
+
+  // The need of the next 30 days: how many of which cell to buy, tiles of one size, and who runs out first.
+  batteryNeed() {
+    const b = this.batteryTrend;
+    if (this.batteryTrendError) return `<div class="panel"><div class="error">${this.esc(this.batteryTrendError)}</div></div>`;
+    if (!b) return `<div class="panel"><div class="panelhead"><div><h2>${this.t("needTitle")}</h2></div></div>${this.skeleton("btLoading")}</div>`;
+    if (!b.available) return `<div class="panel"><div class="emptymsg">${this.t("btNoRecorder")}</div></div>`;
+    if (b.busy) return `<div class="panel"><p class="factnote">${this.t("relBusy")}</p></div>`;
+    const soon = b.rows.filter(r => r.state === "low" || (r.days_left !== null && r.days_left <= BATTERY_NEED_DAYS))
+      .sort((x, y) => (x.state === "low" ? -1 : x.days_left) - (y.state === "low" ? -1 : y.days_left) || String(x.name || "").localeCompare(String(y.name || "")));
+    const limit = b.limit ?? this.data.meta.low_battery_percent ?? 20;
+    const counts = new Map();
+    let untyped = 0;
+    for (const r of soon) {
+      const type = b.types?.[r.entity_id];
+      if (!type) { untyped++; continue; }
+      const match = /^(\d+)\s*[×x]\s*(.+)$/i.exec(type);
+      const [n, name] = match ? [Number(match[1]), match[2].trim()] : [1, type];
+      counts.set(name, (counts.get(name) || 0) + n);
+    }
+    const tile = (count, name, cls = "") => `<div class="needtile ${cls}"><b>${this.esc(count)}</b><span>${this.esc(name)}</span></div>`;
+    const tiles = [...counts].sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0])).map(([name, n]) => tile(`${this.formatNumber(n)}×`, name));
+    if (untyped) tiles.push(tile(this.formatNumber(untyped), `${this.t("needUntyped")} · ${this.t("needUntypedHint")}`, "miss"));
+    const name = r => { const item = this.findObject(`entity:${r.entity_id}`); return item ? this.batteryName(item).title : (r.name || r.entity_id); };
+    const line = r => `<li><button class="linkbtn" data-object="entity:${this.esc(r.entity_id)}">${this.esc(name(r))}</button> <span>${this.esc([b.types?.[r.entity_id], r.state === "low" ? this.t("btLeftLow") : this.t("btLeftDays", { n: r.days_left })].filter(Boolean).join(" · "))}</span></li>`;
+    const list = (title, rows) => {
+      if (!rows.length) return "";
+      const shown = rows.slice(0, 5);
+      return `<div><h3>${this.t(title)} · ${this.formatNumber(rows.length)}</h3><ul>${shown.map(line).join("")}${rows.length > shown.length ? `<li class="muted">${this.t("needMore", { n: rows.length - shown.length })}</li>` : ""}</ul></div>`;
+    };
+    const near = soon.filter(r => r.state === "low" || r.days_left <= BATTERY_SOON_DAYS), later = soon.filter(r => !near.includes(r));
+    const sub = this.t(soon.length === 1 ? "needSub1" : "needSub", { n: this.formatNumber(soon.length), limit: this.formatNumber(limit) });
+    const body = soon.length ? `<div class="needgrid">${tiles.join("")}</div><div class="needsplit">${list("needSoon", near)}${list("needLater", later)}</div>` : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t("needNone")}</div>`;
+    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("needTitle")}</h2>${soon.length ? `<p>${this.esc(sub)}</p>` : ""}</div></div>${this.batterySuggestions()}${body}<p class="factnote">${this.t("needNote")}</p></div>`;
   }
 }
 
@@ -10805,7 +10893,7 @@ class HAHousekeeperPanel extends HTMLElement {
       else { this.sort = el.dataset.sort; this.sortDir = "asc"; }
       this.pages = {}; this.render();
     });
-    root.querySelectorAll("[data-object]").forEach(el => el.onclick = () => { const obj = this.findObject(el.dataset.object); if (obj) this.openObject(obj); });
+    root.querySelectorAll("[data-object]").forEach(el => el.onclick = ev => { const inner = ev?.target?.closest?.("button, select, input, a, label"); if (inner && inner !== el && el.contains(inner)) return; const obj = this.findObject(el.dataset.object); if (obj) this.openObject(obj); });
     // Table rows and graph nodes are not native buttons: Enter and Space open them like a click.
     const openByKey = el => el.onkeydown = ev => {
       if (ev.target !== el || (ev.key !== "Enter" && ev.key !== " ")) return;
@@ -10983,7 +11071,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, RenameMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, RenameMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }
