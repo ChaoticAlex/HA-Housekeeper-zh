@@ -73,3 +73,73 @@ def test_helper_options_reference_their_source_entities() -> None:
         ("sensor.gone", "certain"),
         ("sun.sun", "probable"),
     }
+
+
+def test_location_names_view_section_and_card() -> None:
+    from custom_components.ha_housekeeper.dashboard_analysis import describe_location
+
+    config = {
+        "views": [
+            {"title": "A"},
+            {
+                "path": "archiv",
+                "sections": [
+                    {"cards": []},
+                    {
+                        "cards": [
+                            {
+                                "type": "custom:charger-card",
+                                "details": {"x": [{"entity_id": "a.b"}]},
+                            }
+                        ]
+                    },
+                ],
+            },
+        ]
+    }
+
+    place = describe_location(config, "views/1/sections/1/cards/0/details/x/0/entity_id")
+
+    assert place == {
+        "view": "archiv",
+        "view_index": 1,
+        "section": 2,
+        "card": "custom:charger-card",
+        "card_path": "views/1/sections/1/cards/0",
+    }
+    assert describe_location(config, "preferences/0") == {}
+
+
+def test_suggestions_need_close_names_and_findings_count_the_card() -> None:
+    from custom_components.ha_housekeeper.dashboard_analysis import (
+        annotate_findings,
+        suggest_replacements,
+    )
+
+    known = {
+        "sensor.keba_p30_charging_power",
+        "sensor.keba_p30_maximum_current_system",
+        "sensor.keba_p30_status",
+    }
+
+    assert suggest_replacements("sensor.keba_p30_power", known) == [
+        "sensor.keba_p30_charging_power"
+    ]
+    assert suggest_replacements("sensor.keba_p30_max_current", known) == [
+        "sensor.keba_p30_maximum_current_system"
+    ]
+    assert suggest_replacements("binary_sensor.keba_p30_status", known) == [
+        "sensor.keba_p30_status"
+    ]
+    assert suggest_replacements("binary_sensor.keba_p30_basic_schedule", known) == []
+
+    config = {"views": [{"cards": [{"type": "entities", "entities": ["a.gone", "a.here"]}]}]}
+    refs = [
+        {"location": "views/0/cards/0/entities/0", "object_id": "a.gone"},
+        {"location": "views/0/cards/0/entities/1", "object_id": "a.here"},
+    ]
+    findings = [{"evidence": [{"location": "views/0/cards/0/entities/0"}]}]
+    annotate_findings(findings, config, refs)
+
+    place = findings[0]["evidence"][0]["place"]
+    assert (place["card"], place["card_refs"], place["card_missing"]) == ("entities", 2, 1)

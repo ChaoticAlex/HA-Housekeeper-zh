@@ -3902,3 +3902,24 @@ test("battery sensors that are no replaceable battery leave the list, wait in a 
   await el.batterySetKinds([{ entity_id: "sensor.bank_battery", kind: "storage" }, { entity_id: "sensor.door_battery", kind: "" }]);
   assert.equal(JSON.stringify(calls[0]), JSON.stringify({ type: "ha_housekeeper/battery_kind_set", items: [{ entity_id: "sensor.bank_battery", kind: "storage" }, { entity_id: "sensor.door_battery", kind: "" }] }));
 });
+
+test("broken references of one dashboard card form one row with a readable place and the suggestions", () => {
+  const { el } = panel("en");
+  const place = { view: "Archiv", view_index: 12, section: 2, card: "custom:charger-card", card_path: "views/12/sections/1/cards/0", card_refs: 4, card_missing: 3 };
+  const broken = (id, rest, extra = {}) => ({
+    rule_id: "dashboard.missing_entity", object_id: "technik", classification: "broken_reference", confidence: 0.98, impact: "none",
+    affected_object: id, key: `dashboard.missing_entity|technik|${id}`,
+    evidence: [{ location: `views/12/sections/1/cards/0/${rest}`, place }], ...extra,
+  });
+  const list = [broken("sensor.a", "details/a"), broken("sensor.b", "details/b", { suggestions: ["sensor.b_new"] }), broken("sensor.c", "details/c")];
+  el.data = { ...DATA, objects: [{ object_type: "dashboard", object_id: "technik", name: "Technik", status: "active" }], findings: list };
+  const rows = el.groupBroken(list);
+  assert.equal(rows.length, 1);
+  assert.equal(el.groupBroken([list[0]])[0], list[0], "a card with one broken reference stays a plain row");
+  el.folds = { [`bg:technik|${place.card_path}`]: true };
+  const html = el.findingGroup(rows[0]);
+  assert.ok(html.includes("Technik › Archiv") && html.includes("Card custom:charger-card (Section 2) · 3 broken references"));
+  assert.ok(html.includes("looks abandoned: 3 of 4") && html.includes("Maybe: sensor.b_new") && html.includes("details/b"));
+  assert.ok(html.includes("<small>sensor.a · details/a"), "inside the group only the part below the card shows");
+  assert.equal(el.placeText(list[0]), 'Tab “Archiv” · Card custom:charger-card (Section 2)');
+});

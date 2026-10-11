@@ -2031,7 +2031,7 @@ class FindingsMixin {
     return { percent, share, tone, label, affected: affected.size, base, tasks, red, later: tasks - red, penalty };
   }
 
-  findingRow(finding) {
+  findingRow(finding, inGroup = false) {
     const key = this.findingKey(finding), object = this.findObject(key);
     const title = object?.name || finding.object_id;
     const subtitle = finding.rule_id === "entity.possible_duplicate"
@@ -2041,7 +2041,7 @@ class FindingsMixin {
         : finding.rule_id === "entity.stale"
         ? this.esc(this.staleLine(finding))
         : finding.affected_object
-          ? `${this.esc(finding.affected_object)} · ${this.esc(finding.evidence?.[0]?.location || "")}`
+          ? [this.esc(finding.affected_object), this.esc(this.placeText(finding, inGroup)), this.esc(this.suggestText(finding))].filter(Boolean).join(" · ")
           : this.esc(object?.reason ? this.t(object.reason) : this.findingTitle(finding));
     const button = `<button class="row ${finding.ignored ? "dim" : ""}" data-object="${this.esc(key)}">${this.tile(object?.object_type || "entity", this.tone(finding.classification))}<span class="row-text"><strong>${this.esc(title)}</strong><small>${subtitle}${finding.ignored ? ` · ${this.esc(finding.mark ? this.markLine(finding.mark) : this.decisionLabel(finding))}` : ""}${finding.resurfaced ? ` · ${this.t("dueLabel")}` : ""}${this.statusTags(finding)}${finding.impact && finding.impact !== "none" ? ` · ${this.t(`impact_${finding.impact}`)}` : ""}${finding.first_detected_at ? `<span class="msince"> · ${this.t("sortSince")} ${this.formatDate(finding.first_detected_at)}</span>` : ""}</small></span>${this.pill(finding.classification)}<span class="date">${finding.first_detected_at ? this.formatDate(finding.first_detected_at) : ""}</span></button>`;
     return `<div class="rowwrap"><input type="checkbox" class="selbox" data-fsel="${this.esc(finding.key)}" ${this.findSel.has(finding.key) ? "checked" : ""} aria-label="${this.esc(title)}">${button}${this.autoDeleteButton(finding)}</div>`;
@@ -2107,7 +2107,7 @@ class FindingsMixin {
   findingsView() {
     const all = this.sortedFindings(true).filter(f => this.statusMatch(f));
     const classes = [...new Set(all.map(f => f.classification))];
-    const list = this.collapseFollowers(this.visibleFindings());
+    const list = this.groupBroken(this.collapseFollowers(this.visibleFindings()));
     const types = [...new Set(all.map(f => this.findingType(f)))].sort();
     const bar = this.listBar("findings", { sorts: this.findingSorts(), filters: [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }, { name: "impact", all: this.t("allImpacts"), options: ["high", "medium", "low", "none"].map(x => [x, this.t(`impact_${x}`)]) }] });
     const pg = this.paginate("findings", list);
@@ -2126,13 +2126,13 @@ class FindingsMixin {
     const dueCount = this.data.findings.filter(f => f.resurfaced).length;
     const followers = this.followerCount();
     return `<div class="stack">${tiles}${this.causesCard()}${this.fixedCard()}<div class="panel"><div class="chips">${followers ? `<button class="chip ${this.showFollowers ? "active" : ""}" data-toggle-followers>${this.t(this.showFollowers ? "causeHide" : "causeShow")} (${followers})</button>` : ""}${dueCount ? `<button class="chip ${this.findingDue ? "active" : ""}" data-finding-due>${this.t("dueFilter")} (${dueCount})</button>` : ""}${this.statusChips()}<span class="spacer"></span><button class="chip" data-export="csv" title="${this.t("exportTitle")}">${this.t("exportCsv")}</button><button class="chip" data-export="json" title="${this.t("exportTitle")}">${this.t("exportJson")}</button></div>
-      ${this.findSelBar(pg.rows)}${bar}${list.length ? pg.rows.map(f => this.findingRow(f)).join("") : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${all.length ? this.noMatches("findings") : this.t("noFindings")}</div>`}${pg.footer}</div></div>`;
+      ${this.findSelBar(pg.rows)}${bar}${list.length ? pg.rows.map(f => (f.members ? this.findingGroup(f) : this.findingRow(f))).join("") : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${all.length ? this.noMatches("findings") : this.t("noFindings")}</div>`}${pg.footer}</div></div>`;
   }
 
   // The selection of findings: hide several at once, or export just those. Kept across pages until cleared.
   findSelBar(pageRows) {
     const n = this.findSel.size;
-    this._findPage = pageRows.map(f => f.key);
+    this._findPage = pageRows.flatMap(f => (f.members ? f.members : [f])).map(f => f.key);
     if (!pageRows.length && !n) return "";
     return `<div class="toolbar${n ? "" : " nosel"}"><span class="date">${this.t("selectedCount", { count: n })}</span><button class="btn quiet" data-fsel-page>${this.t("selectPage")}</button><button class="btn quiet" data-fsel-clear ${n ? "" : "disabled"}>${this.t("clearSelection")}</button><span class="toolgap"></span>${["hidden", "known", "snoozed"].includes(this.findingStatus) ? `<div class="fbtns"><button class="btn accent" data-fsel-unhide ${n ? "" : "disabled"}><ha-icon icon="mdi:eye-outline"></ha-icon>${this.t("findUnhide")}</button></div>` : `<div class="fbtns"><button class="btn" data-fsel-state="known" ${n ? "" : "disabled"}>${this.t("fselKnown")}</button><button class="btn" data-fsel-state="snoozed" ${n ? "" : "disabled"}>${this.t("fselSnooze")}</button><button class="btn" data-fsel-state="label" ${n ? "" : "disabled"}>${this.t("fselLabel")}</button><button class="btn" data-fsel-hide ${n ? "" : "disabled"}>${this.t("findHideSelected")}</button></div>`}</div>${this.bulkForm()}`;
   }
@@ -4006,12 +4006,12 @@ class DiagnosisMixin {
         cause = t(item.error ? "cause_entry_problem_error" : "cause_entry_problem", { state: t(`cs_${state}`), error: item.error || "" }); hint = t("hint_integration");
       }
       const helperBroken = this.data.findings.filter(f => f.rule_id === "config_entry.missing_entity" && f.object_id === item.object_id);
-      helperBroken.forEach(f => rows.push(this.check(t("missing_entity"), "red", `${f.affected_object}${f.evidence?.[0]?.location ? ` · ${f.evidence[0].location}` : ""}`, t("missing"))));
+      helperBroken.forEach(f => rows.push(this.check(t("missing_entity"), "red", [f.affected_object, this.placeText(f), this.suggestText(f)].filter(Boolean).join(" · "), t("missing"))));
       if (helperBroken.length) { cause = t("cause_helper_broken", { count: helperBroken.length }); hint = t("hint_helper_broken"); tone = "red"; }
     } else if (["automation", "script", "scene", "dashboard"].includes(item.object_type)) {
       const key = this.objectKey(item);
       const broken = this.data.findings.filter(f => this.findingKey(f) === key && f.rule_id.includes(".missing_"));
-      broken.forEach(f => rows.push(this.check(t(f.rule_id.split(".")[1]), "red", `${f.affected_object}${f.evidence?.[0]?.location ? ` · ${f.evidence[0].location}` : ""}`, t("missing"))));
+      broken.forEach(f => rows.push(this.check(t(f.rule_id.split(".")[1]), "red", [f.affected_object, this.placeText(f), this.suggestText(f)].filter(Boolean).join(" · "), t("missing"))));
       if (item.object_type === "automation" && item.status === "disabled") rows.push(this.check(t("status"), "mute", t("automationOff"), t("disabled")));
       if (!broken.length) rows.push(this.check(t("dependencies"), "ok", t("refsResolved"), t("present")));
       const unused = item.object_type === "automation" ? this.data.findings.find(f => this.findingKey(f) === key && f.classification === "unused") : null;
@@ -10455,6 +10455,62 @@ class ConfirmMixin {
   }
 }
 
+// BrokenCardsMixin: where a broken dashboard reference sits (tab and card instead of a raw path), the close names that
+// do exist, and one row per card instead of one per reference. Mixed into the panel in 99-register.js.
+Object.assign(TEXT.de, {
+  brokenView: "Tab „{view}“", brokenCard: "Karte {card}", brokenSection: "Abschnitt {n}", brokenMaybe: "Vielleicht: {ids}",
+  brokenCount: "{n} defekte Referenzen",
+  brokenOrphan: "Die Karte wirkt verwaist: {missing} von {total} Referenzen sind defekt. Prüfen, ob sie ganz entfernt werden kann, statt jede Zeile einzeln zu reparieren.",
+});
+Object.assign(TEXT.en, {
+  brokenView: "Tab “{view}”", brokenCard: "Card {card}", brokenSection: "Section {n}", brokenMaybe: "Maybe: {ids}",
+  brokenCount: "{n} broken references",
+  brokenOrphan: "The card looks abandoned: {missing} of {total} references are broken. Check whether it can be removed as a whole instead of repairing each line.",
+});
+
+class BrokenCardsMixin {
+  // Tab and card of a reference as text; inside a group the part below the card, because the card is the heading.
+  placeText(f, inGroup = false) {
+    const e = f.evidence?.[0], p = e?.place;
+    if (!p) return e?.location || "";
+    if (inGroup && p.card_path && e.location.startsWith(`${p.card_path}/`)) return e.location.slice(p.card_path.length + 1);
+    return this.placeParts(p).join(" · ");
+  }
+
+  placeParts(p) {
+    return [p.view != null ? this.t("brokenView", { view: p.view }) : "",
+      p.card ? `${this.t("brokenCard", { card: p.card })}${p.section ? ` (${this.t("brokenSection", { n: p.section })})` : ""}` : ""].filter(Boolean);
+  }
+
+  suggestText(f) { return f.suggestions?.length ? this.t("brokenMaybe", { ids: f.suggestions.join(", ") }) : ""; }
+
+  // One entry per card for broken dashboard references with a known card; a card with a single one stays a plain row.
+  groupBroken(list) {
+    const groups = new Map(), out = [];
+    for (const f of list) {
+      const p = f.evidence?.[0]?.place;
+      if (f.classification === "broken_reference" && f.rule_id.startsWith("dashboard.") && p?.card_path) {
+        const id = `${f.object_id}|${p.card_path}`;
+        let g = groups.get(id);
+        if (!g) { g = { group: id, members: [] }; groups.set(id, g); out.push(g); }
+        g.members.push(f);
+      } else out.push(f);
+    }
+    return out.map(x => (x.members?.length === 1 ? x.members[0] : x));
+  }
+
+  findingGroup(g) {
+    const f = g.members[0], p = f.evidence[0].place, object = this.findObject(this.findingKey(f));
+    const keys = g.members.map(m => m.key), n = keys.length, id = `bg:${g.group}`, open = this.foldOpen(id, false);
+    (this._findGroups ||= {})[g.group] = keys;
+    const orphan = p.card_missing >= 2 && p.card_missing * 2 > p.card_refs;
+    const title = `${object?.name || f.object_id}${p.view != null ? ` › ${p.view}` : ""}`;
+    const sub = [...this.placeParts({ card: p.card, section: p.section }), this.t("brokenCount", { n })].join(" · ");
+    const head = `<div class="rowwrap"><input type="checkbox" class="selbox" data-fsel-group="${this.esc(g.group)}" ${keys.every(k => this.findSel.has(k)) ? "checked" : ""} aria-label="${this.esc(title)}"><button class="row foldhead" data-fold="${this.esc(id)}" aria-expanded="${open}"><span class="tile red"><ha-icon icon="mdi:${open ? "chevron-down" : "chevron-right"}"></ha-icon></span><span class="row-text"><strong>${this.esc(title)}</strong><small>${this.esc(sub)}${orphan ? ` · ${this.esc(this.t("brokenOrphan", { missing: p.card_missing, total: p.card_refs }))}` : ""}</small></span><span class="pill red">${n}</span></button></div>`;
+    return `<div class="fold${open ? " open" : ""}">${head}${open ? `<div class="foldbody">${g.members.map(m => this.findingRow(m, true)).join("")}</div>` : ""}</div>`;
+  }
+}
+
 class HAHousekeeperPanel extends HTMLElement {
   constructor() {
     super();
@@ -11281,6 +11337,7 @@ class HAHousekeeperPanel extends HTMLElement {
     });
     root.querySelector("[data-bp-refresh]")?.addEventListener("click", () => { this._blueprintsRequested = false; this.blueprints = null; this.render(); });
     root.querySelector("[data-weekly]")?.addEventListener("click", () => this.weeklyReport());
+    root.querySelectorAll("[data-fsel-group]").forEach(el => el.onchange = () => { (this._findGroups?.[el.dataset.fselGroup] || []).forEach(key => (el.checked ? this.findSel.add(key) : this.findSel.delete(key))); this.render(); });
     root.querySelectorAll("[data-fsel]").forEach(el => el.onchange = () => { this.pickRows("fsel", el.dataset.fsel, el.checked, this.findSel, this._findPage); this.render(); });
     root.querySelectorAll("[data-sel-only]").forEach(el => el.onclick = () => { const id = el.dataset.selOnly; this.selOnly = { ...this.selOnly, [id]: !this.selOnly?.[id] }; this.pages = {}; this.render(); });
     root.querySelectorAll("[data-lreset]").forEach(el => el.onclick = () => { const st = this.lv[el.dataset.lreset]; if (st) { st.q = ""; st.f = {}; this.persistLv(el.dataset.lreset); } this.pages = {}; this.render(); });
@@ -11429,7 +11486,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin, BrokenCardsMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }

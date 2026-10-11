@@ -49,10 +49,12 @@ from .coverage import CoverageStore
 from .criteria import CriteriaStore
 from .dashboard_analysis import (
     HELPER_DOMAINS,
+    annotate_findings,
     dashboard_health,
     extract_dashboard_references,
     extract_entity_references,
     extract_helper_references,
+    suggest_replacements,
     view_keys,
 )
 from .db_health import database_summary
@@ -90,6 +92,7 @@ from .stale import StaleStore
 from .window import WindowStore
 
 _LOGGER = logging.getLogger(__name__)
+SUGGEST_LIMIT = 200
 
 # Keys of the Energy dashboard preferences that name statistics, which are entity IDs.
 ENERGY_KEYS = frozenset(
@@ -428,10 +431,18 @@ def _entity_findings(
 
 
 def _missing_findings(
-    domain: str, object_id: str, missing: list[dict[str, str]]
+    domain: str,
+    object_id: str,
+    missing: list[dict[str, str]],
+    known: set[str] | None = None,
 ) -> list[dict[str, Any]]:
-    """Create one finding per reference whose target no longer exists."""
-    return [
+    """Create one finding per reference whose target no longer exists.
+
+    With ``known`` (the existing entity IDs) a missing entity also gets ``suggestions``: close
+    names that do exist. The first ``SUGGEST_LIMIT`` findings get them, so a huge broken config
+    cannot make a scan slow.
+    """
+    findings = [
         {
             "rule_id": f"{domain}.missing_{reference['kind']}",
             "object_id": object_id,
@@ -449,6 +460,14 @@ def _missing_findings(
         }
         for reference in missing
     ]
+    if known:
+        cache: dict[str, tuple[str, ...]] = {}
+        for finding in findings[:SUGGEST_LIMIT]:
+            if finding["rule_id"].endswith("_entity"):
+                found = suggest_replacements(finding["affected_object"], known, cache=cache)
+                if found:
+                    finding["suggestions"] = found
+    return findings
 
 
 def _structure_edges(
@@ -1172,7 +1191,7 @@ class InventoryScanner:
             )
 
             missing = missing_references(references, existing)
-            findings.extend(_missing_findings(domain, entity_id, missing))
+            findings.extend(_missing_findings(domain, entity_id, missing, existing["entity"]))
 
             attrs = state.attributes if state else {}
             blueprint = getattr(entity, "referenced_blueprint", None)
@@ -1246,7 +1265,10 @@ class InventoryScanner:
             )
             findings.extend(
                 _missing_findings(
-                    "config_entry", entry.entry_id, missing_references(references, existing)
+                    "config_entry",
+                    entry.entry_id,
+                    missing_references(references, existing),
+                    existing["entity"],
                 )
             )
         return edges, findings
@@ -1396,7 +1418,9 @@ class InventoryScanner:
                 for reference in references
             )
             missing = missing_references(references, existing)
-            findings.extend(_missing_findings("dashboard", object_id, missing))
+            broken = _missing_findings("dashboard", object_id, missing, existing["entity"])
+            annotate_findings(broken, config, references)
+            findings.extend(broken)
             settings = getattr(dashboard, "config", None) or {}
             views = config.get("views") if isinstance(config.get("views"), list) else []
             dashboards.append(
@@ -1460,7 +1484,9 @@ class InventoryScanner:
                 for reference in references
             )
             missing = missing_references(references, existing)
-            findings.extend(_missing_findings("scene", state.entity_id, missing))
+            findings.extend(
+                _missing_findings("scene", state.entity_id, missing, existing["entity"])
+            )
             scenes.append(
                 {
                     "object_type": "scene",
