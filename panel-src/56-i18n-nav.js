@@ -27,8 +27,8 @@ Object.assign(TEXT.de, {
   actRepairValues: "Werte reparieren", actHintRepair: "Falsche Werte im Verlauf und in der Statistik ersetzen.", actMeter: "Zähler wechseln", actHintMeter: "Die Statistik bei einem neuen Zähler fortführen.", actExchange: "Gerät austauschen", actHintExchange: "Durch ein neues Gerät ersetzen und alles übernehmen.",
   actHintReplace: "Überall durch eine andere Entität ersetzen.", actHintDisable: "Erst deaktivieren; nach der Wartezeit entfernen.",
   navGroupActions: "Aktionen",
-  err_cleanup_busy: "Ein Plan läuft gerade. Housekeeper lädt die Ansicht neu, sobald er fertig ist.", tilesTitle: "Was möchtest du tun?", tilesCleanupHint: "Verwaiste Entitäten und Geräte deaktivieren oder entfernen.", tilesRepairHint: "Sensorfehler, Zähler, Verweise und Geräte in Ordnung bringen.", tilesMaintenanceHint: "Backups, Update-Preflight, Blueprints und Wartungsziele.", tilesFindingsHint: "Alle Auffälligkeiten durchgehen und entscheiden.",
-  tilesReady: "{count} bereit", tilesMissed: "{count} Ziele verfehlt", tilesOpen: "{count} offen",
+  err_cleanup_busy: "Ein Plan läuft gerade. Housekeeper lädt die Ansicht neu, sobald er fertig ist.", 
+  
   goalMissedTitle: "{goal}: Ziel verfehlt", goalsLine: "Wartungsziele: {met} von {total} erfüllt", hintsTitle: "Hinweise",
   healthScore: "{percent} % der Objekte ohne Befund", healthTasks: "{count} Aufgaben offen", healthNoTasks: "keine offenen Aufgaben", healthTip: "{affected} von {base} bewerteten Objekten sind betroffen; gezählt werden Objekte, nicht einzelne Befunde. Die Zahl im Ring ist der abgerundete Anteil ohne Befund, minus 10 Punkte je dringendes Thema (höchstens 30): kaputte Integrationen, neue kritische Befunde, Backup-Probleme. Die übrigen Themen färben den Ring nur gelb. Ausgeblendete Befunde und die Datenbankprüfung zählen nicht. Mehr per Klick auf den Ring.",
   repair: "Reparieren", repairSubtitle: "Bestehende Daten und Verweise korrigieren oder auf etwas Neues umstellen. Housekeeper zeigt erst eine Vorschau; geschrieben wird erst nach deiner Bestätigung.", repairDryRun: "Nichts wird geändert, bis du die Vorschau bestätigst.",
@@ -69,8 +69,8 @@ Object.assign(TEXT.en, {
   actRepairValues: "Repair values", actHintRepair: "Replace wrong values in the history and the statistics.", actMeter: "Replace the meter", actHintMeter: "Carry the statistics on with a new meter.", actExchange: "Exchange the device", actHintExchange: "Replace it with a new device and carry everything over.",
   actHintReplace: "Replace it with another entity everywhere.", actHintDisable: "Disable first; remove after the waiting time.",
   navGroupActions: "Actions",
-  err_cleanup_busy: "A plan is running. Housekeeper reloads the view as soon as it has finished.", tilesTitle: "What would you like to do?", tilesCleanupHint: "Disable or remove orphaned entities and devices.", tilesRepairHint: "Fix sensor errors, meters, references and devices.", tilesMaintenanceHint: "Backups, update preflight, blueprints and maintenance goals.", tilesFindingsHint: "Go through every finding and decide.",
-  tilesReady: "{count} ready", tilesMissed: "{count} goals missed", tilesOpen: "{count} open",
+  err_cleanup_busy: "A plan is running. Housekeeper reloads the view as soon as it has finished.", 
+  
   goalMissedTitle: "{goal}: goal missed", goalsLine: "Maintenance goals: {met} of {total} met", hintsTitle: "Hints",
   healthScore: "{percent}% of objects without a finding", healthTasks: "{count} tasks open", healthNoTasks: "no open tasks", healthTip: "{affected} of {base} rated objects are affected; objects are counted, not single findings. The number in the ring is the share without a finding, rounded down, minus 10 points for each urgent topic (at most 30): broken integrations, new critical findings, backup problems. The other topics only turn the ring amber. Hidden findings and the database check do not count. More with a click on the ring.",
   repair: "Repair", repairSubtitle: "Correct existing data and references, or switch them over to something new. Housekeeper shows a preview first; nothing is written until you confirm.", repairDryRun: "Nothing is changed until you confirm the preview.",

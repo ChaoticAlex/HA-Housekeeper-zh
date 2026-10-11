@@ -59,22 +59,6 @@ class OverviewMixin {
     return (this.data?.quarantine || []).filter(q => this.daysSince(q.since) >= limit).length;
   }
 
-  // The tasks the person can start from here; a count says where something waits.
-  actionTiles() {
-    const limit = this.data.meta.quarantine_days ?? 14;
-    const ready = (this.data.quarantine || []).filter(q => this.daysSince(q.since) >= limit).length;
-    const missed = (this.goals?.goals || []).filter(g => g.state === "missed").length;
-    const found = this.counterScan?.items?.length || 0;
-    const open = this.data.findings.filter(f => !f.ignored).length;
-    const tile = (view, icon, label, hint, pill, tone) => `<button class="taskcard t-${pill ? tone : "ok"}" data-jump="${view}"><ha-icon icon="${icon}"></ha-icon><strong>${this.t(label)}${pill ? ` <span class="pill ${tone}">${this.esc(pill)}</span>` : ""}</strong><small>${this.t(hint)}</small></button>`;
-    return `<section class="panel u-mb14" aria-labelledby="hk-tiles"><div class="panelhead"><div><h2 id="hk-tiles">${this.t("tilesTitle")}</h2></div></div><div class="taskgrid">${[
-      tile("cleanup", "mdi:broom", "cleanup", "tilesCleanupHint", ready ? this.t("tilesReady", { count: this.formatNumber(ready) }) : "", "warn"),
-      tile("repair", "mdi:tools", "repair", "tilesRepairHint", found ? this.t("repairFound", { count: this.formatNumber(found) }) : "", "warn"),
-      tile("maintenance", "mdi:wrench-clock", "maintenance", "tilesMaintenanceHint", missed ? this.t("tilesMissed", { count: this.formatNumber(missed) }) : "", "red"),
-      tile("findingsNav", "mdi:alert-outline", "findingsNav", "tilesFindingsHint", open ? this.t("tilesOpen", { count: this.formatNumber(open) }) : "", "mute"),
-    ].join("")}</div></section>`;
-  }
-
   // A line under the to-do list instead of a card of its own: how many goals are met, and where the limits are set.
   goalsLine() {
     const r = this.goals;
@@ -195,7 +179,7 @@ class OverviewMixin {
     return `<section class="statushead" title="${this.esc(this.t("healthTip", { affected: health.affected, base: health.base }))}"><button type="button" class="ring ${health.tone}" style="--p:${health.percent}" data-health-why aria-expanded="${Boolean(this.healthWhy)}" aria-label="${this.esc(this.t("healthWhy"))}"><b>${health.percent}<small>%</small></b></button>
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p></div>
       <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
-      ${this.sinceVisitLine()}${this.actionTiles()}${this.todoCard()}<div class="grid2"><div class="stack">${this.inventoryStatusCard()}<div class="panel"><div class="panelhead"><div><h2>${this.t("needsAttention")}</h2><p>${this.t("sortedBySure")}</p></div><button class="link" data-jump="findingsNav">${this.t("allFindings")} (${findings.length}) <ha-icon icon="mdi:chevron-right"></ha-icon></button></div>
+      ${this.sinceVisitLine()}${this.todoCard()}<div class="grid2"><div class="stack">${this.inventoryStatusCard()}<div class="panel"><div class="panelhead"><div><h2>${this.t("needsAttention")}</h2><p>${this.t("sortedBySure")}</p></div><button class="link" data-jump="findingsNav">${this.t("allFindings")} (${findings.length}) <ha-icon icon="mdi:chevron-right"></ha-icon></button></div>
       ${findings.length ? findings.filter(f => !f.cause_id).slice(0, 8).map(f => this.findingRow(f)).join("") : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("noFindings")}</div>`}</div>${this.integrationProblems()}</div>
       <div class="stack">${this.databaseCard()}${this.trendCard()}${this.cleanupCard()}
       <div class="panel"><div class="panelhead"><h2>${this.t("byType")}</h2></div><div class="types">${["entity", "device", "config_entry", "automation", "script", "scene", "dashboard", "area", "floor", "label"].filter(t => types[t]).map(type => `<button class="type" data-type-jump="${type}">${this.tile(type)}<span>${this.t(type)}</span><b>${this.formatNumber(types[type])}</b></button>`).join("")}</div></div></div></div>`;

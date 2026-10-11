@@ -3269,13 +3269,13 @@ test("the repair view offers its tasks as tiles; one opens its assistant and the
   assert.ok(html.includes("data-repair-back") && html.includes('data-picker="meterOld"') && !html.includes("data-repair-task="));
 });
 
-test("the overview starts with task tiles; a missed goal is a to-do row, not a card of its own", () => {
+test("the overview has no tile card; a missed goal is a to-do row, not a card of its own", () => {
   const { el } = panel("en");
   el.data = { ...DATA, regressions: [], criteria_alerts: [] };
   el.goals = { met: 2, missed: 1, goals: [{ id: "broken_references", state: "missed", value: 43, limit: 0, unit: "count", enabled: true, default: 0 }, { id: "backup_age", state: "met", value: 3, limit: 48, unit: "hours", enabled: true, default: 48 }] };
   el._goalsRequested = true; el._goalsKey = el.data.meta.scanned_at || "";
   const html = el.overview();
-  for (const view of ["cleanup", "repair", "maintenance", "findingsNav"]) assert.ok(new RegExp(`class="taskcard t-\\w+" data-jump="${view}"`).test(html), view);
+  assert.ok(!html.includes("hk-tiles"));
   assert.ok(html.includes("Broken references: goal missed") && html.includes("Maintenance goals: 3 of 3 met".replace("3 of 3", "2 of 3")) && html.includes("data-goals-settings"));
   assert.ok(!html.includes('aria-labelledby="hk-goals"') && html.includes("without a finding"));
   assert.ok(el.health().tasks >= 1 && el.health().tone !== "ok"); // a missed goal is an open task: the status is not "all good"

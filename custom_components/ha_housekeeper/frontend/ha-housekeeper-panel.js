@@ -1316,7 +1316,7 @@ class StylesMixin {
       .statushead .ring{width:84px;height:84px;flex:none;box-shadow:inset 0 0 0 1px var(--hk-border),var(--hk-sh1);background:radial-gradient(circle at center,var(--hk-surface) 66%,transparent 68%),conic-gradient(var(--c) calc(var(--p)*1%),var(--hk-soft) 0)}
       .statushead .ring b{font-size:calc(22px*var(--hk-fs,1));font-weight:600}.ring b small{font-size:.55em;margin-left:1px}
       .statustext{min-width:0;flex:1 1 220px}.statustext h2{font-size:calc(18px*var(--hk-fs,1));font-weight:600}.statustext p{margin-top:3px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}
-      .kpis{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(120px,1fr);gap:10px;margin-left:auto}@media(max-width:640px){.kpis{grid-auto-flow:row;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}}
+      .kpis{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(120px,1fr);gap:10px;margin-left:auto}@media(max-width:640px){.kpis{grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);width:100%;gap:8px}}
       .kpi{display:block;min-width:0;text-align:left;padding:9px 14px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-soft);color:inherit;font:inherit;cursor:pointer;box-shadow:var(--hk-hi)}.kpi:hover{box-shadow:var(--hk-sh2)}
       .kpi small{display:block;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.kpi strong{font-size:calc(20px*var(--hk-fs,1));font-weight:600}.kpi.red strong{color:var(--hk-red)}.kpi.warn strong{color:var(--hk-amber)}
       .spark-row{display:block;margin-top:4px}.spark{display:block;width:100%;height:36px}.spark-end{fill:var(--hk-muted);stroke:var(--hk-soft);stroke-width:1.5}.spark-end.red{fill:var(--hk-red)}.spark-end.ok{fill:var(--hk-green)}.spark-cap,.spark-hint{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.spark-cap.red{color:var(--hk-red)}.spark-cap.ok{color:var(--hk-green)}
@@ -1786,22 +1786,6 @@ class OverviewMixin {
     return (this.data?.quarantine || []).filter(q => this.daysSince(q.since) >= limit).length;
   }
 
-  // The tasks the person can start from here; a count says where something waits.
-  actionTiles() {
-    const limit = this.data.meta.quarantine_days ?? 14;
-    const ready = (this.data.quarantine || []).filter(q => this.daysSince(q.since) >= limit).length;
-    const missed = (this.goals?.goals || []).filter(g => g.state === "missed").length;
-    const found = this.counterScan?.items?.length || 0;
-    const open = this.data.findings.filter(f => !f.ignored).length;
-    const tile = (view, icon, label, hint, pill, tone) => `<button class="taskcard t-${pill ? tone : "ok"}" data-jump="${view}"><ha-icon icon="${icon}"></ha-icon><strong>${this.t(label)}${pill ? ` <span class="pill ${tone}">${this.esc(pill)}</span>` : ""}</strong><small>${this.t(hint)}</small></button>`;
-    return `<section class="panel u-mb14" aria-labelledby="hk-tiles"><div class="panelhead"><div><h2 id="hk-tiles">${this.t("tilesTitle")}</h2></div></div><div class="taskgrid">${[
-      tile("cleanup", "mdi:broom", "cleanup", "tilesCleanupHint", ready ? this.t("tilesReady", { count: this.formatNumber(ready) }) : "", "warn"),
-      tile("repair", "mdi:tools", "repair", "tilesRepairHint", found ? this.t("repairFound", { count: this.formatNumber(found) }) : "", "warn"),
-      tile("maintenance", "mdi:wrench-clock", "maintenance", "tilesMaintenanceHint", missed ? this.t("tilesMissed", { count: this.formatNumber(missed) }) : "", "red"),
-      tile("findingsNav", "mdi:alert-outline", "findingsNav", "tilesFindingsHint", open ? this.t("tilesOpen", { count: this.formatNumber(open) }) : "", "mute"),
-    ].join("")}</div></section>`;
-  }
-
   // A line under the to-do list instead of a card of its own: how many goals are met, and where the limits are set.
   goalsLine() {
     const r = this.goals;
@@ -1922,7 +1906,7 @@ class OverviewMixin {
     return `<section class="statushead" title="${this.esc(this.t("healthTip", { affected: health.affected, base: health.base }))}"><button type="button" class="ring ${health.tone}" style="--p:${health.percent}" data-health-why aria-expanded="${Boolean(this.healthWhy)}" aria-label="${this.esc(this.t("healthWhy"))}"><b>${health.percent}<small>%</small></b></button>
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p></div>
       <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
-      ${this.sinceVisitLine()}${this.actionTiles()}${this.todoCard()}<div class="grid2"><div class="stack">${this.inventoryStatusCard()}<div class="panel"><div class="panelhead"><div><h2>${this.t("needsAttention")}</h2><p>${this.t("sortedBySure")}</p></div><button class="link" data-jump="findingsNav">${this.t("allFindings")} (${findings.length}) <ha-icon icon="mdi:chevron-right"></ha-icon></button></div>
+      ${this.sinceVisitLine()}${this.todoCard()}<div class="grid2"><div class="stack">${this.inventoryStatusCard()}<div class="panel"><div class="panelhead"><div><h2>${this.t("needsAttention")}</h2><p>${this.t("sortedBySure")}</p></div><button class="link" data-jump="findingsNav">${this.t("allFindings")} (${findings.length}) <ha-icon icon="mdi:chevron-right"></ha-icon></button></div>
       ${findings.length ? findings.filter(f => !f.cause_id).slice(0, 8).map(f => this.findingRow(f)).join("") : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("noFindings")}</div>`}</div>${this.integrationProblems()}</div>
       <div class="stack">${this.databaseCard()}${this.trendCard()}${this.cleanupCard()}
       <div class="panel"><div class="panelhead"><h2>${this.t("byType")}</h2></div><div class="types">${["entity", "device", "config_entry", "automation", "script", "scene", "dashboard", "area", "floor", "label"].filter(t => types[t]).map(type => `<button class="type" data-type-jump="${type}">${this.tile(type)}<span>${this.t(type)}</span><b>${this.formatNumber(types[type])}</b></button>`).join("")}</div></div></div></div>`;
@@ -7947,8 +7931,8 @@ Object.assign(TEXT.de, {
   actRepairValues: "Werte reparieren", actHintRepair: "Falsche Werte im Verlauf und in der Statistik ersetzen.", actMeter: "Zähler wechseln", actHintMeter: "Die Statistik bei einem neuen Zähler fortführen.", actExchange: "Gerät austauschen", actHintExchange: "Durch ein neues Gerät ersetzen und alles übernehmen.",
   actHintReplace: "Überall durch eine andere Entität ersetzen.", actHintDisable: "Erst deaktivieren; nach der Wartezeit entfernen.",
   navGroupActions: "Aktionen",
-  err_cleanup_busy: "Ein Plan läuft gerade. Housekeeper lädt die Ansicht neu, sobald er fertig ist.", tilesTitle: "Was möchtest du tun?", tilesCleanupHint: "Verwaiste Entitäten und Geräte deaktivieren oder entfernen.", tilesRepairHint: "Sensorfehler, Zähler, Verweise und Geräte in Ordnung bringen.", tilesMaintenanceHint: "Backups, Update-Preflight, Blueprints und Wartungsziele.", tilesFindingsHint: "Alle Auffälligkeiten durchgehen und entscheiden.",
-  tilesReady: "{count} bereit", tilesMissed: "{count} Ziele verfehlt", tilesOpen: "{count} offen",
+  err_cleanup_busy: "Ein Plan läuft gerade. Housekeeper lädt die Ansicht neu, sobald er fertig ist.", 
+  
   goalMissedTitle: "{goal}: Ziel verfehlt", goalsLine: "Wartungsziele: {met} von {total} erfüllt", hintsTitle: "Hinweise",
   healthScore: "{percent} % der Objekte ohne Befund", healthTasks: "{count} Aufgaben offen", healthNoTasks: "keine offenen Aufgaben", healthTip: "{affected} von {base} bewerteten Objekten sind betroffen; gezählt werden Objekte, nicht einzelne Befunde. Die Zahl im Ring ist der abgerundete Anteil ohne Befund, minus 10 Punkte je dringendes Thema (höchstens 30): kaputte Integrationen, neue kritische Befunde, Backup-Probleme. Die übrigen Themen färben den Ring nur gelb. Ausgeblendete Befunde und die Datenbankprüfung zählen nicht. Mehr per Klick auf den Ring.",
   repair: "Reparieren", repairSubtitle: "Bestehende Daten und Verweise korrigieren oder auf etwas Neues umstellen. Housekeeper zeigt erst eine Vorschau; geschrieben wird erst nach deiner Bestätigung.", repairDryRun: "Nichts wird geändert, bis du die Vorschau bestätigst.",
@@ -7989,8 +7973,8 @@ Object.assign(TEXT.en, {
   actRepairValues: "Repair values", actHintRepair: "Replace wrong values in the history and the statistics.", actMeter: "Replace the meter", actHintMeter: "Carry the statistics on with a new meter.", actExchange: "Exchange the device", actHintExchange: "Replace it with a new device and carry everything over.",
   actHintReplace: "Replace it with another entity everywhere.", actHintDisable: "Disable first; remove after the waiting time.",
   navGroupActions: "Actions",
-  err_cleanup_busy: "A plan is running. Housekeeper reloads the view as soon as it has finished.", tilesTitle: "What would you like to do?", tilesCleanupHint: "Disable or remove orphaned entities and devices.", tilesRepairHint: "Fix sensor errors, meters, references and devices.", tilesMaintenanceHint: "Backups, update preflight, blueprints and maintenance goals.", tilesFindingsHint: "Go through every finding and decide.",
-  tilesReady: "{count} ready", tilesMissed: "{count} goals missed", tilesOpen: "{count} open",
+  err_cleanup_busy: "A plan is running. Housekeeper reloads the view as soon as it has finished.", 
+  
   goalMissedTitle: "{goal}: goal missed", goalsLine: "Maintenance goals: {met} of {total} met", hintsTitle: "Hints",
   healthScore: "{percent}% of objects without a finding", healthTasks: "{count} tasks open", healthNoTasks: "no open tasks", healthTip: "{affected} of {base} rated objects are affected; objects are counted, not single findings. The number in the ring is the share without a finding, rounded down, minus 10 points for each urgent topic (at most 30): broken integrations, new critical findings, backup problems. The other topics only turn the ring amber. Hidden findings and the database check do not count. More with a click on the ring.",
   repair: "Repair", repairSubtitle: "Correct existing data and references, or switch them over to something new. Housekeeper shows a preview first; nothing is written until you confirm.", repairDryRun: "Nothing is changed until you confirm the preview.",
