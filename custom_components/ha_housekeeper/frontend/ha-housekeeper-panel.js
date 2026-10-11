@@ -8397,14 +8397,14 @@ Object.assign(TEXT.de, {
   pinSet: "Scan-Punkt setzen", pinDialogTitle: "Scan-Punkt setzen", pinDialogHint: "Housekeeper scannt jetzt und merkt sich diesen Zustand, bis du ihn löschst.",
   pinName: "Name (optional)", pinNamePh: "z. B. Vor dem Umbau", pinChipRebuild: "Vor dem Umbau", pinChipUpdate: "Vor dem Update", pinChipOk: "Alles läuft",
   pinNote: "Es ändert nichts in Home Assistant. Ohne Namen heißt der Punkt wie der Zeitpunkt.", pinGo: "Scannen und merken", pinCancel: "Abbrechen",
-  pinMine: "Eigener Punkt", pinDelete: "Löschen", pinDeleteAsk: "Punkt löschen?", pinDeleteYes: "Ja, löschen", pinDeleteNo: "Abbrechen",
+  pinMine: "Eigener Punkt", pinDelete: "Löschen", confirmPin: "Der Scan-Punkt „{name}“ wird gelöscht.",
   pinFailed: "Der Scan-Punkt konnte nicht gespeichert werden: {reason}", storedPin: "Eigener Scan-Punkt",
 });
 Object.assign(TEXT.en, {
   pinSet: "Set scan point", pinDialogTitle: "Set scan point", pinDialogHint: "Housekeeper scans now and keeps this state until you delete it.",
   pinName: "Name (optional)", pinNamePh: "e.g. Before the rebuild", pinChipRebuild: "Before the rebuild", pinChipUpdate: "Before the update", pinChipOk: "All is running",
   pinNote: "It changes nothing in Home Assistant. Without a name the point is called by its time.", pinGo: "Scan and keep", pinCancel: "Cancel",
-  pinMine: "Own point", pinDelete: "Delete", pinDeleteAsk: "Delete the point?", pinDeleteYes: "Yes, delete", pinDeleteNo: "Cancel",
+  pinMine: "Own point", pinDelete: "Delete", confirmPin: "The scan point “{name}” will be deleted.",
   pinFailed: "The scan point could not be saved: {reason}", storedPin: "Own scan point",
 });
 
@@ -8430,7 +8430,6 @@ class ScanPointsMixin {
   pinLabel(b) { return b.name || this.formatDate(b.at); }
 
   pinActions(b) {
-    if (this.pinAsk === b.id) return `<span class="askrow"><span>${this.t("pinDeleteAsk")}</span><button class="btn danger" data-pin-del-yes="${this.esc(b.id)}">${this.t("pinDeleteYes")}</button><button class="btn" data-pin-del-no>${this.t("pinDeleteNo")}</button></span>`;
     return `<span class="pill pin">${this.t("pinMine")}</span><button class="link" data-pin-del="${this.esc(b.id)}">${this.t("pinDelete")}</button>`;
   }
 
@@ -8446,7 +8445,6 @@ class ScanPointsMixin {
   }
 
   async pinDelete(id) {
-    this.pinAsk = null;
     try {
       await this._hass.callWS({ type: "ha_housekeeper/scan_point", action: "delete", baseline: id });
       if (this.compareBaseline === id) this.compareBaseline = "previous";
@@ -8460,9 +8458,11 @@ class ScanPointsMixin {
     root.querySelector("[data-pin-name]")?.addEventListener("input", ev => { this.pinDraft.name = ev.target.value; });
     root.querySelector("[data-pin-cancel]")?.addEventListener("click", () => { this.pinDraft = null; this.render(); });
     root.querySelector("[data-pin-form]")?.addEventListener("submit", ev => { ev.preventDefault(); this.pinSave(); });
-    root.querySelectorAll("[data-pin-del]").forEach(el => el.onclick = ev => { ev.stopPropagation(); this.pinAsk = el.dataset.pinDel; this.render(); });
-    root.querySelectorAll("[data-pin-del-yes]").forEach(el => el.onclick = ev => { ev.stopPropagation(); this.pinDelete(el.dataset.pinDelYes); });
-    root.querySelectorAll("[data-pin-del-no]").forEach(el => el.onclick = ev => { ev.stopPropagation(); this.pinAsk = null; this.render(); });
+    root.querySelectorAll("[data-pin-del]").forEach(el => el.onclick = ev => {
+      ev.stopPropagation();
+      const id = el.dataset.pinDel, b = (this.compare?.baselines || []).find(x => x.id === id);
+      this.confirmAsk(this.t("confirmPin", { name: b ? this.pinLabel(b) : "" }), () => this.pinDelete(id));
+    });
     root.querySelectorAll("div[data-baseline]").forEach(el => el.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); el.click(); } }));
     const modal = root.querySelector("[data-pin-modal]");
     if (modal) {
@@ -9223,7 +9223,7 @@ class KnownMixin {
 // They are kept by Housekeeper only and count as an event for the correlation, always worded "at about the same time".
 Object.assign(TEXT.de, {
   noteAdd: "Eintrag", noteMine: "Von mir", noteSrcHk: "Von Housekeeper vorgeschlagen", noteEdit: "Bearbeiten", noteDelete: "Löschen",
-  noteAskDelete: "Diesen Eintrag löschen?", noteYes: "Ja, löschen", noteNo: "Abbrechen",
+  confirmNote: "Der Logbuch-Eintrag „{title}“ wird gelöscht.",
   noteFormTitle: "Titel", noteTitlePh: "z. B. Zigbee-Stick getauscht", noteWhen: "Wann", noteTarget: "Betrifft (optional)", noteTargetPh: "Entität, Gerät, Integration, Bereich",
   noteText: "Notiz (optional)", noteTextPh: "Was genau hast du geändert?", noteSave: "Speichern", noteCancel: "Abbrechen",
   noteNeedTitle: "Gib dem Eintrag einen Titel.", noteBadTime: "Die Zeit ist ungültig oder liegt zu weit in der Zukunft.", noteFailed: "Der Eintrag konnte nicht gespeichert werden: {reason}",
@@ -9239,7 +9239,7 @@ Object.assign(TEXT.de, {
 });
 Object.assign(TEXT.en, {
   noteAdd: "Entry", noteMine: "By me", noteSrcHk: "Suggested by Housekeeper", noteEdit: "Edit", noteDelete: "Delete",
-  noteAskDelete: "Delete this entry?", noteYes: "Yes, delete", noteNo: "Cancel",
+  confirmNote: "The logbook entry “{title}” will be deleted.",
   noteFormTitle: "Title", noteTitlePh: "e.g. Zigbee stick replaced", noteWhen: "When", noteTarget: "Concerns (optional)", noteTargetPh: "Entity, device, integration, area",
   noteText: "Note (optional)", noteTextPh: "What exactly did you change?", noteSave: "Save", noteCancel: "Cancel",
   noteNeedTitle: "Give the entry a title.", noteBadTime: "The time is invalid or too far in the future.", noteFailed: "The entry could not be saved: {reason}",
@@ -9273,7 +9273,7 @@ class NotesMixin {
     this.noteDraft = note
       ? { id: note.id, title: note.title, at: this.noteLocal(note.at), target: note.target, targetText: this.findObject(note.target)?.name || note.target || "", note: note.note, source: note.source, ref: note.ref, error: "" }
       : { id: null, title: "", at: this.noteLocal(new Date().toISOString()), target, targetText: obj?.name || "", note: "", error: "" };
-    this.noteAsk = null; this._noteFocus = true;
+    this._noteFocus = true;
   }
 
   noteTargetName(target) {
@@ -9293,10 +9293,7 @@ class NotesMixin {
     const d = this.noteDraft;
     if (!d) return "";
     const chips = d.id ? "" : `<div class="notechips" role="group" aria-label="${this.esc(this.t("noteChips"))}">${["Stick", "Firmware", "Paired", "Moved"].map(k => `<button type="button" class="chip" data-note-chip="${this.esc(this.t(`noteChip${k}`))}">${this.t(`noteChip${k}`)}</button>`).join("")}</div>`;
-    const asking = d.id && this.noteAsk === d.id;
-    const foot = asking
-      ? `<div class="dfoot"><span class="dquestion">${this.t("noteAskDelete")}</span><span class="dbtns"><button type="button" class="btn" data-note-del-no>${this.t("noteNo")}</button><button type="button" class="btn danger" data-note-del-yes="${this.esc(d.id)}">${this.t("noteYes")}</button></span></div>`
-      : `<div class="dfoot">${d.id ? `<button type="button" class="btn quiet danger-t" data-note-del="${this.esc(d.id)}">${this.t("noteDelete")}</button>` : ""}<span class="dbtns"><button type="button" class="btn" data-note-cancel>${this.t("noteCancel")}</button><button type="submit" class="btn primary">${this.t("noteSave")}</button></span></div>`;
+    const foot = `<div class="dfoot">${d.id ? `<button type="button" class="btn quiet danger-t" data-note-del="${this.esc(d.id)}">${this.t("noteDelete")}</button>` : ""}<span class="dbtns"><button type="button" class="btn" data-note-cancel>${this.t("noteCancel")}</button><button type="submit" class="btn primary">${this.t("noteSave")}</button></span></div>`;
     return `<div class="hkmodal" data-note-modal><form class="hkdialog" role="dialog" aria-modal="true" aria-labelledby="hk-note-head" data-note-form>
       <div class="dhead"><h2 id="hk-note-head">${this.t(d.id ? "noteDialogEdit" : "noteDialogNew")}</h2></div>
       <div class="dbody polform">
@@ -9378,7 +9375,7 @@ class NotesMixin {
   }
 
   async noteDeleteConfirmed(id) {
-    this.noteAsk = null; this.noteDraft = null;
+    this.noteDraft = null;
     try {
       const res = await this._hass.callWS({ type: "ha_housekeeper/note_set", action: "delete", note_id: id });
       this.data = { ...this.data, notes: res.notes };
@@ -9400,9 +9397,7 @@ class NotesMixin {
     root.querySelectorAll("[data-logbook-src]").forEach(el => el.onclick = () => { this.logbookSource = el.dataset.logbookSrc; this.pages = {}; this.render(); });
     root.querySelector("[data-logbook-clear]")?.addEventListener("click", () => { this.logbookObject = ""; this.pages = {}; this.render(); });
     root.querySelectorAll("[data-note-chip]").forEach(el => el.onclick = () => { this.noteDraft.title = el.dataset.noteChip; this.noteDraft.error = ""; this._noteFocus = true; this.render(); });
-    root.querySelector("[data-note-del]")?.addEventListener("click", ev => { this.noteAsk = ev.currentTarget.dataset.noteDel; this.render(); });
-    root.querySelector("[data-note-del-yes]")?.addEventListener("click", ev => this.noteDeleteConfirmed(ev.currentTarget.dataset.noteDelYes));
-    root.querySelector("[data-note-del-no]")?.addEventListener("click", () => { this.noteAsk = null; this.render(); });
+    root.querySelector("[data-note-del]")?.addEventListener("click", ev => { const id = ev.currentTarget.dataset.noteDel; this.confirmAsk(this.t("confirmNote", { title: this.noteDraft?.title || "" }), () => this.noteDeleteConfirmed(id)); });
     root.querySelector("[data-note-cancel]")?.addEventListener("click", () => { this.noteDraft = null; this.render(); });
     root.querySelector("[data-note-title]")?.addEventListener("input", ev => { this.noteDraft.title = ev.target.value; this.noteDraft.error = ""; });
     root.querySelector("[data-note-at]")?.addEventListener("input", ev => { this.noteDraft.at = ev.target.value; });

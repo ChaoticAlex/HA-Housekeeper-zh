@@ -4,14 +4,14 @@ Object.assign(TEXT.de, {
   pinSet: "Scan-Punkt setzen", pinDialogTitle: "Scan-Punkt setzen", pinDialogHint: "Housekeeper scannt jetzt und merkt sich diesen Zustand, bis du ihn löschst.",
   pinName: "Name (optional)", pinNamePh: "z. B. Vor dem Umbau", pinChipRebuild: "Vor dem Umbau", pinChipUpdate: "Vor dem Update", pinChipOk: "Alles läuft",
   pinNote: "Es ändert nichts in Home Assistant. Ohne Namen heißt der Punkt wie der Zeitpunkt.", pinGo: "Scannen und merken", pinCancel: "Abbrechen",
-  pinMine: "Eigener Punkt", pinDelete: "Löschen", pinDeleteAsk: "Punkt löschen?", pinDeleteYes: "Ja, löschen", pinDeleteNo: "Abbrechen",
+  pinMine: "Eigener Punkt", pinDelete: "Löschen", confirmPin: "Der Scan-Punkt „{name}“ wird gelöscht.",
   pinFailed: "Der Scan-Punkt konnte nicht gespeichert werden: {reason}", storedPin: "Eigener Scan-Punkt",
 });
 Object.assign(TEXT.en, {
   pinSet: "Set scan point", pinDialogTitle: "Set scan point", pinDialogHint: "Housekeeper scans now and keeps this state until you delete it.",
   pinName: "Name (optional)", pinNamePh: "e.g. Before the rebuild", pinChipRebuild: "Before the rebuild", pinChipUpdate: "Before the update", pinChipOk: "All is running",
   pinNote: "It changes nothing in Home Assistant. Without a name the point is called by its time.", pinGo: "Scan and keep", pinCancel: "Cancel",
-  pinMine: "Own point", pinDelete: "Delete", pinDeleteAsk: "Delete the point?", pinDeleteYes: "Yes, delete", pinDeleteNo: "Cancel",
+  pinMine: "Own point", pinDelete: "Delete", confirmPin: "The scan point “{name}” will be deleted.",
   pinFailed: "The scan point could not be saved: {reason}", storedPin: "Own scan point",
 });
 
@@ -37,7 +37,6 @@ class ScanPointsMixin {
   pinLabel(b) { return b.name || this.formatDate(b.at); }
 
   pinActions(b) {
-    if (this.pinAsk === b.id) return `<span class="askrow"><span>${this.t("pinDeleteAsk")}</span><button class="btn danger" data-pin-del-yes="${this.esc(b.id)}">${this.t("pinDeleteYes")}</button><button class="btn" data-pin-del-no>${this.t("pinDeleteNo")}</button></span>`;
     return `<span class="pill pin">${this.t("pinMine")}</span><button class="link" data-pin-del="${this.esc(b.id)}">${this.t("pinDelete")}</button>`;
   }
 
@@ -53,7 +52,6 @@ class ScanPointsMixin {
   }
 
   async pinDelete(id) {
-    this.pinAsk = null;
     try {
       await this._hass.callWS({ type: "ha_housekeeper/scan_point", action: "delete", baseline: id });
       if (this.compareBaseline === id) this.compareBaseline = "previous";
@@ -67,9 +65,11 @@ class ScanPointsMixin {
     root.querySelector("[data-pin-name]")?.addEventListener("input", ev => { this.pinDraft.name = ev.target.value; });
     root.querySelector("[data-pin-cancel]")?.addEventListener("click", () => { this.pinDraft = null; this.render(); });
     root.querySelector("[data-pin-form]")?.addEventListener("submit", ev => { ev.preventDefault(); this.pinSave(); });
-    root.querySelectorAll("[data-pin-del]").forEach(el => el.onclick = ev => { ev.stopPropagation(); this.pinAsk = el.dataset.pinDel; this.render(); });
-    root.querySelectorAll("[data-pin-del-yes]").forEach(el => el.onclick = ev => { ev.stopPropagation(); this.pinDelete(el.dataset.pinDelYes); });
-    root.querySelectorAll("[data-pin-del-no]").forEach(el => el.onclick = ev => { ev.stopPropagation(); this.pinAsk = null; this.render(); });
+    root.querySelectorAll("[data-pin-del]").forEach(el => el.onclick = ev => {
+      ev.stopPropagation();
+      const id = el.dataset.pinDel, b = (this.compare?.baselines || []).find(x => x.id === id);
+      this.confirmAsk(this.t("confirmPin", { name: b ? this.pinLabel(b) : "" }), () => this.pinDelete(id));
+    });
     root.querySelectorAll("div[data-baseline]").forEach(el => el.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); el.click(); } }));
     const modal = root.querySelector("[data-pin-modal]");
     if (modal) {

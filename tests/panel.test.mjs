@@ -3441,9 +3441,9 @@ test("the logbook has its own tab, entries are written in a dialog, an action ca
   await el.noteSave();
   assert.equal(sent[0].type, "ha_housekeeper/note_set"); assert.equal(sent[0].action, "save"); assert.equal(sent[0].title, "Router update"); assert.ok(sent[0].at.endsWith("Z"));
   assert.equal(el.noteDraft, null); assert.equal(el.data.notes.length, 2);
-  // deleting happens in the dialog and asks first
-  el.noteOpen(entry); el.noteAsk = "n1"; el.render();
-  assert.ok(shadow.innerHTML.includes("data-note-del-yes"));
+  // deleting is offered in the dialog and asks in the confirmation dialog first
+  el.noteOpen(entry); el.render();
+  assert.ok(shadow.innerHTML.includes('data-note-del="n1"') && !shadow.innerHTML.includes("data-note-del-yes"));
   await el.noteDeleteConfirmed("n1");
   assert.equal(sent[1].action, "delete"); assert.equal(el.data.notes.length, 0); assert.equal(el.noteDraft, null);
   // in the tab "History" of the object: the hint while empty, the entries when there are some
@@ -3482,8 +3482,8 @@ test("an own scan point sits in the history of the scans with its name, is set t
   assert.deepEqual(sent.map(m => m.type), ["ha_housekeeper/scan", "ha_housekeeper/scan_point", "ha_housekeeper/compare"]);
   assert.equal(sent[1].action, "save"); assert.equal(sent[1].name, "Before the update");
   el.compare = { ...COMPARE, baselines: [{ id: "previous", at: "2026-10-09T23:20:00+00:00", objects: 6, findings: 2 }, pin], current: { objects: 6, findings: 1 }, retention_days: 30 };
-  el.pinAsk = pin.id; el.render();
-  assert.ok(shadow.innerHTML.includes("data-pin-del-yes"));
+  el.render();
+  assert.ok(shadow.innerHTML.includes(`data-pin-del="${pin.id}"`) && !shadow.innerHTML.includes("data-pin-del-yes"));
   el.compareBaseline = pin.id;
   await el.pinDelete(pin.id);
   assert.equal(sent.at(-2).action, "delete"); assert.equal(sent.at(-2).baseline, pin.id); assert.equal(el.compareBaseline, "previous");
