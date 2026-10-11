@@ -84,6 +84,7 @@ class BatteryCareMixin {
 
   bindBatteryCare(root) {
     this.bindBatteryType(root);
+    this.bindBatteryKind(root);
     root.querySelector("[data-bt-refresh]")?.addEventListener("click", () => this.loadBatteryTrend(true));
     root.querySelectorAll("[data-rem-field]").forEach(el => el.addEventListener("input", () => { this.remDraft = { ...(this.remDraft || { name: "", interval_days: 90, last_done: new Date().toISOString().slice(0, 10), note: "" }), [el.dataset.remField]: el.value }; }));
     root.querySelector("[data-rem-add]")?.addEventListener("click", () => {

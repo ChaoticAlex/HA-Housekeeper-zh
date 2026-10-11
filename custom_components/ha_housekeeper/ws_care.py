@@ -14,6 +14,7 @@ from homeassistant.core import HomeAssistant, callback
 from . import battery_trend, battery_voltage
 from .backup_health import ATTEST_KINDS, backup_health
 from .battery_care import BatteryError
+from .battery_kind import excluded
 from .const import DOMAIN
 from .db_health import growth
 from .exposure import exposure
@@ -252,6 +253,7 @@ async def websocket_battery_trend(
         for o in snapshot["objects"]
         if o["object_type"] == "entity"
         and o.get("device_class") == "battery"
+        and not excluded(o)
         and o["object_id"].startswith("sensor.")
         and o.get("status") == "active"
         and o.get("has_statistics")
@@ -262,6 +264,7 @@ async def websocket_battery_trend(
         for o in snapshot["objects"]
         if o["object_type"] == "entity"
         and o.get("has_statistics")
+        and not excluded(o)
         and battery_voltage.is_voltage_battery(o)
     }
     wanted = sorted({*names, *volts})
@@ -329,6 +332,32 @@ def websocket_battery_type_set(
         connection.send_error(msg["id"], "invalid_format", f"Not accepted: {err}")
         return
     connection.send_result(msg["id"], _versioned({"types": scanner.batteries.types}))
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): f"{DOMAIN}/battery_kind_set",
+        vol.Required("items"): vol.All(
+            [{vol.Required("entity_id"): str, vol.Required("kind"): str}], vol.Length(max=200)
+        ),
+    }
+)
+@callback
+@with_scanner
+def websocket_battery_kind_set(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """Say which battery sensors are no replaceable battery (empty kind = take it back)."""
+    try:
+        scanner.set_battery_kinds([(i["entity_id"], i["kind"]) for i in msg["items"]])
+    except BatteryError as err:
+        connection.send_error(msg["id"], "invalid_format", f"Not accepted: {err}")
+        return
+    connection.send_result(msg["id"], _versioned({"kinds": scanner.batteries.kinds}))
 
 
 @websocket_api.require_admin
@@ -792,6 +821,7 @@ def async_register(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_backup_attest)
     websocket_api.async_register_command(hass, websocket_notify_set)
     websocket_api.async_register_command(hass, websocket_battery_type_set)
+    websocket_api.async_register_command(hass, websocket_battery_kind_set)
     websocket_api.async_register_command(hass, websocket_battery_replaced)
     websocket_api.async_register_command(hass, websocket_lifecycle)
     websocket_api.async_register_command(hass, websocket_lifecycle_note)

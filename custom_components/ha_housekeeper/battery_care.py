@@ -13,6 +13,7 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 
+from .battery_kind import ALL_KINDS
 from .const import BATTERY_STORAGE_KEY, STORAGE_VERSION
 
 SAVE_DELAY = 5
@@ -32,25 +33,28 @@ class BatteryStore:
         self._store: Store[dict[str, Any]] = Store(hass, STORAGE_VERSION, BATTERY_STORAGE_KEY)
         self.types: dict[str, str] = {}
         self.handled: dict[str, str] = {}
+        self.kinds: dict[str, str] = {}
 
     async def async_load(self) -> None:
         data = await self._store.async_load()
         if not isinstance(data, dict):
             return
-        for name, kept in (("types", self.types), ("handled", self.handled)):
+        for name, kept in (("types", self.types), ("handled", self.handled), ("kinds", self.kinds)):
             found = data.get(name)
             for key, value in found.items() if isinstance(found, dict) else ():
                 if isinstance(key, str) and ENTITY.match(key) and isinstance(value, str):
+                    if name == "kinds" and value not in ALL_KINDS:
+                        continue
                     kept[key] = value[:TYPE_MAX] if name == "types" else value
         for key in [k for k, v in self.handled.items() if not _day(v)]:
             del self.handled[key]
-        for kept in (self.types, self.handled):
+        for kept in (self.types, self.handled, self.kinds):
             for key in list(kept)[MAX_ITEMS:]:
                 del kept[key]
 
     def _save(self) -> None:
         self._store.async_delay_save(
-            lambda: {"types": self.types, "handled": self.handled}, SAVE_DELAY
+            lambda: {"types": self.types, "handled": self.handled, "kinds": self.kinds}, SAVE_DELAY
         )
 
     def set_type(self, entity_id: str, value: str) -> None:
@@ -66,6 +70,23 @@ class BatteryStore:
             if entity_id not in self.types and len(self.types) >= MAX_ITEMS:
                 raise BatteryError("too_many")
             self.types[entity_id] = value
+        self._save()
+
+    def set_kinds(self, items: list[tuple[str, str]]) -> None:
+        """Set the kind of several sensors; an empty kind takes it back. All or nothing."""
+        for entity_id, kind in items:
+            if not ENTITY.match(entity_id):
+                raise BatteryError("entity_id")
+            if kind and kind not in ALL_KINDS:
+                raise BatteryError("kind")
+        fresh = {e for e, k in items if k and e not in self.kinds}
+        if len(self.kinds) + len(fresh) > MAX_ITEMS:
+            raise BatteryError("too_many")
+        for entity_id, kind in items:
+            if kind:
+                self.kinds[entity_id] = kind
+            else:
+                self.kinds.pop(entity_id, None)
         self._save()
 
     def handle(self, entity_id: str, day: str, today: date) -> None:

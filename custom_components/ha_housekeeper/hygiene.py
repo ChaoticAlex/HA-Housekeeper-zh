@@ -6,6 +6,8 @@ import re
 from datetime import datetime, timedelta
 from typing import Any
 
+from .battery_kind import excluded
+
 SUFFIXED_NAME = re.compile(r"^(?P<base>.+?)_(?P<number>\d+)$")
 LEFTOVER_STATUSES = frozenset({"unavailable", "orphaned", "unknown"})
 
@@ -138,7 +140,7 @@ def battery_level(item: dict[str, Any]) -> tuple[float | None, bool]:
     Battery sensors report a percentage; battery binary sensors report ``on`` when low. A sensor
     with another unit (volts, for example) is not a percentage and is judged by ``battery_voltage``.
     """
-    if item.get("device_class") != "battery" or item.get("status") != "active":
+    if item.get("device_class") != "battery" or item.get("status") != "active" or excluded(item):
         return None, False
     domain = item["object_id"].partition(".")[0]
     if domain == "binary_sensor":

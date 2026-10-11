@@ -1232,7 +1232,7 @@ class StylesMixin {
       .detailhead{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:16px;padding:18px 20px;margin-bottom:14px}.detailhead .tile{width:48px;height:48px}.detailhead h1{margin:6px 0 2px;font-size:calc(22px*var(--hk-fs,1))}.actions{display:flex;flex-wrap:wrap;gap:8px}
       .sumline{display:flex;flex-wrap:wrap;gap:10px 26px;padding:12px 18px;margin-bottom:14px}.sumline span{display:grid;gap:3px;align-content:start}.sumline small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.sumline b{font-size:calc(13px*var(--hk-fs,1));font-weight:600}
       .tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--hk-border);overflow-x:auto;background:linear-gradient(to right,var(--hk-bg),transparent) left/36px 100% no-repeat local,linear-gradient(to left,var(--hk-bg),transparent) right/36px 100% no-repeat local,linear-gradient(to right,rgba(0,0,0,.16),transparent) left/10px 100% no-repeat scroll,linear-gradient(to left,rgba(0,0,0,.16),transparent) right/10px 100% no-repeat scroll}.tab{flex:none;padding:10px 14px;border:0;border-bottom:2px solid transparent;background:none;color:var(--hk-muted);white-space:nowrap}.tab em{font-style:normal;font-size:calc(11px*var(--hk-fs,1));padding:1px 6px;border-radius:10px;background:var(--hk-soft)}.tab[aria-selected="true"]{color:var(--hk-blue-text);border-bottom-color:var(--hk-blue);font-weight:600}
-      .rowwrap{display:flex;align-items:center;border-bottom:1px solid var(--hk-border)}.rowwrap:last-child{border-bottom:0}.rowwrap .row{border-bottom:0;flex:1;min-width:0}.selbox{margin:0 0 0 16px;flex:none}.statcell{display:flex;gap:10px;align-items:flex-start}.outcome{display:flex;gap:12px;align-items:center;margin:14px 16px 4px;padding:14px 16px;border-radius:12px;--oc:var(--hk-gray);color:color-mix(in srgb,var(--oc) 55%,var(--hk-text));background:color-mix(in srgb,var(--oc) 13%,transparent);border:1px solid color-mix(in srgb,var(--oc) 30%,transparent)}.outcome ha-icon{--mdc-icon-size:26px;flex:none}.outcome.ok{--oc:var(--hk-green)}.outcome.warn{--oc:var(--hk-amber)}.outcome.red{--oc:var(--hk-red)}.namecell{position:relative}.copybtn{position:absolute;right:0;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;padding:4px;border:1px solid var(--hk-border);border-radius:6px;background:var(--hk-surface);color:var(--hk-muted);cursor:pointer;opacity:0;--mdc-icon-size:14px}tr:hover .copybtn,.copybtn:focus-visible,.namecell:hover .copybtn{opacity:1}.copybtn.done{color:var(--hk-green);opacity:1}@media (hover:none){.copybtn{opacity:.7}}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;padding:10px 16px;border-radius:10px;background:var(--hk-text);color:var(--hk-bg);font-weight:600;box-shadow:var(--hk-sh2);pointer-events:none}.toast.bad{border-left:5px solid var(--hk-red);max-width:min(560px,calc(100vw - 32px))}.modepill{display:inline-flex;align-items:center;gap:5px;--mdc-icon-size:14px}.outcome small{display:block;font-weight:400;margin-top:2px}.visitline{display:flex;gap:8px;align-items:center;margin:0 0 12px}.visitline ha-icon{--mdc-icon-size:16px}.headsel{display:flex;gap:10px;align-items:center}.statcell .selbox{margin:3px 0 0}.statcell>div{min-width:0}.btcart,.btsuggest{margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 10%,transparent);border:1px solid color-mix(in srgb,var(--hk-blue) 30%,transparent)}.btcart strong{display:block;margin-bottom:2px}.btsuggest{background:color-mix(in srgb,var(--hk-green) 11%,transparent);border-color:color-mix(in srgb,var(--hk-green) 30%,transparent)}.btsuggest h3{margin:0 0 4px}.btrepl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}.btrepl .row-text{flex:1;min-width:200px}.btctl,.btedit{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 16px 0 8px}.btedit{flex-basis:100%;margin:0;padding:8px 16px 12px}.rowwrap:has(.btedit){flex-wrap:wrap}.chcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;padding:0 16px}.chcols>div{padding:8px 0}.chcols .big{font-size:22px;font-weight:700}.chbars{display:flex;gap:3px;align-items:flex-end;height:54px;padding:8px 16px 4px}.chbars i{flex:1;max-width:14px;min-width:3px;border-radius:3px 3px 0 0;background:var(--hk-green);display:block}.chbars i.m{background:var(--hk-red)}.chaxis{display:flex;justify-content:space-between;padding:0 16px 12px;color:var(--hk-muted);font-size:12px}.trimbox{margin:14px 16px 0;padding-top:14px;border-top:1px solid var(--hk-border)}.trimbox .actions{margin-top:8px}
+      .bkedit{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 16px 12px 62px;background:var(--hk-soft);border-bottom:1px solid var(--hk-border)}.bkedit select,.bkrow select{padding:5px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit;font-size:calc(13px*var(--hk-fs,1))}.bkcancel{border:0;background:none;padding:4px 2px;font:inherit;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);cursor:pointer;text-decoration:underline}.bkrow{gap:8px;padding-right:12px;flex-wrap:wrap}.bkall,.bkask{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--hk-border)}.bkask{background:var(--hk-soft)}.rowwrap{display:flex;align-items:center;border-bottom:1px solid var(--hk-border)}.rowwrap:last-child{border-bottom:0}.rowwrap .row{border-bottom:0;flex:1;min-width:0}.selbox{margin:0 0 0 16px;flex:none}.statcell{display:flex;gap:10px;align-items:flex-start}.outcome{display:flex;gap:12px;align-items:center;margin:14px 16px 4px;padding:14px 16px;border-radius:12px;--oc:var(--hk-gray);color:color-mix(in srgb,var(--oc) 55%,var(--hk-text));background:color-mix(in srgb,var(--oc) 13%,transparent);border:1px solid color-mix(in srgb,var(--oc) 30%,transparent)}.outcome ha-icon{--mdc-icon-size:26px;flex:none}.outcome.ok{--oc:var(--hk-green)}.outcome.warn{--oc:var(--hk-amber)}.outcome.red{--oc:var(--hk-red)}.namecell{position:relative}.copybtn{position:absolute;right:0;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;padding:4px;border:1px solid var(--hk-border);border-radius:6px;background:var(--hk-surface);color:var(--hk-muted);cursor:pointer;opacity:0;--mdc-icon-size:14px}tr:hover .copybtn,.copybtn:focus-visible,.namecell:hover .copybtn{opacity:1}.copybtn.done{color:var(--hk-green);opacity:1}@media (hover:none){.copybtn{opacity:.7}}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;padding:10px 16px;border-radius:10px;background:var(--hk-text);color:var(--hk-bg);font-weight:600;box-shadow:var(--hk-sh2);pointer-events:none}.toast.bad{border-left:5px solid var(--hk-red);max-width:min(560px,calc(100vw - 32px))}.modepill{display:inline-flex;align-items:center;gap:5px;--mdc-icon-size:14px}.outcome small{display:block;font-weight:400;margin-top:2px}.visitline{display:flex;gap:8px;align-items:center;margin:0 0 12px}.visitline ha-icon{--mdc-icon-size:16px}.headsel{display:flex;gap:10px;align-items:center}.statcell .selbox{margin:3px 0 0}.statcell>div{min-width:0}.btcart,.btsuggest{margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 10%,transparent);border:1px solid color-mix(in srgb,var(--hk-blue) 30%,transparent)}.btcart strong{display:block;margin-bottom:2px}.btsuggest{background:color-mix(in srgb,var(--hk-green) 11%,transparent);border-color:color-mix(in srgb,var(--hk-green) 30%,transparent)}.btsuggest h3{margin:0 0 4px}.btrepl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}.btrepl .row-text{flex:1;min-width:200px}.btctl,.btedit{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 16px 0 8px}.btedit{flex-basis:100%;margin:0;padding:8px 16px 12px}.rowwrap:has(.btedit){flex-wrap:wrap}.chcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;padding:0 16px}.chcols>div{padding:8px 0}.chcols .big{font-size:22px;font-weight:700}.chbars{display:flex;gap:3px;align-items:flex-end;height:54px;padding:8px 16px 4px}.chbars i{flex:1;max-width:14px;min-width:3px;border-radius:3px 3px 0 0;background:var(--hk-green);display:block}.chbars i.m{background:var(--hk-red)}.chaxis{display:flex;justify-content:space-between;padding:0 16px 12px;color:var(--hk-muted);font-size:12px}.trimbox{margin:14px 16px 0;padding-top:14px;border-top:1px solid var(--hk-border)}.trimbox .actions{margin-top:8px}
       .sumtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.sumtile{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border:1px solid var(--hk-border);border-left:4px solid var(--hk-gray);border-radius:12px;background:var(--hk-surface);text-align:left;font:inherit;color:inherit}button.sumtile{cursor:pointer}button.sumtile:hover{background:var(--hk-soft)}.sumtile.ok{border-left-color:var(--hk-green)}.sumtile.warn{border-left-color:var(--hk-amber)}.sumtile.red{border-left-color:var(--hk-red)}.sumlabel{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.sumvalue{font-size:calc(22px*var(--hk-fs,1));font-weight:600;line-height:1.2;overflow-wrap:anywhere}.sumtile small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));overflow-wrap:anywhere}.tabdot{display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:50%;background:var(--hk-gray)}.tabdot.warn{background:var(--hk-amber)}.tabdot.red{background:var(--hk-red)}
       .detailgrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:14px;align-items:start}.pad{padding:16px}
       .facts{display:grid}.fact{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.fact:first-child{border-top:0}.fact span{color:var(--hk-muted)}.fact b{font-weight:600;text-align:right}.fact small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:400}
@@ -3593,7 +3593,7 @@ class UnusedMixin {
   batteryRows() {
     const rows = [];
     for (const o of this.data.objects) {
-      if (o.object_type !== "entity" || o.device_class !== "battery" || o.status !== "active") continue;
+      if (o.object_type !== "entity" || o.device_class !== "battery" || o.status !== "active" || this.batteryExcluded(o)) continue;
       const domain = o.object_id.split(".")[0];
       if (domain === "binary_sensor") rows.push({ item: o, level: null, low: o.state === "on" });
       else if (domain === "sensor" && (!o.unit || o.unit === "%") && o.state !== null && o.state !== "" && !Number.isNaN(Number(o.state))) rows.push({ item: o, level: Number(o.state), low: false });
@@ -3869,10 +3869,10 @@ class UnusedMixin {
       const names = this.batteryName(item);
       const sub = volt ? [area?.name, names.entity, this.t("bvLine", { now: this.voltNum(level), kind: this.t(`bvType_${volt.type}`), limit: this.voltNum(volt.limit) })] : [area?.name, names.entity, item.object_id];
       const pill = volt ? this.voltNum(level) : level !== null ? `${Math.round(level)} ${item.unit || "%"}` : this.t("batteryLow");
-      return `<button class="row rel" data-object="${this.esc(this.objectKey(item))}"><span class="tile ${tone === "ok" ? "ok" : tone}"><ha-icon icon="${isLow ? "mdi:battery-alert-variant-outline" : "mdi:battery-high"}"></ha-icon></span><span class="row-text"><strong>${this.esc(names.title)}</strong><small>${this.esc(sub.filter(Boolean).join(" · "))}</small></span><span class="pill ${tone}">${this.esc(pill)}</span></button>`;
+      return `<div class="rowwrap"><button class="row rel" data-object="${this.esc(this.objectKey(item))}"><span class="tile ${tone === "ok" ? "ok" : tone}"><ha-icon icon="${isLow ? "mdi:battery-alert-variant-outline" : "mdi:battery-high"}"></ha-icon></span><span class="row-text"><strong>${this.esc(names.title)}</strong><small>${this.esc(sub.filter(Boolean).join(" · "))}</small></span><span class="pill ${tone}">${this.esc(pill)}</span></button>${this.batteryKindControl(item)}</div>${this.batteryKindForm(item)}`;
     };
     const pg = this.paginate(`batteries-${this.batteryFilter}`, list);
-    return `<div class="stack">${chips}${this.batteryTrendCard()}<div class="panel">${bar}${list.length ? pg.rows.map(row).join("") : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t(all.length ? "noMatches" : "noBatteries")}</div>`}${pg.footer}${this.voltNote()}</div></div>`;
+    return `<div class="stack">${chips}${this.batteryTrendCard()}<div class="panel">${bar}${list.length ? pg.rows.map(row).join("") : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t(all.length ? "noMatches" : "noBatteries")}</div>`}${pg.footer}${this.voltNote()}</div>${this.batteryKindCard()}</div>`;
   }
 }
 
@@ -7138,6 +7138,7 @@ class BatteryCareMixin {
 
   bindBatteryCare(root) {
     this.bindBatteryType(root);
+    this.bindBatteryKind(root);
     root.querySelector("[data-bt-refresh]")?.addEventListener("click", () => this.loadBatteryTrend(true));
     root.querySelectorAll("[data-rem-field]").forEach(el => el.addEventListener("input", () => { this.remDraft = { ...(this.remDraft || { name: "", interval_days: 90, last_done: new Date().toISOString().slice(0, 10), note: "" }), [el.dataset.remField]: el.value }; }));
     root.querySelector("[data-rem-add]")?.addEventListener("click", () => {
@@ -9898,6 +9899,118 @@ class DetailEditMixin {
   }
 }
 
+// Battery sensors that are not a battery you change (storage, vehicle, a device's own pack).
+// The scan proposes them from the device's other sensors (battery_suggest); you confirm, correct or say
+// "it is a battery". Only Housekeeper's own list changes. Mixed into the panel in 99-register.js.
+const BATTERY_KINDS = ["device", "storage", "vehicle", "other"];
+
+Object.assign(TEXT.de, {
+  bkSet: "Keine Wechselbatterie?", bkLabel: "Was ist {name}?", bkSave: "Speichern", bkBack: "Doch Batterie", bkConfirm: "Stimmt", bkNote: "Danach zählt der Sensor nicht mehr in Niedrigstand, Prognose und Statusrechnung. Gespeichert nur in Housekeeper.",
+  bkKind_device: "Akku eines Geräts", bkKind_storage: "Speicher", bkKind_vehicle: "Fahrzeug", bkKind_other: "Sonstiges",
+  bkProposed: "Vermutlich keine Wechselbatterie", bkProposedHint: "Geräte, die auch Leistung, Energie oder Ladevorgang melden. Sie zählen nicht in Niedrigstand und Prognose, bis du sie bestätigst oder zurückholst.",
+  bkMine: "Keine Wechselbatterie", bkMineHint: "Von dir oder aus einem Vorschlag bestätigt.",
+  bkAll: "Alle bestätigen", bkAsk: "{n} Sensoren als keine Wechselbatterie speichern?", bkYes: "Ja, speichern", bkNo: "Abbrechen",
+  bkWhy: "Gerät meldet auch {list}", bkWhyMower: "Gerät ist ein Mähroboter", bkWhyVacuum: "Gerät ist ein Staubsauger",
+  bkSig_power: "Leistung", bkSig_energy: "Energie", bkSig_energy_storage: "Speicher", bkSig_current: "Strom", bkSig_battery_charging: "Ladevorgang", bkSig_plug: "Stecker",
+  bkFailed: "Das hat nicht geklappt: {detail}",
+});
+Object.assign(TEXT.en, {
+  bkSet: "Not a replaceable battery?", bkLabel: "What is {name}?", bkSave: "Save", bkBack: "It is a battery", bkConfirm: "Correct", bkNote: "Afterwards the sensor no longer counts in lowest level, forecast and the status. Stored only in Housekeeper.",
+  bkKind_device: "A device's own pack", bkKind_storage: "Storage", bkKind_vehicle: "Vehicle", bkKind_other: "Other",
+  bkProposed: "Probably not a replaceable battery", bkProposedHint: "Devices that also report power, energy or charging. They do not count in lowest level and forecast until you confirm them or bring them back.",
+  bkMine: "Not a replaceable battery", bkMineHint: "Set by you or confirmed from a proposal.",
+  bkAll: "Confirm all", bkAsk: "Save {n} sensors as not a replaceable battery?", bkYes: "Yes, save", bkNo: "Cancel",
+  bkWhy: "Device also reports {list}", bkWhyMower: "Device is a mowing robot", bkWhyVacuum: "Device is a vacuum",
+  bkSig_power: "power", bkSig_energy: "energy", bkSig_energy_storage: "storage", bkSig_current: "current", bkSig_battery_charging: "charging", bkSig_plug: "plug",
+  bkFailed: "That did not work: {detail}",
+});
+
+class BatteryKindMixin {
+  batteryExcluded(o) {
+    return BATTERY_KINDS.includes(o.battery_kind) || (!o.battery_kind && !!o.battery_suggest);
+  }
+
+  // The battery sensors that are left out of the counts: confirmed ones and proposals.
+  batteryKindItems() {
+    const mine = [], proposed = [];
+    for (const o of this.data.objects) {
+      if (o.object_type !== "entity" || o.device_class !== "battery" || o.status !== "active") continue;
+      if (BATTERY_KINDS.includes(o.battery_kind)) mine.push(o);
+      else if (!o.battery_kind && o.battery_suggest) proposed.push(o);
+    }
+    const byName = (a, b) => this.batteryName(a).title.localeCompare(this.batteryName(b).title);
+    return { mine: mine.sort(byName), proposed: proposed.sort(byName) };
+  }
+
+  bkWhy(o) {
+    const signals = o.battery_suggest?.signals || [];
+    if (signals.includes("lawn_mower")) return this.t("bkWhyMower");
+    if (signals.includes("vacuum")) return this.t("bkWhyVacuum");
+    return this.t("bkWhy", { list: signals.map(s => this.t(`bkSig_${s}`)).join(", ") });
+  }
+
+  bkSelect(o, value, attr) {
+    return `<select ${attr}="${this.esc(o.object_id)}" aria-label="${this.esc(this.t("bkLabel", { name: this.batteryName(o).title }))}">${BATTERY_KINDS.map(k => `<option value="${k}" ${k === value ? "selected" : ""}>${this.t(`bkKind_${k}`)}</option>`).join("")}</select>`;
+  }
+
+  // One small button after a row of the battery list; it opens the form below the row.
+  batteryKindControl(o) {
+    if (this.bkEdit !== o.object_id) return `<button class="btn quiet" data-bk-open="${this.esc(o.object_id)}">${this.t("bkSet")}</button>`;
+    return "";
+  }
+
+  batteryKindForm(o) {
+    if (this.bkEdit !== o.object_id) return "";
+    const name = this.batteryName(o).title;
+    return `<div class="bkedit"><label class="factnote">${this.esc(this.t("bkLabel", { name }))}</label>${this.bkSelect(o, "device", "data-bk-pick")}<button class="btn small primary" data-bk-save="${this.esc(o.object_id)}">${this.t("bkSave")}</button><button class="bkcancel" data-bk-cancel>${this.t("cancelRun")}</button><span class="factnote">${this.t("bkNote")}</span></div>`;
+  }
+
+  batteryKindCard() {
+    const { mine, proposed } = this.batteryKindItems();
+    if (!mine.length && !proposed.length) return this.bkMessage ? `<p class="factnote" role="status">${this.esc(this.bkMessage)}</p>` : "";
+    const level = o => (o.unit === "%" || !o.unit) && o.state !== null && o.state !== "" && !Number.isNaN(Number(o.state)) ? `${Math.round(Number(o.state))} %` : "";
+    const row = (o, kind, mineRow) => `<div class="rowwrap bkrow"><button class="row rel" data-object="${this.esc(this.objectKey(o))}"><span class="tile mute"><ha-icon icon="mdi:battery-high"></ha-icon></span><span class="row-text"><strong>${this.esc(this.batteryName(o).title)}</strong><small>${this.esc([mineRow ? "" : this.bkWhy(o), this.batteryName(o).entity, o.object_id].filter(Boolean).join(" · "))}</small></span>${level(o) ? `<span class="pill mute">${level(o)}</span>` : ""}</button>${this.bkSelect(o, kind, mineRow ? "data-bk-change" : "data-bk-proposal")}${mineRow ? "" : `<button class="btn small" data-bk-accept="${this.esc(o.object_id)}">${this.t("bkConfirm")}</button>`}<button class="btn quiet" data-bk-back="${this.esc(o.object_id)}">${this.t("bkBack")}</button></div>`;
+    const ask = this.bkAsk ? `<div class="bkask" role="alert"><strong>${this.t("bkAsk", { n: this.formatNumber(proposed.length) })}</strong><button class="btn small primary" data-bk-all-yes>${this.t("bkYes")}</button><button class="btn small" data-bk-all-no>${this.t("bkNo")}</button></div>` : "";
+    const all = proposed.length > 1 && !this.bkAsk ? `<div class="bkall"><button class="btn small" data-bk-all>${this.t("bkAll")}</button></div>` : "";
+    const parts = [];
+    if (proposed.length) parts.push(this.fold("bk_proposed", { tone: "warn", title: this.t("bkProposed"), sub: this.t("bkProposedHint"), pill: this.formatNumber(proposed.length) }, `${all}${ask}${proposed.map(o => row(o, o.battery_suggest?.kind || "other", false)).join("")}`, true));
+    if (mine.length) parts.push(this.fold("bk_mine", { tone: "mute", title: this.t("bkMine"), sub: this.t("bkMineHint"), pill: this.formatNumber(mine.length) }, mine.map(o => row(o, o.battery_kind, true)).join(""), false));
+    return `<div class="panel">${parts.join("")}${this.bkMessage ? `<p class="factnote pad" role="status">${this.esc(this.bkMessage)}</p>` : ""}</div>`;
+  }
+
+  async batterySetKinds(items) {
+    this.bkMessage = ""; this.bkAsk = false;
+    try {
+      await this._hass.callWS({ type: "ha_housekeeper/battery_kind_set", items });
+      this.bkEdit = "";
+      this.batteryTrend = null; this._btRequested = false;
+      await this.refreshData();
+    } catch (err) { this.bkMessage = this.t("bkFailed", { detail: err?.message || String(err) }); }
+    this.render();
+  }
+
+  bindBatteryKind(root) {
+    root.querySelectorAll("[data-bk-open]").forEach(el => el.addEventListener("click", () => { this.bkEdit = el.dataset.bkOpen; this.render(); }));
+    root.querySelector("[data-bk-cancel]")?.addEventListener("click", () => { this.bkEdit = ""; this.render(); });
+    root.querySelector("[data-bk-save]")?.addEventListener("click", e => {
+      const id = e.currentTarget.dataset.bkSave;
+      this.batterySetKinds([{ entity_id: id, kind: root.querySelector("[data-bk-pick]")?.value || "other" }]);
+    });
+    root.querySelectorAll("[data-bk-accept]").forEach(el => el.addEventListener("click", () => {
+      const id = el.dataset.bkAccept;
+      this.batterySetKinds([{ entity_id: id, kind: [...root.querySelectorAll("[data-bk-proposal]")].find(s => s.dataset.bkProposal === id)?.value || "other" }]);
+    }));
+    root.querySelectorAll("[data-bk-change]").forEach(el => el.addEventListener("change", () => this.batterySetKinds([{ entity_id: el.dataset.bkChange, kind: el.value }])));
+    root.querySelectorAll("[data-bk-back]").forEach(el => el.addEventListener("click", () => this.batterySetKinds([{ entity_id: el.dataset.bkBack, kind: "keep" }])));
+    root.querySelector("[data-bk-all]")?.addEventListener("click", () => { this.bkAsk = true; this.render(); });
+    root.querySelector("[data-bk-all-no]")?.addEventListener("click", () => { this.bkAsk = false; this.render(); });
+    root.querySelector("[data-bk-all-yes]")?.addEventListener("click", () => {
+      const items = [...root.querySelectorAll("[data-bk-proposal]")].map(s => ({ entity_id: s.dataset.bkProposal, kind: s.value }));
+      this.batterySetKinds(items);
+    });
+  }
+}
+
 class HAHousekeeperPanel extends HTMLElement {
   constructor() {
     super();
@@ -10870,7 +10983,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, RenameMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, RenameMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }

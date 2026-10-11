@@ -3,7 +3,7 @@ class UnusedMixin {
   batteryRows() {
     const rows = [];
     for (const o of this.data.objects) {
-      if (o.object_type !== "entity" || o.device_class !== "battery" || o.status !== "active") continue;
+      if (o.object_type !== "entity" || o.device_class !== "battery" || o.status !== "active" || this.batteryExcluded(o)) continue;
       const domain = o.object_id.split(".")[0];
       if (domain === "binary_sensor") rows.push({ item: o, level: null, low: o.state === "on" });
       else if (domain === "sensor" && (!o.unit || o.unit === "%") && o.state !== null && o.state !== "" && !Number.isNaN(Number(o.state))) rows.push({ item: o, level: Number(o.state), low: false });
@@ -279,9 +279,9 @@ class UnusedMixin {
       const names = this.batteryName(item);
       const sub = volt ? [area?.name, names.entity, this.t("bvLine", { now: this.voltNum(level), kind: this.t(`bvType_${volt.type}`), limit: this.voltNum(volt.limit) })] : [area?.name, names.entity, item.object_id];
       const pill = volt ? this.voltNum(level) : level !== null ? `${Math.round(level)} ${item.unit || "%"}` : this.t("batteryLow");
-      return `<button class="row rel" data-object="${this.esc(this.objectKey(item))}"><span class="tile ${tone === "ok" ? "ok" : tone}"><ha-icon icon="${isLow ? "mdi:battery-alert-variant-outline" : "mdi:battery-high"}"></ha-icon></span><span class="row-text"><strong>${this.esc(names.title)}</strong><small>${this.esc(sub.filter(Boolean).join(" · "))}</small></span><span class="pill ${tone}">${this.esc(pill)}</span></button>`;
+      return `<div class="rowwrap"><button class="row rel" data-object="${this.esc(this.objectKey(item))}"><span class="tile ${tone === "ok" ? "ok" : tone}"><ha-icon icon="${isLow ? "mdi:battery-alert-variant-outline" : "mdi:battery-high"}"></ha-icon></span><span class="row-text"><strong>${this.esc(names.title)}</strong><small>${this.esc(sub.filter(Boolean).join(" · "))}</small></span><span class="pill ${tone}">${this.esc(pill)}</span></button>${this.batteryKindControl(item)}</div>${this.batteryKindForm(item)}`;
     };
     const pg = this.paginate(`batteries-${this.batteryFilter}`, list);
-    return `<div class="stack">${chips}${this.batteryTrendCard()}<div class="panel">${bar}${list.length ? pg.rows.map(row).join("") : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t(all.length ? "noMatches" : "noBatteries")}</div>`}${pg.footer}${this.voltNote()}</div></div>`;
+    return `<div class="stack">${chips}${this.batteryTrendCard()}<div class="panel">${bar}${list.length ? pg.rows.map(row).join("") : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t(all.length ? "noMatches" : "noBatteries")}</div>`}${pg.footer}${this.voltNote()}</div>${this.batteryKindCard()}</div>`;
   }
 }

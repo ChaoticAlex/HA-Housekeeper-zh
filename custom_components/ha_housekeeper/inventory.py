@@ -29,6 +29,7 @@ from .automation_analysis import (
 )
 from .backup_health import AttestStore, backup_health
 from .battery_care import BatteryStore
+from .battery_kind import apply_battery_kinds
 from .causes import apply_causes
 from .cleanup import JournalStore, is_child_device, quarantine_entries, recurring_devices
 from .cleanup_exec import CleanupRunner
@@ -892,6 +893,7 @@ class InventoryScanner:
             finding["key"] = finding_key(finding)
             self._mark_ignored(finding, entity_registry_entries)
         apply_marks(objects, findings, self.marks.items)
+        apply_battery_kinds(objects, self.batteries.kinds)
         apply_impact(objects, edges, findings)
         causes = apply_causes(objects, edges, findings)
 
@@ -1061,6 +1063,17 @@ class InventoryScanner:
             return False
         self._refresh_marks()
         return True
+
+    def set_battery_kinds(self, items: list[tuple[str, str]]) -> None:
+        """Store the kinds of battery sensors and bring the cached snapshot and its count up to date."""
+        self.batteries.set_kinds(items)
+        snapshot = self._snapshot
+        if not snapshot:
+            return
+        apply_battery_kinds(snapshot["objects"], self.batteries.kinds)
+        entities = [o for o in snapshot["objects"] if o["object_type"] == "entity"]
+        snapshot["meta"]["low_batteries"] = len(low_battery_ids(entities, self.low_battery_percent))
+        async_dispatcher_send(self.hass, SIGNAL_SCAN_COMPLETE)
 
     def _refresh_marks(self) -> None:
         """Bring the objects and findings of the cached snapshot up to date with the marks."""

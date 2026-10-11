@@ -63,3 +63,72 @@ async def test_a_criterion_missed_again_and_again_is_a_finding_of_an_existing_au
     assert found[0]["rule_id"] == "automation.goal_missed"
     assert found[0]["evidence"][0]["missed"] == 4 and found[0]["evidence"][0]["reached"] == 2
     assert store.view("automation.a", today)["days"]["2026-10-09"] == [2, 3]
+
+
+def test_battery_kinds_are_proposed_from_the_device_and_left_out_of_the_counts() -> None:
+    from custom_components.ha_housekeeper.battery_kind import apply_battery_kinds, excluded
+    from custom_components.ha_housekeeper.hygiene import battery_level
+
+    def entity(
+        object_id: str, device_id: str | None, device_class: str | None, state: str = "50"
+    ) -> dict:
+        return {
+            "object_type": "entity",
+            "object_id": object_id,
+            "device_id": device_id,
+            "device_class": device_class,
+            "state": state,
+            "status": "active",
+            "unit": "%",
+        }
+
+    objects = [
+        entity("sensor.sensor_battery", "d1", "battery"),
+        entity("sensor.sensor_temp", "d1", "temperature"),
+        entity("sensor.bank_battery", "d2", "battery"),
+        entity("sensor.bank_power", "d2", "power"),
+        entity("sensor.bank_energy", "d2", "energy_storage"),
+        entity("sensor.car_battery", "d3", "battery"),
+        entity("binary_sensor.car_plug", "d3", "plug"),
+        entity("sensor.mower_battery", "d4", "battery"),
+        entity("lawn_mower.mower", "d4", None),
+        entity("sensor.kept_battery", "d2", "battery"),
+    ]
+    apply_battery_kinds(objects, {"sensor.kept_battery": "keep"})
+    by_id = {o["object_id"]: o for o in objects}
+    assert "battery_suggest" not in by_id["sensor.sensor_battery"] and not excluded(
+        by_id["sensor.sensor_battery"]
+    )
+    assert by_id["sensor.bank_battery"]["battery_suggest"] == {
+        "kind": "storage",
+        "signals": ["energy_storage", "power"],
+    }
+    assert by_id["sensor.car_battery"]["battery_suggest"]["kind"] == "other"
+    assert by_id["sensor.mower_battery"]["battery_suggest"] == {
+        "kind": "device",
+        "signals": ["lawn_mower"],
+    }
+    assert by_id["sensor.kept_battery"]["battery_kind"] == "keep" and not excluded(
+        by_id["sensor.kept_battery"]
+    )
+    assert excluded(by_id["sensor.bank_battery"]) and battery_level(
+        by_id["sensor.bank_battery"]
+    ) == (None, False)
+    assert battery_level(by_id["sensor.kept_battery"]) == (50.0, False)
+    apply_battery_kinds(objects, {"sensor.bank_battery": "storage"})
+    assert (
+        by_id["sensor.bank_battery"]["battery_kind"] == "storage"
+        and "battery_suggest" not in by_id["sensor.bank_battery"]
+    )
+
+
+async def test_battery_kinds_are_checked_and_kept(hass: HomeAssistant) -> None:
+    store = BatteryStore(hass)
+    store.set_kinds([("sensor.a", "storage"), ("sensor.b", "keep")])
+    assert store.kinds == {"sensor.a": "storage", "sensor.b": "keep"}
+    store.set_kinds([("sensor.a", "")])
+    assert store.kinds == {"sensor.b": "keep"}
+    for bad in ([("flur", "storage")], [("sensor.a", "robot")]):
+        with pytest.raises(BatteryError):
+            store.set_kinds(bad)
+    assert store.kinds == {"sensor.b": "keep"}

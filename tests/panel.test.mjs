@@ -3781,3 +3781,18 @@ test("what the recorder already excludes stays pickable for trimming but never r
   el.excludeSel.add("sensor.done");
   assert.ok(!el.excludeCard([]).includes("data-ex-left") && el.excludeCard([]).includes("1 to trim") && !el.excludeCard([]).includes("Copy YAML"), "only trimming: no block");
 });
+
+test("battery sensors that are no replaceable battery leave the list, wait in a proposal group and are saved through the server", async () => {
+  const calls = [];
+  const { el } = panel("en");
+  const bat = (id, extra = {}) => ({ object_type: "entity", object_id: id, name: id, status: "active", device_class: "battery", unit: "%", state: "50", ...extra });
+  el.data = { ...DATA, objects: [...DATA.objects, bat("sensor.door_battery"), bat("sensor.bank_battery", { battery_suggest: { kind: "storage", signals: ["power", "energy_storage"] } }), bat("sensor.car_battery", { battery_kind: "vehicle" }), bat("sensor.back_battery", { battery_kind: "keep" })] };
+  el._hass = { language: "en", callWS: async msg => { calls.push(msg); return {}; } };
+  el.refreshData = async () => {};
+  const ids = el.batteryRows().map(r => r.item.object_id);
+  assert.ok(ids.includes("sensor.door_battery") && ids.includes("sensor.back_battery") && !ids.includes("sensor.bank_battery") && !ids.includes("sensor.car_battery"));
+  const card = el.batteryKindCard();
+  assert.ok(card.includes("Probably not a replaceable battery") && card.includes("Device also reports power, storage") && card.includes('data-bk-accept="sensor.bank_battery"'));
+  await el.batterySetKinds([{ entity_id: "sensor.bank_battery", kind: "storage" }, { entity_id: "sensor.door_battery", kind: "" }]);
+  assert.equal(JSON.stringify(calls[0]), JSON.stringify({ type: "ha_housekeeper/battery_kind_set", items: [{ entity_id: "sensor.bank_battery", kind: "storage" }, { entity_id: "sensor.door_battery", kind: "" }] }));
+});
