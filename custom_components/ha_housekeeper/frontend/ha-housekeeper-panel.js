@@ -1235,7 +1235,7 @@ class StylesMixin {
       .sumline{display:flex;flex-wrap:wrap;gap:10px 26px;padding:12px 18px;margin-bottom:14px}.sumline span{display:grid;gap:3px;align-content:start}.sumline small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.sumline b{font-size:calc(13px*var(--hk-fs,1));font-weight:600}
       .tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--hk-border);overflow-x:auto;background:linear-gradient(to right,var(--hk-bg),transparent) left/36px 100% no-repeat local,linear-gradient(to left,var(--hk-bg),transparent) right/36px 100% no-repeat local,linear-gradient(to right,rgba(0,0,0,.16),transparent) left/10px 100% no-repeat scroll,linear-gradient(to left,rgba(0,0,0,.16),transparent) right/10px 100% no-repeat scroll}.tab{flex:none;padding:10px 14px;border:0;border-bottom:2px solid transparent;background:none;color:var(--hk-muted);white-space:nowrap}.tab em{font-style:normal;font-size:calc(11px*var(--hk-fs,1));padding:1px 6px;border-radius:10px;background:var(--hk-soft)}.tab[aria-selected="true"]{color:var(--hk-blue-text);border-bottom-color:var(--hk-blue);font-weight:600}
       .needgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:16px}.needtile{display:flex;flex-direction:column;justify-content:center;gap:4px;height:92px;padding:0 16px;border:1px solid var(--hk-border);border-radius:14px;background:var(--hk-soft);min-width:0}.needtile b{font-size:calc(28px*var(--hk-fs,1));line-height:1;font-variant-numeric:tabular-nums}.needtile span{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.needtile.miss{border-style:dashed}.needtile.miss b{color:var(--hk-amber)}.needsplit{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--hk-border)}.needsplit>div{padding:12px 16px;min-width:0}.needsplit>div+div{border-left:1px solid var(--hk-border)}.needsplit:empty{display:none}.needsplit h3{margin:0 0 6px;font-size:calc(12px*var(--hk-fs,1));letter-spacing:.04em;text-transform:uppercase;color:var(--hk-muted)}.needsplit ul{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:calc(14px*var(--hk-fs,1))}.needsplit li span,.needsplit li.muted{color:var(--hk-muted)}.needsplit li span::before{content:"· "}.tablewrap.lt.batt .iconbtn{padding:3px 6px;margin-left:4px;--mdc-icon-size:16px}.linkbtn{border:0;background:none;padding:0;font:inherit;color:var(--hk-text);cursor:pointer;text-decoration:underline;text-decoration-color:var(--hk-border)}.linkbtn:hover{text-decoration-color:currentColor}.tablewrap.lt.batt .lvl{display:flex;align-items:center;gap:8px;min-width:130px}.tablewrap.lt.batt .lvl .bar{flex:1;height:7px;border-radius:4px;background:var(--hk-border);overflow:hidden;min-width:48px}.tablewrap.lt.batt .lvl .bar i{display:block;height:100%}.lvl .lvlnum{min-width:4.2em;text-align:right;white-space:nowrap}.lvl .lvlnum small{display:block;color:var(--hk-muted);font-size:calc(11.5px*var(--hk-fs,1))}.tablewrap.lt.batt .red{color:var(--hk-red)}.tablewrap.lt.batt .amber{color:var(--hk-amber)}.tablewrap.lt.batt .green{color:var(--hk-green)}.tablewrap.lt.batt td .btedit{display:flex;flex-wrap:wrap;gap:6px;white-space:normal}.tablewrap.lt.batt .btedit label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.tablewrap.lt.batt .bkedit{padding:0;background:none;border:0}.tablewrap.lt.batt .bkedit .factnote{display:none}.tablewrap.lt.batt .btn.miss{border-style:dashed;color:var(--hk-amber)}.btn.miss ha-icon{--mdc-icon-size:14px;margin-left:6px}.tablewrap.lt.batt td:last-child{text-align:right}@media(max-width:700px){.needsplit{grid-template-columns:1fr}.needsplit>div+div{border-left:0;border-top:1px solid var(--hk-border)}}.bkedit{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 16px 12px 62px;background:var(--hk-soft);border-bottom:1px solid var(--hk-border)}.bkedit select,.bkrow select{padding:5px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit;font-size:calc(13px*var(--hk-fs,1))}.bkcancel{border:0;background:none;padding:4px 2px;font:inherit;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);cursor:pointer;text-decoration:underline}.bkrow{gap:8px;padding-right:12px;flex-wrap:wrap}.bkall,.bkask{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--hk-border)}.bkask{background:var(--hk-soft)}.rowwrap{display:flex;align-items:center;border-bottom:1px solid var(--hk-border)}.rowwrap:last-child{border-bottom:0}.rowwrap .row{border-bottom:0;flex:1;min-width:0}.selbox{margin:0 0 0 16px;flex:none}.statcell{display:flex;gap:10px;align-items:flex-start}.outcome{display:flex;gap:12px;align-items:center;margin:14px 16px 4px;padding:14px 16px;border-radius:12px;--oc:var(--hk-gray);color:color-mix(in srgb,var(--oc) 55%,var(--hk-text));background:color-mix(in srgb,var(--oc) 13%,transparent);border:1px solid color-mix(in srgb,var(--oc) 30%,transparent)}.outcome ha-icon{--mdc-icon-size:26px;flex:none}.outcome.ok{--oc:var(--hk-green)}.outcome.warn{--oc:var(--hk-amber)}.outcome.red{--oc:var(--hk-red)}.namecell{position:relative}.copybtn{position:absolute;right:0;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;padding:4px;border:1px solid var(--hk-border);border-radius:6px;background:var(--hk-surface);color:var(--hk-muted);cursor:pointer;opacity:0;--mdc-icon-size:14px}tr:hover .copybtn,.copybtn:focus-visible,.namecell:hover .copybtn{opacity:1}.copybtn.done{color:var(--hk-green);opacity:1}@media (hover:none){.copybtn{opacity:.7}}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;padding:10px 16px;border-radius:10px;background:var(--hk-text);color:var(--hk-bg);font-weight:600;box-shadow:var(--hk-sh2);pointer-events:none}.toast.bad{border-left:5px solid var(--hk-red);max-width:min(560px,calc(100vw - 32px))}.modepill{display:inline-flex;align-items:center;gap:5px;--mdc-icon-size:14px}.outcome small{display:block;font-weight:400;margin-top:2px}.visitline{display:flex;gap:8px;align-items:center;margin:0 0 12px}.visitline ha-icon{--mdc-icon-size:16px}.headsel{display:flex;gap:10px;align-items:center}.statcell .selbox{margin:3px 0 0}.statcell>div{min-width:0}.btcart,.btsuggest{margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 10%,transparent);border:1px solid color-mix(in srgb,var(--hk-blue) 30%,transparent)}.btcart strong{display:block;margin-bottom:2px}.btsuggest{background:color-mix(in srgb,var(--hk-green) 11%,transparent);border-color:color-mix(in srgb,var(--hk-green) 30%,transparent)}.btsuggest h3{margin:0 0 4px}.btrepl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}.btrepl .row-text{flex:1;min-width:200px}.btctl,.btedit{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 16px 0 8px}.btedit{flex-basis:100%;margin:0;padding:8px 16px 12px}.rowwrap:has(.btedit){flex-wrap:wrap}.chcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;padding:0 16px}.chcols>div{padding:8px 0}.chcols .big{font-size:22px;font-weight:700}.chbars{display:flex;gap:3px;align-items:flex-end;height:54px;padding:8px 16px 4px}.chbars i{flex:1;max-width:14px;min-width:3px;border-radius:3px 3px 0 0;background:var(--hk-green);display:block}.chbars i.m{background:var(--hk-red)}.chaxis{display:flex;justify-content:space-between;padding:0 16px 12px;color:var(--hk-muted);font-size:12px}.trimbox{margin:14px 16px 0;padding-top:14px;border-top:1px solid var(--hk-border)}.trimbox .actions{margin-top:8px}
-      .row.politem[data-pol-row]{cursor:pointer}.poldetail{cursor:auto;display:grid;gap:12px;margin-top:10px}.poldetail h4{margin:0 0 4px;font-size:calc(11px*var(--hk-fs,1));font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--hk-muted)}.poldetail p{margin:0}.poledit{display:grid;gap:6px}.poldetail .inline{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.poldetail .inline input,.poldetail .inline select{height:36px;min-width:0}.poldetail .acts{display:flex;flex-wrap:wrap;gap:8px}.polcheck{font-size:calc(13px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted)}.polcheck.ok{color:var(--hk-ok,#3f7d4e)}.polcheck.bad{color:var(--hk-red,#b3392f)}.row.politem.open{background:var(--hk-soft)}
+      .row.politem[data-pol-row]{cursor:pointer}.poldetail{cursor:auto;display:grid;gap:12px;margin-top:10px}.poldetail h4{margin:0 0 4px;font-size:calc(11px*var(--hk-fs,1));font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--hk-muted)}.poldetail p{margin:0}.poledit{display:grid;gap:6px}.poldetail .inline{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.poldetail .inline input,.poldetail .inline select{height:36px;min-width:0}.poldetail .acts{display:flex;flex-wrap:wrap;gap:8px}.poldetail .btn.on{border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 14%,var(--hk-surface));color:var(--hk-blue-text);font-weight:700}.poldetail .btn small{font-weight:400;color:var(--hk-muted);margin-left:4px}.polcheck{font-size:calc(13px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted)}.polcheck.ok{color:var(--hk-ok,#3f7d4e)}.polcheck.bad{color:var(--hk-red,#b3392f)}.row.politem.open{background:var(--hk-soft)}
       .remform{display:grid;gap:14px;padding:16px;border-top:1px solid var(--hk-border);background:var(--hk-soft)}.remgrid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;align-items:start}.remfield{display:grid;grid-template-rows:auto 40px auto;gap:4px;font-size:calc(12px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted);min-width:0}.remfield input{height:40px;min-width:0}.remfield.full{grid-column:1/-1;grid-template-rows:auto 40px}.remchips{display:flex;gap:6px;flex-wrap:wrap}.remchips .chip{padding:2px 10px;font-size:calc(12px*var(--hk-fs,1))}.remhint{color:var(--hk-blue-text);font-weight:600}.remactions{display:flex;gap:14px;align-items:center;justify-content:flex-end}
       .tablewrap.rem td:first-child{white-space:normal}.chevbtn{display:inline-flex;vertical-align:middle;padding:0;margin-right:4px;border:0;background:none;color:var(--hk-muted);cursor:pointer}.remnote{display:block;margin-left:28px;color:var(--hk-muted)}.remact{text-align:right;white-space:nowrap}.remact .btn{margin-left:6px}.remhist td{padding:10px 16px 14px 44px;background:var(--hk-soft)}.remhist h3{margin:0 0 6px;font-size:calc(11px*var(--hk-fs,1));font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--hk-muted)}.remhist ul{display:grid;gap:4px;margin:0;padding:0;list-style:none}.remhist li{display:flex;gap:12px;align-items:center}.remhist li .linkbtn{margin-left:auto;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.remhist p{margin:0}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
       @media(max-width:700px){.remact{display:flex;flex-wrap:wrap;gap:8px;white-space:normal}.remact .btn{margin-left:0}.remgrid{grid-template-columns:1fr}.remfield.wide,.remfield.full{grid-column:auto}}
@@ -3279,6 +3279,7 @@ class CleanupMixin {
 
 // Texts for the second set of policy rules; merged into TEXT.
 Object.assign(TEXT.de, {
+  polRule_entity_id_address: "ID enthält eine IP- oder MAC-Adresse", polDesc_entity_id_address: "Die ID besteht aus einer IP- oder MAC-Adresse und sagt nichts über das Gerät; die Adresse kann sich ändern. Der Name ist als ID besser lesbar.",
   polRule_entity_id_suffix: "Entitäts-ID mit angehängter Zahl", polDesc_entity_id_suffix: "IDs, die auf _2, _3 … enden, ohne dass der Name die Zahl trägt. Meist ein Rest von Doppelungen oder Umbenennungen.",
   polRule_default_name: "Standardname bei Automation oder Skript", polDesc_default_name: "Name wie „Neue Automation“ oder „Skript 3“. Ein sprechender Name spart später das Suchen.",
   polRule_script_description: "Skript ohne Beschreibung", polDesc_script_description: "Skripte brauchen eine Beschreibung.",
@@ -3301,6 +3302,7 @@ Object.assign(TEXT.de, {
   polRetention: "Behält {days} Tage, Datenbank {size}", polTriggers: "{n} Auslöser",
 });
 Object.assign(TEXT.en, {
+  polRule_entity_id_address: "Id contains an IP or MAC address", polDesc_entity_id_address: "The id is made of an IP or MAC address and says nothing about the device; the address can change. The name reads better as an id.",
   polRule_entity_id_suffix: "Entity id with a trailing number", polDesc_entity_id_suffix: "Ids that end in _2, _3 … without the name carrying the number. Mostly a leftover of duplicates or renames.",
   polRule_default_name: "Default name on an automation or script", polDesc_default_name: "A name like “New automation” or “Script 3”. A telling name saves searching later.",
   polRule_script_description: "Script without a description", polDesc_script_description: "Scripts need a description.",
@@ -10207,15 +10209,15 @@ class BatteryTableMixin {
 Object.assign(TEXT.de, {
   polOpenRow: "Details aufklappen", polCloseRow: "Details zuklappen", polWhy: "Warum", polActRename: "Umbenennen", polOpenObject: "Objekt öffnen", polToCleanup: "Zum Aufräumen",
   polNameFree: "frei", polNameTaken: "vergeben von {name} ({id})", polNameTakenDead: "vergeben: {id} ist nicht mehr verfügbar. Aufräumen gibt den Namen frei.", polNameSame: "unverändert",
-  polSuggestHint: "Vorschläge aus Name und Bereich:", polExpectedNote: "Die ID beginnt hier mit „{prefix}“.",
+  polSuggestHint: "Vorschläge:", polRecommended: "empfohlen", polPickHint: "Wähle einen Vorschlag oder tippe eine ID.", polNoSuggest: "Kein freier Vorschlag aus Name und Bereich. Tippe eine ID.", polSuggTaken: "{id} ist vergeben: {why}", polExpectedNote: "Die ID beginnt hier mit „{prefix}“.",
 });
 Object.assign(TEXT.en, {
   polOpenRow: "Show details", polCloseRow: "Hide details", polWhy: "Why", polActRename: "Rename", polOpenObject: "Open object", polToCleanup: "To the clean-up",
   polNameFree: "free", polNameTaken: "taken by {name} ({id})", polNameTakenDead: "taken: {id} is no longer available. Cleaning up frees the name.", polNameSame: "unchanged",
-  polSuggestHint: "Suggestions from the name and the area:", polExpectedNote: "Here the ID starts with “{prefix}”.",
+  polSuggestHint: "Suggestions:", polRecommended: "recommended", polPickHint: "Pick a suggestion or type an ID.", polNoSuggest: "No free suggestion from the name and the area. Type an ID.", polSuggTaken: "{id} is taken: {why}", polExpectedNote: "Here the ID starts with “{prefix}”.",
 });
 
-const POL_RENAME_RULES = ["entity_id_suffix", "naming_scheme"];
+const POL_RENAME_RULES = ["entity_id_suffix", "entity_id_address", "naming_scheme"];
 const POL_AREA_RULES = ["entity_area", "device_area"];
 const POL_ID_RULE = /^[a-z0-9_]+$/;
 
@@ -10234,15 +10236,10 @@ class PolicyRowMixin {
     return String(text || "").toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
   }
 
-  // What the draft of one row starts with: the ID without the trailing number, or with the prefix the scheme expects.
+  // The draft of one row starts empty, so the person picks a suggestion or types an ID on purpose.
   polDraft(item) {
     const edits = (this.polEdits ||= {});
-    if (!edits[item.key]) {
-      const name = item.object_id.split(".").slice(1).join(".");
-      const value = item.rule === "naming_scheme" && item.expected ? `${item.expected}${name}` : name.replace(/_\d+$/, "");
-      edits[item.key] = { value: value && value !== name ? value : name, area: "" };
-    }
-    return edits[item.key];
+    return edits[item.key] ||= { value: "", area: "" };
   }
 
   // Whether the new ID can be used: "bad" (characters), "same" (no change), "taken" (by `other`) or "free".
@@ -10255,6 +10252,7 @@ class PolicyRowMixin {
   }
 
   polCheckText(item, value) {
+    if (!value) return { tone: "", text: this.t(this.polSuggestions(item).list.length ? "polPickHint" : "polNoSuggest") };
     const c = this.polNameCheck(item, value);
     if (c.state === "bad") return { tone: "bad", text: this.t("deBadId") };
     if (c.state === "same") return { tone: "", text: this.t("polNameSame") };
@@ -10263,24 +10261,26 @@ class PolicyRowMixin {
     return { tone: "bad", text: dead ? this.t("polNameTakenDead", { id: c.other.object_id }) : this.t("polNameTaken", { name: c.other.name || c.other.object_id, id: c.other.object_id }), dead };
   }
 
-  // Free names built from the entity's own name and its area, to click when the plain one is taken.
+  // The names to pick from, the best first: the id without its counter or with the prefix of the scheme,
+  // the name of the entity, and the name with the area. `list` holds the free ones, `taken` the best one that is not.
   polSuggestions(item) {
-    const domain = item.object_id.split(".")[0], own = item.object_id.split(".").slice(1).join(".");
-    const base = own.replace(/_\d+$/, ""), obj = this.findObject(`${item.object_type}:${item.object_id}`);
-    const area = this.polSlug(obj ? this.areaName(obj) : "");
-    const out = [];
-    for (const v of [this.polSlug(item.name), area ? `${base}_${area}` : ""]) {
-      if (v && v !== own && !out.includes(v) && this.polNameCheck(item, v).state === "free") out.push(v);
-    }
-    return out.slice(0, 2).map(v => `${domain}.${v}`.split(".")[1]);
+    const own = item.object_id.split(".").slice(1).join("."), obj = this.findObject(`${item.object_type}:${item.object_id}`);
+    const area = this.polSlug(obj ? this.areaName(obj) : ""), name = this.polSlug(item.name);
+    const first = item.rule === "naming_scheme" && item.expected ? `${item.expected}${own}` : item.rule === "entity_id_suffix" ? own.replace(/_\d+$/, "") : "";
+    const base = item.rule === "entity_id_address" ? name : first || name;
+    const all = [first, name, area ? `${base}_${area}` : ""].filter((v, i, a) => v && v !== own && a.indexOf(v) === i);
+    const list = all.filter(v => this.polNameCheck(item, v).state === "free");
+    return { list, taken: all.length && this.polNameCheck(item, all[0]).state === "taken" ? all[0] : "" };
   }
 
   polRenameBlock(item) {
     const d = this.polDraft(item), c = this.polCheckText(item, d.value), key = this.esc(item.key);
     const blocked = !["free"].includes(this.polNameCheck(item, d.value).state) || this.planBusy;
-    const sugg = this.polSuggestions(item);
+    const { list, taken } = this.polSuggestions(item);
     const hint = c.dead ? `<button type="button" class="btn small" data-jump="cleanup">${this.t("polToCleanup")}</button>` : "";
-    return `<div class="poledit"><label for="pol-id-${key}"><strong>${this.t("deNewId")}</strong></label><div class="inline"><span class="mono">${this.esc(item.object_id.split(".")[0])}.</span><input id="pol-id-${key}" data-pol-id="${key}" value="${this.esc(d.value)}" autocomplete="off" spellcheck="false"><span class="polcheck ${c.tone}" data-pol-check="${key}" role="status">${this.esc(c.text)}</span><button type="button" class="btn primary small" data-pol-rename-go="${key}" ${blocked ? "disabled" : ""}>${this.t("deRename")}</button>${hint}</div>${sugg.length ? `<div class="inline"><small class="factnote">${this.t("polSuggestHint")}</small>${sugg.map(s => `<button type="button" class="btn small mono" data-pol-sugg="${key}|${this.esc(s)}">${this.esc(s)}</button>`).join("")}</div>` : ""}<small class="factnote">${this.t("deRenameNote")}</small></div>`;
+    const chips = list.map((v, i) => `<button type="button" class="btn small mono${d.value === v ? " on" : ""}" data-pol-sugg="${key}|${this.esc(v)}" aria-pressed="${d.value === v}">${this.esc(v)}${i === 0 ? ` <small>${this.t("polRecommended")}</small>` : ""}</button>`).join("");
+    const why = taken ? `<small class="factnote">${this.t("polSuggTaken", { id: taken, why: this.polCheckText(item, taken).text })}</small>` : "";
+    return `<div class="poledit"><label for="pol-id-${key}"><strong>${this.t("deNewId")}</strong></label><div class="inline"><span class="mono">${this.esc(item.object_id.split(".")[0])}.</span><input id="pol-id-${key}" data-pol-id="${key}" value="${this.esc(d.value)}" placeholder="${this.esc(this.t("deNewId"))}" autocomplete="off" spellcheck="false"><span class="polcheck ${c.tone}" data-pol-check="${key}" role="status">${this.esc(c.text)}</span><button type="button" class="btn primary small" data-pol-rename-go="${key}" ${blocked ? "disabled" : ""}>${this.t("deRename")}</button>${hint}</div>${chips ? `<div class="inline"><small class="factnote">${this.t("polSuggestHint")}</small>${chips}</div>` : ""}${why}<small class="factnote">${this.t("deRenameNote")}</small></div>`;
   }
 
   polAreaBlock(item) {
@@ -10297,6 +10297,12 @@ class PolicyRowMixin {
       : ["entity", "device"].includes(item.object_type) && POL_AREA_RULES.includes(item.rule) ? this.polAreaBlock(item) : "";
     const open = item.object_type === "recorder" ? "" : `<button type="button" class="btn small" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}">${this.t("polOpenObject")}</button>`;
     return `<div class="poldetail">${why}${fix}${open || hide ? `<div class="acts">${open}${hide}</div>` : ""}</div>`;
+  }
+
+  // The key of a row holds "|" itself, so a pick is cut at the last one.
+  polSuggSplit(raw) {
+    const at = raw.lastIndexOf("|");
+    return { key: raw.slice(0, at), value: raw.slice(at + 1) };
   }
 
   bindPolicyRow(root) {
@@ -10316,6 +10322,7 @@ class PolicyRowMixin {
       const d = this.polDraft(item), c = this.polCheckText(item, d.value);
       const span = root.querySelector(`[data-pol-check="${CSS.escape(key)}"]`), go = root.querySelector(`[data-pol-rename-go="${CSS.escape(key)}"]`);
       if (span) { span.textContent = c.text; span.className = `polcheck ${c.tone}`; }
+      root.querySelectorAll(`[data-pol-sugg^="${CSS.escape(key)}|"]`).forEach(b => { const on = b.dataset.polSugg.slice(key.length + 1) === d.value; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
       if (go) go.disabled = this.polNameCheck(item, d.value).state !== "free" || !!this.planBusy;
     };
     root.querySelectorAll("[data-pol-id]").forEach(el => el.addEventListener("input", () => {
@@ -10325,9 +10332,10 @@ class PolicyRowMixin {
       refresh(el.dataset.polId, item);
     }));
     root.querySelectorAll("[data-pol-sugg]").forEach(el => el.addEventListener("click", () => {
-      const [key, value] = el.dataset.polSugg.split("|"), item = find(key);
+      const { key, value } = this.polSuggSplit(el.dataset.polSugg), item = find(key);
       if (!item) return;
-      this.polDraft(item).value = value;
+      const draft = this.polDraft(item);
+      draft.value = draft.value === value ? "" : value;
       this.render();
     }));
     root.querySelectorAll("[data-pol-rename-go]").forEach(el => el.addEventListener("click", () => {

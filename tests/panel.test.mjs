@@ -3819,6 +3819,20 @@ test("a violation row folds open to a rename that checks the name and plans one 
   assert.equal(calls[0].actions[0].target, "light.hall_wall");
 });
 
+test("a rename starts empty, offers free names as picks, and an address in the id gets the name first", () => {
+  const calls = [];
+  const el = policyPanel(calls);
+  el.data = { ...el.data, objects: [...(el.data.objects || []), { object_type: "entity", object_id: "device_tracker.pc_192_168_79_138", name: "3D Printer", status: "active" }, { object_type: "entity", object_id: "light.hall", name: "Hall light", status: "active" }] };
+  const ip = { object_type: "entity", object_id: "device_tracker.pc_192_168_79_138", name: "3D Printer", key: "entity_id_address|device_tracker.pc_192_168_79_138|", rule: "entity_id_address", ignored: false };
+  assert.equal(el.polDraft(ip).value, "");
+  assert.equal(JSON.stringify(el.polSuggestions(ip).list), '["3d_printer"]');
+  assert.ok(el.polCheckText(ip, "").text.includes("Pick a suggestion"));
+  assert.equal(JSON.stringify(el.polSuggSplit("entity_id_address|device_tracker.x_1||3d_printer")), JSON.stringify({ key: "entity_id_address|device_tracker.x_1|", value: "3d_printer" }));
+  const dup = { object_type: "entity", object_id: "light.hall_2", name: "Hall", key: "kc", rule: "entity_id_suffix", ignored: false };
+  assert.equal(el.polSuggestions(dup).taken, "hall");
+  assert.equal(JSON.stringify(el.polSuggestions({ ...dup, name: "Garden" }).list), '["garden"]');
+});
+
 test("the overview counts batteries that report volts as low too", () => {
   const { el } = panel("en");
   el.data = { ...DATA };

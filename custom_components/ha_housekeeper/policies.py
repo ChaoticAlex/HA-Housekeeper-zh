@@ -31,6 +31,7 @@ RULES = (
     "naming_scheme",
     "state_rate",
     "entity_id_suffix",
+    "entity_id_address",
     "default_name",
     "script_description",
     "script_label",
@@ -272,6 +273,7 @@ def evaluate(
     exposed = extra.get("exposed") or {}
     found = {
         "entity_id_suffix": lambda: rules_more.entity_id_suffix(entities),
+        "entity_id_address": lambda: rules_more.entity_id_address(entities),
         "default_name": lambda: rules_more.default_name(automations, scripts),
         "script_description": lambda: rules_more.script_description(scripts),
         "script_label": lambda: rules_more.script_label(scripts, labels_of),

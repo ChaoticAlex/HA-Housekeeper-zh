@@ -3,15 +3,15 @@
 Object.assign(TEXT.de, {
   polOpenRow: "Details aufklappen", polCloseRow: "Details zuklappen", polWhy: "Warum", polActRename: "Umbenennen", polOpenObject: "Objekt öffnen", polToCleanup: "Zum Aufräumen",
   polNameFree: "frei", polNameTaken: "vergeben von {name} ({id})", polNameTakenDead: "vergeben: {id} ist nicht mehr verfügbar. Aufräumen gibt den Namen frei.", polNameSame: "unverändert",
-  polSuggestHint: "Vorschläge aus Name und Bereich:", polExpectedNote: "Die ID beginnt hier mit „{prefix}“.",
+  polSuggestHint: "Vorschläge:", polRecommended: "empfohlen", polPickHint: "Wähle einen Vorschlag oder tippe eine ID.", polNoSuggest: "Kein freier Vorschlag aus Name und Bereich. Tippe eine ID.", polSuggTaken: "{id} ist vergeben: {why}", polExpectedNote: "Die ID beginnt hier mit „{prefix}“.",
 });
 Object.assign(TEXT.en, {
   polOpenRow: "Show details", polCloseRow: "Hide details", polWhy: "Why", polActRename: "Rename", polOpenObject: "Open object", polToCleanup: "To the clean-up",
   polNameFree: "free", polNameTaken: "taken by {name} ({id})", polNameTakenDead: "taken: {id} is no longer available. Cleaning up frees the name.", polNameSame: "unchanged",
-  polSuggestHint: "Suggestions from the name and the area:", polExpectedNote: "Here the ID starts with “{prefix}”.",
+  polSuggestHint: "Suggestions:", polRecommended: "recommended", polPickHint: "Pick a suggestion or type an ID.", polNoSuggest: "No free suggestion from the name and the area. Type an ID.", polSuggTaken: "{id} is taken: {why}", polExpectedNote: "Here the ID starts with “{prefix}”.",
 });
 
-const POL_RENAME_RULES = ["entity_id_suffix", "naming_scheme"];
+const POL_RENAME_RULES = ["entity_id_suffix", "entity_id_address", "naming_scheme"];
 const POL_AREA_RULES = ["entity_area", "device_area"];
 const POL_ID_RULE = /^[a-z0-9_]+$/;
 
@@ -30,15 +30,10 @@ class PolicyRowMixin {
     return String(text || "").toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
   }
 
-  // What the draft of one row starts with: the ID without the trailing number, or with the prefix the scheme expects.
+  // The draft of one row starts empty, so the person picks a suggestion or types an ID on purpose.
   polDraft(item) {
     const edits = (this.polEdits ||= {});
-    if (!edits[item.key]) {
-      const name = item.object_id.split(".").slice(1).join(".");
-      const value = item.rule === "naming_scheme" && item.expected ? `${item.expected}${name}` : name.replace(/_\d+$/, "");
-      edits[item.key] = { value: value && value !== name ? value : name, area: "" };
-    }
-    return edits[item.key];
+    return edits[item.key] ||= { value: "", area: "" };
   }
 
   // Whether the new ID can be used: "bad" (characters), "same" (no change), "taken" (by `other`) or "free".
@@ -51,6 +46,7 @@ class PolicyRowMixin {
   }
 
   polCheckText(item, value) {
+    if (!value) return { tone: "", text: this.t(this.polSuggestions(item).list.length ? "polPickHint" : "polNoSuggest") };
     const c = this.polNameCheck(item, value);
     if (c.state === "bad") return { tone: "bad", text: this.t("deBadId") };
     if (c.state === "same") return { tone: "", text: this.t("polNameSame") };
@@ -59,24 +55,26 @@ class PolicyRowMixin {
     return { tone: "bad", text: dead ? this.t("polNameTakenDead", { id: c.other.object_id }) : this.t("polNameTaken", { name: c.other.name || c.other.object_id, id: c.other.object_id }), dead };
   }
 
-  // Free names built from the entity's own name and its area, to click when the plain one is taken.
+  // The names to pick from, the best first: the id without its counter or with the prefix of the scheme,
+  // the name of the entity, and the name with the area. `list` holds the free ones, `taken` the best one that is not.
   polSuggestions(item) {
-    const domain = item.object_id.split(".")[0], own = item.object_id.split(".").slice(1).join(".");
-    const base = own.replace(/_\d+$/, ""), obj = this.findObject(`${item.object_type}:${item.object_id}`);
-    const area = this.polSlug(obj ? this.areaName(obj) : "");
-    const out = [];
-    for (const v of [this.polSlug(item.name), area ? `${base}_${area}` : ""]) {
-      if (v && v !== own && !out.includes(v) && this.polNameCheck(item, v).state === "free") out.push(v);
-    }
-    return out.slice(0, 2).map(v => `${domain}.${v}`.split(".")[1]);
+    const own = item.object_id.split(".").slice(1).join("."), obj = this.findObject(`${item.object_type}:${item.object_id}`);
+    const area = this.polSlug(obj ? this.areaName(obj) : ""), name = this.polSlug(item.name);
+    const first = item.rule === "naming_scheme" && item.expected ? `${item.expected}${own}` : item.rule === "entity_id_suffix" ? own.replace(/_\d+$/, "") : "";
+    const base = item.rule === "entity_id_address" ? name : first || name;
+    const all = [first, name, area ? `${base}_${area}` : ""].filter((v, i, a) => v && v !== own && a.indexOf(v) === i);
+    const list = all.filter(v => this.polNameCheck(item, v).state === "free");
+    return { list, taken: all.length && this.polNameCheck(item, all[0]).state === "taken" ? all[0] : "" };
   }
 
   polRenameBlock(item) {
     const d = this.polDraft(item), c = this.polCheckText(item, d.value), key = this.esc(item.key);
     const blocked = !["free"].includes(this.polNameCheck(item, d.value).state) || this.planBusy;
-    const sugg = this.polSuggestions(item);
+    const { list, taken } = this.polSuggestions(item);
     const hint = c.dead ? `<button type="button" class="btn small" data-jump="cleanup">${this.t("polToCleanup")}</button>` : "";
-    return `<div class="poledit"><label for="pol-id-${key}"><strong>${this.t("deNewId")}</strong></label><div class="inline"><span class="mono">${this.esc(item.object_id.split(".")[0])}.</span><input id="pol-id-${key}" data-pol-id="${key}" value="${this.esc(d.value)}" autocomplete="off" spellcheck="false"><span class="polcheck ${c.tone}" data-pol-check="${key}" role="status">${this.esc(c.text)}</span><button type="button" class="btn primary small" data-pol-rename-go="${key}" ${blocked ? "disabled" : ""}>${this.t("deRename")}</button>${hint}</div>${sugg.length ? `<div class="inline"><small class="factnote">${this.t("polSuggestHint")}</small>${sugg.map(s => `<button type="button" class="btn small mono" data-pol-sugg="${key}|${this.esc(s)}">${this.esc(s)}</button>`).join("")}</div>` : ""}<small class="factnote">${this.t("deRenameNote")}</small></div>`;
+    const chips = list.map((v, i) => `<button type="button" class="btn small mono${d.value === v ? " on" : ""}" data-pol-sugg="${key}|${this.esc(v)}" aria-pressed="${d.value === v}">${this.esc(v)}${i === 0 ? ` <small>${this.t("polRecommended")}</small>` : ""}</button>`).join("");
+    const why = taken ? `<small class="factnote">${this.t("polSuggTaken", { id: taken, why: this.polCheckText(item, taken).text })}</small>` : "";
+    return `<div class="poledit"><label for="pol-id-${key}"><strong>${this.t("deNewId")}</strong></label><div class="inline"><span class="mono">${this.esc(item.object_id.split(".")[0])}.</span><input id="pol-id-${key}" data-pol-id="${key}" value="${this.esc(d.value)}" placeholder="${this.esc(this.t("deNewId"))}" autocomplete="off" spellcheck="false"><span class="polcheck ${c.tone}" data-pol-check="${key}" role="status">${this.esc(c.text)}</span><button type="button" class="btn primary small" data-pol-rename-go="${key}" ${blocked ? "disabled" : ""}>${this.t("deRename")}</button>${hint}</div>${chips ? `<div class="inline"><small class="factnote">${this.t("polSuggestHint")}</small>${chips}</div>` : ""}${why}<small class="factnote">${this.t("deRenameNote")}</small></div>`;
   }
 
   polAreaBlock(item) {
@@ -93,6 +91,12 @@ class PolicyRowMixin {
       : ["entity", "device"].includes(item.object_type) && POL_AREA_RULES.includes(item.rule) ? this.polAreaBlock(item) : "";
     const open = item.object_type === "recorder" ? "" : `<button type="button" class="btn small" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}">${this.t("polOpenObject")}</button>`;
     return `<div class="poldetail">${why}${fix}${open || hide ? `<div class="acts">${open}${hide}</div>` : ""}</div>`;
+  }
+
+  // The key of a row holds "|" itself, so a pick is cut at the last one.
+  polSuggSplit(raw) {
+    const at = raw.lastIndexOf("|");
+    return { key: raw.slice(0, at), value: raw.slice(at + 1) };
   }
 
   bindPolicyRow(root) {
@@ -112,6 +116,7 @@ class PolicyRowMixin {
       const d = this.polDraft(item), c = this.polCheckText(item, d.value);
       const span = root.querySelector(`[data-pol-check="${CSS.escape(key)}"]`), go = root.querySelector(`[data-pol-rename-go="${CSS.escape(key)}"]`);
       if (span) { span.textContent = c.text; span.className = `polcheck ${c.tone}`; }
+      root.querySelectorAll(`[data-pol-sugg^="${CSS.escape(key)}|"]`).forEach(b => { const on = b.dataset.polSugg.slice(key.length + 1) === d.value; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
       if (go) go.disabled = this.polNameCheck(item, d.value).state !== "free" || !!this.planBusy;
     };
     root.querySelectorAll("[data-pol-id]").forEach(el => el.addEventListener("input", () => {
@@ -121,9 +126,10 @@ class PolicyRowMixin {
       refresh(el.dataset.polId, item);
     }));
     root.querySelectorAll("[data-pol-sugg]").forEach(el => el.addEventListener("click", () => {
-      const [key, value] = el.dataset.polSugg.split("|"), item = find(key);
+      const { key, value } = this.polSuggSplit(el.dataset.polSugg), item = find(key);
       if (!item) return;
-      this.polDraft(item).value = value;
+      const draft = this.polDraft(item);
+      draft.value = draft.value === value ? "" : value;
       this.render();
     }));
     root.querySelectorAll("[data-pol-rename-go]").forEach(el => el.addEventListener("click", () => {

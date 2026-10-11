@@ -42,6 +42,27 @@ def test_entity_id_suffix_only_when_the_name_does_not_carry_the_number() -> None
     assert ids(rule) == ["sensor.temp_2"]
 
 
+def test_an_address_in_the_id_is_its_own_rule_and_no_counter() -> None:
+    objects = [
+        obj("entity", "device_tracker.pc_192_168_79_138", name="Drucker"),
+        obj("entity", "sensor.phone_aa_bb_cc_dd_ee_ff", name="Handy"),
+        obj("entity", "sensor.tracker_a1b2c3d4e5f6", name="Tracker"),
+        obj("entity", "sensor.room_172_20_1_5", name="Raum"),
+        obj("entity", "sensor.energy_2_3_4_5_6", name="Energie"),
+        obj("entity", "sensor.x_172_40_1_5", name="X"),
+        obj("entity", "sensor.sensor_2024_01_15_08", name="Datum"),
+        obj("entity", "sensor.temp_123456789012", name="Ziffern"),
+    ]
+    assert ids(run(objects, "entity_id_address")) == [
+        "device_tracker.pc_192_168_79_138",
+        "sensor.phone_aa_bb_cc_dd_ee_ff",
+        "sensor.tracker_a1b2c3d4e5f6",
+        "sensor.room_172_20_1_5",
+    ]
+    suffix = ids(run(objects, "entity_id_suffix"))
+    assert not {"device_tracker.pc_192_168_79_138", "sensor.room_172_20_1_5"} & set(suffix)
+
+
 def test_default_names_and_script_texts() -> None:
     objects = [
         obj("automation", "automation.a", name="Neue Automation", source="config"),

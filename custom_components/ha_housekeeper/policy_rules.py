@@ -14,6 +14,16 @@ from .exposure import SENSITIVE_COVERS, SENSITIVE_DOMAINS
 from .hygiene import low_battery_ids
 
 SUFFIX = re.compile(r"_(\d+)$")
+_OCTET = r"(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)"
+_HEX = r"[0-9a-f]{2}"
+# An address in an id: a private IPv4 (192.168.x.x, 10.x.x.x, 172.16-31.x.x; other four numbers
+# such as ``sensor_1_2_3_4`` are not taken for one), or a MAC as six pairs or twelve hex digits
+# with at least one digit and one letter.
+ADDRESS = re.compile(
+    rf"(?<![0-9a-z])(?:(?:192_168|10_{_OCTET}|172_(?:1[6-9]|2\d|3[01]))_{_OCTET}_{_OCTET}"
+    rf"|{_HEX}(?:_{_HEX}){{5}}"
+    rf"|(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{{12}})(?![0-9a-z])"
+)
 DEFAULT_NAME = re.compile(
     r"^(neue[rsn]?\s+|new\s+)?(automation|automatisierung|skript|script)(\s+\d+)?$", re.IGNORECASE
 )
@@ -69,11 +79,28 @@ def _config_automations(automations: list[dict[str, Any]]) -> list[dict[str, Any
     return [item for item in automations if item.get("source") != "state_fallback"]
 
 
+def has_address(object_id: str) -> bool:
+    """Whether the id (without its domain) carries an IP or MAC address."""
+    return bool(ADDRESS.search(object_id.split(".", 1)[-1]))
+
+
+def entity_id_address(entities: dict[str, dict[str, Any]]):
+    """Ids built from an IP or MAC address: they say nothing about the device."""
+    for item in entities.values():
+        if has_address(item["object_id"]) and not item.get("disabled_by"):
+            yield item
+
+
 def entity_id_suffix(entities: dict[str, dict[str, Any]]):
-    """Ids that end in a counter (``_2``) the name does not carry: a leftover of a duplicate or rename."""
+    """Ids that end in a counter (``_2``) the name does not carry: a leftover of a rename.
+
+    An id with an address (``..._192_168_79_138``) is no counter; ``entity_id_address`` has it.
+    """
     for item in entities.values():
         match = SUFFIX.search(item["object_id"])
         if not match or int(match.group(1)) < 2 or item.get("disabled_by"):
+            continue
+        if has_address(item["object_id"]):
             continue
         if not str(item.get("name") or "").rstrip().endswith(match.group(1)):
             yield item
