@@ -3922,4 +3922,7 @@ test("broken references of one dashboard card form one row with a readable place
   assert.ok(html.includes("looks abandoned: 3 of 4") && html.includes("Maybe: sensor.b_new") && html.includes("details/b"));
   assert.ok(html.includes("<small>sensor.a · details/a"), "inside the group only the part below the card shows");
   assert.equal(el.placeText(list[0]), 'Tab “Archiv” · Card custom:charger-card (Section 2)');
+  const diag = el.diagnose(el.data.objects[0]);
+  assert.equal(diag.rows.filter(r => r.tone === "red").length, 1, "one diagnosis row per card");
+  assert.ok(diag.hint.includes("custom:charger-card") && diag.hint.includes("3 of 4"), "the diagnosis names the abandoned card");
 });

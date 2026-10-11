@@ -101,7 +101,8 @@ class DiagnosisMixin {
     } else if (["automation", "script", "scene", "dashboard"].includes(item.object_type)) {
       const key = this.objectKey(item);
       const broken = this.data.findings.filter(f => this.findingKey(f) === key && f.rule_id.includes(".missing_"));
-      broken.forEach(f => rows.push(this.check(t(f.rule_id.split(".")[1]), "red", [f.affected_object, this.placeText(f), this.suggestText(f)].filter(Boolean).join(" · "), t("missing"))));
+      const grouped = this.groupBroken(broken);
+      grouped.forEach(g => rows.push(g.members ? this.brokenGroupRow(g) : this.check(t(g.rule_id.split(".")[1]), "red", [g.affected_object, this.placeText(g), this.suggestText(g)].filter(Boolean).join(" · "), t("missing"))));
       if (item.object_type === "automation" && item.status === "disabled") rows.push(this.check(t("status"), "mute", t("automationOff"), t("disabled")));
       if (!broken.length) rows.push(this.check(t("dependencies"), "ok", t("refsResolved"), t("present")));
       const unused = item.object_type === "automation" ? this.data.findings.find(f => this.findingKey(f) === key && f.classification === "unused") : null;
@@ -114,6 +115,8 @@ class DiagnosisMixin {
       if (runWarn.length && !broken.length && !unused) { hint = t(`rfHint_${runWarn[0].kind}`); tone = "warn"; }
       if (unused && !broken.length) { hint = t("hint_unused"); tone = "warn"; }
       if (broken.length) { hint = t("hint_automation_broken"); tone = "red"; }
+      const orphan = grouped.find(g => g.members && this.isOrphan(g.members[0].evidence[0].place));
+      if (orphan) { const p = orphan.members[0].evidence[0].place; hint = t("brokenOrphanHint", { card: p.card, view: p.view ?? "", missing: p.card_missing, total: p.card_refs }); }
     } else return null;
     return { rows, cause, hint, tone };
   }
