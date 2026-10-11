@@ -8300,12 +8300,27 @@ class EntityRecorderMixin {
     const id = item.object_id, state = this.entityRec?.[id];
     let body;
     if (state?.loading) body = `<p class="factnote">${this.t("erecRunning")}</p>`;
-    else if (state?.data) body = this.entityRecorderRows(state.data);
+    else if (state?.data) body = this.entityRecorderRows(state.data, id);
     else body = `${state?.message ? `<p class="factnote">${this.esc(state.message)}</p>` : ""}<div class="pad"><button class="btn" data-erec="${this.esc(id)}">${this.t("erecCount")}</button></div>`;
     return `<section class="panel"><div class="panelhead"><div><h2>${this.t("erecTitle")}</h2><p>${this.t("erecHint")}</p></div></div>${body}</section>`;
   }
 
-  entityRecorderRows(d) {
+  // The write rate of the entity (from the recorder load numbers) is the last row; it needs the numbers of the whole recorder.
+  entityWriteRate(id) {
+    const storms = this.storms?.available && !this.storms.busy ? this.storms : null;
+    if (!storms) return "";
+    const t = (k, v) => this.t(k, v), idx = (storms.entities || []).findIndex(e => e.entity_id === id), row = storms.entities?.[idx];
+    let value;
+    if (row?.excluded) value = t("knownExcluded");
+    else if (row) {
+      const share = storms.per_day ? Math.round((1000 * row.per_day) / storms.per_day) / 10 : null;
+      value = `<b>${t("knownRate", { n: this.formatNumber(row.per_day) })}</b><small>${t("knownRank", { n: idx + 1 })}${share !== null ? ` · ${t("knownShare", { share: this.formatNumber(share) })}` : ""}</small>`;
+    } else if ((storms.entities || []).length >= 100) value = t("knownQuiet", { n: 100 });
+    else return "";
+    return `<div class="fact"><span>${t("knownWriteRate")}</span><b>${value}</b></div>`;
+  }
+
+  entityRecorderRows(d, id = "") {
     const date = ts => this.esc(this.formatDate(new Date(ts * 1000).toISOString()));
     const row = (label, part) => `<div class="fact"><span>${this.t(label)}</span><b>${part.rows
       ? `${this.t("erecRows", { count: this.formatNumber(part.rows) })}<small>${this.t("erecFirst", { date: date(part.first) })} · ${this.t("erecLast", { date: date(part.last) })}</small>`
@@ -8315,10 +8330,11 @@ class EntityRecorderMixin {
       const days = Math.max(1, Math.round((Date.now() / 1000 - d.states.first) / 86400));
       keep = `<p class="factnote">${d.keep_days ? this.t("erecKeep", { days, keep: d.keep_days }) : this.t("erecKeepOff", { days })}</p>`;
     }
-    return `<div class="facts">${row("erecStates", d.states)}${row("erecShort", d.short)}${row("erecLong", d.long)}</div>${keep}`;
+    return `<div class="facts">${row("erecStates", d.states)}${row("erecShort", d.short)}${row("erecLong", d.long)}${id ? this.entityWriteRate(id) : ""}</div>${keep}`;
   }
 
   async loadEntityRecorder(entityId) {
+    if (!this.storms && !this.stormsLoading) this.loadStorms();
     this.entityRec = { ...this.entityRec, [entityId]: { loading: true } };
     this.render();
     let next;
@@ -8942,7 +8958,7 @@ Object.assign(TEXT.de, {
   knownRefs: "Verweist auf", knownRefsText: "{n} Objekte", knownRefsMissing: "davon {n} nicht vorhanden", knownCalledBy: "Aufgerufen von", knownLastTriggered: "Zuletzt ausgelöst",
   knownTitle: "Bekannt über diese Entität", knownHint: "Was Housekeeper aus Scan, Recorder, Freigaben und Logbuch weiß. Zeilen ohne Wissen fehlen.",
   knownLoad: "Recorder-Werte laden", knownLoading: "Lädt …",
-  knownState: "Zustand", knownRecorder: "Recorder", knownUse: "Nutzung", knownCare: "Regeln und Pflege", knownHistory: "Verlauf",
+  knownTimes: "Zeiten", knownState: "Zustand", knownRecorder: "Recorder", knownUse: "Nutzung", knownCare: "Regeln und Pflege", knownHistory: "Verlauf",
   knownSrcScan: "Scan", knownSrcRecorder: "Recorder", knownSrcRelations: "Beziehungen", knownSrcRules: "Regeln", knownSrcReliability: "Zuverlässigkeit", knownSrcLog: "Logbuch", knownSrcCorr: "Korrelation", knownSrcExposure: "Freigaben", knownSrcDecisions: "Entscheidungen", knownSrcJournal: "Journal", knownSrcRuns: "Läufe",
   knownRunning: "Zustand", knownDevice: "Gerät", knownAttrs: "Eigenschaften", knownUnit: "Einheit", knownClass: "Geräteklasse", knownStateClass: "Zustandsklasse",
   knownWriteRate: "Schreibrate", knownRate: "{n} Einträge pro Tag", knownRank: "Platz {n} der lautesten", knownShare: "etwa {share} % aller Einträge", knownExcluded: "Wird nicht aufgezeichnet (Recorder-Filter)", knownQuiet: "Nicht unter den {n} lautesten Entitäten",
@@ -8964,7 +8980,7 @@ Object.assign(TEXT.en, {
   knownRefs: "Refers to", knownRefsText: "{n} objects", knownRefsMissing: "{n} of them missing", knownCalledBy: "Called by", knownLastTriggered: "Last triggered",
   knownTitle: "Known about this entity", knownHint: "What Housekeeper knows from the scan, the recorder, the exposure and the logbook. Lines without knowledge are left out.",
   knownLoad: "Load recorder values", knownLoading: "Loading …",
-  knownState: "State", knownRecorder: "Recorder", knownUse: "Use", knownCare: "Rules and care", knownHistory: "History",
+  knownTimes: "Times", knownState: "State", knownRecorder: "Recorder", knownUse: "Use", knownCare: "Rules and care", knownHistory: "History",
   knownSrcScan: "Scan", knownSrcRecorder: "Recorder", knownSrcRelations: "Relations", knownSrcRules: "Rules", knownSrcReliability: "Reliability", knownSrcLog: "Logbook", knownSrcCorr: "Correlation", knownSrcExposure: "Exposure", knownSrcDecisions: "Decisions", knownSrcJournal: "Journal", knownSrcRuns: "Runs",
   knownRunning: "State", knownDevice: "Device", knownAttrs: "Properties", knownUnit: "Unit", knownClass: "Device class", knownStateClass: "State class",
   knownWriteRate: "Write rate", knownRate: "{n} records a day", knownRank: "Rank {n} of the loudest", knownShare: "about {share} % of all records", knownExcluded: "Not recorded (recorder filter)", knownQuiet: "Not among the {n} loudest entities",
@@ -9002,43 +9018,11 @@ class KnownMixin {
     const when = value => `${this.esc(this.formatDate(value))}<small>${this.esc(this.relTime(value))}</small>`;
     const finding = this.data.findings.find(f => this.findingKey(f) === key);
     this.ensureExposure();
-    // State
+    // Times: the state, the stability and the device are in the diagnosis; the recorder numbers are in "In the recorder".
     const device = item.device_id ? this.findObject(`device:${item.device_id}`) : null;
-    const entry = item.config_entry_id ? this.findObject(`config_entry:${item.config_entry_id}`) : null;
-    const stable = this.stabilityOf(item);
     const state = [];
-    if (item.state !== null && item.state !== undefined) {
-      const tone = item.state === "unavailable" ? "red" : item.state === "unknown" ? "warn" : "ok";
-      const shown = item.state === "unavailable" || item.state === "unknown" ? t(item.state) : item.unit ? `${item.state} ${item.unit}` : item.state;
-      state.push(this.knownLine(tone, t("knownRunning"), `${this.esc(shown)}${item.status_since ? `<small>${t("since")}: ${this.esc(this.formatDate(item.status_since))} · ${this.esc(this.relTime(item.status_since))} · ${t("firstSeenNote")}</small>` : ""}`, "knownSrcScan"));
-    } else state.push(this.knownLine("mute", t("knownRunning"), t("noState"), "knownSrcScan"));
+    if (item.status_since) state.push(this.knownLine("mute", t("since"), when(item.status_since), "knownSrcScan"));
     if (item.last_changed) state.push(this.knownLine("mute", t("propLastChanged"), when(item.last_changed), "knownSrcScan"), this.knownLine("mute", t("propLastReported"), when(item.last_reported || item.last_updated), "knownSrcScan"));
-    if (stable?.missing) state.push(this.knownLine("mute", t("stability"), t("stabilityMissing"), "knownSrcReliability"));
-    else if (stable?.info) state.push(this.knownLine(stable.info.level === "flapping" ? "red" : "warn", t("stability"), `<span class="pill ${stable.info.level === "flapping" ? "red" : "warn"}">${t(stable.info.level === "flapping" ? "relFlapping" : "relUnstable")}</span>${this.unstableLines(stable.info, stable.r.window_days).map(line => `<small>${line}</small>`).join("")}`, "knownSrcReliability"));
-    else if (stable) state.push(this.knownLine("ok", t("stability"), `${t("stabilityOk")}<small>${t(stable.r.window_days === 1 ? "relWindow1" : "relWindow7")}</small>`, "knownSrcReliability"));
-    const where = [device ? `${t("knownDevice")}: ${this.esc(device.name)}` : "", entry ? `${t("integration")}: ${this.esc(entry.name)}` : ""].filter(Boolean).join(" · ");
-    if (where) state.push(this.knownLine("mute", t("knownDevice"), where, "knownSrcScan"));
-    // Recorder
-    const rec = [];
-    const attrs = [item.unit && `${t("knownUnit")}: ${this.esc(item.unit)}`, item.device_class && `${t("knownClass")}: ${this.esc(item.device_class)}`, item.state_class && `${t("knownStateClass")}: ${this.esc(item.state_class)}`].filter(Boolean);
-    if (attrs.length) rec.push(this.knownLine("mute", t("knownAttrs"), attrs.join(" · "), "knownSrcScan"));
-    const recorder = this.data.meta.recorder_available;
-    if (recorder) {
-      if (item.has_statistics) this.ensureStatLast(id);
-      const last = this.statLast?.[id], span = this.statSpan?.[id];
-      const fmt = ts => this.esc(this.formatDate(new Date(ts * 1000).toISOString()));
-      const lines = [item.has_statistics && span?.first ? `<small>${t("statFirstEntry")}: ${fmt(span.first)} · ${t("statRows", { count: this.formatNumber(span.rows) })}</small>` : "", item.has_statistics && last ? `<small>${t("statLastEntry")}: ${fmt(last)} · ${this.esc(this.relTime(new Date(last * 1000).toISOString()))}</small>` : ""].join("");
-      rec.push(this.knownLine(item.has_statistics ? "ok" : "mute", t("longTermStats"), `${t(item.has_statistics ? "yes" : "no")}${lines}`, "knownSrcRecorder"));
-      const storms = this.storms?.available && !this.storms.busy ? this.storms : null;
-      if (storms) {
-        const idx = (storms.entities || []).findIndex(e => e.entity_id === id), row = storms.entities?.[idx];
-        if (row?.excluded) rec.push(this.knownLine("mute", t("knownWriteRate"), t("knownExcluded"), "knownSrcRecorder"));
-        else if (row) {
-          const share = storms.per_day ? Math.round((1000 * row.per_day) / storms.per_day) / 10 : null;
-          rec.push(this.knownLine(idx < 10 ? "warn" : "mute", t("knownWriteRate"), `${t("knownRate", { n: this.formatNumber(row.per_day) })}<small>${t("knownRank", { n: idx + 1 })}${share !== null ? ` · ${t("knownShare", { share: this.formatNumber(share) })}` : ""}</small>`, "knownSrcRecorder"));
-        } else if ((storms.entities || []).length >= 100) rec.push(this.knownLine("ok", t("knownWriteRate"), t("knownQuiet", { n: 100 }), "knownSrcRecorder"));
-      }
-    }
     // Use
     const used = this.knownUsage(key);
     const use = [this.knownLine("mute", t("knownUsedIn"), used || t("knownUsedNone"), "knownSrcRelations")];
@@ -9065,7 +9049,7 @@ class KnownMixin {
     }
     const corr = finding ? this.corrLine(finding.key) : "";
     if (corr) hist.push(this.knownLine("mute", t("knownCorr"), this.esc(corr), "knownSrcCorr"));
-    return [["knownState", state], ["knownRecorder", rec], ["knownUse", use], ["knownCare", care], ["knownHistory", hist]];
+    return [["knownTimes", state], ["knownUse", use], ["knownCare", care], ["knownHistory", hist]];
   }
 
   // The usage by type of several objects at once, each source counted once: "3 automations, 1 script".
@@ -9198,7 +9182,7 @@ class KnownMixin {
     const title = { entity: "knownTitle", device: "knownTitleDevice", config_entry: "knownTitleEntry", automation: "knownTitleAutomation", script: "knownTitleScript" }[type];
     const hint = { entity: "knownHint", device: "knownHintDevice", config_entry: "knownHintEntry", automation: "knownHintAuto", script: "knownHintAuto" }[type];
     const recorder = this.data.meta.recorder_available;
-    const needLoad = recorder && ["entity", "config_entry"].includes(type) && !this.storms?.available && !this.stormsError;
+    const needLoad = recorder && type === "config_entry" && !this.storms?.available && !this.stormsError;
     const head = needLoad ? `<button class="btn" data-known-load="${this.esc(item.object_id)}" data-known-type="${type}" ${this.stormsLoading ? "disabled" : ""}>${t(this.stormsLoading ? "knownLoading" : "knownLoad")}</button>` : "";
     const finding = type === "entity" ? this.data.findings.find(f => this.findingKey(f) === key) : null;
     const note = type === "entity" && item.status === "unavailable" && !finding && (this.data.meta.min_unavailable_days || 0) > 0 ? `<p class="factnote">${t("belowThreshold", { days: this.data.meta.min_unavailable_days })}</p>` : "";

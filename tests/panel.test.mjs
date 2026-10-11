@@ -3446,14 +3446,16 @@ test("the entity page sums up what is known in groups with the source of each li
   el.exposure = { exposed_entities: [{ entity_id: "sensor.power", assistants: ["cloud.alexa"] }], exposed_total: 1 };
   el.ensureExposure = () => {};
   let html = el.knownCard(light, "entity:sensor.power");
-  for (const text of ["Known about this entity", "412 W", "Last state change", "Long-term statistics", "Unit: W", "Used in", "Stick replaced", "Load recorder values"]) assert.ok(html.includes(text), text);
-  assert.ok(html.includes('class="ksrc">Scan') && html.includes('class="ksrc">Recorder') && html.includes('class="ksrc">Logbook'), "each line names its source");
-  assert.ok(!html.includes("Write rate"), "no rate before the recorder values are loaded");
+  for (const text of ["Known about this entity", "Times", "Last state change", "Used in", "Stick replaced"]) assert.ok(html.includes(text), text);
+  for (const text of ["412 W", "Long-term statistics", "Unit: W", "Load recorder values", "Write rate"]) assert.ok(!html.includes(text), `${text} is in the diagnosis or in "In the recorder"`);
+  assert.ok(html.includes('class="ksrc">Scan') && html.includes('class="ksrc">Logbook'), "each line names its source");
+  const rows = { states: { rows: 10, first: 1760000000, last: 1760100000 }, short: { rows: 0 }, long: { rows: 5, first: 1750000000, last: 1760000000 } };
+  assert.ok(!el.entityRecorderRows(rows, "sensor.power").includes("Write rate"), "no rate before the recorder load numbers are there");
   el.storms = { available: true, per_day: 1000, entities: [{ entity_id: "sensor.other", per_day: 500 }, { entity_id: "sensor.power", per_day: 120 }] };
-  html = el.knownCard(light, "entity:sensor.power");
-  assert.ok(html.includes("120 records a day") && html.includes("Rank 2 of the loudest") && html.includes("12 % of all records") && !html.includes("Load recorder values"));
+  html = el.entityRecorderRows(rows, "sensor.power");
+  assert.ok(html.includes("120 records a day") && html.includes("Rank 2 of the loudest") && html.includes("12 % of all records"));
   el.storms.entities[1].excluded = true;
-  assert.ok(el.knownCard(light, "entity:sensor.power").includes("Not recorded (recorder filter)"));
+  assert.ok(el.entityRecorderRows(rows, "sensor.power").includes("Not recorded (recorder filter)"));
 });
 
 test("an entity has an Actions tab that holds what changes something; the overview only shows the next step of an open finding", () => {
