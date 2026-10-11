@@ -108,7 +108,10 @@ class DiagnosisMixin {
       if (item.object_type === "automation") {
         rows.push(this.check(t("lastTriggered"), unused ? "warn" : "ok", item.last_triggered ? this.formatDate(item.last_triggered) : t("never"), unused ? t("unused") : t("available")));
       }
-      cause = broken.length ? t("cause_automation_broken", { count: broken.length }) : unused ? t(`cause_${unused.rule_id.split(".")[1]}`, { days: unused.evidence?.[0]?.days ?? "" }) : t("cause_automation_ok");
+      const runRow = this.runsRow(item), runWarn = (runRow?.findings || []).filter(f => f.level !== "info");
+      runWarn.forEach(f => rows.push(this.check(t("knownRuns"), f.level, this.runFindingText(f).replace(/<[^>]+>/g, ""), t((RUN_FINDINGS[f.kind] || ["rfLabelFailing"])[0]))));
+      cause = broken.length ? t("cause_automation_broken", { count: broken.length }) : unused ? t(`cause_${unused.rule_id.split(".")[1]}`, { days: unused.evidence?.[0]?.days ?? "" }) : runWarn.length ? this.runFindingText(runWarn[0]).replace(/<[^>]+>/g, "") : t("cause_automation_ok");
+      if (runWarn.length && !broken.length && !unused) { hint = t(`rfHint_${runWarn[0].kind}`); tone = "warn"; }
       if (unused && !broken.length) { hint = t("hint_unused"); tone = "warn"; }
       if (broken.length) { hint = t("hint_automation_broken"); tone = "red"; }
     } else return null;

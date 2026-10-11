@@ -3489,7 +3489,7 @@ test("devices, integrations, automations and scripts sum up what is known in gro
   const auto = { object_type: "automation", object_id: "automation.evening", name: "Evening", status: "active", state: "on", mode: "single", trigger_count: 2, condition_count: 1, action_count: 3, last_triggered: "2026-10-10T19:02:00+00:00" };
   const e1 = { object_type: "entity", object_id: "sensor.a", name: "A", status: "active", device_id: "d1", config_entry_id: "c1" };
   const e2 = { object_type: "entity", object_id: "sensor.b", name: "B", status: "unavailable", device_id: "d1", config_entry_id: "c1" };
-  el.data = { ...DATA, meta: { ...DATA.meta, recorder_available: true }, objects: [...DATA.objects, device, entry, auto, e1, e2, { object_type: "area", object_id: "living", name: "Living", status: "active" }],
+  el.data = { ...DATA, findings: [...DATA.findings, { rule_id: "automation.missing_entity", object_id: "automation.evening", classification: "orphaned", confidence: 0.98, affected_object: "sensor.gone", evidence: [{ location: "triggers[0]" }] }], meta: { ...DATA.meta, recorder_available: true }, objects: [...DATA.objects, device, entry, auto, e1, e2, { object_type: "area", object_id: "living", name: "Living", status: "active" }],
     edges: [{ source: "automation:automation.evening", target: "entity:sensor.a", relation: "TRIGGERS_ON", confidence: "certain" }, { source: "automation:automation.evening", target: "entity:sensor.gone", relation: "TRIGGERS_ON", confidence: "certain" }, { source: "script:script.night", target: "automation:automation.evening", relation: "CALLS", confidence: "certain" }], notes: [] };
   el._rev = (el._rev || 0) + 1;
   const dev = el.knownCard(device, "device:d1");

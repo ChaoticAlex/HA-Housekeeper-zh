@@ -57,7 +57,7 @@ class RunsMixin {
   runsTrend(row) {
     const max = Math.max(1, ...row.per_day);
     const bars = row.per_day.map(n => `<i style="height:${Math.round((n / max) * 100)}%"></i>`).join("");
-    return `<span class="spark" role="img" aria-label="${this.esc(this.t("runsTrendLabel", { values: row.per_day.join(", ") }))}">${bars}</span>`;
+    return `<span class="runspark" role="img" aria-label="${this.esc(this.t("runsTrendLabel", { values: row.per_day.join(", ") }))}">${bars}</span>`;
   }
 
   // Possible conflicts and loops between automations; only shown when the check found something.

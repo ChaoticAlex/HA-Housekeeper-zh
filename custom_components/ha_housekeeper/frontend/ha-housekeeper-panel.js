@@ -850,7 +850,7 @@ Object.assign(TEXT.de, {
   runsFootnote: "Gezählt wird, was Home Assistant je Automation kurz vorhält (standardmäßig 5 Läufe), alle 15 Minuten. Gespeichert werden nur Zähler je Tag und die Stelle eines Fehlers, keine Variablen, Daten oder Fehlertexte. Die Hinweise sind Anlässe, genauer hinzusehen, kein Urteil.",
   rfLabelFailing: "Fehler", rfLabelOverlap: "Überschneidung", rfLabelNeverOk: "nie erfolgreich", rfLabelNoEffect: "ohne Wirkung", rfLabelBurst: "sehr oft", rfLabelLongRun: "lange Läufe", rfLabelAfterUpdate: "nach Update", rfLabelLongWait: "lange Wartezeit", rfLabelWaitNoTimeout: "ohne Timeout", rfLabelContinue: "Fehler verdeckt",
   rfFailing: "{errors} von {runs} Läufen endeten mit einem Fehler.", rfFailingStep: " Meist an Stelle {step} ({count}-mal).",
-  rfOverlap: "{n} Läufe wurden abgewiesen oder überschritten das Maximum (Modus {mode}).", rfNeverOk: "Kein Lauf war erfolgreich ({runs} Läufe).",
+  rfOverlap: "{n} Läufe wurden abgewiesen oder überschritten das Maximum, weil noch ein Lauf aktiv war (Modus {mode}).", rfNeverOk: "Kein Lauf war erfolgreich ({runs} Läufe).",
   rfNoEffect: "{conditions} von {runs} Läufen endeten an einer Bedingung.", rfBurst: "Läuft ungewöhnlich oft: {perDay} pro Tag statt üblich {normal}.",
   rfLongRun: "Ein Lauf dauerte {longest}, üblich sind {normal}.",
   rfAfterUpdate: "Fehlerquote {after} % nach dem Update ({what}) statt {before} % davor. Zeitlich zusammen, nicht als Ursache bewiesen.", rfWhatHa: "Home Assistant {to}", rfWhatEntry: "{domain} {to}",
@@ -877,7 +877,7 @@ Object.assign(TEXT.en, {
   runsFootnote: "What is counted is what Home Assistant keeps for each automation for a short time (5 runs by default), read every 15 minutes. Only counters per day and the place of a failure are stored, no variables, data or error texts. The notes are reasons to look closer, not a verdict.",
   rfLabelFailing: "failing", rfLabelOverlap: "overlap", rfLabelNeverOk: "never succeeds", rfLabelNoEffect: "no effect", rfLabelBurst: "very often", rfLabelLongRun: "long runs", rfLabelAfterUpdate: "after update", rfLabelLongWait: "long wait", rfLabelWaitNoTimeout: "no timeout", rfLabelContinue: "errors hidden",
   rfFailing: "{errors} of {runs} runs ended with an error.", rfFailingStep: " Mostly at step {step} ({count} times).",
-  rfOverlap: "{n} runs were rejected or exceeded the maximum (mode {mode}).", rfNeverOk: "No run succeeded ({runs} runs).",
+  rfOverlap: "{n} runs were rejected or exceeded the maximum because a run was still active (mode {mode}).", rfNeverOk: "No run succeeded ({runs} runs).",
   rfNoEffect: "{conditions} of {runs} runs ended at a condition.", rfBurst: "Runs unusually often: {perDay} a day instead of the usual {normal}.",
   rfLongRun: "One run took {longest}; {normal} is usual.",
   rfAfterUpdate: "Error rate {after} % after the update ({what}) instead of {before} % before. Close in time, not proven as the cause.", rfWhatHa: "Home Assistant {to}", rfWhatEntry: "{domain} {to}",
@@ -1194,7 +1194,7 @@ class StylesMixin {
       .pill{display:inline-flex;align-items:center;gap:6px;width:max-content;padding:3px 9px;border-radius:99px;font-size:calc(11px*var(--hk-fs,1));font-weight:600;white-space:nowrap;color:color-mix(in srgb,var(--hk-blue) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-blue) 13%,transparent)}
       .pill.ok{color:color-mix(in srgb,var(--hk-green) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-green) 14%,transparent)}.pill.warn{color:color-mix(in srgb,var(--hk-amber) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-amber) 16%,transparent)}.pill.red{color:color-mix(in srgb,var(--hk-red) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-red) 13%,transparent)}.pill.mute{color:color-mix(in srgb,var(--hk-gray) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-gray) 16%,transparent)}.pill.violet{color:color-mix(in srgb,var(--hk-violet) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-violet) 14%,transparent)}
       .linklike{padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}.linklike:hover{text-decoration:underline}.qrow{grid-template-columns:auto minmax(0,1fr) auto auto}.qconfirm{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}.factaction{display:block;margin-top:6px}
-      .spark{display:inline-flex;align-items:flex-end;gap:2px;height:22px}.spark i{display:block;width:5px;min-height:2px;border-radius:1px;background:var(--hk-blue)}
+      .runspark{display:inline-flex;align-items:flex-end;gap:2px;height:22px}.runspark i{display:block;width:5px;min-height:2px;border-radius:1px;background:var(--hk-blue)}
       .bar{display:flex;height:10px;margin:16px;border-radius:99px;overflow:hidden;background:var(--hk-soft)}.bar i{display:block;min-width:2px}.legend{display:grid;gap:9px;padding:0 16px 16px;font-size:calc(12px*var(--hk-fs,1))}.legend div{display:flex;align-items:center;justify-content:space-between;gap:8px}.legend span{display:flex;align-items:center;gap:8px}.legend .nums{gap:14px}.legend .pct{font-style:normal;color:var(--hk-muted);min-width:52px;text-align:right}.invlegend{padding-top:14px}.panelhead+.legend+.bar{margin-top:0}.dot{width:9px;height:9px;border-radius:50%;background:var(--hk-blue)}
       .dot.ok,.bar .ok{background:var(--hk-green)}.dot.warn,.bar .warn{background:var(--hk-amber)}.dot.red,.bar .red{background:var(--hk-red)}.dot.mute,.bar .mute{background:var(--hk-gray)}.dot.violet,.bar .violet{background:var(--hk-violet)}
       .types{display:grid}.type{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:10px 16px;border:0;border-top:1px solid var(--hk-border);background:transparent;text-align:left;font-size:calc(13px*var(--hk-fs,1))}.type:hover{background:var(--hk-soft)}.type .tile{width:30px;height:30px}.type b{font-weight:600}
@@ -1335,7 +1335,7 @@ class StylesMixin {
       .bkcsum{padding:14px 16px 0}.bkcsum .sumtiles{margin-bottom:0}.bkcrule{display:grid;gap:8px;margin:14px 16px;padding:12px 14px;border-radius:12px;background:var(--hk-soft)}.bkcrule .line{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.bkcrule input{width:76px}.bkcrule .line .btn{margin-left:auto}.bkcrule p,.bkcfoot small{display:block;margin:0;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));line-height:1.5}.bkcwarn{display:flex;gap:6px;align-items:flex-start;margin-top:4px;color:var(--hk-amber)}.bkcwarn ha-icon{--mdc-icon-size:14px;flex:none;margin-top:1px}.bkcfoot{display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;padding:14px 16px;border-top:1px solid var(--hk-border)}.bkcfoot>div{flex:1 1 260px;min-width:0}.bkcerr{margin:6px 0 0;color:var(--hk-red);font-size:calc(12px*var(--hk-fs,1))}@media(max-width:640px){.bkcrow{grid-auto-flow:row}.bkcrow>.pill{grid-column:2;justify-self:start}}
       @media(max-width:640px){.navtiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.navtiles .taskcard{grid-template-rows:auto auto;padding:10px}.navtiles .taskcard>ha-icon,.navtiles .taskcard>small{display:none}.toolbar.nosel [data-fsel-clear],.toolbar.nosel [data-sel-clear],.toolbar.nosel [data-sel-only],.toolbar.nosel .fbtns{display:none}}
       .hkmodal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(10,14,20,.55)}.hkdialog{width:min(520px,100%);max-height:calc(100vh - 32px);overflow:auto;border:1px solid var(--hk-border);border-radius:16px;background:var(--hk-surface);box-shadow:0 14px 40px rgba(0,0,0,.35)}.hkdialog .dhead{padding:16px 18px 4px}.hkdialog .dhead h2{margin:0}.hkdialog .dbody{display:grid;gap:12px;padding:10px 18px 14px}.hkdialog .dbody label{display:block;margin-bottom:4px;font-weight:600;font-size:calc(12.5px*var(--hk-fs,1))}.hkdialog .dbody input[type=text],.hkdialog .dbody input[type=datetime-local],.hkdialog .dbody textarea{width:100%;box-sizing:border-box}.hkdialog .dfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--hk-border);background:var(--hk-soft)}.hkdialog .dbtns,.logsuggest .dbtns{display:flex;gap:8px;margin-left:auto}.hkdialog .dquestion{font-weight:600}.hkdialog .danger-t{color:var(--hk-red)}.notechips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.notechips .chip{cursor:pointer}.notetwo{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.notetwo{grid-template-columns:1fr}}
-      .kngrp{padding:9px 16px 4px;border-top:1px solid var(--hk-border);background:var(--hk-soft);color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:700;letter-spacing:.05em;text-transform:uppercase}.kngrp:first-child{border-top:0}.knline{display:grid;grid-template-columns:20px minmax(110px,170px) minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 16px;border-top:1px solid var(--hk-border)}.kngrp+.knline{border-top:0}.knline .kk{color:var(--hk-muted)}.knline .kv small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.knline .ksrc{padding:1px 6px;border:1px solid var(--hk-border);border-radius:6px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));white-space:nowrap}.kdot{font-weight:700;text-align:center}.k-ok{color:var(--hk-green)}.k-warn{color:var(--hk-amber)}.k-red{color:var(--hk-red)}.k-mute{color:var(--hk-muted)}@media(max-width:640px){.knline{grid-template-columns:20px minmax(0,1fr)}.knline .kv{grid-column:2}.knline .ksrc{display:none}}
+      .kngrp{padding:9px 16px 4px;border-top:1px solid var(--hk-border);background:var(--hk-soft);color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:700;letter-spacing:.05em;text-transform:uppercase}.kngrp:first-child{border-top:0}.knline{display:grid;grid-template-columns:20px minmax(110px,170px) minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 16px;border-top:1px solid var(--hk-border)}.kngrp+.knline{border-top:0}.knline .kk{color:var(--hk-muted)}.knline .kval{min-width:0;overflow-wrap:anywhere}.knline .kval small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.knline .ksrc{padding:1px 6px;border:1px solid var(--hk-border);border-radius:6px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));white-space:nowrap}.kdot{font-weight:700;text-align:center}.k-ok{color:var(--hk-green)}.k-warn{color:var(--hk-amber)}.k-red{color:var(--hk-red)}.k-mute{color:var(--hk-muted)}@media(max-width:640px){.knline{grid-template-columns:20px minmax(0,1fr)}.knline .kval{grid-column:2}.knline .ksrc{display:none}}
       .nextstep{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:12px 16px;background:color-mix(in srgb,var(--hk-blue) 9%,transparent)}.nextstep small{display:block;margin-top:2px;color:var(--hk-muted)}.nextstep .dbtns{display:flex;gap:8px;margin-left:auto}.actgrp{margin:6px 0 -4px;color:var(--hk-muted);font-size:calc(11.5px*var(--hk-fs,1));font-weight:700;letter-spacing:.05em;text-transform:uppercase}
       .actpanel .actsec{padding:9px 16px 4px;border-top:1px solid var(--hk-border);background:var(--hk-soft);color:var(--hk-muted);font-size:calc(11.5px*var(--hk-fs,1));font-weight:700;letter-spacing:.05em;text-transform:uppercase}.actpanel .actsec:first-child{border-top:0}.actrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 16px;border-top:1px solid var(--hk-border)}.actsec+.actrow{border-top:0}.actrow .acttext small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(12.5px*var(--hk-fs,1))}.actctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.actctl form{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin:0}.actctl .deform{display:flex;padding:0;border:0}.actblock{padding:10px 16px;border-top:1px solid var(--hk-border)}.actsec+.actblock{border-top:0}@media(max-width:640px){.actrow{grid-template-columns:1fr}.actctl,.actctl form{justify-content:flex-start}}
       .headpills{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
@@ -3986,7 +3986,10 @@ class DiagnosisMixin {
       if (item.object_type === "automation") {
         rows.push(this.check(t("lastTriggered"), unused ? "warn" : "ok", item.last_triggered ? this.formatDate(item.last_triggered) : t("never"), unused ? t("unused") : t("available")));
       }
-      cause = broken.length ? t("cause_automation_broken", { count: broken.length }) : unused ? t(`cause_${unused.rule_id.split(".")[1]}`, { days: unused.evidence?.[0]?.days ?? "" }) : t("cause_automation_ok");
+      const runRow = this.runsRow(item), runWarn = (runRow?.findings || []).filter(f => f.level !== "info");
+      runWarn.forEach(f => rows.push(this.check(t("knownRuns"), f.level, this.runFindingText(f).replace(/<[^>]+>/g, ""), t((RUN_FINDINGS[f.kind] || ["rfLabelFailing"])[0]))));
+      cause = broken.length ? t("cause_automation_broken", { count: broken.length }) : unused ? t(`cause_${unused.rule_id.split(".")[1]}`, { days: unused.evidence?.[0]?.days ?? "" }) : runWarn.length ? this.runFindingText(runWarn[0]).replace(/<[^>]+>/g, "") : t("cause_automation_ok");
+      if (runWarn.length && !broken.length && !unused) { hint = t(`rfHint_${runWarn[0].kind}`); tone = "warn"; }
       if (unused && !broken.length) { hint = t("hint_unused"); tone = "warn"; }
       if (broken.length) { hint = t("hint_automation_broken"); tone = "red"; }
     } else return null;
@@ -4832,7 +4835,7 @@ class RunsMixin {
   runsTrend(row) {
     const max = Math.max(1, ...row.per_day);
     const bars = row.per_day.map(n => `<i style="height:${Math.round((n / max) * 100)}%"></i>`).join("");
-    return `<span class="spark" role="img" aria-label="${this.esc(this.t("runsTrendLabel", { values: row.per_day.join(", ") }))}">${bars}</span>`;
+    return `<span class="runspark" role="img" aria-label="${this.esc(this.t("runsTrendLabel", { values: row.per_day.join(", ") }))}">${bars}</span>`;
   }
 
   // Possible conflicts and loops between automations; only shown when the check found something.
@@ -8909,7 +8912,7 @@ class KnownMixin {
   // One line: tone dot, label, value (HTML), source tag. `tone` is ok, warn, red or mute.
   knownLine(tone, label, value, source) {
     const dot = { ok: "✓", warn: "!", red: "✕", mute: "·" }[tone] || "·";
-    return `<div class="knline"><span class="kdot k-${tone}">${dot}</span><span class="kk">${label}</span><span class="kv">${value}</span><span class="ksrc">${this.t(source)}</span></div>`;
+    return `<div class="knline"><span class="kdot k-${tone}">${dot}</span><span class="kk">${label}</span><span class="kval">${value}</span><span class="ksrc">${this.t(source)}</span></div>`;
   }
 
   knownGroup(title, lines) {
@@ -9014,9 +9017,11 @@ class KnownMixin {
     return this.knownLine(item.mark_due ? "warn" : "mute", this.t("markTitle"), `${this.esc(this.t(`mark_${item.mark.kind}`))}<small>${this.esc(this.markLine(item.mark))}${item.mark_due ? ` · ${this.t("markDue")}` : ""}</small>`, "knownSrcDecisions");
   }
 
-  knownFindingsLine(key) {
-    const open = this.data.findings.filter(f => !f.ignored && this.findingKey(f) === key);
-    return this.knownLine(open.length ? "warn" : "ok", this.t("knownFindings"), open.length ? `${this.t("knownFindingsOpen", { n: open.length })}<small>${open.slice(0, 3).map(f => this.esc(this.findingTitle(f))).join(" · ")}</small>` : this.t("knownFindingsNone"), "knownSrcRules");
+  // `runRow` adds the findings of the counted runs (overlap, failing, ...), which are not scan findings.
+  knownFindingsLine(key, runRow = null) {
+    const scan = this.data.findings.filter(f => !f.ignored && this.findingKey(f) === key);
+    const names = [...scan.map(f => this.findingTitle(f)), ...(runRow?.findings || []).map(f => this.t((RUN_FINDINGS[f.kind] || ["rfLabelFailing"])[0]))];
+    return this.knownLine(names.length ? "warn" : "ok", this.t("knownFindings"), names.length ? `${this.t("knownFindingsOpen", { n: names.length })}<small>${names.slice(0, 3).map(n => this.esc(n)).join(" · ")}</small>` : this.t("knownFindingsNone"), "knownSrcRules");
   }
 
   knownLogLines(key) {
@@ -9091,7 +9096,7 @@ class KnownMixin {
       }
     }
     const hist = this.knownLogLines(key);
-    return [["knownState", state], ["knownGroupOrigin", origin], ["knownGroupScope", scope], ["knownRecorder", rec], ["knownCare", [this.knownFindingsLine(key)]], ["knownHistory", hist]];
+    return [["knownState", state], ["knownGroupOrigin", origin], ["knownGroupScope", scope], ["knownRecorder", rec], ["knownCare", [this.knownFindingsLine(key, row)]], ["knownHistory", hist]];
   }
 
   knownAutomation(item, key) {
@@ -9108,8 +9113,9 @@ class KnownMixin {
     if (item.blueprint) build.push(this.knownLine("mute", t("knownBlueprint"), t("knownBlueprintText", { name: this.esc(String(item.blueprint)) }), "knownSrcScan"));
     const use = [];
     const out = this.edgesFrom(key).filter(e => USAGE_RELATIONS.includes(e.relation) || e.relation === "REFERENCES");
-    const targets = [...new Set(out.map(e => e.target))], missing = targets.filter(k => !this.findObject(k));
-    if (targets.length) use.push(this.knownLine(missing.length ? "warn" : "mute", t("knownRefs"), `${t("knownRefsText", { n: this.formatNumber(targets.length) })}${missing.length ? `<small>${t("knownRefsMissing", { n: missing.length })}: ${this.esc(missing.slice(0, 3).map(k => k.split(":").slice(1).join(":")).join(", "))}</small>` : ""}`, "knownSrcRelations"));
+    const targets = [...new Set(out.map(e => e.target))];
+    const missing = [...new Set(this.data.findings.filter(f => this.findingKey(f) === key && f.rule_id.includes(".missing_")).map(f => f.affected_object))];
+    if (targets.length) use.push(this.knownLine(missing.length ? "warn" : "mute", t("knownRefs"), `${t("knownRefsText", { n: this.formatNumber(targets.length) })}${missing.length ? `<small>${t("knownRefsMissing", { n: missing.length })}: ${this.esc(missing.slice(0, 3).join(", "))}</small>` : ""}`, "knownSrcRelations"));
     const by = {};
     for (const e of this.edgesTo(key)) { const type = e.source.split(":")[0]; if (["script", "scene", "automation"].includes(type)) by[type] = (by[type] || 0) + 1; }
     const called = Object.entries(by).map(([type, n]) => `${this.formatNumber(n)} ${t(type)}`).join(", ");

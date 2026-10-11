@@ -49,7 +49,7 @@ class KnownMixin {
   // One line: tone dot, label, value (HTML), source tag. `tone` is ok, warn, red or mute.
   knownLine(tone, label, value, source) {
     const dot = { ok: "✓", warn: "!", red: "✕", mute: "·" }[tone] || "·";
-    return `<div class="knline"><span class="kdot k-${tone}">${dot}</span><span class="kk">${label}</span><span class="kv">${value}</span><span class="ksrc">${this.t(source)}</span></div>`;
+    return `<div class="knline"><span class="kdot k-${tone}">${dot}</span><span class="kk">${label}</span><span class="kval">${value}</span><span class="ksrc">${this.t(source)}</span></div>`;
   }
 
   knownGroup(title, lines) {
@@ -154,9 +154,11 @@ class KnownMixin {
     return this.knownLine(item.mark_due ? "warn" : "mute", this.t("markTitle"), `${this.esc(this.t(`mark_${item.mark.kind}`))}<small>${this.esc(this.markLine(item.mark))}${item.mark_due ? ` · ${this.t("markDue")}` : ""}</small>`, "knownSrcDecisions");
   }
 
-  knownFindingsLine(key) {
-    const open = this.data.findings.filter(f => !f.ignored && this.findingKey(f) === key);
-    return this.knownLine(open.length ? "warn" : "ok", this.t("knownFindings"), open.length ? `${this.t("knownFindingsOpen", { n: open.length })}<small>${open.slice(0, 3).map(f => this.esc(this.findingTitle(f))).join(" · ")}</small>` : this.t("knownFindingsNone"), "knownSrcRules");
+  // `runRow` adds the findings of the counted runs (overlap, failing, ...), which are not scan findings.
+  knownFindingsLine(key, runRow = null) {
+    const scan = this.data.findings.filter(f => !f.ignored && this.findingKey(f) === key);
+    const names = [...scan.map(f => this.findingTitle(f)), ...(runRow?.findings || []).map(f => this.t((RUN_FINDINGS[f.kind] || ["rfLabelFailing"])[0]))];
+    return this.knownLine(names.length ? "warn" : "ok", this.t("knownFindings"), names.length ? `${this.t("knownFindingsOpen", { n: names.length })}<small>${names.slice(0, 3).map(n => this.esc(n)).join(" · ")}</small>` : this.t("knownFindingsNone"), "knownSrcRules");
   }
 
   knownLogLines(key) {
@@ -231,7 +233,7 @@ class KnownMixin {
       }
     }
     const hist = this.knownLogLines(key);
-    return [["knownState", state], ["knownGroupOrigin", origin], ["knownGroupScope", scope], ["knownRecorder", rec], ["knownCare", [this.knownFindingsLine(key)]], ["knownHistory", hist]];
+    return [["knownState", state], ["knownGroupOrigin", origin], ["knownGroupScope", scope], ["knownRecorder", rec], ["knownCare", [this.knownFindingsLine(key, row)]], ["knownHistory", hist]];
   }
 
   knownAutomation(item, key) {
@@ -248,8 +250,9 @@ class KnownMixin {
     if (item.blueprint) build.push(this.knownLine("mute", t("knownBlueprint"), t("knownBlueprintText", { name: this.esc(String(item.blueprint)) }), "knownSrcScan"));
     const use = [];
     const out = this.edgesFrom(key).filter(e => USAGE_RELATIONS.includes(e.relation) || e.relation === "REFERENCES");
-    const targets = [...new Set(out.map(e => e.target))], missing = targets.filter(k => !this.findObject(k));
-    if (targets.length) use.push(this.knownLine(missing.length ? "warn" : "mute", t("knownRefs"), `${t("knownRefsText", { n: this.formatNumber(targets.length) })}${missing.length ? `<small>${t("knownRefsMissing", { n: missing.length })}: ${this.esc(missing.slice(0, 3).map(k => k.split(":").slice(1).join(":")).join(", "))}</small>` : ""}`, "knownSrcRelations"));
+    const targets = [...new Set(out.map(e => e.target))];
+    const missing = [...new Set(this.data.findings.filter(f => this.findingKey(f) === key && f.rule_id.includes(".missing_")).map(f => f.affected_object))];
+    if (targets.length) use.push(this.knownLine(missing.length ? "warn" : "mute", t("knownRefs"), `${t("knownRefsText", { n: this.formatNumber(targets.length) })}${missing.length ? `<small>${t("knownRefsMissing", { n: missing.length })}: ${this.esc(missing.slice(0, 3).join(", "))}</small>` : ""}`, "knownSrcRelations"));
     const by = {};
     for (const e of this.edgesTo(key)) { const type = e.source.split(":")[0]; if (["script", "scene", "automation"].includes(type)) by[type] = (by[type] || 0) + 1; }
     const called = Object.entries(by).map(([type, n]) => `${this.formatNumber(n)} ${t(type)}`).join(", ");
