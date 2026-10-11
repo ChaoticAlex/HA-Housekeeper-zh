@@ -149,11 +149,17 @@ def test_noted_types_come_from_the_battery_notes_sensor_of_the_device() -> None:
 
     objects = [
         entity("sensor.a_battery", "d1"),
-        entity("sensor.a_t", "d1", platform="battery_notes",
-               unique_id="a_battery_type", state="2× AAA"),
+        entity(
+            "sensor.a_t", "d1", platform="battery_notes", unique_id="a_battery_type", state="2× AAA"
+        ),
         entity("sensor.b_battery", "d2"),
-        entity("sensor.b_t", "d2", platform="battery_notes",
-               unique_id="b_battery_type", state="unknown"),
+        entity(
+            "sensor.b_t",
+            "d2",
+            platform="battery_notes",
+            unique_id="b_battery_type",
+            state="unknown",
+        ),
     ]
     found = noted_types(objects, ["sensor.a_battery", "sensor.b_battery"])
     assert found == {"sensor.a_battery": "2× AAA"}
@@ -169,7 +175,11 @@ def test_battery_notes_entities_never_count_as_a_battery() -> None:
 def test_a_decided_volt_sensor_gets_its_kind_although_its_class_is_voltage() -> None:
     from custom_components.ha_housekeeper.battery_kind import apply_battery_kinds, excluded
 
-    volt = {"object_type": "entity", "object_id": "sensor.starter_voltage", "device_class": "voltage"}
+    volt = {
+        "object_type": "entity",
+        "object_id": "sensor.starter_voltage",
+        "device_class": "voltage",
+    }
     other = {"object_type": "entity", "object_id": "sensor.mains", "device_class": "voltage"}
     apply_battery_kinds([volt, other], {"sensor.starter_voltage": "other"})
     assert excluded(volt) and "battery_kind" not in other

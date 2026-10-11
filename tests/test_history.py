@@ -185,12 +185,16 @@ def test_a_pinned_scan_point_is_named_compared_kept_beyond_the_retention_and_del
     with pytest.raises(PinError):
         history.pin(early, "again")
     with pytest.raises(PinError):
-        history.pin({**early, "meta": {"scanned_at": "2026-10-02T08:00:00+00:00", "preliminary": True}}, "")
+        history.pin(
+            {**early, "meta": {"scanned_at": "2026-10-02T08:00:00+00:00", "preliminary": True}}, ""
+        )
     for day in range(2, 8):
         history.record(_snapshot(f"2026-10-0{day}T08:00:00+00:00", [("entity", "x.a", "active")]))
 
     pinned = [o for o in history.baselines() if o.get("pinned")]
-    assert [(o["id"], o["name"]) for o in pinned] == [("pin:2026-10-01T08:00:00+00:00", "Before the rebuild")]
+    assert [(o["id"], o["name"]) for o in pinned] == [
+        ("pin:2026-10-01T08:00:00+00:00", "Before the rebuild")
+    ]
     now = _snapshot("2026-10-08T09:00:00+00:00", [("entity", "x.a", "unavailable")])
     assert history.compare(now, pinned[0]["id"])["status_changes"]["total"] == 1
     history.unpin(pinned[0]["id"])

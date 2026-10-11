@@ -55,12 +55,12 @@ def test_an_address_in_the_id_is_its_own_rule_and_no_counter() -> None:
         obj("entity", "sensor.sensor_2024_01_15_08", name="Datum"),
         obj("entity", "sensor.temp_123456789012", name="Ziffern"),
     ]
-    assert ids(run(objects, "entity_id_address")) == [
+    assert sorted(ids(run(objects, "entity_id_address"))) == [
         "device_tracker.pc_192_168_79_138",
-        "sensor.phone_aa_bb_cc_dd_ee_ff",
-        "sensor.tracker_a1b2c3d4e5f6",
-        "sensor.room_172_20_1_5",
         "light.eltako_gw1_ff_c2_4a_89",
+        "sensor.phone_aa_bb_cc_dd_ee_ff",
+        "sensor.room_172_20_1_5",
+        "sensor.tracker_a1b2c3d4e5f6",
     ]
     suffix = ids(run(objects, "entity_id_suffix"))
     assert not {"device_tracker.pc_192_168_79_138", "light.eltako_gw1_ff_c2_4a_89"} & set(suffix)

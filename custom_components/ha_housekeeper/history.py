@@ -224,7 +224,13 @@ class ScanHistory:
                 {"id": "previous", "at": self._previous["at"], **checkpoint_counts(self._previous)}
             )
         options.extend(
-            {"id": f"pin:{cp['at']}", "at": cp["at"], "name": cp["name"], "pinned": True, **checkpoint_counts(cp)}
+            {
+                "id": f"pin:{cp['at']}",
+                "at": cp["at"],
+                "name": cp["name"],
+                "pinned": True,
+                **checkpoint_counts(cp),
+            }
             for cp in sorted(self._pinned, key=lambda c: c["at"], reverse=True)
         )
         options.extend(

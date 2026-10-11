@@ -320,8 +320,9 @@ def _count_trim(
             if name not in found or stat_meta is None:
                 continue
             rows, oldest, newest = session.execute(
-                select(func.count(model.id), func.min(model.start_ts), func.max(model.start_ts))
-                .where(model.metadata_id == stat_meta, model.start_ts < end)
+                select(
+                    func.count(model.id), func.min(model.start_ts), func.max(model.start_ts)
+                ).where(model.metadata_id == stat_meta, model.start_ts < end)
             ).one()
             found[name] = {
                 "rows": int(rows or 0),

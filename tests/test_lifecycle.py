@@ -1,4 +1,4 @@
-"""The life of a device: the steps from registry, journal and reliability, """
+"""The life of a device: the steps from registry, journal and reliability,"""
 
 from __future__ import annotations
 
