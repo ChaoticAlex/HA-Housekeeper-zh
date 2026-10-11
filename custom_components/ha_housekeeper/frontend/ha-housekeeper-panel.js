@@ -1345,6 +1345,7 @@ class StylesMixin {
       .actpanel .actsec small{display:block;margin-top:2px;text-transform:none;letter-spacing:0;font-weight:400;font-size:calc(12.5px*var(--hk-fs,1))}.actrow .acttext small.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.actrow .acttext small.clamp.open{display:block;overflow:visible}.actrow .morebtn{margin-top:2px;font-size:calc(12.5px*var(--hk-fs,1));color:var(--hk-blue-text)}.unitfield{display:flex;align-items:center;flex:1;min-width:7rem;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);overflow:hidden}.unitfield input{flex:1;min-width:0;width:4rem;border:0;outline:0;background:transparent;color:inherit;font:inherit;padding:0 4px 0 10px;min-height:38px}.unitfield span{padding:0 10px;color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1))}.unitfield:focus-within{border-color:var(--hk-blue)}
       .propgrid{align-items:start}.propcol{display:grid;gap:16px;align-content:start;min-width:0}.propgrid .pad{padding:0}.propgrid .kv{grid-template-columns:11rem minmax(0,1fr);gap:0;font-size:calc(14px*var(--hk-fs,1))}.propgrid .kv dt{padding:10px 0 10px 18px}.propgrid .kv dd{padding:10px 18px 10px 14px}.propgrid .kv dt:not(:first-of-type),.propgrid .kv dt:not(:first-of-type)+dd{border-top:1px solid var(--hk-border)}.propgrid .kv dd .rel{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));white-space:nowrap}.propgrid .kv .chip{padding:1px 10px;font-size:calc(13px*var(--hk-fs,1))}
       .row .recown{display:grid;gap:2px;justify-items:end;justify-self:end}.row .recown small{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.row .recown.lock{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));max-width:16rem;text-align:right}.row .recown .trimseg button{padding:5px 10px;font-size:calc(13px*var(--hk-fs,1))}.recsum{display:flex;flex-wrap:wrap;gap:6px}
+      .hkdialog .dhead h2{font-size:calc(18px*var(--hk-fs,1))}.hkdialog .dbody label{font-size:calc(12px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted)}.hkdialog .dbody textarea{font:inherit;font-size:calc(14px*var(--hk-fs,1));padding:9px 11px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-surface);color:inherit;line-height:1.4;resize:vertical}.hkdialog .dbody input[type=text],.hkdialog .dbody input[type=datetime-local]{min-height:38px;padding:0 11px;border-radius:10px}.hkdialog .notechips .chip{padding:3px 10px;font-size:calc(12px*var(--hk-fs,1))}.hkdialog .notemeta{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;align-self:end;padding-bottom:9px;color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1))}.hkdialog .notemeta strong{color:var(--hk-text);font-weight:600}.hkdialog .notehint2{margin:0;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}
       @media(max-width:700px){.propgrid .kv{grid-template-columns:minmax(0,1fr)}.propgrid .kv dt{padding:10px 18px 0}.propgrid .kv dd{padding:2px 18px 10px}.propgrid .kv dt:not(:first-of-type)+dd{border-top:0}.propgrid .kv dd .rel{white-space:normal}}
       .trimseg{width:max-content;max-width:100%;justify-self:start;align-self:start}.trimseg button:not(.on):hover{background:var(--hk-soft);color:var(--hk-text)}
       @media(min-width:761px){.actrow{grid-template-columns:minmax(0,1fr) minmax(0,380px)}.actctl,.actctl form,.actctl .deform{flex-wrap:nowrap;justify-content:flex-end}.actctl select,.actctl .deid{flex:1;width:auto}.actctl .deform .btn,.actctl .btn{width:auto}.actctl form{flex-wrap:wrap}}
@@ -9227,9 +9228,9 @@ Object.assign(TEXT.de, {
   noteFormTitle: "Titel", noteTitlePh: "z. B. Zigbee-Stick getauscht", noteWhen: "Wann", noteTarget: "Betrifft (optional)", noteTargetPh: "Entität, Gerät, Integration, Bereich",
   noteText: "Notiz (optional)", noteTextPh: "Was genau hast du geändert?", noteSave: "Speichern", noteCancel: "Abbrechen",
   noteNeedTitle: "Gib dem Eintrag einen Titel.", noteBadTime: "Die Zeit ist ungültig oder liegt zu weit in der Zukunft.", noteFailed: "Der Eintrag konnte nicht gespeichert werden: {reason}",
-  noteConcerns: "Betrifft: {name}", noteHint: "Nur für dich: Housekeeper ändert nichts in Home Assistant. Die Einträge erscheinen nicht im Prüfbericht.",
+  noteConcerns: "Betrifft: {name}", noteHint: "Nur für dich. Housekeeper ändert nichts in Home Assistant.", noteConcernsNow: "Betrifft", noteChange: "ändern",
   noteDetailTitle: "Logbuch", noteDetailEmpty: "Noch kein Eintrag.", noteDetailHint: "Halte fest, was du hieran geändert hast, damit es nachvollziehbar bleibt.", noteDetailNone: "Halte fest, was du hieran geändert hast, damit es später als möglicher Zusammenhang auftaucht.", noteAddHere: "Eintrag",
-  noteDialogNew: "Neuer Logbuch-Eintrag", noteDialogEdit: "Logbuch-Eintrag bearbeiten", noteChips: "Schnell eintragen",
+  noteDialogNew: "Neuer Eintrag", noteDialogEdit: "Eintrag bearbeiten", noteChips: "Schnell eintragen",
   noteChipStick: "Stick getauscht", noteChipFirmware: "Firmware aktualisiert", noteChipPaired: "Neu angelernt", noteChipMoved: "Umgezogen",
   noteSeeAll: "Im Logbuch ansehen", logbook: "Logbuch", tabScans: "Scan-Vergleich", logbookHint: "Alle Einträge, neueste zuerst", logbookEmpty: "Das Logbuch ist leer. Trage ein, was du außerhalb von Housekeeper änderst, zum Beispiel einen getauschten Stick.",
   logbookFiltered: "Kein Eintrag passt zu diesem Filter.", logbookAll: "Alle", logbookObject: "Objekt: {name}",
@@ -9243,9 +9244,9 @@ Object.assign(TEXT.en, {
   noteFormTitle: "Title", noteTitlePh: "e.g. Zigbee stick replaced", noteWhen: "When", noteTarget: "Concerns (optional)", noteTargetPh: "Entity, device, integration, area",
   noteText: "Note (optional)", noteTextPh: "What exactly did you change?", noteSave: "Save", noteCancel: "Cancel",
   noteNeedTitle: "Give the entry a title.", noteBadTime: "The time is invalid or too far in the future.", noteFailed: "The entry could not be saved: {reason}",
-  noteConcerns: "Concerns: {name}", noteHint: "Only for you: Housekeeper changes nothing in Home Assistant. The entries do not appear in the audit report.",
+  noteConcerns: "Concerns: {name}", noteHint: "Only for you. Housekeeper changes nothing in Home Assistant.", noteConcernsNow: "Concerns", noteChange: "change",
   noteDetailTitle: "Logbook", noteDetailEmpty: "No entry yet.", noteDetailHint: "Note what you changed here, so it stays traceable.", noteDetailNone: "Note what you changed here, so it shows up later as a possible connection.", noteAddHere: "Entry",
-  noteDialogNew: "New logbook entry", noteDialogEdit: "Edit logbook entry", noteChips: "Quick entry",
+  noteDialogNew: "New entry", noteDialogEdit: "Edit entry", noteChips: "Quick entry",
   noteChipStick: "Stick replaced", noteChipFirmware: "Firmware updated", noteChipPaired: "Paired again", noteChipMoved: "Moved",
   noteSeeAll: "See in the logbook", logbook: "Logbook", tabScans: "Scan comparison", logbookHint: "All entries, newest first", logbookEmpty: "The logbook is empty. Note what you change outside Housekeeper, for example a replaced stick.",
   logbookFiltered: "No entry matches this filter.", logbookAll: "All", logbookObject: "Object: {name}",
@@ -9299,9 +9300,9 @@ class NotesMixin {
       <div class="dbody polform">
         <div><label for="hk-note-title">${this.t("noteFormTitle")}</label><input id="hk-note-title" type="text" maxlength="80" data-note-title value="${this.esc(d.title)}" placeholder="${this.esc(this.t("noteTitlePh"))}" autocomplete="off">${chips}</div>
         <div class="notetwo"><div><label for="hk-note-at">${this.t("noteWhen")}</label><input id="hk-note-at" type="datetime-local" data-note-at value="${this.esc(d.at)}"></div>
-        <div><label>${this.t("noteTarget")}</label>${this.pickerBox("note", this.t("noteTargetPh"))}</div></div>
-        <div><label for="hk-note-text">${this.t("noteText")}</label><textarea id="hk-note-text" rows="2" maxlength="500" data-note-text placeholder="${this.esc(this.t("noteTextPh"))}">${this.esc(d.note)}</textarea></div>
-        <small class="factnote u-m0">${this.t("noteHint")}</small>
+        ${d.target && !d.changeTarget ? `<div class="notemeta"><span>${this.t("noteConcernsNow")} <strong>${this.esc(d.targetText || this.noteTargetName(d.target))}</strong></span><button type="button" class="linkbtn" data-note-retarget>${this.t("noteChange")}</button></div>` : `<div><label>${this.t("noteTarget")}</label>${this.pickerBox("note", this.t("noteTargetPh"))}</div>`}</div>
+        <div><label for="hk-note-text">${this.t("noteText")}</label><textarea id="hk-note-text" rows="3" maxlength="500" data-note-text placeholder="${this.esc(this.t("noteTextPh"))}">${this.esc(d.note)}</textarea></div>
+        <small class="notehint2">${this.t("noteHint")}</small>
         ${d.error ? `<div class="error" role="alert">${this.esc(d.error)}</div>` : ""}
       </div>${foot}</form></div>`;
   }
@@ -9396,6 +9397,7 @@ class NotesMixin {
     });
     root.querySelectorAll("[data-logbook-src]").forEach(el => el.onclick = () => { this.logbookSource = el.dataset.logbookSrc; this.pages = {}; this.render(); });
     root.querySelector("[data-logbook-clear]")?.addEventListener("click", () => { this.logbookObject = ""; this.pages = {}; this.render(); });
+    root.querySelector("[data-note-retarget]")?.addEventListener("click", () => { this.noteDraft.changeTarget = true; this.render(); this.shadowRoot?.querySelector?.("[data-note-modal] .picker input, [data-note-modal] input[data-picker]")?.focus?.(); });
     root.querySelectorAll("[data-note-chip]").forEach(el => el.onclick = () => { this.noteDraft.title = el.dataset.noteChip; this.noteDraft.error = ""; this._noteFocus = true; this.render(); });
     root.querySelector("[data-note-del]")?.addEventListener("click", ev => { const id = ev.currentTarget.dataset.noteDel; this.confirmAsk(this.t("confirmNote", { title: this.noteDraft?.title || "" }), () => this.noteDeleteConfirmed(id)); });
     root.querySelector("[data-note-cancel]")?.addEventListener("click", () => { this.noteDraft = null; this.render(); });

@@ -6,9 +6,9 @@ Object.assign(TEXT.de, {
   noteFormTitle: "Titel", noteTitlePh: "z. B. Zigbee-Stick getauscht", noteWhen: "Wann", noteTarget: "Betrifft (optional)", noteTargetPh: "Entität, Gerät, Integration, Bereich",
   noteText: "Notiz (optional)", noteTextPh: "Was genau hast du geändert?", noteSave: "Speichern", noteCancel: "Abbrechen",
   noteNeedTitle: "Gib dem Eintrag einen Titel.", noteBadTime: "Die Zeit ist ungültig oder liegt zu weit in der Zukunft.", noteFailed: "Der Eintrag konnte nicht gespeichert werden: {reason}",
-  noteConcerns: "Betrifft: {name}", noteHint: "Nur für dich: Housekeeper ändert nichts in Home Assistant. Die Einträge erscheinen nicht im Prüfbericht.",
+  noteConcerns: "Betrifft: {name}", noteHint: "Nur für dich. Housekeeper ändert nichts in Home Assistant.", noteConcernsNow: "Betrifft", noteChange: "ändern",
   noteDetailTitle: "Logbuch", noteDetailEmpty: "Noch kein Eintrag.", noteDetailHint: "Halte fest, was du hieran geändert hast, damit es nachvollziehbar bleibt.", noteDetailNone: "Halte fest, was du hieran geändert hast, damit es später als möglicher Zusammenhang auftaucht.", noteAddHere: "Eintrag",
-  noteDialogNew: "Neuer Logbuch-Eintrag", noteDialogEdit: "Logbuch-Eintrag bearbeiten", noteChips: "Schnell eintragen",
+  noteDialogNew: "Neuer Eintrag", noteDialogEdit: "Eintrag bearbeiten", noteChips: "Schnell eintragen",
   noteChipStick: "Stick getauscht", noteChipFirmware: "Firmware aktualisiert", noteChipPaired: "Neu angelernt", noteChipMoved: "Umgezogen",
   noteSeeAll: "Im Logbuch ansehen", logbook: "Logbuch", tabScans: "Scan-Vergleich", logbookHint: "Alle Einträge, neueste zuerst", logbookEmpty: "Das Logbuch ist leer. Trage ein, was du außerhalb von Housekeeper änderst, zum Beispiel einen getauschten Stick.",
   logbookFiltered: "Kein Eintrag passt zu diesem Filter.", logbookAll: "Alle", logbookObject: "Objekt: {name}",
@@ -22,9 +22,9 @@ Object.assign(TEXT.en, {
   noteFormTitle: "Title", noteTitlePh: "e.g. Zigbee stick replaced", noteWhen: "When", noteTarget: "Concerns (optional)", noteTargetPh: "Entity, device, integration, area",
   noteText: "Note (optional)", noteTextPh: "What exactly did you change?", noteSave: "Save", noteCancel: "Cancel",
   noteNeedTitle: "Give the entry a title.", noteBadTime: "The time is invalid or too far in the future.", noteFailed: "The entry could not be saved: {reason}",
-  noteConcerns: "Concerns: {name}", noteHint: "Only for you: Housekeeper changes nothing in Home Assistant. The entries do not appear in the audit report.",
+  noteConcerns: "Concerns: {name}", noteHint: "Only for you. Housekeeper changes nothing in Home Assistant.", noteConcernsNow: "Concerns", noteChange: "change",
   noteDetailTitle: "Logbook", noteDetailEmpty: "No entry yet.", noteDetailHint: "Note what you changed here, so it stays traceable.", noteDetailNone: "Note what you changed here, so it shows up later as a possible connection.", noteAddHere: "Entry",
-  noteDialogNew: "New logbook entry", noteDialogEdit: "Edit logbook entry", noteChips: "Quick entry",
+  noteDialogNew: "New entry", noteDialogEdit: "Edit entry", noteChips: "Quick entry",
   noteChipStick: "Stick replaced", noteChipFirmware: "Firmware updated", noteChipPaired: "Paired again", noteChipMoved: "Moved",
   noteSeeAll: "See in the logbook", logbook: "Logbook", tabScans: "Scan comparison", logbookHint: "All entries, newest first", logbookEmpty: "The logbook is empty. Note what you change outside Housekeeper, for example a replaced stick.",
   logbookFiltered: "No entry matches this filter.", logbookAll: "All", logbookObject: "Object: {name}",
@@ -78,9 +78,9 @@ class NotesMixin {
       <div class="dbody polform">
         <div><label for="hk-note-title">${this.t("noteFormTitle")}</label><input id="hk-note-title" type="text" maxlength="80" data-note-title value="${this.esc(d.title)}" placeholder="${this.esc(this.t("noteTitlePh"))}" autocomplete="off">${chips}</div>
         <div class="notetwo"><div><label for="hk-note-at">${this.t("noteWhen")}</label><input id="hk-note-at" type="datetime-local" data-note-at value="${this.esc(d.at)}"></div>
-        <div><label>${this.t("noteTarget")}</label>${this.pickerBox("note", this.t("noteTargetPh"))}</div></div>
-        <div><label for="hk-note-text">${this.t("noteText")}</label><textarea id="hk-note-text" rows="2" maxlength="500" data-note-text placeholder="${this.esc(this.t("noteTextPh"))}">${this.esc(d.note)}</textarea></div>
-        <small class="factnote u-m0">${this.t("noteHint")}</small>
+        ${d.target && !d.changeTarget ? `<div class="notemeta"><span>${this.t("noteConcernsNow")} <strong>${this.esc(d.targetText || this.noteTargetName(d.target))}</strong></span><button type="button" class="linkbtn" data-note-retarget>${this.t("noteChange")}</button></div>` : `<div><label>${this.t("noteTarget")}</label>${this.pickerBox("note", this.t("noteTargetPh"))}</div>`}</div>
+        <div><label for="hk-note-text">${this.t("noteText")}</label><textarea id="hk-note-text" rows="3" maxlength="500" data-note-text placeholder="${this.esc(this.t("noteTextPh"))}">${this.esc(d.note)}</textarea></div>
+        <small class="notehint2">${this.t("noteHint")}</small>
         ${d.error ? `<div class="error" role="alert">${this.esc(d.error)}</div>` : ""}
       </div>${foot}</form></div>`;
   }
@@ -175,6 +175,7 @@ class NotesMixin {
     });
     root.querySelectorAll("[data-logbook-src]").forEach(el => el.onclick = () => { this.logbookSource = el.dataset.logbookSrc; this.pages = {}; this.render(); });
     root.querySelector("[data-logbook-clear]")?.addEventListener("click", () => { this.logbookObject = ""; this.pages = {}; this.render(); });
+    root.querySelector("[data-note-retarget]")?.addEventListener("click", () => { this.noteDraft.changeTarget = true; this.render(); this.shadowRoot?.querySelector?.("[data-note-modal] .picker input, [data-note-modal] input[data-picker]")?.focus?.(); });
     root.querySelectorAll("[data-note-chip]").forEach(el => el.onclick = () => { this.noteDraft.title = el.dataset.noteChip; this.noteDraft.error = ""; this._noteFocus = true; this.render(); });
     root.querySelector("[data-note-del]")?.addEventListener("click", ev => { const id = ev.currentTarget.dataset.noteDel; this.confirmAsk(this.t("confirmNote", { title: this.noteDraft?.title || "" }), () => this.noteDeleteConfirmed(id)); });
     root.querySelector("[data-note-cancel]")?.addEventListener("click", () => { this.noteDraft = null; this.render(); });

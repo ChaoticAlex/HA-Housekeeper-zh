@@ -3025,6 +3025,19 @@ test("deleting asks in a dialog first; the deletion runs only from its confirmat
   assert.ok(el.t("confirmPlan", { date: "x" }).includes("no longer possible") && el.t("confirmRemDay", { date: "d", name: "n" }).includes("due day stays"));
 });
 
+test("the logbook dialog names the object it was opened for and offers the picker only when none is set or on request", () => {
+  const { el } = panel("en");
+  el.data = { ...DATA, notes: [] };
+  el.noteOpen(null, "entity:sensor.a");
+  let html = el.noteDialog();
+  assert.ok(html.includes("data-note-retarget") && !html.includes('data-picker="note"') && html.includes("New entry") && !html.includes("audit report"));
+  el.noteDraft.changeTarget = true;
+  assert.ok(el.noteDialog().includes('data-picker="note"'), "after 'change' the picker shows");
+  el.noteOpen(null, "");
+  html = el.noteDialog();
+  assert.ok(html.includes('data-picker="note"') && !html.includes("data-note-retarget"), "from the global logbook the object is chosen here");
+});
+
 test("the protection mode shows in the safety line and the settings, and is set through the server", async () => {
   const calls = [];
   const { el, shadow } = panel("en");
