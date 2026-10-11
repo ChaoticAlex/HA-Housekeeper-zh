@@ -48,6 +48,8 @@ def test_an_address_in_the_id_is_its_own_rule_and_no_counter() -> None:
         obj("entity", "sensor.phone_aa_bb_cc_dd_ee_ff", name="Handy"),
         obj("entity", "sensor.tracker_a1b2c3d4e5f6", name="Tracker"),
         obj("entity", "sensor.room_172_20_1_5", name="Raum"),
+        obj("entity", "light.eltako_gw1_ff_c2_4a_89", name="Licht"),
+        obj("entity", "switch.schedule_878149", name="Zeitplan"),
         obj("entity", "sensor.energy_2_3_4_5_6", name="Energie"),
         obj("entity", "sensor.x_172_40_1_5", name="X"),
         obj("entity", "sensor.sensor_2024_01_15_08", name="Datum"),
@@ -58,9 +60,11 @@ def test_an_address_in_the_id_is_its_own_rule_and_no_counter() -> None:
         "sensor.phone_aa_bb_cc_dd_ee_ff",
         "sensor.tracker_a1b2c3d4e5f6",
         "sensor.room_172_20_1_5",
+        "light.eltako_gw1_ff_c2_4a_89",
     ]
     suffix = ids(run(objects, "entity_id_suffix"))
-    assert not {"device_tracker.pc_192_168_79_138", "sensor.room_172_20_1_5"} & set(suffix)
+    assert not {"device_tracker.pc_192_168_79_138", "light.eltako_gw1_ff_c2_4a_89"} & set(suffix)
+    assert "switch.schedule_878149" not in suffix
 
 
 def test_default_names_and_script_texts() -> None:

@@ -13,15 +13,16 @@ from typing import Any
 from .exposure import SENSITIVE_COVERS, SENSITIVE_DOMAINS
 from .hygiene import low_battery_ids
 
-SUFFIX = re.compile(r"_(\d+)$")
+# A counter has up to three digits; a longer number is one Home Assistant hands out.
+SUFFIX = re.compile(r"_(\d{1,3})$")
 _OCTET = r"(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)"
 _HEX = r"[0-9a-f]{2}"
 # An address in an id: a private IPv4 (192.168.x.x, 10.x.x.x, 172.16-31.x.x; other four numbers
-# such as ``sensor_1_2_3_4`` are not taken for one), or a MAC as six pairs or twelve hex digits
-# with at least one digit and one letter.
+# such as ``sensor_1_2_3_4`` are not taken for one), or four or more pairs of hex digits (Eltako
+# 4 bytes, MAC 6, Zigbee 8), or twelve hex digits in a row with at least one digit and one letter.
 ADDRESS = re.compile(
     rf"(?<![0-9a-z])(?:(?:192_168|10_{_OCTET}|172_(?:1[6-9]|2\d|3[01]))_{_OCTET}_{_OCTET}"
-    rf"|{_HEX}(?:_{_HEX}){{5}}"
+    rf"|{_HEX}(?:_{_HEX}){{3,}}"
     rf"|(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{{12}})(?![0-9a-z])"
 )
 DEFAULT_NAME = re.compile(
@@ -80,12 +81,12 @@ def _config_automations(automations: list[dict[str, Any]]) -> list[dict[str, Any
 
 
 def has_address(object_id: str) -> bool:
-    """Whether the id (without its domain) carries an IP or MAC address."""
+    """Whether the id (without its domain) carries a device address."""
     return bool(ADDRESS.search(object_id.split(".", 1)[-1]))
 
 
 def entity_id_address(entities: dict[str, dict[str, Any]]):
-    """Ids built from an IP or MAC address: they say nothing about the device."""
+    """Ids built from a device address (IP, MAC, radio): they say nothing about the device."""
     for item in entities.values():
         if has_address(item["object_id"]) and not item.get("disabled_by"):
             yield item

@@ -3279,7 +3279,7 @@ class CleanupMixin {
 
 // Texts for the second set of policy rules; merged into TEXT.
 Object.assign(TEXT.de, {
-  polRule_entity_id_address: "ID enthält eine IP- oder MAC-Adresse", polDesc_entity_id_address: "Die ID besteht aus einer IP- oder MAC-Adresse und sagt nichts über das Gerät; die Adresse kann sich ändern. Der Name ist als ID besser lesbar.",
+  polRule_entity_id_address: "ID enthält eine Geräteadresse", polDesc_entity_id_address: "Die ID enthält eine IP-, MAC-, Funk- oder Zigbee-Adresse und sagt nichts über das Gerät; die Adresse kann sich ändern. Der Name ist als ID besser lesbar.",
   polRule_entity_id_suffix: "Entitäts-ID mit angehängter Zahl", polDesc_entity_id_suffix: "IDs, die auf _2, _3 … enden, ohne dass der Name die Zahl trägt. Meist ein Rest von Doppelungen oder Umbenennungen.",
   polRule_default_name: "Standardname bei Automation oder Skript", polDesc_default_name: "Name wie „Neue Automation“ oder „Skript 3“. Ein sprechender Name spart später das Suchen.",
   polRule_script_description: "Skript ohne Beschreibung", polDesc_script_description: "Skripte brauchen eine Beschreibung.",
@@ -3302,7 +3302,7 @@ Object.assign(TEXT.de, {
   polRetention: "Behält {days} Tage, Datenbank {size}", polTriggers: "{n} Auslöser",
 });
 Object.assign(TEXT.en, {
-  polRule_entity_id_address: "Id contains an IP or MAC address", polDesc_entity_id_address: "The id is made of an IP or MAC address and says nothing about the device; the address can change. The name reads better as an id.",
+  polRule_entity_id_address: "Id contains a device address", polDesc_entity_id_address: "The id contains an IP, MAC, radio or Zigbee address and says nothing about the device; the address can change. The name reads better as an id.",
   polRule_entity_id_suffix: "Entity id with a trailing number", polDesc_entity_id_suffix: "Ids that end in _2, _3 … without the name carrying the number. Mostly a leftover of duplicates or renames.",
   polRule_default_name: "Default name on an automation or script", polDesc_default_name: "A name like “New automation” or “Script 3”. A telling name saves searching later.",
   polRule_script_description: "Script without a description", polDesc_script_description: "Scripts need a description.",
