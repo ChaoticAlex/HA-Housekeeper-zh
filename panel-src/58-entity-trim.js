@@ -2,7 +2,7 @@
 // states; mixed into the panel in 99-register.js. It makes the same plan action as the recorder's trim block (trim_history).
 Object.assign(TEXT.de, {
   etTitle: "Verlauf kürzen", etHint: "Löscht gespeicherte Daten dieser Entität. Vorher siehst du, wie viele Zeilen wegfallen. Zurücknehmen geht nur mit dem Backup, das Housekeeper davor anlegt.",
-  etCount: "Erst zählen: Unter „Im Recorder“ steht, was gespeichert ist.", etNone: "Nichts gespeichert",
+  etCount: "Erst zählen, dann siehst du, wie viele Zeilen gespeichert sind und was du kürzen kannst.", etNone: "Nichts gespeichert",
   etStates: "Zustände", etStatesHint: "Jede Änderung der Entität, wie sie im Verlauf und im Logbuch steht. Das ist der größte Teil der Datenbank.",
   etShort: "Kurzzeitstatistik", etShortHint: "Werte im 5-Minuten-Takt. Home Assistant hebt sie nur etwa 10 Tage auf und räumt sie selbst auf.",
   etLong: "Langzeitstatistik", etLongHint: "Stundenwerte ohne Ablaufdatum. Energie-Dashboard, Diagramme und Summen lesen daraus.",
@@ -18,7 +18,7 @@ Object.assign(TEXT.de, {
 });
 Object.assign(TEXT.en, {
   etTitle: "Trim history", etHint: "Deletes stored data of this entity. You see how many rows go before anything happens. Undoing needs the backup that Housekeeper makes first.",
-  etCount: "Count first: “In the recorder” shows what is stored.", etNone: "Nothing stored",
+  etCount: "Count first, then you see how many rows are stored and what you can trim.", etNone: "Nothing stored",
   etStates: "States", etStatesHint: "Every change of the entity, as shown in the history and the logbook. This is the biggest part of the database.",
   etShort: "Short-term statistics", etShortHint: "Values every 5 minutes. Home Assistant keeps them for about 10 days and cleans them up itself.",
   etLong: "Long-term statistics", etLongHint: "Hourly values without an expiry. The Energy dashboard, charts and sums read from them.",
@@ -93,7 +93,9 @@ class EntityTrimMixin {
   entityTrimRows(item) {
     if (item.object_type !== "entity" || !this.data.meta.recorder_available) return [];
     const body = this.entityTrimBody(item);
-    return [this.actRow(this.t("etTitle"), this.t(body === null ? "etCount" : "etHint"), ""), body === null ? "" : `<div class="actblock">${body}</div>`];
+    const state = this.entityRec?.[item.object_id];
+    const count = body === null ? `<button class="btn" data-erec="${this.esc(item.object_id)}" ${state?.loading ? "disabled" : ""}>${this.t(state?.loading ? "erecRunning" : "erecCount")}</button>${state?.message ? `<small class="factnote">${this.esc(state.message)}</small>` : ""}` : "";
+    return [this.actRow(this.t("etTitle"), this.t(body === null ? "etCount" : "etHint"), count), body === null ? "" : `<div class="actblock">${body}</div>`];
   }
 
   // The line a trim row shows in a plan: what is trimmed and how much.
