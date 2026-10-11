@@ -179,7 +179,7 @@ class GraphMixin {
   graphBar(item, key) {
     const canGraph = this.canGraph(), graph = this.useGraph();
     const toggle = canGraph ? `<div class="seg" role="group" aria-label="${this.esc(this.t("graphMode"))}">${[["list", "graphList"], ["graph", "graphGraph"]].map(([mode, label]) => `<button class="btn ${(graph ? "graph" : "list") === mode ? "primary" : ""}" data-pref="graphMode|${mode}" aria-pressed="${(graph ? "graph" : "list") === mode}">${this.t(label)}</button>`).join("")}</div>` : "";
-    if (!graph) return toggle ? `<div class="panel graphbar">${toggle}</div>` : "";
+    if (!graph) return toggle ? `<div class="panel graphbar">${toggle}</div>` : `<p class="factnote graphphone">${this.t("graphPhone")}</p>`;
     const depth = [1, 2, 3].map(n => `<button class="btn ${this.graphDepth === n ? "primary" : ""}" data-graph-depth="${n}" aria-pressed="${this.graphDepth === n}">${n}</button>`).join("");
     const relations = [...new Set(this.graphModel(item, key, { depth: this.graphDepth, limit: 400 }).edges.map(e => e.edge.relation))].sort();
     const relSelect = `<select id="graphRel" aria-label="${this.esc(this.t("graphRelation"))}"><option value="">${this.t("graphAllRelations")}</option>${relations.map(r => `<option value="${r}" ${this.graphRel === r ? "selected" : ""}>${this.t(r)}</option>`).join("")}</select>`;
@@ -203,6 +203,6 @@ class GraphMixin {
     const more = (model.hidden ? `<button class="btn" data-graph-more>${this.t("graphMore")}</button>` : "") + (this.graphOpen.size ? ` <button class="btn" data-graph-regroup>${this.t("graphRegroup")}</button>` : "");
     return `<div class="panel"><div class="panelhead"><h2>${this.t("origin")} → ${this.t("usage")}</h2><span class="date">${this.t("graphNodes", { n: model.count })}</span></div>
       ${nothing ? `<p style="padding:6px 16px;color:var(--hk-muted)">${this.t("noRelations")}</p>` : this.graphSvg(model, item, hitKeys)}
-      <p class="factnote">${this.t("graphLegend")}${notes ? ` ${this.esc(notes)}` : ""} ${more}</p></div>`;
+      ${notes || more.trim() ? `<p class="factnote">${this.esc(notes)} ${more}</p>` : ""}${this.fold("graph_legend", { title: this.t("graphLegendTitle") }, `<p class="factnote">${this.t("graphLegend")}</p>`, false)}</div>`;
   }
 }

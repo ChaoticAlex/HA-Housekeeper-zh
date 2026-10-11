@@ -19,6 +19,7 @@ const TEXT = {
     state: "Zustand & Attribute", incoming: "Eingehend", outgoing: "Ausgehend",
     graphMode: "Darstellung", graphList: "Liste", graphGraph: "Graph", graphDepth: "Ebenen", graphRelation: "Beziehungstyp", graphAllRelations: "Alle Beziehungen", graphConfidence: "Sicherheit", graphAllConf: "Alle Sicherheiten", graphCertainOnly: "Nur sichere",
     graphGroup: "{n} × {type}", graphGroupOpen: "Zum Aufklappen anklicken", graphRegroup: "Wieder zusammenfassen", graphImpact: "Was bricht beim Entfernen?", graphBreaks: "bricht", graphLabel: "Abhängigkeitsgraph von {name}", graphNodes: "Objekte: {n}", graphMore: "Mehr anzeigen",
+    graphLegendTitle: "Legende", graphPhone: "Auf dem Handy als Liste; der Graph braucht mehr Platz.",
     graphLegend: "Durchgezogen: sicher · Gestrichelt: wahrscheinlich · Rot gepunktet: Zyklus · Roter Rahmen: bricht beim Entfernen · Gestrichelter Rahmen: Objekt fehlt.",
     graphMissing: "Fehlende Ziele: {n}", graphProbable: "Wahrscheinliche Beziehungen: {n}", graphCycles: "Zyklen: {n}", graphHidden: "Ausgeblendet: {n}", graphHitsOutside: "{n} betroffene Objekte liegen außerhalb des Graphen (mehr Ebenen wählen)",
     graphHint: "Wähle ein Objekt aus, um seine direkten Beziehungen zu untersuchen.",
@@ -198,6 +199,7 @@ const TEXT = {
     state: "State & attributes", incoming: "Incoming", outgoing: "Outgoing",
     graphMode: "View", graphList: "List", graphGraph: "Graph", graphDepth: "Levels", graphRelation: "Relation type", graphAllRelations: "All relations", graphConfidence: "Certainty", graphAllConf: "All certainties", graphCertainOnly: "Certain only",
     graphGroup: "{n} × {type}", graphGroupOpen: "Click to expand", graphRegroup: "Group again", graphImpact: "What breaks when removed?", graphBreaks: "breaks", graphLabel: "Dependency graph of {name}", graphNodes: "Objects: {n}", graphMore: "Show more",
+    graphLegendTitle: "Legend", graphPhone: "Shown as a list on a phone; the graph needs more room.",
     graphLegend: "Solid: certain · Dashed: probable · Red dotted: cycle · Red outline: breaks when removed · Dashed outline: object is missing.",
     graphMissing: "Missing targets: {n}", graphProbable: "Probable relations: {n}", graphCycles: "Cycles: {n}", graphHidden: "Hidden: {n}", graphHitsOutside: "{n} affected objects are outside the graph (choose more levels)",
     graphHint: "Select an object to inspect its direct relationships.",
@@ -1217,7 +1219,7 @@ class StylesMixin {
       .dense .row-text small:not(:first-of-type){display:none}.dense .bh .row-text small:not(:first-of-type){display:block}.dirbtn[aria-pressed="true"]{border-color:var(--hk-blue);color:var(--hk-blue)}
       .bh .row-text small{overflow:visible;white-space:normal;text-overflow:clip}
       .bhguide{padding:12px 16px;border-top:1px solid var(--hk-border)}.bhguide summary{font-size:calc(12px*var(--hk-fs,1))}.bhguide .factnote{padding:8px 0 0;border:0}
-      .graphbar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:10px 14px;margin-bottom:14px}.graphctl{display:flex;align-items:center;gap:8px}.graphctl small{color:var(--hk-muted)}.graphwrap{overflow:auto;padding:14px}.graphsvg{display:block;max-width:none}
+      .graphbar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:10px 14px;margin-bottom:14px}.graphctl{display:flex;align-items:center;gap:8px}.graphctl small{color:var(--hk-muted)}.graphwrap{overflow:auto;padding:14px;min-height:360px;display:grid;align-content:center;justify-items:start}.graphphone{margin:0 0 14px;border:0;padding:0 2px}@media(max-width:600px){.node strong{white-space:normal;overflow-wrap:anywhere}.node span.meta{overflow-wrap:anywhere}}.graphsvg{display:block;max-width:none}
       .gedge{fill:none;stroke:var(--hk-muted);stroke-width:1.5}.gedge.prob{stroke-dasharray:7 4}.gedge.cycle{stroke:var(--hk-red);stroke-dasharray:2 3}.gedge.hit{stroke:var(--hk-red);stroke-width:2.5}.garrow{fill:var(--hk-muted)}.gdim{opacity:.3}
       .gnode{cursor:pointer}.gnode.center{cursor:default}.gnode rect{fill:var(--hk-surface);stroke:var(--hk-border);stroke-width:1.5}.gnode.center rect{stroke:var(--hk-blue);stroke-width:2.5}.gnode.missing rect{stroke:var(--hk-red);stroke-dasharray:4 3}.gnode.ggroup rect{stroke-dasharray:2 3}.gnode.hit rect{stroke:var(--hk-red);stroke-width:2.5}.gnode rect.bar{stroke:none;fill:var(--hk-blue)}.gnode rect.bar.ok{fill:var(--hk-green)}.gnode rect.bar.warn{fill:var(--hk-amber)}.gnode rect.bar.red{fill:var(--hk-red)}.gnode rect.bar.mute{fill:var(--hk-gray)}.gnode rect.bar.violet{fill:var(--hk-violet)}
       .gnode text{fill:var(--hk-text);font-size:calc(12px*var(--hk-fs,1));font-weight:600}.gnode text.t1{fill:var(--hk-muted);font-size:calc(10px*var(--hk-fs,1));font-weight:400}.gnode:focus-visible{outline:none}.gnode:focus-visible rect:first-of-type{stroke:var(--hk-blue);stroke-width:3.5}.gnode:hover rect:first-of-type{stroke:var(--hk-blue)}
@@ -3588,7 +3590,7 @@ class GraphMixin {
   graphBar(item, key) {
     const canGraph = this.canGraph(), graph = this.useGraph();
     const toggle = canGraph ? `<div class="seg" role="group" aria-label="${this.esc(this.t("graphMode"))}">${[["list", "graphList"], ["graph", "graphGraph"]].map(([mode, label]) => `<button class="btn ${(graph ? "graph" : "list") === mode ? "primary" : ""}" data-pref="graphMode|${mode}" aria-pressed="${(graph ? "graph" : "list") === mode}">${this.t(label)}</button>`).join("")}</div>` : "";
-    if (!graph) return toggle ? `<div class="panel graphbar">${toggle}</div>` : "";
+    if (!graph) return toggle ? `<div class="panel graphbar">${toggle}</div>` : `<p class="factnote graphphone">${this.t("graphPhone")}</p>`;
     const depth = [1, 2, 3].map(n => `<button class="btn ${this.graphDepth === n ? "primary" : ""}" data-graph-depth="${n}" aria-pressed="${this.graphDepth === n}">${n}</button>`).join("");
     const relations = [...new Set(this.graphModel(item, key, { depth: this.graphDepth, limit: 400 }).edges.map(e => e.edge.relation))].sort();
     const relSelect = `<select id="graphRel" aria-label="${this.esc(this.t("graphRelation"))}"><option value="">${this.t("graphAllRelations")}</option>${relations.map(r => `<option value="${r}" ${this.graphRel === r ? "selected" : ""}>${this.t(r)}</option>`).join("")}</select>`;
@@ -3612,7 +3614,7 @@ class GraphMixin {
     const more = (model.hidden ? `<button class="btn" data-graph-more>${this.t("graphMore")}</button>` : "") + (this.graphOpen.size ? ` <button class="btn" data-graph-regroup>${this.t("graphRegroup")}</button>` : "");
     return `<div class="panel"><div class="panelhead"><h2>${this.t("origin")} → ${this.t("usage")}</h2><span class="date">${this.t("graphNodes", { n: model.count })}</span></div>
       ${nothing ? `<p style="padding:6px 16px;color:var(--hk-muted)">${this.t("noRelations")}</p>` : this.graphSvg(model, item, hitKeys)}
-      <p class="factnote">${this.t("graphLegend")}${notes ? ` ${this.esc(notes)}` : ""} ${more}</p></div>`;
+      ${notes || more.trim() ? `<p class="factnote">${this.esc(notes)} ${more}</p>` : ""}${this.fold("graph_legend", { title: this.t("graphLegendTitle") }, `<p class="factnote">${this.t("graphLegend")}</p>`, false)}</div>`;
   }
 }
 
