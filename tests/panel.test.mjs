@@ -348,6 +348,8 @@ test("battery view lists the lowest levels first and counts low ones", () => {
   ] };
   assert.equal(el.lowBatteries().length, 3);
   assert.equal(JSON.stringify(Array.from(el.batteryRows().map(r => r.item.object_id))), JSON.stringify(["binary_sensor.flag", "sensor.low", "sensor.edge", "binary_sensor.fine", "sensor.full"]));
+  assert.equal(el.batteryFilter, "all", "the table opens with every battery");
+  el.batteryFilter = "low";
   el.view = "batteries";
   el.render();
   assert.ok(shadow.innerHTML.includes("sumvalue\">3<") && shadow.innerHTML.includes("sumvalue\">5<"));

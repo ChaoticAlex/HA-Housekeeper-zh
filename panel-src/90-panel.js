@@ -10,7 +10,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.statusFilter = "";
     this.findingFilter = ""; this.findingAfter = false; this.findingDue = false; this.showFollowers = false; this.goals = null; this.goalsLoading = false; this.goalForm = null; this.decide = null; this.markForm = null;
     this.findingStatus = ""; this.bulk = null;
-    this.batteryFilter = "low";
+    this.batteryFilter = "all";
 
     this._urlApplied = false;
     this.sort = "name";
