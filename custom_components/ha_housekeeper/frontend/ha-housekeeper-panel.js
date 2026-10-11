@@ -4201,7 +4201,7 @@ class DiagnosisMixin {
     if (this.hasActionsTab(item, key)) tabs.splice(1, 0, ["actions", "tabActions", this.fixItems(item, key).items.length]);
     if (item.attributes && Object.keys(item.attributes).length) tabs.push(["attributes", "tabAttributes"]);
     if (["automation", "script"].includes(item.object_type) && (item.actions?.length || item.triggers?.length)) tabs.push(["flow", "flowTab"]);
-    if (item.object_type === "device") tabs.push(["life", "lifeTab"]);
+    if (NOTE_TYPES.includes(item.object_type)) tabs.push(["history", "tabHistory", this.historyCount(item)]);
     if (this.runsRow(item)) tabs.push(["runs", "runsTab"]);
     if (this.reliabilityRow(item)) tabs.push(["reliability", "relTab"]);
     return tabs;
@@ -4215,6 +4215,7 @@ class DiagnosisMixin {
     if (item.object_type === "config_entry") this.ensureReliability();
     if (item.object_type === "entity") this.ensureStability();
     if (item.object_type === "device") this.ensureLifecycle(item.object_id);
+    if (NOTE_TYPES.includes(item.object_type)) this.ensureJournal();
     this.ensureCorrelations();
     const tabs = this.detailTabs(item, key);
     const tab = tabs.some(([id]) => id === this.detailTab) ? this.detailTab : "overview";
@@ -4235,7 +4236,7 @@ class DiagnosisMixin {
     if (tab === "actions") return this.actionsTab(item, key);
     if (tab === "relations") return `<div class="stack">${this.relationsCard(key)}</div>`;
     if (tab === "flow") return this.flowCard(item, key);
-    if (tab === "life") return this.lifeCard(item);
+    if (tab === "history") return this.historyTab(item);
     if (tab === "runs") return this.runsDetailCard(this.runsRow(item));
     if (tab === "reliability") return this.reliabilityDetailCard(this.reliabilityRow(item));
     if (tab === "attributes") {
@@ -4250,8 +4251,8 @@ class DiagnosisMixin {
       const cards = this.propertyCards(item);
       return `<div class="stack">${cards ? `<div class="propgrid">${cards}</div>` : `<section class="panel"><div class="panelhead"><h2>${this.t("registry")}</h2></div><div class="pad"><dl class="kv"><dt>${this.t("type")}</dt><dd>${this.t(item.object_type)}</dd>${fields.map(([k, v]) => `<dt>${this.esc(k)}</dt><dd>${this.esc(Array.isArray(v) ? v.join(", ") : v)}</dd>`).join("")}</dl></div></section>`}${automation}${this.detailLoading ? `<p class="sub">${this.t("loading")}</p>` : ""}</div>`;
     }
-    if (ACTION_TYPES.includes(item.object_type)) return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.nextStepBand(item, key)}${this.impactCard(item, key)}</div><div class="stack">${KNOWN_TYPES.includes(item.object_type) ? this.knownCard(item, key) : this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.noteCard(item)}</div></div>`;
-    return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.actionsCard(item, key)}${this.detailEditCard(item)}${this.impactCard(item, key)}</div><div class="stack">${this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.entityTrimCard(item)}${this.staleCard(item)}${this.noteCard(item)}</div></div>`;
+    if (ACTION_TYPES.includes(item.object_type)) return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.nextStepBand(item, key)}${this.impactCard(item, key)}</div><div class="stack">${KNOWN_TYPES.includes(item.object_type) ? this.knownCard(item, key) : this.factsCard(item, key)}${this.entityRecorderCard(item)}</div></div>`;
+    return `<div class="detailgrid"><div class="stack">${this.diagnosisCard(item)}${this.actionsCard(item, key)}${this.detailEditCard(item)}${this.impactCard(item, key)}</div><div class="stack">${this.factsCard(item, key)}${this.entityRecorderCard(item)}${this.entityTrimCard(item)}${this.staleCard(item)}</div></div>`;
   }
 }
 
@@ -5811,7 +5812,7 @@ class LifecycleMixin {
 
   lifeCard(item) {
     const life = this.life?.get(item.object_id);
-    const head = `<div class="panelhead"><div><h2>${this.t("lifeTab")}</h2><p>${this.t("lifeHint")}</p></div></div>`;
+    const head = `<div class="panelhead"><div><h2>${this.t("lifeTitle")}</h2><p>${this.t("lifeHint")}</p></div></div>`;
     if (!life) return `<section class="panel">${head}${this.skeleton("loading")}</section>`;
     const state = [this.statusLabel(item.status), life.unstable ? this.t(life.unstable === "flapping" ? "relFlapping" : "relUnstable") : ""].filter(Boolean).join(" · ");
     const rows = life.steps.map(s => `<div class="row rel"><span class="tile ${s.kind === "removed" ? "red" : s.kind === "quarantine" || s.kind === "disabled" ? "warn" : "mute"}"><ha-icon icon="${{ discovered: "mdi:magnify", quarantine: "mdi:timer-sand", disabled: "mdi:power-plug-off-outline", removed: "mdi:delete-outline", replaced: "mdi:swap-horizontal" }[s.kind] || "mdi:circle-small"}"></ha-icon></span><span class="row-text"><strong>${this.lifeStepText(s)}</strong><small>${this.esc(this.formatDate(s.at))}</small></span></div>`).join("");
@@ -8982,7 +8983,7 @@ Object.assign(TEXT.de, {
   knownGroupDevice: "Gerät", knownGroupOrigin: "Herkunft", knownGroupScope: "Umfang", knownGroupBuild: "Aufbau",
   knownEntitiesState: "Zustand", knownEntitiesBad: "{bad} von {n} Entitäten nicht verfügbar", knownEntitiesAll: "Alle {n} Entitäten laufen", knownNoEntities: "Keine Entitäten",
   knownModel: "Modell", knownVia: "Angeschlossen über", knownEntities: "Entitäten", knownEntitiesHidden: "{n} versteckt oder deaktiviert", knownUsedViaEntities: "über die Entitäten des Geräts",
-  knownAgain: "Wieder aufgetaucht", knownAgainText: "Wurde am {date} vergessen und ist wieder da", knownLife: "Lebenslauf", knownLifeText: "{n} Schritte, mehr im Reiter „Lebenslauf“", knownCreated: "Angelegt", knownModified: "Geändert",
+  knownAgain: "Wieder aufgetaucht", knownAgainText: "Wurde am {date} vergessen und ist wieder da", knownLife: "Lebenslauf", knownLifeText: "{n} Schritte, mehr im Reiter „Verlauf“", knownCreated: "Angelegt", knownModified: "Geändert",
   knownLoaded: "Zustand", knownAvail: "Verfügbarkeit", knownAvailText: "{pct} % in {days} Tagen", knownShared: "{n} gemeinsame Ausfälle, längster {longest}", knownKind: "Art", knownCustom: "Benutzerdefiniert", knownCore: "Kern", knownVersion: "Version {v}",
   knownScope: "Geräte, Entitäten", knownScopeText: "{d} Geräte · {e} Entitäten", knownScopeBad: "{n} nicht verfügbar", knownRecShare: "Anteil am Recorder", knownRecText: "mindestens {n} Einträge pro Tag", knownRecShareOf: "etwa {share} % aller Einträge",
   knownFindings: "Befunde", knownFindingsNone: "Keine offenen", knownFindingsOpen: "{n} offen",
@@ -9004,7 +9005,7 @@ Object.assign(TEXT.en, {
   knownGroupDevice: "Device", knownGroupOrigin: "Origin", knownGroupScope: "Scope", knownGroupBuild: "Structure",
   knownEntitiesState: "State", knownEntitiesBad: "{bad} of {n} entities unavailable", knownEntitiesAll: "All {n} entities are running", knownNoEntities: "No entities",
   knownModel: "Model", knownVia: "Connected via", knownEntities: "Entities", knownEntitiesHidden: "{n} hidden or disabled", knownUsedViaEntities: "through the entities of the device",
-  knownAgain: "Came back", knownAgainText: "Was forgotten on {date} and is back", knownLife: "Life", knownLifeText: "{n} steps, more in the tab “Life”", knownCreated: "Created", knownModified: "Modified",
+  knownAgain: "Came back", knownAgainText: "Was forgotten on {date} and is back", knownLife: "Life", knownLifeText: "{n} steps, more in the tab “History”", knownCreated: "Created", knownModified: "Modified",
   knownLoaded: "State", knownAvail: "Availability", knownAvailText: "{pct} % in {days} days", knownShared: "{n} shared outages, longest {longest}", knownKind: "Kind", knownCustom: "Custom", knownCore: "Core", knownVersion: "Version {v}",
   knownScope: "Devices, entities", knownScopeText: "{d} devices · {e} entities", knownScopeBad: "{n} unavailable", knownRecShare: "Share of the recorder", knownRecText: "at least {n} records a day", knownRecShareOf: "about {share} % of all records",
   knownFindings: "Findings", knownFindingsNone: "None open", knownFindingsOpen: "{n} open",
@@ -9236,7 +9237,7 @@ Object.assign(TEXT.de, {
   noteText: "Notiz (optional)", noteTextPh: "Was genau hast du geändert?", noteSave: "Speichern", noteCancel: "Abbrechen",
   noteNeedTitle: "Gib dem Eintrag einen Titel.", noteBadTime: "Die Zeit ist ungültig oder liegt zu weit in der Zukunft.", noteFailed: "Der Eintrag konnte nicht gespeichert werden: {reason}",
   noteConcerns: "Betrifft: {name}", noteHint: "Nur für dich: Housekeeper ändert nichts in Home Assistant. Die Einträge erscheinen nicht im Prüfbericht.",
-  noteDetailTitle: "Logbuch", noteDetailNone: "Halte fest, was du hieran geändert hast, damit es später als möglicher Zusammenhang auftaucht.", noteAddHere: "Eintrag",
+  noteDetailTitle: "Logbuch", noteDetailEmpty: "Noch kein Eintrag.", noteDetailHint: "Halte fest, was du hieran geändert hast, damit es nachvollziehbar bleibt.", noteDetailNone: "Halte fest, was du hieran geändert hast, damit es später als möglicher Zusammenhang auftaucht.", noteAddHere: "Eintrag",
   noteDialogNew: "Neuer Logbuch-Eintrag", noteDialogEdit: "Logbuch-Eintrag bearbeiten", noteChips: "Schnell eintragen",
   noteChipStick: "Stick getauscht", noteChipFirmware: "Firmware aktualisiert", noteChipPaired: "Neu angelernt", noteChipMoved: "Umgezogen",
   noteSeeAll: "Im Logbuch ansehen", logbook: "Logbuch", tabScans: "Scan-Vergleich", logbookHint: "Alle Einträge, neueste zuerst", logbookEmpty: "Das Logbuch ist leer. Trage ein, was du außerhalb von Housekeeper änderst, zum Beispiel einen getauschten Stick.",
@@ -9252,7 +9253,7 @@ Object.assign(TEXT.en, {
   noteText: "Note (optional)", noteTextPh: "What exactly did you change?", noteSave: "Save", noteCancel: "Cancel",
   noteNeedTitle: "Give the entry a title.", noteBadTime: "The time is invalid or too far in the future.", noteFailed: "The entry could not be saved: {reason}",
   noteConcerns: "Concerns: {name}", noteHint: "Only for you: Housekeeper changes nothing in Home Assistant. The entries do not appear in the audit report.",
-  noteDetailTitle: "Logbook", noteDetailNone: "Note what you changed here, so it shows up later as a possible connection.", noteAddHere: "Entry",
+  noteDetailTitle: "Logbook", noteDetailEmpty: "No entry yet.", noteDetailHint: "Note what you changed here, so it stays traceable.", noteDetailNone: "Note what you changed here, so it shows up later as a possible connection.", noteAddHere: "Entry",
   noteDialogNew: "New logbook entry", noteDialogEdit: "Edit logbook entry", noteChips: "Quick entry",
   noteChipStick: "Stick replaced", noteChipFirmware: "Firmware updated", noteChipPaired: "Paired again", noteChipMoved: "Moved",
   noteSeeAll: "See in the logbook", logbook: "Logbook", tabScans: "Scan comparison", logbookHint: "All entries, newest first", logbookEmpty: "The logbook is empty. Note what you change outside Housekeeper, for example a replaced stick.",
@@ -9263,6 +9264,8 @@ Object.assign(TEXT.en, {
 });
 
 const NOTE_PLAN_KINDS = ["replace_references", "rename_entity", "migrate_meter"];
+
+const NOTE_TYPES = ["entity", "device", "config_entry", "area", "automation", "script"];
 
 class NotesMixin {
   notesList() { return this.data?.notes || []; }
@@ -9315,13 +9318,14 @@ class NotesMixin {
       </div>${foot}</form></div>`;
   }
 
-  // On the details page of an object: one line while empty, else the latest three entries.
+  // The logbook of one object, in its tab "History": every entry, newest first, and the button to add one.
   noteCard(item) {
-    if (!["entity", "device", "config_entry", "area", "automation", "script"].includes(item.object_type)) return "";
+    if (!NOTE_TYPES.includes(item.object_type)) return "";
     const key = this.objectKey(item), mine = this.notesList().filter(n => n.target === key);
-    const add = `<button class="btn small" data-note-add-for="${this.esc(key)}"><ha-icon icon="mdi:plus"></ha-icon>${this.t("noteAddHere")}</button>`;
-    if (!mine.length) return `<section class="panel"><div class="line notehint"><span class="tile"><ha-icon icon="mdi:notebook-outline"></ha-icon></span><span class="row-text"><strong>${this.t("noteDetailTitle")}</strong><small>${this.t("noteDetailNone")}</small></span>${add}</div></section>`;
-    return `<section class="panel"><div class="panelhead"><h2>${this.t("noteDetailTitle")} <span class="pill mute">${this.formatNumber(mine.length)}</span></h2>${add}</div>${mine.slice(0, 3).map(n => this.noteRow(n)).join("")}<button class="row seeall" data-logbook-for="${this.esc(key)}">${this.t("noteSeeAll")} ›</button></section>`;
+    const add = `<button class="btn primary" data-note-add-for="${this.esc(key)}"><ha-icon icon="mdi:plus"></ha-icon>${this.t("noteAddHere")}</button>`;
+    const pg = this.paginate(`notes-${key}`, mine.map(n => this.noteRow(n)));
+    const body = mine.length ? pg.rows.join("") + pg.footer : `<div class="emptymsg"><ha-icon icon="mdi:notebook-outline"></ha-icon>${this.t("noteDetailEmpty")}</div>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("noteDetailTitle")}${mine.length ? ` <span class="pill mute">${this.formatNumber(mine.length)}</span>` : ""}</h2><p>${this.t("noteDetailHint")}</p></div>${add}</div>${body}</section>`;
   }
 
   // The logbook under Changes: all entries in one place, filtered by who wrote them and by object.
@@ -10294,6 +10298,40 @@ class PolicyRowMixin {
       const area = this.polDraft(item).area;
       this.makeDetailPlan({ kind: "set_area", object_id: item.object_id, ...(area ? { target: area } : {}) });
     }));
+  }
+}
+
+// HistoryTabMixin: the tab "History" of an object: its logbook, the plans of the journal that touched it and, for a
+// device, its life. Mixed into the panel in 99-register.js.
+Object.assign(TEXT.de, {
+  tabHistory: "Verlauf", histPlans: "Pläne zu diesem Objekt", histPlansHint: "Bestätigte und geplante Änderungen aus dem Journal, die dieses Objekt betrafen.", histPlansNone: "Bisher kein Plan zu diesem Objekt.", histPlansLoading: "Journal wird geladen …",
+  lifeTitle: "Lebenslauf",
+});
+Object.assign(TEXT.en, {
+  tabHistory: "History", histPlans: "Plans for this object", histPlansHint: "Confirmed and planned changes from the journal that concerned this object.", histPlansNone: "No plan for this object so far.", histPlansLoading: "Loading the journal …",
+  lifeTitle: "Life",
+});
+
+class HistoryTabMixin {
+  // The plans of the journal that name this object (the journal list carries the object IDs of each plan).
+  plansOf(item) { return (this.journal || []).filter(p => (p.objects || []).includes(item.object_id)); }
+
+  historyCount(item) {
+    const key = this.objectKey(item);
+    return this.notesList().filter(n => n.target === key).length + this.plansOf(item).length;
+  }
+
+  plansCard(item) {
+    const plans = this.plansOf(item);
+    const head = `<div class="panelhead"><div><h2>${this.t("histPlans")}</h2><p>${this.t("histPlansHint")}</p></div></div>`;
+    if (this.journal === null || this.journal === undefined) return `<section class="panel">${head}${this.skeleton("histPlansLoading")}</section>`;
+    const rows = plans.map(plan => `<div class="row jrow"><span class="tile mute"><ha-icon icon="mdi:clipboard-text-clock-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(this.formatDate(plan.created_at))}</strong><small>${this.t("planSummary", { total: plan.summary?.total ?? 0, ok: plan.summary?.ok ?? 0, review: plan.summary?.review ?? 0, blocked: plan.summary?.blocked ?? 0 })}</small></span><span class="pill ${plan.status === "verified" ? "ok" : plan.status === "dry_run" ? "mute" : "warn"}">${this.t(`plan_status_${plan.status || "dry_run"}`)}</span><button class="btn small" data-plan-open="${this.esc(plan.plan_id)}">${this.t("openPlan")}</button></div>`).join("");
+    return `<section class="panel">${head}${rows || `<div class="emptymsg"><ha-icon icon="mdi:clipboard-text-outline"></ha-icon>${this.t("histPlansNone")}</div>`}</section>`;
+  }
+
+  historyTab(item) {
+    const right = `${item.object_type === "device" ? this.lifeCard(item) : ""}${this.plansCard(item)}`;
+    return `<div class="detailgrid"><div class="stack">${this.noteCard(item)}</div><div class="stack">${right}</div></div>`;
   }
 }
 
@@ -11270,7 +11308,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }

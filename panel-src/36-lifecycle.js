@@ -28,7 +28,7 @@ class LifecycleMixin {
 
   lifeCard(item) {
     const life = this.life?.get(item.object_id);
-    const head = `<div class="panelhead"><div><h2>${this.t("lifeTab")}</h2><p>${this.t("lifeHint")}</p></div></div>`;
+    const head = `<div class="panelhead"><div><h2>${this.t("lifeTitle")}</h2><p>${this.t("lifeHint")}</p></div></div>`;
     if (!life) return `<section class="panel">${head}${this.skeleton("loading")}</section>`;
     const state = [this.statusLabel(item.status), life.unstable ? this.t(life.unstable === "flapping" ? "relFlapping" : "relUnstable") : ""].filter(Boolean).join(" · ");
     const rows = life.steps.map(s => `<div class="row rel"><span class="tile ${s.kind === "removed" ? "red" : s.kind === "quarantine" || s.kind === "disabled" ? "warn" : "mute"}"><ha-icon icon="${{ discovered: "mdi:magnify", quarantine: "mdi:timer-sand", disabled: "mdi:power-plug-off-outline", removed: "mdi:delete-outline", replaced: "mdi:swap-horizontal" }[s.kind] || "mdi:circle-small"}"></ha-icon></span><span class="row-text"><strong>${this.lifeStepText(s)}</strong><small>${this.esc(this.formatDate(s.at))}</small></span></div>`).join("");

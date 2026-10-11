@@ -1486,7 +1486,7 @@ test("the detail page keeps a summary on top and builds only the open tab", () =
   for (const text of ["Integration", "hue", "Device", "Küchenlampe", "Area", "Küche (Raum)", "Risk when removed"]) assert.ok(summary.includes(text), text);
   assert.ok(html.includes('role="tablist"') && html.includes('role="tabpanel"'));
   const tabs = [...html.matchAll(/data-detail-tab="(\w+)"/g)].map(m => m[1]);
-  assert.equal(JSON.stringify(tabs), JSON.stringify(["overview", "actions", "relations", "technical", "attributes"]));
+  assert.equal(JSON.stringify(tabs), JSON.stringify(["overview", "actions", "relations", "technical", "attributes", "history"]));
   assert.ok(/id="hk-tab-overview" aria-selected="true" aria-controls="hk-tabpanel" tabindex="0"/.test(html));
   assert.ok(/id="hk-tab-relations" aria-selected="false" aria-controls="hk-tabpanel" tabindex="-1"/.test(html), "roving tabindex");
   assert.ok(html.includes('class="panelhead"') && html.includes(el.t("knownTitle")), "overview: diagnosis and what is known");
@@ -2662,7 +2662,7 @@ test("a device has a history tab with its steps and note; removed devices are li
   const { el } = panel("en");
   el.data = DATA;
   const device = { object_type: "device", object_id: "d1", name: "Hub", status: "active" };
-  assert.ok(el.detailTabs(device, "device:d1").some(([id]) => id === "life"));
+  assert.ok(el.detailTabs(device, "device:d1").some(([id]) => id === "history"));
   el.life = new Map([["d1", { steps: [{ kind: "discovered", at: "2026-01-01T00:00:00+00:00" }, { kind: "replaced", at: "2026-02-01T00:00:00+00:00", from: "light.old", to: "light.new" }], unstable: "flapping", note: { text: "kept <b>", at: "x" } }]]);
   const html = el.lifeCard(device);
   assert.ok(html.includes("Discovered") && html.includes("light.old → light.new") && html.includes("flapping") && html.includes("kept &lt;b&gt;") && !html.includes("<b>kept"));
@@ -2755,7 +2755,7 @@ test("a mark can be set and cleared on the detail page and hides nothing in the 
   el.openMark("entity:sensor.b");
   el.markForm.kind = "seasonal"; el.markForm.reason = " Winter "; el.markForm.days = 90;
   await el.commitMark();
-  assert.equal(JSON.stringify(sent[0]), JSON.stringify({ type: "ha_housekeeper/mark_set", object_type: "entity", object_id: "sensor.b", kind: "seasonal", reason: "Winter", days: 90 }));
+  assert.equal(JSON.stringify(sent.find(m => m.type === "ha_housekeeper/mark_set")), JSON.stringify({ type: "ha_housekeeper/mark_set", object_type: "entity", object_id: "sensor.b", kind: "seasonal", reason: "Winter", days: 90 }));
   assert.equal(el.markForm, null);
   assert.ok(el.markCard(el.selected).includes("Seasonal") && el.markCard(el.selected).includes("data-mark-clear"));
   await el.clearMark("entity:sensor.b");
@@ -2990,6 +2990,20 @@ test("a removal chooses the recorder data per entity: its own choice, the defaul
   assert.equal(JSON.stringify(calls.find(c => c.type === "ha_housekeeper/plan_create").actions), JSON.stringify([{ kind: "remove_entity", object_id: "sensor.a" }, { kind: "remove_entity", object_id: "sensor.b", recorder: "states" }, { kind: "remove_entity", object_id: "sensor.e" }]));
   const sum = el.recorderSummary({ actions: [{ kind: "remove_entity", recorder: "states", used_by: [] }, { kind: "remove_entity", used_by: [] }, { kind: "remove_entity", used_by: [{ source: "dashboard:energy" }] }] });
   assert.ok(sum.includes("1 delete statistics and history") && sum.includes("1 keep their data") && sum.includes("1 data locked (Energy)"));
+});
+
+test("the History tab holds the logbook, the plans of the journal that named the object, and the life of a device", () => {
+  const { el } = panel("en");
+  const ent = { object_type: "entity", object_id: "sensor.h", name: "H", status: "active" }, dev = { object_type: "device", object_id: "d9", name: "D", status: "active" };
+  el.data = { ...DATA, objects: [...DATA.objects, ent, dev], notes: [{ id: "n1", title: "Stick replaced", at: "2026-10-08T18:05:00+00:00", target: "entity:sensor.h" }] };
+  el._rev = (el._rev || 0) + 1;
+  assert.ok(el.plansCard(ent).includes("Loading the journal"), "no journal yet");
+  el.journal = [{ plan_id: "p1", created_at: "2026-10-01T10:00:00+00:00", status: "verified", summary: { total: 1, ok: 1, review: 0, blocked: 0 }, objects: ["sensor.h"] }, { plan_id: "p2", created_at: "2026-10-02T10:00:00+00:00", status: "verified", objects: ["sensor.other"] }];
+  assert.equal(el.historyCount(ent), 2, "one entry and one plan");
+  const html = el.historyTab(ent);
+  assert.ok(html.includes("Stick replaced") && html.includes('data-plan-open="p1"') && !html.includes('data-plan-open="p2"') && html.includes("data-note-add-for"));
+  assert.ok(el.detailTabs(ent, "entity:sensor.h").some(([id, , n]) => id === "history" && n === 2));
+  assert.ok(el.detailTabs({ object_type: "dashboard", object_id: "x", name: "x" }, "dashboard:x").every(([id]) => id !== "history"), "kinds without a logbook have no tab");
 });
 
 test("the protection mode shows in the safety line and the settings, and is set through the server", async () => {
@@ -3413,11 +3427,11 @@ test("the logbook has its own tab, entries are written in a dialog, an action ca
   assert.ok(shadow.innerHTML.includes("data-note-del-yes"));
   await el.noteDeleteConfirmed("n1");
   assert.equal(sent[1].action, "delete"); assert.equal(el.data.notes.length, 0); assert.equal(el.noteDraft, null);
-  // on the details page of the object: one line while empty, the entries when there are some
-  assert.ok(el.noteCard({ object_type: "entity", object_id: "light.a" }).includes("data-note-add-for") && !el.noteCard({ object_type: "entity", object_id: "light.a" }).includes("data-logbook-for"));
+  // in the tab "History" of the object: the hint while empty, the entries when there are some
+  assert.ok(el.noteCard({ object_type: "entity", object_id: "light.a" }).includes("data-note-add-for") && !el.noteCard({ object_type: "entity", object_id: "light.a" }).includes("data-note-edit"));
   el.data = { ...el.data, notes: [entry] };
   const card = el.noteCard({ object_type: "entity", object_id: "light.a" });
-  assert.ok(card.includes("Zigbee stick replaced") && card.includes("data-logbook-for"));
+  assert.ok(card.includes("Zigbee stick replaced") && card.includes("data-note-edit"));
   assert.equal(el.noteCard({ object_type: "dashboard", object_id: "d" }), "");
   // a finished replace offers an entry; accepting saves it as suggested by Housekeeper with the plan as reference
   const plan = { plan_id: "p1", status: "verified", actions: [{ kind: "replace_references", object_id: "sensor.old", target: "sensor.new", result: { state: "done" } }] };

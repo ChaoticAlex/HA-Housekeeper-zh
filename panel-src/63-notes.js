@@ -7,7 +7,7 @@ Object.assign(TEXT.de, {
   noteText: "Notiz (optional)", noteTextPh: "Was genau hast du geändert?", noteSave: "Speichern", noteCancel: "Abbrechen",
   noteNeedTitle: "Gib dem Eintrag einen Titel.", noteBadTime: "Die Zeit ist ungültig oder liegt zu weit in der Zukunft.", noteFailed: "Der Eintrag konnte nicht gespeichert werden: {reason}",
   noteConcerns: "Betrifft: {name}", noteHint: "Nur für dich: Housekeeper ändert nichts in Home Assistant. Die Einträge erscheinen nicht im Prüfbericht.",
-  noteDetailTitle: "Logbuch", noteDetailNone: "Halte fest, was du hieran geändert hast, damit es später als möglicher Zusammenhang auftaucht.", noteAddHere: "Eintrag",
+  noteDetailTitle: "Logbuch", noteDetailEmpty: "Noch kein Eintrag.", noteDetailHint: "Halte fest, was du hieran geändert hast, damit es nachvollziehbar bleibt.", noteDetailNone: "Halte fest, was du hieran geändert hast, damit es später als möglicher Zusammenhang auftaucht.", noteAddHere: "Eintrag",
   noteDialogNew: "Neuer Logbuch-Eintrag", noteDialogEdit: "Logbuch-Eintrag bearbeiten", noteChips: "Schnell eintragen",
   noteChipStick: "Stick getauscht", noteChipFirmware: "Firmware aktualisiert", noteChipPaired: "Neu angelernt", noteChipMoved: "Umgezogen",
   noteSeeAll: "Im Logbuch ansehen", logbook: "Logbuch", tabScans: "Scan-Vergleich", logbookHint: "Alle Einträge, neueste zuerst", logbookEmpty: "Das Logbuch ist leer. Trage ein, was du außerhalb von Housekeeper änderst, zum Beispiel einen getauschten Stick.",
@@ -23,7 +23,7 @@ Object.assign(TEXT.en, {
   noteText: "Note (optional)", noteTextPh: "What exactly did you change?", noteSave: "Save", noteCancel: "Cancel",
   noteNeedTitle: "Give the entry a title.", noteBadTime: "The time is invalid or too far in the future.", noteFailed: "The entry could not be saved: {reason}",
   noteConcerns: "Concerns: {name}", noteHint: "Only for you: Housekeeper changes nothing in Home Assistant. The entries do not appear in the audit report.",
-  noteDetailTitle: "Logbook", noteDetailNone: "Note what you changed here, so it shows up later as a possible connection.", noteAddHere: "Entry",
+  noteDetailTitle: "Logbook", noteDetailEmpty: "No entry yet.", noteDetailHint: "Note what you changed here, so it stays traceable.", noteDetailNone: "Note what you changed here, so it shows up later as a possible connection.", noteAddHere: "Entry",
   noteDialogNew: "New logbook entry", noteDialogEdit: "Edit logbook entry", noteChips: "Quick entry",
   noteChipStick: "Stick replaced", noteChipFirmware: "Firmware updated", noteChipPaired: "Paired again", noteChipMoved: "Moved",
   noteSeeAll: "See in the logbook", logbook: "Logbook", tabScans: "Scan comparison", logbookHint: "All entries, newest first", logbookEmpty: "The logbook is empty. Note what you change outside Housekeeper, for example a replaced stick.",
@@ -34,6 +34,8 @@ Object.assign(TEXT.en, {
 });
 
 const NOTE_PLAN_KINDS = ["replace_references", "rename_entity", "migrate_meter"];
+
+const NOTE_TYPES = ["entity", "device", "config_entry", "area", "automation", "script"];
 
 class NotesMixin {
   notesList() { return this.data?.notes || []; }
@@ -86,13 +88,14 @@ class NotesMixin {
       </div>${foot}</form></div>`;
   }
 
-  // On the details page of an object: one line while empty, else the latest three entries.
+  // The logbook of one object, in its tab "History": every entry, newest first, and the button to add one.
   noteCard(item) {
-    if (!["entity", "device", "config_entry", "area", "automation", "script"].includes(item.object_type)) return "";
+    if (!NOTE_TYPES.includes(item.object_type)) return "";
     const key = this.objectKey(item), mine = this.notesList().filter(n => n.target === key);
-    const add = `<button class="btn small" data-note-add-for="${this.esc(key)}"><ha-icon icon="mdi:plus"></ha-icon>${this.t("noteAddHere")}</button>`;
-    if (!mine.length) return `<section class="panel"><div class="line notehint"><span class="tile"><ha-icon icon="mdi:notebook-outline"></ha-icon></span><span class="row-text"><strong>${this.t("noteDetailTitle")}</strong><small>${this.t("noteDetailNone")}</small></span>${add}</div></section>`;
-    return `<section class="panel"><div class="panelhead"><h2>${this.t("noteDetailTitle")} <span class="pill mute">${this.formatNumber(mine.length)}</span></h2>${add}</div>${mine.slice(0, 3).map(n => this.noteRow(n)).join("")}<button class="row seeall" data-logbook-for="${this.esc(key)}">${this.t("noteSeeAll")} ›</button></section>`;
+    const add = `<button class="btn primary" data-note-add-for="${this.esc(key)}"><ha-icon icon="mdi:plus"></ha-icon>${this.t("noteAddHere")}</button>`;
+    const pg = this.paginate(`notes-${key}`, mine.map(n => this.noteRow(n)));
+    const body = mine.length ? pg.rows.join("") + pg.footer : `<div class="emptymsg"><ha-icon icon="mdi:notebook-outline"></ha-icon>${this.t("noteDetailEmpty")}</div>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("noteDetailTitle")}${mine.length ? ` <span class="pill mute">${this.formatNumber(mine.length)}</span>` : ""}</h2><p>${this.t("noteDetailHint")}</p></div>${add}</div>${body}</section>`;
   }
 
   // The logbook under Changes: all entries in one place, filtered by who wrote them and by object.
