@@ -101,7 +101,7 @@ class OverviewMixin {
     const lines = [row(this.t("whyShare"), `${health.share} %`)];
     if (health.red) lines.push(row(this.t(health.red === 1 ? "whyUrgentOne" : "whyUrgent", { n: this.formatNumber(health.red), points: HEALTH_PENALTY_URGENT }), `− ${health.penalty}`, "minus"));
     lines.push(row(this.t("whyTotal"), `${health.percent} %`, "total"));
-    return `<div class="healthwhy" role="region" aria-label="${this.esc(this.t("healthWhy"))}">${lines.join("")}<small>${this.t("whyNote", { max: HEALTH_PENALTY_MAX })}</small><button type="button" class="btn" data-todo-jump>${this.t("whyToList")}</button></div>`;
+    return `<div class="healthwhy" role="region" aria-label="${this.esc(this.t("healthWhy"))}">${lines.join("")}<small>${this.t("whyNote", { max: HEALTH_PENALTY_MAX })}</small></div>`;
   }
 
   // A number with its noun, so that the rows count what they say: "8 integrations".
