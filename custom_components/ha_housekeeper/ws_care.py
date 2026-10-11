@@ -469,11 +469,12 @@ def websocket_note_set(
 @websocket_api.websocket_command(
     {
         vol.Required("type"): f"{DOMAIN}/reminder_set",
-        vol.Required("action"): vol.In(["save", "done", "delete"]),
+        vol.Required("action"): vol.In(["save", "done", "delete", "history_delete"]),
         vol.Optional("reminder_id"): str,
         vol.Optional("name"): str,
         vol.Optional("interval_days"): int,
-        vol.Optional("last_done"): str,
+        vol.Optional("due"): str,
+        vol.Optional("day"): str,
         vol.Optional("note", default=""): str,
     }
 )
@@ -493,12 +494,13 @@ def websocket_reminder_set(
                 msg.get("reminder_id"),
                 msg.get("name", ""),
                 msg.get("interval_days", 0),
-                msg.get("last_done", ""),
+                msg.get("due", ""),
                 msg["note"],
-                today,
             )
         elif msg["action"] == "done":
             scanner.reminders.done(msg.get("reminder_id", ""), today)
+        elif msg["action"] == "history_delete":
+            scanner.reminders.delete_history(msg.get("reminder_id", ""), msg.get("day", ""))
         else:
             scanner.reminders.delete(msg.get("reminder_id", ""))
     except ReminderError as err:

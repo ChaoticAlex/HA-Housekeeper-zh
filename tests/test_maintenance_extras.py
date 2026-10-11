@@ -50,23 +50,44 @@ def test_the_battery_estimate_follows_the_fall_since_the_last_change_and_promise
 async def test_reminders_validate_count_the_days_and_start_a_new_round_when_done(hass) -> None:
     store = ReminderStore(hass)
     today = date(2026, 10, 9)
-    item = store.upsert(None, " Filter ", 30, "2026-09-01", "", today)
+    item = store.upsert(None, " Filter ", 30, "2026-10-01", "")
     assert store.view(today)[0]["state"] == "due" and store.view(today)[0]["days_left"] == -8
     for args in (
         (None, "", 30, "2026-09-01", ""),
         (None, "x", 0, "2026-09-01", ""),
-        (None, "x", 30, "2026-10-10", ""),
         (None, "x", 30, "no", ""),
     ):
         with pytest.raises(ReminderError):
-            store.upsert(*args, today)
+            store.upsert(*args)
     store.done(item, today)
-    assert store.view(today)[0]["state"] == "ok" and store.view(today)[0]["due"] == "2026-11-08"
-    store.upsert(None, "Entkalken", 14, "2026-09-30", "", today)
-    assert [r["state"] for r in store.view(today)] == ["soon", "ok"]
+    row = store.view(today)[0]
+    assert row["state"] == "ok" and row["due"] == "2026-11-08"
+    assert row["history"] == ["2026-10-09"] and row["last_done"] == "2026-10-09"
+    new = store.upsert(None, "Rauchmelder", 365, "2026-10-22", "")  # new entry, due in 13 days
+    first, second = store.view(today)  # soonest first
+    assert first["id"] == new and first["state"] == "soon" and first["last_done"] is None
+    store.delete_history(item, "2026-10-09")
+    assert second["id"] == item and store.view(today)[1]["history"] == []
+    assert store.view(today)[1]["due"] == "2026-11-08"
+    with pytest.raises(ReminderError):
+        store.delete_history(item, "2026-10-09")
     store.delete(item)
     with pytest.raises(ReminderError):
         store.delete(item)
+
+
+async def test_reminders_from_before_the_history_get_their_due_day_and_one_entry(hass) -> None:
+    store = ReminderStore(hass)
+    store._store.async_load = lambda: _async(  # type: ignore[method-assign]
+        {"items": [{"id": "a", "name": "Filter", "interval_days": 90, "last_done": "2026-07-01"}]}
+    )
+    await store.async_load()
+    row = store.view(date(2026, 10, 9))[0]
+    assert row["due"] == "2026-09-29" and row["history"] == ["2026-07-01"] and row["state"] == "due"
+
+
+async def _async(value):
+    return value
 
 
 async def test_a_failing_entry_counts_once_per_episode_and_old_ones_are_dropped(hass) -> None:

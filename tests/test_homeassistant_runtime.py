@@ -1370,9 +1370,9 @@ async def test_reminders_are_saved_finished_and_deleted_over_the_websocket(
         await client.send_json_auto_id({"type": "ha_housekeeper/reminder_set", **msg})
         return await client.receive_json()
 
-    bad = await call(action="save", name="", interval_days=30, last_done="2026-01-01")
+    bad = await call(action="save", name="", interval_days=30, due="2026-01-01")
     assert bad["error"]["code"] == "invalid_format"
-    saved = await call(action="save", name="Filter", interval_days=30, last_done="2026-01-01")
+    saved = await call(action="save", name="Filter", interval_days=30, due="2026-01-01")
     reminder = saved["result"]["reminders"][0]
     assert reminder["state"] == "due" and scanner.snapshot["reminders"][0]["id"] == reminder["id"]
     done = await call(action="done", reminder_id=reminder["id"])
@@ -1392,13 +1392,10 @@ async def test_a_detected_battery_replacement_is_entered_once_and_updates_a_matc
         None,
         "Batterie Bewegungsmelder Flur",
         365,
-        (today - timedelta(days=300)).isoformat(),
+        (today + timedelta(days=65)).isoformat(),
         "",
-        today,
     )
-    scanner.reminders.upsert(
-        None, "Filter", 90, (today - timedelta(days=10)).isoformat(), "", today
-    )
+    scanner.reminders.upsert(None, "Filter", 90, (today + timedelta(days=80)).isoformat(), "")
     day = (today - timedelta(days=1)).isoformat()
     await client.send_json_auto_id(
         {
@@ -1415,8 +1412,8 @@ async def test_a_detected_battery_replacement_is_entered_once_and_updates_a_matc
     assert [i["title"] for i in scanner.notes.view()] == [
         "Batterie gewechselt: Bewegungsmelder Flur"
     ]
-    assert scanner.reminders.items[0]["last_done"] == day
-    assert scanner.reminders.items[1]["last_done"] != day
+    assert scanner.reminders.items[0]["history"] == [day]
+    assert scanner.reminders.items[1]["history"] == []
     await client.send_json_auto_id(
         {
             "type": "ha_housekeeper/battery_type_set",

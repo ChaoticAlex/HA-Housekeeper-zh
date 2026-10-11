@@ -1,7 +1,7 @@
 """Maintenance reminders you write yourself: a filter, a descaling, a battery change.
 
-Housekeeper only keeps the name, the interval and the day it was last done, and says when the
-next one is due. It changes nothing in Home Assistant and keeps this apart from the findings.
+Housekeeper keeps the name, the interval, the day it is due and the days it was done (newest
+first, the last few), and says when the next one is due. It changes nothing in Home Assistant and keeps this apart from the findings.
 """
 
 from __future__ import annotations
@@ -21,6 +21,7 @@ NAME_MAX = 80
 NOTE_MAX = 200
 INTERVAL_MAX = 3650
 SOON_DAYS = 14
+HISTORY_MAX = 20
 
 
 class ReminderError(Exception):
@@ -45,22 +46,38 @@ class ReminderStore:
         data = await self._store.async_load()
         items = data.get("items") if isinstance(data, dict) else None
         for item in items if isinstance(items, list) else ():
-            if (
+            if not (
                 isinstance(item, dict)
                 and isinstance(item.get("id"), str)
                 and isinstance(item.get("name"), str)
                 and isinstance(item.get("interval_days"), int)
-                and _day(item.get("last_done"))
             ):
-                self.items.append(
-                    {
-                        "id": item["id"],
-                        "name": item["name"][:NAME_MAX],
-                        "interval_days": min(max(item["interval_days"], 1), INTERVAL_MAX),
-                        "last_done": item["last_done"],
-                        "note": str(item.get("note") or "")[:NOTE_MAX],
-                    }
-                )
+                continue
+            interval = min(max(item["interval_days"], 1), INTERVAL_MAX)
+            history = sorted(
+                {
+                    d
+                    for d in (item["history"] if isinstance(item.get("history"), list) else [])
+                    if _day(d)
+                }
+                | ({item["last_done"]} if _day(item.get("last_done")) else set()),
+                reverse=True,
+            )[:HISTORY_MAX]
+            due = item.get("due") if _day(item.get("due")) else None
+            if due is None and history:  # stored before "due" existed
+                due = (date.fromisoformat(history[0]) + timedelta(days=interval)).isoformat()
+            if due is None:
+                continue
+            self.items.append(
+                {
+                    "id": item["id"],
+                    "name": item["name"][:NAME_MAX],
+                    "interval_days": interval,
+                    "due": due,
+                    "history": history,
+                    "note": str(item.get("note") or "")[:NOTE_MAX],
+                }
+            )
         del self.items[MAX_ITEMS:]
 
     def _save(self) -> None:
@@ -71,41 +88,46 @@ class ReminderStore:
         item_id: str | None,
         name: str,
         interval_days: int,
-        last_done: str,
+        due: str,
         note: str,
-        today: date,
     ) -> str:
         name = name.strip()
         if not name or len(name) > NAME_MAX:
             raise ReminderError("name")
         if not 1 <= interval_days <= INTERVAL_MAX:
             raise ReminderError("interval_days")
-        done = _day(last_done)
-        if done is None or done > today:
-            raise ReminderError("last_done")
+        if _day(due) is None:
+            raise ReminderError("due")
         if len(note) > NOTE_MAX:
             raise ReminderError("note")
         if item_id is None:
             if len(self.items) >= MAX_ITEMS:
                 raise ReminderError("too_many")
             item_id = secrets.token_hex(6)
-            self.items.append({"id": item_id})  # type: ignore[typeddict-item]
+            self.items.append({"id": item_id, "history": []})  # type: ignore[typeddict-item]
         item = next((i for i in self.items if i["id"] == item_id), None)
         if item is None:
             raise ReminderError("not_found")
-        item.update(name=name, interval_days=interval_days, last_done=last_done, note=note)
+        item.update(name=name, interval_days=interval_days, due=due, note=note)
         self._save()
         return item_id
+
+    @staticmethod
+    def _finish(item: dict[str, Any], day: date) -> None:
+        """Enter ``day`` in the history and start the next round from it."""
+        history = {*item["history"], day.isoformat()}
+        item["history"] = sorted(history, reverse=True)[:HISTORY_MAX]
+        item["due"] = (day + timedelta(days=item["interval_days"])).isoformat()
 
     def done(self, item_id: str, today: date) -> None:
         item = next((i for i in self.items if i["id"] == item_id), None)
         if item is None:
             raise ReminderError("not_found")
-        item["last_done"] = today.isoformat()
+        self._finish(item, today)
         self._save()
 
     def done_matching(self, names: list[str], day: str, today: date) -> int:
-        """Set "last done" of every reminder whose name contains one of ``names``; how many changed."""
+        """Finish every reminder whose name contains one of ``names`` on ``day``; how many changed."""
         done = _day(day)
         wanted = [n.lower() for n in names if n]
         if done is None or done > today or not wanted:
@@ -113,11 +135,18 @@ class ReminderStore:
         changed = 0
         for item in self.items:
             if any(n in item["name"].lower() for n in wanted):
-                item["last_done"] = day
+                self._finish(item, done)
                 changed += 1
         if changed:
             self._save()
         return changed
+
+    def delete_history(self, item_id: str, day: str) -> None:
+        item = next((i for i in self.items if i["id"] == item_id), None)
+        if item is None or day not in item["history"]:
+            raise ReminderError("not_found")
+        item["history"].remove(day)
+        self._save()
 
     def delete(self, item_id: str) -> None:
         before = len(self.items)
@@ -130,12 +159,12 @@ class ReminderStore:
         """Every reminder with its due day and state (``due``, ``soon`` or ``ok``), soonest first."""
         rows = []
         for item in self.items:
-            due = date.fromisoformat(item["last_done"]) + timedelta(days=item["interval_days"])
+            due = date.fromisoformat(item["due"])
             left = (due - today).days
             rows.append(
                 {
                     **item,
-                    "due": due.isoformat(),
+                    "last_done": item["history"][0] if item["history"] else None,
                     "days_left": left,
                     "state": "due" if left <= 0 else "soon" if left <= SOON_DAYS else "ok",
                 }

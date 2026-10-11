@@ -1233,6 +1233,9 @@ class StylesMixin {
       .sumline{display:flex;flex-wrap:wrap;gap:10px 26px;padding:12px 18px;margin-bottom:14px}.sumline span{display:grid;gap:3px;align-content:start}.sumline small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.sumline b{font-size:calc(13px*var(--hk-fs,1));font-weight:600}
       .tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--hk-border);overflow-x:auto;background:linear-gradient(to right,var(--hk-bg),transparent) left/36px 100% no-repeat local,linear-gradient(to left,var(--hk-bg),transparent) right/36px 100% no-repeat local,linear-gradient(to right,rgba(0,0,0,.16),transparent) left/10px 100% no-repeat scroll,linear-gradient(to left,rgba(0,0,0,.16),transparent) right/10px 100% no-repeat scroll}.tab{flex:none;padding:10px 14px;border:0;border-bottom:2px solid transparent;background:none;color:var(--hk-muted);white-space:nowrap}.tab em{font-style:normal;font-size:calc(11px*var(--hk-fs,1));padding:1px 6px;border-radius:10px;background:var(--hk-soft)}.tab[aria-selected="true"]{color:var(--hk-blue-text);border-bottom-color:var(--hk-blue);font-weight:600}
       .needgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:16px}.needtile{display:flex;flex-direction:column;justify-content:center;gap:4px;height:92px;padding:0 16px;border:1px solid var(--hk-border);border-radius:14px;background:var(--hk-soft);min-width:0}.needtile b{font-size:calc(28px*var(--hk-fs,1));line-height:1;font-variant-numeric:tabular-nums}.needtile span{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.needtile.miss{border-style:dashed}.needtile.miss b{color:var(--hk-amber)}.needsplit{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--hk-border)}.needsplit>div{padding:12px 16px;min-width:0}.needsplit>div+div{border-left:1px solid var(--hk-border)}.needsplit:empty{display:none}.needsplit h3{margin:0 0 6px;font-size:calc(12px*var(--hk-fs,1));letter-spacing:.04em;text-transform:uppercase;color:var(--hk-muted)}.needsplit ul{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:calc(14px*var(--hk-fs,1))}.needsplit li span,.needsplit li.muted{color:var(--hk-muted)}.needsplit li span::before{content:"· "}.tablewrap.lt.batt .iconbtn{padding:3px 6px;margin-left:4px;--mdc-icon-size:16px}.linkbtn{border:0;background:none;padding:0;font:inherit;color:var(--hk-text);cursor:pointer;text-decoration:underline;text-decoration-color:var(--hk-border)}.linkbtn:hover{text-decoration-color:currentColor}.tablewrap.lt.batt .lvl{display:flex;align-items:center;gap:8px;min-width:130px}.tablewrap.lt.batt .lvl .bar{flex:1;height:7px;border-radius:4px;background:var(--hk-border);overflow:hidden;min-width:48px}.tablewrap.lt.batt .lvl .bar i{display:block;height:100%}.tablewrap.lt.batt .red{color:var(--hk-red)}.tablewrap.lt.batt .amber{color:var(--hk-amber)}.tablewrap.lt.batt .green{color:var(--hk-green)}.tablewrap.lt.batt td .btedit{display:flex;flex-wrap:wrap;gap:6px;white-space:normal}.tablewrap.lt.batt .btedit label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.tablewrap.lt.batt .bkedit{padding:0;background:none;border:0}.tablewrap.lt.batt .bkedit .factnote{display:none}.tablewrap.lt.batt .btn.miss{border-style:dashed;color:var(--hk-amber)}.tablewrap.lt.batt td:last-child{text-align:right}@media(max-width:700px){.needsplit{grid-template-columns:1fr}.needsplit>div+div{border-left:0;border-top:1px solid var(--hk-border)}}.bkedit{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 16px 12px 62px;background:var(--hk-soft);border-bottom:1px solid var(--hk-border)}.bkedit select,.bkrow select{padding:5px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit;font-size:calc(13px*var(--hk-fs,1))}.bkcancel{border:0;background:none;padding:4px 2px;font:inherit;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);cursor:pointer;text-decoration:underline}.bkrow{gap:8px;padding-right:12px;flex-wrap:wrap}.bkall,.bkask{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--hk-border)}.bkask{background:var(--hk-soft)}.rowwrap{display:flex;align-items:center;border-bottom:1px solid var(--hk-border)}.rowwrap:last-child{border-bottom:0}.rowwrap .row{border-bottom:0;flex:1;min-width:0}.selbox{margin:0 0 0 16px;flex:none}.statcell{display:flex;gap:10px;align-items:flex-start}.outcome{display:flex;gap:12px;align-items:center;margin:14px 16px 4px;padding:14px 16px;border-radius:12px;--oc:var(--hk-gray);color:color-mix(in srgb,var(--oc) 55%,var(--hk-text));background:color-mix(in srgb,var(--oc) 13%,transparent);border:1px solid color-mix(in srgb,var(--oc) 30%,transparent)}.outcome ha-icon{--mdc-icon-size:26px;flex:none}.outcome.ok{--oc:var(--hk-green)}.outcome.warn{--oc:var(--hk-amber)}.outcome.red{--oc:var(--hk-red)}.namecell{position:relative}.copybtn{position:absolute;right:0;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;padding:4px;border:1px solid var(--hk-border);border-radius:6px;background:var(--hk-surface);color:var(--hk-muted);cursor:pointer;opacity:0;--mdc-icon-size:14px}tr:hover .copybtn,.copybtn:focus-visible,.namecell:hover .copybtn{opacity:1}.copybtn.done{color:var(--hk-green);opacity:1}@media (hover:none){.copybtn{opacity:.7}}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;padding:10px 16px;border-radius:10px;background:var(--hk-text);color:var(--hk-bg);font-weight:600;box-shadow:var(--hk-sh2);pointer-events:none}.toast.bad{border-left:5px solid var(--hk-red);max-width:min(560px,calc(100vw - 32px))}.modepill{display:inline-flex;align-items:center;gap:5px;--mdc-icon-size:14px}.outcome small{display:block;font-weight:400;margin-top:2px}.visitline{display:flex;gap:8px;align-items:center;margin:0 0 12px}.visitline ha-icon{--mdc-icon-size:16px}.headsel{display:flex;gap:10px;align-items:center}.statcell .selbox{margin:3px 0 0}.statcell>div{min-width:0}.btcart,.btsuggest{margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 10%,transparent);border:1px solid color-mix(in srgb,var(--hk-blue) 30%,transparent)}.btcart strong{display:block;margin-bottom:2px}.btsuggest{background:color-mix(in srgb,var(--hk-green) 11%,transparent);border-color:color-mix(in srgb,var(--hk-green) 30%,transparent)}.btsuggest h3{margin:0 0 4px}.btrepl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}.btrepl .row-text{flex:1;min-width:200px}.btctl,.btedit{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 16px 0 8px}.btedit{flex-basis:100%;margin:0;padding:8px 16px 12px}.rowwrap:has(.btedit){flex-wrap:wrap}.chcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;padding:0 16px}.chcols>div{padding:8px 0}.chcols .big{font-size:22px;font-weight:700}.chbars{display:flex;gap:3px;align-items:flex-end;height:54px;padding:8px 16px 4px}.chbars i{flex:1;max-width:14px;min-width:3px;border-radius:3px 3px 0 0;background:var(--hk-green);display:block}.chbars i.m{background:var(--hk-red)}.chaxis{display:flex;justify-content:space-between;padding:0 16px 12px;color:var(--hk-muted);font-size:12px}.trimbox{margin:14px 16px 0;padding-top:14px;border-top:1px solid var(--hk-border)}.trimbox .actions{margin-top:8px}
+      .remform{display:grid;gap:14px;padding:16px;border-top:1px solid var(--hk-border);background:var(--hk-soft)}.remgrid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;align-items:start}.remfield{display:grid;grid-template-rows:auto 40px auto;gap:4px;font-size:calc(12px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted);min-width:0}.remfield input{height:40px;min-width:0}.remfield.full{grid-column:1/-1;grid-template-rows:auto 40px}.remchips{display:flex;gap:6px;flex-wrap:wrap}.remchips .chip{padding:2px 10px;font-size:calc(12px*var(--hk-fs,1))}.remhint{color:var(--hk-blue-text);font-weight:600}.remactions{display:flex;gap:14px;align-items:center}
+      .tablewrap.rem td:first-child{white-space:normal}.chevbtn{display:inline-flex;vertical-align:middle;padding:0;margin-right:4px;border:0;background:none;color:var(--hk-muted);cursor:pointer}.remnote{display:block;margin-left:28px;color:var(--hk-muted)}.remact{text-align:right;white-space:nowrap}.remact .btn{margin-left:6px}.remhist td{padding:10px 16px 14px 44px;background:var(--hk-soft)}.remhist h3{margin:0 0 6px;font-size:calc(11px*var(--hk-fs,1));font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--hk-muted)}.remhist ul{display:grid;gap:4px;margin:0;padding:0;list-style:none}.remhist li{display:flex;gap:12px;align-items:center}.remhist li .linkbtn{margin-left:auto;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.remhist p{margin:0}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+      @media(max-width:700px){.remact{display:flex;flex-wrap:wrap;gap:8px;white-space:normal}.remact .btn{margin-left:0}.remgrid{grid-template-columns:1fr}.remfield.wide,.remfield.full{grid-column:auto}}
       .sumtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.sumtile{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border:1px solid var(--hk-border);border-left:4px solid var(--hk-gray);border-radius:12px;background:var(--hk-surface);text-align:left;font:inherit;color:inherit}button.sumtile{cursor:pointer}button.sumtile:hover{background:var(--hk-soft)}.sumtile.ok{border-left-color:var(--hk-green)}.sumtile.warn{border-left-color:var(--hk-amber)}.sumtile.red{border-left-color:var(--hk-red)}.sumlabel{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.sumvalue{font-size:calc(22px*var(--hk-fs,1));font-weight:600;line-height:1.2;overflow-wrap:anywhere}.sumtile small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));overflow-wrap:anywhere}.tabdot{display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:50%;background:var(--hk-gray)}.tabdot.warn{background:var(--hk-amber)}.tabdot.red{background:var(--hk-red)}
       .detailgrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:14px;align-items:start}.pad{padding:16px}
       .facts{display:grid}.fact{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.fact:first-child{border-top:0}.fact span{color:var(--hk-muted)}.fact b{font-weight:600;text-align:right}.fact small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:400}
@@ -1330,7 +1333,7 @@ class StylesMixin {
       .stepsbar .step i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:calc(12px*var(--hk-fs,1));background:var(--hk-surface);border:1px solid var(--hk-border);box-shadow:var(--hk-sh1)}
       .stepsbar .step.on{color:var(--hk-text);font-weight:600}.stepsbar .step.on i{background:var(--hk-blue);color:var(--hk-on,#fff);border-color:var(--hk-blue)}
       .stepsbar .step.done i{background:color-mix(in srgb,var(--hk-green) 16%,var(--hk-surface));color:var(--hk-green);border-color:var(--hk-green)}
-      @media (max-width:520px){.row.remrow{grid-auto-flow:row}.row.remrow>:nth-child(n+3){grid-column:1/-1;justify-self:end}}.stepsbar .step .stepname{font-weight:inherit}@media (max-width:640px){.stepsbar .step:not(.on) .stepname{display:none}.stepsbar .line{min-width:8px;margin:0 6px}}.stepsbar .line{flex:1;height:2px;min-width:20px;margin:0 10px;border-radius:2px;background:var(--hk-border)}.stepsbar .line.done{background:var(--hk-green)}
+      .stepsbar .step .stepname{font-weight:inherit}@media (max-width:640px){.stepsbar .step:not(.on) .stepname{display:none}.stepsbar .line{min-width:8px;margin:0 6px}}.stepsbar .line{flex:1;height:2px;min-width:20px;margin:0 10px;border-radius:2px;background:var(--hk-border)}.stepsbar .line.done{background:var(--hk-green)}
       .rangechart .grid{stroke:var(--hk-border);stroke-width:1}
       .bkcsum{padding:14px 16px 0}.bkcsum .sumtiles{margin-bottom:0}.bkcrule{display:grid;gap:8px;margin:14px 16px;padding:12px 14px;border-radius:12px;background:var(--hk-soft)}.bkcrule .line{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.bkcrule input{width:76px}.bkcrule .line .btn{margin-left:auto}.bkcrule p,.bkcfoot small{display:block;margin:0;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));line-height:1.5}.bkcwarn{display:flex;gap:6px;align-items:flex-start;margin-top:4px;color:var(--hk-amber)}.bkcwarn ha-icon{--mdc-icon-size:14px;flex:none;margin-top:1px}.bkcfoot{display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;padding:14px 16px;border-top:1px solid var(--hk-border)}.bkcfoot>div{flex:1 1 260px;min-width:0}.bkcerr{margin:6px 0 0;color:var(--hk-red);font-size:calc(12px*var(--hk-fs,1))}@media(max-width:640px){.bkcrow{grid-auto-flow:row}.bkcrow>.pill{grid-column:2;justify-self:start}}
       @media(max-width:640px){.navtiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.navtiles .taskcard{grid-template-rows:auto auto;padding:10px}.navtiles .taskcard>ha-icon,.navtiles .taskcard>small{display:none}.toolbar.nosel [data-fsel-clear],.toolbar.nosel [data-sel-clear],.toolbar.nosel [data-sel-only],.toolbar.nosel .fbtns{display:none}}
@@ -7082,10 +7085,40 @@ class BatteryCareMixin {
     return v && (v.rows.length || v.unknown) ? `<p class="factnote">${this.t("bvNote", { unknown: this.formatNumber(v.unknown) })}</p>` : "";
   }
 
+  // The reminders table: one row each with its due day as a pill, the history folds open under the row.
+  remDay(iso) {
+    try { return new Intl.DateTimeFormat(this.lang, { dateStyle: "medium" }).format(new Date(`${iso}T12:00:00Z`)); }
+    catch (_) { return iso; }
+  }
+
+  remToday() { return new Date().toISOString().slice(0, 10); }
+
+  remAddDays(iso, n) { return new Date(Date.parse(`${iso}T00:00:00Z`) + n * 864e5).toISOString().slice(0, 10); }
+
+  remDaysLeft(iso) { return Math.round((Date.parse(`${iso}T00:00:00Z`) - Date.parse(`${this.remToday()}T00:00:00Z`)) / 864e5); }
+
+  remWhen(left) { return left < 0 ? this.t("remOverdue", { n: -left }) : left === 0 ? this.t("remToday") : this.t("remIn", { n: left }); }
+
+  remBlank() { return { id: "", name: "", interval_days: 90, due: this.remAddDays(this.remToday(), 90), dueTouched: false, note: "" }; }
+
   reminderRow(r) {
     const tone = { due: "red", soon: "warn", ok: "ok" }[r.state];
-    const when = r.state === "due" ? this.t("remOverdue", { n: Math.abs(r.days_left) }) : this.t("remIn", { n: r.days_left });
-    return `<div class="row remrow"><span class="tile ${tone}"><ha-icon icon="mdi:wrench-clock"></ha-icon></span><span class="row-text"><strong>${this.esc(r.name)}</strong><small>${this.esc(this.t("remLine", { interval: r.interval_days, last: r.last_done, due: r.due }))}${r.note ? ` · ${this.esc(r.note)}` : ""}</small></span><span class="pill ${tone}">${this.esc(when)}</span><button class="btn" data-rem-done="${this.esc(r.id)}">${this.t("remDone")}</button><button class="btn quiet" data-rem-del="${this.esc(r.id)}" aria-label="${this.esc(this.t("remDelete"))}">${this.t("remDelete")}</button></div>`;
+    const open = (this.remOpen || []).includes(r.id);
+    const id = this.esc(r.id);
+    const hist = r.history || [];
+    const label = this.esc(this.t(open ? "remHistoryClose" : "remHistoryOpen"));
+    const main = `<tr class="static"><td><button type="button" class="chevbtn" data-rem-open="${id}" aria-expanded="${open}" aria-label="${label}" title="${label}"><ha-icon icon="mdi:chevron-${open ? "down" : "right"}"></ha-icon></button><strong>${this.esc(r.name)}</strong>${r.note ? `<small class="remnote">${this.esc(r.note)}</small>` : ""}</td><td data-label="${this.esc(this.t("remColEvery"))}">${this.esc(this.t("remEveryN", { n: r.interval_days }))}</td><td data-label="${this.esc(this.t("remColLast"))}">${r.last_done ? this.esc(this.remDay(r.last_done)) : `<span class="muted">–</span>`}</td><td data-label="${this.esc(this.t("remColDue"))}"><span class="pill ${tone}" title="${this.esc(this.remDay(r.due))}">${this.esc(this.remWhen(r.days_left))}</span></td><td class="remact"><button class="btn small" data-rem-done="${id}">${this.t("remDone")}</button><button class="btn small quiet" data-rem-edit="${id}">${this.t("remEdit")}</button><button class="btn small quiet" data-rem-del="${id}">${this.t("remDelete")}</button></td></tr>`;
+    if (!open) return main;
+    const list = hist.length ? `<ul>${hist.map(d => `<li>${this.esc(this.remDay(d))}<button type="button" class="linkbtn" data-rem-hdel="${id}|${this.esc(d)}">${this.t("remDelete")}</button></li>`).join("")}</ul>` : `<p class="muted">${this.t("remNoHistory")}</p>`;
+    return `${main}<tr class="static remhist"><td colspan="5"><h3>${this.t("remHistory", { n: hist.length })}</h3>${list}</td></tr>`;
+  }
+
+  // The form for a new or an edited reminder: labels above fields of one height; "due" follows the interval until it is set by hand.
+  remForm() {
+    const d = this.remDraft;
+    const field = (key, label, body, extra = "") => `<label class="remfield ${extra}"><span>${this.t(label)}</span>${body}</label>`;
+    const chips = [30, 90, 180, 365].map(n => `<button type="button" class="chip${Number(d.interval_days) === n ? " on" : ""}" data-rem-chip="${n}">${n}</button>`).join("");
+    return `<div class="remform"><div class="remgrid">${field("name", "remFName", `<input data-rem-field="name" placeholder="${this.esc(this.t("remName"))}" value="${this.esc(d.name)}" maxlength="80">`, "wide")}${field("interval_days", "remFEvery", `<input data-rem-field="interval_days" type="number" min="1" max="3650" value="${this.esc(d.interval_days)}"><span class="remchips">${chips}</span>`)}${field("due", "remFDue", `<input data-rem-field="due" type="date" value="${this.esc(d.due)}"><span class="remhint" data-rem-hint>${this.esc(this.remWhen(this.remDaysLeft(d.due)))}</span>`)}${field("note", "remFNote", `<input data-rem-field="note" placeholder="${this.esc(this.t("remNote"))}" value="${this.esc(d.note)}" maxlength="200">`, "full")}</div>${this.remError ? `<div class="error">${this.esc(this.remError)}</div>` : ""}<div class="remactions"><button class="btn primary" data-rem-save>${this.t(d.id ? "remSave" : "remAdd")}</button><button type="button" class="linkbtn" data-rem-cancel>${this.t("remCancel")}</button></div></div>`;
   }
 
   // Own view under "Maintain": own reminders (filter, descaling, changing batteries) with a date when they are due.
@@ -7093,9 +7126,10 @@ class BatteryCareMixin {
 
   remindersCard() {
     const items = this.data.reminders || [];
-    const draft = this.remDraft || { name: "", interval_days: 90, last_done: new Date().toISOString().slice(0, 10), note: "" };
-    const form = `<div class="setrow remform"><input data-rem-field="name" placeholder="${this.esc(this.t("remName"))}" aria-label="${this.esc(this.t("remName"))}" value="${this.esc(draft.name)}" maxlength="80"><label class="recchoice"><span>${this.t("remEvery")}</span><input data-rem-field="interval_days" type="number" min="1" max="3650" value="${this.esc(draft.interval_days)}" style="width:5em"> ${this.t("remDays")}</label><label class="recchoice"><span>${this.t("remLast")}</span><input data-rem-field="last_done" type="date" value="${this.esc(draft.last_done)}"></label><input data-rem-field="note" placeholder="${this.esc(this.t("remNote"))}" aria-label="${this.esc(this.t("remNote"))}" value="${this.esc(draft.note)}" maxlength="200"><button class="btn primary" data-rem-add>${this.t("remAdd")}</button></div>${this.remError ? `<div class="error">${this.esc(this.remError)}</div>` : ""}`;
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("remTitle")}</h2><p>${this.t("remHint")}</p></div></div>${items.length ? items.map(r => this.reminderRow(r)).join("") : `<p class="factnote">${this.t("remNone")}</p>`}${form}</div>`;
+    const overdue = items.filter(r => r.state === "due").length;
+    const head = `<div class="panelhead"><div><h2>${this.t("remTitle")}</h2><p>${items.length ? this.t("remSummary", { n: items.length, due: overdue }) : this.t("remHint")}</p></div>${this.remDraft ? "" : `<div class="actions"><button class="btn primary" data-rem-new>${this.t("remNew")}</button></div>`}</div>`;
+    const table = items.length ? `<div class="tablewrap lt rem"><table><thead><tr><th scope="col">${this.t("remColName")}</th><th scope="col">${this.t("remColEvery")}</th><th scope="col">${this.t("remColLast")}</th><th scope="col">${this.t("remColDue")}</th><th scope="col"><span class="sr">${this.t("remColActions")}</span></th></tr></thead><tbody>${items.map(r => this.reminderRow(r)).join("")}</tbody></table></div>` : this.remDraft ? "" : `<div class="emptymsg"><ha-icon icon="mdi:calendar-clock-outline"></ha-icon>${this.t("remEmpty")}</div>`;
+    return `<div class="panel">${head}${table}${this.remDraft ? this.remForm() : ""}</div>`;
   }
 
   async reminderCall(msg) {
@@ -7109,12 +7143,48 @@ class BatteryCareMixin {
     this.bindBatteryType(root);
     this.bindBatteryKind(root);
     root.querySelector("[data-bt-refresh]")?.addEventListener("click", () => this.loadBatteryTrend(true));
-    root.querySelectorAll("[data-rem-field]").forEach(el => el.addEventListener("input", () => { this.remDraft = { ...(this.remDraft || { name: "", interval_days: 90, last_done: new Date().toISOString().slice(0, 10), note: "" }), [el.dataset.remField]: el.value }; }));
-    root.querySelector("[data-rem-add]")?.addEventListener("click", () => {
-      const d = this.remDraft || { name: "", interval_days: 90, last_done: new Date().toISOString().slice(0, 10), note: "" };
-      this.reminderCall({ action: "save", name: d.name, interval_days: Number(d.interval_days), last_done: d.last_done, note: d.note });
+    root.querySelector("[data-rem-new]")?.addEventListener("click", () => { this.remDraft = this.remBlank(); this.remError = ""; this.render(); });
+    root.querySelector("[data-rem-cancel]")?.addEventListener("click", () => { this.remDraft = null; this.remError = ""; this.render(); });
+    const syncForm = () => {
+      const d = this.remDraft;
+      if (!d) return;
+      const set = (key, value) => { const el = root.querySelector(`[data-rem-field="${key}"]`); if (el && el.value !== value) el.value = value; };
+      if (!d.dueTouched) { d.due = this.remAddDays(this.remToday(), Number(d.interval_days) || 0); set("due", d.due); }
+      const hint = root.querySelector("[data-rem-hint]");
+      if (hint) hint.textContent = d.due ? this.remWhen(this.remDaysLeft(d.due)) : "";
+      root.querySelectorAll("[data-rem-chip]").forEach(c => c.classList.toggle("on", Number(c.dataset.remChip) === Number(d.interval_days)));
+    };
+    root.querySelectorAll("[data-rem-field]").forEach(el => el.addEventListener("input", () => {
+      const key = el.dataset.remField;
+      this.remDraft[key] = el.value;
+      if (key === "due") this.remDraft.dueTouched = true;
+      syncForm();
+    }));
+    root.querySelectorAll("[data-rem-chip]").forEach(el => el.addEventListener("click", () => {
+      this.remDraft.interval_days = Number(el.dataset.remChip);
+      const input = root.querySelector('[data-rem-field="interval_days"]');
+      if (input) input.value = this.remDraft.interval_days;
+      syncForm();
+    }));
+    root.querySelector("[data-rem-save]")?.addEventListener("click", () => {
+      const d = this.remDraft;
+      this.reminderCall({ action: "save", ...(d.id ? { reminder_id: d.id } : {}), name: d.name, interval_days: Number(d.interval_days), due: d.due, note: d.note });
     });
+    root.querySelectorAll("[data-rem-open]").forEach(el => el.addEventListener("click", () => {
+      const id = el.dataset.remOpen;
+      const open = this.remOpen || [];
+      this.remOpen = open.includes(id) ? open.filter(x => x !== id) : [...open, id];
+      this.render();
+    }));
+    root.querySelectorAll("[data-rem-edit]").forEach(el => el.addEventListener("click", () => {
+      const r = (this.data.reminders || []).find(x => x.id === el.dataset.remEdit);
+      if (!r) return;
+      this.remDraft = { id: r.id, name: r.name, interval_days: r.interval_days, due: r.due, dueTouched: true, note: r.note || "" };
+      this.remError = "";
+      this.render();
+    }));
     root.querySelectorAll("[data-rem-done]").forEach(el => el.addEventListener("click", () => this.reminderCall({ action: "done", reminder_id: el.dataset.remDone })));
+    root.querySelectorAll("[data-rem-hdel]").forEach(el => el.addEventListener("click", () => { const [id, day] = el.dataset.remHdel.split("|"); this.reminderCall({ action: "history_delete", reminder_id: id, day }); }));
     root.querySelectorAll("[data-rem-del]").forEach(el => el.addEventListener("click", () => this.reminderCall({ action: "delete", reminder_id: el.dataset.remDel })));
   }
 }
@@ -7123,9 +7193,10 @@ Object.assign(TEXT.de, {
   bvLine: "Jetzt {now} · erkannt als {kind} · Grenze {limit}", bvNote: "Der Typ ist eine Schätzung; liegt er falsch, ist auch die Grenze falsch. Ohne Angabe: {unknown} (zu wenige Tage oder eine Spannung, die zu keinem Typ passt).",
   bvType_cell15: "Einzelzelle 1,5 V (AA/AAA, Alkaline oder NiMH)", bvType_coin3: "3-V-Zelle (z. B. CR2032 oder 2 × AA)", bvType_lithium: "Lithium-Ionen-Zelle", bvType_cells3: "3 Zellen in Reihe (4,5 V)", bvType_cells4: "4 Zellen in Reihe (6 V)", bvType_block9: "9-V-Block", bvType_lead12: "12-V-Akku",
   btTitle: "Alle Batterien", btHint: "Stand, Verbrauch und die Prognose, wann eine Batterie die Grenze erreicht (bis 90 Tage).", btLoading: "Prognose wird berechnet …", btNoRecorder: "Ohne Recorder gibt es keine Prognose.",
-  remTitle: "Wartungserinnerungen", remHint: "Filter, Entkalken, Batteriewechsel: du trägst Name, Abstand und letztes Datum ein, Housekeeper sagt, wann es wieder fällig ist. Es ändert nichts in Home Assistant.", remNone: "Noch keine Erinnerung.",
-  remName: "Name (z. B. Wasserfilter)", remEvery: "alle", remDays: "Tage", remLast: "zuletzt am", remNote: "Notiz (z. B. Batterietyp CR2032)", remAdd: "Hinzufügen", remDone: "Erledigt", remDelete: "Löschen",
-  remLine: "Alle {interval} Tage · zuletzt {last} · fällig {due}", remOverdue: "{n} Tage überfällig", remIn: "in {n} Tagen", remInvalid: "Nicht gespeichert, bitte prüfen: {field}",
+  remTitle: "Wartungserinnerungen", remHint: "Filter, Entkalken, Batteriewechsel: du trägst Name, Abstand und Fälligkeit ein, Housekeeper sagt, wann es dran ist, und merkt sich, wann du es erledigt hast. Es ändert nichts in Home Assistant.", remEmpty: "Noch keine Erinnerung. Lege zum Beispiel den Wasserfilter oder den Rauchmelder-Test an.",
+  remName: "z. B. Wasserfilter", remNote: "z. B. Batterietyp CR2032", remAdd: "Hinzufügen", remSave: "Speichern", remCancel: "Abbrechen", remDone: "Erledigt", remDelete: "Löschen", remEdit: "Ändern", remNew: "+ Erinnerung hinzufügen",
+  remFName: "Name", remFEvery: "Abstand in Tagen", remFDue: "Fällig am", remFNote: "Notiz (optional)", remColName: "Name", remColEvery: "Abstand", remColLast: "Zuletzt erledigt", remColDue: "Fällig", remColActions: "Aktionen",
+  remEveryN: "alle {n} Tage", remSummary: "{n} Erinnerungen, {due} überfällig.", remHistory: "Historie · {n}× erledigt", remNoHistory: "Noch nie erledigt.", remHistoryOpen: "Historie aufklappen", remHistoryClose: "Historie zuklappen", remToday: "heute", remOverdue: "{n} Tage überfällig", remIn: "in {n} Tagen", remInvalid: "Nicht gespeichert, bitte prüfen: {field}",
   reminders: "Erinnerungen", remindersSubtitle: "Eigene Wartungstermine: Filter, Entkalken, Batteriewechsel.", actReminders: "Wartung fällig", actRemindersHint: "Eine eigene Erinnerung ist erreicht",
   relSetup: "Einrichtungsfehler: {n} in {days} Tagen, zuletzt {last}", relSetupNow: "Gerade im Zustand {state}", relSetupNote: "Aus den Scans gezählt, so fein wie das Scan-Intervall.",
   event_reminder_due: "Wartungserinnerung fällig",
@@ -7135,9 +7206,10 @@ Object.assign(TEXT.en, {
   bvLine: "Now {now} · recognised as {kind} · limit {limit}", bvNote: "The type is a guess; if it is wrong, so is the limit. Without a result: {unknown} (too few days or a voltage that fits no type).",
   bvType_cell15: "single 1.5 V cell (AA/AAA, alkaline or NiMH)", bvType_coin3: "3 V cell (e.g. CR2032 or 2 × AA)", bvType_lithium: "lithium-ion cell", bvType_cells3: "3 cells in series (4.5 V)", bvType_cells4: "4 cells in series (6 V)", bvType_block9: "9 V block", bvType_lead12: "12 V battery",
   btTitle: "All batteries", btHint: "Level, drain and the forecast of when a battery reaches the limit (up to 90 days).", btLoading: "Calculating the forecast …", btNoRecorder: "There is no forecast without a recorder.",
-  remTitle: "Maintenance reminders", remHint: "Filter, descaling, battery change: you enter a name, an interval and the last date, Housekeeper tells you when it is due again. It changes nothing in Home Assistant.", remNone: "No reminder yet.",
-  remName: "Name (e.g. water filter)", remEvery: "every", remDays: "days", remLast: "last done", remNote: "Note (e.g. battery type CR2032)", remAdd: "Add", remDone: "Done", remDelete: "Delete",
-  remLine: "Every {interval} days · last {last} · due {due}", remOverdue: "{n} days overdue", remIn: "in {n} days", remInvalid: "Not saved, please check: {field}",
+  remTitle: "Maintenance reminders", remHint: "Filter, descaling, battery change: you enter a name, an interval and the due date, Housekeeper tells you when it is due and keeps when you did it. It changes nothing in Home Assistant.", remEmpty: "No reminder yet. Add the water filter or the smoke detector test, for example.",
+  remName: "e.g. water filter", remNote: "e.g. battery type CR2032", remAdd: "Add", remSave: "Save", remCancel: "Cancel", remDone: "Done", remDelete: "Delete", remEdit: "Edit", remNew: "+ Add reminder",
+  remFName: "Name", remFEvery: "Interval in days", remFDue: "Due on", remFNote: "Note (optional)", remColName: "Name", remColEvery: "Interval", remColLast: "Last done", remColDue: "Due", remColActions: "Actions",
+  remEveryN: "every {n} days", remSummary: "{n} reminders, {due} overdue.", remHistory: "History · done {n}×", remNoHistory: "Never done yet.", remHistoryOpen: "Show history", remHistoryClose: "Hide history", remToday: "today", remOverdue: "{n} days overdue", remIn: "in {n} days", remInvalid: "Not saved, please check: {field}",
   reminders: "Reminders", remindersSubtitle: "Your own maintenance dates: filter, descaling, changing batteries.", actReminders: "Maintenance due", actRemindersHint: "One of your own reminders is reached",
   relSetup: "Setup failures: {n} in {days} days, last {last}", relSetupNow: "Currently in state {state}", relSetupNote: "Counted from the scans, as fine as the scan interval.",
   event_reminder_due: "maintenance reminder due",
