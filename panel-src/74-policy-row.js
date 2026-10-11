@@ -97,10 +97,16 @@ class PolicyRowMixin {
   }
 
   bindPolicyRow(root) {
-    root.querySelectorAll("[data-pol-open]").forEach(el => el.addEventListener("click", () => {
-      const key = el.dataset.polOpen, open = this.polOpen || [];
+    const toggle = key => {
+      const open = this.polOpen || [];
       this.polOpen = open.includes(key) ? open.filter(k => k !== key) : [...open, key];
       this.render();
+    };
+    root.querySelectorAll("[data-pol-open]").forEach(el => el.addEventListener("click", () => toggle(el.dataset.polOpen)));
+    // A click anywhere on the row folds it too; buttons, fields and the opened part keep their own clicks.
+    root.querySelectorAll("[data-pol-row]").forEach(el => el.addEventListener("click", ev => {
+      if (ev.target.closest("button, a, input, select, label, textarea, .poldetail")) return;
+      toggle(el.dataset.polRow);
     }));
     const find = key => (this.policies?.rules || []).flatMap(r => r.items.map(i => ({ ...i, rule: r.id }))).find(i => i.key === key);
     const refresh = (key, item) => {
