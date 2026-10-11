@@ -760,9 +760,9 @@ class HAHousekeeperPanel extends HTMLElement {
     this.bindBatteryCare(root);
     this.bindCriteriaHistory(root);
     this.bindBackupCleanup(root);
-    this.bindRename(root);
     this.bindDetailEdit(root);
     this.bindPolSel(root);
+    this.bindPolicyRow(root);
     this.bindCounter(root);
     this.bindPicker(root);
     root.querySelectorAll("[data-decide-open]").forEach(el => el.onclick = () => this.openDecide(el.dataset.decideOpen, el.dataset.decidePreset));

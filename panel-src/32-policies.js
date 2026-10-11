@@ -67,7 +67,13 @@ class PoliciesMixin {
     const decision = item.ignored && item.by === "user" ? `<small>${this.esc(this.decisionLabel(item))}</small>` : "";
     const form = this.decide?.key === item.key ? this.decideForm(item) : "";
     const box = this.polSelBox(item);
-    return `${box ? `<div class="rowwrap">${box}` : ""}<div class="row politem">${""}<span class="tile mute"><ha-icon icon="mdi:chevron-right"></ha-icon></span><span class="row-text">${item.object_type === "recorder" ? `<strong>${this.esc(item.name)}</strong>` : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong></button>`}${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}</span>${due}${pill}${button}</div>${box ? "</div>" : ""}${form}`;
+    const open = this.polIsOpen(item), main = this.polMainAction(item);
+    const label = this.esc(this.t(open ? "polCloseRow" : "polOpenRow"));
+    const chev = `<span class="tile mute"><button type="button" class="chevbtn" data-pol-open="${this.esc(item.key)}" aria-expanded="${open}" aria-label="${label}" title="${label}"><ha-icon icon="mdi:chevron-${open ? "down" : "right"}"></ha-icon></button></span>`;
+    // A row with a fix offers it as its button (it folds the row open); the other rows keep their hide button.
+    const act = main ? (open ? "" : `<button class="btn" data-pol-open="${this.esc(item.key)}">${this.t(main)}</button>`) : button;
+    const detail = open ? this.polDetail(item, !!main) : "";
+    return `${box ? `<div class="rowwrap">${box}` : ""}<div class="row politem${open ? " open" : ""}">${chev}<span class="row-text">${item.object_type === "recorder" ? `<strong>${this.esc(item.name)}</strong>` : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong></button>`}${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}${detail}</span>${due}${pill}${act}</div>${box ? "</div>" : ""}${form}`;
   }
 
   // One rule on the "Rules" tab: what it checks, how many violations, and its switch.

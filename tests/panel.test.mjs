@@ -751,7 +751,10 @@ test("policies: rules switch, violations list with hide buttons, hidden ones are
   el.viewTab = {}; el.policyShowHidden = true; el.render(); html = shadow.innerHTML;
   assert.ok(html.includes("light.c") && html.includes("hidden by label") && html.includes(">Show<"));
   assert.equal((html.match(/data-policy-ignore=/g) || []).length, 1, "only the user's own decision can be undone");
-  assert.equal((html.match(/data-decide-open=/g) || []).length, 2, "the others ask what to do; the label hides one");
+  assert.equal((html.match(/data-decide-open=/g) || []).length, 0, "a row with a fix offers it; hiding sits in the folded-open part");
+  assert.ok(html.includes(">Assign area<"));
+  el.polOpen = ["policy.entity_area|light.a|", "policy.entity_area|light.b|"]; el.render(); html = shadow.innerHTML;
+  assert.equal((html.match(/data-decide-open=/g) || []).length, 2, "folded open: the others ask what to do; the label hides one");
   await el.changePolicy({ type: "ha_housekeeper/set_policy", rule: "device_area", enabled: true });
   assert.equal(JSON.stringify(calls.map(c => c.type)), JSON.stringify(["ha_housekeeper/policies", "ha_housekeeper/set_policy", "ha_housekeeper/policies"]));
   el.policies = { available: true, enabled: 0, violations: 0, rules: [{ id: "entity_area", enabled: false, count: 0, ignored: 0, items: [] }] };
@@ -3719,20 +3722,23 @@ test("ticked policy violations get an area through a plan, by suggestion or by c
   assert.equal(el.view, "cleanup");
 });
 
-test("renaming strips the number or replaces text, shows the new IDs and plans one rename each", async () => {
+test("a violation row folds open to a rename that checks the name and plans one rename", async () => {
   const calls = [];
   const el = policyPanel(calls);
-  el.polSel = new Set(["kb", "kc"]);
-  el.bulk = { kind: "rename", mode: "strip", find: "", with: "", error: "" };
-  assert.ok(el.polSelBar().includes("light.hall") && el.polSelBar().includes("2 IDs change"));
-  await el.commitBulk();
-  assert.equal(JSON.stringify(calls[0].actions.map(a => [a.kind, a.object_id, a.target])),
-    JSON.stringify([["rename_entity", "light.hall_2", "light.hall"], ["rename_entity", "light.room_3", "light.room"]]));
-  el.polSel = new Set(["kb"]); el.bulk = { kind: "rename", mode: "replace", find: "hall", with: "flur", error: "" };
-  await el.commitBulk();
-  assert.equal(calls[1].actions[0].target, "light.flur_2");
-  el.polSel = new Set(["kb"]); el.bulk = { kind: "rename", mode: "replace", find: "", with: "", error: "" };
-  assert.ok(el.polSelBar().includes("no ID changes"));
+  el.data = { ...el.data, objects: [...(el.data.objects || []), { object_type: "entity", object_id: "light.hall", name: "Hall light", status: "active" }, { object_type: "entity", object_id: "light.room", name: "Old", status: "unavailable" }] };
+  const item = { object_type: "entity", object_id: "light.hall_2", name: "Hall", key: "kb", rule: "entity_id_suffix", ignored: false };
+  assert.equal(el.polMainAction(item), "polActRename");
+  assert.equal(el.polCheckText(item, "hall").tone, "bad");
+  assert.ok(el.polCheckText(item, "hall").text.includes("Hall light") && !el.polCheckText(item, "hall").dead);
+  assert.ok(el.polCheckText({ ...item, object_id: "light.room_2" }, "room").dead, "a name held by an unavailable entity points to the clean-up");
+  assert.equal(el.polCheckText(item, "Bad Id").tone, "bad");
+  assert.equal(el.polCheckText(item, "hall_wall").tone, "ok");
+  el.polOpen = ["kb"];
+  const html = el.polDetail(item, true);
+  assert.ok(html.includes("data-pol-id") && html.includes("data-pol-rename-go") && html.includes("disabled"), "taken: the plan button stays off");
+  el.polDraft(item).value = "hall_wall";
+  await el.makeDetailPlan({ kind: "rename_entity", object_id: item.object_id, target: `light.${el.polDraft(item).value}` });
+  assert.equal(calls[0].actions[0].target, "light.hall_wall");
 });
 
 test("the overview counts batteries that report volts as low too", () => {

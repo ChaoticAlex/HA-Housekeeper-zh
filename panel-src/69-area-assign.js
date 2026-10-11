@@ -24,7 +24,7 @@ class AreaAssignMixin {
   // The bar over the policy list: how many are ticked and what can be done with them.
   polSelBar() {
     const n = this.polSel?.size || 0;
-    return `<div class="toolbar${n ? "" : " nosel"}"><span class="date">${this.t("selectedCount", { count: n })}</span><button class="btn quiet" data-pol-sel-page>${this.t("selectPage")}</button><button class="btn quiet" data-pol-sel-clear ${n ? "" : "disabled"}>${this.t("clearSelection")}</button><span class="toolgap"></span><div class="fbtns"><button class="btn" data-pol-bulk="area" ${n ? "" : "disabled"}>${this.t("fselArea")}</button><button class="btn" data-pol-bulk="rename" ${n ? "" : "disabled"}>${this.t("fselRename")}</button></div></div>${this.bulk && ["area", "rename"].includes(this.bulk.kind) ? this.bulkForm() : ""}`;
+    return `<div class="toolbar${n ? "" : " nosel"}"><span class="date">${this.t("selectedCount", { count: n })}</span><button class="btn quiet" data-pol-sel-page>${this.t("selectPage")}</button><button class="btn quiet" data-pol-sel-clear ${n ? "" : "disabled"}>${this.t("clearSelection")}</button><span class="toolgap"></span>${n ? `<div class="fbtns"><button class="btn" data-pol-bulk="area">${this.t("fselArea")}</button></div>` : ""}</div>${this.bulk && this.bulk.kind === "area" ? this.bulkForm() : ""}`;
   }
 
   polSelBox(item) {

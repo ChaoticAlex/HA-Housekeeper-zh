@@ -77,7 +77,6 @@ class FindingStatusMixin {
     const b = this.bulk;
     if (!b) return "";
     if (b.kind === "area") return this.areaForm();
-    if (b.kind === "rename") return this.renameForm();
     if (b.kind === "label") {
       const labels = (this.data.objects || []).filter(o => o.object_type === "label").sort((x, y) => String(x.name).localeCompare(String(y.name)));
       if (!labels.length) return `<div class="polform bulkform"><small>${this.t("labelNone")}</small><button type="button" class="btn quiet" data-bulk-cancel>${this.t("cancelRun")}</button></div>`;
@@ -113,7 +112,6 @@ class FindingStatusMixin {
     if (!b) return;
     if (b.kind === "label") return this.makeLabelPlan();
     if (b.kind === "area") return this.makeAreaPlan();
-    if (b.kind === "rename") return this.makeRenamePlan();
     if (b.kind === "known" && !b.reason.trim()) { b.error = "decideNeedReason"; this.render(); return; }
     const keys = [...this.findSel].filter(key => this.data.findings.some(f => f.key === key && !f.ignored));
     try {

@@ -1233,6 +1233,7 @@ class StylesMixin {
       .sumline{display:flex;flex-wrap:wrap;gap:10px 26px;padding:12px 18px;margin-bottom:14px}.sumline span{display:grid;gap:3px;align-content:start}.sumline small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.sumline b{font-size:calc(13px*var(--hk-fs,1));font-weight:600}
       .tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--hk-border);overflow-x:auto;background:linear-gradient(to right,var(--hk-bg),transparent) left/36px 100% no-repeat local,linear-gradient(to left,var(--hk-bg),transparent) right/36px 100% no-repeat local,linear-gradient(to right,rgba(0,0,0,.16),transparent) left/10px 100% no-repeat scroll,linear-gradient(to left,rgba(0,0,0,.16),transparent) right/10px 100% no-repeat scroll}.tab{flex:none;padding:10px 14px;border:0;border-bottom:2px solid transparent;background:none;color:var(--hk-muted);white-space:nowrap}.tab em{font-style:normal;font-size:calc(11px*var(--hk-fs,1));padding:1px 6px;border-radius:10px;background:var(--hk-soft)}.tab[aria-selected="true"]{color:var(--hk-blue-text);border-bottom-color:var(--hk-blue);font-weight:600}
       .needgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:16px}.needtile{display:flex;flex-direction:column;justify-content:center;gap:4px;height:92px;padding:0 16px;border:1px solid var(--hk-border);border-radius:14px;background:var(--hk-soft);min-width:0}.needtile b{font-size:calc(28px*var(--hk-fs,1));line-height:1;font-variant-numeric:tabular-nums}.needtile span{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.needtile.miss{border-style:dashed}.needtile.miss b{color:var(--hk-amber)}.needsplit{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--hk-border)}.needsplit>div{padding:12px 16px;min-width:0}.needsplit>div+div{border-left:1px solid var(--hk-border)}.needsplit:empty{display:none}.needsplit h3{margin:0 0 6px;font-size:calc(12px*var(--hk-fs,1));letter-spacing:.04em;text-transform:uppercase;color:var(--hk-muted)}.needsplit ul{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:calc(14px*var(--hk-fs,1))}.needsplit li span,.needsplit li.muted{color:var(--hk-muted)}.needsplit li span::before{content:"· "}.tablewrap.lt.batt .iconbtn{padding:3px 6px;margin-left:4px;--mdc-icon-size:16px}.linkbtn{border:0;background:none;padding:0;font:inherit;color:var(--hk-text);cursor:pointer;text-decoration:underline;text-decoration-color:var(--hk-border)}.linkbtn:hover{text-decoration-color:currentColor}.tablewrap.lt.batt .lvl{display:flex;align-items:center;gap:8px;min-width:130px}.tablewrap.lt.batt .lvl .bar{flex:1;height:7px;border-radius:4px;background:var(--hk-border);overflow:hidden;min-width:48px}.tablewrap.lt.batt .lvl .bar i{display:block;height:100%}.tablewrap.lt.batt .red{color:var(--hk-red)}.tablewrap.lt.batt .amber{color:var(--hk-amber)}.tablewrap.lt.batt .green{color:var(--hk-green)}.tablewrap.lt.batt td .btedit{display:flex;flex-wrap:wrap;gap:6px;white-space:normal}.tablewrap.lt.batt .btedit label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.tablewrap.lt.batt .bkedit{padding:0;background:none;border:0}.tablewrap.lt.batt .bkedit .factnote{display:none}.tablewrap.lt.batt .btn.miss{border-style:dashed;color:var(--hk-amber)}.tablewrap.lt.batt td:last-child{text-align:right}@media(max-width:700px){.needsplit{grid-template-columns:1fr}.needsplit>div+div{border-left:0;border-top:1px solid var(--hk-border)}}.bkedit{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 16px 12px 62px;background:var(--hk-soft);border-bottom:1px solid var(--hk-border)}.bkedit select,.bkrow select{padding:5px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit;font-size:calc(13px*var(--hk-fs,1))}.bkcancel{border:0;background:none;padding:4px 2px;font:inherit;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);cursor:pointer;text-decoration:underline}.bkrow{gap:8px;padding-right:12px;flex-wrap:wrap}.bkall,.bkask{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--hk-border)}.bkask{background:var(--hk-soft)}.rowwrap{display:flex;align-items:center;border-bottom:1px solid var(--hk-border)}.rowwrap:last-child{border-bottom:0}.rowwrap .row{border-bottom:0;flex:1;min-width:0}.selbox{margin:0 0 0 16px;flex:none}.statcell{display:flex;gap:10px;align-items:flex-start}.outcome{display:flex;gap:12px;align-items:center;margin:14px 16px 4px;padding:14px 16px;border-radius:12px;--oc:var(--hk-gray);color:color-mix(in srgb,var(--oc) 55%,var(--hk-text));background:color-mix(in srgb,var(--oc) 13%,transparent);border:1px solid color-mix(in srgb,var(--oc) 30%,transparent)}.outcome ha-icon{--mdc-icon-size:26px;flex:none}.outcome.ok{--oc:var(--hk-green)}.outcome.warn{--oc:var(--hk-amber)}.outcome.red{--oc:var(--hk-red)}.namecell{position:relative}.copybtn{position:absolute;right:0;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;padding:4px;border:1px solid var(--hk-border);border-radius:6px;background:var(--hk-surface);color:var(--hk-muted);cursor:pointer;opacity:0;--mdc-icon-size:14px}tr:hover .copybtn,.copybtn:focus-visible,.namecell:hover .copybtn{opacity:1}.copybtn.done{color:var(--hk-green);opacity:1}@media (hover:none){.copybtn{opacity:.7}}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;padding:10px 16px;border-radius:10px;background:var(--hk-text);color:var(--hk-bg);font-weight:600;box-shadow:var(--hk-sh2);pointer-events:none}.toast.bad{border-left:5px solid var(--hk-red);max-width:min(560px,calc(100vw - 32px))}.modepill{display:inline-flex;align-items:center;gap:5px;--mdc-icon-size:14px}.outcome small{display:block;font-weight:400;margin-top:2px}.visitline{display:flex;gap:8px;align-items:center;margin:0 0 12px}.visitline ha-icon{--mdc-icon-size:16px}.headsel{display:flex;gap:10px;align-items:center}.statcell .selbox{margin:3px 0 0}.statcell>div{min-width:0}.btcart,.btsuggest{margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 10%,transparent);border:1px solid color-mix(in srgb,var(--hk-blue) 30%,transparent)}.btcart strong{display:block;margin-bottom:2px}.btsuggest{background:color-mix(in srgb,var(--hk-green) 11%,transparent);border-color:color-mix(in srgb,var(--hk-green) 30%,transparent)}.btsuggest h3{margin:0 0 4px}.btrepl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}.btrepl .row-text{flex:1;min-width:200px}.btctl,.btedit{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 16px 0 8px}.btedit{flex-basis:100%;margin:0;padding:8px 16px 12px}.rowwrap:has(.btedit){flex-wrap:wrap}.chcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;padding:0 16px}.chcols>div{padding:8px 0}.chcols .big{font-size:22px;font-weight:700}.chbars{display:flex;gap:3px;align-items:flex-end;height:54px;padding:8px 16px 4px}.chbars i{flex:1;max-width:14px;min-width:3px;border-radius:3px 3px 0 0;background:var(--hk-green);display:block}.chbars i.m{background:var(--hk-red)}.chaxis{display:flex;justify-content:space-between;padding:0 16px 12px;color:var(--hk-muted);font-size:12px}.trimbox{margin:14px 16px 0;padding-top:14px;border-top:1px solid var(--hk-border)}.trimbox .actions{margin-top:8px}
+      .poldetail{display:grid;gap:12px;margin-top:10px}.poldetail h4{margin:0 0 4px;font-size:calc(11px*var(--hk-fs,1));font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--hk-muted)}.poldetail p{margin:0}.poledit{display:grid;gap:6px}.poldetail .inline{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.poldetail .inline input,.poldetail .inline select{height:36px;min-width:0}.poldetail .acts{display:flex;flex-wrap:wrap;gap:8px}.polcheck{font-size:calc(13px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted)}.polcheck.ok{color:var(--hk-ok,#3f7d4e)}.polcheck.bad{color:var(--hk-red,#b3392f)}.row.politem.open{background:var(--hk-soft)}
       .remform{display:grid;gap:14px;padding:16px;border-top:1px solid var(--hk-border);background:var(--hk-soft)}.remgrid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;align-items:start}.remfield{display:grid;grid-template-rows:auto 40px auto;gap:4px;font-size:calc(12px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted);min-width:0}.remfield input{height:40px;min-width:0}.remfield.full{grid-column:1/-1;grid-template-rows:auto 40px}.remchips{display:flex;gap:6px;flex-wrap:wrap}.remchips .chip{padding:2px 10px;font-size:calc(12px*var(--hk-fs,1))}.remhint{color:var(--hk-blue-text);font-weight:600}.remactions{display:flex;gap:14px;align-items:center}
       .tablewrap.rem td:first-child{white-space:normal}.chevbtn{display:inline-flex;vertical-align:middle;padding:0;margin-right:4px;border:0;background:none;color:var(--hk-muted);cursor:pointer}.remnote{display:block;margin-left:28px;color:var(--hk-muted)}.remact{text-align:right;white-space:nowrap}.remact .btn{margin-left:6px}.remhist td{padding:10px 16px 14px 44px;background:var(--hk-soft)}.remhist h3{margin:0 0 6px;font-size:calc(11px*var(--hk-fs,1));font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--hk-muted)}.remhist ul{display:grid;gap:4px;margin:0;padding:0;list-style:none}.remhist li{display:flex;gap:12px;align-items:center}.remhist li .linkbtn{margin-left:auto;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.remhist p{margin:0}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
       @media(max-width:700px){.remact{display:flex;flex-wrap:wrap;gap:8px;white-space:normal}.remact .btn{margin-left:0}.remgrid{grid-template-columns:1fr}.remfield.wide,.remfield.full{grid-column:auto}}
@@ -5458,7 +5459,13 @@ class PoliciesMixin {
     const decision = item.ignored && item.by === "user" ? `<small>${this.esc(this.decisionLabel(item))}</small>` : "";
     const form = this.decide?.key === item.key ? this.decideForm(item) : "";
     const box = this.polSelBox(item);
-    return `${box ? `<div class="rowwrap">${box}` : ""}<div class="row politem">${""}<span class="tile mute"><ha-icon icon="mdi:chevron-right"></ha-icon></span><span class="row-text">${item.object_type === "recorder" ? `<strong>${this.esc(item.name)}</strong>` : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong></button>`}${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}</span>${due}${pill}${button}</div>${box ? "</div>" : ""}${form}`;
+    const open = this.polIsOpen(item), main = this.polMainAction(item);
+    const label = this.esc(this.t(open ? "polCloseRow" : "polOpenRow"));
+    const chev = `<span class="tile mute"><button type="button" class="chevbtn" data-pol-open="${this.esc(item.key)}" aria-expanded="${open}" aria-label="${label}" title="${label}"><ha-icon icon="mdi:chevron-${open ? "down" : "right"}"></ha-icon></button></span>`;
+    // A row with a fix offers it as its button (it folds the row open); the other rows keep their hide button.
+    const act = main ? (open ? "" : `<button class="btn" data-pol-open="${this.esc(item.key)}">${this.t(main)}</button>`) : button;
+    const detail = open ? this.polDetail(item, !!main) : "";
+    return `${box ? `<div class="rowwrap">${box}` : ""}<div class="row politem${open ? " open" : ""}">${chev}<span class="row-text">${item.object_type === "recorder" ? `<strong>${this.esc(item.name)}</strong>` : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong></button>`}${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}${detail}</span>${due}${pill}${act}</div>${box ? "</div>" : ""}${form}`;
   }
 
   // One rule on the "Rules" tab: what it checks, how many violations, and its switch.
@@ -7597,7 +7604,6 @@ class FindingStatusMixin {
     const b = this.bulk;
     if (!b) return "";
     if (b.kind === "area") return this.areaForm();
-    if (b.kind === "rename") return this.renameForm();
     if (b.kind === "label") {
       const labels = (this.data.objects || []).filter(o => o.object_type === "label").sort((x, y) => String(x.name).localeCompare(String(y.name)));
       if (!labels.length) return `<div class="polform bulkform"><small>${this.t("labelNone")}</small><button type="button" class="btn quiet" data-bulk-cancel>${this.t("cancelRun")}</button></div>`;
@@ -7633,7 +7639,6 @@ class FindingStatusMixin {
     if (!b) return;
     if (b.kind === "label") return this.makeLabelPlan();
     if (b.kind === "area") return this.makeAreaPlan();
-    if (b.kind === "rename") return this.makeRenamePlan();
     if (b.kind === "known" && !b.reason.trim()) { b.error = "decideNeedReason"; this.render(); return; }
     const keys = [...this.findSel].filter(key => this.data.findings.some(f => f.key === key && !f.ignored));
     try {
@@ -9728,7 +9733,7 @@ class AreaAssignMixin {
   // The bar over the policy list: how many are ticked and what can be done with them.
   polSelBar() {
     const n = this.polSel?.size || 0;
-    return `<div class="toolbar${n ? "" : " nosel"}"><span class="date">${this.t("selectedCount", { count: n })}</span><button class="btn quiet" data-pol-sel-page>${this.t("selectPage")}</button><button class="btn quiet" data-pol-sel-clear ${n ? "" : "disabled"}>${this.t("clearSelection")}</button><span class="toolgap"></span><div class="fbtns"><button class="btn" data-pol-bulk="area" ${n ? "" : "disabled"}>${this.t("fselArea")}</button><button class="btn" data-pol-bulk="rename" ${n ? "" : "disabled"}>${this.t("fselRename")}</button></div></div>${this.bulk && ["area", "rename"].includes(this.bulk.kind) ? this.bulkForm() : ""}`;
+    return `<div class="toolbar${n ? "" : " nosel"}"><span class="date">${this.t("selectedCount", { count: n })}</span><button class="btn quiet" data-pol-sel-page>${this.t("selectPage")}</button><button class="btn quiet" data-pol-sel-clear ${n ? "" : "disabled"}>${this.t("clearSelection")}</button><span class="toolgap"></span>${n ? `<div class="fbtns"><button class="btn" data-pol-bulk="area">${this.t("fselArea")}</button></div>` : ""}</div>${this.bulk && this.bulk.kind === "area" ? this.bulkForm() : ""}`;
   }
 
   polSelBox(item) {
@@ -9766,71 +9771,21 @@ class AreaAssignMixin {
   }
 }
 
-// Renaming entity IDs with their references: the form under the selection bar, the plan, the row button. Mixed into the panel in 99-register.js.
+// The texts of renaming entity IDs with their references (plan states, reasons, checks); the form is in 71-detail-edit.js and 74-policy-row.js.
 Object.assign(TEXT.de, {
-  fselRename: "Umbenennen", state_rename: "Umbenennen mit Verweisen", renameMode: "Wie", renameStrip: "Zahl am Ende entfernen (_2, _3 …)", renameReplace: "Text ersetzen",
-  renameFind: "Suchen", renameWith: "Ersetzen durch", renameNoItems: "Wähle Entitäten aus.", renameNothing: "Mit dieser Angabe ändert sich keine ID.", renamePreview: "{count} IDs ändern sich:",
-  renameMore: "und {count} weitere", renameNote: "Die Verweise in Automationen, Skripten, Szenen und Dashboards ziehen mit. Das Backup davor ist klein, ohne Datenbank.",
+  state_rename: "Umbenennen mit Verweisen",
   reason_not_registered: "Die Entität steht nicht in der Registry und lässt sich nicht umbenennen.", reason_bad_new_id: "Die neue ID ist ungültig oder hat eine andere Domain.", reason_target_taken: "Die neue ID ist schon vergeben.",
   reason_rename_unwritable: "Ein Verweis steht in einer Quelle, die Housekeeper nicht schreiben darf (zum Beispiel ein Paket). Er würde brechen.", reason_rename_templates: "Eine Vorlage nennt die ID als Text. Sie würde brechen und muss von Hand angepasst werden.",
   check_entity_renamed: "Neue ID ist da, alte ist weg", confirmedSummaryRename: "{count} Entitäten bekommen eine neue ID, Verweise werden umgeschrieben. Rückgängig ist möglich, solange die Dateien unverändert sind.", result_renamed: "Umbenannt",
   abort_rename_failed: "Home Assistant konnte die ID nicht ändern; die Dateien wurden zurückgesetzt.", confirmWordRename: "UMBENENNEN",
 });
 Object.assign(TEXT.en, {
-  fselRename: "Rename", state_rename: "Rename with references", renameMode: "How", renameStrip: "Remove the trailing number (_2, _3 …)", renameReplace: "Replace text",
-  renameFind: "Find", renameWith: "Replace with", renameNoItems: "Select entities.", renameNothing: "With this input no ID changes.", renamePreview: "{count} IDs change:",
-  renameMore: "and {count} more", renameNote: "References in automations, scripts, scenes and dashboards follow. The backup before it is small, without the database.",
+  state_rename: "Rename with references",
   reason_not_registered: "The entity is not in the registry and cannot be renamed.", reason_bad_new_id: "The new ID is invalid or has another domain.", reason_target_taken: "The new ID is taken already.",
   reason_rename_unwritable: "A reference sits in a source Housekeeper may not write (a package, for example). It would break.", reason_rename_templates: "A template names the ID as text. It would break and has to be changed by hand.",
   check_entity_renamed: "New ID exists, old one is gone", confirmedSummaryRename: "{count} entities get a new ID, references are rewritten. Undo works while the files are unchanged.", result_renamed: "Renamed",
   abort_rename_failed: "Home Assistant could not change the ID; the files were put back.", confirmWordRename: "RENAME",
 });
-
-class RenameMixin {
-  // The new ID of one entity under the chosen rule, or "" when nothing changes. Only the part after the dot is touched.
-  renameTarget(id, b) {
-    const [domain, ...rest] = id.split("."), name = rest.join(".");
-    const next = b.mode === "replace" ? (b.find ? name.split(b.find).join(b.with || "") : name) : name.replace(/_\d+$/, "");
-    return next && next !== name ? `${domain}.${next}` : "";
-  }
-
-  renameItems() {
-    const b = this.bulk;
-    const ids = [...new Set(this.bulkTargets().filter(t => t.type === "entity").map(t => t.id))];
-    return ids.map(id => [id, this.renameTarget(id, b)]).filter(([, to]) => to);
-  }
-
-  renameForm() {
-    const b = this.bulk, items = this.renameItems();
-    const shown = items.slice(0, 5).map(([from, to]) => `<code>${this.esc(from)}</code> → <code>${this.esc(to)}</code>`).join("<br>");
-    const rest = items.length > 5 ? `<br>${this.t("renameMore", { count: items.length - 5 })}` : "";
-    const preview = items.length ? `<small class="factnote">${this.t("renamePreview", { count: items.length })}<br>${shown}${rest}</small>` : `<small class="factnote">${this.t("renameNothing")}</small>`;
-    return `<form class="polform bulkform" data-bulk-form><strong>${this.t("state_rename")}</strong>
-      <select data-bulk-rename-mode aria-label="${this.esc(this.t("renameMode"))}"><option value="strip" ${b.mode !== "replace" ? "selected" : ""}>${this.t("renameStrip")}</option><option value="replace" ${b.mode === "replace" ? "selected" : ""}>${this.t("renameReplace")}</option></select>
-      ${b.mode === "replace" ? `<input data-bulk-rename-find value="${this.esc(b.find || "")}" placeholder="${this.esc(this.t("renameFind"))}" aria-label="${this.esc(this.t("renameFind"))}"><input data-bulk-rename-with value="${this.esc(b.with || "")}" placeholder="${this.esc(this.t("renameWith"))}" aria-label="${this.esc(this.t("renameWith"))}">` : ""}
-      <button type="submit" class="btn primary" ${items.length && !this.planBusy ? "" : "disabled"}>${this.t("refactorPlan")}</button><button type="button" class="btn quiet" data-bulk-cancel>${this.t("cancelRun")}</button>
-      ${preview}<small class="factnote">${this.t("renameNote")}</small>
-      ${b.error ? `<small class="error" role="alert">${this.esc(this.t(b.error))}</small>` : ""}</form>`;
-  }
-
-  async makeRenamePlan() {
-    const b = this.bulk, items = this.renameItems();
-    if (!items.length) { b.error = "renameNothing"; this.render(); return; }
-    try {
-      if (!await this.newPlan(items.map(([object_id, target]) => ({ kind: "rename_entity", object_id, target })))) return;
-      this.bulk = null; this.polSel = new Set();
-    } catch (err) { b.error = ""; this.failed(err); }
-    this.render();
-  }
-
-  bindRename(root) {
-    const mode = root.querySelector("[data-bulk-rename-mode]");
-    if (mode) mode.onchange = ev => { this.bulk.mode = ev.target.value; this.render(); };
-    const find = root.querySelector("[data-bulk-rename-find]"), repl = root.querySelector("[data-bulk-rename-with]");
-    if (find) find.onchange = ev => { this.bulk.find = ev.target.value; this.render(); };
-    if (repl) repl.onchange = ev => { this.bulk.with = ev.target.value; this.render(); };
-  }
-}
 
 // Renaming one entity and giving an entity or device an area, from its detail page. Both end in a plan
 // like the bulk forms of the policy list. Mixed into the panel in 99-register.js.
@@ -10168,6 +10123,144 @@ class BatteryTableMixin {
     const sub = this.t(soon.length === 1 ? "needSub1" : "needSub", { n: this.formatNumber(soon.length), limit: this.formatNumber(limit) });
     const body = soon.length ? `<div class="needgrid">${tiles.join("")}</div><div class="needsplit">${list("needSoon", near)}${list("needLater", later)}</div>` : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t("needNone")}</div>`;
     return `<div class="panel"><div class="panelhead"><div><h2>${this.t("needTitle")}</h2>${soon.length ? `<p>${this.esc(sub)}</p>` : ""}</div></div>${this.batterySuggestions()}${body}<p class="factnote">${this.t("needNote")}</p></div>`;
+  }
+}
+
+// PolicyRowMixin: a row of the rule violations folds open to its reasons and actions: rename one entity, give
+// one entity or device an area, open it, hide it. Mixed into the panel in 99-register.js.
+Object.assign(TEXT.de, {
+  polOpenRow: "Details aufklappen", polCloseRow: "Details zuklappen", polWhy: "Warum", polActRename: "Umbenennen", polOpenObject: "Objekt öffnen", polToCleanup: "Zum Aufräumen",
+  polNameFree: "frei", polNameTaken: "vergeben von {name} ({id})", polNameTakenDead: "vergeben: {id} ist nicht mehr verfügbar. Aufräumen gibt den Namen frei.", polNameSame: "unverändert",
+  polSuggestHint: "Vorschläge aus Name und Bereich:", polExpectedNote: "Die ID beginnt hier mit „{prefix}“.",
+});
+Object.assign(TEXT.en, {
+  polOpenRow: "Show details", polCloseRow: "Hide details", polWhy: "Why", polActRename: "Rename", polOpenObject: "Open object", polToCleanup: "To the clean-up",
+  polNameFree: "free", polNameTaken: "taken by {name} ({id})", polNameTakenDead: "taken: {id} is no longer available. Cleaning up frees the name.", polNameSame: "unchanged",
+  polSuggestHint: "Suggestions from the name and the area:", polExpectedNote: "Here the ID starts with “{prefix}”.",
+});
+
+const POL_RENAME_RULES = ["entity_id_suffix", "naming_scheme"];
+const POL_AREA_RULES = ["entity_area", "device_area"];
+const POL_ID_RULE = /^[a-z0-9_]+$/;
+
+class PolicyRowMixin {
+  polIsOpen(item) { return (this.polOpen || []).includes(item.key); }
+
+  // The one action a closed row offers besides hiding: the one that fixes what the rule found.
+  polMainAction(item) {
+    if (item.ignored) return "";
+    if (item.object_type === "entity" && POL_RENAME_RULES.includes(item.rule)) return "polActRename";
+    if (["entity", "device"].includes(item.object_type) && POL_AREA_RULES.includes(item.rule)) return "fselArea";
+    return "";
+  }
+
+  polSlug(text) {
+    return String(text || "").toLowerCase().replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss").replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+  }
+
+  // What the draft of one row starts with: the ID without the trailing number, or with the prefix the scheme expects.
+  polDraft(item) {
+    const edits = (this.polEdits ||= {});
+    if (!edits[item.key]) {
+      const name = item.object_id.split(".").slice(1).join(".");
+      const value = item.rule === "naming_scheme" && item.expected ? `${item.expected}${name}` : name.replace(/_\d+$/, "");
+      edits[item.key] = { value: value && value !== name ? value : name, area: "" };
+    }
+    return edits[item.key];
+  }
+
+  // Whether the new ID can be used: "bad" (characters), "same" (no change), "taken" (by `other`) or "free".
+  polNameCheck(item, value) {
+    const domain = item.object_id.split(".")[0];
+    if (!POL_ID_RULE.test(value)) return { state: "bad" };
+    if (`${domain}.${value}` === item.object_id) return { state: "same" };
+    const other = this.findObject(`entity:${domain}.${value}`);
+    return other ? { state: "taken", other } : { state: "free" };
+  }
+
+  polCheckText(item, value) {
+    const c = this.polNameCheck(item, value);
+    if (c.state === "bad") return { tone: "bad", text: this.t("deBadId") };
+    if (c.state === "same") return { tone: "", text: this.t("polNameSame") };
+    if (c.state === "free") return { tone: "ok", text: this.t("polNameFree") };
+    const dead = ["unavailable", "orphaned"].includes(c.other.status);
+    return { tone: "bad", text: dead ? this.t("polNameTakenDead", { id: c.other.object_id }) : this.t("polNameTaken", { name: c.other.name || c.other.object_id, id: c.other.object_id }), dead };
+  }
+
+  // Free names built from the entity's own name and its area, to click when the plain one is taken.
+  polSuggestions(item) {
+    const domain = item.object_id.split(".")[0], own = item.object_id.split(".").slice(1).join(".");
+    const base = own.replace(/_\d+$/, ""), obj = this.findObject(`${item.object_type}:${item.object_id}`);
+    const area = this.polSlug(obj ? this.areaName(obj) : "");
+    const out = [];
+    for (const v of [this.polSlug(item.name), area ? `${base}_${area}` : ""]) {
+      if (v && v !== own && !out.includes(v) && this.polNameCheck(item, v).state === "free") out.push(v);
+    }
+    return out.slice(0, 2).map(v => `${domain}.${v}`.split(".")[1]);
+  }
+
+  polRenameBlock(item) {
+    const d = this.polDraft(item), c = this.polCheckText(item, d.value), key = this.esc(item.key);
+    const blocked = !["free"].includes(this.polNameCheck(item, d.value).state) || this.planBusy;
+    const sugg = this.polSuggestions(item);
+    const hint = c.dead ? `<button type="button" class="btn small" data-jump="cleanup">${this.t("polToCleanup")}</button>` : "";
+    return `<div class="poledit"><label for="pol-id-${key}"><strong>${this.t("deNewId")}</strong></label><div class="inline"><span class="mono">${this.esc(item.object_id.split(".")[0])}.</span><input id="pol-id-${key}" data-pol-id="${key}" value="${this.esc(d.value)}" autocomplete="off" spellcheck="false"><span class="polcheck ${c.tone}" data-pol-check="${key}" role="status">${this.esc(c.text)}</span><button type="button" class="btn primary small" data-pol-rename-go="${key}" ${blocked ? "disabled" : ""}>${this.t("deRename")}</button>${hint}</div>${sugg.length ? `<div class="inline"><small class="factnote">${this.t("polSuggestHint")}</small>${sugg.map(s => `<button type="button" class="btn small mono" data-pol-sugg="${key}|${this.esc(s)}">${this.esc(s)}</button>`).join("")}</div>` : ""}<small class="factnote">${this.t("deRenameNote")}</small></div>`;
+  }
+
+  polAreaBlock(item) {
+    const obj = this.findObject(`${item.object_type}:${item.object_id}`), d = this.polDraft(item), key = this.esc(item.key);
+    const areas = (this.data.objects || []).filter(o => o.object_type === "area").sort((x, y) => String(x.name).localeCompare(String(y.name)));
+    if (!areas.length) return `<small class="factnote">${this.t("areaNone")}</small>`;
+    return `<div class="poledit"><label for="pol-area-${key}"><strong>${this.t("deArea")}</strong></label><div class="inline"><select id="pol-area-${key}" data-pol-area="${key}"><option value="">${this.t("areaSuggest")}</option>${areas.map(a => `<option value="${this.esc(a.object_id)}" ${d.area === a.object_id ? "selected" : ""}>${this.esc(a.name)}</option>`).join("")}</select><button type="button" class="btn primary small" data-pol-area-go="${key}" ${this.planBusy || !obj ? "disabled" : ""}>${this.t("deAssign")}</button></div><small class="factnote">${this.t("areaNote")}</small></div>`;
+  }
+
+  // The folded-open part of a row: why, the fix that belongs to the rule, then open and hide.
+  polDetail(item, withHide) {
+    const why = `<div><h4>${this.t("polWhy")}</h4><p>${this.t(`polDesc_${item.rule}`)}${item.expected ? ` ${this.t("polExpectedNote", { prefix: item.expected })}` : ""}</p></div>`;
+    const fix = item.ignored ? "" : item.object_type === "entity" && POL_RENAME_RULES.includes(item.rule) ? this.polRenameBlock(item)
+      : ["entity", "device"].includes(item.object_type) && POL_AREA_RULES.includes(item.rule) ? this.polAreaBlock(item) : "";
+    const open = item.object_type === "recorder" ? "" : `<button type="button" class="btn small" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}">${this.t("polOpenObject")}</button>`;
+    const hide = !withHide || item.ignored || item.by === "label" ? "" : `<button type="button" class="btn small" data-decide-open="${this.esc(item.key)}">${this.t("polHide")}</button>`;
+    return `<div class="poldetail">${why}${fix}${open || hide ? `<div class="acts">${open}${hide}</div>` : ""}</div>`;
+  }
+
+  bindPolicyRow(root) {
+    root.querySelectorAll("[data-pol-open]").forEach(el => el.addEventListener("click", () => {
+      const key = el.dataset.polOpen, open = this.polOpen || [];
+      this.polOpen = open.includes(key) ? open.filter(k => k !== key) : [...open, key];
+      this.render();
+    }));
+    const find = key => (this.policies?.rules || []).flatMap(r => r.items.map(i => ({ ...i, rule: r.id }))).find(i => i.key === key);
+    const refresh = (key, item) => {
+      const d = this.polDraft(item), c = this.polCheckText(item, d.value);
+      const span = root.querySelector(`[data-pol-check="${CSS.escape(key)}"]`), go = root.querySelector(`[data-pol-rename-go="${CSS.escape(key)}"]`);
+      if (span) { span.textContent = c.text; span.className = `polcheck ${c.tone}`; }
+      if (go) go.disabled = this.polNameCheck(item, d.value).state !== "free" || !!this.planBusy;
+    };
+    root.querySelectorAll("[data-pol-id]").forEach(el => el.addEventListener("input", () => {
+      const item = find(el.dataset.polId);
+      if (!item) return;
+      this.polDraft(item).value = el.value.trim().toLowerCase();
+      refresh(el.dataset.polId, item);
+    }));
+    root.querySelectorAll("[data-pol-sugg]").forEach(el => el.addEventListener("click", () => {
+      const [key, value] = el.dataset.polSugg.split("|"), item = find(key);
+      if (!item) return;
+      this.polDraft(item).value = value;
+      this.render();
+    }));
+    root.querySelectorAll("[data-pol-rename-go]").forEach(el => el.addEventListener("click", () => {
+      const item = find(el.dataset.polRenameGo);
+      if (!item || this.polNameCheck(item, this.polDraft(item).value).state !== "free") return;
+      this.makeDetailPlan({ kind: "rename_entity", object_id: item.object_id, target: `${item.object_id.split(".")[0]}.${this.polDraft(item).value}` });
+    }));
+    root.querySelectorAll("[data-pol-area]").forEach(el => el.addEventListener("change", () => { const item = find(el.dataset.polArea); if (item) this.polDraft(item).area = el.value; }));
+    root.querySelectorAll("[data-pol-area-go]").forEach(el => el.addEventListener("click", () => {
+      const item = find(el.dataset.polAreaGo);
+      if (!item) return;
+      const area = this.polDraft(item).area;
+      this.makeDetailPlan({ kind: "set_area", object_id: item.object_id, ...(area ? { target: area } : {}) });
+    }));
   }
 }
 
@@ -10933,9 +11026,9 @@ class HAHousekeeperPanel extends HTMLElement {
     this.bindBatteryCare(root);
     this.bindCriteriaHistory(root);
     this.bindBackupCleanup(root);
-    this.bindRename(root);
     this.bindDetailEdit(root);
     this.bindPolSel(root);
+    this.bindPolicyRow(root);
     this.bindCounter(root);
     this.bindPicker(root);
     root.querySelectorAll("[data-decide-open]").forEach(el => el.onclick = () => this.openDecide(el.dataset.decideOpen, el.dataset.decidePreset));
@@ -11143,7 +11236,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, RenameMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }
