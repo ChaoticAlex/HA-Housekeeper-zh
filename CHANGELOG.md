@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.4.0 - 2026-10-11
+
+Defekte Referenzen in Dashboards sind jetzt lesbar und gruppiert.
+
+### Neu
+
+- **Defekte Dashboard-Referenzen:** Statt eines Pfads wie `views/12/sections/1/cards/0/…` stehen Tab, Abschnitt und Kartentyp da. Die Referenzen einer Karte sind eine aufklappbare Zeile, und die Diagnose hat eine Zeile je Karte.
+- **Vorschläge:** Zu einer fehlenden Entität nennt Housekeeper vorhandene mit ähnlichem Namen („Vielleicht: …“), bei Dashboards, Automationen, Skripten, Szenen und Helfern.
+- **Verwaiste Karten:** Ist mehr als die Hälfte der Referenzen einer Karte defekt, weist Housekeeper darauf hin, die Karte ganz zu entfernen.
+
+### Behoben
+
+- Lange Werte in der Diagnose werden nicht mehr mit „…“ abgeschnitten.
+
+### English
+
+Broken references in dashboards are now readable and grouped.
+
+#### New
+
+- **Broken dashboard references:** Instead of a path such as `views/12/sections/1/cards/0/…` you see the tab, section and card type. The references of one card are a single expandable row, and the diagnosis has one row per card.
+- **Suggestions:** For a missing entity Housekeeper names existing ones with a similar name (“Maybe: …”), in dashboards, automations, scripts, scenes and helpers.
+- **Abandoned cards:** When more than half of a card's references are broken, Housekeeper points out that the whole card can be removed.
+
+#### Fixed
+
+- Long values in the diagnosis are no longer cut off with “…”.
+
 ## 1.3.0 - 2026-10-11
 
 Ein Logbuch für eigene Einträge, Objektseiten mit Reitern „Aktionen“ und „Verlauf“, Batterien mit Prognose und Knopfzellen in Volt, Richtlinien direkt am Objekt und ein überarbeiteter Recorder.
