@@ -64,6 +64,10 @@ class BatteryTableMixin {
 
   batteryLevelCell(row, limit) {
     const { item, level, low, volt } = row;
+    if (volt && volt.percent !== undefined) {
+      const tone = low ? (volt.percent <= limit / 2 ? "red" : "amber") : volt.percent <= limit * 2 ? "amber" : "green";
+      return `<div class="lvl"><div class="bar"><i style="width:${Math.max(2, Math.min(100, volt.percent))}%;background:var(--hk-${tone})"></i></div><span class="lvlnum ${low ? "red" : ""}">${this.esc(`${this.voltNum(level)} · ${volt.percent} %`)}</span></div>`;
+    }
     if (volt) return `<span class="${low ? "red" : ""}">${this.esc(this.voltNum(level))}</span>`;
     if (level === null || level === undefined) return `<span class="pill ${low ? "red" : "mute"}">${this.t(low ? "batteryLow" : "btLevelOk")}</span>`;
     const tone = low ? (level <= limit / 2 ? "red" : "amber") : level <= limit * 2 ? "amber" : "green";

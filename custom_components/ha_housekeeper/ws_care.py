@@ -289,10 +289,13 @@ async def websocket_battery_trend(
         )
         return
     result = battery_trend.build({k: v for k, v in found.raw.items() if k in names}, names, limit)
+    types = {**noted_types(snapshot["objects"], wanted), **scanner.batteries.types}
     voltage = battery_voltage.build(
         {k: v for k, v in found.raw.items() if k in volts},
         {k: o["name"] for k, o in volts.items()},
         {k: battery_voltage.UNITS[o["unit"]] for k, o in volts.items()},
+        types,
+        limit,
     )
     result["replaced"] = scanner.batteries.open_replacements(result["replaced"])
     connection.send_result(
@@ -303,10 +306,7 @@ async def websocket_battery_trend(
                 "busy": False,
                 **result,
                 "voltage": voltage,
-                "types": {
-                    **noted_types(snapshot["objects"], wanted),
-                    **scanner.batteries.types,
-                },
+                "types": types,
             }
         ),
     )

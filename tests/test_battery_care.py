@@ -173,3 +173,16 @@ def test_a_decided_volt_sensor_gets_its_kind_although_its_class_is_voltage() -> 
     other = {"object_type": "entity", "object_id": "sensor.mains", "device_class": "voltage"}
     apply_battery_kinds([volt, other], {"sensor.starter_voltage": "other"})
     assert excluded(volt) and "battery_kind" not in other
+
+
+def test_a_named_coin_cell_gets_percent_from_its_curve_and_a_limit_at_the_percent() -> None:
+    from custom_components.ha_housekeeper import battery_voltage as bv
+
+    assert bv.curve_for("2× CR2450")[0] == "CR2450" and bv.curve_for("AAA") is None
+    curve = bv.CURVES["CR2450"]
+    assert bv.percent_at(curve, 3.3) == 100 and bv.percent_at(curve, 2.1) == 0
+    assert round(bv.percent_at(curve, 2.83)) == 36 and round(bv.volts_at(curve, 20), 2) == 2.75
+    days = [i * 86400.0 for i in range(10)]
+    series = {"sensor.a": [(t, 3.0 - 0.01 * i) for i, t in enumerate(days)]}
+    row = bv.build(series, {"sensor.a": "A"}, {"sensor.a": 1.0}, {"sensor.a": "CR2450"})["rows"][0]
+    assert row["cell"] == "CR2450" and row["limit"] == 2.75 and row["percent"] == 52

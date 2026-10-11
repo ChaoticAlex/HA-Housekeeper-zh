@@ -15,7 +15,7 @@ Object.assign(TEXT.en, {
   btReplTitleEntry: "Battery replaced: {name}", btReplDone: "Entered.", btReplDoneRem: "Entered, {count} reminder updated.", btReplFailed: "That did not work: {detail}",
 });
 
-const BATTERY_TYPES = ["2× AAA", "2× AA", "CR2032", "CR2450", "9 V"];
+const BATTERY_TYPES = ["2× AAA", "2× AA", "CR2016", "CR2032", "CR2450", "9 V"];
 
 class BatteryTypeMixin {
   // The device name when the sensor has one, else the entity name: what reminders are matched by.
