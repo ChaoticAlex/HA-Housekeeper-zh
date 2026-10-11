@@ -8,7 +8,7 @@ const BATTERY_GROUP_DAYS = 14;
 
 Object.assign(TEXT.de, {
   btColName: "Gerät", btColArea: "Bereich", btColType: "Typ", btColLevel: "Stand", btColSlope: "Verbrauch", btColLeft: "Leer in", btColAct: "Aktion", btTypeChange: "Typ ändern", btLevelOk: "in Ordnung",
-  btSlopeDay: "{n} %/Tag", btVoltDay: "{n} V/Tag", btSlopeStable: "stabil", btLeftLow: "unter Grenze", btLeftDays: "{n} Tage", btLeftFar: "> {n} Tage", btLeftStable: "stabil",
+  btSlopeDay: "{n} %/Tag", btVoltDay: "{n} V/Tag", btSlopeStable: "stabil", btLeftLow: "unter Grenze", btLeftDays: "{n} Tage", btLeftFar: "> {n} Tage", btLeftStable: "nicht absehbar",
   btFilterSoon: "Bald leer", btFilterUntyped: "Ohne Typ", btAllTypes: "Alle Typen",
   needTitle: "Benötigte Batterien in den nächsten 30 Tagen", needSub: "{n} Geräte fallen laut Prognose in 30 Tagen unter die Grenze von {limit} %.", needSub1: "1 Gerät fällt laut Prognose in 30 Tagen unter die Grenze von {limit} %.",
   needNone: "Keine Batterie wird in den nächsten 30 Tagen leer.", needUntyped: "ohne Typ", needUntypedHint: "Typ in der Tabelle setzen", needSoon: "In den nächsten 14 Tagen", needLater: "In 15 bis 30 Tagen", needMore: "… {n} weitere in der Tabelle",
@@ -20,7 +20,7 @@ Object.assign(TEXT.de, {
 });
 Object.assign(TEXT.en, {
   btColName: "Device", btColArea: "Area", btColType: "Type", btColLevel: "Level", btColSlope: "Drain", btColLeft: "Empty in", btColAct: "Action", btTypeChange: "Change type", btLevelOk: "ok",
-  btSlopeDay: "{n} %/day", btVoltDay: "{n} V/day", btSlopeStable: "stable", btLeftLow: "below limit", btLeftDays: "{n} days", btLeftFar: "> {n} days", btLeftStable: "stable",
+  btSlopeDay: "{n} %/day", btVoltDay: "{n} V/day", btSlopeStable: "stable", btLeftLow: "below limit", btLeftDays: "{n} days", btLeftFar: "> {n} days", btLeftStable: "no forecast",
   btFilterSoon: "Empty soon", btFilterUntyped: "No type", btAllTypes: "All types",
   needTitle: "Batteries needed in the next 30 days", needSub: "{n} devices will fall below the limit of {limit} % within 30 days, by the forecast.", needSub1: "1 device will fall below the limit of {limit} % within 30 days, by the forecast.",
   needNone: "No battery runs out in the next 30 days.", needUntyped: "no type", needUntypedHint: "set the type in the table", needSoon: "In the next 14 days", needLater: "In 15 to 30 days", needMore: "… {n} more in the table",
@@ -66,7 +66,7 @@ class BatteryTableMixin {
     const { item, level, low, volt } = row;
     if (volt && volt.percent !== undefined) {
       const tone = low ? (volt.percent <= limit / 2 ? "red" : "amber") : volt.percent <= limit * 2 ? "amber" : "green";
-      return `<div class="lvl"><div class="bar"><i style="width:${Math.max(2, Math.min(100, volt.percent))}%;background:var(--hk-${tone})"></i></div><span class="lvlnum ${low ? "red" : ""}">${this.esc(`${this.voltNum(level)} · ${volt.percent} %`)}</span></div>`;
+      return `<div class="lvl"><div class="bar"><i style="width:${Math.max(2, Math.min(100, volt.percent))}%;background:var(--hk-${tone})"></i></div><span class="lvlnum ${low ? "red" : ""}">${volt.percent} %<small>${this.esc(this.voltNum(level))}</small></span></div>`;
     }
     if (volt) return `<span class="${low ? "red" : ""}">${this.esc(this.voltNum(level))}</span>`;
     if (level === null || level === undefined) return `<span class="pill ${low ? "red" : "mute"}">${this.t(low ? "batteryLow" : "btLevelOk")}</span>`;
