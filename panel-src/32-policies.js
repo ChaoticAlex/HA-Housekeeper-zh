@@ -70,9 +70,9 @@ class PoliciesMixin {
     const open = this.polIsOpen(item), main = this.polMainAction(item);
     const label = this.esc(this.t(open ? "polCloseRow" : "polOpenRow"));
     const chev = `<span class="tile mute"><button type="button" class="chevbtn" data-pol-open="${this.esc(item.key)}" aria-expanded="${open}" aria-label="${label}" title="${label}"><ha-icon icon="mdi:chevron-${open ? "down" : "right"}"></ha-icon></button></span>`;
-    // A row with a fix offers it as its button (it folds the row open); the other rows keep their hide button.
-    const act = main ? (open ? "" : `<button class="btn" data-pol-open="${this.esc(item.key)}">${this.t(main)}</button>`) : button;
-    const detail = open ? this.polDetail(item, !!main) : "";
+    // A row with a fix offers it as its button (it folds the row open); the other rows keep their hide button; an opened row has it next to "open object".
+    const act = open ? "" : main ? `<button class="btn" data-pol-open="${this.esc(item.key)}">${this.t(main)}</button>` : button;
+    const detail = open ? this.polDetail(item, button) : "";
     return `${box ? `<div class="rowwrap">${box}` : ""}<div class="row politem${open ? " open" : ""}" data-pol-row="${this.esc(item.key)}">${chev}<span class="row-text">${item.object_type === "recorder" || compact ? `<strong>${this.esc(item.name)}</strong>` : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong></button>`}${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}${detail}</span>${due}${pill}${act}</div>${box ? "</div>" : ""}${form}`;
   }
 

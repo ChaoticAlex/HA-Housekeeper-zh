@@ -5490,9 +5490,9 @@ class PoliciesMixin {
     const open = this.polIsOpen(item), main = this.polMainAction(item);
     const label = this.esc(this.t(open ? "polCloseRow" : "polOpenRow"));
     const chev = `<span class="tile mute"><button type="button" class="chevbtn" data-pol-open="${this.esc(item.key)}" aria-expanded="${open}" aria-label="${label}" title="${label}"><ha-icon icon="mdi:chevron-${open ? "down" : "right"}"></ha-icon></button></span>`;
-    // A row with a fix offers it as its button (it folds the row open); the other rows keep their hide button.
-    const act = main ? (open ? "" : `<button class="btn" data-pol-open="${this.esc(item.key)}">${this.t(main)}</button>`) : button;
-    const detail = open ? this.polDetail(item, !!main) : "";
+    // A row with a fix offers it as its button (it folds the row open); the other rows keep their hide button; an opened row has it next to "open object".
+    const act = open ? "" : main ? `<button class="btn" data-pol-open="${this.esc(item.key)}">${this.t(main)}</button>` : button;
+    const detail = open ? this.polDetail(item, button) : "";
     return `${box ? `<div class="rowwrap">${box}` : ""}<div class="row politem${open ? " open" : ""}" data-pol-row="${this.esc(item.key)}">${chev}<span class="row-text">${item.object_type === "recorder" || compact ? `<strong>${this.esc(item.name)}</strong>` : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong></button>`}${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}${detail}</span>${due}${pill}${act}</div>${box ? "</div>" : ""}${form}`;
   }
 
@@ -10290,13 +10290,12 @@ class PolicyRowMixin {
     return `<div class="poledit"><label for="pol-area-${key}"><strong>${this.t("deArea")}</strong></label><div class="inline"><select id="pol-area-${key}" data-pol-area="${key}"><option value="">${this.t("areaSuggest")}</option>${areas.map(a => `<option value="${this.esc(a.object_id)}" ${d.area === a.object_id ? "selected" : ""}>${this.esc(a.name)}</option>`).join("")}</select><button type="button" class="btn primary small" data-pol-area-go="${key}" ${this.planBusy || !obj ? "disabled" : ""}>${this.t("deAssign")}</button></div><small class="factnote">${this.t("areaNote")}</small></div>`;
   }
 
-  // The folded-open part of a row: why, the fix that belongs to the rule, then open and hide.
-  polDetail(item, withHide) {
+  // The folded-open part of a row: why, the fix that belongs to the rule, then open and hide (or show) side by side.
+  polDetail(item, hide) {
     const why = `<div><h4>${this.t("polWhy")}</h4><p>${this.t(`polDesc_${item.rule}`)}${item.expected ? ` ${this.t("polExpectedNote", { prefix: item.expected })}` : ""}</p></div>`;
     const fix = item.ignored ? "" : item.object_type === "entity" && POL_RENAME_RULES.includes(item.rule) ? this.polRenameBlock(item)
       : ["entity", "device"].includes(item.object_type) && POL_AREA_RULES.includes(item.rule) ? this.polAreaBlock(item) : "";
     const open = item.object_type === "recorder" ? "" : `<button type="button" class="btn small" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}">${this.t("polOpenObject")}</button>`;
-    const hide = !withHide || item.ignored || item.by === "label" ? "" : `<button type="button" class="btn small" data-decide-open="${this.esc(item.key)}">${this.t("polHide")}</button>`;
     return `<div class="poldetail">${why}${fix}${open || hide ? `<div class="acts">${open}${hide}</div>` : ""}</div>`;
   }
 
