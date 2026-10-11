@@ -2658,18 +2658,19 @@ test("findings that began with an update get a line, a tile and a filter", () =>
   assert.ok(el.findingsView().includes('data-finding-after="1"') && el.corrGroupsCard().includes("Update of hue"));
 });
 
-test("a device has a history tab with its steps and note; removed devices are listed in Maintenance", () => {
+test("a device has a history tab with its steps and no note; removed devices show their logbook entry in Maintenance", () => {
   const { el } = panel("en");
   el.data = DATA;
   const device = { object_type: "device", object_id: "d1", name: "Hub", status: "active" };
   assert.ok(el.detailTabs(device, "device:d1").some(([id]) => id === "history"));
-  el.life = new Map([["d1", { steps: [{ kind: "discovered", at: "2026-01-01T00:00:00+00:00" }, { kind: "replaced", at: "2026-02-01T00:00:00+00:00", from: "light.old", to: "light.new" }], unstable: "flapping", note: { text: "kept <b>", at: "x" } }]]);
+  el.life = new Map([["d1", { steps: [{ kind: "discovered", at: "2026-01-01T00:00:00+00:00" }, { kind: "replaced", at: "2026-02-01T00:00:00+00:00", from: "light.old", to: "light.new" }], unstable: "flapping" }]]);
   const html = el.lifeCard(device);
-  assert.ok(html.includes("Discovered") && html.includes("light.old → light.new") && html.includes("flapping") && html.includes("kept &lt;b&gt;") && !html.includes("<b>kept"));
+  assert.ok(html.includes("Discovered") && html.includes("light.old → light.new") && html.includes("flapping") && !html.includes("<textarea") && !html.includes("data-life-save"));
   el._removedRequested = true;
-  el.removed = [{ object_id: "d9", name: "Old hub", kind: "remove_device", at: "2026-03-01T00:00:00+00:00", note: "retired" }];
+  el.removed = [{ object_id: "d9", name: "Old hub", kind: "remove_device", at: "2026-03-01T00:00:00+00:00" }, { object_id: "d8", name: "Old plug", kind: "forget_device", at: "2026-03-02T00:00:00+00:00" }];
+  el.data = { ...DATA, notes: [{ id: "n1", title: "Device “Old plug” forgotten", at: "2026-03-02T00:00:00+00:00", target: "device:d8", note: "broken <b>", source: "housekeeper", ref: "forget_device:d8" }] };
   const list = el.removedCard();
-  assert.ok(list.includes("Old hub") && list.includes("Removed by a plan") && list.includes("retired"));
+  assert.ok(list.includes("Old hub") && list.includes("Removed by a plan") && list.includes("Device “Old plug” forgotten") && list.includes('data-note-edit="n1"') && list.includes("broken &lt;b&gt;") && !list.includes("<b>"));
 });
 
 test("the maintenance window is off until switched on, then shows the open step and builds a report", () => {

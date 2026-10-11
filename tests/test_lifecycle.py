@@ -1,4 +1,4 @@
-"""The life of a device: the steps from registry, journal and reliability, and the note that is kept."""
+"""The life of a device: the steps from registry, journal and reliability, """
 
 from __future__ import annotations
 
@@ -7,10 +7,7 @@ import pytest
 pytest.importorskip("homeassistant")
 pytest.importorskip("pytest_homeassistant_custom_component")
 
-from homeassistant.core import HomeAssistant  # noqa: E402
-
 from custom_components.ha_housekeeper.lifecycle import (  # noqa: E402
-    LifecycleStore,
     removed_devices,
     timeline,
 )
@@ -80,20 +77,3 @@ def test_the_timeline_holds_only_what_the_data_says_and_the_removed_list_is_newe
     assert result["unstable"] == "flapping" and result["steps"][-1]["to"] == "light.new"
     assert timeline(device, snapshot, plans, None)["unstable"] is None
     assert [d["object_id"] for d in removed_devices(plans)] == ["d8", "d9"]
-
-
-async def test_notes_are_short_cleared_by_empty_text_and_kept(
-    hass: HomeAssistant, hass_storage
-) -> None:
-    store = LifecycleStore(hass)
-    await store.async_load()
-    store.set_note("d1", "  replaced by the new hub  ", "2026-10-01T00:00:00+00:00")
-    with pytest.raises(ValueError):
-        store.set_note("d2", "x" * 201, "2026-10-01T00:00:00+00:00")
-    store.set_note("d3", "gone", "2026-10-01T00:00:00+00:00")
-    store.set_note("d3", "   ", "2026-10-01T00:00:00+00:00")
-    await store._store.async_save(store._data())
-    hass_storage["ha_housekeeper.lifecycle"]["data"]["notes"]["bad"] = {"text": 5, "at": "x"}
-    again = LifecycleStore(hass)
-    await again.async_load()
-    assert list(again.notes) == ["d1"] and again.notes["d1"]["text"] == "replaced by the new hub"

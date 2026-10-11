@@ -96,6 +96,7 @@ from .cleanup import (
 )
 from .const import DOMAIN, MAX_FILE_BACKUP, MAX_PLAN_SNAPSHOTS
 from .meter import analyse, prepare_meter, read_series, recorder_ready
+from .notes import NoteError
 from .protection import allows, allows_undo
 from .recorder_purge import (
     count_older,
@@ -122,6 +123,8 @@ TOKEN_TTL = timedelta(minutes=5)
 ID_FREE_TIMEOUT = 10.0  # seconds to wait until Home Assistant has removed a renamed entity's state
 STATISTIC_KEYS = ("state", "sum", "min", "max", "mean")
 _LOGGER = logging.getLogger(__name__)
+
+LOGBOOK_KINDS = ("remove_device", "forget_device")  # written to the logbook when done
 BACKUP_TIMEOUT = 30 * 60  # seconds; large installations can take a while
 
 
@@ -606,6 +609,8 @@ class CleanupRunner:
                 return
             action["result"] = {"state": "done", "at": _now().isoformat(), **result}
             _event(plan, event, object_id=object_id)
+            if action["kind"] in LOGBOOK_KINDS:
+                self._write_logbook(plan, action)
             if action.get("recorder"):
                 action["result"].update(await self._purge_after_removal(plan, action))
             plan["executed"] = True
@@ -615,6 +620,27 @@ class CleanupRunner:
                 self._abort(plan, stopped, object_ids[index + 1 :], object_id)
                 return
         plan["status"] = "executed"
+
+    def _write_logbook(self, plan: dict[str, Any], action: dict[str, Any]) -> None:
+        """Enter a removed or forgotten device in the logbook; the entry outlives the device."""
+        german = str(self.hass.config.language).startswith("de")
+        name = str(action.get("name") or action["object_id"])
+        text = "Gerät „{}“ {}" if german else "Device “{}” {}"
+        forgot = action["kind"] == "forget_device"
+        words = ("vergessen", "entfernt") if german else ("forgotten", "removed")
+        try:
+            self.scanner.notes.upsert(
+                None,
+                text.format(name, words[not forgot])[:80],
+                _now().isoformat(),
+                f"device:{action['object_id']}",
+                "",
+                _now(),
+                source="housekeeper",
+                ref=f"{action['kind']}:{action['object_id']}"[:64],
+            )
+        except NoteError:
+            _LOGGER.debug("Logbook entry for %s not written", action["object_id"])
 
     async def _perform(self, plan: dict[str, Any], action: dict[str, Any]) -> tuple[dict, str]:
         """Carry out one checked action; returns what to journal and the event name."""

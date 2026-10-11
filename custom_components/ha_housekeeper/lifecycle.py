@@ -1,22 +1,13 @@
 """The life of a device as far as the data tells it: found, in quarantine, unstable, replaced, removed.
 
-Only reads, apart from one short note per device that you write yourself; it goes into Housekeeper's
-own store and never into Home Assistant. Nothing is invented: every step comes from the device
-registry, the journal of cleanup plans or the last calculated reliability.
+Only reads. Nothing is invented: every step comes from the device registry, the journal of cleanup
+plans or the last calculated reliability.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.storage import Store
-
-from .const import LIFECYCLE_STORAGE_KEY, STORAGE_VERSION
-
-SAVE_DELAY = 10
-NOTE_LIMIT = 200  # characters
-NOTE_COUNT = 500
 REMOVED_LIMIT = 200
 REMOVAL_KINDS = ("remove_device", "forget_device")
 DEVICE_STEPS = {
@@ -24,47 +15,6 @@ DEVICE_STEPS = {
     "remove_device": "removed",
     "forget_device": "removed",
 }
-
-
-class LifecycleStore:
-    """One short free-text note per device (why it was retired, what replaced it)."""
-
-    def __init__(self, hass: HomeAssistant) -> None:
-        self._store: Store[dict[str, Any]] = Store(hass, STORAGE_VERSION, LIFECYCLE_STORAGE_KEY)
-        self.notes: dict[str, dict[str, str]] = {}
-
-    async def async_load(self) -> None:
-        """Load the notes; anything that is not a short text under a text key is dropped."""
-        data = await self._store.async_load()
-        if not isinstance(data, dict) or not isinstance(data.get("notes"), dict):
-            return
-        for device_id, note in data["notes"].items():
-            if (
-                isinstance(device_id, str)
-                and isinstance(note, dict)
-                and isinstance(note.get("text"), str)
-                and isinstance(note.get("at"), str)
-                and 0 < len(note["text"]) <= NOTE_LIMIT
-            ):
-                self.notes[device_id] = {"text": note["text"], "at": note["at"]}
-        self.notes = dict(list(self.notes.items())[:NOTE_COUNT])
-
-    def set_note(self, device_id: str, text: str, at: str) -> None:
-        """Set or clear (empty text) the note of a device. Raises ``ValueError`` if it is too long."""
-        text = text.strip()
-        if len(text) > NOTE_LIMIT:
-            raise ValueError("too long")
-        if not text:
-            if self.notes.pop(device_id, None) is not None:
-                self._store.async_delay_save(self._data, SAVE_DELAY)
-            return
-        if device_id not in self.notes and len(self.notes) >= NOTE_COUNT:
-            raise ValueError("too many notes")
-        self.notes[device_id] = {"text": text, "at": at}
-        self._store.async_delay_save(self._data, SAVE_DELAY)
-
-    def _data(self) -> dict[str, Any]:
-        return {"notes": dict(sorted(self.notes.items()))}
 
 
 def _done_steps(plans: list[dict[str, Any]]):

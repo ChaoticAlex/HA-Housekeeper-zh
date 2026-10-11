@@ -72,7 +72,6 @@ from .hygiene import (
 from .ignored import IgnoreStore
 from .impact import apply_impact
 from .issues import async_sync_issues
-from .lifecycle import LifecycleStore
 from .maintenance import PreflightStore
 from .marks import MarkStore, apply_marks, mark_key
 from .notes import NoteStore
@@ -527,7 +526,6 @@ class InventoryScanner:
         self.preflight = PreflightStore(hass)
         self.attest = AttestStore(hass)
         self.events = EventLog(hass)
-        self.lifecycle = LifecycleStore(hass)
         self.marks = MarkStore(hass)
         self.stale = StaleStore(hass)
         self._started = datetime.now(UTC)
@@ -580,7 +578,6 @@ class InventoryScanner:
         await self.preflight.async_load()
         await self.attest.async_load()
         await self.events.async_load()
-        await self.lifecycle.async_load()
         await self.marks.async_load()
         await self.stale.async_load()
         await self.goals.async_load()

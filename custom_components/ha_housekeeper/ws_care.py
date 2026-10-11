@@ -549,14 +549,10 @@ async def websocket_lifecycle(
     msg: dict[str, Any],
     scanner: InventoryScanner,
 ) -> None:
-    """The life of one device (steps, state, note), or without a device the removed devices."""
+    """The life of one device (steps, state), or without a device the removed devices."""
     plans = scanner.journal.plans
     if "device_id" not in msg:
-        removed = [
-            {**d, "note": (scanner.lifecycle.notes.get(d["object_id"]) or {}).get("text")}
-            for d in removed_devices(plans)
-        ]
-        connection.send_result(msg["id"], _versioned({"removed": removed}))
+        connection.send_result(msg["id"], _versioned({"removed": removed_devices(plans)}))
         return
     snapshot = await scanner.async_get_snapshot()
     device = next(
@@ -571,7 +567,6 @@ async def websocket_lifecycle(
         connection.send_error(msg["id"], "not_found", "Unknown device")
         return
     result = timeline(device, snapshot, plans, scanner.replies)
-    result["note"] = scanner.lifecycle.notes.get(msg["device_id"])
     connection.send_result(msg["id"], _versioned(result))
 
 
@@ -727,31 +722,6 @@ def websocket_mark_clear(
 @websocket_api.require_admin
 @websocket_api.websocket_command(
     {
-        vol.Required("type"): f"{DOMAIN}/lifecycle_note",
-        vol.Required("device_id"): str,
-        vol.Required("text"): str,
-    }
-)
-@callback
-@with_scanner
-def websocket_lifecycle_note(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-    scanner: InventoryScanner,
-) -> None:
-    """Set or clear the note of a device. Only Housekeeper's own store changes."""
-    try:
-        scanner.lifecycle.set_note(msg["device_id"], msg["text"], datetime.now(UTC).isoformat())
-    except ValueError as err:
-        connection.send_error(msg["id"], "invalid_format", f"Not accepted: {err}")
-        return
-    connection.send_result(msg["id"], {"note": scanner.lifecycle.notes.get(msg["device_id"])})
-
-
-@websocket_api.require_admin
-@websocket_api.websocket_command(
-    {
         vol.Required("type"): f"{DOMAIN}/notify_set",
         vol.Required("enabled"): bool,
     }
@@ -829,7 +799,6 @@ def async_register(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_battery_kind_set)
     websocket_api.async_register_command(hass, websocket_battery_replaced)
     websocket_api.async_register_command(hass, websocket_lifecycle)
-    websocket_api.async_register_command(hass, websocket_lifecycle_note)
     websocket_api.async_register_command(hass, websocket_mark_set)
     websocket_api.async_register_command(hass, websocket_mark_clear)
     websocket_api.async_register_command(hass, websocket_set_stale_limit)
