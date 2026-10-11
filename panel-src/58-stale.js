@@ -27,7 +27,7 @@ class StaleMixin {
     const state = own === 0 ? this.t("staleStateOff") : own != null ? this.t("staleStateOwn", { hours }) : hours ? this.t("staleStateDefault", { hours }) : this.t("staleStateNone");
     const last = item.stale_last_activity ? ` · ${this.t("staleLast", { date: this.formatDate(item.stale_last_activity) })}` : "";
     const id = this.esc(item.object_id);
-    const controls = `<input type="number" min="1" max="8760" data-stale-hours value="${this.esc(own || hours || 48)}" aria-label="${this.esc(this.t("staleHours"))}">
+    const controls = `<span class="unitfield"><input type="number" min="1" max="8760" data-stale-hours value="${this.esc(own || hours || 48)}" aria-label="${this.esc(this.t("staleHours"))}"><span>${this.t("staleHours")}</span></span>
       <button type="submit" class="btn primary">${this.t("staleSet")}</button>
       <button type="button" class="btn" data-stale-off="${id}">${this.t("staleOff")}</button>
       ${own != null ? `<button type="button" class="btn quiet" data-stale-default="${id}">${this.t("staleDefault")}</button>` : ""}`;

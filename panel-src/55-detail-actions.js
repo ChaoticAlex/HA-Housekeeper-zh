@@ -52,23 +52,24 @@ class DetailActionsMixin {
     const recommended = [];
     if (findings) recommended.push(`<div class="actblock">${findings}</div>`);
     for (const it of items) recommended.push(this.actRow(it.label, this.t(it.hint), `<button class="btn${it.finding ? " primary" : ""}" ${it.attr}>${this.t("actOpen")}</button>`));
-    if (items.length) recommended.push(`<div class="actblock"><small class="factnote">${this.t("actPreviewOnly")}${broken ? ` ${this.t("actEditInHa")}` : ""}</small></div>`);
-    const labelControls = this.labelParts(item);
-    const name = [...this.detailEditRows(item), ...this.markRows(item), labelControls ? this.actRow(this.t("actLabelTitle"), this.t("actLabelHint"), labelControls) : ""];
+    if (broken) recommended.push(`<div class="actblock"><small class="factnote">${this.t("actEditInHa")}</small></div>`);
+    const labelControls = this.labelParts(item, true);
+    const name = [...this.detailEditRows(item), labelControls ? this.actRow(this.t("actLabelTitle"), this.t("actLabelHint"), labelControls) : ""];
+    const notes = this.markRows(item);
     const record = [...this.entityTrimRows(item), this.staleRow(item)];
-    const group = (title, rows) => { const html = rows.filter(Boolean).join(""); return html ? `<div class="actsec">${this.t(title)}</div>${html}` : ""; };
-    const body = [group("actGroupRecommended", recommended), group("actGroupName", name), group("actGroupRecord", record)].join("");
+    const group = (title, rows, sub = "") => { const html = rows.filter(Boolean).join(""); return html ? `<div class="actsec">${this.t(title)}${sub ? `<small>${sub}</small>` : ""}</div>${html}` : ""; };
+    const body = [group("actGroupRecommended", recommended, items.length ? this.t("actPreviewOnly") : ""), group("actGroupName", name), group("actGroupNotes", notes), group("actGroupRecord", record)].join("");
     return body ? `<section class="panel actpanel">${body}</section>` : `<p class="factnote">${this.t("actNone")}</p>`;
   }
 
   // The label list and its button; null when the object cannot take a label or no label exists.
-  labelParts(item) {
+  labelParts(item, short = false) {
     if (!LABEL_TYPES.includes(item.object_type)) return null;
     const labels = (this.data.objects || []).filter(o => o.object_type === "label").sort((x, y) => String(x.name).localeCompare(String(y.name)));
     if (!labels.length) return null;
     const chosen = this.actLabel && labels.some(l => l.object_id === this.actLabel) ? this.actLabel : labels[0].object_id;
     return `<select data-act-label aria-label="${this.esc(this.t("labelChoose"))}">${labels.map(l => `<option value="${this.esc(l.object_id)}" ${chosen === l.object_id ? "selected" : ""}>${this.esc(l.name)}</option>`).join("")}</select>
-      <button class="btn primary" data-act-label-plan="${this.esc(item.object_id)}" ${this.planBusy ? "disabled" : ""}>${this.t("actLabelPreview")}</button>`;
+      <button class="btn primary" data-act-label-plan="${this.esc(item.object_id)}" ${this.planBusy ? "disabled" : ""}>${this.t(short ? "actLabelPreviewShort" : "actLabelPreview")}</button>`;
   }
 
   labelForm(item) {
@@ -87,8 +88,10 @@ class DetailActionsMixin {
   }
 
   // One row of the tab "Actions": the name with its explanation, and the control.
+  // Long explanations are cut at two lines; "More" opens the rest.
   actRow(title, hint, control) {
-    return `<div class="actrow"><span class="acttext"><strong>${title}</strong>${hint ? `<small>${hint}</small>` : ""}</span>${control ? `<span class="actctl">${control}</span>` : ""}</div>`;
+    const long = hint && String(hint).length > 150;
+    return `<div class="actrow"><span class="acttext"><strong>${title}</strong>${hint ? `<small${long ? ' class="clamp"' : ""}>${hint}</small>` : ""}${long ? `<button type="button" class="linkbtn morebtn" data-act-more aria-expanded="false">${this.t("actMore")}</button>` : ""}</span>${control ? `<span class="actctl">${control}</span>` : ""}</div>`;
   }
 
   // The Cleanup view takes over from here: the assistant is filled in, the person looks at the preview and confirms.
@@ -116,6 +119,11 @@ class DetailActionsMixin {
   }
 
   bindDetailActions(root) {
+    root.querySelectorAll("[data-act-more]").forEach(el => el.onclick = () => {
+      const open = el.previousElementSibling?.classList.toggle("open");
+      el.setAttribute("aria-expanded", String(Boolean(open)));
+      el.textContent = this.t(open ? "actLess" : "actMore");
+    });
     root.querySelectorAll("[data-act-repair]").forEach(el => el.onclick = () => this.repairValues(el.dataset.actRepair));
     root.querySelectorAll("[data-act-meter]").forEach(el => el.onclick = () => this.startCleanup("migrate_meter", () => { this.meterOld = el.dataset.actMeter; this.meterNew = ""; }));
     root.querySelectorAll("[data-act-exchange]").forEach(el => el.onclick = () => this.startCleanup("exchange_device", () => { const ex = this.exchangeState(); ex.oldDev = el.dataset.actExchange; ex.newDev = ""; ex.result = null; ex.choices = {}; }));
@@ -126,14 +134,14 @@ class DetailActionsMixin {
   }
 }
 Object.assign(TEXT.de, {
-  actOpen: "Öffnen", tabActions: "Aktionen", nextStep: "Nächster Schritt", moreActions: "Weitere Aktionen", actGroupRecommended: "Empfohlen", actGroupName: "Benennen und einordnen", actGroupRecord: "Aufzeichnung und Überwachung", actNone: "Hier gibt es nichts zu tun.",
+  actOpen: "Öffnen", tabActions: "Aktionen", nextStep: "Nächster Schritt", moreActions: "Weitere Aktionen", actGroupRecommended: "Empfohlen", actGroupName: "Benennen und einordnen", actGroupNotes: "Notizen", actMore: "Mehr", actLess: "Weniger", actLabelPreviewShort: "Vorschau", actGroupRecord: "Aufzeichnung und Überwachung", actNone: "Hier gibt es nichts zu tun.",
   actionsTitle: "Was möchtest du tun?", actReplace: "Ersetzen:", actReplaceThis: "Durch andere Entität ersetzen", actDisable: "Deaktivieren planen",
   actLabelTitle: "Label ergänzen", actLabelHint: "Fügt ein vorhandenes Label hinzu, zum Beispiel zum Filtern. Du siehst zuerst eine Vorschau.", actLabelPreview: "Vorschau erstellen",
   actPreviewOnly: "Hier startest du nur eine Vorschau. Geändert wird erst, wenn du sie bestätigst.",
   actEditInHa: "Eine einzelne Referenz entfernt Housekeeper nicht selbst. Öffne die Automation in Home Assistant und bearbeite sie dort.",
 });
 Object.assign(TEXT.en, {
-  actOpen: "Open", tabActions: "Actions", nextStep: "Next step", moreActions: "More actions", actGroupRecommended: "Recommended", actGroupName: "Name and classify", actGroupRecord: "Recording and monitoring", actNone: "There is nothing to do here.",
+  actOpen: "Open", tabActions: "Actions", nextStep: "Next step", moreActions: "More actions", actGroupRecommended: "Recommended", actGroupName: "Name and classify", actGroupNotes: "Notes", actMore: "More", actLess: "Less", actLabelPreviewShort: "Preview", actGroupRecord: "Recording and monitoring", actNone: "There is nothing to do here.",
   actionsTitle: "What would you like to do?", actReplace: "Replace:", actReplaceThis: "Replace by another entity", actDisable: "Plan to disable",
   actLabelTitle: "Add a label", actLabelHint: "Adds an existing label, for example for filtering. You see a preview first.", actLabelPreview: "Create preview",
   actPreviewOnly: "This only starts a preview. Nothing changes until you confirm it.",
