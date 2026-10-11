@@ -2,6 +2,7 @@
 class BackupMixin {
   // `call` is the attest command or nothing (just read). Every reply is the full report.
   async loadBackup(call) {
+    if (call) this.bhForm = null;
     this.backupLoading = true; this.backupError = ""; this.render();
     try { this.backup = await this._hass.callWS(call || { type: "ha_housekeeper/backup_health" }); }
     catch (err) { this.backupError = err?.message || String(err); }
@@ -70,11 +71,15 @@ class BackupMixin {
   bhRow(c) {
     const tone = { ok: "ok", note: "warn", problem: "red", unknown: "mute" }[c.level] || "mute";
     const icon = { ok: "mdi:check", note: "mdi:alert-outline", problem: "mdi:close-octagon-outline", unknown: "mdi:help-circle-outline" }[c.level] || "mdi:help-circle-outline";
-    const row = `<div class="row rel bh"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`bh_${c.id}`)}</strong><small>${this.bhText(c)}</small></span><span class="pill ${tone}">${this.t(`bhLevel_${c.level}`)}</span></div>`;
-    if (c.id !== "emergency_kit" && c.id !== "restore_test") return row;
+    const attest = c.id === "emergency_kit" || c.id === "restore_test";
+    const open = attest && this.bhForm === c.id;
+    // One neutral button in the row opens the form; it names the step by the state of the confirmation.
+    const opener = attest ? `<button class="btn small" data-bh-open="${c.id}" aria-expanded="${open}">${this.t(c.values?.at ? "bhAttestAgain" : "bhAttestMark")}</button>` : "";
+    const row = `<div class="row rel bh${open ? " open" : ""}"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`bh_${c.id}`)}</strong><small>${this.bhText(c)}</small></span><span class="pill ${tone}">${this.t(`bhLevel_${c.level}`)}</span>${opener}</div>`;
+    if (!open) return row;
     const today = new Date().toISOString().slice(0, 10);
-    const clear = c.values?.at ? `<button class="btn" data-bh-clear="${c.id}">${this.t("bhAttestClear")}</button>` : "";
-    return `${row}<div class="pad bhattest"><label>${this.t("bhAttestDate")} <input type="date" data-bh-date="${c.id}" value="${today}" max="${today}"></label><button class="btn" data-bh-save="${c.id}">${this.t("bhAttestSave")}</button>${clear}</div>`;
+    const clear = c.values?.at ? `<button class="bhtake" data-bh-clear="${c.id}">${this.t("bhAttestClear")}</button>` : "";
+    return `${row}<div class="bhattest"><label>${this.t("bhAttestDate")} <input type="date" data-bh-date="${c.id}" value="${today}" max="${today}"></label><button class="btn small primary" data-bh-save="${c.id}">${this.t("bhAttestSave")}</button><button class="bhcancel" data-bh-cancel>${this.t("bhAttestCancel")}</button>${clear}</div>`;
   }
 
   bhBackups(list) {

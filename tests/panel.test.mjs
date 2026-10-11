@@ -1233,8 +1233,11 @@ test("the two confirmations are saved with their date and can be taken back", as
   el.shadowRoot.querySelectorAll = selector => (selector === "[data-bh-save]" ? [kit] : selector === "[data-bh-clear]" ? [restore] : []);
   el.shadowRoot.querySelector = selector => { const m = /data-bh-date="(\w+)"/.exec(selector); return m ? dates[m[1]] || null : null; };
   el.render();
-  assert.ok(shadow.innerHTML.includes('data-bh-save="emergency_kit"') && shadow.innerHTML.includes('data-bh-save="restore_test"'));
-  assert.ok(shadow.innerHTML.includes('data-bh-clear="restore_test"') && !shadow.innerHTML.includes('data-bh-clear="emergency_kit"'), "only a recorded one can be taken back");
+  assert.ok(shadow.innerHTML.includes('data-bh-open="emergency_kit"') && !shadow.innerHTML.includes("data-bh-save"), "the form opens only on a click");
+  el.bhForm = "emergency_kit"; el.render();
+  assert.ok(shadow.innerHTML.includes('data-bh-save="emergency_kit"') && !shadow.innerHTML.includes('data-bh-clear="emergency_kit"'), "only a recorded one can be taken back");
+  el.bhForm = "restore_test"; el.render();
+  assert.ok(shadow.innerHTML.includes('data-bh-clear="restore_test"'));
   sent.length = 0;
   kit.onclick();
   await Promise.resolve();
