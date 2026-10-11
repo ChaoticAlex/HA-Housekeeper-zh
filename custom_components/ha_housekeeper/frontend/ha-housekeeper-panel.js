@@ -1346,6 +1346,7 @@ class StylesMixin {
       .propgrid{align-items:start}.propcol{display:grid;gap:16px;align-content:start;min-width:0}.propgrid .pad{padding:0}.propgrid .kv{grid-template-columns:11rem minmax(0,1fr);gap:0;font-size:calc(14px*var(--hk-fs,1))}.propgrid .kv dt{padding:10px 0 10px 18px}.propgrid .kv dd{padding:10px 18px 10px 14px}.propgrid .kv dt:not(:first-of-type),.propgrid .kv dt:not(:first-of-type)+dd{border-top:1px solid var(--hk-border)}.propgrid .kv dd .rel{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));white-space:nowrap}.propgrid .kv .chip{padding:1px 10px;font-size:calc(13px*var(--hk-fs,1))}
       .row .recown{display:grid;gap:2px;justify-items:end;justify-self:end}.row .recown small{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.row .recown.lock{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));max-width:16rem;text-align:right}.row .recown .trimseg button{padding:5px 10px;font-size:calc(13px*var(--hk-fs,1))}.recsum{display:flex;flex-wrap:wrap;gap:6px}
       .hkdialog .dhead h2{font-size:calc(18px*var(--hk-fs,1))}.hkdialog .dbody label{font-size:calc(12px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted)}.hkdialog .dbody textarea{font:inherit;font-size:calc(14px*var(--hk-fs,1));padding:9px 11px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-surface);color:inherit;line-height:1.4;resize:vertical}.hkdialog .dbody input[type=text],.hkdialog .dbody input[type=datetime-local]{min-height:38px;padding:0 11px;border-radius:10px}.hkdialog .notechips .chip{padding:3px 10px;font-size:calc(12px*var(--hk-fs,1))}.hkdialog .notemeta{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;align-self:end;padding-bottom:9px;color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1))}.hkdialog .notemeta strong{color:var(--hk-text);font-weight:600}.hkdialog .notehint2{margin:0;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}
+      .hkdialog .remgrid{grid-template-columns:1fr 1fr}.hkdialog .remfield.wide,.hkdialog .remfield.full{grid-column:1/-1}.hkdialog .remfield input{width:100%;min-width:0;padding:0 11px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-surface);color:inherit;font:inherit;font-size:calc(14px*var(--hk-fs,1))}
       @media(max-width:700px){.propgrid .kv{grid-template-columns:minmax(0,1fr)}.propgrid .kv dt{padding:10px 18px 0}.propgrid .kv dd{padding:2px 18px 10px}.propgrid .kv dt:not(:first-of-type)+dd{border-top:0}.propgrid .kv dd .rel{white-space:normal}}
       .trimseg{width:max-content;max-width:100%;justify-self:start;align-self:start}.trimseg button:not(.on):hover{background:var(--hk-soft);color:var(--hk-text)}
       @media(min-width:761px){.actrow{grid-template-columns:minmax(0,1fr) minmax(0,380px)}.actctl,.actctl form,.actctl .deform{flex-wrap:nowrap;justify-content:flex-end}.actctl select,.actctl .deid{flex:1;width:auto}.actctl .deform .btn,.actctl .btn{width:auto}.actctl form{flex-wrap:wrap}}
@@ -7161,12 +7162,16 @@ class BatteryCareMixin {
     return `${main}<tr class="static remhist"><td colspan="5"><h3>${this.t("remHistory", { n: hist.length })}</h3>${list}</td></tr>`;
   }
 
-  // The form for a new or an edited reminder: labels above fields of one height; "due" follows the interval until it is set by hand.
-  remForm() {
+  // The dialog for a new or an edited reminder: labels above fields of one height; "due" follows the interval until it is set by hand.
+  remDialog() {
     const d = this.remDraft;
+    if (!d) return "";
     const field = (key, label, body, extra = "") => `<label class="remfield ${extra}"><span>${this.t(label)}</span>${body}</label>`;
     const chips = [30, 90, 180, 365].map(n => `<button type="button" class="chip${Number(d.interval_days) === n ? " on" : ""}" data-rem-chip="${n}">${n}</button>`).join("");
-    return `<div class="remform"><div class="remgrid">${field("name", "remFName", `<input data-rem-field="name" placeholder="${this.esc(this.t("remName"))}" value="${this.esc(d.name)}" maxlength="80">`, "wide")}${field("interval_days", "remFEvery", `<input data-rem-field="interval_days" type="number" min="1" max="3650" value="${this.esc(d.interval_days)}"><span class="remchips">${chips}</span>`)}${field("due", "remFDue", `<input data-rem-field="due" type="date" value="${this.esc(d.due)}"><span class="remhint" data-rem-hint>${this.esc(this.remWhen(this.remDaysLeft(d.due)))}</span>`)}${field("note", "remFNote", `<input data-rem-field="note" placeholder="${this.esc(this.t("remNote"))}" value="${this.esc(d.note)}" maxlength="200">`, "full")}</div>${this.remError ? `<div class="error">${this.esc(this.remError)}</div>` : ""}<div class="remactions"><button type="button" class="linkbtn" data-rem-cancel>${this.t("remCancel")}</button><button class="btn primary" data-rem-save>${this.t(d.id ? "remSave" : "remAdd")}</button></div></div>`;
+    return `<div class="hkmodal" data-rem-modal><form class="hkdialog" role="dialog" aria-modal="true" aria-labelledby="hk-rem-head" data-rem-form>
+      <div class="dhead"><h2 id="hk-rem-head">${this.t(d.id ? "remDialogEdit" : "remDialogNew")}</h2></div>
+      <div class="dbody"><div class="remgrid">${field("name", "remFName", `<input data-rem-field="name" placeholder="${this.esc(this.t("remName"))}" value="${this.esc(d.name)}" maxlength="80">`, "wide")}${field("interval_days", "remFEvery", `<input data-rem-field="interval_days" type="number" min="1" max="3650" value="${this.esc(d.interval_days)}"><span class="remchips">${chips}</span>`)}${field("due", "remFDue", `<input data-rem-field="due" type="date" value="${this.esc(d.due)}"><span class="remhint" data-rem-hint>${this.esc(this.remWhen(this.remDaysLeft(d.due)))}</span>`)}${field("note", "remFNote", `<input data-rem-field="note" placeholder="${this.esc(this.t("remNote"))}" value="${this.esc(d.note)}" maxlength="200">`, "full")}</div>${this.remError ? `<div class="error" role="alert">${this.esc(this.remError)}</div>` : ""}</div>
+      <div class="dfoot"><span></span><span class="dbtns"><button type="button" class="btn" data-rem-cancel>${this.t("remCancel")}</button><button type="submit" class="btn primary" data-rem-save>${this.t(d.id ? "remSave" : "remAdd")}</button></span></div></form></div>`;
   }
 
   // Own view under "Maintain": own reminders (filter, descaling, changing batteries) with a date when they are due.
@@ -7175,9 +7180,9 @@ class BatteryCareMixin {
   remindersCard() {
     const items = this.data.reminders || [];
     const overdue = items.filter(r => r.state === "due").length;
-    const head = `<div class="panelhead"><div><h2>${this.t("remTitle")}</h2><p>${items.length ? this.t("remSummary", { n: items.length, due: overdue }) : this.t("remHint")}</p></div>${this.remDraft ? "" : `<div class="actions"><button class="btn primary" data-rem-new>${this.t("remNew")}</button></div>`}</div>`;
-    const table = items.length ? `<div class="tablewrap lt rem"><table><thead><tr><th scope="col">${this.t("remColName")}</th><th scope="col">${this.t("remColEvery")}</th><th scope="col">${this.t("remColLast")}</th><th scope="col">${this.t("remColDue")}</th><th scope="col"><span class="sr">${this.t("remColActions")}</span></th></tr></thead><tbody>${items.map(r => this.reminderRow(r)).join("")}</tbody></table></div>` : this.remDraft ? "" : `<div class="emptymsg"><ha-icon icon="mdi:calendar-clock-outline"></ha-icon>${this.t("remEmpty")}</div>`;
-    return `<div class="panel">${head}${table}${this.remDraft ? this.remForm() : ""}</div>`;
+    const head = `<div class="panelhead"><div><h2>${this.t("remTitle")}</h2><p>${items.length ? this.t("remSummary", { n: items.length, due: overdue }) : this.t("remHint")}</p></div><div class="actions"><button class="btn primary" data-rem-new>${this.t("remNew")}</button></div></div>`;
+    const table = items.length ? `<div class="tablewrap lt rem"><table><thead><tr><th scope="col">${this.t("remColName")}</th><th scope="col">${this.t("remColEvery")}</th><th scope="col">${this.t("remColLast")}</th><th scope="col">${this.t("remColDue")}</th><th scope="col"><span class="sr">${this.t("remColActions")}</span></th></tr></thead><tbody>${items.map(r => this.reminderRow(r)).join("")}</tbody></table></div>` : `<div class="emptymsg"><ha-icon icon="mdi:calendar-clock-outline"></ha-icon>${this.t("remEmpty")}</div>`;
+    return `<div class="panel">${head}${table}</div>`;
   }
 
   async reminderCall(msg) {
@@ -7191,7 +7196,7 @@ class BatteryCareMixin {
     this.bindBatteryType(root);
     this.bindBatteryKind(root);
     root.querySelector("[data-bt-refresh]")?.addEventListener("click", () => this.loadBatteryTrend(true));
-    root.querySelector("[data-rem-new]")?.addEventListener("click", () => { this.remDraft = this.remBlank(); this.remError = ""; this.render(); });
+    root.querySelector("[data-rem-new]")?.addEventListener("click", () => { this.remDraft = this.remBlank(); this.remError = ""; this._remFocus = true; this.render(); });
     root.querySelector("[data-rem-cancel]")?.addEventListener("click", () => { this.remDraft = null; this.remError = ""; this.render(); });
     const syncForm = () => {
       const d = this.remDraft;
@@ -7214,7 +7219,14 @@ class BatteryCareMixin {
       if (input) input.value = this.remDraft.interval_days;
       syncForm();
     }));
-    root.querySelector("[data-rem-save]")?.addEventListener("click", () => {
+    const remModal = root.querySelector("[data-rem-modal]");
+    if (remModal) {
+      remModal.addEventListener("mousedown", ev => { if (ev.target === remModal) { this.remDraft = null; this.remError = ""; this.render(); } });
+      remModal.addEventListener("keydown", ev => { if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); this.remDraft = null; this.remError = ""; this.render(); } });
+      if (this._remFocus) { this._remFocus = false; remModal.querySelector('[data-rem-field="name"]')?.focus(); }
+    }
+    root.querySelector("[data-rem-form]")?.addEventListener("submit", ev => {
+      ev.preventDefault();
       const d = this.remDraft;
       this.reminderCall({ action: "save", ...(d.id ? { reminder_id: d.id } : {}), name: d.name, interval_days: Number(d.interval_days), due: d.due, note: d.note });
     });
@@ -7227,6 +7239,7 @@ class BatteryCareMixin {
     root.querySelectorAll("[data-rem-edit]").forEach(el => el.addEventListener("click", () => {
       const r = (this.data.reminders || []).find(x => x.id === el.dataset.remEdit);
       if (!r) return;
+      this._remFocus = true;
       this.remDraft = { id: r.id, name: r.name, interval_days: r.interval_days, due: r.due, dueTouched: true, note: r.note || "" };
       this.remError = "";
       this.render();
@@ -7250,7 +7263,7 @@ Object.assign(TEXT.de, {
   remTitle: "Wartungserinnerungen", remHint: "Filter, Entkalken, Batteriewechsel: du trägst Name, Abstand und Fälligkeit ein, Housekeeper sagt, wann es dran ist, und merkt sich, wann du es erledigt hast. Es ändert nichts in Home Assistant.", remEmpty: "Noch keine Erinnerung. Lege zum Beispiel den Wasserfilter oder den Rauchmelder-Test an.",
   remName: "z. B. Wasserfilter", remNote: "z. B. Batterietyp CR2032", remAdd: "Hinzufügen", remSave: "Speichern", remCancel: "Abbrechen", remDone: "Erledigt", remDelete: "Löschen", remEdit: "Ändern", remNew: "+ Erinnerung hinzufügen",
   remFName: "Name", remFEvery: "Abstand in Tagen", remFDue: "Fällig am", remFNote: "Notiz (optional)", remColName: "Name", remColEvery: "Abstand", remColLast: "Zuletzt erledigt", remColDue: "Fällig", remColActions: "Aktionen",
-  remEveryN: "alle {n} Tage", remSummary: "{n} Erinnerungen, {due} überfällig.", remHistory: "Historie · {n}× erledigt", remNoHistory: "Noch nie erledigt.", remHistoryOpen: "Historie aufklappen", remHistoryClose: "Historie zuklappen", remToday: "heute", remOverdue: "{n} Tage überfällig", remIn: "in {n} Tagen", remInvalid: "Nicht gespeichert, bitte prüfen: {field}",
+  remDialogNew: "Neue Erinnerung", remDialogEdit: "Erinnerung bearbeiten", remEveryN: "alle {n} Tage", remSummary: "{n} Erinnerungen, {due} überfällig.", remHistory: "Historie · {n}× erledigt", remNoHistory: "Noch nie erledigt.", remHistoryOpen: "Historie aufklappen", remHistoryClose: "Historie zuklappen", remToday: "heute", remOverdue: "{n} Tage überfällig", remIn: "in {n} Tagen", remInvalid: "Nicht gespeichert, bitte prüfen: {field}",
   reminders: "Erinnerungen", remindersSubtitle: "Eigene Wartungstermine: Filter, Entkalken, Batteriewechsel.", actReminders: "Wartung fällig", actRemindersHint: "Eine eigene Erinnerung ist erreicht",
   relSetup: "Einrichtungsfehler: {n} in {days} Tagen, zuletzt {last}", relSetupNow: "Gerade im Zustand {state}", relSetupNote: "Aus den Scans gezählt, so fein wie das Scan-Intervall.",
   event_reminder_due: "Wartungserinnerung fällig",
@@ -7263,7 +7276,7 @@ Object.assign(TEXT.en, {
   remTitle: "Maintenance reminders", remHint: "Filter, descaling, battery change: you enter a name, an interval and the due date, Housekeeper tells you when it is due and keeps when you did it. It changes nothing in Home Assistant.", remEmpty: "No reminder yet. Add the water filter or the smoke detector test, for example.",
   remName: "e.g. water filter", remNote: "e.g. battery type CR2032", remAdd: "Add", remSave: "Save", remCancel: "Cancel", remDone: "Done", remDelete: "Delete", remEdit: "Edit", remNew: "+ Add reminder",
   remFName: "Name", remFEvery: "Interval in days", remFDue: "Due on", remFNote: "Note (optional)", remColName: "Name", remColEvery: "Interval", remColLast: "Last done", remColDue: "Due", remColActions: "Actions",
-  remEveryN: "every {n} days", remSummary: "{n} reminders, {due} overdue.", remHistory: "History · done {n}×", remNoHistory: "Never done yet.", remHistoryOpen: "Show history", remHistoryClose: "Hide history", remToday: "today", remOverdue: "{n} days overdue", remIn: "in {n} days", remInvalid: "Not saved, please check: {field}",
+  remDialogNew: "New reminder", remDialogEdit: "Edit reminder", remEveryN: "every {n} days", remSummary: "{n} reminders, {due} overdue.", remHistory: "History · done {n}×", remNoHistory: "Never done yet.", remHistoryOpen: "Show history", remHistoryClose: "Hide history", remToday: "today", remOverdue: "{n} days overdue", remIn: "in {n} days", remInvalid: "Not saved, please check: {field}",
   reminders: "Reminders", remindersSubtitle: "Your own maintenance dates: filter, descaling, changing batteries.", actReminders: "Maintenance due", actRemindersHint: "One of your own reminders is reached",
   relSetup: "Setup failures: {n} in {days} days, last {last}", relSetupNow: "Currently in state {state}", relSetupNote: "Counted from the scans, as fine as the scan interval.",
   event_reminder_due: "maintenance reminder due",
@@ -10833,7 +10846,7 @@ class HAHousekeeperPanel extends HTMLElement {
     // A view that throws shows a message under the top bar instead of freezing the panel on the last page.
     let page;
     try { page = this.selected && this.data ? this.detail() : `${this.heading()}${this.content()}`; } catch (err) { page = this.renderFailed(err); }
-    const shell = `<div class="shell${this.dense ? " dense" : ""}"><div class="stickyhead">${this.topbar()}${this.safetyBar()}</div><main class="main">${page}</main>${this.noteDialog()}${this.pinDialog()}${this.confirmDialog()}<div class="sr-only" role="status" aria-live="polite">${this.esc(this.liveStatus())}</div></div>`;
+    const shell = `<div class="shell${this.dense ? " dense" : ""}"><div class="stickyhead">${this.topbar()}${this.safetyBar()}</div><main class="main">${page}</main>${this.noteDialog()}${this.pinDialog()}${this.remDialog()}${this.confirmDialog()}<div class="sr-only" role="status" aria-live="polite">${this.esc(this.liveStatus())}</div></div>`;
     // The style sheet is only parsed again when the theme changed; otherwise just the page is replaced.
     const root = this.shadowRoot, css = this.themeCss(), current = root.querySelector?.(".shell");
     let swapped = false;

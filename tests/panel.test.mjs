@@ -3072,7 +3072,7 @@ test("the batteries view shows the forecast with groups and the reminders, which
   el.remOpen = ["r1"];
   assert.ok(el.reminderRow({ id: "r1", name: "Water filter", interval_days: 90, last_done: "2026-07-01", history: ["2026-07-01"], due: "2026-09-29", days_left: -10, state: "due", note: "" }).includes("data-rem-hdel=\"r1|2026-07-01\""));
   el.remDraft = el.remBlank();
-  assert.ok(el.remindersCard().includes("data-rem-save") && !el.remindersCard().includes("data-rem-new"));
+  assert.ok(el.remDialog().includes("data-rem-save") && el.remDialog().includes("New reminder") && !el.remindersCard().includes("data-rem-save"), "the form is a dialog, the card keeps its button");
   const row = el.relRowBody({ title: "Hue", domain: "hue", entities: 3, availability: 99, setup: { count: 2, days: 7, last: "2026-10-08T10:00:00+00:00", state: "setup_retry" } });
   assert.ok(row.includes("Setup failures: 2 in 7 days") && row.includes("Currently in state setup_retry"));
 });
