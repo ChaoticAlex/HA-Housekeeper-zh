@@ -51,7 +51,7 @@ class MaintenanceMixin {
     const num = v => this.esc(this.formatNumber(v ?? 0));
     const avg = e => e.per_day_avg ?? e.per_day ?? 0;
     const columns = [
-      { key: "sel", label: "stormColSelect", sortable: false, cell: e => this.excludeBox(e.entity_id) },
+      { key: "sel", label: "stormColSelect", sortable: false, narrow: true, allBox: rows => this.excludeAllBox(rows.map(e => e.entity_id)), cell: e => this.excludeBox(e.entity_id) },
       { key: "name", label: "utName", cell: e => this.nameCell(e.name, e.entity_id) },
       { key: "share", label: "recorderColShare", dir: "desc", cell: e => `<span class="costshare">${this.sysShare(e.share, max)}<span>${this.esc(this.formatNumber(e.share))} %</span></span>` },
       { key: "states", label: "recorderColTotal", dir: "desc", cell: e => num(e.states) },

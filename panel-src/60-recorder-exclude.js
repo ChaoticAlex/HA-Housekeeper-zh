@@ -56,6 +56,13 @@ class ExcludeMixin {
     return `<input type="checkbox" class="selbox" data-exsel="${this.esc(entityId)}" ${this.excludeSel.has(entityId) ? "checked" : ""} aria-label="${this.esc(entityId)}">`;
   }
 
+  // The box in the head of the picking column: ticks or clears the entities of the page in view (the ids ride on the box).
+  excludeAllBox(ids) {
+    if (!ids.length) return "";
+    const n = ids.filter(id => this.excludeSel.has(id)).length;
+    return `<input type="checkbox" class="selbox" data-exsel-all="${this.esc(ids.join(","))}" ${n === ids.length ? "checked" : ""} ${n && n < ids.length ? "data-partial" : ""} aria-label="${this.esc(this.t("selectPage"))}">`;
+  }
+
   // The picked entities that are not excluded yet, in the order of the block.
   excludeChosen() {
     const done = this.excludedIds();
@@ -115,6 +122,7 @@ class ExcludeMixin {
     root.querySelectorAll("[data-trim-days]").forEach(el => el.onclick = () => { this.trimDays = Number(el.dataset.trimDays) || 14; this.render(); });
     root.querySelector("[data-trim-plan]")?.addEventListener("click", () => this.trimPlan());
     root.querySelectorAll("[data-exsel]").forEach(el => el.onchange = () => { el.checked ? this.excludeSel.add(el.dataset.exsel) : this.excludeSel.delete(el.dataset.exsel); this.render(); });
+    root.querySelectorAll("[data-exsel-all]").forEach(el => { el.indeterminate = el.hasAttribute("data-partial"); el.onchange = () => { el.dataset.exselAll.split(",").forEach(id => (el.checked ? this.excludeSel.add(id) : this.excludeSel.delete(id))); this.render(); }; });
     root.querySelector("[data-ex-suggested]")?.addEventListener("click", () => { (this._exSuggested || []).forEach(id => this.excludeSel.add(id)); this.render(); });
     root.querySelector("[data-ex-left]")?.addEventListener("click", () => { this.excludeLeft().ids.forEach(id => this.excludeSel.add(id)); this.render(); });
     root.querySelector("[data-ex-only]")?.addEventListener("click", () => { this.exOnlySug = !this.exOnlySug; this.pages.costs = 1; this.pages.stormentities = 1; this.render(); });

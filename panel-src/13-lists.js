@@ -184,18 +184,18 @@ class ListsMixin {
   }
 
   // A sortable table for a list built with lvState/refine: header buttons set sort and direction, the phone shows cards.
-  // columns: [{ key, label, cell(item) -> html, sortable, dir }]; rowAttrs(item) adds attributes to the row.
+  // columns: [{ key, label, cell(item) -> html, sortable, dir, narrow, allBox(rows) }]; narrow is a checkbox column with a fixed small width; allBox puts a box that ticks the page in its head; rowAttrs(item) adds attributes to the row.
   listTable(id, columns, rows, { rowAttrs = () => "", cls = "" } = {}) {
     const st = this.lv[id];
     columns = columns.filter((c, i) => !i || !this.colHidden(id, c.key));
     const head = columns.map(c => {
       const on = st.sort === c.key;
-      const inner = c.sortable === false ? this.t(c.label) : `<button type="button" class="thbtn" data-lsort="${id}|${c.key}|${c.dir || "asc"}">${this.t(c.label)}${on ? ` <span aria-hidden="true">${st.dir === "desc" ? "↓" : "↑"}</span>` : ""}</button>`;
-      return `<th scope="col" aria-sort="${on ? (st.dir === "desc" ? "descending" : "ascending") : "none"}">${c.headPrefix ? `<span class="headsel">${c.headPrefix()}${inner}</span>` : inner}</th>`;
+      const inner = c.allBox ? c.allBox(rows) : c.narrow ? `<ha-icon icon="mdi:checkbox-marked-outline" title="${this.esc(this.t(c.label))}"></ha-icon><span class="sr-only">${this.t(c.label)}</span>` : c.sortable === false ? this.t(c.label) : `<button type="button" class="thbtn" data-lsort="${id}|${c.key}|${c.dir || "asc"}">${this.t(c.label)}${on ? ` <span aria-hidden="true">${st.dir === "desc" ? "↓" : "↑"}</span>` : ""}</button>`;
+      return `<th scope="col"${c.narrow ? ' class="selcol"' : ""} aria-sort="${on ? (st.dir === "desc" ? "descending" : "ascending") : "none"}">${c.headPrefix ? `<span class="headsel">${c.headPrefix()}${inner}</span>` : inner}</th>`;
     }).join("");
     const body = rows.map(item => {
       const attrs = rowAttrs(item);
-      return `<tr ${attrs}>${columns.map((c, i) => `<td${i ? ` data-label="${this.esc(this.t(c.label))}"` : ""}>${c.cell(item)}</td>`).join("")}</tr>`;
+      return `<tr ${attrs}>${columns.map((c, i) => `<td${c.narrow ? ' class="selcol"' : ""}${i ? ` data-label="${this.esc(this.t(c.label))}"` : ""}>${c.cell(item)}</td>`).join("")}</tr>`;
     }).join("");
     return `<div class="tablewrap lt ${cls}"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
   }

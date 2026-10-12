@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Recorder, Lauteste Entitäten:** Die Liste ist jetzt eine sortierbare Tabelle wie „Auffälligkeiten“ (Name, Einordnung, Zeilen, Zeilen pro Tag, ohne neuen Zustand, Attribute, lauteste Stunde) statt vierzeiliger Karten; auf dem Telefon wird sie zu Karten. Im Kopf der Auswahlspalte markiert ein Kästchen alle Zeilen der Seite (auch bei „Auffälligkeiten“ und in der Kostenliste).
+- **Recorder:** Die Auswahlspalte der Tabellen („Auffälligkeiten“, Lauteste Entitäten) ist nur noch so breit wie das Kästchen; der Kopf zeigt ein Symbol statt des Worts „Auswahl“.
 - **Übersicht:** Neue Karte „Backup-Schutz“ neben System und Datenbank: letztes Backup, letzter automatischer Lauf und Gesamtergebnis der Prüfungen, mit Link zu den Details.
 - **Übersicht:** Hinweise, „Seit dem letzten Scan“ und der Inventarstatus stehen in einer dreispaltigen Zeile; darunter System und Datenbank.
 - **Übersicht:** „Seit deinem letzten Besuch“ steht jetzt in der Fußzeile von „Was muss ich jetzt tun?“, rechts neben den Wartungszielen, und nicht mehr lose zwischen den Karten. Der Text hatte „vor“ doppelt („vor vor 41 Min.“).

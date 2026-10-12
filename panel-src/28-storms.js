@@ -59,7 +59,7 @@ class StormsMixin {
     const kindsOf = g => g.items.map(f => f.kind);
     const present = ["storm", "attribute_flood", "no_new_state", "integration_share", "event_burst"].filter(k => groups.some(g => kindsOf(g).includes(k)));
     const columns = [
-      { key: "sel", label: "stormColSelect", sortable: false, cell: g => (g.type === "entities" ? this.excludeBox(g.items[0].entity_id) : "") },
+      { key: "sel", label: "stormColSelect", sortable: false, narrow: true, allBox: rows => this.excludeAllBox(rows.filter(g => g.type === "entities").map(g => g.items[0].entity_id)), cell: g => (g.type === "entities" ? this.excludeBox(g.items[0].entity_id) : "") },
       { key: "name", label: "utName", cell: g => { const chain = g.items.map(f => this.stormFollowers(f.followers)).find(Boolean); return `${this.nameCell(title(g), g.type === "entities" && g.items[0].entity_id !== title(g) ? g.items[0].entity_id : "")}${chain ? `<small class="muted">${this.esc(chain)}</small>` : ""}`; } },
       { key: "kinds", label: "stormColKinds", sortable: false, cell: g => g.items.map(f => `<span class="pill ${tone(f)}">${this.t(`stormKind_${f.kind}`)}</span>`).join(" ") },
       { key: "perDay", label: "stormColPerDay", dir: "desc", cell: g => num(perDay(g)) },
@@ -102,13 +102,33 @@ class StormsMixin {
     ].join("")}</div></details>`;
   }
 
-  stormEntityRow(item) {
-    const parts = [this.t("stormRows", { rows: this.formatNumber(item.rows), perDay: this.formatNumber(item.per_day) })];
-    if (item.no_new_state >= 0.1) parts.push(this.t("stormNoNewShort", { share: Math.round(item.no_new_state * 100) }));
-    if (item.attr_bytes !== null && item.attr_bytes !== undefined) parts.push(this.t("stormAttr", { kb: this.formatNumber(Math.round(item.attr_bytes / 102.4) / 10) }));
-    if (item.peak_hour) parts.push(this.t("stormPeak", { n: this.formatNumber(item.peak_hour) }));
-    const info = this.excludeInfo(item.entity_id, item.per_day, item.excluded);
-    return `<div class="rowwrap${item.excluded ? " exdone" : ""}${info.suggest ? " exsug" : ""}">${this.excludeBox(item.entity_id)}<button class="row" data-object="entity:${this.esc(item.entity_id)}"><span class="tile ${info.suggest ? "warn" : "mute"}"><ha-icon icon="mdi:database-clock-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(item.name || item.entity_id)}</strong>${this.rowId(item.entity_id, parts.join(" · "))}${info.why ? `<small class="exwhy">${this.esc(info.why)}</small>` : ""}</span><span class="extags">${info.tags}<span class="pill mute">${this.formatNumber(item.per_day)} ${this.t("stormPerDay")}</span></span></button></div>`;
+  // The loudest entities as the same kind of table as the findings: numbers in columns, sortable, with the box column.
+  stormEntitiesList(entities) {
+    const num = v => (v === null || v === undefined ? "–" : this.esc(this.formatNumber(v)));
+    const kb = item => (item.attr_bytes === null || item.attr_bytes === undefined ? null : Math.round(item.attr_bytes / 102.4) / 10);
+    const info = item => this.excludeInfo(item.entity_id, item.per_day, item.excluded);
+    const columns = [
+      { key: "sel", label: "stormColSelect", sortable: false, narrow: true, allBox: rows => this.excludeAllBox(rows.map(item => item.entity_id)), cell: item => this.excludeBox(item.entity_id) },
+      { key: "name", label: "utName", cell: item => this.nameCell(item.name || item.entity_id, item.name ? item.entity_id : "") },
+      { key: "hint", label: "stormColHint", sortable: false, cell: item => { const i = info(item); return `<span class="extags" ${i.why ? `title="${this.esc(i.why)}"` : ""}>${i.tags}</span>`; } },
+      { key: "rows", label: "stormColRows", dir: "desc", cell: item => num(item.rows) },
+      { key: "perDay", label: "stormColPerDay", dir: "desc", cell: item => num(item.per_day) },
+      { key: "noNew", label: "stormColNoNew", dir: "desc", cell: item => (item.no_new_state === null || item.no_new_state === undefined ? "–" : `${this.esc(this.formatNumber(Math.round(item.no_new_state * 100)))} %`) },
+      { key: "attr", label: "stormColAttr", dir: "desc", cell: item => num(kb(item)) },
+      { key: "peak", label: "stormColPeak", dir: "desc", cell: item => num(item.peak_hour) },
+    ];
+    return this.sysList("stormentities", entities, {
+      sort: "rows", dir: "desc",
+      sorts: [
+        { key: "rows", label: "stormColRows", dir: "desc", get: item => item.rows ?? 0 },
+        { key: "perDay", label: "stormColPerDay", dir: "desc", get: item => item.per_day ?? 0 },
+        { key: "name", label: "utName", dir: "asc", get: item => item.name || item.entity_id },
+        { key: "noNew", label: "stormColNoNew", dir: "desc", get: item => item.no_new_state ?? 0 },
+        { key: "peak", label: "stormColPeak", dir: "desc", get: item => item.peak_hour ?? 0 },
+      ],
+      text: item => `${item.name || ""} ${item.entity_id}`, tie: item => item.entity_id, empty: "stormNone", columns,
+      rowAttrs: item => `class="${[info(item).suggest ? "exsug" : "", item.excluded ? "exdone" : ""].filter(Boolean).join(" ")}" data-object="entity:${this.esc(item.entity_id)}" tabindex="0" role="button" aria-label="${this.esc(item.name || item.entity_id)}"`,
+    });
   }
 
   // A bar needs a text next to it: the percentage stands in the row, the bar is decoration.
@@ -170,9 +190,7 @@ class StormsMixin {
     const ofEntry = entry ? r.entities.filter(item => item.entry_id === entry.entry_id) : r.entities;
     const shownEntities = this.exOnlySug ? ofEntry.filter(item => this.excludeInfo(item.entity_id, item.per_day, item.excluded).suggest) : ofEntry;
     const entryBar = entry ? `<div class="toolbar exbar"><span class="date">${this.t("stormOnlyEntry", { title: this.esc(entry.title), shown: this.formatNumber(ofEntry.length), total: this.formatNumber(entry.entities) })}</span><button class="btn quiet" data-storm-entry-clear>${this.t("stormEntryClear")}</button></div>` : "";
-    const foundEntities = this.searchList("stormentities", shownEntities, item => [item.name, item.entity_id].join(" "));
-    const entityPage = this.paginate("stormentities", foundEntities.rows);
-    const table = r.entities.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormLoudest")}</h2><p>${this.t("stormLoudestHint")}</p></div></div>${this.excludeCard(r.entities.filter(item => this.excludeInfo(item.entity_id, item.per_day, item.excluded).suggest).map(item => item.entity_id))}${entryBar}${foundEntities.bar}${foundEntities.none}${entityPage.rows.map(item => this.stormEntityRow(item)).join("")}${entityPage.footer}</div>` : "";
+    const table = r.entities.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormLoudest")}</h2><p>${this.t("stormLoudestHint")}</p></div></div>${this.excludeCard(r.entities.filter(item => this.excludeInfo(item.entity_id, item.per_day, item.excluded).suggest).map(item => item.entity_id))}${entryBar}${this.stormEntitiesList(shownEntities)}</div>` : "";
     const foundShares = this.searchList("stormshares", r.integrations, item => [item.title, item.domain].join(" "));
     const shares = r.integrations.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormShares")}</h2><p>${this.t("stormSharesHint")}</p></div></div>${foundShares.bar}${foundShares.none}${foundShares.rows.map(item => this.stormShareRow(item)).join("")}</div>` : "";
     const topEvent = Math.max(...r.events.map(e => e.count), 1), eventTotal = r.event_total || r.events.reduce((sum, e) => sum + e.count, 0) || 1, eventDays = r.window_days || 1;
