@@ -247,3 +247,62 @@ def test_http_rules_report_only_public_networks_plain_http_and_the_login_bypass(
     assert (
         ids(run([], "http_external_url", http={"external_url": "https://home.example.org"})) == []
     )
+
+
+async def test_account_rules_name_age_and_logins_but_never_a_token_value() -> None:
+    from datetime import UTC, datetime, timedelta
+    from types import SimpleNamespace
+
+    from custom_components.ha_housekeeper.policies import auth_facts
+
+    now = datetime(2026, 10, 12, tzinfo=UTC)
+
+    def token(kind: str, days: int, name: str | None = None, used: int | None = None):
+        return SimpleNamespace(
+            token_type=kind,
+            client_name=name,
+            created_at=now - timedelta(days=days),
+            last_used_at=None if used is None else now - timedelta(days=used),
+            token="SECRET",
+            last_used_ip="10.0.0.9",
+        )
+
+    def user(uid: str, tokens: list, active: bool = True, system: bool = False):
+        return SimpleNamespace(
+            id=uid,
+            name=uid.title(),
+            is_active=active,
+            system_generated=system,
+            refresh_tokens={str(i): t for i, t in enumerate(tokens)},
+        )
+
+    users = [
+        user("anna", [token("normal", 400, used=3)]),
+        user("ben", [token("normal", 400, used=120)]),
+        user("cleo", []),  # never logged in
+        user("dienst", [token("long_lived_access_token", 500, "MCP")]),  # service account
+        user("emil", [token("long_lived_access_token", 200, "Skript")]),
+        user("fred", [token("long_lived_access_token", 5, "Neu")]),
+        user("gina", [token("long_lived_access_token", 50, "Alt")], active=False),
+        user("supervisor", [], system=True),
+    ]
+
+    async def async_get_users():
+        return users
+
+    hass = SimpleNamespace(auth=SimpleNamespace(async_get_users=async_get_users))
+    assert await auth_facts(hass, {"entity_area"}) is None
+    auth = await auth_facts(hass, {"user_inactive"})
+    assert "SECRET" not in str(auth) and "10.0.0.9" not in str(auth)
+    assert "supervisor" not in [u["id"] for u in auth["users"]]
+
+    def hits(rule: str) -> dict:
+        found = run([], rule, auth=auth, now=now)
+        return {i["object_id"]: i for i in found["items"]}
+
+    inactive = hits("user_inactive")
+    assert set(inactive) == {"ben", "cleo"} and inactive["ben"]["days"] == 120
+    assert "days" not in inactive["cleo"]
+    assert hits("user_old_tokens")["emil"]["also"] == ["Skript: 200"]
+    assert set(hits("user_old_tokens")) == {"dienst", "emil"}  # service accounts count here
+    assert hits("user_dead_tokens")["gina"]["also"] == ["Alt"]

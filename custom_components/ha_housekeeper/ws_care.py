@@ -29,7 +29,7 @@ from .marks import KINDS as MARK_KINDS
 from .marks import OBJECT_TYPES as MARK_TYPES
 from .notes import NoteError
 from .policies import RULES as POLICY_RULES
-from .policies import policies
+from .policies import auth_facts, policies
 from .protection import MODES as PROTECTION_MODES
 from .queries import cached_query
 from .reminders import ReminderError
@@ -113,6 +113,7 @@ async def websocket_policies(
             scanner.ignored,
             scanner.replies,
             scanner.low_battery_percent,
+            await auth_facts(hass, scanner.policies.enabled),
         )
     except Exception as err:
         connection.send_error(msg["id"], "policies_failed", f"{type(err).__name__}: {err}")
@@ -655,6 +656,7 @@ async def websocket_goals(
             scanner.ignored,
             scanner.replies,
             scanner.low_battery_percent,
+            await auth_facts(hass, scanner.policies.enabled),
         )["rules"]
         grown = growth(scanner.events.sizes, datetime.now(UTC).date())
         month = (datetime.now(UTC) - timedelta(days=30)).date().isoformat()

@@ -5577,6 +5577,7 @@ class PoliciesMixin {
   polItemNote(item) {
     if (item.keep_days !== undefined) return `<small>${this.esc(this.t("polRetention", { days: item.keep_days, size: this.formatBytes(item.db_bytes) }))}</small>`;
     if (item.also?.length) return `<small>${this.esc(this.t(TEXT[this.lang]?.[`polAlso_${item.rule}`] ? `polAlso_${item.rule}` : "polAlso", { ids: item.also.join(", ") }))}</small>`;
+    if (item.days !== undefined) return `<small>${this.esc(this.t("polDays", { n: this.formatNumber(item.days) }))}</small>`;
     if (item.rate !== undefined) return `<small>${this.esc(this.t("polRate", { n: this.formatNumber(item.rate) }))}</small>`;
     if (item.expected) return `<small>${this.esc(this.t("polExpected", { prefix: item.expected }))}</small>`;
     return "";
@@ -5617,7 +5618,7 @@ class PoliciesMixin {
     // A row with a fix offers it as its button (it folds the row open); the other rows keep their hide button; an opened row has it next to "open object".
     const act = open ? "" : main ? `<button class="btn" data-pol-open="${this.esc(item.key)}">${this.t(main)}</button>` : button;
     const detail = open ? this.polDetail(item, button) : "";
-    return `${box ? `<div class="rowwrap">${box}` : ""}<div class="row politem${open ? " open" : ""}" data-pol-row="${this.esc(item.key)}">${chev}<span class="row-text">${["recorder", "system"].includes(item.object_type) || compact ? `<strong>${this.esc(item.name)}</strong>` : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong></button>`}${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}${detail}</span>${due}${pill}${act}</div>${box ? "</div>" : ""}${form}`;
+    return `${box ? `<div class="rowwrap">${box}` : ""}<div class="row politem${open ? " open" : ""}" data-pol-row="${this.esc(item.key)}">${chev}<span class="row-text">${["recorder", "system", "user"].includes(item.object_type) || compact ? `<strong>${this.esc(item.name)}</strong>` : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong></button>`}${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}${detail}</span>${due}${pill}${act}</div>${box ? "</div>" : ""}${form}`;
   }
 
   // The violations of one object, on its overview: the same rows as in the policies view, so a fix can be made here.
@@ -7384,6 +7385,9 @@ Object.assign(TEXT.de, {
   polRule_http_trusted_networks: "Anmeldung ohne Passwort für ein öffentliches Netz", polDesc_http_trusted_networks: "Der Anmeldeweg „trusted_networks“ vertraut einem Netz, das öffentliche Adressen umfasst (ganz oder größer als ein privater Bereich), oder lässt die Anmeldung ganz aus (allow_bypass_login). Gewöhnliche private Netze wie 192.168.x.x werden nicht gemeldet. Nur ein Hinweis.", polAlso_http_trusted_networks: "{ids}",
   polRule_http_external_url: "Externe URL ohne Verschlüsselung", polDesc_http_external_url: "Die externe URL beginnt mit http:// und nennt einen Host außerhalb des Heimnetzes. Zugangsdaten und Sitzungen laufen dann unverschlüsselt. Nur ein Hinweis.", polAlso_http_external_url: "Host: {ids}",
   polRule_http_proxies: "Vertrauenswürdige Proxys: öffentliches Netz", polDesc_http_proxies: "trusted_proxies enthält ein Netz mit öffentlichen Adressen. Jeder Absender dort könnte die Adresse des Clients (X-Forwarded-For) beliebig angeben. Nur ein Hinweis.", polAlso_http_proxies: "{ids}",
+  polRule_user_inactive: "Benutzer lange nicht angemeldet", polDesc_user_inactive: "Ein aktiver Benutzer hat sich seit mindestens 90 Tagen nicht angemeldet oder noch nie. Konten, die nur Langzeit-Tokens halten (Dienstkonten), zählen nicht. Nur ein Hinweis; ob das Konto noch gebraucht wird, weißt nur du.", polDays: "Zuletzt angemeldet vor {n} Tagen",
+  polRule_user_old_tokens: "Alte Langzeit-Tokens", polDesc_user_old_tokens: "Ein aktives Konto hat Langzeit-Tokens, die mindestens 90 Tage alt sind. Home Assistant merkt sich nicht, wann ein Langzeit-Token benutzt wird; die Regel kann deshalb nur das Alter nennen, nicht, ob es noch gebraucht wird. Nie ein Token-Wert.", polAlso_user_old_tokens: "Alter in Tagen: {ids}",
+  polRule_user_dead_tokens: "Langzeit-Tokens abgeschalteter Konten", polDesc_user_dead_tokens: "Ein abgeschaltetes Konto hält noch Langzeit-Tokens. Sie funktionieren nicht mehr und können mit dem Konto gelöscht werden.", polAlso_user_dead_tokens: "Tokens: {ids}",
 });
 Object.assign(TEXT.en, {
   polRule_statistics_unit: "Statistics: unit no longer fits", polDesc_statistics_unit: "The unit of the entity differs from the unit of its long-term statistics and the recorder cannot convert it. New values then do not fit the old ones. Only metadata is read.", polAlso_statistics_unit: "Statistics → entity: {ids}",
@@ -7396,6 +7400,9 @@ Object.assign(TEXT.en, {
   polRule_http_trusted_networks: "Login without password for a public network", polDesc_http_trusted_networks: "The \"trusted_networks\" login trusts a network that includes public addresses (all of them, or bigger than a private range), or skips the login altogether (allow_bypass_login). Ordinary private networks such as 192.168.x.x are not reported. A hint only.", polAlso_http_trusted_networks: "{ids}",
   polRule_http_external_url: "External URL without encryption", polDesc_http_external_url: "The external URL starts with http:// and names a host outside the home network. Credentials and sessions then travel unencrypted. A hint only.", polAlso_http_external_url: "Host: {ids}",
   polRule_http_proxies: "Trusted proxies: public network", polDesc_http_proxies: "trusted_proxies contains a network with public addresses. Any sender there could name any client address (X-Forwarded-For). A hint only.", polAlso_http_proxies: "{ids}",
+  polRule_user_inactive: "User not logged in for a long time", polDesc_user_inactive: "An active user has not logged in for at least 90 days, or never has. Accounts that only hold long-lived tokens (service accounts) do not count. A hint only; whether the account is still needed is for you to say.", polDays: "Last login {n} days ago",
+  polRule_user_old_tokens: "Old long-lived tokens", polDesc_user_old_tokens: "An active account has long-lived tokens that are at least 90 days old. Home Assistant does not record when a long-lived token is used, so the rule can only name the age, not whether it is still needed. Never a token value.", polAlso_user_old_tokens: "Age in days: {ids}",
+  polRule_user_dead_tokens: "Long-lived tokens of switched-off accounts", polDesc_user_dead_tokens: "A switched-off account still holds long-lived tokens. They no longer work and can go with the account.", polAlso_user_dead_tokens: "Tokens: {ids}",
 });
 
 // BatteryCareMixin: the battery forecast and the maintenance reminders in the Batteries view.
@@ -11278,7 +11285,7 @@ class PolicyRowMixin {
     const why = `<div><h4>${this.t("polWhy")}</h4><p>${this.t(`polDesc_${item.rule}`)}${item.expected ? ` ${this.t("polExpectedNote", { prefix: item.expected })}` : ""}</p></div>`;
     const fix = item.ignored ? "" : item.object_type === "entity" && POL_RENAME_RULES.includes(item.rule) ? this.polRenameBlock(item)
       : ["entity", "device"].includes(item.object_type) && POL_AREA_RULES.includes(item.rule) ? this.polAreaBlock(item) : "";
-    const open = ["recorder", "system"].includes(item.object_type) ? "" : `<button type="button" class="btn small" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}">${this.t("polOpenObject")}</button>`;
+    const open = ["recorder", "system", "user"].includes(item.object_type) ? "" : `<button type="button" class="btn small" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}">${this.t("polOpenObject")}</button>`;
     return `<div class="poldetail">${why}${fix}${open || hide ? `<div class="acts">${open}${hide}</div>` : ""}</div>`;
   }
 

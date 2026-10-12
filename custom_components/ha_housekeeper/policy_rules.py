@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterable
+from datetime import datetime
 from ipaddress import ip_address, ip_network
 from typing import Any
 from urllib.parse import urlsplit
@@ -411,3 +412,55 @@ def http_proxies(http: dict[str, Any]):
     also = [net for net in http.get("trusted_proxies") or [] if _too_wide(net)]
     if also:
         yield _system_item("http_proxies", "trusted_proxies", also)
+
+
+ACCOUNT_DAYS = 90  # days without a login, or a token this old, from which a hint is worth it
+
+
+def _days_since(moment: datetime | None, now: datetime) -> int | None:
+    return None if moment is None else max(0, (now - moment).days)
+
+
+def user_inactive(auth: dict[str, Any], now: datetime):
+    """Active people who never logged in or have not for a long time.
+
+    Only tokens a person logs in with count. An account that holds nothing but long-lived tokens
+    is a service account that never logs in, so it is left out.
+    """
+    for user in auth.get("users") or []:
+        if not user["active"] or (user["tokens"] and not user["logins"]):
+            continue
+        days = _days_since(user["last_login"], now)
+        if days is None or days >= ACCOUNT_DAYS:
+            item = {"object_type": "user", "object_id": user["id"], "name": user["name"]}
+            yield item if days is None else {**item, "days": days}
+
+
+def user_old_tokens(auth: dict[str, Any], now: datetime):
+    """Active accounts with long-lived tokens that are old. Home Assistant does not record when
+    such a token is used, so this is the age, never a statement about use."""
+    for user in auth.get("users") or []:
+        old = [
+            f"{token['name']}: {_days_since(token['created'], now)}"
+            for token in user["tokens"]
+            if (_days_since(token["created"], now) or 0) >= ACCOUNT_DAYS
+        ]
+        if user["active"] and old:
+            yield {
+                "object_type": "user",
+                "object_id": user["id"],
+                "name": user["name"],
+                "also": old,
+            }
+
+
+def user_dead_tokens(auth: dict[str, Any], now: datetime):
+    """Switched-off accounts that still hold long-lived tokens; the tokens no longer work."""
+    for user in auth.get("users") or []:
+        if not user["active"] and user["tokens"]:
+            yield {
+                "object_type": "user",
+                "object_id": user["id"],
+                "name": user["name"],
+                "also": [token["name"] for token in user["tokens"]],
+            }

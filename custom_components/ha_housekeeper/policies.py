@@ -9,6 +9,7 @@ list of Housekeeper (the key is ``policy.<rule>|<object id>|``).
 from __future__ import annotations
 
 import re
+from datetime import UTC, datetime
 from typing import Any
 
 from homeassistant.core import HomeAssistant
@@ -58,6 +59,9 @@ RULES = (
     "http_trusted_networks",
     "http_external_url",
     "http_proxies",
+    "user_inactive",
+    "user_old_tokens",
+    "user_dead_tokens",
 )
 # Rules that wait for numbers the Recorder views keep; they never start a recorder query themselves.
 NEEDS_LOAD = ("state_rate", "recorder_unused")
@@ -274,6 +278,8 @@ def evaluate(
     labels_of = automation_labels or {}
     used = rules_more.referenced(snapshot.get("edges", []))
     exposed = extra.get("exposed") or {}
+    auth = extra.get("auth") or {}
+    now = extra.get("now") or datetime.now(UTC)
     found = {
         "entity_id_suffix": lambda: rules_more.entity_id_suffix(entities),
         "entity_id_address": lambda: rules_more.entity_id_address(entities),
@@ -298,6 +304,9 @@ def evaluate(
         "http_trusted_networks": lambda: rules_more.http_trusted_networks(extra.get("http") or {}),
         "http_external_url": lambda: rules_more.http_external_url(extra.get("http") or {}),
         "http_proxies": lambda: rules_more.http_proxies(extra.get("http") or {}),
+        "user_inactive": lambda: rules_more.user_inactive(auth, now),
+        "user_old_tokens": lambda: rules_more.user_old_tokens(auth, now),
+        "user_dead_tokens": lambda: rules_more.user_dead_tokens(auth, now),
         "recorder_unused": lambda: rules_more.recorder_unused(entities, rates or {}, used),
         "recorder_retention": lambda: rules_more.recorder_retention(extra.get("db") or {}),
         "statistics_unit": lambda: rules_more.statistics_issue(
@@ -359,7 +368,7 @@ def evaluate(
                     "resurfaced": key in (extra.get("due") or ()),
                     **{
                         k: item[k]
-                        for k in ("also", "expected", "rate", "keep_days", "db_bytes")
+                        for k in ("also", "expected", "rate", "keep_days", "db_bytes", "days")
                         if k in item
                     },
                 }
@@ -391,6 +400,7 @@ def policies(
     ignored: Any,
     replies: Any = None,
     battery_percent: int = 20,
+    auth: dict[str, Any] | None = None,
 ) -> PoliciesResult:
     """The result for the panel: the rules, how many objects break each, and which are hidden."""
     from homeassistant.helpers import entity_registry as er
@@ -413,8 +423,10 @@ def policies(
             entry = registry.async_get(item["object_id"])
             if entry is not None:
                 with_labels[item["object_id"]] = bool(entry.labels)
-    object_ids = [item["object_id"] for item in snapshot["objects"]] + list(
-        rules_more.SYSTEM_OBJECTS
+    object_ids = (
+        [item["object_id"] for item in snapshot["objects"]]
+        + list(rules_more.SYSTEM_OBJECTS)
+        + [user["id"] for user in (auth or {}).get("users") or []]
     )
     keys = {
         policy_key(rule, object_id)
@@ -440,6 +452,7 @@ def policies(
         store.limit,
         {
             **_extra(hass, snapshot, store, registry, replies, battery_percent),
+            "auth": auth,
             "decisions": decisions,
             "due": due,
         },
@@ -496,6 +509,44 @@ def http_facts(hass: HomeAssistant) -> dict[str, Any]:
             (getattr(p, "config", None) or {}).get("allow_bypass_login") for p in trusted
         )
     return facts
+
+
+USER_RULES = frozenset({"user_inactive", "user_old_tokens", "user_dead_tokens"})
+
+
+async def auth_facts(hass: HomeAssistant, enabled: Any) -> dict[str, Any] | None:
+    """The people of this Home Assistant and their tokens, or ``None`` when no account rule is on.
+
+    Only names, dates and the kind of a token are kept: never a token value, never an address.
+    Accounts the system made for itself (Supervisor, add-ons) are left out.
+    """
+    if not USER_RULES & set(enabled):
+        return None
+    try:
+        users = await hass.auth.async_get_users()
+    except Exception:  # noqa: BLE001 - no readable accounts, no hints
+        return None
+    facts = []
+    for user in users:
+        if user.system_generated:
+            continue
+        tokens = list(user.refresh_tokens.values())
+        logins = [t for t in tokens if t.token_type == "normal"]
+        facts.append(
+            {
+                "id": user.id,
+                "name": user.name or "?",
+                "active": user.is_active,
+                "tokens": [
+                    {"name": t.client_name or "?", "created": t.created_at}
+                    for t in tokens
+                    if t.token_type == "long_lived_access_token"
+                ],
+                "logins": bool(logins),
+                "last_login": max((t.last_used_at or t.created_at for t in logins), default=None),
+            }
+        )
+    return {"users": facts}
 
 
 def stored_rates(replies: Any) -> dict[str, int] | None:

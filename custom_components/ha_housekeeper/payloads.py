@@ -173,6 +173,7 @@ class PolicyItem(TypedDict):
     rate: NotRequired[int]  # state_rate: state changes per day
     keep_days: NotRequired[int]  # recorder_retention: days the recorder keeps
     db_bytes: NotRequired[int]  # recorder_retention: size of the database
+    days: NotRequired[int]  # user_inactive: days since the last login (absent: never)
 
 
 class PolicyRule(TypedDict):
