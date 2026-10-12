@@ -140,22 +140,36 @@ class OverviewMixin {
     return unit ? `${this.formatNumber(it.count)} ${this.t(`unit_${unit}_${it.count === 1 ? "1" : "n"}`)}` : this.formatNumber(it.count);
   }
 
+  // The outages as a fold of the to-do list: one row per failed integration or device, the first few; the rest is behind "all findings".
+  outagesFold(it, limit) {
+    const outages = this.causeList();
+    const row = c => `<button class="row rel" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(this.t(`cause_${c.kind}`, { name: c.name }))}</strong><small>${this.esc([this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · "))}</small></span></button>`;
+    const more = outages.length > limit ? `<div class="pad"><small><button class="link" data-jump="findingsNav">${this.t("allFindings")}</button></small></div>` : "";
+    return this.fold("todo_outages", { tone: "red", title: this.esc(this.t(it.label)), sub: it.hintText, pill: this.todoCount(it) }, outages.slice(0, limit).map(row).join("") + more, outages.length <= 3);
+  }
+
   todoCard() {
     const items = this.todoItems();
+    const findings = this.sortedFindings(), LIMIT = 5;
     const row = it => {
+      if (it.key === "outages") return this.outagesFold(it, LIMIT);
       const inner = `<span class="tile ${it.tone}"><ha-icon icon="${it.icon}"></ha-icon></span><span class="row-text"><strong>${this.esc(it.text || this.t(it.label))}</strong>${it.hint || it.hintText ? `<small>${this.esc(it.hintText || this.t(it.hint))}</small>` : ""}</span>`;
       if (it.scan) return `<div class="row todo" data-todo="${it.key}">${inner}<button class="btn" data-action="scan">${this.t("scan")}</button></div>`;
       const target = `data-jump="${it.view}"${it.filter !== undefined ? ` data-filter="${it.filter}"` : ""}${it.type ? ` data-type="${it.type}"` : ""}${it.status ? ` data-status="${it.status}"` : ""}`;
       return `<button class="row todo" data-todo="${it.key}" ${target}>${inner}${it.count !== undefined ? `<span class="pill ${it.tone}">${this.todoCount(it)}</span>` : ""}</button>`;
     };
-    // Red items first and open; the rest is a fold of its own once both kinds exist.
-    const urgent = items.filter(i => i.tone === "red"), later = items.filter(i => i.tone !== "red");
+    // Red items first and open; the rest is a fold of its own once both kinds exist. The single findings
+    // (those without an outage behind them) are one more fold at the end; they are not a topic of the status.
+    const singles = findings.filter(f => !f.cause_id);
+    const urgent = items.filter(i => i.tone === "red"), later = items.filter(i => i.tone !== "red").map(row);
+    if (singles.length) later.push(this.fold("todo_findings", { tone: "warn", title: this.t("singleFindings"), sub: this.t("sortedBySure"), pill: this.formatNumber(singles.length) }, singles.slice(0, LIMIT).map(f => this.findingRow(f)).join(""), false));
     const grouped = urgent.length && later.length;
-    const body = items.length ? (grouped
-      ? `<h3 class="foldhd">${this.t("actNow")}</h3>${urgent.map(row).join("")}${this.fold("todo_later", { tone: "warn", title: this.t("actSoon"), sub: this.t("actSoonSub"), pill: this.t(later.length === 1 ? "topicsOne" : "topicsN", { n: this.formatNumber(later.length) }) }, later.map(row).join(""), false)}`
-      : items.map(row).join(""))
+    const body = items.length || singles.length ? (grouped
+      ? `<h3 class="foldhd">${this.t("actNow")}</h3>${urgent.map(row).join("")}${this.fold("todo_later", { tone: "warn", title: this.t("actSoon"), sub: this.t("actSoonSub"), pill: this.t(later.length === 1 ? "topicsOne" : "topicsN", { n: this.formatNumber(later.length) }) }, later.join(""), false)}`
+      : [...urgent.map(row), ...later].join(""))
       : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.esc(this.t("actNone", { date: this.formatDate(this.data.meta.scanned_at) }))}</div>`;
-    return `<section class="panel u-mb14" aria-labelledby="hk-todo" id="hk-todo-card" tabindex="-1"><div class="panelhead"><div><h2 id="hk-todo">${this.t("actTitle")}</h2><p>${this.t("actSub")}</p></div></div>${body}${this.goalsLine()}</section>`;
+    const all = `<button class="link" data-jump="findingsNav">${this.t("allFindings")} (${this.formatNumber(findings.length)}) <ha-icon icon="mdi:chevron-right"></ha-icon></button>`;
+    return `<section class="panel u-mb14" aria-labelledby="hk-todo" id="hk-todo-card" tabindex="-1"><div class="panelhead"><div><h2 id="hk-todo">${this.t("actTitle")}</h2><p>${this.t("actSub")}</p></div>${all}</div>${body}${this.goalsLine()}</section>`;
   }
 
   // The comparison with the previous scan is fetched once per data set; the overview shows it when it is there.
@@ -225,7 +239,7 @@ class OverviewMixin {
     return `<section class="statushead" title="${this.esc(this.t("healthTip", { affected: health.affected, base: health.base }))}"><button type="button" class="ring ${health.tone}" style="--p:${health.percent}" data-health-why aria-expanded="${Boolean(this.healthWhy)}" aria-label="${this.esc(this.t("healthWhy"))}"><b>${health.percent}<small>%</small></b></button>
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p></div>
       <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
-      ${this.todoCard()}<div class="grid2 ovmid"><div class="stack">${this.topFindingsCard(findings)}${this.inventoryStatusCard()}</div>
+      ${this.todoCard()}<div class="grid2 ovmid"><div class="stack">${this.inventoryStatusCard()}</div>
       <div class="stack">${this.sinceVisitLine()}${this.cleanupCard()}</div></div>
       <div class="ovzone">${this.systemCard()}${this.databaseCard()}${this.trendCard()}</div>`;
   }
@@ -320,16 +334,5 @@ class OverviewMixin {
     ];
     const rows = items.map(([label, icon, view, count, filter]) => `<button class="row" data-jump="${view}"${label === "unreferenced" ? ' data-jump-tab="unused"' : ""}${filter !== undefined && view === "findingsNav" ? ` data-filter="${filter}"` : ""}><span class="tile ${count ? "warn" : "mute"}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(label)}</strong></span><span class="pill ${count ? "warn" : "mute"}">${this.formatNumber(count)}</span></button>`).join("");
     return `<div class="panel"><div class="panelhead"><div><h2>${this.t("hintsTitle")}</h2><p>${this.t("cleanupHint")}</p></div></div>${rows}</div>`;
-  }
-
-  // The most important findings in two blocks: outages first (one note for what is down), then single findings.
-  topFindingsCard(findings) {
-    const LIMIT = 5, outages = this.causeList(), shown = outages.slice(0, LIMIT), single = findings.filter(f => !f.cause_id).slice(0, LIMIT - shown.length);
-    const outageRow = c => `<button class="row rel" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(this.t(`cause_${c.kind}`, { name: c.name }))}</strong><small>${this.esc([this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · "))}</small></span></button>`;
-    const block = (title, rows) => rows ? `<h3 class="foldhd">${title}</h3>${rows}` : "";
-    const body = outages.length || single.length
-      ? block(`${this.t("causesTitle")} (${outages.length})`, shown.map(outageRow).join("")) + block(this.t("singleFindings"), single.map(f => this.findingRow(f)).join(""))
-      : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("noFindings")}</div>`;
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("needsAttention")}</h2><p>${this.t("sortedBySure")}</p></div><button class="link" data-jump="findingsNav">${this.t("allFindings")} (${findings.length}) <ha-icon icon="mdi:chevron-right"></ha-icon></button></div>${body}</div>`;
   }
 }

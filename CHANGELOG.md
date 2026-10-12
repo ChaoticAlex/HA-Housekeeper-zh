@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Übersicht:** „Wichtigste Befunde“ ist in „Was muss ich jetzt tun?“ aufgegangen: die Zeile „Ausfälle“ klappt auf und zeigt die betroffenen Integrationen, „Einzelne Befunde“ steht als aufklappbarer Bereich unter „Bald“, und „Alle Befunde“ ist ein Link im Kopf der Karte.
 - **Zugangsdaten:** Die Kachel „Felder mit Wert“ entfällt; die Zahl steht als Unterzeile unter „Integrationen mit Zugangsdaten“.
 - **Recorder, Last:** Zeilen, Entitäten und Ereignisse stehen als drei beschriftete Kennzahlen statt in einem Satz; was nicht mitgezählt wird (ausgeblendet, deaktiviert, dauerhaft ausgefallen), steht als eigene Marken mit Erklärung darunter.
 - **Reparieren:** Die Karte „Sensorfehler bereinigen“ hat jetzt ihren Titel wie die anderen, und die Titel der Karten tragen den Namen ihrer Kachel („Sensorfehler bereinigen“, „Zähler wechseln“).

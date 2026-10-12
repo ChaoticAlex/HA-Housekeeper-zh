@@ -40,7 +40,7 @@ const TEXT = {
     recentFindings: "Aktuelle Befunde", affected: "Betroffenes Objekt",
     systemState: "Systemzustand", health: "Housekeeping-Status", healthGood: "Gut", healthCheck: "Prüfen",
     healthBad: "Problematisch", healthHint: "Anteil der Entitäten, Automationen, Skripte und Szenen ohne Befund", healthTip: "Gezählt werden betroffene Objekte, nicht einzelne Befunde. Ausgeblendete Befunde und andere Objekttypen (Dashboards, Geräte, Helfer) zählen nicht. Der Wert ist gerundet. Betroffen: {affected} von {base}.",
-    openFindings: "Offene Befunde", needsAttention: "Wichtigste Befunde",
+    openFindings: "Offene Befunde",
     actTitle: "Was muss ich jetzt tun?", actSub: "Nach Dringlichkeit sortiert", actNone: "Nichts zu tun. Letzter Scan: {date}.",
     actNewCritical: "Neue kritische Befunde", actNewCriticalHint: "Seit dem letzten Scan: nicht verfügbar, defekte Referenz oder Problem",
    
@@ -222,7 +222,7 @@ const TEXT = {
     recentFindings: "Current findings", affected: "Affected object",
     systemState: "System health", health: "Housekeeping status", healthGood: "Good", healthCheck: "Review",
     healthBad: "Problematic", healthHint: "Share of entities, automations, scripts and scenes without findings", healthTip: "Affected objects are counted, not single findings. Hidden findings and other object types (dashboards, devices, helpers) do not count. The value is rounded. Affected: {affected} of {base}.",
-    openFindings: "Open findings", needsAttention: "Most important findings",
+    openFindings: "Open findings",
     actTitle: "What needs doing now?", actSub: "Sorted by urgency", actNone: "Nothing to do. Last scan: {date}.",
     actNewCritical: "New critical findings", actNewCriticalHint: "Since the last scan: unavailable, broken reference or problem",
    
