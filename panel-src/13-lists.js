@@ -14,7 +14,7 @@ class ListsMixin {
     if (this.lv[id]) return this.lv[id];
     const kept = this.lvStored()[id];
     const ok = kept && typeof kept.sort === "string" && (kept.dir === "asc" || kept.dir === "desc");
-    return (this.lv[id] = { q: "", sort: ok ? kept.sort : sort, dir: ok ? kept.dir : dir, f: ok && kept.f && typeof kept.f === "object" ? Object.fromEntries(Object.entries(kept.f).filter(([, v]) => typeof v === "string")) : {}, view: "" });
+    return (this.lv[id] = { q: "", sort: ok ? kept.sort : sort, dir: ok ? kept.dir : dir, f: ok && kept.f && typeof kept.f === "object" ? Object.fromEntries(Object.entries(kept.f).filter(([, v]) => typeof v === "string")) : {}, view: "", base: { sort, dir } });
   }
 
   lvStored() {
@@ -239,7 +239,10 @@ class ListsMixin {
 
   viewsControl(id) {
     const st = this.lv[id], saved = this.viewsStore()[id] || [];
-    const dirty = Boolean(st.q.trim()) || Object.values(st.f).some(Boolean);
+    // Worth saving when the search, a filter, the sort or its direction differs from the chosen view, or from the list's own default.
+    const shape = (q, f, sort, dir) => JSON.stringify([q.trim(), Object.entries(f).filter(([, v]) => v).sort(([a], [b]) => (a < b ? -1 : 1)), sort, dir]);
+    const view = saved.find(v => v.name === st.view);
+    const dirty = shape(st.q, st.f, st.sort, st.dir) !== (view ? shape(view.q, view.f, view.sort, view.dir) : shape("", {}, st.base?.sort ?? st.sort, st.base?.dir ?? st.dir));
     if (!saved.length && !dirty) return "";
     const select = saved.length ? `<select data-lview="${id}" aria-label="${this.esc(this.t("viewsLabel"))}"><option value="">${this.t("viewsNone")}</option>${saved.map(v => `<option value="${this.esc(v.name)}" ${st.view === v.name ? "selected" : ""}>${this.esc(v.name)}</option>`).join("")}</select>` : "";
     if (this.viewNaming === id) {

@@ -4395,3 +4395,20 @@ test("the page of an object tells what was decided about it: a decided finding w
   el.data = { ...DATA, findings: [f({ ignored: false, ignored_by: null })] };
   assert.equal(el.statusBand({ ...item, mark: null }, key), "");
 });
+
+test("a sort alone can be saved as a view, and the save button goes away when the list is back at its default or equals the chosen view", () => {
+  const { el } = panel("en", { localStorage: fakeStorage({}) });
+  el.data = DATA;
+  const st = el.lvState("inv", "name", "asc");
+  assert.equal(el.viewsControl("inv"), "");
+  st.sort = "status";
+  assert.ok(el.viewsControl("inv").includes("data-lview-save"), "a changed sort is worth saving");
+  st.sort = "name"; st.dir = "desc";
+  assert.ok(el.viewsControl("inv").includes("data-lview-save"), "so is the direction");
+  st.dir = "asc";
+  assert.equal(el.viewsControl("inv"), "", "back at the default: nothing to save");
+  st.sort = "status"; el.saveView("inv"); el.commitView("inv", "By status");
+  assert.ok(!el.viewsControl("inv").includes("data-lview-save"), "equal to the chosen view: nothing new to save");
+  st.dir = "desc";
+  assert.ok(el.viewsControl("inv").includes("data-lview-save"), "a change against the chosen view can be saved");
+});
