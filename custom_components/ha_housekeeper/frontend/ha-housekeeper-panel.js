@@ -586,7 +586,7 @@ Object.assign(TEXT.en, {
 
 // Texts for the integration detail page; merged into TEXT.
 Object.assign(TEXT.de, {
-  originKindCore: "Core", originKindCustom: "Custom", allOrigins: "Alle Herkünfte", helperKind: "Helfer", usedByCol: "Verwendet von", changedCol: "Zuletzt geändert",
+  originKindCore: "Core", originKindCustom: "Custom", allOrigins: "Alle Herkünfte", helperKind: "Helfer", usedByCol: "Verwendet von", changedCol: "Zuletzt geändert", helperIdleLabel: "Nutzung", helperIdleAny: "Alle Helfer", helperIdleOpt: "Vermutlich ungenutzt, {days} Tage unverändert", helperIdleHint: "Nur ein Hinweis: Diese Helfer werden in dem, was Housekeeper liest (Automationen, Skripte, Szenen, Dashboards, Gruppen), nicht verwendet. Dashboards außerhalb des Scans, Apps und YAML können sie trotzdem nutzen.",
   ignored: "Ignoriert", integrationCard: "Integration", integrationName: "Integration", origin: "Herkunft", originBuiltIn: "In Home Assistant enthalten", originCustom: "Benutzerdefiniert · {path}{version}",
   entrySource: "Eingerichtet über", entryError: "Fehlermeldung", entryId: "Eintrags-ID", entryUniqueId: "Eindeutige ID", entryCreated: "Angelegt", entryModified: "Geändert", entryEntities: "Entitäten", entryDevices: "Geräte",
   entryDocs: "Dokumentation", entryHaPath: "Pfad in Home Assistant", noneValue: "keine",
@@ -596,7 +596,7 @@ Object.assign(TEXT.de, {
   cause_entry_problem_error: "Die Integration ist nicht geladen ({state}). Meldung: {error}",
 });
 Object.assign(TEXT.en, {
-  originKindCore: "Core", originKindCustom: "Custom", allOrigins: "All origins", helperKind: "Helpers", usedByCol: "Used by", changedCol: "Last changed",
+  originKindCore: "Core", originKindCustom: "Custom", allOrigins: "All origins", helperKind: "Helpers", usedByCol: "Used by", changedCol: "Last changed", helperIdleLabel: "Use", helperIdleAny: "All helpers", helperIdleOpt: "Probably unused, unchanged for {days} days", helperIdleHint: "A hint only: nothing Housekeeper reads (automations, scripts, scenes, dashboards, groups) uses these helpers. Dashboards outside the scan, apps and YAML may still use them.",
   ignored: "Ignored", integrationCard: "Integration", integrationName: "Integration", origin: "Origin", originBuiltIn: "Included with Home Assistant", originCustom: "Custom · {path}{version}",
   entrySource: "Set up via", entryError: "Error message", entryId: "Entry ID", entryUniqueId: "Unique ID", entryCreated: "Created", entryModified: "Modified", entryEntities: "Entities", entryDevices: "Devices",
   entryDocs: "Documentation", entryHaPath: "Path in Home Assistant", noneValue: "none",
@@ -3382,11 +3382,12 @@ class InventoryMixin {
   filtered() {
     if (!this.data) return [];
     const q = this.query.trim().toLowerCase();
-    return this.memo("inventory", [q, this.typeFilter, this.statusFilter, this.originFilter, this.sort, this.sortDir, this.lang], () => {
+    return this.memo("inventory", [q, this.typeFilter, this.statusFilter, this.originFilter, this.helperIdle, this.sort, this.sortDir, this.lang], () => {
       const { natural, ids } = this.collators(), desc = this.sortDir === "desc";
       const pick = item => this.sort === "status" ? item.status : this.sort === "type" ? item.object_type : this.sort === "since" ? item.status_since : this.sort === "version" ? item.integration_version : this.sort === "entities" ? String(item.entity_count ?? "") : this.sort === "usedByCol" ? String(this.usedByCount(item) ?? "") : this.sort === "changedCol" ? (item.last_changed || "") : (item.name || item.object_id);
       const rows = this.data.objects.filter(item => (!q || this.haystack(item).includes(q)) && (!this.typeFilter || (this.typeFilter === "helper" ? this.isHelper(item) : item.object_type === this.typeFilter))
         && (!this.statusFilter || item.status === this.statusFilter)
+        && (!(this.typeFilter === "helper" && this.helperIdle) || this.isIdleHelper(item, Number(this.helperIdle)))
         && (!this.originFilter || (item.object_type === "config_entry" && !!item.custom === (this.originFilter === "custom")))).map(item => ({ item, key: pick(item) }));
       rows.sort((a, b) => {
         if (!a.key !== !b.key) return a.key ? -1 : 1; // missing values stay last in both directions
@@ -3403,19 +3404,35 @@ class InventoryMixin {
   }
 
   // How many objects use this one (incoming edges of the usage kinds); a config entry adds up its entities.
-  usedByCount(item) {
-    const counts = this.memo("usedBy", [], () => {
-      const own = new Map(), perEntry = new Map();
+  usedByIndex() {
+    return this.memo("usedBy", [], () => {
+      const own = new Map(), perEntry = new Map(), newest = new Map();
       for (const o of this.data.objects) {
         if (o.object_type !== "entity") continue;
         const n = this.edgesTo(this.objectKey(o)).filter(e => USAGE_RELATIONS.includes(e.relation)).length;
         own.set(o.object_id, n);
-        if (o.config_entry_id) perEntry.set(o.config_entry_id, (perEntry.get(o.config_entry_id) || 0) + n);
+        if (o.config_entry_id) {
+          perEntry.set(o.config_entry_id, (perEntry.get(o.config_entry_id) || 0) + n);
+          if (o.last_changed && o.last_changed > (newest.get(o.config_entry_id) || "")) newest.set(o.config_entry_id, o.last_changed);
+        }
       }
-      return { own, perEntry };
+      return { own, perEntry, newest };
     });
+  }
+
+  usedByCount(item) {
+    const counts = this.usedByIndex();
     if (item.object_type === "config_entry") return counts.perEntry.get(item.object_id) ?? 0;
     return item.object_type === "entity" ? counts.own.get(item.object_id) ?? 0 : null;
+  }
+
+  // A hint, not a finding: nobody uses this helper in what the scan reads and it has not changed for `days` days.
+  // Dashboards outside the scan, apps and YAML can still use it, so nothing here suggests deleting it.
+  isIdleHelper(item, days) {
+    if (!this.isHelper(item) || this.usedByCount(item) !== 0) return false;
+    const changed = item.object_type === "config_entry" ? this.usedByIndex().newest.get(item.object_id) : item.last_changed;
+    const time = changed ? Date.parse(changed) : NaN;
+    return Number.isFinite(time) && Date.now() - time >= days * 86400000;
   }
 
   // The text a search looks in, built once per object.
@@ -3448,11 +3465,13 @@ class InventoryMixin {
     const integ = this.typeFilter === "config_entry" || !!this.originFilter;
     const helperMode = this.typeFilter === "helper";
     const integCols = [...(integ ? ["version", "entities"] : []), ...(helperMode ? ["usedByCol", "changedCol"] : [])];
+    const idleSelect = helperMode ? `<select id="helperIdle" aria-label="${this.t("helperIdleLabel")}"><option value="">${this.t("helperIdleAny")}</option>${["30", "90", "180"].map(d => `<option value="${d}" ${this.helperIdle === d ? "selected" : ""}>${this.t("helperIdleOpt", { days: d })}</option>`).join("")}</select>` : "";
+    const idleHint = helperMode && this.helperIdle ? `<div class="hintbox"><ha-icon icon="mdi:lightbulb-on-outline"></ha-icon><div><p>${this.esc(this.t("helperIdleHint"))}</p></div></div>` : "";
     const colValue = (item, k) => k === "version" ? (item.object_type === "config_entry" ? item.integration_version || "" : "") : k === "entities" ? (item.object_type === "config_entry" ? item.entity_count ?? 0 : "") : k === "usedByCol" ? this.usedByCount(item) ?? "" : item.last_changed || "";
     this.setExporter("inventory", "inventory", [this.t("name"), "ID", this.t("type"), this.t("status"), this.t("reason"), this.t("since"), ...(integ ? [this.t("origin")] : []), ...integCols.map(k => this.t(k))], () => rows.map(i => [i.name, i.object_id, this.t(i.object_type), this.statusLabel(i.status), i.reason ? this.t(i.reason) : i.missing_reference_count ? `${i.missing_reference_count} ${this.t("missingReferences")}` : "", i.status_since || "", ...(integ ? [i.object_type === "config_entry" ? this.t(i.custom ? "originKindCustom" : "originKindCore") : ""] : []), ...integCols.map(k => colValue(i, k))]));
     const tools = `<div class="listtools">${this.listTools("inventory", ["type", "status", "reason", "since", ...integCols].map(k => ({ key: k, label: k })))}<button type="button" class="btn" data-xp-open><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button></div>`;
-    return `<div class="stack">${tiles}<div class="panel"><div class="filters"><input id="query" type="search" value="${this.esc(this.query)}" placeholder="${this.t("search")}"><select id="typeFilter" aria-label="${this.t("type")}"><option value="">${this.t("all")}</option><option value="helper" ${this.typeFilter === "helper" ? "selected" : ""}>${this.t("helperKind")}</option>${types.map(x => `<option value="${x}" ${this.typeFilter === x ? "selected" : ""}>${this.t(x)}</option>`).join("")}</select><select id="statusFilter" aria-label="${this.t("status")}"><option value="">${this.t("allStatus")}</option>${statuses.map(x => `<option value="${x}" ${this.statusFilter === x ? "selected" : ""}>${this.statusLabel(x)}</option>`).join("")}</select><select id="originFilter" aria-label="${this.t("origin")}"><option value="">${this.t("allOrigins")}</option>${["core", "custom"].map(x => `<option value="${x}" ${this.originFilter === x ? "selected" : ""}>${this.t(x === "core" ? "originKindCore" : "originKindCustom")}</option>`).join("")}</select>
-        <div class="mobsort"><select id="sortKey" aria-label="${this.t("sortBy")}">${[["name", "sortName"], ["type", "sortType"], ["status", "sortStatus"], ["since", "sortSince"], ...(integ ? [["version", "version"], ["entities", "entities"]] : []), ...(helperMode ? [["usedByCol", "usedByCol"], ["changedCol", "changedCol"]] : [])].map(([key, label]) => `<option value="${key}" ${this.sort === key ? "selected" : ""}>${this.t(label)}</option>`).join("")}</select><button class="btn" id="sortDir" aria-label="${this.t("sortBy")}">${this.sortDir === "desc" ? "▼" : "▲"}</button></div></div>${tools}
+    return `<div class="stack">${tiles}<div class="panel"><div class="filters"><input id="query" type="search" value="${this.esc(this.query)}" placeholder="${this.t("search")}"><select id="typeFilter" aria-label="${this.t("type")}"><option value="">${this.t("all")}</option><option value="helper" ${this.typeFilter === "helper" ? "selected" : ""}>${this.t("helperKind")}</option>${types.map(x => `<option value="${x}" ${this.typeFilter === x ? "selected" : ""}>${this.t(x)}</option>`).join("")}</select><select id="statusFilter" aria-label="${this.t("status")}"><option value="">${this.t("allStatus")}</option>${statuses.map(x => `<option value="${x}" ${this.statusFilter === x ? "selected" : ""}>${this.statusLabel(x)}</option>`).join("")}</select><select id="originFilter" aria-label="${this.t("origin")}"><option value="">${this.t("allOrigins")}</option>${["core", "custom"].map(x => `<option value="${x}" ${this.originFilter === x ? "selected" : ""}>${this.t(x === "core" ? "originKindCore" : "originKindCustom")}</option>`).join("")}</select>${idleSelect}
+        <div class="mobsort"><select id="sortKey" aria-label="${this.t("sortBy")}">${[["name", "sortName"], ["type", "sortType"], ["status", "sortStatus"], ["since", "sortSince"], ...(integ ? [["version", "version"], ["entities", "entities"]] : []), ...(helperMode ? [["usedByCol", "usedByCol"], ["changedCol", "changedCol"]] : [])].map(([key, label]) => `<option value="${key}" ${this.sort === key ? "selected" : ""}>${this.t(label)}</option>`).join("")}</select><button class="btn" id="sortDir" aria-label="${this.t("sortBy")}">${this.sortDir === "desc" ? "▼" : "▲"}</button></div></div>${idleHint}${tools}
       <div class="tablewrap inv"><table><thead><tr>${this.th("name", "name")}${hid("type") ? "" : this.th("type", "type")}${hid("status") ? "" : this.th("status", "status")}${hid("reason") ? "" : `<th>${this.t("reason")}</th>`}${hid("since") ? "" : this.th("since", "since")}${integCols.map(k => hid(k) ? "" : this.th(k, k)).join("")}</tr></thead><tbody>${visibleRows.map(item => `<tr data-object="${this.esc(this.objectKey(item))}" tabindex="0" role="button" aria-label="${this.esc(item.name)}"><td><span class="object">${this.tile(item.object_type, this.tone(item.status) === "ok" ? "" : this.tone(item.status))}${this.nameCell(item.name, item.object_id, "span")}</span></td>${hid("type") ? "" : `<td data-label="${this.esc(this.t("type"))}">${this.t(item.object_type)}</td>`}${hid("status") ? "" : `<td data-label="${this.esc(this.t("status"))}">${this.pill(item.status)}</td>`}${hid("reason") ? "" : `<td data-label="${this.esc(this.t("reason"))}">${this.esc(item.reason ? this.t(item.reason) : item.missing_reference_count ? `${item.missing_reference_count} ${this.t("missingReferences")}` : "—")}</td>`}${hid("since") ? "" : `<td data-label="${this.esc(this.t("since"))}">${this.formatDate(item.status_since)}</td>`}${integCols.map(k => hid(k) ? "" : `<td data-label="${this.esc(this.t(k))}">${this.esc(k === "usedByCol" ? (this.usedByCount(item) == null ? "—" : this.formatNumber(this.usedByCount(item))) : k === "changedCol" ? (item.last_changed ? this.formatDate(item.last_changed) : "—") : item.object_type !== "config_entry" ? "—" : k === "version" ? (item.integration_version || "—") : this.formatNumber(item.entity_count ?? 0))}</td>`).join("")}</tr>`).join("")}</tbody></table>${rows.length ? "" : `<div class="emptymsg">${this.t("noResults")}</div>`}</div>
       ${pg.footer || `<div class="tablefoot"><span>${this.formatNumber(rows.length)} ${this.t("of_total")} ${this.formatNumber(this.data.objects.length)} ${this.t("shown")}</span></div>`}</div>`;
   }
@@ -11675,6 +11694,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.typeFilter = "";
     this.statusFilter = "";
     this.originFilter = "";
+    this.helperIdle = "";
     this.findingFilter = ""; this.findingAfter = false; this.findingDue = false; this.showFollowers = false; this.goals = null; this.goalsLoading = false; this.goalForm = null; this.decide = null; this.markForm = null;
     this.findingStatus = ""; this.bulk = null;
     this.batteryFilter = "all";
@@ -12490,6 +12510,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-baseline]").forEach(b => b.addEventListener("click", () => { this.compareBaseline = b.dataset.baseline; this.pages = {}; this.loadCompare(); }));
     const bl = root.querySelector("#baseline"); if (bl) bl.onchange = () => { this.compareBaseline = bl.value; this.pages = {}; this.loadCompare(); };
     const tf = root.querySelector("#typeFilter"); if (tf) tf.onchange = () => { this.typeFilter = tf.value; this.pages = {}; this.render(); };
+    const hi = root.querySelector("#helperIdle"); if (hi) hi.onchange = () => { this.helperIdle = hi.value; this.pages = {}; this.render(); };
     const of = root.querySelector("#originFilter"); if (of) of.onchange = () => { this.originFilter = of.value; this.pages = {}; this.render(); };
     const sf = root.querySelector("#statusFilter"); if (sf) sf.onchange = () => { this.statusFilter = sf.value; this.pages = {}; this.render(); };
     const sk = root.querySelector("#sortKey"); if (sk) sk.onchange = () => { this.sort = sk.value; this.pages = {}; this.render(); };

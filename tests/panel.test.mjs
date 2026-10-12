@@ -3959,6 +3959,23 @@ test("helper filter keeps helper entries and entities and counts what uses them"
   assert.equal(el.usedByCount(el.data.objects[3]), 0);
 });
 
+test("the idle helper hint needs no use and a change older than the chosen days", () => {
+  const { el } = panel();
+  const old = new Date(Date.now() - 200 * 86400000).toISOString(), fresh = new Date(Date.now() - 5 * 86400000).toISOString();
+  el.data = { ...DATA, edges: [{ source: "automation:a1", target: "entity:input_boolean.used", relation: "TRIGGERS_ON" }], objects: [
+    { object_type: "entity", object_id: "input_boolean.used", name: "Used", platform: "input_boolean", status: "active", last_changed: old },
+    { object_type: "entity", object_id: "input_boolean.idle", name: "Idle", platform: "input_boolean", status: "active", last_changed: old },
+    { object_type: "entity", object_id: "input_boolean.recent", name: "Recent", platform: "input_boolean", status: "active", last_changed: fresh },
+    { object_type: "entity", object_id: "input_boolean.nodate", name: "No date", platform: "input_boolean", status: "active" },
+  ] };
+  el.typeFilter = "helper";
+  el.helperIdle = "180";
+  assert.deepEqual(el.filtered().map(o => o.object_id), ["input_boolean.idle"]);
+  assert.ok(el.inventory().includes('id="helperIdle"') && el.inventory().includes("Housekeeper"), "the select and the hint show in helper mode");
+  el.helperIdle = "";
+  assert.equal(el.filtered().length, 4);
+});
+
 // ---------------------------------------------------------------- Storage & system, access & data flow
 
 const SYSTEM = {

@@ -9,6 +9,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.typeFilter = "";
     this.statusFilter = "";
     this.originFilter = "";
+    this.helperIdle = "";
     this.findingFilter = ""; this.findingAfter = false; this.findingDue = false; this.showFollowers = false; this.goals = null; this.goalsLoading = false; this.goalForm = null; this.decide = null; this.markForm = null;
     this.findingStatus = ""; this.bulk = null;
     this.batteryFilter = "all";
@@ -824,6 +825,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-baseline]").forEach(b => b.addEventListener("click", () => { this.compareBaseline = b.dataset.baseline; this.pages = {}; this.loadCompare(); }));
     const bl = root.querySelector("#baseline"); if (bl) bl.onchange = () => { this.compareBaseline = bl.value; this.pages = {}; this.loadCompare(); };
     const tf = root.querySelector("#typeFilter"); if (tf) tf.onchange = () => { this.typeFilter = tf.value; this.pages = {}; this.render(); };
+    const hi = root.querySelector("#helperIdle"); if (hi) hi.onchange = () => { this.helperIdle = hi.value; this.pages = {}; this.render(); };
     const of = root.querySelector("#originFilter"); if (of) of.onchange = () => { this.originFilter = of.value; this.pages = {}; this.render(); };
     const sf = root.querySelector("#statusFilter"); if (sf) sf.onchange = () => { this.statusFilter = sf.value; this.pages = {}; this.render(); };
     const sk = root.querySelector("#sortKey"); if (sk) sk.onchange = () => { this.sort = sk.value; this.pages = {}; this.render(); };
