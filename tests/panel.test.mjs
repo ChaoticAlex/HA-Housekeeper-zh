@@ -3284,7 +3284,7 @@ test("the repair view offers its tasks as tiles; one opens its assistant and the
   assert.ok(shadow.innerHTML.includes("none found"));
   el.repairTask = "migrate_meter"; el.cleanupKind = "migrate_meter"; el.render();
   html = shadow.innerHTML;
-  assert.ok(html.includes("data-repair-back") && html.includes('data-picker="meterOld"') && !html.includes("data-repair-task="));
+  assert.ok(html.includes('data-picker="meterOld"') && html.includes('aria-pressed="true" data-repair-task="migrate_meter"') && !html.includes("data-repair-back"));
 });
 
 test("the overview has no tile card; a missed goal is a to-do row, not a card of its own", () => {

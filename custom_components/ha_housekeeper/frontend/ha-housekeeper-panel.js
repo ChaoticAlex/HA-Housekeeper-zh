@@ -3331,21 +3331,21 @@ class CleanupMixin {
   repairView() {
     this.ensureJournal();
     const task = REPAIR_TASKS.some(([kind]) => kind === this.repairTask) ? this.repairTask : null;
+    const scan = this.counterScan, found = scan?.items?.length || 0;
+    // Without a scan there is nothing to count: the tile says so instead of showing nothing (no scan runs by itself).
+    const state = kind => kind !== "repair_counter" ? "" : !scan?.available ? `<span class="pill mute">${this.t("repairNotChecked")}</span>` : found ? `<span class="pill warn">${this.t("repairFound", { count: found })}</span>` : `<span class="pill ok">${this.t("repairNoneFound")}</span>`;
+    const tone = kind => (kind !== "repair_counter" ? "ac" : !scan?.available ? "mute" : found ? "warn" : "ok");
+    const tiles = REPAIR_TASKS.map(([kind, icon, label, hint]) => `<button class="taskcard t-${tone(kind)}${kind === task ? " on" : ""}" aria-pressed="${kind === task}" data-repair-task="${kind}"><ha-icon icon="${icon}"></ha-icon><strong>${this.t(label)}</strong><span class="setpill">${state(kind)}</span><small>${this.t(hint)}</small></button>`).join("");
+    const nav = `<div class="taskgrid compactgrid setgrid navtiles compact" style="--cols:${this.navColumns(REPAIR_TASKS.length)}" role="group" aria-label="${this.esc(this.t("repairTitle"))}">${tiles}</div>`;
     let body;
     if (task) {
       const card = { exchange_device: () => this.exchangeCard(), replace_references: () => this.replaceCard(), migrate_meter: () => this.meterCard(), repair_counter: () => this.counterCard() }[task]();
-      const label = REPAIR_TASKS.find(([kind]) => kind === task)[2];
       const chosen = { repair_counter: (this.counterId || "").trim(), migrate_meter: this.meterOld, replace_references: this.replOld, exchange_device: this.exchangeState().oldDev }[task];
-      body = `<button class="btn quiet" data-repair-back><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("repairBack")}</button><h2 class="repairhead">${this.t(label)}</h2>${this.stepsBar(this.plan ? 3 : chosen ? 2 : 1)}${card}`;
+      body = `${this.stepsBar(this.plan ? 3 : chosen ? 2 : 1)}${card}`;
     } else {
-      const scan = this.counterScan, found = scan?.items?.length || 0;
-      // Without a scan there is nothing to count: the tile says so instead of showing nothing (no scan runs by itself).
-      const state = kind => kind !== "repair_counter" ? "" : !scan?.available ? ` <span class="pill mute">${this.t("repairNotChecked")}</span>` : found ? ` <span class="pill warn">${this.t("repairFound", { count: found })}</span>` : ` <span class="pill ok">${this.t("repairNoneFound")}</span>`;
-      const tone = kind => (kind !== "repair_counter" ? "ac" : !scan?.available ? "mute" : found ? "warn" : "ok");
-      const tiles = REPAIR_TASKS.map(([kind, icon, label, hint]) => `<button class="taskcard t-${tone(kind)}" data-repair-task="${kind}"><ha-icon icon="${icon}"></ha-icon><strong>${this.t(label)}${state(kind)}</strong><small>${this.t(hint)}</small></button>`).join("");
-      body = `<div class="panel"><div class="panelhead"><div><h2>${this.t("repairTitle")}</h2><p>${this.t("repairHint")}</p></div></div><div class="taskgrid">${tiles}</div></div>`;
+      body = `<p class="factnote pad">${this.t("repairHint")}</p>`;
     }
-    return `<div class="stack">${this.planHeader()}${body}</div>`;
+    return `<div class="stack">${this.planHeader()}${nav}${body}</div>`;
   }
 }
 
@@ -12551,7 +12551,7 @@ class HAHousekeeperPanel extends HTMLElement {
     const graphBack = this.view === "graph" && this.graphSelected && this.graphBackLabel() ? `<button class="btn" data-action="graph-back"><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("backTo")} ${this.esc(this.graphBackLabel())}</button>` : "";
     const viewBack = from ? `<button class="btn" data-action="view-back"><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("backTo")} ${this.t(from.view)}</button>` : "";
     const back = graphBack || viewBack ? `<div class="crumbs">${viewBack}${graphBack}</div>` : "";
-    return `${back}<div class="heading"><div><p class="eyebrow">${this.eyebrowFor(this.view)}</p><h1>${title}${INFO_SUB_VIEWS.includes(this.view) ? this.infoTip(sub) : ""}${["cleanup", "journal"].includes(this.view) ? this.infoTip(this.t("cleanupDryRun"), true) : ""}</h1>${VIEW_HINT[this.view] ? `<span class="sub">${this.t(VIEW_HINT[this.view])}</span>` : INFO_SUB_VIEWS.includes(this.view) ? "" : `<span class="sub">${sub}</span>`}</div>
+    return `${back}<div class="heading"><div><p class="eyebrow">${this.eyebrowFor(this.view)}</p><h1>${title}${INFO_SUB_VIEWS.includes(this.view) ? this.infoTip(sub) : ""}${["cleanup", "repair", "journal"].includes(this.view) ? this.infoTip(this.t("cleanupDryRun"), true) : ""}</h1>${VIEW_HINT[this.view] ? `<span class="sub">${this.t(VIEW_HINT[this.view])}</span>` : INFO_SUB_VIEWS.includes(this.view) ? "" : `<span class="sub">${sub}</span>`}</div>
       <div class="head-actions">${modePill}${ago}<button class="btn primary" data-action="scan" ${this.busy || this.cleanupRunning() ? "disabled" : ""} title="${this.esc(this.t("scanHint"))}">${this.scanButtonInner()}</button></div></div>${this.warmupBanner()}`;
   }
 
@@ -12818,8 +12818,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-rec-own]").forEach(el => el.addEventListener("click", () => { const [id, value] = el.dataset.recOwn.split("|"); this.cleanupRecorderOwn = { ...(this.cleanupRecorderOwn || {}), [id]: value }; this.render(); }));
     root.querySelectorAll("[data-qtype]").forEach(el => el.onclick = () => { this.quarantineType = el.dataset.qtype; this.cleanupKind = el.dataset.qtype === "device" ? "remove_device" : "remove_entity"; this.cleanupSel = new Set(); if (this.lv.cleanup) this.lv.cleanup.f = {}; this.pages = {}; this.render(); });
     const kind = root.querySelector("[data-cleanup-kind]"); if (kind) kind.onchange = () => { this.cleanupKind = kind.value; this.cleanupSel = new Set(); if (this.lv.cleanup) this.lv.cleanup.f = {}; this.pages = {}; this.render(); };
-    root.querySelectorAll("[data-repair-task]").forEach(el => el.onclick = () => { this.repairTask = el.dataset.repairTask; this.cleanupKind = this.repairTask; this.cleanupSel = new Set(); this.plan = null; this.render(); });
-    root.querySelector("[data-repair-back]")?.addEventListener("click", () => { this.repairTask = null; this.render(); });
+    root.querySelectorAll("[data-repair-task]").forEach(el => el.onclick = () => { if (this.repairTask === el.dataset.repairTask) { this.repairTask = null; this.render(); return; } this.repairTask = el.dataset.repairTask; this.cleanupKind = this.repairTask; this.cleanupSel = new Set(); this.plan = null; this.render(); });
     root.querySelector("[data-ack-all]")?.addEventListener("change", e => { this.ack = new Set(e.target.checked ? this.plan.actions.filter(x => x.verdict === "review" && x.executable).map(x => x.object_id) : []); this.render(); });
     root.querySelector("[data-plan-confirm]")?.addEventListener("click", () => this.confirmPlan());
     const word = root.querySelector("[data-confirm-word]");

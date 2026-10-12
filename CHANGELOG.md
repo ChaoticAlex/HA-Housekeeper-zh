@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Reparieren wie Aufräumen:** Die Aufgaben stehen als kompakte Kacheln oben und bleiben beim Arbeiten stehen; ein Wechsel braucht kein „Zurück“ mehr. Der Hinweis zum bestätigten Plan sitzt auch hier hinter dem farbigen (i).
 - **Kein Kopieren-Knopf mehr in den Listen:** Das Viereck beim Daraufzeigen verdeckte Namen und IDs; die ID lässt sich direkt markieren.
 - **Automationen: Diagnose auf der Detailseite:** Die Spalte „Diagnose“ in der Übersicht entfällt; die Zeile öffnet die Detailseite, die einen Reiter „Diagnose“ hat (Blickwinkel, Erfolgskriterien, Verbessern, Ablaufverfolgung). Skripte zeigen dort ihre vier Blickwinkel.
 - **Recorder-Kosten als Tabelle:** Die Einträge stehen in einer sortierbaren Liste mit Balken für den Anteil und Spalten für Gesamt, 24 Stunden, 7 Tage und Durchschnitt pro Tag; klickbare Kacheln (Alle, Vorschläge, Ausgeschlossen, Nicht verwendet), Filter und CSV-Export.
