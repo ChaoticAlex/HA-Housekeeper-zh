@@ -198,3 +198,12 @@ def test_the_panel_knows_the_same_action_kinds_as_the_backend() -> None:
     assert js("DEVICE_KINDS") == cleanup.DEVICE_KINDS
     assert js("CLEANUP_KINDS") == cleanup.ENTITY_KINDS | cleanup.DEVICE_KINDS
     assert f"const MAX_PLAN_ACTIONS = {cleanup.MAX_ACTIONS};" in source
+
+
+def test_every_text_key_the_panel_asks_for_exists_in_both_languages() -> None:
+    """A key that is used with this.t("...") and defined nowhere shows up raw on the screen."""
+    parts = [p.read_text(encoding="utf-8") for p in sorted((ROOT / "panel-src").glob("*.js"))]
+    source = "\n".join(parts)
+    defined = set(re.findall(r"(?<![\w\"'])\"?([A-Za-z_][\w.]*)\"?\s*:\s*[\"`]", source))
+    used = set(re.findall(r"\bt\(\"([A-Za-z_][\w.]*)\"", source))
+    assert not sorted(used - defined)
