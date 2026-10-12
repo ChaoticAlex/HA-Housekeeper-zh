@@ -239,9 +239,8 @@ class OverviewMixin {
     return `<section class="statushead" title="${this.esc(this.t("healthTip", { affected: health.affected, base: health.base }))}"><button type="button" class="ring ${health.tone}" style="--p:${health.percent}" data-health-why aria-expanded="${Boolean(this.healthWhy)}" aria-label="${this.esc(this.t("healthWhy"))}"><b>${health.percent}<small>%</small></b></button>
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p></div>
       <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
-      ${this.todoCard()}<div class="grid2 ovmid"><div class="stack">${this.inventoryStatusCard()}</div>
-      <div class="stack">${this.cleanupCard()}</div></div>
-      <div class="ovzone">${this.systemCard()}${this.databaseCard()}${this.trendCard()}</div>`;
+      ${this.todoCard()}<div class="ovzone">${this.cleanupCard()}${this.trendCard()}${this.inventoryStatusCard()}</div>
+      <div class="ovzone">${this.systemCard()}${this.databaseCard()}</div>`;
   }
 
   // Three groups instead of seven raw statuses: what is fine, what to look at, what is broken.
