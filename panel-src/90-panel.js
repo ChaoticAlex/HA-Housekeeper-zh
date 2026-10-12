@@ -930,7 +930,6 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-runs-refresh]")?.addEventListener("click", () => this.loadRuns());
     root.querySelector("[data-rel-compare]")?.addEventListener("click", () => { this.relCompare = !this.relCompare; this.reliability = null; this.loadReliability(); });
     root.querySelectorAll("[data-rel-window]").forEach(el => el.onclick = () => { this.relWindow = Number(el.dataset.relWindow); this.reliability = null; this.pages.relentries = 1; this.pages.relunstable = 1; this.loadReliability(); });
-    root.querySelectorAll("[data-storm-find]").forEach(el => el.onclick = () => { this.stormFind = el.dataset.stormFind; this.pages.stormfind = 1; this.render(); });
     root.querySelectorAll("[data-storm-entry]").forEach(el => el.onclick = () => { this.stormEntry = el.dataset.stormEntry; this.pages.stormentities = 1; (this.viewTab ||= {}).recload = "entities"; this.render(); });
     root.querySelector("[data-storm-entry-clear]")?.addEventListener("click", () => { this.stormEntry = ""; this.pages.stormentities = 1; this.render(); });
     root.querySelectorAll("[data-storm-mark]").forEach(el => el.onclick = () => { this.excludeSel.add(el.dataset.stormMark); (this.viewTab ||= {}).recload = "entities"; this.render(); });

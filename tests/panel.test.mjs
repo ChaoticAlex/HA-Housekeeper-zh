@@ -4243,3 +4243,13 @@ test("an app is an object of its own: status, detail tabs with rights and load, 
   el.view = "inventory"; el.render();
   assert.ok(shadow.innerHTML.includes('data-inv-filter="app|"'), "the inventory has a tile for the type");
 });
+
+test("the findings of the load view are a sortable table with the numbers in columns and clickable tiles", () => {
+  const { el } = panel("en");
+  el.data = { ...DATA }; el._stormsRequested = 1; el._exposureRequested = true;
+  el.storms = STORMS;
+  const html = el.stormsView();
+  assert.ok(html.includes('data-lf-set="stormfind||"') && html.includes('data-lf-set="stormfind|kind|storm"'));
+  assert.ok(html.includes("Rows/day") && html.includes("72,000") && html.includes('data-object="entity:sensor.laut"') && html.includes('data-storm-mark="sensor.laut"'));
+  assert.ok(!html.includes("stormgroup"));
+});

@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Recorder: Auffälligkeiten als Tabelle:** Die Auffälligkeiten stehen in einer sortierbaren Liste (Zeilen pro Tag, lauteste Stunde, Anteil ohne neuen Zustand) mit klickbaren Kacheln und Filtern; ein Klick auf die Zeile öffnet die Details.
 - **Skripte als eigener Reiter:** Unter „Automationen“ listet der Reiter „Skripte“ alle Skripte mit Läufen, Fehlern, vier Blickwinkeln und der Spalte „Aufgerufen von“ (Automationen und Skripte, die das Skript nutzen); Skripte ohne Aufrufer sind schnell zu finden.
 - **Automationen: neue Übersicht:** Der Reiter „Übersicht“ (vorher „Qualität“) listet alle Automationen mit Status, Läufen, Fehlern und den sieben Blickwinkeln, auch deaktivierte und nie gelaufene. Die Liste hat Suche, Filter, Sortierung nach jeder Spalte, Seitenumbruch und CSV-Export; die Zeile öffnet die Detailseite. Die Kacheln oben sind klickbar und filtern, ebenso die Kacheln unter „Läufe“.
 - **Helfer im Inventar:** Der Typfilter hat die Auswahl „Helfer“ (Helfer mit Eintrag und Helfer-Entitäten) mit den Spalten „Verwendet von“ und „Zuletzt geändert“ und einer Auswahl für vermutlich ungenutzte Helfer; Schimmelindikator und Bayes-Sensor werden auf fehlende Quellen geprüft.
@@ -42,6 +43,7 @@
 
 ### English
 
+- **Recorder: findings as a table:** The findings are a sortable list (rows per day, loudest hour, share without a new state) with clickable tiles and filters; clicking a row opens the details.
 - **Scripts in a tab of their own:** Under "Automations" the "Scripts" tab lists every script with runs, errors, four views and a "Called by" column (the automations and scripts that use the script), so scripts nobody calls are easy to find.
 - **Automations: new overview:** The "Overview" tab (formerly "Quality") lists every automation with state, runs, errors and the seven views, including disabled ones and ones that never ran. The list has search, filters, sorting by any column, paging and CSV export; a row opens the detail page. The tiles above are clickable and filter, and so are the tiles under "Runs".
 - **Helpers in the inventory:** The type filter has a "Helpers" choice (helpers with a config entry and helper entities) with the columns "Used by" and "Last changed" and a choice for helpers that are probably unused; mold indicator and Bayesian sensor are checked for missing sources.

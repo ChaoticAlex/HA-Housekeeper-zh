@@ -43,18 +43,46 @@ class StormsMixin {
     return groups;
   }
 
-  stormGroupCard(group) {
-    const first = group.items[0], tone = f => (f.kind === "storm" ? "red" : f.kind === "integration_share" || f.kind === "event_burst" ? "blue" : "warn");
-    const title = group.type === "events" ? first.event_type : group.type === "integrations" ? first.title : first.name || first.entity_id;
-    const id = group.type === "entities" && first.entity_id !== title ? this.rowId(first.entity_id) : "";
-    const badges = group.items.map(f => `<span class="pill ${tone(f)}">${this.t(`stormKind_${f.kind}`)}</span>`).join("");
-    const lines = group.items.map(f => group.items.length === 1 ? `<li class="solo"><span>${this.esc(this.stormFindingText(f))}</span></li>` : `<li><span>${this.t(`stormKind_${f.kind}`)}</span><span>${this.esc(this.stormFindingText(f))}</span></li>`).join(""); // one reason: the badge already names it
-    const chain = group.items.map(f => this.stormFollowers(f.followers)).find(Boolean);
-    const used = chain ? `<li><span>${this.t("stormDependsLabel")}</span><span>${this.esc(chain)} ${this.t("stormDependsNote")}</span></li>` : "";
-    const done = group.type === "entities" && (this.excludeSel.has(first.entity_id) || this.excludedIds().has(first.entity_id));
-    const entry = group.type === "integrations" && first.entry_id ? `<div class="stormactions">${this.stormEntryButton(first.entry_id)}${this.findObject(`config_entry:${first.entry_id}`) ? `<button class="btn quiet" data-object="config_entry:${this.esc(first.entry_id)}">${this.t("stormDetails")}</button>` : ""}</div>` : "";
-    const actions = entry || (group.type === "entities" ? `<div class="stormactions"><button class="btn" data-object="entity:${this.esc(first.entity_id)}">${this.t("stormDetails")}</button><button class="btn quiet" data-storm-mark="${this.esc(first.entity_id)}" ${done ? "disabled" : ""}>${this.t("stormMarkExclude")}</button></div>` : "");
-    return `<div class="stormgroup"><div class="stormtop"><div><strong>${this.esc(title)}</strong>${id}</div><span class="stormbadges">${badges}</span></div><ul class="stormfinds">${lines}${used}</ul>${actions}</div>`;
+  // One row per group: the numbers sit in columns so the list sorts by them; the sentences live in the object's details.
+  stormGroupFact(group, kind, field) {
+    return group.items.find(f => f.kind === kind)?.[field] ?? null;
+  }
+
+  stormGroupsList(groups) {
+    const num = v => (v === null || v === undefined ? "–" : this.esc(this.formatNumber(v)));
+    const tone = f => (f.kind === "storm" ? "red" : f.kind === "integration_share" || f.kind === "event_burst" ? "blue" : "warn");
+    const title = g => (g.type === "events" ? g.items[0].event_type : g.type === "integrations" ? g.items[0].title : g.items[0].name || g.items[0].entity_id);
+    const perDay = g => g.items.map(f => f.per_day ?? f.count).find(v => v !== undefined) ?? null;
+    const peak = g => this.stormGroupFact(g, "storm", "peak_hour");
+    const share = g => this.stormGroupFact(g, "no_new_state", "share");
+    const marked = g => g.type === "entities" && (this.excludeSel.has(g.items[0].entity_id) || this.excludedIds().has(g.items[0].entity_id));
+    const target = g => (g.type === "entities" ? `entity:${g.items[0].entity_id}` : g.type === "integrations" && g.items[0].entry_id && this.findObject(`config_entry:${g.items[0].entry_id}`) ? `config_entry:${g.items[0].entry_id}` : "");
+    const kindsOf = g => g.items.map(f => f.kind);
+    const present = ["storm", "attribute_flood", "no_new_state", "integration_share", "event_burst"].filter(k => groups.some(g => kindsOf(g).includes(k)));
+    const columns = [
+      { key: "name", label: "utName", cell: g => { const chain = g.items.map(f => this.stormFollowers(f.followers)).find(Boolean); return `${this.nameCell(title(g), g.type === "entities" && g.items[0].entity_id !== title(g) ? g.items[0].entity_id : "")}${chain ? `<small class="muted">${this.esc(chain)}</small>` : ""}`; } },
+      { key: "kinds", label: "stormColKinds", sortable: false, cell: g => g.items.map(f => `<span class="pill ${tone(f)}">${this.t(`stormKind_${f.kind}`)}</span>`).join(" ") },
+      { key: "perDay", label: "stormColPerDay", dir: "desc", cell: g => num(perDay(g)) },
+      { key: "peak", label: "stormColPeak", dir: "desc", cell: g => num(peak(g)) },
+      { key: "share", label: "stormColNoNew", dir: "desc", cell: g => (share(g) === null ? "–" : `${this.esc(this.formatNumber(share(g)))} %`) },
+      { key: "mark", label: "stormColAction", sortable: false, cell: g => (g.type === "entities" ? `<button class="btn quiet" data-storm-mark="${this.esc(g.items[0].entity_id)}" ${marked(g) ? "disabled" : ""}>${this.t("stormMarkExclude")}</button>` : g.type === "integrations" && g.items[0].entry_id ? this.stormEntryButton(g.items[0].entry_id) : "") },
+    ];
+    return this.sysList("stormfind", groups, {
+      sort: "perDay", dir: "desc",
+      sorts: [
+        { key: "perDay", label: "stormColPerDay", dir: "desc", get: perDay },
+        { key: "name", label: "utName", dir: "asc", get: title },
+        { key: "peak", label: "stormColPeak", dir: "desc", get: peak },
+        { key: "share", label: "stormColNoNew", dir: "desc", get: share },
+      ],
+      filters: [
+        { name: "type", all: this.t("stormFilterAll"), options: [["entities", this.t("stormGroupEntities")], ["integrations", this.t("stormGroupIntegrations")], ["events", this.t("stormGroupEvents")]].filter(([id]) => groups.some(g => g.type === id)) },
+        { name: "kind", all: this.t("stormFilterKind"), options: present.map(k => [k, this.t(`stormKind_${k}`)]) },
+      ],
+      filterFns: { type: (g, v) => g.type === v, kind: (g, v) => kindsOf(g).includes(v) },
+      text: g => g.items.flatMap(f => [f.name, f.entity_id, f.title, f.event_type]).join(" "), tie: g => g.key, empty: "stormNone", columns,
+      rowAttrs: g => (target(g) ? `data-object="${this.esc(target(g))}" tabindex="0" role="button" aria-label="${this.esc(title(g))}"` : 'class="static"'),
+    });
   }
 
   // Shows the loudest entities of one integration entry: the list already carries each entity's entry_id.
@@ -126,13 +154,12 @@ class StormsMixin {
     if (!r.available) return `<div class="stack">${head}<div class="panel"><p class="factnote">${this.t("relNoRecorder")}</p></div></div>`;
     if (r.busy) return `<div class="stack">${head}<div class="panel">${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p></div></div>`;
     const loading = this.stormsLoading ? `<p class="factnote">${this.t("stormLoading")}</p>` : "";
-    const groups = this.stormGroups(r), kinds = [["all", "stormFilterAll"], ["entities", "stormGroupEntities"], ["integrations", "stormGroupIntegrations"], ["events", "stormGroupEvents"]].filter(([id]) => id === "all" || groups.some(g => g.type === id));
-    const kind = kinds.some(([id]) => id === this.stormFind) ? this.stormFind : "all";
-    const filter = `<div class="stormfilter">${kinds.map(([id, key]) => `<button class="chip ${kind === id ? "active" : ""}" data-storm-find="${id}" aria-pressed="${kind === id}">${this.t(key)} ${id === "all" ? groups.length : groups.filter(g => g.type === id).length}</button>`).join("")}</div>`;
-    const shownGroups = kind === "all" ? groups : groups.filter(g => g.type === kind);
-    const foundFindings = this.searchList("stormfind", shownGroups, g => g.items.flatMap(f => [f.name, f.entity_id, f.title, f.event_type]).join(" "));
-    const findingPage = this.paginate("stormfind", foundFindings.rows);
-    const attention = groups.length ? `<p class="factnote">${this.t("stormGroupHint")}</p>${this.stormLegend(r)}${filter}${foundFindings.bar}${foundFindings.none}${findingPage.rows.map(g => this.stormGroupCard(g)).join("")}${findingPage.footer}<p class="factnote">${this.t("stormWhatToDo")}</p>` : `<div class="emptymsg">${this.t("stormNone")}</div>`;
+    const groups = this.stormGroups(r);
+    const tiles = groups.length ? this.sumTiles([
+      { label: this.t("stormFilterAll"), value: this.formatNumber(groups.length), tone: "mute", lf: ["stormfind", "", ""] },
+      ...["storm", "no_new_state", "attribute_flood", "integration_share", "event_burst"].map(k => ({ k, n: groups.filter(g => g.items.some(f => f.kind === k)).length })).filter(x => x.n).map(x => ({ label: this.t(`stormKind_${x.k}`), value: this.formatNumber(x.n), tone: x.k === "storm" || x.k === "integration_share" ? "red" : "warn", lf: ["stormfind", "kind", x.k] })),
+    ]) : "";
+    const attention = groups.length ? `<p class="factnote">${this.t("stormGroupHint")}</p>${this.stormLegend(r)}${this.stormGroupsList(groups)}<p class="factnote">${this.t("stormWhatToDo")}</p>` : `<div class="emptymsg">${this.t("stormNone")}</div>`;
     const summary = `<p class="factnote">${this.t("stormSummary", { rows: this.formatNumber(r.total_rows), perDay: this.formatNumber(r.per_day), entities: this.formatNumber(r.entity_count), events: this.formatNumber(r.event_total) })}</p>`;
     const entry = this.stormEntry && r.integrations.find(g => g.entry_id === this.stormEntry);
     const ofEntry = entry ? r.entities.filter(item => item.entry_id === entry.entry_id) : r.entities;
@@ -162,6 +189,6 @@ class StormsMixin {
     ].filter(Boolean);
     const open = this.viewTabOf("recload", tabs, r.findings.length ? "findings" : "entities");
     const body = open === "entities" ? table : open === "shares" ? shares : open === "events" ? events : `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormTabFindings")}</h2></div></div>${attention}</div>`;
-    return `<div class="stack">${head}<div class="panel">${loading}${summary}${left ? `<p class="factnote">${left}</p>` : ""}</div>${this.viewTabBar("recload", tabs, open)}${body}</div>`;
+    return `<div class="stack">${head}<div class="panel">${loading}${summary}${left ? `<p class="factnote">${left}</p>` : ""}</div>${this.viewTabBar("recload", tabs, open)}${open === "findings" ? tiles : ""}${body}</div>`;
   }
 }
