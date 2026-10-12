@@ -7508,6 +7508,8 @@ Object.assign(TEXT.de, {
   polRule_user_old_tokens: "Alte Langzeit-Tokens", polDesc_user_old_tokens: "Ein aktives Konto hat Langzeit-Tokens, die mindestens 90 Tage alt sind. Home Assistant merkt sich nicht, wann ein Langzeit-Token benutzt wird; die Regel kann deshalb nur das Alter nennen, nicht, ob es noch gebraucht wird. Nie ein Token-Wert.", polAlso_user_old_tokens: "Alter in Tagen: {ids}",
   polRule_user_dead_tokens: "Langzeit-Tokens abgeschalteter Konten", polDesc_user_dead_tokens: "Ein abgeschaltetes Konto hält noch Langzeit-Tokens. Sie funktionieren nicht mehr und können mit dem Konto gelöscht werden.", polAlso_user_dead_tokens: "Tokens: {ids}",
   polRule_companion_silent: "Companion-App-Gerät meldet sich nicht mehr", polDesc_companion_silent: "Kein beobachteter Sensor eines Companion-App-Geräts hat seit mindestens 30 Tagen etwas gemeldet. Oft ist es ein altes Handy, dessen Eintrag stehen geblieben ist. Die Zeit zählt ab dem Beginn der Beobachtung, \"mindestens\" also. Ein Handy im Energiesparmodus kann ebenfalls still sein. Nur ein Hinweis; entfernt wird in den Einstellungen von Home Assistant.", polIdle: "Seit mindestens {n} Tagen keine Meldung", polAlso_companion_silent: "{ids}",
+  polRule_hacs_archived: "HACS-Integration ist archiviert", polDesc_hacs_archived: "Das GitHub-Repository einer über HACS installierten Integration ist archiviert: Es wird nicht mehr gepflegt und bekommt keine Updates mehr. Stand aus dem Speicher von HACS. Nur ein Hinweis; ob ein Ersatz nötig ist, entscheidest du.", polAlso_hacs_archived: "{ids}",
+  polRule_hacs_blocked: "HACS-Update braucht neuere Home-Assistant-Version", polDesc_hacs_blocked: "Für eine über HACS installierte Integration wartet ein Update, das HACS nicht installiert, weil es eine neuere Home-Assistant-Version verlangt als die laufende. Nur ein Hinweis; erst Home Assistant aktualisieren.", polAlso_hacs_blocked: "{ids}",
 });
 Object.assign(TEXT.en, {
   polRule_statistics_unit: "Statistics: unit no longer fits", polDesc_statistics_unit: "The unit of the entity differs from the unit of its long-term statistics and the recorder cannot convert it. New values then do not fit the old ones. Only metadata is read.", polAlso_statistics_unit: "Statistics → entity: {ids}",
@@ -7524,6 +7526,8 @@ Object.assign(TEXT.en, {
   polRule_user_old_tokens: "Old long-lived tokens", polDesc_user_old_tokens: "An active account has long-lived tokens that are at least 90 days old. Home Assistant does not record when a long-lived token is used, so the rule can only name the age, not whether it is still needed. Never a token value.", polAlso_user_old_tokens: "Age in days: {ids}",
   polRule_user_dead_tokens: "Long-lived tokens of switched-off accounts", polDesc_user_dead_tokens: "A switched-off account still holds long-lived tokens. They no longer work and can go with the account.", polAlso_user_dead_tokens: "Tokens: {ids}",
   polRule_companion_silent: "Companion app device no longer reports", polDesc_companion_silent: "No watched sensor of a companion app device has reported anything for at least 30 days. Often it is an old phone whose entry was left behind. The time counts from when watching began, so it is \"at least\". A phone in power saving mode can be quiet too. A hint only; removal is done in the Home Assistant settings.", polIdle: "No report for at least {n} days", polAlso_companion_silent: "{ids}",
+  polRule_hacs_archived: "HACS integration is archived", polDesc_hacs_archived: "The GitHub repository of an integration installed through HACS is archived: it is no longer maintained and gets no more updates. Taken from the memory of HACS. A hint only; whether a replacement is needed is up to you.", polAlso_hacs_archived: "{ids}",
+  polRule_hacs_blocked: "HACS update needs a newer Home Assistant", polDesc_hacs_blocked: "An update waits for an integration installed through HACS, but HACS will not install it because it needs a newer Home Assistant than the one running. A hint only; update Home Assistant first.", polAlso_hacs_blocked: "{ids}",
 });
 
 // BatteryCareMixin: the battery forecast and the maintenance reminders in the Batteries view.
@@ -11750,7 +11754,7 @@ Object.assign(TEXT.de, {
   intNoRel: "Für diese Integration liegen noch keine Zuverlässigkeitswerte vor.", intColName: "Name", intColType: "Typ", intColStatus: "Status",
   intSources: "Quellen der Einträge", intFirstCreated: "Ältester Eintrag angelegt", intLastModified: "Zuletzt geändert", intIds: "Eintrags-IDs",
   intEntityCount: "{e} Entitäten · {d} Geräte",
-  intHacsTitle: "HACS", intHacsInstalled: "Installierte Version", intHacsAvailable: "Neueste Version", intHacsUpdate: "Update verfügbar", intHacsCurrent: "Aktuell", intHacsOpen: "In HACS öffnen", intHacsGitHub: "Repository auf GitHub", intHacsNote: "Stand aus dem Speicher von HACS; es wird nichts bei GitHub abgefragt und nichts installiert.",
+  intHacsTitle: "HACS", intHacsInstalled: "Installierte Version", intHacsAvailable: "Neueste Version", intHacsUpdate: "Update verfügbar", intHacsCurrent: "Aktuell", intHacsArchived: "Archiviert", intHacsBlocked: "Braucht neuere HA-Version", intHacsOpen: "In HACS öffnen", intHacsGitHub: "Repository auf GitHub", intHacsNote: "Stand aus dem Speicher von HACS; es wird nichts bei GitHub abgefragt und nichts installiert.",
 });
 Object.assign(TEXT.en, {
   integration: "Integration", intTabEntries: "Entries", intTabMembers: "Entities & devices", intTabUsed: "Used by", intTabRel: "Reliability",
@@ -11760,7 +11764,7 @@ Object.assign(TEXT.en, {
   intNoRel: "There are no reliability values for this integration yet.", intColName: "Name", intColType: "Type", intColStatus: "Status",
   intSources: "Sources of the entries", intFirstCreated: "Oldest entry created", intLastModified: "Last changed", intIds: "Entry IDs",
   intEntityCount: "{e} entities · {d} devices",
-  intHacsTitle: "HACS", intHacsInstalled: "Installed version", intHacsAvailable: "Latest version", intHacsUpdate: "Update available", intHacsCurrent: "Up to date", intHacsOpen: "Open in HACS", intHacsGitHub: "Repository on GitHub", intHacsNote: "Taken from the memory of HACS; nothing is asked from GitHub and nothing is installed.",
+  intHacsTitle: "HACS", intHacsInstalled: "Installed version", intHacsAvailable: "Latest version", intHacsUpdate: "Update available", intHacsCurrent: "Up to date", intHacsArchived: "Archived", intHacsBlocked: "Needs newer HA version", intHacsOpen: "Open in HACS", intHacsGitHub: "Repository on GitHub", intHacsNote: "Taken from the memory of HACS; nothing is asked from GitHub and nothing is installed.",
 });
 
 const INT_RANK = { problem: 3, disabled: 2, active: 1, ignored: 0 };
@@ -11864,7 +11868,7 @@ class IntegrationPageMixin {
   // What HACS says about the integration, for custom integrations that HACS installed.
   intHacsCard(h) {
     const fact = (label, value) => `<div class="fact"><span>${this.t(label)}</span><b>${value}</b></div>`;
-    const status = `<span class="pill ${h.pending_update ? "warn" : "ok"}">${this.t(h.pending_update ? "intHacsUpdate" : "intHacsCurrent")}</span>`;
+    const status = `<span class="pill ${h.pending_update ? "warn" : "ok"}">${this.t(h.pending_update ? "intHacsUpdate" : "intHacsCurrent")}</span>${h.blocked ? ` <span class="pill warn">${this.t("intHacsBlocked")}</span>` : ""}${h.archived ? ` <span class="pill warn">${this.t("intHacsArchived")}</span>` : ""}`;
     const open = h.id ? `<button class="btn" data-ha-path="${this.esc(`/hacs/repository/${encodeURIComponent(h.id)}`)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("intHacsOpen")}</button>` : "";
     const github = h.full_name ? `<a class="btn" href="${this.esc(`https://github.com/${h.full_name}`)}" target="_blank" rel="noopener noreferrer"><ha-icon icon="mdi:github"></ha-icon>${this.t("intHacsGitHub")}</a>` : "";
     return `<section class="panel"><div class="panelhead"><h2>${this.t("intHacsTitle")}</h2>${open || github ? `<div class="actions">${open}${github}</div>` : ""}</div><div class="facts">${fact("intHacsInstalled", this.esc(h.installed_version || "–"))}${fact("intHacsAvailable", this.esc(h.available_version || "–"))}${fact("sysColState", status)}</div><p class="factnote">${this.t("intHacsNote")}</p></section>`;

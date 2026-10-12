@@ -63,6 +63,8 @@ RULES = (
     "user_old_tokens",
     "user_dead_tokens",
     "companion_silent",
+    "hacs_archived",
+    "hacs_blocked",
 )
 # Rules that wait for numbers the Recorder views keep; they never start a recorder query themselves.
 NEEDS_LOAD = ("state_rate", "recorder_unused")
@@ -273,6 +275,7 @@ def evaluate(
         by_type.setdefault(item["object_type"], []).append(item)
     entities = {i["object_id"]: i for i in by_type.get("entity", [])}
     devices = {i["object_id"]: i for i in by_type.get("device", [])}
+    integrations = by_type.get("config_entry", [])
     automations = by_type.get("automation", [])
     scripts = by_type.get("script", [])
     dashboards = by_type.get("dashboard", [])
@@ -309,6 +312,8 @@ def evaluate(
         "user_old_tokens": lambda: rules_more.user_old_tokens(auth, now),
         "user_dead_tokens": lambda: rules_more.user_dead_tokens(auth, now),
         "companion_silent": lambda: rules_more.companion_silent(devices, entities, now),
+        "hacs_archived": lambda: rules_more.hacs_archived(integrations),
+        "hacs_blocked": lambda: rules_more.hacs_blocked(integrations),
         "recorder_unused": lambda: rules_more.recorder_unused(entities, rates or {}, used),
         "recorder_retention": lambda: rules_more.recorder_retention(extra.get("db") or {}),
         "statistics_unit": lambda: rules_more.statistics_issue(
@@ -370,7 +375,15 @@ def evaluate(
                     "resurfaced": key in (extra.get("due") or ()),
                     **{
                         k: item[k]
-                        for k in ("also", "expected", "rate", "keep_days", "db_bytes", "days", "idle_days")
+                        for k in (
+                            "also",
+                            "expected",
+                            "rate",
+                            "keep_days",
+                            "db_bytes",
+                            "days",
+                            "idle_days",
+                        )
                         if k in item
                     },
                 }

@@ -34,7 +34,8 @@ def repository_info(repository: Any) -> tuple[str, dict[str, Any]] | None:
         or getattr(data, "installed_version", None)
     )
     available = _text(
-        getattr(repository, "display_available_version", None) or getattr(data, "last_version", None)
+        getattr(repository, "display_available_version", None)
+        or getattr(data, "last_version", None)
     )
     pending = getattr(repository, "pending_update", None)
     if not isinstance(pending, bool):
@@ -46,6 +47,8 @@ def repository_info(repository: Any) -> tuple[str, dict[str, Any]] | None:
         "installed_version": installed,
         "available_version": available,
         "pending_update": pending,
+        "archived": getattr(data, "archived", None) is True,
+        "blocked": getattr(repository, "can_download", True) is False and pending,
     }
 
 

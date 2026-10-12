@@ -334,3 +334,19 @@ def test_companion_silent_names_only_phones_whose_watched_sensors_all_went_quiet
     rule = run(objects, "companion_silent", now=now)
     assert ids(rule) == ["old"]
     assert rule["items"][0]["idle_days"] == 40
+
+
+def test_hacs_rules_name_each_integration_once_not_each_entry() -> None:
+    def entry(object_id: str, **hacs) -> dict:
+        return obj(
+            "config_entry", object_id, domain="demo", integration_name="Demo", hacs=hacs or None
+        )
+
+    objects = [
+        entry("e1", archived=True, blocked=False),
+        entry("e2", archived=True, blocked=False),
+        obj("config_entry", "e3", domain="other", hacs={"archived": False, "blocked": True}),
+        obj("config_entry", "e4", domain="builtin"),
+    ]
+    assert ids(run(objects, "hacs_archived")) == ["e1"]
+    assert ids(run(objects, "hacs_blocked")) == ["e3"]

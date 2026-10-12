@@ -9,7 +9,7 @@ Object.assign(TEXT.de, {
   intNoRel: "Für diese Integration liegen noch keine Zuverlässigkeitswerte vor.", intColName: "Name", intColType: "Typ", intColStatus: "Status",
   intSources: "Quellen der Einträge", intFirstCreated: "Ältester Eintrag angelegt", intLastModified: "Zuletzt geändert", intIds: "Eintrags-IDs",
   intEntityCount: "{e} Entitäten · {d} Geräte",
-  intHacsTitle: "HACS", intHacsInstalled: "Installierte Version", intHacsAvailable: "Neueste Version", intHacsUpdate: "Update verfügbar", intHacsCurrent: "Aktuell", intHacsOpen: "In HACS öffnen", intHacsGitHub: "Repository auf GitHub", intHacsNote: "Stand aus dem Speicher von HACS; es wird nichts bei GitHub abgefragt und nichts installiert.",
+  intHacsTitle: "HACS", intHacsInstalled: "Installierte Version", intHacsAvailable: "Neueste Version", intHacsUpdate: "Update verfügbar", intHacsCurrent: "Aktuell", intHacsArchived: "Archiviert", intHacsBlocked: "Braucht neuere HA-Version", intHacsOpen: "In HACS öffnen", intHacsGitHub: "Repository auf GitHub", intHacsNote: "Stand aus dem Speicher von HACS; es wird nichts bei GitHub abgefragt und nichts installiert.",
 });
 Object.assign(TEXT.en, {
   integration: "Integration", intTabEntries: "Entries", intTabMembers: "Entities & devices", intTabUsed: "Used by", intTabRel: "Reliability",
@@ -19,7 +19,7 @@ Object.assign(TEXT.en, {
   intNoRel: "There are no reliability values for this integration yet.", intColName: "Name", intColType: "Type", intColStatus: "Status",
   intSources: "Sources of the entries", intFirstCreated: "Oldest entry created", intLastModified: "Last changed", intIds: "Entry IDs",
   intEntityCount: "{e} entities · {d} devices",
-  intHacsTitle: "HACS", intHacsInstalled: "Installed version", intHacsAvailable: "Latest version", intHacsUpdate: "Update available", intHacsCurrent: "Up to date", intHacsOpen: "Open in HACS", intHacsGitHub: "Repository on GitHub", intHacsNote: "Taken from the memory of HACS; nothing is asked from GitHub and nothing is installed.",
+  intHacsTitle: "HACS", intHacsInstalled: "Installed version", intHacsAvailable: "Latest version", intHacsUpdate: "Update available", intHacsCurrent: "Up to date", intHacsArchived: "Archived", intHacsBlocked: "Needs newer HA version", intHacsOpen: "Open in HACS", intHacsGitHub: "Repository on GitHub", intHacsNote: "Taken from the memory of HACS; nothing is asked from GitHub and nothing is installed.",
 });
 
 const INT_RANK = { problem: 3, disabled: 2, active: 1, ignored: 0 };
@@ -123,7 +123,7 @@ class IntegrationPageMixin {
   // What HACS says about the integration, for custom integrations that HACS installed.
   intHacsCard(h) {
     const fact = (label, value) => `<div class="fact"><span>${this.t(label)}</span><b>${value}</b></div>`;
-    const status = `<span class="pill ${h.pending_update ? "warn" : "ok"}">${this.t(h.pending_update ? "intHacsUpdate" : "intHacsCurrent")}</span>`;
+    const status = `<span class="pill ${h.pending_update ? "warn" : "ok"}">${this.t(h.pending_update ? "intHacsUpdate" : "intHacsCurrent")}</span>${h.blocked ? ` <span class="pill warn">${this.t("intHacsBlocked")}</span>` : ""}${h.archived ? ` <span class="pill warn">${this.t("intHacsArchived")}</span>` : ""}`;
     const open = h.id ? `<button class="btn" data-ha-path="${this.esc(`/hacs/repository/${encodeURIComponent(h.id)}`)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("intHacsOpen")}</button>` : "";
     const github = h.full_name ? `<a class="btn" href="${this.esc(`https://github.com/${h.full_name}`)}" target="_blank" rel="noopener noreferrer"><ha-icon icon="mdi:github"></ha-icon>${this.t("intHacsGitHub")}</a>` : "";
     return `<section class="panel"><div class="panelhead"><h2>${this.t("intHacsTitle")}</h2>${open || github ? `<div class="actions">${open}${github}</div>` : ""}</div><div class="facts">${fact("intHacsInstalled", this.esc(h.installed_version || "–"))}${fact("intHacsAvailable", this.esc(h.available_version || "–"))}${fact("sysColState", status)}</div><p class="factnote">${this.t("intHacsNote")}</p></section>`;

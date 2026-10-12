@@ -500,3 +500,25 @@ def companion_silent(
         if days is not None and days >= COMPANION_DAYS:
             also = [str(v) for v in (device.get("model"), device.get("sw_version")) if v]
             yield {**device, "idle_days": days, "also": also}
+
+
+def _hacs_integrations(integrations: list[dict[str, Any]], flag: str):
+    """One item per HACS integration (not per entry) whose HACS data carries ``flag``."""
+    seen: set[str] = set()
+    for item in integrations:
+        info = item.get("hacs")
+        if not info or not info.get(flag) or item["domain"] in seen:
+            continue
+        seen.add(item["domain"])
+        also = [str(v) for v in (info.get("installed_version"), info.get("available_version")) if v]
+        yield {**item, "name": item.get("integration_name") or item["domain"], "also": also}
+
+
+def hacs_archived(integrations: list[dict[str, Any]]):
+    """Integrations installed through HACS whose GitHub repository is archived (not maintained)."""
+    return _hacs_integrations(integrations, "archived")
+
+
+def hacs_blocked(integrations: list[dict[str, Any]]):
+    """HACS integrations with an update waiting that needs a newer Home Assistant than runs."""
+    return _hacs_integrations(integrations, "blocked")
