@@ -9,12 +9,14 @@ class SystemMixin {
     return ((this._sys ||= {})[name] ||= { data: null, loading: false, error: "", requested: false, at: null });
   }
 
-  async sysLoad(name) {
+  // `fresh` is the refresh button: the server then walks the folders again, unless it did a moment ago.
+  async sysLoad(name, fresh = false) {
     const st = this.sysState(name);
     st.loading = true; st.error = ""; st.requested = true; this.render();
     try {
-      st.data = await this._hass.callWS({ type: `ha_housekeeper/${SYS_COMMANDS[name]}` });
-      st.at = new Date().toISOString();
+      st.data = await this._hass.callWS({ type: `ha_housekeeper/${SYS_COMMANDS[name]}`, ...(fresh && name === "storage" ? { fresh: true } : {}) });
+      // The sizes carry the time they were read; the rest of the page is live.
+      st.at = (name === "storage" && st.data?.read_at) || new Date().toISOString();
     } catch (err) { st.error = this.errText(err); }
     st.loading = false;
     this.render();
@@ -502,7 +504,7 @@ class SystemMixin {
   // ---------------------------------------------------------------- bindings
 
   bindSystem(root) {
-    root.querySelectorAll("[data-sys-refresh]").forEach(el => el.onclick = () => this.sysLoad(el.dataset.sysRefresh));
+    root.querySelectorAll("[data-sys-refresh]").forEach(el => el.onclick = () => this.sysLoad(el.dataset.sysRefresh, true));
     // A tap on the (i) shows its text for a few seconds, as touch has no hover.
     root.querySelectorAll(".infotip").forEach(el => el.addEventListener("click", () => {
       this.showTip(el); globalThis.clearTimeout?.(this._tipHide);

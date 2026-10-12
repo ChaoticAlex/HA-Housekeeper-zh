@@ -35,7 +35,9 @@ def _used_card_types(scanner: InventoryScanner) -> set[str] | None:
 
 
 @websocket_api.require_admin
-@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/system_usage"})
+@websocket_api.websocket_command(
+    {vol.Required("type"): f"{DOMAIN}/system_usage", vol.Optional("fresh", default=False): bool}
+)
 @websocket_api.async_response
 @with_scanner
 async def websocket_system_usage(
@@ -47,7 +49,7 @@ async def websocket_system_usage(
     """Disk, memory, CPU and the largest consumers of space. Read-only."""
     try:
         async with asyncio.timeout(SYSTEM_TIMEOUT):
-            result = await system_usage(hass, _used_card_types(scanner))
+            result = await system_usage(hass, _used_card_types(scanner), msg["fresh"])
         result["history"] = scanner.load.series()
     except Exception as err:
         connection.send_error(msg["id"], "system_failed", f"{type(err).__name__}: {err}")

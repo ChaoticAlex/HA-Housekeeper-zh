@@ -4429,3 +4429,20 @@ test("the coverage of a scan shows in the overview as one line, lists each sourc
   assert.equal(el.endedSourceLabel({ rule_id: "dashboard.missing_entity" }), "Source not read: Dashboards");
   assert.equal(el.endedSourceLabel({ rule_id: "entity.state_unavailable" }), "not checked");
 });
+
+test("the info page lists the phases of the last scan, longest first, and the refresh of the storage page asks the server for a fresh walk", async () => {
+  const { el } = panel("en");
+  el.data = { ...DATA, meta: { ...DATA.meta, scan_timing: { entities: 0.4, automations: 2.26, analysis: 1.0, strange_phase: 0.1 } } };
+  const html = el.scanTimingCard();
+  assert.ok(html.indexOf("Automations, scripts and scenes") < html.indexOf("Evaluating the findings") && html.indexOf("Evaluating the findings") < html.indexOf("Reading entities"), "longest first");
+  assert.ok(html.includes("2.3 s") && html.includes("3.8 s in total") && html.includes("strange_phase"), "rounded, summed, an unknown phase by its name");
+  el.data.meta.scan_timing = undefined;
+  assert.equal(el.scanTimingCard(), "");
+  const sent = [];
+  el._hass.callWS = async msg => { sent.push(msg); return { read_at: "2026-10-12T20:00:00+00:00" }; };
+  await el.sysLoad("storage");
+  await el.sysLoad("storage", true);
+  const usage = sent.filter(m => m.type === "ha_housekeeper/system_usage");
+  assert.equal(usage[0].fresh, undefined); assert.equal(usage.at(-1).fresh, true);
+  assert.equal(el.sysState("storage").at, "2026-10-12T20:00:00+00:00", "the page shows when the sizes were read");
+});

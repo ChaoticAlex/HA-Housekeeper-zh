@@ -164,6 +164,38 @@ async def test_system_usage_without_a_supervisor(hass: HomeAssistant, tmp_path) 
     assert all("path" not in card for card in result["cards"]), "no absolute paths leave the server"
 
 
+async def test_the_folder_walk_is_reused_and_a_refresh_waits_for_the_gap(
+    hass: HomeAssistant, tmp_path
+) -> None:
+    """Two pages, two browsers or a pressed button must not walk the disk again and again."""
+    hass.config.config_dir = str(tmp_path)
+    walks = []
+    real = module.storage_breakdown
+
+    def counting(config_dir: str) -> dict:
+        walks.append(config_dir)
+        return real(config_dir)
+
+    with (
+        patch.dict(os.environ, {}, clear=False),
+        patch.object(module, "cpu_percent", return_value=1.0),
+        patch.object(module, "storage_breakdown", counting),
+    ):
+        os.environ.pop("SUPERVISOR_TOKEN", None)
+        first = await system_usage(hass)
+        second = await system_usage(hass)
+        refreshed = await system_usage(hass, fresh=True)
+        assert len(walks) == 1, "the second call and a refresh inside the gap reuse the walk"
+        assert first["cached"] is False and second["cached"] is True and refreshed["cached"] is True
+        assert second["read_at"] == first["read_at"]
+        with patch.object(module, "WALK_MIN_GAP", 0):
+            again = await system_usage(hass, fresh=True)
+        assert len(walks) == 2 and again["cached"] is False
+        with patch.object(module, "WALK_MAX_AGE", 0), patch.object(module, "WALK_MIN_GAP", 0):
+            await system_usage(hass)
+        assert len(walks) == 3, "an old walk is not reused"
+
+
 async def test_apps_become_objects_and_a_stopped_app_is_no_problem(hass: HomeAssistant) -> None:
     from custom_components.ha_housekeeper import inventory
 

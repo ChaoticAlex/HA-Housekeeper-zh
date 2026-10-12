@@ -17,10 +17,13 @@ import re
 import shutil
 import time
 from collections.abc import Iterable
+from datetime import UTC, datetime
 from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,6 +31,11 @@ SUPERVISOR_URL = "http://supervisor"
 SUPERVISOR_TIMEOUT = 15  # seconds per request
 DISK_USAGE_TIMEOUT = 45  # the usage walk over the data disk can take a while
 CPU_SAMPLE_SECONDS = 0.4
+# The walk over the folders and files is the costly part of the page. A result is reused for this
+# long, and a real second walk waits at least the gap, however often the page is refreshed.
+WALK_MAX_AGE = 300  # seconds
+WALK_MIN_GAP = 30  # seconds
+_WALK_KEY = f"{DOMAIN}_folder_walk"
 GIB = 1024**3
 
 # Known places under the configuration directory: (id, relative path, kind).
@@ -298,8 +306,25 @@ def disk_usage(path: str) -> dict[str, Any]:
     }
 
 
-def collect_local(config_dir: str) -> dict[str, Any]:
-    """Everything that is read from this machine's files (blocking; runs in the executor)."""
+def _empty_storage() -> dict[str, Any]:
+    return {"breakdown": [], "custom_integrations": [], "other": [], "other_rest": {"count": 0, "bytes": 0}}
+
+
+def safe_storage_breakdown(config_dir: str) -> dict[str, Any]:
+    """The folder walk; a failure leaves the lists empty instead of failing the page."""
+    try:
+        return storage_breakdown(config_dir)
+    except Exception as err:
+        _LOGGER.warning("Storage breakdown failed: %s", err)
+        return _empty_storage()
+
+
+def collect_local(config_dir: str, storage: bool = True) -> dict[str, Any]:
+    """Everything that is read from this machine's files (blocking; runs in the executor).
+
+    ``storage=False`` leaves out the folder walk: the live values are read, the sizes come from
+    the cached walk.
+    """
     try:
         load = os.getloadavg()
         load_avg: dict[str, float] | None = {
@@ -310,18 +335,13 @@ def collect_local(config_dir: str) -> dict[str, Any]:
     except (OSError, AttributeError):
         load_avg = None
     mem = memory()
-    try:
-        storage = storage_breakdown(config_dir)
-    except Exception as err:
-        _LOGGER.warning("Storage breakdown failed: %s", err)
-        storage = {"breakdown": [], "custom_integrations": [], "other": [], "other_rest": {"count": 0, "bytes": 0}}
     return {
         "cpu": {"percent": cpu_percent(), "count": os.cpu_count()},
         "load": load_avg,
         "ram": mem["ram"],
         "swap": mem["swap"],
         "disk": disk_usage(config_dir),
-        "storage": storage,
+        "storage": safe_storage_breakdown(config_dir) if storage else None,
     }
 
 
@@ -550,26 +570,78 @@ def merge_cards(
     return total
 
 
+class _Walk:
+    """The last folder walk of this instance and the lock that lets a second caller reuse it."""
+
+    def __init__(self) -> None:
+        self.lock = asyncio.Lock()
+        self.result: dict[str, Any] | None = None
+        self.signature: tuple[Any, ...] | None = None
+        self.at = 0.0
+
+
+async def _folder_walk(
+    hass: HomeAssistant,
+    config_dir: str,
+    resources: list[dict[str, Any]],
+    blueprints: list[dict[str, Any]],
+    fresh: bool,
+) -> dict[str, Any]:
+    """The sizes from the folders, reused for WALK_MAX_AGE seconds and never walked twice at once.
+
+    ``fresh`` asks for a new walk, which is still refused inside WALK_MIN_GAP seconds of the last
+    one. A second page, a second browser or a pressed button then costs no disk reads.
+    """
+    walk = hass.data.setdefault(_WALK_KEY, _Walk())
+    signature = (
+        tuple(item["url"] for item in resources),
+        tuple((item["domain"], item["path"]) for item in blueprints),
+    )
+    async with walk.lock:
+        age = time.monotonic() - walk.at
+        if (
+            walk.result is not None
+            and walk.signature == signature
+            and (age < WALK_MIN_GAP or (not fresh and age < WALK_MAX_AGE))
+        ):
+            return {**walk.result, "cached": True}
+        began = time.monotonic()
+        storage, sizes, bp_sizes = await asyncio.gather(
+            hass.async_add_executor_job(safe_storage_breakdown, config_dir),
+            hass.async_add_executor_job(card_sizes, config_dir, [r["url"] for r in resources]),
+            hass.async_add_executor_job(
+                blueprint_sizes, config_dir, [(b["domain"], b["path"]) for b in blueprints]
+            ),
+        )
+        walk.result = {
+            "storage": storage,
+            "sizes": sizes,
+            "bp_sizes": bp_sizes,
+            "read_at": datetime.now(UTC).isoformat(),
+            "read_seconds": round(time.monotonic() - began, 2),
+        }
+        walk.signature, walk.at = signature, time.monotonic()
+        return {**walk.result, "cached": False}
+
+
 async def system_usage(
-    hass: HomeAssistant, used_card_types: set[str] | None = None
+    hass: HomeAssistant, used_card_types: set[str] | None = None, fresh: bool = False
 ) -> dict[str, Any]:
     """Storage and system: everything the "Storage & system" page shows.
 
     ``used_card_types`` are the ``custom:`` card types of all dashboards (``None`` when unknown).
+    The live values (CPU, memory, disk) are read every time; the folder sizes come from a walk
+    that is reused for a few minutes (see ``_folder_walk``).
     """
     config_dir = hass.config.config_dir
     local, supervisor, resources, blueprints = await asyncio.gather(
-        hass.async_add_executor_job(collect_local, config_dir),
+        hass.async_add_executor_job(collect_local, config_dir, False),
         supervisor_part(hass),
         dashboard_resources(hass),
         blueprint_list(hass),
     )
-    sizes, bp_sizes = await asyncio.gather(
-        hass.async_add_executor_job(card_sizes, config_dir, [r["url"] for r in resources]),
-        hass.async_add_executor_job(
-            blueprint_sizes, config_dir, [(b["domain"], b["path"]) for b in blueprints]
-        ),
-    )
+    walked = await _folder_walk(hass, config_dir, resources, blueprints, fresh)
+    sizes, bp_sizes = walked["sizes"], walked["bp_sizes"]
     cards = []
     for resource in resources:
         size = sizes.get(resource["url"]) or {}
@@ -587,7 +659,7 @@ async def system_usage(
     for blueprint, size in zip(blueprints, bp_sizes, strict=True):
         blueprint["bytes"] = size
 
-    storage = local["storage"]
+    storage = walked["storage"]
     cards_total = merge_cards(storage["breakdown"], cards, config_dir)
     # The host's data disk says more than the container's file system where a Supervisor runs.
     disk = supervisor.get("disk") or local["disk"]
@@ -616,6 +688,10 @@ async def system_usage(
         ],
         "cards_total": cards_total,
         "blueprints": blueprints,
+        # When the sizes were read, how long that took and whether this answer reused an earlier walk.
+        "read_at": walked["read_at"],
+        "read_seconds": walked["read_seconds"],
+        "cached": walked["cached"],
     }
 
 

@@ -2828,7 +2828,7 @@ class SettingsMixin {
     const link = (icon, href, label, hint) => `<a class="row" href="${href}" target="_blank" rel="noopener noreferrer"><span class="tile mute"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${label}</strong>${hint ? `<small>${hint}</small>` : ""}</span><ha-icon icon="mdi:open-in-new"></ha-icon></a>`;
     const kept = this.storedFiles(m);
     return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("about")}</h2></div><div class="facts">${facts}</div></section>
-      ${this.scanCoverageCard()}
+      ${this.scanCoverageCard()}${this.scanTimingCard()}
       <section class="panel"><div class="panelhead"><div><h2>${this.t("setKeptTitle")}</h2><p>${this.t("setKeptHint")} ${this.t("storeHintBytes")}</p></div></div>${kept}<p class="factnote">${this.t("setPrivacy")}</p></section>
       <section class="panel"><div class="panelhead"><h2>${this.t("setLinks")}</h2></div>${link("mdi:github", REPO_URL, this.t("repository"), "")}${link("mdi:bug-outline", `${REPO_URL}/issues`, this.t("reportIssue"), "")}${link("mdi:history", `${REPO_URL}/blob/main/CHANGELOG.md`, this.t("changelog"), "")}
         <button class="row" data-diagnostics><span class="tile mute"><ha-icon icon="mdi:stethoscope"></ha-icon></span><span class="row-text"><strong>${this.t("diagDownload")}</strong><small>${this.t("diagHint")}</small></span><ha-icon icon="mdi:download"></ha-icon></button>
@@ -9217,6 +9217,33 @@ class ScanCoverageMixin {
   }
 }
 
+// How long the last scan took, phase by phase (Settings > Info): the first place to look when a scan is slow.
+// Mixed into the panel in 99-register.js.
+Object.assign(TEXT.de, {
+  timingTitle: "Dauer des letzten Scans", timingHint: "Gesamt {total} s. Die längste Phase steht oben; bei einer großen Installation ist sie der erste Kandidat, wenn ein Scan langsam wird.",
+  timingPhase_entities: "Entitäten lesen", timingPhase_devices: "Geräte, Integrationen und Apps", timingPhase_automations: "Automationen, Skripte und Szenen",
+  timingPhase_dashboards: "Dashboards und Energie", timingPhase_tracking: "Beobachtungen, Statistik und Hilfsobjekte", timingPhase_analysis: "Auswertung der Befunde", timingPhase_finalizing: "Abschluss (Dateigrößen, Datenbank)",
+});
+Object.assign(TEXT.en, {
+  timingTitle: "Duration of the last scan", timingHint: "{total} s in total. The longest phase comes first; on a large installation it is the first suspect when a scan gets slow.",
+  timingPhase_entities: "Reading entities", timingPhase_devices: "Devices, integrations and apps", timingPhase_automations: "Automations, scripts and scenes",
+  timingPhase_dashboards: "Dashboards and Energy", timingPhase_tracking: "Observations, statistics and helpers", timingPhase_analysis: "Evaluating the findings", timingPhase_finalizing: "Finishing (file sizes, database)",
+});
+
+class ScanTimingMixin {
+  scanTimingCard() {
+    const phases = Object.entries(this.data?.meta?.scan_timing || {}).filter(([, seconds]) => typeof seconds === "number").sort((a, b) => b[1] - a[1]);
+    if (!phases.length) return "";
+    const total = phases.reduce((sum, [, seconds]) => sum + seconds, 0), longest = Math.max(phases[0][1], 0.001);
+    const seconds = value => `${this.formatNumber(Math.round(value * 10) / 10)} s`;
+    const rows = phases.map(([phase, value]) => {
+      const label = this.t(`timingPhase_${phase}`);
+      return `<div class="row" data-scan-phase="${this.esc(phase)}"><span class="tile mute"><ha-icon icon="mdi:timer-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(label === `timingPhase_${phase}` ? phase : label)}</strong><span class="bar" style="margin-top:4px"><i style="width:${Math.round((value / longest) * 100)}%"></i></span></span><span class="pill mute">${seconds(value)}</span></div>`;
+    }).join("");
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("timingTitle")}</h2><p>${this.t("timingHint", { total: this.formatNumber(Math.round(total * 10) / 10) })}</p></div></div>${rows}</section>`;
+  }
+}
+
 // "Stops reporting": the limit of one sensor and the texts of the finding; mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
   stale: "Meldet nicht mehr", staleIdle: "seit {hours} h keine neue Meldung (Limit {limit} h)",
@@ -11295,12 +11322,14 @@ class SystemMixin {
     return ((this._sys ||= {})[name] ||= { data: null, loading: false, error: "", requested: false, at: null });
   }
 
-  async sysLoad(name) {
+  // `fresh` is the refresh button: the server then walks the folders again, unless it did a moment ago.
+  async sysLoad(name, fresh = false) {
     const st = this.sysState(name);
     st.loading = true; st.error = ""; st.requested = true; this.render();
     try {
-      st.data = await this._hass.callWS({ type: `ha_housekeeper/${SYS_COMMANDS[name]}` });
-      st.at = new Date().toISOString();
+      st.data = await this._hass.callWS({ type: `ha_housekeeper/${SYS_COMMANDS[name]}`, ...(fresh && name === "storage" ? { fresh: true } : {}) });
+      // The sizes carry the time they were read; the rest of the page is live.
+      st.at = (name === "storage" && st.data?.read_at) || new Date().toISOString();
     } catch (err) { st.error = this.errText(err); }
     st.loading = false;
     this.render();
@@ -11788,7 +11817,7 @@ class SystemMixin {
   // ---------------------------------------------------------------- bindings
 
   bindSystem(root) {
-    root.querySelectorAll("[data-sys-refresh]").forEach(el => el.onclick = () => this.sysLoad(el.dataset.sysRefresh));
+    root.querySelectorAll("[data-sys-refresh]").forEach(el => el.onclick = () => this.sysLoad(el.dataset.sysRefresh, true));
     // A tap on the (i) shows its text for a few seconds, as touch has no hover.
     root.querySelectorAll(".infotip").forEach(el => el.addEventListener("click", () => {
       this.showTip(el); globalThis.clearTimeout?.(this._tipHide);
@@ -13480,7 +13509,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, ScanCoverageMixin, SparklineMixin, BrokenCardsMixin, SystemMixin, ComponentsMixin, IntegrationPageMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, ScanCoverageMixin, ScanTimingMixin, SparklineMixin, BrokenCardsMixin, SystemMixin, ComponentsMixin, IntegrationPageMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }

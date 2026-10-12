@@ -949,6 +949,7 @@ class InventoryScanner:
         automations, automation_edges, automation_findings = self._automation_inventory(
             existing_objects
         )
+        lap("automations")
         dashboards, dashboard_edges, dashboard_findings = await self._dashboard_inventory(
             existing_objects
         )
@@ -956,6 +957,7 @@ class InventoryScanner:
         self.coverage.checked("automations")
         dashboards.extend(energy)
         dashboard_edges.extend(energy_edges)
+        lap("dashboards")
         helper_edges, helper_findings = self._helper_inventory(existing_objects)
         group_edges, group_findings = self._group_inventory(existing_objects)
         known_automation_ids = {item["object_id"] for item in automations}
@@ -1006,6 +1008,7 @@ class InventoryScanner:
             item["has_statistics"] = item["object_id"] in statistic_ids
         statistic_issues = statistic_continuity(statistics, entities)
         mark_duplicates(entities)
+        lap("tracking")
 
         app_links = app_edges(config_entries, apps)
         edges = (
