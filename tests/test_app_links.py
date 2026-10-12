@@ -44,3 +44,24 @@ def test_links_by_host_name_and_by_source_but_never_by_name_alone() -> None:
         ("config_entry:e4", "app:core_mosquitto"),
     }
     assert all(e["confidence"] == "probable" for e in app_edges(entries, apps))
+
+
+def test_a_stopped_app_is_a_finding_only_when_a_linked_integration_has_failed() -> None:
+    from custom_components.ha_housekeeper.app_links import stopped_app_findings
+
+    apps = [
+        {"slug": "a_tail", "object_id": "a_tail", "status": "stopped"},
+        {"slug": "b_run", "object_id": "b_run", "status": "active"},
+        {"slug": "c_idle", "object_id": "c_idle", "status": "stopped"},
+    ]
+    integrations = [
+        {"object_id": "e1", "status": "problem"},
+        {"object_id": "e2", "status": "problem"},
+        {"object_id": "e3", "status": "active"},
+    ]
+    edges = [
+        {"source": f"config_entry:{e}", "target": f"app:{a}", "relation": "CONNECTED"}
+        for e, a in (("e1", "a_tail"), ("e2", "b_run"), ("e3", "c_idle"))
+    ]
+    found = stopped_app_findings(apps, integrations, edges)
+    assert [(f["object_id"], f["affected_object"]) for f in found] == [("a_tail", "e1")]

@@ -21,7 +21,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.loader import IntegrationNotFound, async_get_integration, async_get_integrations
 
 from . import followup
-from .app_links import app_edges
+from .app_links import app_edges, stopped_app_findings
 from .automation_analysis import (
     is_concrete_id,
     missing_references,
@@ -895,13 +895,14 @@ class InventoryScanner:
         statistic_issues = statistic_continuity(statistics, entities)
         mark_duplicates(entities)
 
+        app_links = app_edges(config_entries, apps)
         edges = (
             _structure_edges(entities, devices, areas)
             + automation_edges
             + dashboard_edges
             + helper_edges
             + group_edges
-            + app_edges(config_entries, apps)
+            + app_links
         )
         objects = (
             entities
@@ -933,6 +934,7 @@ class InventoryScanner:
             + dashboard_findings
             + helper_findings
             + group_findings
+            + stopped_app_findings(apps, integrations, app_links)
         )
 
         quarantine = quarantine_entries(self.journal.plans, [*entities, *devices])

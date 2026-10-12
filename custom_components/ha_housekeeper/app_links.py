@@ -71,3 +71,36 @@ def app_edges(entries: Iterable[Any], apps: Iterable[dict[str, Any]]) -> list[di
                     }
                 )
     return edges
+
+
+def stopped_app_findings(
+    apps: Iterable[dict[str, Any]],
+    integrations: Iterable[dict[str, Any]],
+    edges: Iterable[dict[str, str]],
+) -> list[dict[str, Any]]:
+    """One finding for each integration that is not working while the app it seems to use is stopped.
+
+    A stopped app on its own is no problem (``status`` stays ``stopped``); it counts only when
+    something that hangs on it has failed. As the link is an assumption, so is the confidence.
+    """
+    stopped = {app["slug"]: app for app in apps if app["status"] == "stopped"}
+    failed = {item["object_id"]: item for item in integrations if item["status"] == "problem"}
+    findings = []
+    for edge in edges:
+        if edge["relation"] != "CONNECTED":
+            continue
+        app = stopped.get(edge["target"].removeprefix("app:"))
+        entry = failed.get(edge["source"].removeprefix("config_entry:"))
+        if app and entry:
+            findings.append(
+                {
+                    "rule_id": "app.stopped_in_use",
+                    "object_id": app["object_id"],
+                    "classification": "problem",
+                    "confidence": 0.6,
+                    "first_detected_at": app.get("status_since"),
+                    "affected_object": entry["object_id"],
+                    "evidence": [{"kind": "app_stopped", "source": "supervisor"}],
+                }
+            )
+    return findings
