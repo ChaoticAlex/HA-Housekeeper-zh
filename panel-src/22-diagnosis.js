@@ -113,7 +113,8 @@ class DiagnosisMixin {
       }
       const runRow = this.runsRow(item), runWarn = (runRow?.findings || []).filter(f => f.level !== "info");
       runWarn.forEach(f => rows.push(this.check(t("knownRuns"), f.level, this.runFindingText(f).replace(/<[^>]+>/g, ""), t((RUN_FINDINGS[f.kind] || ["rfLabelFailing"])[0]))));
-      cause = broken.length ? t("cause_automation_broken", { count: broken.length }) : unused ? t(`cause_${unused.rule_id.split(".")[1]}`, { days: unused.evidence?.[0]?.days ?? "" }) : runWarn.length ? this.runFindingText(runWarn[0]).replace(/<[^>]+>/g, "") : t("cause_automation_ok");
+      const gone = [...new Set(broken.map(f => f.affected_object).filter(Boolean))];
+      cause = broken.length ? (gone.length === 1 ? t("cause_broken_one", { name: item.name || item.object_id, target: gone[0] }) : t("cause_automation_broken", { count: broken.length })) : unused ? t(`cause_${unused.rule_id.split(".")[1]}`, { days: unused.evidence?.[0]?.days ?? "" }) : runWarn.length ? this.runFindingText(runWarn[0]).replace(/<[^>]+>/g, "") : t("cause_automation_ok");
       if (runWarn.length && !broken.length && !unused) { hint = t(`rfHint_${runWarn[0].kind}`); tone = "warn"; }
       if (unused && !broken.length) { hint = t("hint_unused"); tone = "warn"; }
       if (broken.length) { hint = t("hint_automation_broken"); tone = "red"; }
@@ -207,6 +208,18 @@ class DiagnosisMixin {
     return `<section class="panel"><div class="panelhead"><h2>${this.t("facts")}</h2></div><div class="facts">${facts.map(([k, v]) => `<div class="fact"><span>${k}</span><b>${v}</b></div>`).join("")}</div>${note}</section>`;
   }
 
+  // One row per object and kind of relation: a blueprint automation names the same entity at many
+  // places, and a list with a row for each of them reads like that many different dependencies.
+  mergePlaces(list) {
+    const rows = new Map();
+    for (const x of list) {
+      const place = x.edge.location && x.edge.location !== "runtime_extraction" ? x.edge.location : "";
+      const known = rows.get(`${x.other}|${x.label}`);
+      if (known) known.places.push(place); else rows.set(`${x.other}|${x.label}`, { ...x, places: [place] });
+    }
+    return [...rows.values()];
+  }
+
   relationsCard(key) {
     const USAGE = USAGE_RELATIONS;
     const incoming = this.edgesTo(key), outgoing = this.edgesFrom(key);
@@ -216,13 +229,17 @@ class DiagnosisMixin {
         ...incoming.filter(e => USAGE.includes(e.relation)).map(e => ({ other: e.source, label: `${this.t("usedBy")} · ${this.t(e.relation)}`, edge: e })),
         ...outgoing.map(e => ({ other: e.target, label: this.t(e.relation), edge: e })),
       ]],
-    ].filter(([, list]) => list.length);
+    ].map(([title, list]) => [title, this.mergePlaces(list)]).filter(([, list]) => list.length);
     const LIMIT = 25;
-    const row = ({ other, label, edge }) => {
+    // A target without an inventory object is missing only where a finding says so; helpers and
+    // built-in entities such as sun.sun exist without a registry entry.
+    const gone = new Set((this.data.findings || []).filter(f => f.classification === "broken_reference").map(f => f.affected_object));
+    const row = ({ other, label, edge, places }) => {
       const obj = this.findObject(other), [type, ...rest] = other.split(":");
-      const note = `${label}${edge.location && edge.location !== "runtime_extraction" ? ` · ${edge.location}` : ""}`;
-      const text = `${this.tile(obj?.object_type || type, obj ? (this.tone(obj.status) === "ok" ? "" : this.tone(obj.status)) : "red")}<span class="row-text"><strong>${this.esc(obj?.name || rest.join(":"))}</strong><small>${this.esc(note)}</small></span>${obj ? this.pill(obj.status) : `<span class="pill red">${this.t("missing")}</span>`}`;
-      return obj ? `<button class="row rel" data-object="${this.esc(other)}">${text}</button>` : `<div class="row rel">${text}</div>`;
+      const note = places.length > 1 ? `${label} · ${this.t("relPlaces", { n: places.length })}` : `${label}${places[0] ? ` · ${places[0]}` : ""}`;
+      const text = `${this.tile(obj?.object_type || type, obj ? (this.tone(obj.status) === "ok" ? "" : this.tone(obj.status)) : gone.has(rest.join(":")) ? "red" : "")}<span class="row-text"><strong>${this.esc(obj?.name || rest.join(":"))}</strong><small>${this.esc(note)}</small></span>${obj ? this.pill(obj.status) : gone.has(rest.join(":")) ? `<span class="pill red">${this.t("missing")}</span>` : `<span class="pill">${this.t("notInInventory")}</span>`}`;
+      const title = places.length > 1 ? ` title="${this.esc(places.filter(Boolean).join("\n"))}"` : "";
+      return obj ? `<button class="row rel" data-object="${this.esc(other)}"${title}>${text}</button>` : `<div class="row rel"${title}>${text}</div>`;
     };
     // From 26 entries on a group gets a search box; the entries come in pages.
     const body = groups.map(([title, list], i) => {

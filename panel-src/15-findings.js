@@ -166,13 +166,19 @@ class FindingsMixin {
   }
 
   // The selection of findings: hide several at once, or export just those. Kept across pages until cleared.
+  // A label does not mend a missing reference: the button stays away while only such findings are picked.
+  selectionOnlyBroken() {
+    const picked = [...this.findSel].map(key => this.data.findings.find(f => f.key === key)).filter(Boolean);
+    return picked.length > 0 && picked.every(f => f.classification === "broken_reference");
+  }
+
   findSelBar(pageRows) {
     const n = this.findSel.size;
     this._findPage = pageRows.flatMap(f => (f.members ? f.members : [f])).map(f => f.key).filter(Boolean);
     if (!pageRows.length && !n) return "";
     // Nothing picked: only the box that picks the page. The actions appear with the first pick.
     if (!n) return `<div class="toolbar selhead"><label class="selall"><input type="checkbox" class="selbox" data-fsel-page> ${this.t("selectPage")}</label></div>`;
-    return `<div class="toolbar"><span class="date">${this.t("selectedCount", { count: n })}</span><button class="btn quiet" data-fsel-page>${this.t("selectPage")}</button><button class="btn quiet" data-fsel-clear>${this.t("clearSelection")}</button><span class="toolgap"></span>${["hidden", "known", "snoozed"].includes(this.findingStatus) ? `<div class="fbtns"><button class="btn accent" data-fsel-unhide><ha-icon icon="mdi:eye-outline"></ha-icon>${this.t("findUnhide")}</button></div>` : `<div class="fbtns"><button class="btn" data-fsel-state="known">${this.t("fselKnown")}</button><button class="btn" data-fsel-state="snoozed">${this.t("fselSnooze")}</button><button class="btn" data-fsel-state="label">${this.t("fselLabel")}</button><button class="btn" data-fsel-hide>${this.t("findHideSelected")}</button></div>`}</div>${this.bulkForm()}`;
+    return `<div class="toolbar"><span class="date">${this.t("selectedCount", { count: n })}</span><button class="btn quiet" data-fsel-page>${this.t("selectPage")}</button><button class="btn quiet" data-fsel-clear>${this.t("clearSelection")}</button><span class="toolgap"></span>${["hidden", "known", "snoozed"].includes(this.findingStatus) ? `<div class="fbtns"><button class="btn accent" data-fsel-unhide><ha-icon icon="mdi:eye-outline"></ha-icon>${this.t("findUnhide")}</button></div>` : `<div class="fbtns"><button class="btn" data-fsel-state="known">${this.t("fselKnown")}</button><button class="btn" data-fsel-state="snoozed">${this.t("fselSnooze")}</button>${this.selectionOnlyBroken() ? "" : `<button class="btn" data-fsel-state="label">${this.t("fselLabel")}</button>`}<button class="btn" data-fsel-hide>${this.t("findHideSelected")}</button></div>`}</div>${this.bulkForm()}`;
   }
 
   // Takes the selected findings that the person had hidden, marked as known or snoozed back into the open list.

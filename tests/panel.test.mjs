@@ -3346,7 +3346,7 @@ test("the overview of an object offers its actions: decide a finding, replace a 
     { ...DATA.findings[0], key: "k1", ignored: false },
   ] };
   const auto = el.actionsCard(el.findObject("automation:automation.c"), "automation:automation.c");
-  assert.ok(auto.includes('data-act-replace="sensor.gone"') && auto.includes('data-decide-preset="snooze"') && auto.includes("data-act-label-plan") && auto.includes("edit it there"));
+  assert.ok(auto.includes('data-act-replace="sensor.gone"') && auto.includes('data-decide-preset="snooze"') && !auto.includes("data-act-label-plan") && auto.includes("edit it there"));
   assert.ok(!auto.includes("data-act-disable"));
   const entity = el.actionsCard(el.findObject("entity:sensor.a"), "entity:sensor.a");
   assert.ok(entity.includes('data-act-disable="sensor.a"'));

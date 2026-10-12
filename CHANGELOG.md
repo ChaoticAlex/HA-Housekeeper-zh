@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Behoben
+
+- **Abhängigkeiten:** Dieselbe Entität, die eine Automation an vielen Stellen nennt, steht nur noch einmal in der Liste („12 Stellen“, die Orte beim Darüberfahren). Objekte ohne eigenen Eintrag im Inventar (zum Beispiel `sun.sun`) zeigen „Nicht im Inventar“ statt „Fehlt“; „Fehlt“ steht nur noch, wo ein Befund es belegt.
+- **Defekte Referenzen:** „Label ergänzen“ erscheint dort nicht mehr (Reiter „Aktionen“, Sammelleiste der Befunde). Die Ursache ist ein Satz: „Automation X verweist auf Y, das es nicht mehr gibt.“
+
+### Fixed
+
+- **Relations:** An entity that an automation names in many places now appears once in the list ("12 places", the places on hover). Objects without an inventory entry of their own (for example `sun.sun`) show "Not in inventory" instead of "Missing"; "Missing" only appears where a finding backs it.
+- **Broken references:** "Add label" no longer shows there (Actions tab, finding selection bar). The cause is one sentence: "Automation X points to Y, which no longer exists."
+
 ## 1.5.0 - 2026-10-12
 
 ### Geändert

@@ -56,7 +56,7 @@ class DetailActionsMixin {
     if (findings) recommended.push(`<div class="actblock">${findings}</div>`);
     for (const it of items) recommended.push(this.actRow(it.label, this.t(it.hint), `<button class="btn${it.finding ? " primary" : ""}" ${it.attr}>${this.t("actOpen")}</button>`));
     if (broken) recommended.push(`<div class="actblock"><small class="factnote">${this.t("actEditInHa")}</small></div>`);
-    const labelControls = this.labelParts(item, true);
+    const labelControls = broken ? null : this.labelParts(item, true);
     const name = [...this.detailEditRows(item), labelControls ? this.actRow(this.t("actLabelTitle"), this.t("actLabelHint"), labelControls) : ""];
     const notes = this.markRows(item);
     const record = [...this.entityTrimRows(item), this.staleRow(item)];
@@ -84,7 +84,7 @@ class DetailActionsMixin {
   actionsCard(item, key, withLabel = true) {
     const rows = this.findingRows(key);
     const { buttons, broken } = this.fixButtons(item, key);
-    const label = withLabel ? this.labelForm(item) : "";
+    const label = withLabel && !broken ? this.labelForm(item) : "";
     if (!rows && !buttons && !label) return "";
     const fix = buttons || label ? `<div class="pad actpad"><small class="factnote">${this.t("actPreviewOnly")}</small>${buttons ? `<div class="taskgrid compactgrid">${buttons}</div>` : ""}${label}${broken ? `<small class="factnote">${this.t("actEditInHa")}</small>` : ""}</div>` : "";
     return `<section class="panel"><div class="panelhead"><h2>${this.t("actionsTitle")}</h2></div>${rows}${fix}</section>`;
