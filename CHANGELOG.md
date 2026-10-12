@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Läufe:** Die Liste „Alle gezählten Läufe“ ist auf großen Bildschirmen besser lesbar: die Namensspalte ist schmaler, die Zahlen stehen näher am Namen.
 - **Läufe:** Die Detailseite einer Automation oder eines Skripts zeigt den Verlauf der Läufe über 30 Tage statt 7 (die Zahlen und die Liste bleiben bei 7 Tagen).
 - **Befunde:** Die Seite hat einen klareren Aufbau: ein Panel mit den Reitern Offen, Neu, Bekannt … und „Zuletzt behoben“ (statt eines Faltbereichs darüber). Suche und Filter stehen zuerst; im Reiter „Offen“ folgen zuerst die Ausfälle als aufklappbare Gruppe, dann die einzelnen Befunde. Die Auswahl-Knöpfe erscheinen erst nach dem ersten Markieren; vorher gibt es nur das Kästchen „Seite auswählen“.
 - **Befunde:** Die Zahl der Befunde zählt jetzt jeden Ausfall einmal und jeden Befund ohne Ausfall dahinter („8 Ausfälle + 6 einzelne = 14“); die Folgebefunde der Ausfälle stehen als Unterzeile unter der Kachel „Alle“. Das gilt für die Zahl am Reiter, die Kachel „Offene Befunde“, den Link „Alle Befunde“ und die Befunde-Seite. Die Kacheln der Unterseiten (z. B. Komponenten) haben mehr Platz für den Text.
