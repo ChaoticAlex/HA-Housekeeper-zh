@@ -29,7 +29,9 @@ class BlueprintsMixin {
         ...d.unused.map(b => row("mute", "mdi:file-hidden", b.name === b.path ? b.path : b.name, `${this.t("bpUnused")} · ${this.esc(b.path)}`)),
       ];
       const pg = this.paginate(`bp-${d.domain}`, all), rows = pg.rows.join("") + pg.footer;
-      return `<div class="sectionlabel">${this.t(d.domain)} (${this.formatNumber(d.total)} ${this.t("bpFiles")})</div>${rows || `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("bpNone")}</div>`}`;
+      // A domain with findings is open; one without only shows its heading with the check mark.
+      const tone = d.missing.length || d.broken.length ? "red" : d.unused.length ? "warn" : "ok";
+      return this.fold(`bp_${d.domain}`, { tone, title: `${this.t(d.domain)} (${this.formatNumber(d.total)} ${this.t("bpFiles")})`, pill: all.length ? this.formatNumber(all.length) : "" }, rows || `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("bpNone")}</div>`, all.length > 0);
     }).join("");
     return `<div class="stack">${head}<div class="panel">${blocks}</div></div>`;
   }

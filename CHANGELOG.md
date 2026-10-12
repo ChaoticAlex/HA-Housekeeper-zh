@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Blueprints und Detailseite:** Jede Blueprint-Art ist ein Bereich mit Zahl (offen nur, wenn es Funde gibt); auf der Detailseite einer Entität oder eines Geräts ist „Umbenennen und Bereich“ eingeklappt.
 - **Übersicht:** „Braucht Aufmerksamkeit“ steht vor dem Zustand des Bestands.
 - **Batterien in Reitern:** Die Liste steht allein, die Prognose und die Arten der Batterien sind eigene Reiter, sobald es etwas zu zeigen gibt.
 - **Änderungen als Bereiche:** Jede Kategorie (Statuswechsel, neue und behobene Befunde, neue und entfernte Objekte) ist ein einklappbarer Bereich mit Zahl; die Kacheln oben öffnen genau diese Kategorie.

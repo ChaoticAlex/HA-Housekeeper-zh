@@ -3881,6 +3881,7 @@ test("the detail page offers a rename and an area for one entity and sends one a
   const calls = [];
   const el = policyPanel(calls);
   const item = { object_type: "entity", object_id: "light.hall_2", name: "Hall", area_id: "", device_id: null };
+  el.folds = { detail_edit: true };
   const html = el.detailEditCard(item);
   assert.ok(html.includes('value="hall_2"') && html.includes("Per entry, as suggested") && html.includes('value="kitchen"') && html.includes("data-de-rename-btn disabled"));
   assert.ok(!el.detailIdOk(item, "hall_2") && !el.detailIdOk(item, "Hall") && !el.detailIdOk(item, "") && el.detailIdOk(item, "hall"));

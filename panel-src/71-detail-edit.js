@@ -32,7 +32,9 @@ class DetailEditMixin {
         <small class="factnote">${this.t("deRenameNote")}</small></form>` : "";
     const assign = hasAreas ? `<form class="deform" data-de-area><label for="de-area"><strong>${this.t("deArea")}</strong><small class="denow${now ? "" : " none"}">${this.t("deAreaNow", { area: now || this.t("deNoArea") })}</small></label>${areaControls}
         ${suggest ? `<small class="factnote">${this.t("areaNote")}</small>` : ""}</form>` : `<small class="factnote">${this.t("areaNone")}</small>`;
-    return `<section class="panel"><div class="panelhead"><h2>${this.t("deTitle")}</h2></div><div class="pad">${rename}${assign}${e.error ? `<small class="error" role="alert">${this.esc(this.t(e.error))}</small>` : ""}</div></section>`;
+    // Rarely needed, so it starts closed; an error from the last try keeps it open.
+    const body = `<div class="pad">${rename}${assign}${e.error ? `<small class="error" role="alert">${this.esc(this.t(e.error))}</small>` : ""}</div>`;
+    return `<section class="panel">${this.fold("detail_edit", { title: this.t("deTitle") }, body, false, e.error ? true : undefined)}</section>`;
   }
 
   // The same forms as rows of the tab "Actions": the name and the explanation on the left, the controls on the right.
