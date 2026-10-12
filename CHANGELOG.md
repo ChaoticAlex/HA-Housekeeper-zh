@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Eigene Batterietypen:** Ein Typ, den du bei einem Sensor eintippst, bleibt gespeichert und steht bei allen Sensoren in der Auswahl. Unter der Batterieliste lassen sich eigene Typen hinzufügen, umbenennen und löschen; eingebaute und genutzte Typen bleiben. Die Einkaufsliste zählt sie wie bisher mit.
 - **Kompaktere Menüleiste:** Damit die Leiste oben schmaler wird und seltener in den „Menü“-Knopf wechseln muss, ist sie umgebaut: „Housekeeper“ mit dem Wort „Übersicht“ darunter ist jetzt der Weg zur Übersicht und ersetzt den Menüpunkt „Übersicht“, und die Einstellungen sind in der Leiste nur noch das Zahnrad (der Name steht als Tooltip und in der Liste des Menü-Knopfs). Das Suchfeld ist dafür etwas breiter.
 - **Suche nach Seiten und Filtern:** Die Suche oben findet jetzt auch Seiten (auch die Reiter der Einstellungen, auf Deutsch und Englisch, mit Stichwörtern wie „Backup“ oder „dunkel“) und Filter („Befunde: Bekannt“, „Bestand: Nicht verfügbar“ mit der Zahl dahinter) vor den Objekten; Pfeiltasten und Enter gelten über alle Treffer.
 - **Speicher und Laufzeit:** Die Seite „Speicher & System“ liest die Ordnergrößen nicht mehr bei jedem Aufruf neu: ein Ergebnis wird bis zu 5 Minuten wiederverwendet, auch für mehrere Browser, und „Aktualisieren“ liest erst nach 30 Sekunden erneut. Die Seite zeigt, wann die Größen gemessen wurden. In Einstellungen, Info steht die Dauer des letzten Scans je Phase, die längste zuerst.
@@ -110,6 +111,7 @@
 
 ### English
 
+- **Own battery types:** A type you enter for one sensor stays saved and is offered for every sensor. Below the battery list you can add, rename and delete own types; built-in and used types stay. The shopping list counts them as before.
 - **More compact menu bar:** So the bar at the top gets narrower and has to switch to the “Menu” button less often, it was rebuilt: “Housekeeper” with the word “Overview” below it is now the way to the overview and replaces the “Overview” menu item, and Settings is only the gear in the bar (the name shows as a tooltip and in the list of the menu button). The search field is a little wider for that.
 - **Search for pages and filters:** The search at the top now also finds pages (including the tabs of Settings, in German and English, with keywords such as “backup” or “dark”) and filters (“Findings: Known”, “Inventory: Unavailable” with the count) ahead of the objects; arrow keys and Enter work across all hits.
 - **Storage and runtime:** The "Storage & system" page no longer reads the folder sizes on every visit: a result is reused for up to 5 minutes, also across browsers, and "Refresh" reads again only after 30 seconds. The page shows when the sizes were measured. Settings, Info lists the duration of the last scan per phase, the longest first.

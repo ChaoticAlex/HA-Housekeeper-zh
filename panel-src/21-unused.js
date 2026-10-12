@@ -286,7 +286,7 @@ class UnusedMixin {
     const forecast = this.batteryForecastCard(all), kinds = this.batteryKindCard();
     const tabs = [{ id: "list", label: this.t("tabBatList") }, forecast ? { id: "forecast", label: this.t("tabBatForecast") } : null, kinds ? { id: "kinds", label: this.t("tabBatKinds") } : null].filter(Boolean);
     const open = this.viewTabOf("batteries", tabs, "list");
-    const listTab = `${this.batteryNeed()}<div class="panel">${head}${this.filterNote(this.batteryFilter === "low" ? [this.t("batteryLow")] : [], 'data-battery-filter="all"')}${bar}${body}${notes}</div>`;
+    const listTab = `${this.batteryNeed()}<div class="panel">${head}${this.filterNote(this.batteryFilter === "low" ? [this.t("batteryLow")] : [], 'data-battery-filter="all"')}${bar}${body}${notes}</div>${this.batteryCustomTypes()}`;
     return `<div class="stack">${chips}${tabs.length > 1 ? this.viewTabBar("batteries", tabs, open) : ""}${open === "forecast" ? forecast : open === "kinds" ? kinds : listTab}</div>`;
   }
 }

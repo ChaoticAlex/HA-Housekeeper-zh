@@ -1475,3 +1475,7 @@ async def test_a_detected_battery_replacement_is_entered_once_and_updates_a_matc
         }
     )
     assert (await client.receive_json())["result"]["types"] == {"sensor.flur_battery": "2× AAA"}
+    await client.send_json_auto_id(
+        {"type": "ha_housekeeper/battery_custom_type", "action": "add", "name": "LR44"}
+    )
+    assert (await client.receive_json())["result"]["custom_types"] == ["LR44"]

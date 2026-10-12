@@ -20,6 +20,7 @@ SAVE_DELAY = 5
 MAX_ITEMS = 500
 TYPE_MAX = 30
 ENTITY = re.compile(r"^[a-z0-9_]+\.[a-z0-9_]+$")
+BUILTIN_TYPES = ("2× AAA", "2× AA", "CR2016", "CR2032", "CR2450", "9 V")
 
 
 def noted_types(objects: list[dict[str, Any]], entity_ids: Any) -> dict[str, str]:
@@ -56,6 +57,7 @@ class BatteryStore:
         self.types: dict[str, str] = {}
         self.handled: dict[str, str] = {}
         self.kinds: dict[str, str] = {}
+        self.custom_types: list[str] = []
 
     async def async_load(self) -> None:
         data = await self._store.async_load()
@@ -68,6 +70,10 @@ class BatteryStore:
                     if name == "kinds" and value not in ALL_KINDS:
                         continue
                     kept[key] = value[:TYPE_MAX] if name == "types" else value
+        found = data.get("custom_types")
+        for value in found if isinstance(found, list) else ():
+            if isinstance(value, str) and value.strip():
+                self._remember(value.strip()[:TYPE_MAX])
         for key in [k for k, v in self.handled.items() if not _day(v)]:
             del self.handled[key]
         for kept in (self.types, self.handled, self.kinds):
@@ -76,8 +82,55 @@ class BatteryStore:
 
     def _save(self) -> None:
         self._store.async_delay_save(
-            lambda: {"types": self.types, "handled": self.handled, "kinds": self.kinds}, SAVE_DELAY
+            lambda: {
+                "types": self.types,
+                "handled": self.handled,
+                "kinds": self.kinds,
+                "custom_types": self.custom_types,
+            },
+            SAVE_DELAY,
         )
+
+    def _known(self, value: str) -> bool:
+        """Whether the type is a built-in one or already in the own list (case does not matter)."""
+        wanted = value.casefold()
+        return any(t.casefold() == wanted for t in (*BUILTIN_TYPES, *self.custom_types))
+
+    def _remember(self, value: str) -> None:
+        if not self._known(value) and len(self.custom_types) < MAX_ITEMS:
+            self.custom_types.append(value)
+            self.custom_types.sort(key=str.casefold)
+
+    def _users(self, value: str) -> list[str]:
+        return [e for e, t in self.types.items() if t == value]
+
+    def edit_custom(self, action: str, name: str, new_name: str = "") -> None:
+        """Add, rename or delete an own type; a type in use or a built-in one is never removed."""
+        name, new_name = name.strip(), new_name.strip()
+        if not name or len(name) > TYPE_MAX or len(new_name) > TYPE_MAX:
+            raise BatteryError("type")
+        if action == "add":
+            if self._known(name):
+                raise BatteryError("exists")
+            if len(self.custom_types) >= MAX_ITEMS:
+                raise BatteryError("too_many")
+            self._remember(name)
+        elif name not in self.custom_types:
+            raise BatteryError("unknown")
+        elif action == "delete":
+            if self._users(name):
+                raise BatteryError("in_use")
+            self.custom_types.remove(name)
+        elif action == "rename":
+            if not new_name or (new_name.casefold() != name.casefold() and self._known(new_name)):
+                raise BatteryError("exists")
+            for entity_id in self._users(name):
+                self.types[entity_id] = new_name
+            self.custom_types.remove(name)
+            self._remember(new_name)
+        else:
+            raise BatteryError("action")
+        self._save()
 
     def set_type(self, entity_id: str, value: str) -> None:
         """Set the type of one sensor; an empty text takes it back."""
@@ -92,6 +145,7 @@ class BatteryStore:
             if entity_id not in self.types and len(self.types) >= MAX_ITEMS:
                 raise BatteryError("too_many")
             self.types[entity_id] = value
+            self._remember(value)
         self._save()
 
     def set_kinds(self, items: list[tuple[str, str]]) -> None:

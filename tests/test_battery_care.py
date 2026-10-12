@@ -38,6 +38,20 @@ async def test_types_and_settled_replacements_are_checked_and_kept(hass: HomeAss
         store.handle("sensor.a", "2026-10-11", date(2026, 10, 10))
 
 
+async def test_own_types_are_remembered_renamed_and_kept_while_used(hass: HomeAssistant) -> None:
+    store = BatteryStore(hass)
+    store.set_type("sensor.a", "LR44")
+    store.set_type("sensor.b", "cr2032")
+    assert store.custom_types == ["LR44"]
+    store.edit_custom("add", "AAAA")
+    store.edit_custom("rename", "LR44", "LR 44")
+    assert store.types["sensor.a"] == "LR 44" and store.custom_types == ["AAAA", "LR 44"]
+    store.edit_custom("delete", "AAAA")
+    for action, name, new in (("delete", "LR 44", ""), ("delete", "CR2032", ""), ("rename", "LR 44", "9 v")):
+        with pytest.raises(BatteryError):
+            store.edit_custom(action, name, new)
+
+
 def test_a_recent_rise_is_a_replacement_and_an_old_one_or_a_small_one_is_not() -> None:
     recent = detect_replacement(_series(30, 28, 9, 100, 99), NOW)
     assert recent == {"day": "2026-10-09", "from": 9, "to": 100}

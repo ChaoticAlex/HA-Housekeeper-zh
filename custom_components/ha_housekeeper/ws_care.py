@@ -308,6 +308,7 @@ async def websocket_battery_trend(
                 **result,
                 "voltage": voltage,
                 "types": types,
+                "custom_types": scanner.batteries.custom_types,
             }
         ),
     )
@@ -335,7 +336,39 @@ def websocket_battery_type_set(
     except BatteryError as err:
         connection.send_error(msg["id"], "invalid_format", f"Not accepted: {err}")
         return
-    connection.send_result(msg["id"], _versioned({"types": scanner.batteries.types}))
+    connection.send_result(
+        msg["id"],
+        _versioned({"types": scanner.batteries.types, "custom_types": scanner.batteries.custom_types}),
+    )
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): f"{DOMAIN}/battery_custom_type",
+        vol.Required("action"): vol.In(["add", "rename", "delete"]),
+        vol.Required("name"): str,
+        vol.Optional("new_name", default=""): str,
+    }
+)
+@callback
+@with_scanner
+def websocket_battery_custom_type(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """Add, rename or delete an own battery type; built-in and used types stay."""
+    try:
+        scanner.batteries.edit_custom(msg["action"], msg["name"], msg["new_name"])
+    except BatteryError as err:
+        connection.send_error(msg["id"], "invalid_format", f"Not accepted: {err}")
+        return
+    connection.send_result(
+        msg["id"],
+        _versioned({"types": scanner.batteries.types, "custom_types": scanner.batteries.custom_types}),
+    )
 
 
 @websocket_api.require_admin
@@ -798,6 +831,7 @@ def async_register(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_backup_attest)
     websocket_api.async_register_command(hass, websocket_notify_set)
     websocket_api.async_register_command(hass, websocket_battery_type_set)
+    websocket_api.async_register_command(hass, websocket_battery_custom_type)
     websocket_api.async_register_command(hass, websocket_battery_kind_set)
     websocket_api.async_register_command(hass, websocket_battery_replaced)
     websocket_api.async_register_command(hass, websocket_lifecycle)
