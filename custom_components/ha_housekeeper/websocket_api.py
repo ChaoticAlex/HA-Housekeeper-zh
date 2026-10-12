@@ -136,7 +136,10 @@ def websocket_status(
     scanner: InventoryScanner,
 ) -> None:
     """Return scan progress without triggering work."""
-    connection.send_result(msg["id"], _versioned({**scanner.status, "writing": write_holder(hass)}))
+    warmup = {"booting": scanner.booting, "seconds_left": scanner.warmup_seconds_left}
+    connection.send_result(
+        msg["id"], _versioned({**scanner.status, "writing": write_holder(hass), "warmup": warmup})
+    )
 
 
 @websocket_api.require_admin

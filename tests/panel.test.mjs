@@ -869,6 +869,18 @@ test("preliminary data during the Home Assistant start shows a banner on every p
   assert.ok(el.heading().includes("still starting")); // part of the page heading, so on every view
 });
 
+test("the start banner names the step and counts the warm-up down", () => {
+  const { el } = panel("en");
+  el.data = { ...DATA, meta: { ...DATA.meta, preliminary: true } };
+  el._warm = { booting: true };
+  assert.ok(el.warmupBanner().includes("Step 1 of 3"));
+  el._warm = { until: Date.now() + 125000, total: 300 };
+  assert.ok(el.warmupBanner().includes("2:0") && el.warmupBanner().includes("Step 2 of 3"));
+  el._warm = { until: Date.now() - 1000 };
+  el.scanStatus = { running: true, progress: 40 };
+  assert.ok(el.warmupBanner().includes("Step 3 of 3") && el.warmupBanner().includes("40%"));
+});
+
 test("a dry-run plan is confirmed, typed, executed with progress, and can be undone", async () => {
   const { el, shadow } = panel("en");
   el.data = { ...DATA, objects: [{ object_type: "entity", object_id: "sensor.a", name: "A", status: "orphaned" }, { object_type: "entity", object_id: "sensor.b", name: "B", status: "orphaned" }], edges: [], findings: [] };

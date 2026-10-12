@@ -120,6 +120,10 @@ const TEXT = {
    
     kindSum: "Zähler (Summe)", kindMean: "Messwert (Mittelwert)", kindBoth: "Zähler und Messwert", inEnergy: "Im Energie-Dashboard", sortUnit: "Einheit", allKinds: "Alle Arten",
     warmupBanner: "Home Assistant startet noch. Die Befunde sind vorläufig und werden nach dem Start neu erhoben; Aufräumen ist bis dahin gesperrt.",
+    warmupStepBoot: "Schritt 1 von 3: Home Assistant lädt noch. Die Wartezeit beginnt danach.",
+    warmupStepWait: "Schritt 2 von 3: Integrationen laden noch. Noch ca. {time} Min.",
+    warmupStepScan: "Schritt 3 von 3: abschließender Scan läuft ({percent} %).",
+    warmupStepFinal: "Schritt 3 von 3: der abschließende Scan startet gleich.",
     err_warming_up: "Home Assistant startet noch. Bitte in wenigen Minuten erneut versuchen.",
     staleScan: "Der letzte Scan ist {age} alt. Housekeeper scannt alle {hours} Stunden – die Daten können veraltet sein.", staleScanManual: "Der letzte Scan ist {age} alt.",
     kindDisable: "Deaktivieren (Quarantäne, umkehrbar)", kindRemove: "Entfernen (nach Quarantäne, mit Backup)", actionKind: "Aktion",
@@ -298,6 +302,10 @@ const TEXT = {
    
     kindSum: "Counter (sum)", kindMean: "Measurement (mean)", kindBoth: "Counter and measurement", inEnergy: "In the Energy dashboard", sortUnit: "Unit", allKinds: "All kinds",
     warmupBanner: "Home Assistant is still starting. The findings are preliminary and will be collected again after startup; cleanup is locked until then.",
+    warmupStepBoot: "Step 1 of 3: Home Assistant is still loading. The waiting time starts afterwards.",
+    warmupStepWait: "Step 2 of 3: integrations are still loading. About {time} min left.",
+    warmupStepScan: "Step 3 of 3: the final scan is running ({percent}%).",
+    warmupStepFinal: "Step 3 of 3: the final scan starts in a moment.",
     err_warming_up: "Home Assistant is still starting. Please try again in a few minutes.",
     staleScan: "The last scan is {age} old. Housekeeper scans every {hours} hours – the data may be out of date.", staleScanManual: "The last scan is {age} old.",
     kindDisable: "Disable (quarantine, reversible)", kindRemove: "Remove (after quarantine, with backup)", actionKind: "Action",
@@ -1789,10 +1797,50 @@ class OverviewMixin {
     return null;
   }
 
-  // Shown while the backend treats scans as preliminary because Home Assistant is still starting.
+  // Shown while the backend treats scans as preliminary because Home Assistant is still starting: the step it is in,
+  // the time left of the warm-up and, once that is over, the progress of the final scan.
   warmupBanner() {
     if (!this.data?.meta?.preliminary) return "";
-    return `<div class="panel u-mb14"><div class="row"><span class="tile warn"><ha-icon icon="mdi:timer-sand"></ha-icon></span><span class="row-text"><strong>${this.esc(this.t("warmupBanner"))}</strong></span></div></div>`;
+    return `<div class="panel u-mb14" data-warmup><div class="row"><span class="tile warn"><ha-icon icon="mdi:timer-sand"></ha-icon></span><span class="row-text">${this.warmupInner()}</span></div></div>`;
+  }
+
+  warmupInner() {
+    const w = this._warm || {}, left = w.until ? Math.max(0, Math.round((w.until - Date.now()) / 1000)) : null;
+    const st = this.scanStatus;
+    let step, frac = null;
+    if (w.booting) step = this.t("warmupStepBoot");
+    else if (left) {
+      step = this.t("warmupStepWait", { time: `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}` });
+      frac = 1 - left / (w.total || 300);
+    } else if (st?.running) { step = this.t("warmupStepScan", { percent: st.progress }); frac = st.progress / 100; }
+    else step = this.t("warmupStepFinal");
+    const bar = frac === null ? "" : `<span class="bar"><i class="warn" style="width:${Math.round(Math.min(1, Math.max(0, frac)) * 100)}%"></i></span>`;
+    return `<strong>${this.esc(this.t("warmupBanner"))}</strong><small class="u-m0">${this.esc(step)}</small>${bar}`;
+  }
+
+  // Counts the warm-up down in the banner without rebuilding the page; every few seconds the backend is asked for the step.
+  startWarmupTicker(meta) {
+    this._warm = { booting: Boolean(meta.warmup_booting), until: Date.now() + (Number(meta.warmup_seconds_left) || 0) * 1000, total: 300 };
+    if (this._warmTick) return;
+    let n = 0;
+    this._warmTick = window.setInterval(async () => {
+      if (this._gone || !this.data?.meta?.preliminary) { this.stopWarmupTicker(); return; }
+      if (++n % 5 === 0 && !this.busy && this._hass) {
+        try {
+          const s = await this._hass.callWS({ type: "ha_housekeeper/status" });
+          this.scanStatus = s;
+          this._warm = { ...this._warm, booting: Boolean(s.warmup?.booting), until: Date.now() + (Number(s.warmup?.seconds_left) || 0) * 1000 };
+        } catch (_) { /* the next tick asks again */ }
+      }
+      const box = this.shadowRoot?.querySelector?.("[data-warmup] .row-text");
+      if (box) box.innerHTML = this.warmupInner();
+    }, 1000);
+  }
+
+  stopWarmupTicker() {
+    if (this._warmTick) window.clearInterval(this._warmTick);
+    this._warmTick = null;
+    this._warm = null;
   }
 
   // What to do now, most urgent first: outages (integrations and devices that are down) and new critical findings, then an
@@ -12069,6 +12117,7 @@ class HAHousekeeperPanel extends HTMLElement {
   // Timers and late answers must not touch a panel that HA has taken out of the page.
   disconnectedCallback() {
     this._gone = true;
+    this.stopWarmupTicker?.();
     window.removeEventListener?.("popstate", this._onPop);
     for (const name of ["_warmupTimer", "_searchTimer", "_tipTimer"]) {
       if (this[name]) globalThis.clearTimeout?.(this[name]);
@@ -12148,12 +12197,14 @@ class HAHousekeeperPanel extends HTMLElement {
     } finally {
       if (progressTimer) window.clearInterval(progressTimer);
       this.scanStatus = null;
+      if (!this.data?.meta?.preliminary) this.stopWarmupTicker?.();
       this.busy = false; this.render();
     }
     if (this.view === "changes" && this.data) this.loadCompare();
     if (this.data) this.ensureSafetyData();
     // Preliminary data: fetch the final scan once the backend's warm-up is over.
     if (this.data?.meta?.preliminary) {
+      this.startWarmupTicker(this.data.meta);
       const wait = ((Number(this.data.meta.warmup_seconds_left) || 0) + 20) * 1000;
       this.retryWarmup(wait);
     }

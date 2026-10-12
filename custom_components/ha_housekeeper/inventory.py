@@ -706,6 +706,11 @@ class InventoryScanner:
         self._warmup_until = time.monotonic() + seconds
 
     @property
+    def booting(self) -> bool:
+        """Whether Home Assistant has not reported "started" yet, so the warm-up has not begun."""
+        return self._booting
+
+    @property
     def warmup_seconds_left(self) -> int:
         """Seconds until scans count again, 0 when the warm-up is over."""
         if self._booting:
@@ -1082,6 +1087,7 @@ class InventoryScanner:
                 "read_only": True,
                 "preliminary": preliminary,
                 "warmup_seconds_left": self.warmup_seconds_left,
+                "warmup_booting": self.booting,
                 "min_unavailable_days": self.min_unavailable_days,
                 "unused_automation_days": self.unused_automation_days,
                 "ignore_label": IGNORE_LABEL,

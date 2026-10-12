@@ -102,6 +102,7 @@ class HAHousekeeperPanel extends HTMLElement {
   // Timers and late answers must not touch a panel that HA has taken out of the page.
   disconnectedCallback() {
     this._gone = true;
+    this.stopWarmupTicker?.();
     window.removeEventListener?.("popstate", this._onPop);
     for (const name of ["_warmupTimer", "_searchTimer", "_tipTimer"]) {
       if (this[name]) globalThis.clearTimeout?.(this[name]);
@@ -181,12 +182,14 @@ class HAHousekeeperPanel extends HTMLElement {
     } finally {
       if (progressTimer) window.clearInterval(progressTimer);
       this.scanStatus = null;
+      if (!this.data?.meta?.preliminary) this.stopWarmupTicker?.();
       this.busy = false; this.render();
     }
     if (this.view === "changes" && this.data) this.loadCompare();
     if (this.data) this.ensureSafetyData();
     // Preliminary data: fetch the final scan once the backend's warm-up is over.
     if (this.data?.meta?.preliminary) {
+      this.startWarmupTicker(this.data.meta);
       const wait = ((Number(this.data.meta.warmup_seconds_left) || 0) + 20) * 1000;
       this.retryWarmup(wait);
     }

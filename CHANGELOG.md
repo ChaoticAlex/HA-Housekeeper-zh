@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Start von Home Assistant:** Das Banner nennt den Schritt (Home Assistant lädt, Wartezeit mit Countdown, abschließender Scan mit Fortschritt) statt nur „startet noch“.
 - **Blueprints und Detailseite:** Jede Blueprint-Art ist ein Bereich mit Zahl (offen nur, wenn es Funde gibt); auf der Detailseite einer Entität oder eines Geräts ist „Umbenennen und Bereich“ eingeklappt.
 - **Übersicht:** „Braucht Aufmerksamkeit“ steht vor dem Zustand des Bestands.
 - **Batterien in Reitern:** Die Liste steht allein, die Prognose und die Arten der Batterien sind eigene Reiter, sobald es etwas zu zeigen gibt.
@@ -64,6 +65,7 @@
 
 ### English
 
+- **Home Assistant start:** The banner names the step (Home Assistant loading, waiting time with a countdown, final scan with progress) instead of just “still starting”.
 - **Blueprints and detail page:** Each blueprint kind is a section with its number (open only when there are findings); on the detail page of an entity or device "Rename and area" is folded.
 - **Overview:** "Needs attention" comes before the state of the inventory.
 - **Batteries in tabs:** The list stands alone; the forecast and the kinds of batteries are tabs of their own as soon as there is something to show.
