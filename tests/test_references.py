@@ -549,6 +549,28 @@ async def test_a_failed_reload_puts_the_file_back(hass: HomeAssistant) -> None:
     assert calls == ["automation", "automation"]  # and Home Assistant read it again
 
 
+async def test_an_automation_home_assistant_would_not_accept_is_not_written(
+    hass: HomeAssistant,
+) -> None:
+    from custom_components.ha_housekeeper import refactor
+
+    make_entities(hass)
+    path = write_config(hass, "automations.yaml", AUTOMATIONS)
+    reloads = reload_services(hass)
+    scanner = await make_scanner(hass)
+    manager, _ = fake_backup()
+    with (
+        automation_scanner_state(hass, scanner),
+        patch("homeassistant.components.backup.async_get_manager", return_value=manager),
+        patch.object(refactor, "is_valid", return_value=False),
+    ):
+        plan = await make_reference_plan(scanner, hass)
+        await run(scanner, plan, [OLD])
+    assert plan["actions"][0]["result"]["reason"] == "invalid_config"
+    assert load_yaml(path)[0]["trigger"][0]["entity_id"] == OLD
+    assert reloads == []
+
+
 def _load_source_failing_after_the_first_call(*, times: int):
     """A ``load_source`` that reads once, then fails ``times`` times, then works again."""
     from custom_components.ha_housekeeper import cleanup_exec

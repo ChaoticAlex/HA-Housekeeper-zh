@@ -1240,6 +1240,11 @@ class CleanupRunner:
                 item, changes, _ = rewrite(loaded["item"], old, new)
                 if not changes:
                     raise StepAbort("source_changed")
+                is_automation = loaded["format"] == "yaml" and planned["type"] == "automation"
+                if is_automation and not await refactor_module.is_valid(
+                    self.hass, loaded["ref"], item
+                ):
+                    raise StepAbort("invalid_config")
                 before, extra = await self._write_source(loaded, item, planned["hash"])
                 kept = sum(len(s.get("file_before") or "") for s in written)
                 if extra.get("file_before") is not None and (
@@ -1266,6 +1271,12 @@ class CleanupRunner:
                 source["after_hash"] = after["hash"]
                 source["state"] = "done"
                 await self._reload(loaded)
+                # A reload skips an automation it cannot load instead of failing.
+                if (
+                    is_automation
+                    and self.hass.states.get(planned["source"].split(":", 1)[1]) is None
+                ):
+                    raise StepAbort("reload_failed")
         except (StepAbort, SourceError) as err:
             reason = err.reason if isinstance(err, StepAbort) else str(err)
             await self._roll_back(written, reason, action)
