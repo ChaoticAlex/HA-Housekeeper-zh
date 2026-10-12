@@ -106,3 +106,36 @@ def test_the_finding_of_an_outage_belongs_to_its_cause_and_a_decision_removes_th
     known = outage(ignored=True)
     assert apply_causes([ENTRY], [], [known]) == [], "known, hidden or marked: no longer news"
     assert "cause_id" not in known
+
+
+def test_log_facts_count_per_integration_and_never_carry_a_message():
+    from types import SimpleNamespace as NS
+
+    from custom_components.ha_housekeeper.log_facts import log_facts
+
+    def entry(name, level, count, message, source=("x.py", 1)):
+        return NS(
+            name=name,
+            level=level,
+            count=count,
+            message=[message],
+            source=source,
+            first_occurred=1_700_000_000.0,
+            timestamp=1_700_000_100.0,
+            exception="SECRET-TRACE",
+        )
+
+    records = {
+        1: entry("homeassistant.components.hue.light", "ERROR", 3, "token=SECRET"),
+        2: entry("custom_components.hue.api", "WARNING", 2, "x"),
+        3: entry("homeassistant.config_entries", "ERROR", 1, "Error setting up entry Box for demo"),
+        4: entry("other", "ERROR", 1, "x", ("components/zha/core.py", 5)),
+        5: entry("homeassistant.components.hue", "INFO", 9, "x"),
+        6: entry("unknown", "ERROR", 1, "x"),
+    }
+    hass = NS(data={"system_log": NS(records=records)})
+    facts = log_facts(hass)
+    assert set(facts) == {"hue", "demo", "zha"}
+    assert facts["hue"]["level"] == "error" and facts["hue"]["count"] == 5
+    assert "SECRET" not in repr(facts)
+    assert log_facts(NS(data={})) == {}

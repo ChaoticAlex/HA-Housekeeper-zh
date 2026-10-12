@@ -50,6 +50,8 @@ class DiagnosisMixin {
         rows.push(this.check(t("stability"), flap ? "red" : "warn", this.unstableLines(stable.info, stable.r.window_days)[0], t(flap ? "relFlapping" : "relUnstable")));
       }
       const broken = integ?.broken ? { state: t(`cs_${integ.state}`) } : null;
+      const logged = ["unavailable", null, undefined].includes(item.state) && !item.disabled_by ? this.data.objects.find(o => o.object_type === "config_entry" && o.object_id === item.config_entry_id)?.log : null;
+      if (logged) rows.push(this.check(t("logTitle"), logged.level === "warning" ? "warn" : "red", this.logLine(logged), ""));
       switch (item.reason) {
         case "state_available": cause = t("cause_ok"); break;
         case "entity_disabled": case "device_disabled": case "integration_disabled": case "device_missing": case "config_entry_missing":

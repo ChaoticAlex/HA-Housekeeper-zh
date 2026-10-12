@@ -78,6 +78,7 @@ from .hygiene import (
 from .ignored import IgnoreStore
 from .impact import apply_impact
 from .issues import async_sync_issues
+from .log_facts import log_facts
 from .maintenance import PreflightStore
 from .marks import KINDS, KINDS_OF, MarkStore, apply_marks, mark_key
 from .notes import NoteStore
@@ -1055,6 +1056,10 @@ class InventoryScanner:
                 item["blocked_automation"] = True
         apply_battery_kinds(objects, self.batteries.kinds)
         apply_impact(objects, edges, findings)
+        logged = log_facts(self.hass)
+        for item in objects:
+            if item["object_type"] == "config_entry" and item.get("domain") in logged:
+                item["log"] = logged[item["domain"]]
         causes = apply_causes(objects, edges, findings)
 
         lap("analysis")

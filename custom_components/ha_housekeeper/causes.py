@@ -55,6 +55,8 @@ def _cause(
     }
     if kind == "integration_down":
         cause.update(domain=item.get("domain"), state=item.get("state"), error=item.get("error"))
+        if item.get("log"):
+            cause["log"] = item["log"]
     return cause
 
 

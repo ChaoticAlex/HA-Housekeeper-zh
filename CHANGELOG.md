@@ -29,6 +29,7 @@
 - **Fehlende Tags:** Eine Automation, die auf einen Tag (NFC/QR) wartet, den es nicht mehr gibt, wird als Befund gemeldet.
 - **Richtlinien für den Zugang:** Drei neue Regeln (aus) weisen auf eine Anmeldung ohne Passwort für ein öffentliches Netz (`trusted_networks`), eine externe URL mit `http://` und vertrauenswürdige Proxys mit öffentlichem Netz hin. Normale private Netze werden nicht gemeldet.
 - **Richtlinien für Benutzer:** Drei neue Regeln (aus): Benutzer, die sich lange nicht oder nie angemeldet haben, alte Langzeit-Tokens (nur das Alter, denn Home Assistant merkt sich die Nutzung nicht) und Langzeit-Tokens abgeschalteter Konten. Nie ein Token-Wert.
+- **Fehler aus dem Log:** Bei einer nicht geladenen Integration und bei ausgefallenen Entitäten steht jetzt, wie oft Home Assistant für die Integration einen Fehler oder eine Warnung ins Log geschrieben hat und wann zuletzt. Nur Zahlen und Zeiten, nie der Text.
 - **Verweise ersetzen prüft Automationen:** Home Assistant muss die geänderte Automation annehmen und nach dem Neuladen laden, sonst bleibt die Datei unverändert.
 - **Automationen ohne Wirkung:** Befunde für Automationen und Skripte, deren Aktionen alle auf ausgefallene Entitäten zielen, und für Bedingungen, die nie wahr werden. Eine blockierte Automation lässt sich per Plan ausschalten.
 - **Webhooks:** Zugriffe & Datenfluss zeigt, welche Automationen ein Webhook starten kann und ob er auch von außen erreichbar ist.
@@ -66,6 +67,7 @@
 - **Missing tags:** An automation that waits for a tag (NFC/QR) that no longer exists is reported as a finding.
 - **Access policies:** Three new rules (off) point out a login without password for a public network (`trusted_networks`), an external URL with `http://` and trusted proxies with a public network. Ordinary private networks are not reported.
 - **User policies:** Three new rules (off): users who have not logged in for a long time or never, old long-lived tokens (the age only, because Home Assistant does not record their use) and long-lived tokens of switched-off accounts. Never a token value.
+- **Errors from the log:** For an integration that is not loaded and for failed entities, the page now says how often Home Assistant logged an error or warning for the integration and when last. Numbers and times only, never the text.
 - **Replace references checks automations:** Home Assistant has to accept the changed automation and load it after the reload, otherwise the file stays as it was.
 - **Automations without effect:** Findings for automations and scripts whose actions all target failed entities, and for conditions that can never be true. A blocked automation can be switched off with a plan.
 - **Webhooks:** Access & data flow shows which automations a webhook can start and whether it can also be reached from outside.
