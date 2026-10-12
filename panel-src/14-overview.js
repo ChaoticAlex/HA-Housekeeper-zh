@@ -240,7 +240,25 @@ class OverviewMixin {
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p></div>
       <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
       ${this.todoCard()}<div class="ovzone">${this.cleanupCard()}${this.trendCard()}${this.inventoryStatusCard()}</div>
-      <div class="ovzone">${this.systemCard()}${this.databaseCard()}</div>`;
+      <div class="ovzone">${this.systemCard()}${this.databaseCard()}${this.backupCard()}</div>`;
+  }
+
+  // The backup in three lines: the newest backup, the last automatic run and the overall result. The rest is in Maintenance.
+  backupCard() {
+    const b = this.backup;
+    if (!b?.available) return "";
+    const checks = b.checks || [], by = id => checks.find(c => c.id === id);
+    const newest = by("newest"), run = by("last_run");
+    const problems = checks.filter(c => c.level === "problem").length, notes = checks.filter(c => c.level === "note").length;
+    const tone = level => ({ ok: "ok", note: "warn", problem: "red" })[level] || "mute";
+    const fact = (label, value, level) => `<div class="fact"><span>${this.t(label)}</span><b>${value}${level ? ` <span class="pill ${tone(level)}">${this.t(`bhLevel_${level}`)}</span>` : ""}</b></div>`;
+    const age = newest?.values?.age_hours;
+    const rows = [
+      fact("bh_newest", age === null || age === undefined ? this.t("safeNoBackup") : this.esc(this.t("backupAgo", { age: this.bhAge(age) })), newest?.level),
+      run ? fact("bh_last_run", run.values?.completed ? this.esc(this.formatDate(run.values.completed)) : this.t("bhNever"), run.level) : "",
+      fact("bhResult", problems ? this.t("mtProblems", { n: problems }) : notes ? this.t("mtNotes", { n: notes }) : this.t("bhLevel_ok"), ""),
+    ].join("");
+    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("backupTitle")}</h2><p>${this.t("maintHintBackup")}</p></div><button class="link" data-jump="maintenance">${this.t("backupOpen")} <ha-icon icon="mdi:chevron-right"></ha-icon></button></div><div class="facts">${rows}</div></div>`;
   }
 
   // Three groups instead of seven raw statuses: what is fine, what to look at, what is broken.
