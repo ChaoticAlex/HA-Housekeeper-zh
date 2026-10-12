@@ -1,4 +1,4 @@
-// SystemMixin: the pages "Storage & system", "Access & data flow" and "Credentials" under Explore; mixed in by 99-register.js.
+// SystemMixin: the pages "Storage & system", "Access & data flow" and "Credentials" under Operation and Security; mixed in by 99-register.js.
 // All three only read. A page loads on its first visit; its refresh button reads again.
 // A page and the WebSocket command it asks.
 const SYS_COMMANDS = { storage: "system_usage", dataflow: "access", secrets: "sensitive_fields" };
