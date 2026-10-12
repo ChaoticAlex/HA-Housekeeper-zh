@@ -307,3 +307,14 @@ def test_plans_that_ran_go_after_a_year_or_beyond_the_count_unless_they_hold_a_q
         and ids[0] == "one more"
         and str(JOURNAL_MAX_PLANS - 1) not in ids
     )
+
+
+def test_a_blocked_automation_may_be_disabled_but_a_working_one_may_not() -> None:
+    stuck = entity("automation.stuck", "active", blocked_automation=True)
+    fine = entity("automation.fine", "active")
+    assert "entity_working" not in verdict([stuck], [], "automation.stuck")["reasons"]
+    assert "entity_working" in verdict([fine], [], "automation.fine")["reasons"]
+    assert (
+        "entity_working"
+        in verdict([stuck], [], "automation.stuck", kind="remove_entity")["reasons"]
+    )

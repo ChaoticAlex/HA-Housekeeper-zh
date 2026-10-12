@@ -28,7 +28,7 @@ from .automation_analysis import (
     summarize_automation_config,
     summarize_script_config,
 )
-from .automation_blocked import blocked_automation_findings
+from .automation_blocked import blocked_automation_findings, dead_effect_findings
 from .backup_health import AttestStore, backup_health
 from .battery_care import BatteryStore
 from .battery_kind import apply_battery_kinds
@@ -1020,10 +1020,20 @@ class InventoryScanner:
             self._mark_ignored(finding, entity_registry_entries)
         apply_marks(objects, findings, self.marks.items)
         blocked = blocked_automation_findings(automations, findings)
+        blocked += dead_effect_findings(automations, findings)
         for finding in blocked:
             finding["key"] = finding_key(finding)
             self._mark_ignored(finding, entity_registry_entries)
         findings.extend(blocked)
+        # A blocked automation may be switched off by a plan, though its entity is "working".
+        stuck = {
+            f["object_id"]
+            for f in blocked
+            if f["rule_id"] == "automation.blocked" and not f.get("ignored")
+        }
+        for item in entities:
+            if item["object_id"] in stuck:
+                item["blocked_automation"] = True
         apply_battery_kinds(objects, self.batteries.kinds)
         apply_impact(objects, edges, findings)
         causes = apply_causes(objects, edges, findings)

@@ -33,7 +33,7 @@ const TEXT = {
     integration_disabled: "Zugehörige Integration wurde deaktiviert",
     device_disabled: "Zugehöriges Gerät wurde deaktiviert",
     device_missing: "Zugehöriges Gerät existiert nicht mehr in der Geräte-Registry",
-    config_entry_missing: "Zugehöriger Konfigurationseintrag fehlt", "config_entry.not_loaded": "Integration nicht geladen", "automation.blocked": "Automation kann nicht starten: alle Auslöser sind ausgefallen", "app.stopped_in_use": "App gestoppt, Integration hängt vermutlich daran",
+    config_entry_missing: "Zugehöriger Konfigurationseintrag fehlt", "config_entry.not_loaded": "Integration nicht geladen", "automation.blocked": "Automation kann nicht starten: alle Auslöser sind ausgefallen", "automation.dead_actions": "Automation ändert nichts: alle Aktionen zielen auf ausgefallene Entitäten", "script.dead_actions": "Skript ändert nichts: alle Aktionen zielen auf ausgefallene Entitäten", "automation.dead_condition": "Eine Bedingung kann nie wahr werden: ausgefallene Entität", "app.stopped_in_use": "App gestoppt, Integration hängt vermutlich daran",
     state_missing: "Entität ist registriert, besitzt aber keinen Zustand",
     state_unavailable: "Integration meldet den Zustand unavailable",
     state_unknown: "Integration meldet den Zustand unknown", state_available: "Zustand ist verfügbar",
@@ -211,7 +211,7 @@ const TEXT = {
     integration_disabled: "Related integration was disabled",
     device_disabled: "Related device was disabled",
     device_missing: "Related device no longer exists in the device registry",
-    config_entry_missing: "Related config entry is missing", "config_entry.not_loaded": "Integration not loaded", "automation.blocked": "Automation cannot start: all its triggers are out of order", "app.stopped_in_use": "App stopped, an integration probably depends on it",
+    config_entry_missing: "Related config entry is missing", "config_entry.not_loaded": "Integration not loaded", "automation.blocked": "Automation cannot start: all its triggers are out of order", "automation.dead_actions": "Automation changes nothing: all its actions target dead entities", "script.dead_actions": "Script changes nothing: all its actions target dead entities", "automation.dead_condition": "A condition can never be true: dead entity", "app.stopped_in_use": "App stopped, an integration probably depends on it",
     state_missing: "Entity is registered but has no state",
     state_unavailable: "Integration reports unavailable",
     state_unknown: "Integration reports unknown", state_available: "State is available",
@@ -2075,7 +2075,7 @@ class FindingsMixin {
     const title = object?.name || finding.object_id;
     const subtitle = finding.rule_id === "entity.possible_duplicate"
       ? `${this.t("duplicateOf")} ${this.esc(finding.affected_object)}`
-      : finding.rule_id === "automation.blocked"
+      : ["automation.blocked", "automation.dead_actions", "script.dead_actions", "automation.dead_condition"].includes(finding.rule_id)
         ? this.esc((finding.evidence?.[0]?.entities || []).slice(0, 3).join(", ") + ((finding.evidence?.[0]?.total || 0) > 3 ? " …" : ""))
       : finding.rule_id === "automation.goal_missed"
         ? this.esc(this.goalLine(finding))
@@ -7852,6 +7852,9 @@ class DetailActionsMixin {
       out.push({ attr: `data-act-replace="${this.esc(item.object_id)}"`, icon: "mdi:swap-horizontal", label: this.t("actReplaceThis"), hint: "actHintReplace", finding: true });
       if (item.status !== "disabled") out.push({ attr: `data-act-disable="${this.esc(item.object_id)}"`, icon: "mdi:cancel", label: this.t("actDisable"), hint: "actHintDisable", finding: true });
     }
+    if (item.object_type === "automation" && open.some(f => f.rule_id === "automation.blocked")) {
+      out.push({ attr: `data-act-disable-auto="${this.esc(item.object_id)}"`, icon: "mdi:cancel", label: this.t("actDisableAuto"), hint: "actHintDisableAuto", finding: true });
+    }
     // A sensor with long-term statistics can have wrong values repaired or be swapped for a new meter.
     if (item.object_type === "entity" && item.has_statistics && item.object_id.startsWith("sensor.")) {
       out.push({ attr: `data-act-repair="${this.esc(item.object_id)}"`, icon: "mdi:chart-line", label: this.t("actRepairValues"), hint: "actHintRepair" });
@@ -7939,6 +7942,15 @@ class DetailActionsMixin {
     this.render();
   }
 
+  // A blocked automation is switched off by a plan like any entity: preview, confirmation, journal, undo.
+  async planDisable(entityId) {
+    try {
+      if (!await this.newPlan([{ kind: "disable_entity", object_id: entityId }])) return;
+      this.selected = null;
+    } catch (err) { this.failed(err); }
+    this.render();
+  }
+
   async planLabel(entityId, label) {
     try {
       if (!await this.newPlan([{ kind: "add_label", object_id: entityId, target: label }])) return;
@@ -7965,20 +7977,21 @@ class DetailActionsMixin {
     root.querySelectorAll("[data-act-exchange]").forEach(el => el.onclick = () => this.startCleanup("exchange_device", () => { const ex = this.exchangeState(); ex.oldDev = el.dataset.actExchange; ex.newDev = ""; ex.result = null; ex.choices = {}; }));
     root.querySelectorAll("[data-act-replace]").forEach(el => el.onclick = () => this.startCleanup("replace_references", () => { this.replOld = el.dataset.actReplace; this.replNew = ""; }));
     root.querySelectorAll("[data-act-disable]").forEach(el => el.onclick = () => this.startCleanup("disable_entity", () => this.cleanupSel.add(el.dataset.actDisable)));
+    root.querySelectorAll("[data-act-disable-auto]").forEach(el => el.onclick = () => this.planDisable(el.dataset.actDisableAuto));
     root.querySelector("[data-act-label]")?.addEventListener("change", e => { this.actLabel = e.target.value; });
     root.querySelector("[data-act-label-plan]")?.addEventListener("click", e => this.planLabel(e.currentTarget.dataset.actLabelPlan, root.querySelector("[data-act-label]")?.value || this.actLabel));
   }
 }
 Object.assign(TEXT.de, {
   actOpen: "Öffnen", tabActions: "Aktionen", nextStep: "Nächster Schritt", moreActions: "Weitere Aktionen", actGroupRecommended: "Empfohlen", actGroupName: "Benennen und einordnen", actGroupNotes: "Notizen", actMore: "Mehr", actLess: "Weniger", actLabelPreviewShort: "Vorschau", actGroupRecord: "Aufzeichnung und Überwachung", actNone: "Hier gibt es nichts zu tun.",
-  actionsTitle: "Was möchtest du tun?", actReplace: "Ersetzen:", actReplaceThis: "Durch andere Entität ersetzen", actDisable: "Deaktivieren planen",
+  actionsTitle: "Was möchtest du tun?", actReplace: "Ersetzen:", actReplaceThis: "Durch andere Entität ersetzen", actDisable: "Deaktivieren planen", actDisableAuto: "Automation deaktivieren (Plan)", actHintDisableAuto: "Keiner ihrer Auslöser kann feuern. Der Plan schaltet sie aus, mit Vorschau, Bestätigung und Rückgängig.",
   actLabelTitle: "Label ergänzen", actLabelHint: "Fügt ein vorhandenes Label hinzu, zum Beispiel zum Filtern. Du siehst zuerst eine Vorschau.", actLabelPreview: "Vorschau erstellen",
   actPreviewOnly: "Hier startest du nur eine Vorschau. Geändert wird erst, wenn du sie bestätigst.",
   actEditInHa: "Eine einzelne Referenz entfernt Housekeeper nicht selbst. Öffne die Automation in Home Assistant und bearbeite sie dort.",
 });
 Object.assign(TEXT.en, {
   actOpen: "Open", tabActions: "Actions", nextStep: "Next step", moreActions: "More actions", actGroupRecommended: "Recommended", actGroupName: "Name and classify", actGroupNotes: "Notes", actMore: "More", actLess: "Less", actLabelPreviewShort: "Preview", actGroupRecord: "Recording and monitoring", actNone: "There is nothing to do here.",
-  actionsTitle: "What would you like to do?", actReplace: "Replace:", actReplaceThis: "Replace by another entity", actDisable: "Plan to disable",
+  actionsTitle: "What would you like to do?", actReplace: "Replace:", actReplaceThis: "Replace by another entity", actDisable: "Plan to disable", actDisableAuto: "Disable automation (plan)", actHintDisableAuto: "None of its triggers can fire. The plan switches it off, with preview, confirmation and undo.",
   actLabelTitle: "Add a label", actLabelHint: "Adds an existing label, for example for filtering. You see a preview first.", actLabelPreview: "Create preview",
   actPreviewOnly: "This only starts a preview. Nothing changes until you confirm it.",
   actEditInHa: "Housekeeper does not remove a single reference itself. Open the automation in Home Assistant and edit it there.",

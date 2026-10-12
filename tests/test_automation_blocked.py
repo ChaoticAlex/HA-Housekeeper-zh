@@ -52,3 +52,50 @@ def test_only_automations_without_a_working_trigger_are_blocked() -> None:
     found = blocked_automation_findings(automations, findings)
     assert [f["object_id"] for f in found] == ["automation.dead"]
     assert found[0]["evidence"][0]["entities"] == ["sensor.a", "sensor.b"]
+
+
+def test_actions_on_dead_entities_and_conditions_that_cannot_hold() -> None:
+    from custom_components.ha_housekeeper.automation_blocked import dead_effect_findings
+
+    def act(i, entity_id):
+        return {
+            "kind": "entity",
+            "object_id": entity_id,
+            "relation": "TARGETS",
+            "location": f"actions/{i}/target/entity_id",
+        }
+
+    def item(object_id, actions, conditions=(), kind="automation"):
+        return {
+            "object_type": kind,
+            "object_id": object_id,
+            "status": "active",
+            "action_count": len(actions),
+            "references": [act(i, e) for i, e in enumerate(actions) if e],
+            "conditions": list(conditions),
+        }
+
+    findings = [_dead("light.a"), _dead("sensor.a")]
+    found = dead_effect_findings(
+        [
+            item("automation.silent", ["light.a", "light.a"]),
+            item("automation.notifies", ["light.a", None]),  # one action without an entity
+            item("script.silent", ["light.a"], kind="script"),
+            item(
+                "automation.never",
+                ["light.ok"],
+                [{"condition": "state", "entity_id": "sensor.a", "state": "on"}],
+            ),
+            item(
+                "automation.asks_dead",
+                ["light.ok"],
+                [{"condition": "state", "entity_id": "sensor.a", "state": "unavailable"}],
+            ),
+        ],
+        findings,
+    )
+    assert sorted((f["rule_id"], f["object_id"]) for f in found) == [
+        ("automation.dead_actions", "automation.silent"),
+        ("automation.dead_condition", "automation.never"),
+        ("script.dead_actions", "script.silent"),
+    ]
