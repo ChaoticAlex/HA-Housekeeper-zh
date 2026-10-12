@@ -10127,6 +10127,8 @@ Object.assign(TEXT.de, {
   sysSwap: "Swap: {used} von {total} ({pct})", sysSwapHint: "Auslagerungsspeicher: ein Teil des Datenträgers, den das System als Reserve nutzt, wenn der RAM knapp wird. Er ist deutlich langsamer als RAM; viel Swap bei hoher RAM-Auslastung kann das System bremsen.",
   sysTabCategories: "Systemspeicher nach Kategorie", sysTabCategoriesHint: "vom Supervisor gemessen", sysTabConsumers: "Größte Verbraucher", sysTabConsumersHint: "unter /config", sysTabCustom: "Custom-Integrationen", sysTabCustomHint: "Platz je Integration",
   sysTabApps: "Apps", sysTabAppsHint: "CPU, RAM und Daten je App", sysTabCards: "Custom Cards", sysTabCardsHint: "Dashboard-Ressourcen", sysTabBlueprints: "Blueprints", sysTabBlueprintsHint: "Größe der Dateien", sysNoSupervisor: "nur mit Supervisor",
+  cardStatus_missing: "Datei fehlt", cardStatus_external: "extern", cardStatus_unused: "ungenutzt", cardStatus_used: "genutzt", cardStatus_unknown: "unbekannt",
+  cardStatusHint_missing: "Die lokale Datei gibt es nicht mehr; die Karte lädt nicht.", cardStatusHint_external: "Eine externe Adresse; Housekeeper prüft sie nicht.", cardStatusHint_unused: "Kein Dashboard nutzt eine Karte aus dieser Datei. Ein Hinweis, kein Urteil: Hilfsmodule werden anders gebraucht.", cardStatusHint_used: "Ein Dashboard nutzt eine Karte aus dieser Datei.", cardStatusHint_unknown: "Aus der Datei lassen sich keine Kartennamen lesen; ob sie gebraucht wird, ist offen.",
   sysColCategory: "Kategorie", sysColPlace: "Bereich", sysColSize: "Größe", sysColShare: "Anteil", sysColIntegration: "Integration", sysColApp: "App", sysColState: "Status", sysColCpu: "CPU", sysColRam: "RAM", sysColData: "Daten",
   sysColUrl: "Ressource", sysColType: "Typ", sysColName: "Name", sysColDomain: "Art", sysColAuthor: "Autor",
   sysTarget_recorder_db: "Recorder-Datenbank", sysTarget_backups: "Backups", sysTarget_custom_components: "Custom Components", sysTarget_media: "Medien", sysTarget_www: "www (lokale Web-Dateien)", sysTarget_image: "Bilder-Upload", sysTarget_tts: "TTS-Cache", sysTarget_blueprints: "Blueprints", sysTarget_themes: "Themes", sysTarget_deps: "Python-Abhängigkeiten (deps)", sysTarget_custom_cards: "Custom Cards",
@@ -10180,6 +10182,8 @@ Object.assign(TEXT.en, {
   sysSwap: "Swap: {used} of {total} ({pct})", sysSwapHint: "Swap space: part of the disk the system uses as a reserve when RAM runs low. It is much slower than RAM; a lot of swap together with high RAM use can slow the system down.",
   sysTabCategories: "System storage by category", sysTabCategoriesHint: "measured by the Supervisor", sysTabConsumers: "Largest consumers", sysTabConsumersHint: "under /config", sysTabCustom: "Custom integrations", sysTabCustomHint: "space per integration",
   sysTabApps: "Apps", sysTabAppsHint: "CPU, RAM and data per app", sysTabCards: "Custom cards", sysTabCardsHint: "dashboard resources", sysTabBlueprints: "Blueprints", sysTabBlueprintsHint: "size of the files", sysNoSupervisor: "only with a Supervisor",
+  cardStatus_missing: "File missing", cardStatus_external: "external", cardStatus_unused: "unused", cardStatus_used: "used", cardStatus_unknown: "unknown",
+  cardStatusHint_missing: "The local file is gone; the card does not load.", cardStatusHint_external: "An external address; Housekeeper does not check it.", cardStatusHint_unused: "No dashboard uses a card from this file. A hint, not a verdict: helper modules are used in other ways.", cardStatusHint_used: "A dashboard uses a card from this file.", cardStatusHint_unknown: "No card names can be read from the file; whether it is needed is open.",
   sysColCategory: "Category", sysColPlace: "Area", sysColSize: "Size", sysColShare: "Share", sysColIntegration: "Integration", sysColApp: "App", sysColState: "State", sysColCpu: "CPU", sysColRam: "RAM", sysColData: "Data",
   sysColUrl: "Resource", sysColType: "Type", sysColName: "Name", sysColDomain: "Kind", sysColAuthor: "Author",
   sysTarget_recorder_db: "Recorder database", sysTarget_backups: "Backups", sysTarget_custom_components: "Custom components", sysTarget_media: "Media", sysTarget_www: "www (local web files)", sysTarget_image: "Image upload", sysTarget_tts: "TTS cache", sysTarget_blueprints: "Blueprints", sysTarget_themes: "Themes", sysTarget_deps: "Python dependencies (deps)", sysTarget_custom_cards: "Custom cards",
@@ -10513,7 +10517,7 @@ class SystemMixin {
         { id: "consumers", icon: "mdi:folder-outline", label: this.t("sysTabConsumers"), hint: this.t("sysTabConsumersHint"), count: r.breakdown.length },
         { id: "custom", icon: "mdi:puzzle-outline", label: this.t("sysTabCustom"), hint: this.t("sysTabCustomHint"), count: r.custom_integrations.length },
         { id: "apps", icon: "mdi:package-variant-closed", label: this.t("sysTabApps"), hint: this.t("sysTabAppsHint"), count: r.apps.length, ...(sup ? {} : noSup) },
-        { id: "cards", icon: "mdi:cards-outline", label: this.t("sysTabCards"), hint: this.t("sysTabCardsHint"), count: r.cards.length },
+        { id: "cards", icon: "mdi:cards-outline", label: this.t("sysTabCards"), hint: this.t("sysTabCardsHint"), count: r.cards.length, ...(r.cards.some(c => c.status === "missing") ? { tone: "red" } : {}) },
         { id: "blueprints", icon: "mdi:floor-plan", label: this.t("sysTabBlueprints"), hint: this.t("sysTabBlueprintsHint"), count: r.blueprints.length },
       ];
       const open = this.viewTabOf("storage", tabs.filter(x => !x.disabled), sup && cats.length ? "categories" : "consumers");
@@ -10596,6 +10600,12 @@ class SystemMixin {
     });
   }
 
+  cardStatus(c) {
+    const tone = { missing: "red", unused: "warn", used: "ok" }[c.status] || "mute";
+    const names = (c.elements || []).join(", ");
+    return `<span class="pill ${tone}" title="${this.esc(this.t(`cardStatusHint_${c.status}`) + (names ? ` (${names})` : ""))}">${this.t(`cardStatus_${c.status}`)}</span>`;
+  }
+
   sysCards(cards) {
     const max = Math.max(0, ...cards.map(c => c.bytes || 0));
     const file = c => (String(c.url).split("?")[0].split("/").filter(Boolean).pop() || c.url);
@@ -10604,8 +10614,8 @@ class SystemMixin {
     return this.sysList("syscards", cards, {
       sort: "size", dir: "desc", sorts: [...this.sysBySize(), { key: "name", label: "sysColUrl", dir: "asc", get: file }],
       text: c => `${c.url} ${c.type}`, tie: c => c.url, empty: "sysNoCards",
-      columns: [{ key: "name", label: "sysColUrl", cell: c => this.nameCell(file(c), c.url) }, { key: "type", label: "sysColType", sortable: false, cell: c => `<span class="pill mute">${this.esc(c.type || "–")}</span>` }, ...cols],
-      exportName: "storage-custom-cards", header: [this.t("sysColUrl"), this.t("sysColType"), "Bytes"], rows: c => [c.url, c.type, c.bytes ?? ""],
+      columns: [{ key: "name", label: "sysColUrl", cell: c => this.nameCell(file(c), c.url) }, { key: "type", label: "sysColType", sortable: false, cell: c => `<span class="pill mute">${this.esc(c.type || "–")}</span>` }, { key: "status", label: "sysColState", sortable: false, cell: c => this.cardStatus(c) }, ...cols],
+      exportName: "storage-custom-cards", header: [this.t("sysColUrl"), this.t("sysColType"), this.t("sysColState"), "Bytes"], rows: c => [c.url, c.type, c.status, c.bytes ?? ""],
     });
   }
 

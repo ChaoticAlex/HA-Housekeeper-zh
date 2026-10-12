@@ -21,6 +21,19 @@ LIGHT_TIMEOUT = 20  # the Supervisor's host info and a short CPU sample
 ACCESS_TIMEOUT = 45  # the Supervisor answers for every app
 
 
+def _used_card_types(scanner: InventoryScanner) -> set[str] | None:
+    """The ``custom:`` card types of all dashboards read in the last scan; None without a scan."""
+    snapshot = scanner.snapshot
+    if snapshot is None:
+        return None
+    return {
+        card_type
+        for item in snapshot["objects"]
+        if item["object_type"] == "dashboard"
+        for card_type in (item.get("health") or {}).get("custom_types", [])
+    }
+
+
 @websocket_api.require_admin
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/system_usage"})
 @websocket_api.async_response
@@ -34,7 +47,7 @@ async def websocket_system_usage(
     """Disk, memory, CPU and the largest consumers of space. Read-only."""
     try:
         async with asyncio.timeout(SYSTEM_TIMEOUT):
-            result = await system_usage(hass)
+            result = await system_usage(hass, _used_card_types(scanner))
     except Exception as err:
         connection.send_error(msg["id"], "system_failed", f"{type(err).__name__}: {err}")
         return

@@ -105,7 +105,7 @@ class SystemMixin {
         { id: "consumers", icon: "mdi:folder-outline", label: this.t("sysTabConsumers"), hint: this.t("sysTabConsumersHint"), count: r.breakdown.length },
         { id: "custom", icon: "mdi:puzzle-outline", label: this.t("sysTabCustom"), hint: this.t("sysTabCustomHint"), count: r.custom_integrations.length },
         { id: "apps", icon: "mdi:package-variant-closed", label: this.t("sysTabApps"), hint: this.t("sysTabAppsHint"), count: r.apps.length, ...(sup ? {} : noSup) },
-        { id: "cards", icon: "mdi:cards-outline", label: this.t("sysTabCards"), hint: this.t("sysTabCardsHint"), count: r.cards.length },
+        { id: "cards", icon: "mdi:cards-outline", label: this.t("sysTabCards"), hint: this.t("sysTabCardsHint"), count: r.cards.length, ...(r.cards.some(c => c.status === "missing") ? { tone: "red" } : {}) },
         { id: "blueprints", icon: "mdi:floor-plan", label: this.t("sysTabBlueprints"), hint: this.t("sysTabBlueprintsHint"), count: r.blueprints.length },
       ];
       const open = this.viewTabOf("storage", tabs.filter(x => !x.disabled), sup && cats.length ? "categories" : "consumers");
@@ -188,6 +188,12 @@ class SystemMixin {
     });
   }
 
+  cardStatus(c) {
+    const tone = { missing: "red", unused: "warn", used: "ok" }[c.status] || "mute";
+    const names = (c.elements || []).join(", ");
+    return `<span class="pill ${tone}" title="${this.esc(this.t(`cardStatusHint_${c.status}`) + (names ? ` (${names})` : ""))}">${this.t(`cardStatus_${c.status}`)}</span>`;
+  }
+
   sysCards(cards) {
     const max = Math.max(0, ...cards.map(c => c.bytes || 0));
     const file = c => (String(c.url).split("?")[0].split("/").filter(Boolean).pop() || c.url);
@@ -196,8 +202,8 @@ class SystemMixin {
     return this.sysList("syscards", cards, {
       sort: "size", dir: "desc", sorts: [...this.sysBySize(), { key: "name", label: "sysColUrl", dir: "asc", get: file }],
       text: c => `${c.url} ${c.type}`, tie: c => c.url, empty: "sysNoCards",
-      columns: [{ key: "name", label: "sysColUrl", cell: c => this.nameCell(file(c), c.url) }, { key: "type", label: "sysColType", sortable: false, cell: c => `<span class="pill mute">${this.esc(c.type || "–")}</span>` }, ...cols],
-      exportName: "storage-custom-cards", header: [this.t("sysColUrl"), this.t("sysColType"), "Bytes"], rows: c => [c.url, c.type, c.bytes ?? ""],
+      columns: [{ key: "name", label: "sysColUrl", cell: c => this.nameCell(file(c), c.url) }, { key: "type", label: "sysColType", sortable: false, cell: c => `<span class="pill mute">${this.esc(c.type || "–")}</span>` }, { key: "status", label: "sysColState", sortable: false, cell: c => this.cardStatus(c) }, ...cols],
+      exportName: "storage-custom-cards", header: [this.t("sysColUrl"), this.t("sysColType"), this.t("sysColState"), "Bytes"], rows: c => [c.url, c.type, c.status, c.bytes ?? ""],
     });
   }
 

@@ -13,6 +13,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import re
 import shutil
 import time
 from collections.abc import Iterable
@@ -120,6 +121,41 @@ def card_path(config_dir: str, url: str) -> str | None:
     return os.path.realpath(path) if _inside(path, config_dir) else None
 
 
+ELEMENT_NAME = re.compile(r"customElements\.define\(\s*[\"']([a-z][a-z0-9]*(?:-[a-z0-9]+)+)[\"']")
+MAX_SCRIPT_BYTES = 2 * 1024 * 1024  # a larger file is not read; its card names stay unknown
+
+
+def element_names(path: str) -> list[str]:
+    """The custom element names a card script defines; empty when none can be read from it.
+
+    Minified scripts often define their elements through variables, so an empty list means
+    "unknown", never "defines nothing".
+    """
+    try:
+        if os.path.getsize(path) > MAX_SCRIPT_BYTES:
+            return []
+        with open(path, encoding="utf-8", errors="ignore") as file:
+            return sorted(set(ELEMENT_NAME.findall(file.read())))
+    except OSError:
+        return []
+
+
+def card_status(card: dict[str, Any], used: set[str] | None) -> str:
+    """``missing`` (local file gone), ``external``, ``unused``, ``used`` or ``unknown``.
+
+    ``used`` holds the ``custom:`` card types of all dashboards, ``None`` when they are unknown.
+    A script is ``unused`` only when its element names are known and no dashboard uses one.
+    """
+    if not card.get("local"):
+        return "external"
+    if not card.get("exists"):
+        return "missing"
+    names = card.get("elements") or []
+    if used is None or not names:
+        return "unknown"
+    return "used" if used.intersection(names) else "unused"
+
+
 def card_sizes(config_dir: str, urls: Iterable[str]) -> dict[str, dict[str, Any]]:
     """Size per resource URL: the folder of a card that has one under www (HACS), else the file."""
     www = os.path.realpath(os.path.join(config_dir, "www"))
@@ -127,13 +163,25 @@ def card_sizes(config_dir: str, urls: Iterable[str]) -> dict[str, dict[str, Any]
     for url in urls:
         path = card_path(config_dir, url)
         if not path or not os.path.exists(path):
-            result[url] = {"bytes": None, "scope": None, "path": None}
+            result[url] = {
+                "bytes": None,
+                "scope": None,
+                "path": None,
+                "local": path is not None,
+                "exists": False,
+                "elements": [],
+            }
             continue
+        extra = {
+            "local": True,
+            "exists": True,
+            "elements": element_names(path) if path.endswith((".js", ".mjs")) else [],
+        }
         parent = os.path.realpath(os.path.dirname(path))
         if os.path.isfile(path) and parent != www and parent.startswith(www + os.sep):
-            result[url] = {"bytes": path_size(parent), "scope": "folder", "path": parent}
+            result[url] = {"bytes": path_size(parent), "scope": "folder", "path": parent, **extra}
         else:
-            result[url] = {"bytes": path_size(path), "scope": "file", "path": path}
+            result[url] = {"bytes": path_size(path), "scope": "file", "path": path, **extra}
     return result
 
 
@@ -476,8 +524,13 @@ def merge_cards(
     return total
 
 
-async def system_usage(hass: HomeAssistant) -> dict[str, Any]:
-    """Storage and system: everything the "Storage & system" page shows."""
+async def system_usage(
+    hass: HomeAssistant, used_card_types: set[str] | None = None
+) -> dict[str, Any]:
+    """Storage and system: everything the "Storage & system" page shows.
+
+    ``used_card_types`` are the ``custom:`` card types of all dashboards (``None`` when unknown).
+    """
     config_dir = hass.config.config_dir
     local, supervisor, resources, blueprints = await asyncio.gather(
         hass.async_add_executor_job(collect_local, config_dir),
@@ -500,6 +553,9 @@ async def system_usage(hass: HomeAssistant) -> dict[str, Any]:
                 "bytes": size.get("bytes"),
                 "scope": size.get("scope"),
                 "path": size.get("path"),
+                "local": size.get("local", False),
+                "exists": size.get("exists", False),
+                "elements": size.get("elements", []),
             }
         )
     for blueprint, size in zip(blueprints, bp_sizes, strict=True):
@@ -523,7 +579,13 @@ async def system_usage(hass: HomeAssistant) -> dict[str, Any]:
         "apps": apps,
         "apps_memory": sum(app.get("memory_usage") or 0 for app in apps),
         # Paths are relative to the configuration directory; the absolute path stays on the server.
-        "cards": [{k: v for k, v in card.items() if k != "path"} for card in cards],
+        "cards": [
+            {
+                **{k: v for k, v in card.items() if k not in ("path", "local", "exists")},
+                "status": card_status(card, used_card_types),
+            }
+            for card in cards
+        ],
         "cards_total": cards_total,
         "blueprints": blueprints,
     }

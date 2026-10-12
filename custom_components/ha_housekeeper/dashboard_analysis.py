@@ -287,6 +287,7 @@ def dashboard_health(
         "cards": cards,
         "doubles": doubles,
         "custom": sorted(custom)[:LISTED],
+        "custom_types": sorted(custom),
         "resources": resources,
         "broken_navigation": sorted(set(broken))[:LISTED],
     }

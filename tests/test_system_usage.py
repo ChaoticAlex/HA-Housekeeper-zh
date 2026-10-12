@@ -17,7 +17,9 @@ from custom_components.ha_housekeeper.system_usage import (  # noqa: E402
     blueprint_sizes,
     card_path,
     card_sizes,
+    card_status,
     disk_categories,
+    element_names,
     host_disk,
     merge_cards,
     storage_breakdown,
@@ -68,7 +70,7 @@ def test_card_sizes_count_the_folder_of_a_hacs_card(tmp_path) -> None:
         sizes["/hacsfiles/card/card.js"]["bytes"] == 40
         and sizes["/hacsfiles/card/card.js"]["scope"] == "folder"
     )
-    assert sizes["/local/own.js"] == {
+    assert {k: sizes["/local/own.js"][k] for k in ("bytes", "scope", "path")} == {
         "bytes": 5,
         "scope": "file",
         "path": str((tmp_path / "www" / "own.js").resolve()),
@@ -169,3 +171,23 @@ async def test_apps_become_objects_and_a_stopped_app_is_no_problem(hass: HomeAss
     assert apps[1]["update_available"] is True
     with patch.object(inventory, "supervisor_token", return_value=None):
         assert await inventory._app_inventory(hass) == []
+
+
+def test_a_card_script_is_judged_by_the_element_names_it_defines(tmp_path) -> None:
+    (tmp_path / "www" / "community" / "c").mkdir(parents=True)
+    script = tmp_path / "www" / "community" / "c" / "c.js"
+    script.write_text('x();customElements.define("foo-card",A);customElements.define(e,B)')
+    mini = tmp_path / "www" / "mini.js"
+    mini.write_text("customElements.define(n,t)")
+    assert element_names(str(script)) == ["foo-card"] and element_names(str(mini)) == []
+
+    sizes = card_sizes(str(tmp_path), ["/hacsfiles/c/c.js", "/local/mini.js", "/local/gone.js"])
+    status = {url: card_status(card, {"foo-card"}) for url, card in sizes.items()}
+    assert status == {
+        "/hacsfiles/c/c.js": "used",
+        "/local/mini.js": "unknown",
+        "/local/gone.js": "missing",
+    }
+    assert card_status(sizes["/hacsfiles/c/c.js"], {"bar-card"}) == "unused"
+    assert card_status(sizes["/hacsfiles/c/c.js"], None) == "unknown"
+    assert card_status({"local": False}, set()) == "external"
