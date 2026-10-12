@@ -280,6 +280,8 @@ class DiagnosisMixin {
 
   // Tabs offered for one object; "attributes" only when it has some, so an empty tab never shows.
   detailTabs(item, key) {
+    // An app has no relations or actions of its own; its rights and its load come from the two system reports.
+    if (item.object_type === "app") return [["overview", "tabOverview"], ["access", "accAppTab", null, this.appAccessTone(item)], ["storage", "accAppLoad"], ["technical", "tabTechnical"]];
     const tabs = [["overview", "tabOverview"], ["relations", "tabRelations", this.edgesTo(key).length + this.edgesFrom(key).length], ["technical", "tabTechnical"]];
     if (this.hasActionsTab(item, key)) tabs.splice(1, 0, ["actions", "tabActions", this.fixItems(item, key).items.length]);
     if (item.attributes && Object.keys(item.attributes).length) tabs.push(["attributes", "tabAttributes"]);
@@ -299,6 +301,8 @@ class DiagnosisMixin {
     if (item.object_type === "config_entry") this.ensureReliability();
     // The reports of Access & data flow and Credentials are read when their tab is opened, not with the page.
     if (item.object_type === "config_entry" && this.detailTab === "access") { this.sysEnsure("dataflow"); this.sysEnsure("secrets"); }
+    if (item.object_type === "app" && this.detailTab === "access") this.sysEnsure("dataflow");
+    if (item.object_type === "app" && this.detailTab === "storage") this.sysEnsure("storage");
     if (item.object_type === "entity") this.ensureStability();
     if (item.object_type === "device") this.ensureLifecycle(item.object_id);
     if (NOTE_TYPES.includes(item.object_type)) this.ensureJournal();
@@ -325,7 +329,9 @@ class DiagnosisMixin {
     if (tab === "history") return this.historyTab(item);
     if (tab === "runs") return this.runsDetailCard(this.runsRow(item));
     if (tab === "reliability") return this.reliabilityDetailCard(this.reliabilityRow(item));
-    if (tab === "access") return this.accessDetailCard(item);
+    if (tab === "access") return item.object_type === "app" ? this.appAccessCard(item) : this.accessDetailCard(item);
+    if (tab === "storage") return this.appLoadCard(item);
+    if (tab === "overview" && item.object_type === "app") return this.appOverview(item);
     if (tab === "attributes") {
       return `<section class="panel"><div class="panelhead"><h2>${this.t("state")}</h2></div><div class="pad"><div class="code">${this.esc(JSON.stringify(item.attributes, null, 2))}</div></div></section>`;
     }

@@ -4116,3 +4116,23 @@ test("the detail page of an integration has an access tab and a red line in its 
   assert.equal(el.accessTone(zha), "", "no dot before the report is read");
   assert.ok(!el.accessDetailCard(demo).includes("token.access_token"), "the card waits for both reports");
 });
+
+test("an app is an object of its own: status, detail tabs with rights and load, and the lists open its page", () => {
+  const { el, shadow } = systemPanel("de");
+  const app = { object_type: "app", object_id: "core_ssh", slug: "core_ssh", name: "SSH", version: "1.0", version_latest: "1.1", update_available: true, repository: "core", stage: "stable", description: "Terminal <b>x</b>", state: "started", status: "active" };
+  el.data = { ...DATA, objects: [...DATA.objects, app, { ...app, object_id: "x", slug: "x", name: "X", state: "stopped", status: "stopped", update_available: false }] };
+  el._sys.dataflow.data = { ...ACCESS, apps_available: true, apps: [{ slug: "core_ssh", name: "SSH", state: "started", checked: true, risk: "high", access: [{ kind: "full_access", detail: null, level: "high" }] }] };
+  assert.equal(el.tone("stopped"), "mute", "a stopped app is not a problem");
+  assert.equal(el.haPath(app), "/hassio/addon/core_ssh/info");
+  assert.equal(JSON.stringify(el.detailTabs(app, "app:core_ssh").map(t => t[0])), JSON.stringify(["overview", "access", "storage", "technical"]));
+  assert.equal(el.accessTone(app), "", "an integration helper is not used for apps");
+  assert.equal(el.appAccessTone(app), "red");
+  const overview = el.appOverview(app);
+  assert.ok(overview.includes("1.0") && overview.includes("Update auf 1.1") && overview.includes("Terminal &lt;b&gt;x&lt;/b&gt;") && !overview.includes("<b>x</b>"));
+  assert.ok(el.appAccessCard(app).includes("Voller Hardwarezugriff"));
+  assert.ok(/MB/.test(el.appLoadCard(app)) && /0[.,]4 %/.test(el.appLoadCard(app)), "the load tab shows memory and CPU");
+  assert.ok(el.appRowAttrs({ slug: "core_ssh", name: "SSH" }).includes('data-object="app:core_ssh"'));
+  assert.ok(el.appRowAttrs({ slug: "unknown", name: "U" }).includes("data-ha-path"), "an app the scan does not know opens in Home Assistant");
+  el.view = "inventory"; el.render();
+  assert.ok(shadow.innerHTML.includes('data-inv-filter="app|"'), "the inventory has a tile for the type");
+});

@@ -328,6 +328,7 @@ class HAHousekeeperPanel extends HTMLElement {
         ? `/config/scene/edit/${encodeURIComponent(item.scene_id)}`
         : `/config/entities?search=${encodeURIComponent(item.object_id)}`;
       case "dashboard": return `/${encodeURIComponent(item.url_path || "lovelace")}`;
+      case "app": return `/hassio/addon/${encodeURIComponent(item.slug || item.object_id)}/info`;
       case "config_entry": return `/config/integrations/integration/${encodeURIComponent(item.domain)}`;
       case "floor": return "/config/areas/dashboard";
       case "label": return "/config/labels";

@@ -11,7 +11,7 @@ const TEXT = {
     tabsLabel: "Abschnitte des Objekts", tabOverview: "Übersicht", tabRelations: "Abhängigkeiten", tabTechnical: "Technische Daten", tabAttributes: "Attribute",
     sumCause: "Ursache", sumIntegration: "Integration", sumDevice: "Gerät", sumArea: "Bereich", sumRisk: "Risiko beim Entfernen", riskNone: "keine Verwendung gefunden", riskHits: "{n} Verwendungen, davon sicher: {c}",
     since: "Beobachtet seit", dependencies: "Beziehungen", objects: "Objekte",
-    findings: "Befunde", active: "Aktiv", orphaned: "Verwaist",
+    findings: "Befunde", active: "Aktiv", stopped: "Gestoppt", app: "App", orphaned: "Verwaist",
     unavailable: "Nicht verfügbar", disabled: "Deaktiviert", unknown: "Unbekannt",
     empty: "Leer", problem: "Problem", details: "Details", close: "Schließen",
     noResults: "Keine passenden Objekte gefunden.",
@@ -189,7 +189,7 @@ const TEXT = {
     tabsLabel: "Sections of the object", tabOverview: "Overview", tabRelations: "Dependencies", tabTechnical: "Technical data", tabAttributes: "Attributes",
     sumCause: "Cause", sumIntegration: "Integration", sumDevice: "Device", sumArea: "Area", sumRisk: "Risk when removed", riskNone: "no use found", riskHits: "{n} uses, certain: {c}",
     since: "Observed since", dependencies: "Relations", objects: "Objects",
-    findings: "Findings", active: "Active", orphaned: "Orphaned",
+    findings: "Findings", active: "Active", stopped: "Stopped", app: "App", orphaned: "Orphaned",
     unavailable: "Unavailable", disabled: "Disabled", unknown: "Unknown",
     empty: "Empty", problem: "Problem", details: "Details", close: "Close",
     noResults: "No matching objects found.",
@@ -362,7 +362,7 @@ const TEXT = {
 const ICONS = {
   entity: "mdi:shape-outline", device: "mdi:devices", config_entry: "mdi:puzzle-outline",
   area: "mdi:floor-plan", automation: "mdi:robot-outline", floor: "mdi:layers-outline",
-  label: "mdi:label-outline", script: "mdi:script-text-outline", scene: "mdi:palette-outline", dashboard: "mdi:view-dashboard-outline",
+  label: "mdi:label-outline", script: "mdi:script-text-outline", scene: "mdi:palette-outline", dashboard: "mdi:view-dashboard-outline", app: "mdi:package-variant-closed",
 };
 
 const REMOVAL_KINDS = ["remove_entity", "remove_device", "forget_device"];
@@ -490,7 +490,7 @@ const FONT_CSS = `@font-face{font-family:"IBM Plex Sans";font-weight:400 700;fon
 
 const STATUS_TONE = {
   active: "ok", orphaned: "warn", unavailable: "red", problem: "red", broken_reference: "red",
-  disabled: "mute", empty: "mute", unknown: "violet", ignored: "mute", possible_duplicate: "violet", unused: "mute", stale: "warn",
+  disabled: "mute", stopped: "mute", empty: "mute", unknown: "violet", ignored: "mute", possible_duplicate: "violet", unused: "mute", stale: "warn",
 };
 
 // Finding classes that call for action when they are new.
@@ -1919,7 +1919,7 @@ class OverviewMixin {
       <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
       ${this.sinceVisitLine()}${this.todoCard()}<div class="grid2"><div class="stack">${this.inventoryStatusCard()}${this.topFindingsCard(findings)}</div>
       <div class="stack">${this.systemCard()}${this.databaseCard()}${this.trendCard()}${this.cleanupCard()}
-      <div class="panel"><div class="panelhead"><h2>${this.t("byType")}</h2></div><div class="types">${["entity", "device", "config_entry", "automation", "script", "scene", "dashboard", "area", "floor", "label"].filter(t => types[t]).map(type => `<button class="type" data-type-jump="${type}">${this.tile(type)}<span>${this.t(type)}</span><b>${this.formatNumber(types[type])}</b></button>`).join("")}</div></div></div></div>`;
+      <div class="panel"><div class="panelhead"><h2>${this.t("byType")}</h2></div><div class="types">${["entity", "device", "config_entry", "app", "automation", "script", "scene", "dashboard", "area", "floor", "label"].filter(t => types[t]).map(type => `<button class="type" data-type-jump="${type}">${this.tile(type)}<span>${this.t(type)}</span><b>${this.formatNumber(types[type])}</b></button>`).join("")}</div></div></div></div>`;
   }
 
   // Three groups instead of seven raw statuses: what is fine, what to look at, what is broken.
@@ -3403,7 +3403,7 @@ class InventoryMixin {
     const statusTile = (status, tone) => { const n = count(x => x.status === status); return n && { label: this.statusLabel(status), value: this.formatNumber(n), tone, inv: `|${status}`, active: this.statusFilter === status && !this.typeFilter }; };
     const tiles = this.sumTiles([
       { label: this.t("all"), value: this.formatNumber(all.length), tone: "mute", inv: "|", active: !this.typeFilter && !this.statusFilter },
-      typeTile("entity"), typeTile("device"), typeTile("automation"), typeTile("config_entry"),
+      typeTile("entity"), typeTile("device"), typeTile("automation"), typeTile("config_entry"), typeTile("app"),
       statusTile("unavailable", "red"), statusTile("orphaned", "warn"),
     ]);
     const hid = key => this.colHidden("inventory", key);
@@ -4227,6 +4227,8 @@ class DiagnosisMixin {
 
   // Tabs offered for one object; "attributes" only when it has some, so an empty tab never shows.
   detailTabs(item, key) {
+    // An app has no relations or actions of its own; its rights and its load come from the two system reports.
+    if (item.object_type === "app") return [["overview", "tabOverview"], ["access", "accAppTab", null, this.appAccessTone(item)], ["storage", "accAppLoad"], ["technical", "tabTechnical"]];
     const tabs = [["overview", "tabOverview"], ["relations", "tabRelations", this.edgesTo(key).length + this.edgesFrom(key).length], ["technical", "tabTechnical"]];
     if (this.hasActionsTab(item, key)) tabs.splice(1, 0, ["actions", "tabActions", this.fixItems(item, key).items.length]);
     if (item.attributes && Object.keys(item.attributes).length) tabs.push(["attributes", "tabAttributes"]);
@@ -4246,6 +4248,8 @@ class DiagnosisMixin {
     if (item.object_type === "config_entry") this.ensureReliability();
     // The reports of Access & data flow and Credentials are read when their tab is opened, not with the page.
     if (item.object_type === "config_entry" && this.detailTab === "access") { this.sysEnsure("dataflow"); this.sysEnsure("secrets"); }
+    if (item.object_type === "app" && this.detailTab === "access") this.sysEnsure("dataflow");
+    if (item.object_type === "app" && this.detailTab === "storage") this.sysEnsure("storage");
     if (item.object_type === "entity") this.ensureStability();
     if (item.object_type === "device") this.ensureLifecycle(item.object_id);
     if (NOTE_TYPES.includes(item.object_type)) this.ensureJournal();
@@ -4272,7 +4276,9 @@ class DiagnosisMixin {
     if (tab === "history") return this.historyTab(item);
     if (tab === "runs") return this.runsDetailCard(this.runsRow(item));
     if (tab === "reliability") return this.reliabilityDetailCard(this.reliabilityRow(item));
-    if (tab === "access") return this.accessDetailCard(item);
+    if (tab === "access") return item.object_type === "app" ? this.appAccessCard(item) : this.accessDetailCard(item);
+    if (tab === "storage") return this.appLoadCard(item);
+    if (tab === "overview" && item.object_type === "app") return this.appOverview(item);
     if (tab === "attributes") {
       return `<section class="panel"><div class="panelhead"><h2>${this.t("state")}</h2></div><div class="pad"><div class="code">${this.esc(JSON.stringify(item.attributes, null, 2))}</div></div></section>`;
     }
@@ -10107,6 +10113,7 @@ Object.assign(TEXT.de, {
   accDetNoAccess: "Kein Zugriff auf System, Funk, Hardware, Kamera oder Standort erkannt.", accDetNoFlow: "Kein Datenfluss nach außen erkannt.", accDetNoCredentials: "Keine gespeicherten Zugangsdaten erkannt.",
   accDetSet: "hinterlegt", accDetEmpty: "leer", accDetNever: "Werte zeigt Housekeeper nie", accDetAllFlow: "Alle Zugriffe & Datenfluss", accDetAllSecrets: "Alle Zugangsdaten",
   accAlertHigh: "Hoher Systemzugriff: {list}", accAlertMore: "Details im Reiter",
+  accAppTab: "Rechte", accAppLoad: "Last & Speicher", accAppConfig: "Konfiguration", accAppTotal: "Gesamt", appVersion: "Version", appRepository: "Quelle", appStage: "Entwicklungsstand", appUpdate: "Update auf {version}", appHint: "Installierte App (Add-on), wie der Supervisor sie meldet. Housekeeper liest nur und ändert nichts an Apps.",
   accClearFilter: "Filter aufheben", accSumApps: "Apps mit hohem Risiko", accSumAppsSub: "von {n} Apps", accAppsTitle: "Apps", accAppsHint: "Rechte der installierten Apps, wie der Supervisor sie beschreibt", accColApp: "App", accColRights: "Rechte",
   accAppsNoSupervisor: "Apps gibt es nur mit Home Assistant OS oder Supervised.", accNoneApps: "Keine Apps installiert.", accAppNoRights: "keine besonderen Rechte", accAppUnchecked: "Der Supervisor hat zu dieser App nicht geantwortet.", accAppUncheckedShort: "nicht prüfbar",
   accApp_full_access: "Voller Hardwarezugriff", accApp_privileged: "Privilegiert", accApp_host_pid: "Host-Prozesse (PID)", accApp_docker_api: "Docker-API (wie Root)", accApp_host_ipc: "Host-IPC", accApp_host_dbus: "Host-D-Bus", accApp_host_network: "Host-Netzwerk", accApp_supervisor_api: "Supervisor-API", accApp_ha_api: "Home-Assistant-API", accApp_auth_api: "Login-Prüfung (Auth-API)", accApp_gpio: "GPIO", accApp_usb: "USB", accApp_devices: "Geräte", accApp_apparmor_off: "AppArmor aus",
@@ -10159,6 +10166,7 @@ Object.assign(TEXT.en, {
   accDetNoAccess: "No access to the system, radios, hardware, cameras or the location detected.", accDetNoFlow: "No data flow to the outside detected.", accDetNoCredentials: "No stored credentials detected.",
   accDetSet: "set", accDetEmpty: "empty", accDetNever: "Housekeeper never shows values", accDetAllFlow: "All access & data flow", accDetAllSecrets: "All credentials",
   accAlertHigh: "High system access: {list}", accAlertMore: "Details in the tab",
+  accAppTab: "Rights", accAppLoad: "Load & storage", accAppConfig: "Configuration", accAppTotal: "Total", appVersion: "Version", appRepository: "Source", appStage: "Stage", appUpdate: "Update to {version}", appHint: "Installed app (add-on) as the Supervisor reports it. Housekeeper only reads and changes nothing about apps.",
   accClearFilter: "Remove the filter", accSumApps: "Apps with high risk", accSumAppsSub: "of {n} apps", accAppsTitle: "Apps", accAppsHint: "Rights of the installed apps as the Supervisor describes them", accColApp: "App", accColRights: "Rights",
   accAppsNoSupervisor: "Apps exist only with Home Assistant OS or Supervised.", accNoneApps: "No apps installed.", accAppNoRights: "no special rights", accAppUnchecked: "The Supervisor did not answer for this app.", accAppUncheckedShort: "cannot be checked",
   accApp_full_access: "Full hardware access", accApp_privileged: "Privileged", accApp_host_pid: "Host processes (PID)", accApp_docker_api: "Docker API (like root)", accApp_host_ipc: "Host IPC", accApp_host_dbus: "Host D-Bus", accApp_host_network: "Host network", accApp_supervisor_api: "Supervisor API", accApp_ha_api: "Home Assistant API", accApp_auth_api: "Login check (Auth API)", accApp_gpio: "GPIO", accApp_usb: "USB", accApp_devices: "Devices", accApp_apparmor_off: "AppArmor off",
@@ -10542,6 +10550,7 @@ class SystemMixin {
       filters: [{ name: "state", all: this.t("sysColState"), options: [["on", this.t("sysAppRunning")], ["off", this.t("sysAppStopped")]] }],
       filterFns: { state: (a, v) => running(a) === (v === "on") },
       text: a => `${a.name} ${a.slug}`, tie: a => a.slug, empty: "sysNoApps",
+      rowAttrs: a => (this.findObject(`app:${a.slug}`) ? this.appRowAttrs(a) : 'class="static"'),
       columns: [
         { key: "name", label: "sysColApp", cell: a => this.nameCell(a.name, a.slug) },
         { key: "state", label: "sysColState", sortable: false, cell: a => `<span class="pill ${running(a) ? "ok" : "mute"}">${this.t(running(a) ? "sysAppRunning" : "sysAppStopped")}</span>` },
@@ -10673,6 +10682,12 @@ class SystemMixin {
     }, "accIntro");
   }
 
+  // A row of an app opens its detail page when the scan knows it, else the app in Home Assistant.
+  appRowAttrs(a) {
+    const key = `app:${a.slug}`;
+    return this.findObject(key) ? `data-object="${this.esc(key)}" tabindex="0" role="button" aria-label="${this.esc(a.name)}"` : `data-ha-path="${this.esc(`/hassio/addon/${encodeURIComponent(a.slug)}/info`)}" tabindex="0" role="link" aria-label="${this.esc(a.name)}"`;
+  }
+
   // The rights of the installed apps (add-ons), as the Supervisor describes them. A row opens the app in Home Assistant.
   accAppRight(a) { return `${this.t(`accApp_${a.kind}`)}${a.detail ? ` (${a.detail})` : ""}`; }
 
@@ -10686,7 +10701,7 @@ class SystemMixin {
       sorts: [{ ...riskSort, get: a => order[a.risk] ?? 3 }, { key: "name", label: "accColApp", dir: "asc", get: a => a.name }],
       filters: [{ name: "risk", all: this.t("accAllRisks"), options: risks }], filterFns: { risk: (a, v) => a.risk === v },
       text: a => `${a.name} ${a.slug} ${a.access.map(x => this.accAppRight(x)).join(" ")}`, tie: a => a.slug, empty: "accNoneApps",
-      rowAttrs: a => `data-ha-path="${this.esc(`/hassio/addon/${encodeURIComponent(a.slug)}/info`)}" tabindex="0" role="link" aria-label="${this.esc(a.name)}"`,
+      rowAttrs: a => this.appRowAttrs(a),
       columns: [
         { key: "name", label: "accColApp", cell: a => this.nameCell(a.name, a.slug) },
         { key: "state", label: "sysColState", sortable: false, cell: a => `<span class="pill ${running(a) ? "ok" : "mute"}">${this.t(running(a) ? "sysAppRunning" : "sysAppStopped")}</span>` },
@@ -10695,6 +10710,57 @@ class SystemMixin {
       ],
       exportName: "app-rights", header: [this.t("accColApp"), "Slug", this.t("sysColState"), this.t("accColRights"), this.t("accColRisk")], rows: a => [a.name, a.slug, a.state || "", a.access.map(x => this.accAppRight(x)).join("; "), a.risk ? this.t(`accRisk_${a.risk}`) : ""],
     });
+  }
+
+  // ---------------------------------------------------------------- Detail page of an app
+
+  appRights(item) { return (this.sysState("dataflow").data?.apps || []).find(a => a.slug === item.object_id) || null; }
+
+  appUsage(item) { return (this.sysState("storage").data?.apps || []).find(a => a.slug === item.object_id) || null; }
+
+  // The dot at the rights tab: red for a high risk, once the report is read.
+  appAccessTone(item) { return this.appRights(item)?.risk === "high" ? "red" : ""; }
+
+  appOverview(item) {
+    const fact = (k, v) => `<div class="fact"><span>${this.t(k)}</span><b>${v}</b></div>`;
+    const update = item.update_available ? `<span class="pill warn">${this.esc(this.t("appUpdate", { version: item.version_latest || "?" }))}</span>` : "";
+    const rows = [
+      item.status_since ? fact("since", `${this.esc(this.formatDate(item.status_since))}<small>${this.esc(this.relTime(item.status_since))}</small>`) : "",
+      item.version ? fact("appVersion", `${this.esc(item.version)} ${update}`) : "",
+      item.repository ? fact("appRepository", this.esc(item.repository)) : "",
+      item.stage && item.stage !== "stable" ? fact("appStage", this.esc(item.stage)) : "",
+    ].join("");
+    const text = item.description ? `<div class="pad"><p class="factnote">${this.esc(item.description)}</p></div>` : "";
+    return `<div class="stack"><section class="panel"><div class="panelhead"><div><h2>${this.t("app")}</h2><p>${this.t("appHint")}</p></div></div><div class="facts">${rows}</div>${text}</section></div>`;
+  }
+
+  appAccessCard(item) {
+    const df = this.sysState("dataflow");
+    if (df.error) return `<div class="panel"><div class="error">${this.esc(df.error)}</div></div>`;
+    if (!df.data) return `<div class="panel">${this.skeleton("accLoading")}</div>`;
+    const app = this.appRights(item);
+    if (!df.data.apps_available || !app) return `<div class="panel"><div class="emptymsg">${this.t("accAppsNoSupervisor")}</div></div>`;
+    const tone = { high: "red", medium: "warn", low: "mute" };
+    const rights = app.access.length
+      ? app.access.map(x => `<div class="row static"><span class="row-text"><strong>${this.esc(this.accAppRight(x))}</strong></span><span class="pill ${tone[x.level] || "mute"}">${this.t(`accRisk_${x.level}`)}</span></div>`).join("")
+      : `<div class="emptymsg">${this.t(app.checked ? "accAppNoRights" : "accAppUnchecked")}</div>`;
+    const head = `<div class="panelhead"><div><h2>${this.t("accColRights")}</h2><p>${this.t("accAppsHint")}</p></div>${app.risk ? this.accRiskPill(app.risk) : ""}</div>`;
+    return `<div class="stack"><section class="panel">${head}${rights}</section><section class="panel"><div class="pad"><small><button class="link" data-jump="dataflow">${this.t("accDetAllFlow")}</button></small></div></section></div>`;
+  }
+
+  appLoadCard(item) {
+    const st = this.sysState("storage");
+    if (st.error) return `<div class="panel"><div class="error">${this.esc(st.error)}</div></div>`;
+    if (!st.data) return `<div class="panel">${this.skeleton("sysLoading")}</div>`;
+    const app = this.appUsage(item);
+    if (!st.data.supervisor || !app) return `<div class="panel"><div class="emptymsg">${this.t("accAppsNoSupervisor")}</div></div>`;
+    const fact = (k, v) => `<div class="fact"><span>${this.t(k)}</span><b>${this.esc(v)}</b></div>`;
+    const dash = v => (v === null || v === undefined ? "–" : v);
+    const cpu = app.cpu_percent === null || app.cpu_percent === undefined ? "–" : `${this.formatNumber(Math.round(app.cpu_percent * 10) / 10)} %`;
+    const ram = app.memory_usage === null || app.memory_usage === undefined ? "–" : `${this.formatBytes(app.memory_usage)}${app.memory_limit ? ` / ${this.formatBytes(app.memory_limit)}` : ""}`;
+    const size = b => (b === null || b === undefined ? "–" : this.formatBytes(b));
+    const rows = fact("sysColCpu", cpu) + fact("sysColRam", ram) + fact("sysColData", size(app.data_bytes)) + fact("accAppConfig", size(app.config_bytes)) + (app.size_bytes !== null && app.size_bytes !== undefined ? fact("accAppTotal", size(app.size_bytes)) : "");
+    return `<div class="stack"><section class="panel"><div class="panelhead"><div><h2>${this.t("accAppLoad")}</h2><p>${this.t("sysTabAppsHint")}</p></div></div><div class="facts">${rows}</div></section><section class="panel"><div class="pad"><small><button class="link" data-jump="storage">${this.t("storage")}</button></small></div></section></div>`;
   }
 
   // ---------------------------------------------------------------- Detail page of an integration
@@ -11462,6 +11528,7 @@ class HAHousekeeperPanel extends HTMLElement {
         ? `/config/scene/edit/${encodeURIComponent(item.scene_id)}`
         : `/config/entities?search=${encodeURIComponent(item.object_id)}`;
       case "dashboard": return `/${encodeURIComponent(item.url_path || "lovelace")}`;
+      case "app": return `/hassio/addon/${encodeURIComponent(item.slug || item.object_id)}/info`;
       case "config_entry": return `/config/integrations/integration/${encodeURIComponent(item.domain)}`;
       case "floor": return "/config/areas/dashboard";
       case "label": return "/config/labels";

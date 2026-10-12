@@ -39,7 +39,7 @@ class InventoryMixin {
     const statusTile = (status, tone) => { const n = count(x => x.status === status); return n && { label: this.statusLabel(status), value: this.formatNumber(n), tone, inv: `|${status}`, active: this.statusFilter === status && !this.typeFilter }; };
     const tiles = this.sumTiles([
       { label: this.t("all"), value: this.formatNumber(all.length), tone: "mute", inv: "|", active: !this.typeFilter && !this.statusFilter },
-      typeTile("entity"), typeTile("device"), typeTile("automation"), typeTile("config_entry"),
+      typeTile("entity"), typeTile("device"), typeTile("automation"), typeTile("config_entry"), typeTile("app"),
       statusTile("unavailable", "red"), statusTile("orphaned", "warn"),
     ]);
     const hid = key => this.colHidden("inventory", key);

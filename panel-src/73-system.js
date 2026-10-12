@@ -176,6 +176,7 @@ class SystemMixin {
       filters: [{ name: "state", all: this.t("sysColState"), options: [["on", this.t("sysAppRunning")], ["off", this.t("sysAppStopped")]] }],
       filterFns: { state: (a, v) => running(a) === (v === "on") },
       text: a => `${a.name} ${a.slug}`, tie: a => a.slug, empty: "sysNoApps",
+      rowAttrs: a => (this.findObject(`app:${a.slug}`) ? this.appRowAttrs(a) : 'class="static"'),
       columns: [
         { key: "name", label: "sysColApp", cell: a => this.nameCell(a.name, a.slug) },
         { key: "state", label: "sysColState", sortable: false, cell: a => `<span class="pill ${running(a) ? "ok" : "mute"}">${this.t(running(a) ? "sysAppRunning" : "sysAppStopped")}</span>` },
@@ -307,6 +308,12 @@ class SystemMixin {
     }, "accIntro");
   }
 
+  // A row of an app opens its detail page when the scan knows it, else the app in Home Assistant.
+  appRowAttrs(a) {
+    const key = `app:${a.slug}`;
+    return this.findObject(key) ? `data-object="${this.esc(key)}" tabindex="0" role="button" aria-label="${this.esc(a.name)}"` : `data-ha-path="${this.esc(`/hassio/addon/${encodeURIComponent(a.slug)}/info`)}" tabindex="0" role="link" aria-label="${this.esc(a.name)}"`;
+  }
+
   // The rights of the installed apps (add-ons), as the Supervisor describes them. A row opens the app in Home Assistant.
   accAppRight(a) { return `${this.t(`accApp_${a.kind}`)}${a.detail ? ` (${a.detail})` : ""}`; }
 
@@ -320,7 +327,7 @@ class SystemMixin {
       sorts: [{ ...riskSort, get: a => order[a.risk] ?? 3 }, { key: "name", label: "accColApp", dir: "asc", get: a => a.name }],
       filters: [{ name: "risk", all: this.t("accAllRisks"), options: risks }], filterFns: { risk: (a, v) => a.risk === v },
       text: a => `${a.name} ${a.slug} ${a.access.map(x => this.accAppRight(x)).join(" ")}`, tie: a => a.slug, empty: "accNoneApps",
-      rowAttrs: a => `data-ha-path="${this.esc(`/hassio/addon/${encodeURIComponent(a.slug)}/info`)}" tabindex="0" role="link" aria-label="${this.esc(a.name)}"`,
+      rowAttrs: a => this.appRowAttrs(a),
       columns: [
         { key: "name", label: "accColApp", cell: a => this.nameCell(a.name, a.slug) },
         { key: "state", label: "sysColState", sortable: false, cell: a => `<span class="pill ${running(a) ? "ok" : "mute"}">${this.t(running(a) ? "sysAppRunning" : "sysAppStopped")}</span>` },
@@ -329,6 +336,57 @@ class SystemMixin {
       ],
       exportName: "app-rights", header: [this.t("accColApp"), "Slug", this.t("sysColState"), this.t("accColRights"), this.t("accColRisk")], rows: a => [a.name, a.slug, a.state || "", a.access.map(x => this.accAppRight(x)).join("; "), a.risk ? this.t(`accRisk_${a.risk}`) : ""],
     });
+  }
+
+  // ---------------------------------------------------------------- Detail page of an app
+
+  appRights(item) { return (this.sysState("dataflow").data?.apps || []).find(a => a.slug === item.object_id) || null; }
+
+  appUsage(item) { return (this.sysState("storage").data?.apps || []).find(a => a.slug === item.object_id) || null; }
+
+  // The dot at the rights tab: red for a high risk, once the report is read.
+  appAccessTone(item) { return this.appRights(item)?.risk === "high" ? "red" : ""; }
+
+  appOverview(item) {
+    const fact = (k, v) => `<div class="fact"><span>${this.t(k)}</span><b>${v}</b></div>`;
+    const update = item.update_available ? `<span class="pill warn">${this.esc(this.t("appUpdate", { version: item.version_latest || "?" }))}</span>` : "";
+    const rows = [
+      item.status_since ? fact("since", `${this.esc(this.formatDate(item.status_since))}<small>${this.esc(this.relTime(item.status_since))}</small>`) : "",
+      item.version ? fact("appVersion", `${this.esc(item.version)} ${update}`) : "",
+      item.repository ? fact("appRepository", this.esc(item.repository)) : "",
+      item.stage && item.stage !== "stable" ? fact("appStage", this.esc(item.stage)) : "",
+    ].join("");
+    const text = item.description ? `<div class="pad"><p class="factnote">${this.esc(item.description)}</p></div>` : "";
+    return `<div class="stack"><section class="panel"><div class="panelhead"><div><h2>${this.t("app")}</h2><p>${this.t("appHint")}</p></div></div><div class="facts">${rows}</div>${text}</section></div>`;
+  }
+
+  appAccessCard(item) {
+    const df = this.sysState("dataflow");
+    if (df.error) return `<div class="panel"><div class="error">${this.esc(df.error)}</div></div>`;
+    if (!df.data) return `<div class="panel">${this.skeleton("accLoading")}</div>`;
+    const app = this.appRights(item);
+    if (!df.data.apps_available || !app) return `<div class="panel"><div class="emptymsg">${this.t("accAppsNoSupervisor")}</div></div>`;
+    const tone = { high: "red", medium: "warn", low: "mute" };
+    const rights = app.access.length
+      ? app.access.map(x => `<div class="row static"><span class="row-text"><strong>${this.esc(this.accAppRight(x))}</strong></span><span class="pill ${tone[x.level] || "mute"}">${this.t(`accRisk_${x.level}`)}</span></div>`).join("")
+      : `<div class="emptymsg">${this.t(app.checked ? "accAppNoRights" : "accAppUnchecked")}</div>`;
+    const head = `<div class="panelhead"><div><h2>${this.t("accColRights")}</h2><p>${this.t("accAppsHint")}</p></div>${app.risk ? this.accRiskPill(app.risk) : ""}</div>`;
+    return `<div class="stack"><section class="panel">${head}${rights}</section><section class="panel"><div class="pad"><small><button class="link" data-jump="dataflow">${this.t("accDetAllFlow")}</button></small></div></section></div>`;
+  }
+
+  appLoadCard(item) {
+    const st = this.sysState("storage");
+    if (st.error) return `<div class="panel"><div class="error">${this.esc(st.error)}</div></div>`;
+    if (!st.data) return `<div class="panel">${this.skeleton("sysLoading")}</div>`;
+    const app = this.appUsage(item);
+    if (!st.data.supervisor || !app) return `<div class="panel"><div class="emptymsg">${this.t("accAppsNoSupervisor")}</div></div>`;
+    const fact = (k, v) => `<div class="fact"><span>${this.t(k)}</span><b>${this.esc(v)}</b></div>`;
+    const dash = v => (v === null || v === undefined ? "–" : v);
+    const cpu = app.cpu_percent === null || app.cpu_percent === undefined ? "–" : `${this.formatNumber(Math.round(app.cpu_percent * 10) / 10)} %`;
+    const ram = app.memory_usage === null || app.memory_usage === undefined ? "–" : `${this.formatBytes(app.memory_usage)}${app.memory_limit ? ` / ${this.formatBytes(app.memory_limit)}` : ""}`;
+    const size = b => (b === null || b === undefined ? "–" : this.formatBytes(b));
+    const rows = fact("sysColCpu", cpu) + fact("sysColRam", ram) + fact("sysColData", size(app.data_bytes)) + fact("accAppConfig", size(app.config_bytes)) + (app.size_bytes !== null && app.size_bytes !== undefined ? fact("accAppTotal", size(app.size_bytes)) : "");
+    return `<div class="stack"><section class="panel"><div class="panelhead"><div><h2>${this.t("accAppLoad")}</h2><p>${this.t("sysTabAppsHint")}</p></div></div><div class="facts">${rows}</div></section><section class="panel"><div class="pad"><small><button class="link" data-jump="storage">${this.t("storage")}</button></small></div></section></div>`;
   }
 
   // ---------------------------------------------------------------- Detail page of an integration

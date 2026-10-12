@@ -145,3 +145,27 @@ async def test_system_usage_without_a_supervisor(hass: HomeAssistant, tmp_path) 
     assert result["disk"]["source"] == "filesystem" and result["disk"]["total"] > 0
     assert {"id": "themes", "path": "themes", "bytes": 9} in result["breakdown"]
     assert all("path" not in card for card in result["cards"]), "no absolute paths leave the server"
+
+
+async def test_apps_become_objects_and_a_stopped_app_is_no_problem(hass: HomeAssistant) -> None:
+    from custom_components.ha_housekeeper import inventory
+
+    listing = {
+        "addons": [
+            {"slug": "core_ssh", "name": "SSH", "version": "1.0", "state": "started"},
+            {"slug": "x", "name": "X", "state": "stopped", "update_available": True},
+            {"name": "no slug"},
+        ]
+    }
+    with (
+        patch.object(inventory, "supervisor_token", return_value="t"),
+        patch.object(inventory, "supervisor_get", return_value=listing),
+    ):
+        apps = await inventory._app_inventory(hass)
+    assert [(a["object_type"], a["object_id"], a["status"]) for a in apps] == [
+        ("app", "core_ssh", "active"),
+        ("app", "x", "stopped"),
+    ]
+    assert apps[1]["update_available"] is True
+    with patch.object(inventory, "supervisor_token", return_value=None):
+        assert await inventory._app_inventory(hass) == []

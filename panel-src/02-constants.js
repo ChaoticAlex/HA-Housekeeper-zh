@@ -1,7 +1,7 @@
 const ICONS = {
   entity: "mdi:shape-outline", device: "mdi:devices", config_entry: "mdi:puzzle-outline",
   area: "mdi:floor-plan", automation: "mdi:robot-outline", floor: "mdi:layers-outline",
-  label: "mdi:label-outline", script: "mdi:script-text-outline", scene: "mdi:palette-outline", dashboard: "mdi:view-dashboard-outline",
+  label: "mdi:label-outline", script: "mdi:script-text-outline", scene: "mdi:palette-outline", dashboard: "mdi:view-dashboard-outline", app: "mdi:package-variant-closed",
 };
 
 const REMOVAL_KINDS = ["remove_entity", "remove_device", "forget_device"];
@@ -129,7 +129,7 @@ const FONT_CSS = `@font-face{font-family:"IBM Plex Sans";font-weight:400 700;fon
 
 const STATUS_TONE = {
   active: "ok", orphaned: "warn", unavailable: "red", problem: "red", broken_reference: "red",
-  disabled: "mute", empty: "mute", unknown: "violet", ignored: "mute", possible_duplicate: "violet", unused: "mute", stale: "warn",
+  disabled: "mute", stopped: "mute", empty: "mute", unknown: "violet", ignored: "mute", possible_duplicate: "violet", unused: "mute", stale: "warn",
 };
 
 // Finding classes that call for action when they are new.

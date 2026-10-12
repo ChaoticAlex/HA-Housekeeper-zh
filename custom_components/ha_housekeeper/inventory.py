@@ -89,6 +89,7 @@ from .runs import RunStore
 from .signals import SignalStore, situations
 from .signals import fire as signal_fire
 from .stale import StaleStore
+from .system_usage import supervisor_get, supervisor_token
 from .window import WindowStore
 
 _LOGGER = logging.getLogger(__name__)
@@ -369,6 +370,40 @@ def _config_entry_item(
         "modified_at": _iso(getattr(entry, "modified_at", None)),
         "status": status,
     }
+
+
+APP_TIMEOUT = 8  # seconds; the scan does not wait longer for the Supervisor's list of apps
+
+
+def _app_item(app: dict[str, Any]) -> dict[str, Any]:
+    """One installed app (add-on) from the Supervisor's list; a stopped app is not a problem."""
+    slug = str(app["slug"])
+    return {
+        "object_type": "app",
+        "object_id": slug,
+        "name": str(app.get("name") or slug),
+        "slug": slug,
+        "version": app.get("version"),
+        "version_latest": app.get("version_latest"),
+        "update_available": bool(app.get("update_available")),
+        "state": app.get("state"),
+        "repository": app.get("repository"),
+        "stage": app.get("stage"),
+        "description": app.get("description"),
+        "status": "active" if app.get("state") == "started" else "stopped",
+    }
+
+
+async def _app_inventory(hass: HomeAssistant) -> list[dict[str, Any]]:
+    """Installed apps; empty without a Supervisor or when it does not answer."""
+    if not supervisor_token():
+        return []
+    listing = await supervisor_get(hass, "/addons", timeout=APP_TIMEOUT)
+    return [
+        _app_item(app)
+        for app in (listing or {}).get("addons") or []
+        if isinstance(app, dict) and app.get("slug")
+    ]
 
 
 def _fallback_automation_item(state: Any) -> dict[str, Any]:
@@ -803,6 +838,8 @@ class InventoryScanner:
             for entry in config_entries
         ]
 
+        apps = await _app_inventory(self.hass)
+
         lap("devices")
         self.status.update(phase="automations", progress=60)
         await asyncio.sleep(0)
@@ -827,9 +864,11 @@ class InventoryScanner:
         )
 
         # One update for everything: anything missing from it would be forgotten.
-        tracked = [("entity", item) for item in entities] + [
-            ("automation", item) for item in automations
-        ]
+        tracked = (
+            [("entity", item) for item in entities]
+            + [("automation", item) for item in automations]
+            + [("app", item) for item in apps]
+        )
         if not preliminary:
             await self.observations.async_update(
                 {f"{kind}:{item['object_id']}": item["status"] for kind, item in tracked},
@@ -863,7 +902,15 @@ class InventoryScanner:
             + group_edges
         )
         objects = (
-            entities + devices + integrations + areas + floors + labels + automations + dashboards
+            entities
+            + devices
+            + integrations
+            + apps
+            + areas
+            + floors
+            + labels
+            + automations
+            + dashboards
         )
         findings = (
             _entity_findings(entities, observed_at, self.min_unavailable_days)
