@@ -72,11 +72,13 @@ class RunsMixin {
     return `<div class="row"><span class="tile ${tone}"><ha-icon icon="${c.kind === "loop" ? "mdi:sync-alert" : "mdi:swap-horizontal"}"></ha-icon></span><span class="row-text"><small class="fline"><span class="pill ${tone}">${this.t(`cfStage_${c.stage}`)}</span><span class="fnum">${text}</span></small><small>${seen}</small><small>${links}</small><small class="fnote">${this.t(`cfHint_${c.kind}`)}</small></span></div>`;
   }
 
+  // Only a heading with its number while closed; nothing to open when the check found nothing.
   conflictsPanel(r) {
     const c = r.conflicts;
     if (!c) return "";
-    const rows = c.items.length ? c.items.map(item => this.conflictRow(item)).join("") : `<div class="emptymsg">${this.t("cfNone")}</div>`;
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("cfTitle")}</h2><p>${this.t("cfHint")}</p></div></div>${rows}</div>`;
+    if (!c.items.length) return `<p class="factnote">${this.t("cfNone")}</p>`;
+    const rows = c.items.map(item => this.conflictRow(item)).join("");
+    return `<div class="panel">${this.fold("runs_conflicts", { tone: "warn", title: this.t("cfTitle"), sub: this.t("cfHint"), pill: this.formatNumber(c.items.length) }, rows, false)}</div>`;
   }
 
   runsSorts() {
@@ -112,7 +114,7 @@ class RunsMixin {
     this.lvState("runs", "runs", "desc");
     const pg = this.paginate("runsall", rows);
     const columns = [
-      { key: "name", label: "runsColName", dir: "asc", cell: row => this.nameCell(row.name, row.entity_id) },
+      { key: "name", label: "runsColName", dir: "asc", cell: row => this.nameCell(row.name, row.entity_id) + this.runsFindingLines(row) },
       { key: "runs", label: "runsColRuns", dir: "desc", cell: row => `${this.formatNumber(row.runs)}${row.lower_bound ? "+" : ""}` },
       { key: "errors", label: "runsColErrors", dir: "desc", cell: row => this.formatNumber(row.errors) },
       { key: "conditions", label: "runsColConditions", dir: "desc", cell: row => this.formatNumber(row.conditions) },
@@ -163,14 +165,11 @@ class RunsMixin {
     this.lvState("runs", "runs", "desc");
     const lower = r.items.filter(row => row.lower_bound).length;
     const coverage = this.coverageNote(this.t(lower ? "runsCoverageLower" : "runsCoverageFull", { n: this.formatNumber(lower), days: r.window_days }) + ` ${this.excludedText(r.excluded)}`.trimEnd());
-    const flagged = r.items.filter(row => row.findings.length && this.runsMatch(row));
     const everyCounted = r.items.filter(row => row.runs);
     const counted = this.refine("runs", everyCounted.filter(row => this.runsMatch(row)), { text: row => [row.name, row.entity_id].join(" "), sorts: this.runsSorts(), tie: row => row.entity_id });
     const bar = everyCounted.length > 5 || this.lv.runs.q ? this.runsBar(counted) : "";
-    const flaggedPage = this.paginate("runsflag", flagged);
-    const attention = flagged.length ? flaggedPage.rows.map(row => this.runsAttentionRow(row)).join("") + flaggedPage.footer : (this.lv.runs.q || this.lv.runs.f.type || this.lv.runs.f.outcome) && counted.length ? "" : `<div class="emptymsg">${this.t(this.lv.runs.q || this.lv.runs.f.type || this.lv.runs.f.outcome ? "noMatches" : everyCounted.length ? "runsNone" : "runsNoData")}</div>`;
     const more = r.total > r.items.length ? `<p class="factnote">${this.t("runsMore", { shown: r.items.length, total: r.total })}</p>` : "";
-    const all = everyCounted.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("runsAll")}</h2></div></div>${counted.length ? this.runsTable(counted) : `<div class="emptymsg">${this.t("noMatches")}</div>`}${more}${this.howCounted("runsFootnote")}</div>` : "";
+    const all = everyCounted.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("runsAll")}</h2></div></div>${bar}${counted.length ? this.runsTable(counted) : `<div class="emptymsg">${this.t("noMatches")}</div>`}${more}${this.howCounted("runsFootnote")}</div>` : "";
     const runTotal = r.items.reduce((n, row) => n + row.runs, 0), errorTotal = r.items.reduce((n, row) => n + row.errors, 0);
     const neverOk = r.items.filter(row => row.findings.some(f => f.kind === "never_ok")).length;
     const allFlagged = r.items.filter(row => row.findings.length).length;
@@ -180,6 +179,6 @@ class RunsMixin {
       { label: this.t("runsSumFlagged"), value: this.formatNumber(allFlagged), tone: allFlagged ? "warn" : "ok", lf: ["runs", "outcome", "flagged"] },
       { label: this.t("runsSumNeverOk"), value: this.formatNumber(neverOk), tone: neverOk ? "red" : "ok", lf: ["runs", "outcome", "never"] },
     ]);
-    return `<div class="stack">${head}${tiles}<div class="panel">${coverage}${bar}${attention}</div>${this.conflictsPanel(r)}${all}</div>`;
+    return `<div class="stack">${head}${tiles}<div class="panel">${coverage}${!everyCounted.length ? `<div class="emptymsg">${this.t("runsNoData")}</div>` : allFlagged ? "" : `<p class="factnote">${this.t("runsNone")}</p>`}</div>${all}${this.conflictsPanel(r)}</div>`;
   }
 }

@@ -2051,6 +2051,7 @@ test("the runs view loads once per visit and counts again on request", async () 
 
 test("conflicts and loops show their stage and escape names", () => {
   const { el } = panel("en");
+  el.folds = { runs_conflicts: true };
   const html = el.conflictsPanel({ conflicts: { items: [
     { kind: "opposing", stage: "confirmed", days: 3, entity_id: "light.hall", automations: [{ entity_id: "automation.on", name: "On <i>x</i>" }, { entity_id: "automation.off", name: "Off" }], commands: ["light.turn_on", "light.turn_off"], reason: "trigger", detail: "sensor.door" },
     { kind: "loop", stage: "static", days: 0, entities: ["sensor.x", "sensor.y"], automations: [{ entity_id: "automation.a", name: "A" }] }] } });
