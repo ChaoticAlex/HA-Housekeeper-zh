@@ -3997,7 +3997,8 @@ test("storage shows the key figures, a red disk at 96 % and the Supervisor categ
   el.render();
   const html = shadow.innerHTML;
   assert.ok(html.includes('class="sumtile red"'), "a disk this full is red");
-  assert.ok(html.includes("Speicher belegt") && html.includes("4 Kerne") && html.includes("Swap:"));
+  assert.ok(html.includes("Speicher belegt") && html.includes("4 Kerne") && html.includes("frei"));
+  assert.ok(html.includes('<span class="sumlabel">Swap</span>') && !html.includes('sumlabel">Speicher frei'), "swap is a tile, free space sits in the disk tile");
   assert.ok(html.includes("&lt;b&gt;apps&lt;/b&gt;") && !html.includes("<b>apps</b>"), "Supervisor labels are escaped");
   el.viewTab = { storage: "cards" };
   el.render();
@@ -4019,7 +4020,8 @@ test("access and data flow show one list at a time, chosen by the tiles, and the
   el.view = "dataflow";
   el.render();
   let html = shadow.innerHTML;
-  assert.ok(html.includes("System access & data flow") && html.includes("Cloud data flow"));
+  assert.ok(html.includes("System access &amp; data flow") && html.includes("Cloud data flow"));
+  assert.ok(!html.includes('class="sumtiles"'), "the tabs carry the numbers, there is no second row of key figures");
   assert.ok(html.includes("Radio/device (Zigbee)") && html.includes('class="pill red">High'));
   assert.ok(!html.includes("cloud, polls"), "the cloud list is not open by default");
   el.pickViewTab("dataflow|cloud");
@@ -4063,11 +4065,11 @@ test("the rights of the apps show under access and data flow, or why they are mi
   assert.ok(html.includes("&lt;b&gt;SSH&lt;/b&gt;") && !html.includes("<b>SSH</b>"), "app names are escaped");
   assert.ok(html.includes('data-ha-path="/hassio/addon/core_ssh/info"'), "a row opens the app in Home Assistant");
   assert.ok(html.includes("nicht prüfbar"), "an app without an answer is not called safe");
-  assert.ok(html.includes("Apps mit hohem Risiko"));
+  assert.ok(html.includes("1 hoch"), "the apps tab shows how many are high");
   el._sys.dataflow.data = { ...ACCESS, apps_available: false, apps: [] };
   el.render();
   html = shadow.innerHTML;
-  assert.ok(html.includes("Apps gibt es nur mit Home Assistant OS oder Supervised.") && !html.includes("Apps mit hohem Risiko"));
+  assert.ok(html.includes("Apps gibt es nur mit Home Assistant OS oder Supervised.") && html.includes("taskcard t-mute off"));
 });
 
 test("the menu button for Home Assistant's sidebar shows when the sidebar is hidden", () => {

@@ -4,18 +4,25 @@ class LayoutMixin {
   sumTiles(tiles) {
     const cells = tiles.filter(Boolean).map(t => {
       const inner = `<span class="sumlabel">${this.esc(t.label)}</span><b class="sumvalue">${t.value}</b>${t.sub ? `<small>${t.sub}</small>` : ""}${t.spark ? `<span class="spark-row">${t.spark}</span>` : ""}`;
-      if (t.filter !== undefined) return `<button class="sumtile ${t.tone || "mute"}" data-finding-filter="${this.esc(t.filter)}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
-      if (t.attr) return `<button class="sumtile ${t.tone || "mute"}" ${t.attr[0]}="${this.esc(t.attr[1])}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
-      if (t.unref) return `<button class="sumtile ${t.tone || "mute"}" data-unref-tab="${t.unref}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
-      if (t.inv !== undefined) return `<button class="sumtile ${t.tone || "mute"}" data-inv-filter="${this.esc(t.inv)}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
-      return t.tab ? `<button class="sumtile ${t.tone || "mute"}" data-view-tab="${this.esc(t.tab)}">${inner}</button>` : `<div class="sumtile ${t.tone || "mute"}">${inner}</div>`;
+      if (t.filter !== undefined) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-finding-filter="${this.esc(t.filter)}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
+      if (t.attr) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} ${t.attr[0]}="${this.esc(t.attr[1])}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
+      if (t.unref) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-unref-tab="${t.unref}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
+      if (t.inv !== undefined) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-inv-filter="${this.esc(t.inv)}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
+      return t.tab ? `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-view-tab="${this.esc(t.tab)}">${inner}</button>` : `<div class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""}>${inner}</div>`;
     }).join("");
     return cells ? `<div class="sumtiles" role="group" aria-label="${this.esc(this.t("sumLabel"))}">${cells}</div>` : "";
   }
 
+  // The slim row under a page title: the page's own controls and facts on the left, "as of" and the refresh button on the
+  // right. { left, at (ISO time or null), loading, error, attr (the data-… attribute of the refresh button) }.
+  pageBar({ left = "", at = null, loading = false, attr = "" }) {
+    const stand = loading ? this.t("sysReading") : at ? this.t("sysAsOf", { time: this.formatDate(at) }) : "";
+    return `<div class="pagebar"><div class="pb-left">${left}</div><div class="pb-right">${stand ? `<span class="scanago">${this.esc(stand)}</span>` : ""}<button class="btn" ${attr} title="${this.esc(this.t("sysRefreshHint"))}" ${loading ? "disabled" : ""}><ha-icon icon="mdi:refresh" class="${loading ? "spin" : ""}"></ha-icon>${this.t("sysRefresh")}</button></div></div>`;
+  }
+
   // Tiles that switch between the areas of one view: icon, title, number and a short hint; the open one is marked.
   // tab: { id, icon, label, hint, count, tone, pill, pillTone, disabled }.
-  navTiles(view, tabs, open, label) {
+  navTiles(view, tabs, open, label, compact = false) {
     const cells = tabs.map(t => {
       const tone = t.tone || "mute", has = t.count !== undefined && t.count !== null;
       const pills = `${has ? `<span class="pill ${tone}">${this.esc(this.formatNumber(t.count))}</span>` : ""}${t.pill ? `<span class="pill ${t.pillTone || tone}">${this.esc(t.pill)}</span>` : ""}`;
@@ -23,7 +30,7 @@ class LayoutMixin {
       if (t.disabled) return `<div class="taskcard t-mute off" aria-disabled="true">${inner}</div>`;
       return `<button class="taskcard t-${tone}${t.id === open ? " on" : ""}" aria-pressed="${t.id === open}" data-view-tab="${this.esc(`${view}|${t.id}`)}">${inner}</button>`;
     }).join("");
-    return `<div class="taskgrid compactgrid setgrid navtiles" role="group" aria-label="${this.esc(label)}">${cells}</div>`;
+    return `<div class="taskgrid compactgrid setgrid navtiles${compact ? " compact" : ""}" role="group" aria-label="${this.esc(label)}">${cells}</div>`;
   }
 
   // The tab that is open in a view: the chosen one if it exists, else the first one of `tabs` or `prefer`.

@@ -616,8 +616,8 @@ class HAHousekeeperPanel extends HTMLElement {
     const graphBack = this.view === "graph" && this.graphSelected && this.graphBackLabel() ? `<button class="btn" data-action="graph-back"><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("backTo")} ${this.esc(this.graphBackLabel())}</button>` : "";
     const viewBack = from ? `<button class="btn" data-action="view-back"><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("backTo")} ${this.t(from.view)}</button>` : "";
     const back = graphBack || viewBack ? `<div class="crumbs">${viewBack}${graphBack}</div>` : "";
-    return `${back}<div class="heading"><div><p class="eyebrow">${this.eyebrowFor(this.view)}</p><h1>${title}${INFO_SUB_VIEWS.includes(this.view) ? this.infoTip(sub) : ""}</h1>${INFO_SUB_VIEWS.includes(this.view) ? "" : `<span class="sub">${sub}</span>`}</div>
-      <div class="head-actions">${modePill}${ago}<button class="btn primary" data-action="scan" ${this.busy || this.cleanupRunning() ? "disabled" : ""}>${this.scanButtonInner()}</button></div></div>${this.warmupBanner()}`;
+    return `${back}<div class="heading"><div><p class="eyebrow">${this.eyebrowFor(this.view)}</p><h1>${title}${INFO_SUB_VIEWS.includes(this.view) ? this.infoTip(sub) : ""}</h1>${VIEW_HINT[this.view] ? `<span class="sub">${this.t(VIEW_HINT[this.view])}</span>` : INFO_SUB_VIEWS.includes(this.view) ? "" : `<span class="sub">${sub}</span>`}</div>
+      <div class="head-actions">${modePill}${ago}<button class="btn primary" data-action="scan" ${this.busy || this.cleanupRunning() ? "disabled" : ""} title="${this.esc(this.t("scanHint"))}">${this.scanButtonInner()}</button></div></div>${this.warmupBanner()}`;
   }
 
   content() {

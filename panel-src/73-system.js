@@ -32,18 +32,13 @@ class SystemMixin {
     return `<button type="button" class="infotip" data-tip="${this.esc(text)}" data-tip-plain="1" aria-label="${this.esc(text)}"><ha-icon icon="mdi:information-outline"></ha-icon></button>`;
   }
 
-  sysHead(name, title, hint, intro) {
-    const st = this.sysState(name);
-    const at = st.at ? `<span class="scanago">${this.esc(this.t("sysAsOf", { time: this.formatDate(st.at) }))}</span>` : "";
-    return `<div class="panelhead"><div><h2>${this.t(title)}${intro ? this.infoTip(this.t(intro)) : ""}</h2><p>${this.t(hint)}</p></div><div class="actions">${at}<button class="btn" data-sys-refresh="${name}" ${st.loading ? "disabled" : ""}><ha-icon icon="mdi:refresh"></ha-icon>${this.t("sysRefresh")}</button></div></div>`;
-  }
-
-  // Loading, error or the page: the frame every one of the three pages shares.
-  sysFrame(name, title, hint, loading, build, intro) {
-    const st = this.sysEnsure(name), head = this.sysHead(name, title, hint, intro);
-    if (st.error) return `<div class="panel">${head}<div class="error">${this.esc(st.error)}</div></div>`;
-    if (!st.data) return `<div class="panel">${head}${this.skeleton(loading)}</div>`;
-    return build(st.data, head);
+  // Loading, error or the page: the frame every one of the three pages shares. build(data, bar) puts the bar on top.
+  sysFrame(name, loading, build, left = () => "") {
+    const st = this.sysEnsure(name);
+    const bar = this.pageBar({ left: st.data ? left(st.data) : "", at: st.at, loading: st.loading, attr: `data-sys-refresh="${name}"` });
+    if (st.error) return `<div class="stack">${bar}<div class="panel"><div class="error">${this.esc(st.error)}</div></div></div>`;
+    if (!st.data) return `<div class="stack">${bar}<div class="panel">${this.skeleton(loading)}</div></div>`;
+    return build(st.data, bar);
   }
 
   sysTone(percent) {
@@ -85,18 +80,18 @@ class SystemMixin {
   // ---------------------------------------------------------------- Storage & system
 
   storageView() {
-    return this.sysFrame("storage", "sysTitle", "sysHint", "sysLoading", (r, head) => {
+    return this.sysFrame("storage", "sysLoading", (r, head) => {
       const disk = r.disk || {}, ram = r.ram || {}, cpu = r.cpu || {}, swap = r.swap || {}, load = r.load;
       const of = (used, total) => this.esc(this.t("sysOf", { used: this.formatBytes(used), total: this.formatBytes(total) }));
       const ramSub = [ram.total ? of(ram.used, ram.total) : "", r.apps_memory ? this.esc(this.t("sysAppsRam", { n: this.formatBytes(r.apps_memory) })) : ""].filter(Boolean).join(" · ");
       const cpuSub = [cpu.count ? this.esc(this.t("sysCores", { n: cpu.count })) : "", load ? this.esc(this.t("sysLoad", { a: this.formatNumber(load["1m"]), b: this.formatNumber(load["5m"]), c: this.formatNumber(load["15m"]) })) : ""].filter(Boolean).join(" · ");
+      const diskSub = disk.total ? [of(disk.used, disk.total), disk.free !== undefined && disk.free !== null ? this.esc(this.t("sysFree", { n: this.formatBytes(disk.free) })) : ""].filter(Boolean).join(" · ") : this.esc(this.t("sysUnknown"));
       const tiles = this.sumTiles([
-        { label: this.t("sysDiskUsed"), value: this.esc(this.sysPercent(disk.percent)), sub: disk.total ? of(disk.used, disk.total) : this.esc(this.t("sysUnknown")), tone: this.sysTone(disk.percent), spark: this.sysMeter(disk.percent) },
-        { label: this.t("sysDiskFree"), value: disk.free !== undefined && disk.free !== null ? this.esc(this.formatBytes(disk.free)) : "–", sub: disk.source ? this.esc(this.t(`sysSrc_${disk.source}`)) : "", tone: this.sysTone(disk.percent) },
+        { label: this.t("sysDiskUsed"), value: this.esc(this.sysPercent(disk.percent)), sub: diskSub, hint: disk.source ? this.t(`sysSrc_${disk.source}`) : "", tone: this.sysTone(disk.percent), spark: this.sysMeter(disk.percent) },
         { label: this.t("sysRam"), value: this.esc(this.sysPercent(ram.percent)), sub: ramSub || this.esc(this.t("sysUnknown")), tone: this.sysTone(ram.percent), spark: this.sysMeter(ram.percent) },
         { label: this.t("sysCpu"), value: this.esc(this.sysPercent(cpu.percent)), sub: cpuSub || this.esc(this.t("sysUnknown")), tone: this.sysTone(cpu.percent), spark: this.sysMeter(cpu.percent) },
+        swap.total ? { label: this.t("sysSwapLabel"), value: this.esc(this.sysPercent(swap.percent)), sub: of(swap.used, swap.total), hint: this.t("sysSwapHint"), tone: "mute", spark: this.sysMeter(swap.percent) } : null,
       ]);
-      const swapLine = swap.total ? `<p class="factnote">${this.esc(this.t("sysSwap", { used: this.formatBytes(swap.used), total: this.formatBytes(swap.total), pct: this.sysPercent(swap.percent) }))}<br><small>${this.t("sysSwapHint")}</small></p>` : "";
       const cats = r.categories?.children || [];
       const sup = Boolean(r.supervisor);
       const noSup = { disabled: true, hint: this.t("sysNoSupervisor") };
@@ -109,10 +104,9 @@ class SystemMixin {
         { id: "blueprints", icon: "mdi:floor-plan", label: this.t("sysTabBlueprints"), hint: this.t("sysTabBlueprintsHint"), count: r.blueprints.length },
       ];
       const open = this.viewTabOf("storage", tabs.filter(x => !x.disabled), sup && cats.length ? "categories" : "consumers");
-      const tab = tabs.find(x => x.id === open);
       const body = { categories: () => this.sysCategories(cats), consumers: () => this.sysConsumers(r.breakdown), custom: () => this.sysCustom(r.custom_integrations), apps: () => this.sysApps(r.apps), cards: () => this.sysCards(r.cards), blueprints: () => this.sysBlueprints(r.blueprints) }[open]();
-      return `<div class="stack"><div class="panel">${head}</div>${tiles}${swapLine ? `<div class="panel"><div class="pad">${swapLine}</div></div>` : ""}<div class="sysnav">${this.navTiles("storage", tabs, open, this.t("storage"))}</div><div class="panel"><div class="panelhead"><div><h2>${this.esc(tab.label)}</h2><p>${this.esc(tab.hint)}</p></div></div>${body}${this.howCounted("sysFootnote")}</div></div>`;
-    }, "sysIntro");
+      return `<div class="stack">${head}${tiles}<div class="sysnav">${this.navTiles("storage", tabs, open, this.t("storage"), true)}</div><div class="panel">${body}${this.howCounted("sysFootnote")}</div></div>`;
+    });
   }
 
   sysSizeColumns(max) {
@@ -250,23 +244,14 @@ class SystemMixin {
   }
 
   dataflowView() {
-    return this.sysFrame("dataflow", "accTitle", "accHint", "accLoading", (r, head) => {
+    return this.sysFrame("dataflow", "accLoading", (r, head) => {
       const entries = r.entries || [];
       const sys = entries.filter(e => e.access.length || e.gps || e.camera);
       const cloud = entries.filter(e => e.external);
-      const highCount = entries.filter(e => e.risk === "high").length;
       const appList = r.apps || [];
       const hooks = r.webhooks || [], hooksOpen = hooks.filter(w => !w.local_only).length;
       const open = this.viewTabOf("dataflow", [{ id: "sys" }, { id: "cloud" }, ...(r.apps_available ? [{ id: "apps" }] : []), ...(hooks.length ? [{ id: "hooks" }] : [])], "sys");
       const high = id => this.lv?.[id]?.f?.risk === "high";
-      const tiles = this.sumTiles([
-        { label: this.t("accSumTotal"), value: this.esc(this.formatNumber(entries.length)), tone: "mute" },
-        { label: this.t("accSumAccess"), value: this.esc(this.formatNumber(sys.length)), tone: sys.length ? "warn" : "ok", attr: ["data-acc-show", "sys"], active: open === "sys" && !high("accsys") },
-        { label: this.t("accSumHigh"), value: this.esc(this.formatNumber(highCount)), tone: highCount ? "red" : "ok", attr: ["data-acc-show", "sys|high"], active: open === "sys" && high("accsys") },
-        { label: this.t("accSumExternal"), value: this.esc(this.formatNumber(cloud.length)), tone: cloud.length ? "warn" : "ok", attr: ["data-acc-show", "cloud"], active: open === "cloud" },
-        hooks.length ? { label: this.t("accSumHooks"), value: this.esc(this.formatNumber(hooksOpen)), sub: this.esc(this.t("accSumHooksSub", { n: this.formatNumber(hooks.length) })), tone: hooksOpen ? "warn" : "ok", attr: ["data-acc-show", "hooks"], active: open === "hooks" } : null,
-        r.apps_available ? { label: this.t("accSumApps"), value: this.esc(this.formatNumber(appList.filter(a => a.risk === "high").length)), sub: this.esc(this.t("accSumAppsSub", { n: this.formatNumber(appList.length) })), tone: appList.some(a => a.risk === "high") ? "red" : "ok", attr: ["data-acc-show", "apps|high"], active: open === "apps" && high("accapps") } : null,
-      ]);
       const risks = [["high", this.t("accRisk_high")], ["medium", this.t("accRisk_medium")], ["low", this.t("accRisk_low")]];
       const riskOrder = { high: 0, medium: 1, low: 2 };
       const flows = e => e.flows.map(f => this.t(`accFlow_${f}`));
@@ -315,19 +300,21 @@ class SystemMixin {
         exportName: "webhooks", header: [this.t("accColAutomation"), "ID", this.t("accColReach")], rows: w => [w.name, w.object_id, this.t(w.local_only ? "accHookLocal" : "accHookOpen")],
       });
       const chip = id => high(id) ? `<div class="pad"><button class="pill red" data-acc-clear="${id}" title="${this.esc(this.t("accClearFilter"))}">${this.esc(`${this.t("accColRisk")}: ${this.t("accRisk_high")}`)} ✕</button></div>` : "";
-      const panel = (title, hint, id, body) => `<div class="panel"><div class="panelhead"><div><h2>${this.t(title)}</h2><p>${this.t(hint)}</p></div></div>${chip(id)}${body}</div>`;
+      const panel = (id, body) => `<div class="panel">${chip(id)}${body}</div>`;
+      const hi = list => list.filter(e => e.risk === "high").length;
+      const tone = (n, level = "red") => (n ? level : "ok");
       const tabs = [
-        { id: "sys", icon: "mdi:shield-key-outline", label: this.t("accSysTitle"), hint: this.t("accSysHint"), count: sys.length },
-        { id: "cloud", icon: "mdi:cloud-outline", label: this.t("accCloudTitle"), hint: this.t("accCloudHint"), count: cloud.length },
-        r.apps_available ? { id: "apps", icon: "mdi:package-variant-closed", label: this.t("accAppsTitle"), hint: this.t("accAppsHint"), count: appList.length } : { id: "apps", icon: "mdi:package-variant-closed", label: this.t("accAppsTitle"), hint: this.t("accAppsNoSupervisor"), disabled: true },
+        { id: "sys", icon: "mdi:shield-key-outline", label: this.t("accSysTitle"), hint: this.t("accSysHint"), count: sys.length, tone: tone(hi(sys)), ...(hi(sys) ? { pill: this.t("accTabHigh", { n: this.formatNumber(hi(sys)) }), pillTone: "red" } : {}) },
+        { id: "cloud", icon: "mdi:cloud-outline", label: this.t("accCloudTitle"), hint: this.t("accCloudHint"), count: cloud.length, tone: tone(hi(cloud)), ...(hi(cloud) ? { pill: this.t("accTabHigh", { n: this.formatNumber(hi(cloud)) }), pillTone: "red" } : {}) },
+        r.apps_available ? { id: "apps", icon: "mdi:package-variant-closed", label: this.t("accAppsTitle"), hint: this.t("accAppsHint"), count: appList.length, tone: tone(hi(appList)), ...(hi(appList) ? { pill: this.t("accTabHigh", { n: this.formatNumber(hi(appList)) }), pillTone: "red" } : {}) } : { id: "apps", icon: "mdi:package-variant-closed", label: this.t("accAppsTitle"), hint: this.t("accAppsNoSupervisor"), disabled: true },
       ];
-      if (hooks.length) tabs.push({ id: "hooks", icon: "mdi:webhook", label: this.t("accHooksTitle"), hint: this.t("accHooksHint"), count: hooks.length });
-      const body = open === "hooks" ? panel("accHooksTitle", "accHooksHint", "acchooks", hookTable)
-        : open === "cloud" ? panel("accCloudTitle", "accCloudHint", "acccloud", cloudTable)
-        : open === "apps" ? panel("accAppsTitle", "accAppsHint", "accapps", this.accAppsTable(appList, risks, sorts.find(x => x.key === "risk")))
-        : panel("accSysTitle", "accSysHint", "accsys", sysTable);
-      return `<div class="stack"><div class="panel">${head}</div>${tiles}<div class="sysnav">${this.navTiles("dataflow", tabs, open, this.t("dataflow"))}</div>${body}<div class="panel">${this.howCounted("accFootnote")}</div></div>`;
-    }, "accIntro");
+      if (hooks.length) tabs.push({ id: "hooks", icon: "mdi:webhook", label: this.t("accHooksTitle"), hint: this.t("accHooksHint"), count: hooks.length, tone: tone(hooksOpen, "warn"), ...(hooksOpen ? { pill: this.t("accTabOpen", { n: this.formatNumber(hooksOpen) }), pillTone: "warn" } : {}) });
+      const body = open === "hooks" ? panel("acchooks", hookTable)
+        : open === "cloud" ? panel("acccloud", cloudTable)
+        : open === "apps" ? panel("accapps", this.accAppsTable(appList, risks, sorts.find(x => x.key === "risk")))
+        : panel("accsys", sysTable);
+      return `<div class="stack">${head}${this.navTiles("dataflow", tabs, open, this.t("dataflow"), true)}${body}<div class="panel">${this.howCounted("accFootnote")}</div></div>`;
+    }, e => `<span>${this.esc(this.t("sysChecked", { n: this.formatNumber((e.entries || []).length) }))}</span>`);
   }
 
   // A row of an app opens its detail page when the scan knows it, else the app in Home Assistant.
@@ -456,7 +443,7 @@ class SystemMixin {
 
   // Which integrations hold credentials, of what kind, and whether a value is set. Never a value.
   secretsView() {
-    return this.sysFrame("secrets", "secTitle", "secHint", "secLoading", (r, head) => {
+    return this.sysFrame("secrets", "secLoading", (r, head) => {
       const entries = r.entries || [];
       const count = (e, set) => e.fields.filter(f => f.set === set).length;
       const kinds = e => [...new Set(e.fields.map(f => f.kind))];
@@ -492,8 +479,8 @@ class SystemMixin {
         exportName: "credential-fields", header: [this.t("accColIntegration"), "Domain", this.t("secColKind"), this.t("secColFields"), this.t("secColSetCount"), this.t("secColEmptyCount")],
         rows: e => [e.title, e.domain, kindNames(e).join("; "), names(e), count(e, true), count(e, false)],
       });
-      return `<div class="stack"><div class="panel">${head}</div>${tiles}<div class="panel"><div class="panelhead"><div><h2>${this.t("secListTitle")}</h2><p>${this.t("secListHint")}</p></div></div>${chip}${table}${this.howCounted("secFootnote")}</div></div>`;
-    }, "secIntro");
+      return `<div class="stack">${head}${tiles}<div class="panel"><div class="panelhead"><div><h2>${this.t("secListTitle")}</h2><p>${this.t("secListHint")}</p></div></div>${chip}${table}${this.howCounted("secFootnote")}</div></div>`;
+    });
   }
 
   // ---------------------------------------------------------------- bindings
@@ -506,12 +493,6 @@ class SystemMixin {
       this._tipHide = globalThis.setTimeout?.(() => this.hideTip(), 6000);
     }));
     root.querySelectorAll("[data-detail-tab-go]").forEach(el => el.onclick = () => { this.detailTab = el.dataset.detailTabGo; this.render(); });
-    // A key figure of Access & data flow opens its list, with or without the filter for high risk.
-    root.querySelectorAll("[data-acc-show]").forEach(el => el.onclick = () => {
-      const [tab, filter] = el.dataset.accShow.split("|"), id = { sys: "accsys", cloud: "acccloud", apps: "accapps", hooks: "acchooks" }[tab];
-      (this.viewTab ||= {}).dataflow = tab;
-      this.lvState(id, "risk", "asc").f.risk = filter ? "high" : ""; this.persistLv(id); this.pages = {}; this.render();
-    });
     // A key figure of the credential overview sets the state filter ("gap": some field empty) or clears all filters.
     root.querySelectorAll("[data-sec-show]").forEach(el => el.onclick = () => {
       const st = this.lvState("seclist", "name", "asc");
