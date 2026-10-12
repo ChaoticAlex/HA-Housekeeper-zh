@@ -467,8 +467,7 @@ class SystemMixin {
       const empty = entries.reduce((n, e) => n + count(e, false), 0);
       const gap = this.lv?.seclist?.f?.state === "gap", anyFilter = Object.values(this.lv?.seclist?.f || {}).some(Boolean);
       const tiles = this.sumTiles([
-        { label: this.t("secSumEntries"), value: this.esc(this.formatNumber(entries.length)), tone: "mute", attr: ["data-sec-show", ""], active: !anyFilter },
-        { label: this.t("secSumSet"), value: this.esc(this.formatNumber(entries.reduce((n, e) => n + count(e, true), 0))), tone: "mute" },
+        { label: this.t("secSumEntries"), value: this.esc(this.formatNumber(entries.length)), sub: this.esc(this.t("secSumEntriesSub", { n: this.formatNumber(entries.reduce((n, e) => n + count(e, true), 0)) })), tone: "mute", attr: ["data-sec-show", ""], active: !anyFilter },
         { label: this.t("secSumEmpty"), value: this.esc(this.formatNumber(empty)), sub: this.esc(this.t("secSumEmptySub")), tone: empty ? "warn" : "ok", attr: ["data-sec-show", "gap"], active: gap },
       ]);
       const chip = gap ? `<div class="pad"><button class="pill warn" data-sec-show="" title="${this.esc(this.t("accClearFilter"))}">${this.esc(`${this.t("secColState")}: ${this.t("secStateGap")}`)} ✕</button></div>` : "";

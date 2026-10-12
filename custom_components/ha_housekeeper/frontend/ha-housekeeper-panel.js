@@ -10655,7 +10655,7 @@ Object.assign(TEXT.de, {
   accFootnote: "Systemzugriff und Datenfluss leitet Housekeeper aus dem Namen der Integration ab (zha → Zigbee-Funk, mobile_app → Standort), einen Cloud-Datenfluss außerdem aus der IoT-Klasse cloud_polling oder cloud_push; Tracker- und Kamera-Entitäten zählen als Standort und Kamera. Die Einordnung ist ein Hinweis, kein Beweis. Hoch: Zugriff auf System, Shell oder Funk, Kameras oder Standort. Mittel: Daten gehen nach außen oder ein anderer Zugriff. Ignorierte Funde fehlen. Die Rechte der Apps meldet der Supervisor; hoch ist, was auf dem Host Root gleichkommt (voller Hardwarezugriff, Privilegien, Docker-API, Host-Prozesse, Supervisor-Rolle admin oder manager), mittel sind Host-Netzwerk, Zugriff auf Home Assistant oder Logins und ein abgeschaltetes AppArmor. Ein Klick auf eine App öffnet sie in Home Assistant. Es wird nichts geändert und nichts gespeichert.",
   secrets: "Zugangsdaten", secretsSubtitle: "Welche Integrationen Zugangsdaten gespeichert haben, von welcher Art und ob ein Wert hinterlegt ist. Werte zeigt Housekeeper nie. Liest nur.",
   secHint: "Gespeicherte Zugangsdaten der Integrationen, ohne Werte", secLoading: "Die Integrationen werden durchgesehen …",
-  secSumEntries: "Integrationen mit Zugangsdaten", secSumSet: "Felder mit Wert", secSumEmpty: "Felder ohne Wert", secSumEmptySub: "Feld vorhanden, aber leer",
+  secSumEntries: "Integrationen mit Zugangsdaten", secSumEntriesSub: "{n} Felder mit Wert", secSumEmpty: "Felder ohne Wert", secSumEmptySub: "Feld vorhanden, aber leer",
   secListTitle: "Integrationen", secListHint: "Art der Zugangsdaten und ob ein Wert hinterlegt ist",
   secColKind: "Art", secColFields: "Felder", secColState: "Hinterlegt", secColOpen: "In Home Assistant", secColSetCount: "Felder mit Wert", secColEmptyCount: "Felder ohne Wert",
   secStateGap: "mit leeren Feldern", secState: "{n} von {total}", secStateSet: "alle hinterlegt", secStatePart: "teilweise", secStateEmpty: "nichts hinterlegt", secAllKinds: "Alle Arten", secAllStates: "Alle Zustände",
@@ -10710,7 +10710,7 @@ Object.assign(TEXT.en, {
   accFootnote: "Housekeeper derives system access and data flow from the name of the integration (zha → Zigbee radio, mobile_app → location) and a cloud data flow also from the IoT class cloud_polling or cloud_push; tracker and camera entities count as location and camera. The classification is a hint, not a proof. High: access to the system, shell or radio, cameras or the location. Medium: data goes outside or another access. Ignored discoveries are left out. The rights of the apps come from the Supervisor; high is what equals root on the host (full hardware access, privileges, Docker API, host processes, Supervisor role admin or manager), medium is the host network, access to Home Assistant or logins, and AppArmor switched off. A click on an app opens it in Home Assistant. Nothing is changed and nothing is stored.",
   secrets: "Credentials", secretsSubtitle: "Which integrations store credentials, of what kind, and whether a value is set. Housekeeper never shows the values. Only reads.",
   secHint: "Stored credentials of the integrations, without values", secLoading: "Looking through the integrations …",
-  secSumEntries: "Integrations with credentials", secSumSet: "Fields with a value", secSumEmpty: "Fields without a value", secSumEmptySub: "field exists but is empty",
+  secSumEntries: "Integrations with credentials", secSumEntriesSub: "{n} fields with a value", secSumEmpty: "Fields without a value", secSumEmptySub: "field exists but is empty",
   secListTitle: "Integrations", secListHint: "Kind of credentials and whether a value is set",
   secColKind: "Kind", secColFields: "Fields", secColState: "Set", secColOpen: "In Home Assistant", secColSetCount: "Fields with a value", secColEmptyCount: "Fields without a value",
   secStateGap: "with empty fields", secState: "{n} of {total}", secStateSet: "all set", secStatePart: "partly", secStateEmpty: "nothing set", secAllKinds: "All kinds", secAllStates: "All states",
@@ -11375,8 +11375,7 @@ class SystemMixin {
       const empty = entries.reduce((n, e) => n + count(e, false), 0);
       const gap = this.lv?.seclist?.f?.state === "gap", anyFilter = Object.values(this.lv?.seclist?.f || {}).some(Boolean);
       const tiles = this.sumTiles([
-        { label: this.t("secSumEntries"), value: this.esc(this.formatNumber(entries.length)), tone: "mute", attr: ["data-sec-show", ""], active: !anyFilter },
-        { label: this.t("secSumSet"), value: this.esc(this.formatNumber(entries.reduce((n, e) => n + count(e, true), 0))), tone: "mute" },
+        { label: this.t("secSumEntries"), value: this.esc(this.formatNumber(entries.length)), sub: this.esc(this.t("secSumEntriesSub", { n: this.formatNumber(entries.reduce((n, e) => n + count(e, true), 0)) })), tone: "mute", attr: ["data-sec-show", ""], active: !anyFilter },
         { label: this.t("secSumEmpty"), value: this.esc(this.formatNumber(empty)), sub: this.esc(this.t("secSumEmptySub")), tone: empty ? "warn" : "ok", attr: ["data-sec-show", "gap"], active: gap },
       ]);
       const chip = gap ? `<div class="pad"><button class="pill warn" data-sec-show="" title="${this.esc(this.t("accClearFilter"))}">${this.esc(`${this.t("secColState")}: ${this.t("secStateGap")}`)} ✕</button></div>` : "";
