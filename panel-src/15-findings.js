@@ -16,28 +16,39 @@ class FindingsMixin {
     return `${this.t(`impact_${f.impact}`)}${facts.length ? ` (${facts.join(" · ")})` : ""}`;
   }
 
-  // The share of objects without a finding. It counts affected objects, not findings, so an object
-  // with several findings is subtracted once; only the base types count, hidden findings do not.
+  // The entries of the findings list, as impact levels: every outage chain once at its top, every finding without a cause.
+  // Followers are not entries of their own; hidden, known and snoozed findings do not count.
+  entryLevels() {
+    const top = this.causeList().filter(c => !c.parent_id).map(c => c.impact || "none");
+    const single = this.data.findings.filter(f => !f.ignored && !f.cause_id).map(f => f.impact || "none");
+    return [...top, ...single];
+  }
+
+  // The status is a score from 100. Each entry of the findings list takes points off by its impact, each urgent topic of the
+  // state area (backup, disk) another 10. The objects with a finding are only shown next to it, they are not the percent.
   health() {
     const objects = this.data.objects.filter(o => HEALTH_TYPES.includes(o.object_type));
     const base = objects.length;
     const known = new Set(objects.map(o => this.objectKey(o)));
     const affected = new Set(this.data.findings.filter(f => !f.ignored).map(f => this.findingKey(f)).filter(key => known.has(key)));
-    // Rounded down, so a few affected objects among thousands never read as 100.
-    const share = base ? Math.max(0, Math.floor(100 * (1 - affected.size / base))) : 100;
-    // The status is the worse of two readings: the share of objects without a finding, and what the to-do list still asks for
-    // (broken integrations, a missed goal, a problem with the backup or the database).
     // The same number in every view: what it counts is fetched here, not only when the overview opens. The database
     // check stays out of it, because it reads the recorder and only runs once Maintenance is opened.
     this.ensureBackup?.(); this.ensureTrend?.();
     const open = this.todoItems().filter(i => i.key !== "db"), red = open.filter(i => i.tone === "red").length, tasks = open.length;
-    const byShare = share >= 95 ? "ok" : share >= 80 ? "warn" : "red";
-    // Only urgent topics take points off the share, 10 each and at most 30; the other topics turn the ring amber and are named in the headline.
-    const penalty = Math.min(HEALTH_PENALTY_MAX, red * HEALTH_PENALTY_URGENT);
-    const percent = Math.max(0, share - penalty);
-    const tone = red || byShare === "red" ? "red" : tasks || byShare === "warn" ? "warn" : "ok";
+    const stateRed = open.filter(i => i.area === "state" && i.tone === "red").length;
+    const levels = this.entryLevels();
+    const lines = Object.entries(HEALTH_POINTS).map(([level, [each, max]]) => {
+      const n = levels.filter(l => l === level).length;
+      return { level, n, each, points: Math.min(max, n * each) };
+    }).filter(l => l.n);
+    const statePoints = Math.min(HEALTH_STATE_MAX, stateRed * HEALTH_STATE_POINTS);
+    const penalty = lines.reduce((sum, l) => sum + l.points, 0) + statePoints;
+    const percent = Math.max(0, 100 - penalty);
+    let tone = percent >= HEALTH_GREEN ? "ok" : percent >= HEALTH_YELLOW ? "warn" : "red";
+    // A high-impact entry or an urgent state topic never reads as green, however small the sum is.
+    if (tone === "ok" && (levels.includes("high") || stateRed)) tone = "warn";
     const label = tone === "ok" ? "healthGood" : tone === "warn" ? "healthCheck" : "healthBad";
-    return { percent, share, tone, label, affected: affected.size, base, tasks, red, later: tasks - red, penalty };
+    return { percent, tone, label, affected: affected.size, base, tasks, red, later: tasks - red, penalty, lines, stateRed, statePoints, entries: levels.length };
   }
 
   findingRow(finding, inGroup = false) {
@@ -134,7 +145,7 @@ class FindingsMixin {
     this.ensureCorrelations();
     const afterCount = all.filter(f => this.corr?.by_key?.[f.key]).length;
     const tiles = this.sumTiles([
-      { label: this.t("health"), value: `${h.share} %`, sub: this.t("findSumAffected", { n: this.formatNumber(h.affected), m: this.formatNumber(h.base) }), tone: h.tone, spark: spark("share", "good") },
+      { label: this.t("health"), value: `${h.percent} %`, sub: this.t("findSumAffected", { n: this.formatNumber(h.affected), m: this.formatNumber(h.base) }), tone: h.tone, spark: spark("share", "good") },
       { label: this.t("all"), value: this.formatNumber(this.findingTotal()), sub: this.followerCount() ? this.esc(this.t("findingsFollowSub", { n: this.formatNumber(this.followerCount()) })) : undefined, tone: this.findingTotal() ? "warn" : "ok", filter: "", active: !this.findingFilter, spark: spark("open", "bad") },
       afterCount ? { label: this.t("corrTile"), value: this.formatNumber(afterCount), sub: this.t("corrTileSub"), tone: "warn", attr: ["data-finding-after", "1"], active: this.findingAfter } : null,
       ...classes.map(c => ({ label: this.t(c), value: this.formatNumber(all.filter(f => f.classification === c).length), tone: classTone(c), filter: c, active: this.findingFilter === c, spark: spark(`class:${c}`, "bad") })),

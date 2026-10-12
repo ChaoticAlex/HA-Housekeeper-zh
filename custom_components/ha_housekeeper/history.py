@@ -35,8 +35,6 @@ def _valid_checkpoint(value: Any) -> dict[str, Any] | None:
     return None
 
 
-HEALTH_TYPES = ("entity", "automation", "script", "scene")
-
 # The rules whose outcome depends on a setting: when it changed between two scans, findings that
 # vanished were not repaired, the rule just reads differently now.
 SETTING_RULES = {
@@ -50,19 +48,23 @@ SETTING_RULES = {
 }
 
 
-def _share_without_finding(snapshot: dict[str, Any]) -> int:
-    """The share of objects without an open finding, as the panel reads it (rounded down)."""
-    known = {
-        f"{item['object_type']}:{item['object_id']}"
-        for item in snapshot["objects"]
-        if item["object_type"] in HEALTH_TYPES
-    }
-    affected = {
-        f"{finding['rule_id'].split('.')[0]}:{finding['object_id']}"
-        for finding in snapshot["findings"]
-        if not finding.get("ignored")
-    } & known
-    return max(0, int(100 * (1 - len(affected) / len(known)))) if known else 100
+# The score from 100, as the panel reads it: points off for each entry of the findings list by its
+# impact (points each, at most), counted once for a chain of outages and not for its followers.
+SCORE_POINTS = {"high": (5, 30), "medium": (2, 20), "low": (1, 10)}
+
+
+def _score(snapshot: dict[str, Any]) -> int:
+    levels = [
+        c.get("impact", "none") for c in snapshot.get("causes", []) if not c.get("parent_id")
+    ] + [
+        f.get("impact", "none")
+        for f in snapshot["findings"]
+        if not f.get("ignored") and not f.get("cause_id")
+    ]
+    off = sum(
+        min(most, each * levels.count(level)) for level, (each, most) in SCORE_POINTS.items()
+    )
+    return max(0, 100 - off)
 
 
 def make_checkpoint(snapshot: dict[str, Any]) -> dict[str, Any]:
@@ -79,10 +81,10 @@ def make_checkpoint(snapshot: dict[str, Any]) -> dict[str, Any]:
         "at": snapshot["meta"]["scanned_at"],
         "objects": objects,
         "findings": sorted({_finding_key(f) for f in snapshot["findings"]}),
-        # For the sparklines: open findings, per class, and the share of objects without one.
+        # For the sparklines: open findings, per class, and the score.
         "open": len(open_findings),
         "classes": classes,
-        "share": _share_without_finding(snapshot),
+        "share": _score(snapshot),
         # The settings that decide whether some findings exist at all.
         "rules": {
             name: snapshot["meta"][name] for name in SETTING_RULES if name in snapshot["meta"]

@@ -41,7 +41,7 @@ const TEXT = {
     total: "Gesamt",
     recentFindings: "Aktuelle Befunde", affected: "Betroffenes Objekt",
     systemState: "Systemzustand", health: "Housekeeping-Status", healthGood: "Gut", healthCheck: "Prüfen",
-    healthBad: "Problematisch", healthHint: "Anteil der Entitäten, Automationen, Skripte und Szenen ohne Befund", healthTip: "Gezählt werden betroffene Objekte, nicht einzelne Befunde. Ausgeblendete Befunde und andere Objekttypen (Dashboards, Geräte, Helfer) zählen nicht. Der Wert ist gerundet. Betroffen: {affected} von {base}.",
+    healthBad: "Problematisch", healthHint: "Punktestand aus den Einträgen der Befundliste und dem Zustand", healthTip: "Punktestand von 100. Betroffen: {affected} von {base} Objekten.",
     openFindings: "Offene Befunde",
     actTitle: "Was muss ich jetzt tun?", actSub: "Nach Dringlichkeit sortiert", actNone: "Nichts zu tun. Letzter Scan: {date}.",
     actNewCritical: "Neue kritische Befunde", actNewCriticalHint: "Seit dem letzten Scan: nicht verfügbar, defekte Referenz oder Problem",
@@ -223,7 +223,7 @@ const TEXT = {
     total: "Total",
     recentFindings: "Current findings", affected: "Affected object",
     systemState: "System health", health: "Housekeeping status", healthGood: "Good", healthCheck: "Review",
-    healthBad: "Problematic", healthHint: "Share of entities, automations, scripts and scenes without findings", healthTip: "Affected objects are counted, not single findings. Hidden findings and other object types (dashboards, devices, helpers) do not count. The value is rounded. Affected: {affected} of {base}.",
+    healthBad: "Problematic", healthHint: "Score from the entries of the findings list and the state", healthTip: "Score out of 100. Affected: {affected} of {base} objects.",
     openFindings: "Open findings",
     actTitle: "What needs doing now?", actSub: "Sorted by urgency", actNone: "Nothing to do. Last scan: {date}.",
     actNewCritical: "New critical findings", actNewCriticalHint: "Since the last scan: unavailable, broken reference or problem",
@@ -446,8 +446,13 @@ const ACTION_TYPES = ["entity", "device", "config_entry", "automation", "script"
 // Objects whose overview sums up what is known in groups ("Known about …"); scenes keep the facts card.
 const KNOWN_TYPES = ["entity", "device", "config_entry", "automation", "script"];
 // The ring of the status: points off for each urgent topic, and the most that can come off.
-const HEALTH_PENALTY_URGENT = 10;
-const HEALTH_PENALTY_MAX = 30;
+// The status is a score from 100: each entry of the findings list takes points off by its impact (points each, at most),
+// each urgent topic of the state area takes 10 off (at most 30). Green from 90, yellow from 70.
+const HEALTH_POINTS = { high: [5, 30], medium: [2, 20], low: [1, 10] };
+const HEALTH_STATE_POINTS = 10;
+const HEALTH_STATE_MAX = 30;
+const HEALTH_GREEN = 90;
+const HEALTH_YELLOW = 70;
 const LABEL_TYPES = ["entity", "automation", "script", "scene"];
 
 const NAV = [
@@ -512,7 +517,7 @@ const CAUSE_OWN_RULES = ["config_entry.not_loaded", "device.down", "app.stopped_
 const CRITICAL_CLASSES = ["broken_reference", "unavailable", "problem"];
 
 // Object types the housekeeping status is calculated from.
-const HEALTH_TYPES = ["entity", "automation", "script", "scene"];
+const HEALTH_TYPES = ["entity", "automation", "script", "scene", "config_entry", "device"];
 
 // One CSV cell, quoted. Text a spreadsheet would run as a formula (leading =, +, -, @) gets a leading
 // apostrophe; numbers, also negative ones as text such as "-3.5", stay numbers.
@@ -1964,39 +1969,39 @@ class OverviewMixin {
   todoItems() {
     const items = [], m = this.data.meta;
     const outages = this.causeList();
-    if (outages.length) items.push({ key: "outages", tone: "red", icon: "mdi:source-branch", label: "actOutages", hintText: this.outagesHint(outages), count: outages.length, view: "findingsNav", filter: "" });
+    if (outages.length) items.push({ key: "outages", area: "findings", tone: "red", icon: "mdi:source-branch", label: "actOutages", hintText: this.outagesHint(outages), count: outages.length, view: "findingsNav", filter: "" });
     const regressions = (this.data.regressions || []).length;
-    if (regressions) items.push({ key: "followup", tone: "red", icon: "mdi:history", label: "actFollowup", hint: "actFollowupHint", count: regressions, view: "journal" });
+    if (regressions) items.push({ key: "followup", area: "findings", tone: "red", icon: "mdi:history", label: "actFollowup", hint: "actFollowupHint", count: regressions, view: "journal" });
     const due = (this.data.reminders || []).filter(r => r.state === "due").length;
-    if (due) items.push({ key: "reminders", tone: "warn", icon: "mdi:wrench-clock", label: "actReminders", hint: "actRemindersHint", count: due, view: "reminders" });
+    if (due) items.push({ key: "reminders", area: "care", tone: "warn", icon: "mdi:wrench-clock", label: "actReminders", hint: "actRemindersHint", count: due, view: "reminders" });
     const missed = (this.data.criteria_alerts || []).length;
-    if (missed) items.push({ key: "criteria", tone: "warn", icon: "mdi:target", label: "actCriteria", hint: "actCriteriaHint", count: missed, view: "runs" });
+    if (missed) items.push({ key: "criteria", area: "care", tone: "warn", icon: "mdi:target", label: "actCriteria", hint: "actCriteriaHint", count: missed, view: "runs" });
     const fresh = (this.trend?.new_findings?.items || []).filter(f => !f.ignored && CRITICAL_CLASSES.includes(f.classification)).length;
-    if (fresh) items.push({ key: "critical", tone: "red", icon: "mdi:alert-circle-outline", label: "actNewCritical", hint: "actNewCriticalHint", count: fresh, view: "findingsNav", filter: "" });
+    if (fresh) items.push({ key: "critical", area: "findings", tone: "red", icon: "mdi:alert-circle-outline", label: "actNewCritical", hint: "actNewCriticalHint", count: fresh, view: "findingsNav", filter: "" });
     // A nearly full disk, from the light read of the overview; red from 90 % takes points off the ring like any urgent topic.
     this.ensureSysLight();
     const disk = this.sysLight?.disk;
     if (disk?.percent >= SYS_WARN_PERCENT) {
       const tone = disk.percent >= SYS_RED_PERCENT ? "red" : "warn";
-      items.push({ key: "disk", tone, icon: "mdi:harddisk", label: tone === "red" ? "todoDiskFull" : "todoDiskNear", hintText: this.t("todoDiskHint", { pct: this.sysPercent(disk.percent), free: this.formatBytes(disk.free ?? 0) }), view: "storage" });
+      items.push({ key: "disk", area: "state", tone, icon: "mdi:harddisk", label: tone === "red" ? "todoDiskFull" : "todoDiskNear", hintText: this.t("todoDiskHint", { pct: this.sysPercent(disk.percent), free: this.formatBytes(disk.free ?? 0) }), view: "storage" });
     }
     const stale = this.staleScan();
     if (stale) {
       const age = stale.hours >= 48 ? this.t("daysValue", { n: Math.round(stale.hours / 24) }) : `${stale.hours} h`;
-      items.push({ key: "stale", tone: "warn", icon: "mdi:clock-alert-outline", text: stale.interval > 0 ? this.t("staleScan", { age, hours: stale.interval }) : this.t("staleScanManual", { age }), scan: true });
+      items.push({ key: "stale", area: "state", tone: "warn", icon: "mdi:clock-alert-outline", text: stale.interval > 0 ? this.t("staleScan", { age, hours: stale.interval }) : this.t("staleScanManual", { age }), scan: true });
     }
     // Only real problems are listed; notes such as "emergency kit not confirmed" stay on the Maintenance card.
     const problems = this.backup?.available && this.backup.overall === "problem" ? this.backup.checks.filter(c => c.level === "problem") : [];
     const dbProblems = this.dbHealth?.available ? this.dbHealth.findings.filter(f => f.level === "problem") : [];
-    if (dbProblems.length) items.push({ key: "db", tone: "red", icon: "mdi:database-alert-outline", label: "todoDbProblem", hintText: dbProblems.map(f => this.t(`dbKind_${f.kind}`)).join(", "), view: "recorder" });
-    if (problems.length) items.push({ key: "backup", tone: "red", icon: "mdi:backup-restore", label: "todoBackupProblem", count: problems.length, hintText: problems.map(c => this.t(`bh_${c.id}`)).join(", "), view: "maintenance" });
+    if (dbProblems.length) items.push({ key: "db", area: "state", tone: "red", icon: "mdi:database-alert-outline", label: "todoDbProblem", hintText: dbProblems.map(f => this.t(`dbKind_${f.kind}`)).join(", "), view: "recorder" });
+    if (problems.length) items.push({ key: "backup", area: "state", tone: "red", icon: "mdi:backup-restore", label: "todoBackupProblem", count: problems.length, hintText: problems.map(c => this.t(`bh_${c.id}`)).join(", "), view: "maintenance" });
     const limit = m.quarantine_days ?? 14;
     const ready = (this.data.quarantine || []).filter(q => this.daysSince(q.since) >= limit).length;
-    if (ready) items.push({ key: "quarantine", tone: "warn", icon: "mdi:archive-clock-outline", label: "actQuarantine", hint: "actQuarantineHint", count: ready, view: "cleanup" });
+    if (ready) items.push({ key: "quarantine", area: "care", tone: "warn", icon: "mdi:archive-clock-outline", label: "actQuarantine", hint: "actQuarantineHint", count: ready, view: "cleanup" });
     this.ensureGoals();
     this.ensurePolicies(); // the menu counts need both
     for (const g of (this.goals?.goals || []).filter(x => x.state === "missed")) {
-      items.push({ key: `goal_${g.id}`, tone: "warn", icon: "mdi:target", text: this.t("goalMissedTitle", { goal: this.t(`goal_${g.id}`) }), hintText: `${this.goalNow(g)} · ${this.t("goalLimit", { limit: this.goalAmount(g, g.limit) })}`, view: GOAL_VIEWS[g.id] });
+      items.push({ key: `goal_${g.id}`, area: "care", tone: "warn", icon: "mdi:target", text: this.t("goalMissedTitle", { goal: this.t(`goal_${g.id}`) }), hintText: `${this.goalNow(g)} · ${this.t("goalLimit", { limit: this.goalAmount(g, g.limit) })}`, view: GOAL_VIEWS[g.id] });
     }
     return items;
   }
@@ -2024,16 +2029,17 @@ class OverviewMixin {
 
   statusSubline(health) {
     const topics = health.penalty ? this.t("statusTopicsCost", { n: health.penalty }) : this.t("statusTopicsFree");
-    return `${this.t("statusObjects", { share: health.share, affected: this.formatNumber(health.affected), base: this.formatNumber(health.base) })} · ${topics} · <button type="button" class="link" data-health-why>${this.t("healthWhy")}</button>`;
+    return `${this.t("statusObjects", { affected: this.formatNumber(health.affected), base: this.formatNumber(health.base) })} · ${topics} · <button type="button" class="link" data-health-why>${this.t("healthWhy")}</button>`;
   }
 
-  // The calculation behind the ring: the share without a finding, minus the urgent topics.
+  // The calculation behind the ring: 100, minus the entries of the findings list by impact, minus the urgent state topics.
   healthWhyCard(health) {
     const row = (label, value, cls = "") => `<div class="row ${cls}"><span>${label}</span><span>${value}</span></div>`;
-    const lines = [row(this.t("whyShare"), `${health.share} %`)];
-    if (health.red) lines.push(row(this.t(health.red === 1 ? "whyUrgentOne" : "whyUrgent", { n: this.formatNumber(health.red), points: HEALTH_PENALTY_URGENT }), `− ${health.penalty}`, "minus"));
-    lines.push(row(this.t("whyTotal"), `${health.percent} %`, "total"));
-    return `<div class="healthwhy" role="region" aria-label="${this.esc(this.t("healthWhy"))}">${lines.join("")}<small>${this.t("whyNote", { max: HEALTH_PENALTY_MAX })}</small></div>`;
+    const lines = [row(this.t("whyStart"), "100")];
+    for (const l of health.lines) lines.push(row(this.t("whyLevel", { n: this.formatNumber(l.n), level: this.t(`impact_${l.level}`), each: l.each }), `− ${l.points}`, "minus"));
+    if (health.stateRed) lines.push(row(this.t("whyState", { n: this.formatNumber(health.stateRed), each: HEALTH_STATE_POINTS }), `− ${health.statePoints}`, "minus"));
+    lines.push(row(this.t("whyTotal"), `${health.percent}`, "total"));
+    return `<div class="healthwhy" role="region" aria-label="${this.esc(this.t("healthWhy"))}">${lines.join("")}<small>${this.t("whyNote", { green: HEALTH_GREEN, yellow: HEALTH_YELLOW })}</small></div>`;
   }
 
   // A number with its noun, so that the rows count what they say: "8 integrations".
@@ -2274,28 +2280,39 @@ class FindingsMixin {
     return `${this.t(`impact_${f.impact}`)}${facts.length ? ` (${facts.join(" · ")})` : ""}`;
   }
 
-  // The share of objects without a finding. It counts affected objects, not findings, so an object
-  // with several findings is subtracted once; only the base types count, hidden findings do not.
+  // The entries of the findings list, as impact levels: every outage chain once at its top, every finding without a cause.
+  // Followers are not entries of their own; hidden, known and snoozed findings do not count.
+  entryLevels() {
+    const top = this.causeList().filter(c => !c.parent_id).map(c => c.impact || "none");
+    const single = this.data.findings.filter(f => !f.ignored && !f.cause_id).map(f => f.impact || "none");
+    return [...top, ...single];
+  }
+
+  // The status is a score from 100. Each entry of the findings list takes points off by its impact, each urgent topic of the
+  // state area (backup, disk) another 10. The objects with a finding are only shown next to it, they are not the percent.
   health() {
     const objects = this.data.objects.filter(o => HEALTH_TYPES.includes(o.object_type));
     const base = objects.length;
     const known = new Set(objects.map(o => this.objectKey(o)));
     const affected = new Set(this.data.findings.filter(f => !f.ignored).map(f => this.findingKey(f)).filter(key => known.has(key)));
-    // Rounded down, so a few affected objects among thousands never read as 100.
-    const share = base ? Math.max(0, Math.floor(100 * (1 - affected.size / base))) : 100;
-    // The status is the worse of two readings: the share of objects without a finding, and what the to-do list still asks for
-    // (broken integrations, a missed goal, a problem with the backup or the database).
     // The same number in every view: what it counts is fetched here, not only when the overview opens. The database
     // check stays out of it, because it reads the recorder and only runs once Maintenance is opened.
     this.ensureBackup?.(); this.ensureTrend?.();
     const open = this.todoItems().filter(i => i.key !== "db"), red = open.filter(i => i.tone === "red").length, tasks = open.length;
-    const byShare = share >= 95 ? "ok" : share >= 80 ? "warn" : "red";
-    // Only urgent topics take points off the share, 10 each and at most 30; the other topics turn the ring amber and are named in the headline.
-    const penalty = Math.min(HEALTH_PENALTY_MAX, red * HEALTH_PENALTY_URGENT);
-    const percent = Math.max(0, share - penalty);
-    const tone = red || byShare === "red" ? "red" : tasks || byShare === "warn" ? "warn" : "ok";
+    const stateRed = open.filter(i => i.area === "state" && i.tone === "red").length;
+    const levels = this.entryLevels();
+    const lines = Object.entries(HEALTH_POINTS).map(([level, [each, max]]) => {
+      const n = levels.filter(l => l === level).length;
+      return { level, n, each, points: Math.min(max, n * each) };
+    }).filter(l => l.n);
+    const statePoints = Math.min(HEALTH_STATE_MAX, stateRed * HEALTH_STATE_POINTS);
+    const penalty = lines.reduce((sum, l) => sum + l.points, 0) + statePoints;
+    const percent = Math.max(0, 100 - penalty);
+    let tone = percent >= HEALTH_GREEN ? "ok" : percent >= HEALTH_YELLOW ? "warn" : "red";
+    // A high-impact entry or an urgent state topic never reads as green, however small the sum is.
+    if (tone === "ok" && (levels.includes("high") || stateRed)) tone = "warn";
     const label = tone === "ok" ? "healthGood" : tone === "warn" ? "healthCheck" : "healthBad";
-    return { percent, share, tone, label, affected: affected.size, base, tasks, red, later: tasks - red, penalty };
+    return { percent, tone, label, affected: affected.size, base, tasks, red, later: tasks - red, penalty, lines, stateRed, statePoints, entries: levels.length };
   }
 
   findingRow(finding, inGroup = false) {
@@ -2392,7 +2409,7 @@ class FindingsMixin {
     this.ensureCorrelations();
     const afterCount = all.filter(f => this.corr?.by_key?.[f.key]).length;
     const tiles = this.sumTiles([
-      { label: this.t("health"), value: `${h.share} %`, sub: this.t("findSumAffected", { n: this.formatNumber(h.affected), m: this.formatNumber(h.base) }), tone: h.tone, spark: spark("share", "good") },
+      { label: this.t("health"), value: `${h.percent} %`, sub: this.t("findSumAffected", { n: this.formatNumber(h.affected), m: this.formatNumber(h.base) }), tone: h.tone, spark: spark("share", "good") },
       { label: this.t("all"), value: this.formatNumber(this.findingTotal()), sub: this.followerCount() ? this.esc(this.t("findingsFollowSub", { n: this.formatNumber(this.followerCount()) })) : undefined, tone: this.findingTotal() ? "warn" : "ok", filter: "", active: !this.findingFilter, spark: spark("open", "bad") },
       afterCount ? { label: this.t("corrTile"), value: this.formatNumber(afterCount), sub: this.t("corrTileSub"), tone: "warn", attr: ["data-finding-after", "1"], active: this.findingAfter } : null,
       ...classes.map(c => ({ label: this.t(c), value: this.formatNumber(all.filter(f => f.classification === c).length), tone: classTone(c), filter: c, active: this.findingFilter === c, spark: spark(`class:${c}`, "bad") })),
@@ -8914,8 +8931,8 @@ Object.assign(TEXT.de, {
   planResultDone: "Plan", undoYes: "Ja, rückgängig machen", undoAskOne: "Diese Änderung zurücksetzen?", undoAskAll: "Alles rückgängig machen?",
   undoAskAllHint: "Housekeeper stellt zurück, was dieser Plan geändert hat, soweit es unverändert ist.", undoAllHint: "Housekeeper kann zurückstellen, was dieser Plan geändert hat, solange es unverändert ist.", reportTitle: "Prüfbericht",
   statusUrgentOne: "1 Thema dringend", statusUrgent: "{n} Themen dringend", statusMoreOpen: "{n} weitere offen", statusOpenOne: "1 Thema offen", statusOpen: "{n} Themen offen",
-  statusObjects: "Objekte: {share} % ohne Befund ({affected} von {base} betroffen)", statusTopicsCost: "Themen: Abzug {n} Punkte", statusTopicsFree: "Themen: kein Abzug", healthWhy: "Wie entsteht die Zahl?",
-  whyShare: "Objekte ohne Befund", whyUrgentOne: "1 dringendes Thema ({points} Punkte)", whyUrgent: "{n} dringende Themen ({points} Punkte je Thema)", whyTotal: "Zustand", whyNote: "Zählt Entitäten, Automationen, Skripte und Szenen. Nur dringende Themen ziehen Punkte ab, höchstens {max}. Die anderen Themen färben den Ring gelb. Ausgeblendete Befunde und die Datenbankprüfung zählen nicht. „Offene Befunde“ rechts zählt alle Befunde.",
+  statusObjects: "{affected} von {base} Objekten mit Befund", statusTopicsCost: "Zustand: Abzug {n} Punkte", statusTopicsFree: "Zustand: kein Abzug", healthWhy: "Wie entsteht die Zahl?",
+  whyStart: "Ausgangswert", whyLevel: "{n} Einträge · {level} · je {each} Punkte", whyState: "{n} dringende Zustandsthemen · je {each} Punkte", whyTotal: "Punktestand", whyNote: "Jeder Eintrag der Befundliste zählt einmal, nach seiner Auswirkung; Folgebefunde einer Ursache zählen nicht extra. Hohe Auswirkung höchstens 30 Punkte, mittlere 20, niedrige 10; dringende Zustandsthemen (Backup, Datenträger) höchstens 30. Ab {green} grün, ab {yellow} gelb, darunter rot; ein Eintrag mit hoher Auswirkung oder ein dringendes Zustandsthema ist mindestens gelb. Ausgeblendete, bekannte und zurückgestellte Befunde zählen nicht.",
   topicsOne: "1 Thema", topicsN: "{n} Themen",
   unit_outages_1: "Ausfall", unit_outages_n: "Ausfälle", unit_followup_1: "Plan", unit_followup_n: "Pläne", unit_reminders_1: "Erinnerung", unit_reminders_n: "Erinnerungen", unit_criteria_1: "Ziel", unit_criteria_n: "Ziele", unit_critical_1: "Befund", unit_critical_n: "Befunde", unit_backup_1: "Problem", unit_backup_n: "Probleme", unit_quarantine_1: "Objekt", unit_quarantine_n: "Objekte",
   statusTasks: "{count} Aufgaben warten auf dich", statusTasksJump: "Zur Liste der Aufgaben springen", statusAllGood: "Alles in Ordnung",
@@ -8931,7 +8948,7 @@ Object.assign(TEXT.de, {
   err_cleanup_busy: "Ein Plan läuft gerade. Housekeeper lädt die Ansicht neu, sobald er fertig ist.", 
   
   goalMissedTitle: "{goal}: Ziel verfehlt", goalsLine: "Wartungsziele: {met} von {total} erfüllt", hintsTitle: "Hinweise",
-  healthScore: "{percent} % der Objekte ohne Befund", healthTasks: "{count} Aufgaben offen", healthNoTasks: "keine offenen Aufgaben", healthTip: "{affected} von {base} bewerteten Objekten sind betroffen; gezählt werden Objekte, nicht einzelne Befunde. Die Zahl im Ring ist der abgerundete Anteil ohne Befund, minus 10 Punkte je dringendes Thema (höchstens 30): kaputte Integrationen, neue kritische Befunde, Backup-Probleme. Die übrigen Themen färben den Ring nur gelb. Ausgeblendete Befunde und die Datenbankprüfung zählen nicht. Mehr per Klick auf den Ring.",
+  healthScore: "Punktestand {percent} von 100", healthTasks: "{count} Aufgaben offen", healthNoTasks: "keine offenen Aufgaben", healthTip: "Punktestand von 100: Jeder Eintrag der Befundliste nimmt je nach Auswirkung Punkte weg, dringende Zustandsthemen (Backup, Datenträger) ebenfalls. {affected} von {base} Objekten haben einen Befund; das ist nur die Begleitzahl. Mehr per Klick auf den Ring.",
   repair: "Reparieren", repairSubtitle: "Bestehende Daten und Verweise korrigieren oder auf etwas Neues umstellen. Housekeeper zeigt erst eine Vorschau; geschrieben wird erst nach deiner Bestätigung.", repairDryRun: "Nichts wird geändert, bis du die Vorschau bestätigst.",
   journalSubtitle: "Alle Pläne aus Aufräumen und Reparieren: was geändert wurde, was geprüft wurde und was sich rückgängig machen lässt.",
  relTileIntHint: "Verfügbarkeit {avail} in {window}", relTilePill: "{n} auffällig", relTileUnstableHint: "Entitäten, die oft zwischen Zuständen wechseln", recTileLoadRows: "{n} Einträge pro Tag ({window})", recTileLoadHint: "Welche Entitäten den Recorder füllen", recTileCostsTop: "Größter Posten: {name} ({share} %)", recTileCostsHint: "Wer wie viel Platz belegt", recTileDbHint: "Größe, Wachstum und Aufbewahrung", polTileRulesHint: "{on} eingeschaltet", polTileViolationsHint: "Verstöße gegen eingeschaltete Regeln", polTileHidden: "{n} ausgeblendet", expoTileFindingsHint: "Was du prüfen oder wissen solltest", expoTileSourceHint: "{n} Entitäten freigegeben", runsTileRunsHint: "Gezählte Läufe von Automationen und Skripten", runsTileQualityHint: "Alle Automationen auf einen Blick",
@@ -8957,8 +8974,8 @@ Object.assign(TEXT.en, {
   planResultDone: "Plan", undoYes: "Yes, undo", undoAskOne: "Undo this change?", undoAskAll: "Undo everything?",
   undoAskAllHint: "Housekeeper puts back what this plan changed, as far as it is still unchanged.", undoAllHint: "Housekeeper can put back what this plan changed, as long as it is unchanged.", reportTitle: "Audit report",
   statusUrgentOne: "1 topic urgent", statusUrgent: "{n} topics urgent", statusMoreOpen: "{n} more open", statusOpenOne: "1 topic open", statusOpen: "{n} topics open",
-  statusObjects: "Objects: {share}% without a finding ({affected} of {base} affected)", statusTopicsCost: "Topics: {n} points off", statusTopicsFree: "Topics: nothing off", healthWhy: "How is this number made?",
-  whyShare: "Objects without a finding", whyUrgentOne: "1 urgent topic ({points} points)", whyUrgent: "{n} urgent topics ({points} points each)", whyTotal: "Status", whyNote: "Counts entities, automations, scripts and scenes. Only urgent topics take points off, at most {max}. The other topics turn the ring amber. Hidden findings and the database check do not count. “Open findings” on the right counts all findings.",
+  statusObjects: "{affected} of {base} objects with a finding", statusTopicsCost: "State: {n} points off", statusTopicsFree: "State: nothing off", healthWhy: "How is this number made?",
+  whyStart: "Starting value", whyLevel: "{n} entries · {level} · {each} points each", whyState: "{n} urgent state topics · {each} points each", whyTotal: "Score", whyNote: "Every entry of the findings list counts once, by its impact; follow-up findings of a cause do not count extra. High impact takes off at most 30 points, medium 20, low 10; urgent state topics (backup, disk) at most 30. Green from {green}, yellow from {yellow}, red below; an entry with high impact or an urgent state topic is at least yellow. Hidden, known and snoozed findings do not count.",
   topicsOne: "1 topic", topicsN: "{n} topics",
   unit_outages_1: "outage", unit_outages_n: "outages", unit_followup_1: "plan", unit_followup_n: "plans", unit_reminders_1: "reminder", unit_reminders_n: "reminders", unit_criteria_1: "goal", unit_criteria_n: "goals", unit_critical_1: "finding", unit_critical_n: "findings", unit_backup_1: "problem", unit_backup_n: "problems", unit_quarantine_1: "object", unit_quarantine_n: "objects",
   statusTasks: "{count} tasks are waiting for you", statusTasksJump: "Jump to the list of tasks", statusAllGood: "All good",
@@ -8974,7 +8991,7 @@ Object.assign(TEXT.en, {
   err_cleanup_busy: "A plan is running. Housekeeper reloads the view as soon as it has finished.", 
   
   goalMissedTitle: "{goal}: goal missed", goalsLine: "Maintenance goals: {met} of {total} met", hintsTitle: "Hints",
-  healthScore: "{percent}% of objects without a finding", healthTasks: "{count} tasks open", healthNoTasks: "no open tasks", healthTip: "{affected} of {base} rated objects are affected; objects are counted, not single findings. The number in the ring is the share without a finding, rounded down, minus 10 points for each urgent topic (at most 30): broken integrations, new critical findings, backup problems. The other topics only turn the ring amber. Hidden findings and the database check do not count. More with a click on the ring.",
+  healthScore: "Score {percent} of 100", healthTasks: "{count} tasks open", healthNoTasks: "no open tasks", healthTip: "Score out of 100: every entry of the findings list takes points off by its impact, and so do urgent state topics (backup, disk). {affected} of {base} objects have a finding; that is only the number beside it. More with a click on the ring.",
   repair: "Repair", repairSubtitle: "Correct existing data and references, or switch them over to something new. Housekeeper shows a preview first; nothing is written until you confirm.", repairDryRun: "Nothing is changed until you confirm the preview.",
   journalSubtitle: "Every plan from Tidy up and Repair: what changed, what was checked and what can be undone.",
  relTileIntHint: "Availability {avail} over {window}", relTilePill: "{n} need a look", relTileUnstableHint: "Entities that often change between states", recTileLoadRows: "{n} rows a day ({window})", recTileLoadHint: "Which entities fill the recorder", recTileCostsTop: "Biggest item: {name} ({share} %)", recTileCostsHint: "Who takes how much space", recTileDbHint: "Size, growth and retention", polTileRulesHint: "{on} switched on", polTileViolationsHint: "Violations of the rules that are on", polTileHidden: "{n} hidden", expoTileFindingsHint: "What you should check or know", expoTileSourceHint: "{n} entities exposed", runsTileRunsHint: "Counted runs of automations and scripts", runsTileQualityHint: "All automations at a glance",

@@ -197,7 +197,7 @@ def test_series_lists_the_days_and_the_latest_scan_with_unavailable(hass) -> Non
     ]
 
 
-def test_series_carries_open_findings_classes_and_the_share_for_the_sparklines(hass) -> None:
+def test_series_carries_open_findings_classes_and_the_score_for_the_sparklines(hass) -> None:
     def snap(at: str, findings: list[dict]) -> dict:
         base = _snapshot(at, [("entity", "x.a", "active"), ("entity", "x.b", "active")])
         base["findings"] = findings
@@ -209,6 +209,7 @@ def test_series_carries_open_findings_classes_and_the_share_for_the_sparklines(h
             "object_id": object_id,
             "classification": classification,
             "ignored": ignored,
+            "impact": "medium",
         }
 
     history = ScanHistory(hass)
@@ -224,7 +225,7 @@ def test_series_carries_open_findings_classes_and_the_share_for_the_sparklines(h
         )
     )
     points = history.series()["points"]
-    assert [(p["open"], p["share"]) for p in points] == [(0, 100), (2, 50)]
+    assert [(p["open"], p["share"]) for p in points] == [(0, 100), (2, 96)]
     assert points[0]["classes"] == {} and points[1]["classes"] == {
         "unused": 1,
         "broken_reference": 1,

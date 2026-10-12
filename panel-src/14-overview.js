@@ -72,39 +72,39 @@ class OverviewMixin {
   todoItems() {
     const items = [], m = this.data.meta;
     const outages = this.causeList();
-    if (outages.length) items.push({ key: "outages", tone: "red", icon: "mdi:source-branch", label: "actOutages", hintText: this.outagesHint(outages), count: outages.length, view: "findingsNav", filter: "" });
+    if (outages.length) items.push({ key: "outages", area: "findings", tone: "red", icon: "mdi:source-branch", label: "actOutages", hintText: this.outagesHint(outages), count: outages.length, view: "findingsNav", filter: "" });
     const regressions = (this.data.regressions || []).length;
-    if (regressions) items.push({ key: "followup", tone: "red", icon: "mdi:history", label: "actFollowup", hint: "actFollowupHint", count: regressions, view: "journal" });
+    if (regressions) items.push({ key: "followup", area: "findings", tone: "red", icon: "mdi:history", label: "actFollowup", hint: "actFollowupHint", count: regressions, view: "journal" });
     const due = (this.data.reminders || []).filter(r => r.state === "due").length;
-    if (due) items.push({ key: "reminders", tone: "warn", icon: "mdi:wrench-clock", label: "actReminders", hint: "actRemindersHint", count: due, view: "reminders" });
+    if (due) items.push({ key: "reminders", area: "care", tone: "warn", icon: "mdi:wrench-clock", label: "actReminders", hint: "actRemindersHint", count: due, view: "reminders" });
     const missed = (this.data.criteria_alerts || []).length;
-    if (missed) items.push({ key: "criteria", tone: "warn", icon: "mdi:target", label: "actCriteria", hint: "actCriteriaHint", count: missed, view: "runs" });
+    if (missed) items.push({ key: "criteria", area: "care", tone: "warn", icon: "mdi:target", label: "actCriteria", hint: "actCriteriaHint", count: missed, view: "runs" });
     const fresh = (this.trend?.new_findings?.items || []).filter(f => !f.ignored && CRITICAL_CLASSES.includes(f.classification)).length;
-    if (fresh) items.push({ key: "critical", tone: "red", icon: "mdi:alert-circle-outline", label: "actNewCritical", hint: "actNewCriticalHint", count: fresh, view: "findingsNav", filter: "" });
+    if (fresh) items.push({ key: "critical", area: "findings", tone: "red", icon: "mdi:alert-circle-outline", label: "actNewCritical", hint: "actNewCriticalHint", count: fresh, view: "findingsNav", filter: "" });
     // A nearly full disk, from the light read of the overview; red from 90 % takes points off the ring like any urgent topic.
     this.ensureSysLight();
     const disk = this.sysLight?.disk;
     if (disk?.percent >= SYS_WARN_PERCENT) {
       const tone = disk.percent >= SYS_RED_PERCENT ? "red" : "warn";
-      items.push({ key: "disk", tone, icon: "mdi:harddisk", label: tone === "red" ? "todoDiskFull" : "todoDiskNear", hintText: this.t("todoDiskHint", { pct: this.sysPercent(disk.percent), free: this.formatBytes(disk.free ?? 0) }), view: "storage" });
+      items.push({ key: "disk", area: "state", tone, icon: "mdi:harddisk", label: tone === "red" ? "todoDiskFull" : "todoDiskNear", hintText: this.t("todoDiskHint", { pct: this.sysPercent(disk.percent), free: this.formatBytes(disk.free ?? 0) }), view: "storage" });
     }
     const stale = this.staleScan();
     if (stale) {
       const age = stale.hours >= 48 ? this.t("daysValue", { n: Math.round(stale.hours / 24) }) : `${stale.hours} h`;
-      items.push({ key: "stale", tone: "warn", icon: "mdi:clock-alert-outline", text: stale.interval > 0 ? this.t("staleScan", { age, hours: stale.interval }) : this.t("staleScanManual", { age }), scan: true });
+      items.push({ key: "stale", area: "state", tone: "warn", icon: "mdi:clock-alert-outline", text: stale.interval > 0 ? this.t("staleScan", { age, hours: stale.interval }) : this.t("staleScanManual", { age }), scan: true });
     }
     // Only real problems are listed; notes such as "emergency kit not confirmed" stay on the Maintenance card.
     const problems = this.backup?.available && this.backup.overall === "problem" ? this.backup.checks.filter(c => c.level === "problem") : [];
     const dbProblems = this.dbHealth?.available ? this.dbHealth.findings.filter(f => f.level === "problem") : [];
-    if (dbProblems.length) items.push({ key: "db", tone: "red", icon: "mdi:database-alert-outline", label: "todoDbProblem", hintText: dbProblems.map(f => this.t(`dbKind_${f.kind}`)).join(", "), view: "recorder" });
-    if (problems.length) items.push({ key: "backup", tone: "red", icon: "mdi:backup-restore", label: "todoBackupProblem", count: problems.length, hintText: problems.map(c => this.t(`bh_${c.id}`)).join(", "), view: "maintenance" });
+    if (dbProblems.length) items.push({ key: "db", area: "state", tone: "red", icon: "mdi:database-alert-outline", label: "todoDbProblem", hintText: dbProblems.map(f => this.t(`dbKind_${f.kind}`)).join(", "), view: "recorder" });
+    if (problems.length) items.push({ key: "backup", area: "state", tone: "red", icon: "mdi:backup-restore", label: "todoBackupProblem", count: problems.length, hintText: problems.map(c => this.t(`bh_${c.id}`)).join(", "), view: "maintenance" });
     const limit = m.quarantine_days ?? 14;
     const ready = (this.data.quarantine || []).filter(q => this.daysSince(q.since) >= limit).length;
-    if (ready) items.push({ key: "quarantine", tone: "warn", icon: "mdi:archive-clock-outline", label: "actQuarantine", hint: "actQuarantineHint", count: ready, view: "cleanup" });
+    if (ready) items.push({ key: "quarantine", area: "care", tone: "warn", icon: "mdi:archive-clock-outline", label: "actQuarantine", hint: "actQuarantineHint", count: ready, view: "cleanup" });
     this.ensureGoals();
     this.ensurePolicies(); // the menu counts need both
     for (const g of (this.goals?.goals || []).filter(x => x.state === "missed")) {
-      items.push({ key: `goal_${g.id}`, tone: "warn", icon: "mdi:target", text: this.t("goalMissedTitle", { goal: this.t(`goal_${g.id}`) }), hintText: `${this.goalNow(g)} · ${this.t("goalLimit", { limit: this.goalAmount(g, g.limit) })}`, view: GOAL_VIEWS[g.id] });
+      items.push({ key: `goal_${g.id}`, area: "care", tone: "warn", icon: "mdi:target", text: this.t("goalMissedTitle", { goal: this.t(`goal_${g.id}`) }), hintText: `${this.goalNow(g)} · ${this.t("goalLimit", { limit: this.goalAmount(g, g.limit) })}`, view: GOAL_VIEWS[g.id] });
     }
     return items;
   }
@@ -132,16 +132,17 @@ class OverviewMixin {
 
   statusSubline(health) {
     const topics = health.penalty ? this.t("statusTopicsCost", { n: health.penalty }) : this.t("statusTopicsFree");
-    return `${this.t("statusObjects", { share: health.share, affected: this.formatNumber(health.affected), base: this.formatNumber(health.base) })} · ${topics} · <button type="button" class="link" data-health-why>${this.t("healthWhy")}</button>`;
+    return `${this.t("statusObjects", { affected: this.formatNumber(health.affected), base: this.formatNumber(health.base) })} · ${topics} · <button type="button" class="link" data-health-why>${this.t("healthWhy")}</button>`;
   }
 
-  // The calculation behind the ring: the share without a finding, minus the urgent topics.
+  // The calculation behind the ring: 100, minus the entries of the findings list by impact, minus the urgent state topics.
   healthWhyCard(health) {
     const row = (label, value, cls = "") => `<div class="row ${cls}"><span>${label}</span><span>${value}</span></div>`;
-    const lines = [row(this.t("whyShare"), `${health.share} %`)];
-    if (health.red) lines.push(row(this.t(health.red === 1 ? "whyUrgentOne" : "whyUrgent", { n: this.formatNumber(health.red), points: HEALTH_PENALTY_URGENT }), `− ${health.penalty}`, "minus"));
-    lines.push(row(this.t("whyTotal"), `${health.percent} %`, "total"));
-    return `<div class="healthwhy" role="region" aria-label="${this.esc(this.t("healthWhy"))}">${lines.join("")}<small>${this.t("whyNote", { max: HEALTH_PENALTY_MAX })}</small></div>`;
+    const lines = [row(this.t("whyStart"), "100")];
+    for (const l of health.lines) lines.push(row(this.t("whyLevel", { n: this.formatNumber(l.n), level: this.t(`impact_${l.level}`), each: l.each }), `− ${l.points}`, "minus"));
+    if (health.stateRed) lines.push(row(this.t("whyState", { n: this.formatNumber(health.stateRed), each: HEALTH_STATE_POINTS }), `− ${health.statePoints}`, "minus"));
+    lines.push(row(this.t("whyTotal"), `${health.percent}`, "total"));
+    return `<div class="healthwhy" role="region" aria-label="${this.esc(this.t("healthWhy"))}">${lines.join("")}<small>${this.t("whyNote", { green: HEALTH_GREEN, yellow: HEALTH_YELLOW })}</small></div>`;
   }
 
   // A number with its noun, so that the rows count what they say: "8 integrations".

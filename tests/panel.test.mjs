@@ -291,22 +291,22 @@ test("the status counts affected objects once, only of the base types, and not h
   const { el } = panel("en");
   const entity = id => ({ object_type: "entity", object_id: id, name: id, status: "orphaned" });
   const objects = [...Array.from({ length: 8 }, (_, i) => entity(`sensor.s${i}`)), { object_type: "dashboard", object_id: "dash", name: "d", status: "active" }];
-  const finding = (rule, id, extra = {}) => ({ rule_id: rule, object_id: id, classification: "orphaned", confidence: 0.9, evidence: [], ...extra });
+  const finding = (rule, id, extra = {}) => ({ rule_id: rule, object_id: id, classification: "orphaned", confidence: 0.9, evidence: [], impact: "medium", ...extra });
   const base = { ...DATA, objects };
   el.data = { ...base, findings: [finding("entity.state_missing", "sensor.s0"), finding("entity.duplicate", "sensor.s0"), finding("entity.unavailable", "sensor.s0")] };
-  assert.deepEqual([el.health().affected, el.health().base, el.health().percent], [1, 8, 87]); // one object, three findings; rounded down
+  assert.deepEqual([el.health().affected, el.health().base, el.health().percent], [1, 8, 94]); // one object, three entries of two points each
   el.data = { ...base, findings: [finding("entity.state_missing", "sensor.s0"), finding("entity.state_missing", "sensor.s1", { ignored: true })] };
   assert.equal(el.health().affected, 1); // hidden findings do not count
   el.data = { ...base, findings: [finding("dashboard.missing_entity", "dash")] };
   assert.equal(el.health().affected, 0); // other object types are listed but not part of the ring
   el.data = { ...DATA, objects: [], findings: [finding("entity.state_missing", "sensor.s0")] };
-  assert.equal(el.health().percent, 100); // empty base
+  assert.equal(el.health().percent, 98); // the score does not depend on the number of objects
   const many = Array.from({ length: 1000 }, (_, i) => entity(`sensor.m${i}`));
   el.data = { ...DATA, objects: many, findings: [finding("entity.state_missing", "sensor.m0")] };
-  assert.equal(el.health().percent, 99, "one in a thousand never reads as 100");
+  assert.equal(el.health().percent, 98, "one entry takes its points, however many objects there are");
   el.dbHealth = { available: true, findings: [{ level: "problem", kind: "gaps" }] };
-  assert.equal(el.health().percent, 99, "the database check only runs in Maintenance, so it never moves the number");
-  assert.ok(el.t("healthTip", { affected: 2, base: 8 }).includes("2") && el.t("healthHint").includes("scripts and scenes"));
+  assert.equal(el.health().percent, 98, "the database check only runs in Maintenance, so it never moves the number");
+  assert.ok(el.t("healthTip", { affected: 2, base: 8 }).includes("2") && el.t("healthHint").includes("findings list"));
 });
 
 test("hidden findings are excluded from counts, lists and export unless shown", () => {
@@ -315,7 +315,7 @@ test("hidden findings are excluded from counts, lists and export unless shown", 
   el.data = { ...DATA, findings };
   assert.equal(el.sortedFindings().length, 1);
   assert.equal(el.sortedFindings(true).length, 2);
-  assert.equal(el.health().percent, 66);
+  assert.equal(el.health().percent, 100, "findings without an impact take nothing off");
   el.exportFindings("json");
   assert.equal(JSON.parse(downloads[0].text).findings.length, 1);
   el.findingStatus = "all";
@@ -3026,7 +3026,7 @@ test("the health card names the score and the count; the safety line shows backu
   el.render();
   const html = shadow.innerHTML;
   assert.ok(html.includes("class=\"statushead\"") && /topics? (urgent|open)|All good/.test(html));
-  assert.ok(html.includes("of 3 affected"));
+  assert.ok(/of \d+ objects with a finding/.test(html));
   assert.ok(html.includes("Last backup: 5 h ago") && html.includes("Undo available") && html.includes("1 plan is being watched") && html.includes("1 regression after a change"));
   el.journal = [{ plan_id: "c", status: "verified", finished_at: "2026-10-08T10:00:00+00:00", undoable: false }];
   assert.ok(el.safetyBar().includes("backup restore only"));
@@ -3347,8 +3347,8 @@ test("the overview has no tile card; a missed goal is a to-do row, not a card of
   const html = el.overview();
   assert.ok(!html.includes("hk-tiles"));
   assert.ok(html.includes("Broken references: goal missed") && html.includes("Maintenance goals: 3 of 3 met".replace("3 of 3", "2 of 3")) && html.includes("data-goals-settings"));
-  assert.ok(!html.includes('aria-labelledby="hk-goals"') && html.includes("without a finding"));
-  assert.ok(el.health().tasks >= 1 && el.health().tone !== "ok"); // a missed goal is an open task: the status is not "all good"
+  assert.ok(!html.includes('aria-labelledby="hk-goals"') && html.includes("with a finding"));
+  assert.ok(el.health().tasks >= 1 && el.health().tone === "ok"); // a missed goal is an open task, but maintenance never colours the status
   el.data = { ...DATA, objects: [], findings: [], regressions: [], criteria_alerts: [] };
   el.goals = { met: 3, missed: 0, goals: [] };
   assert.deepEqual([el.health().percent, el.health().tone], [100, "ok"]);
@@ -3695,23 +3695,29 @@ test("the mark is a row of the Actions tab and a line of what is known, no longe
   assert.ok(el.markRows({ object_type: "automation", object_id: "automation.x" }).length === 0);
 });
 
-test("the status takes points off only for urgent topics, names its topics and explains the number on a click", () => {
+test("the status is a score: entries by impact, urgent state topics, followers not extra; the ring explains it", () => {
   const { el, shadow } = panel("en");
-  el.data = { ...DATA };
-  const items = [{ tone: "red", key: "outages", count: 8 }, { tone: "warn", key: "quarantine", count: 2 }, { tone: "warn", key: "reminders", count: 1 }];
+  const f = (id, impact, extra = {}) => ({ rule_id: "entity.state_missing", object_id: id, classification: "orphaned", confidence: 0.9, evidence: [], impact, key: id, ...extra });
+  el.data = { ...DATA, objects: [], causes: [{ id: "a", parent_id: null, impact: "high" }, { id: "b", parent_id: "a", impact: "high" }], findings: [f("x.1", "high", { cause_id: "a" }), f("x.2", "medium"), f("x.3", "low"), f("x.4", "low", { ignored: true })] };
+  const items = [{ tone: "warn", key: "quarantine", area: "care", count: 2 }];
   el.todoItems = () => items;
   let h = el.health();
-  assert.equal(h.red, 1); assert.equal(h.later, 2); assert.equal(h.penalty, 10); assert.equal(h.percent, h.share - 10, "the other topics cost nothing");
-  assert.equal(el.statusHeadline(h), "1 topic urgent, 2 more open");
-  items.splice(0, 3, ...Array.from({ length: 5 }, () => ({ tone: "red", key: "x" })));
+  assert.equal(h.percent, 100 - 5 - 2 - 1, "the chain counts once at its top, the follower and the hidden finding not at all");
+  assert.equal(h.tone, "warn", "a high entry is at least yellow");
+  assert.equal(el.statusHeadline(h), "1 topic open");
+  el.data = { ...el.data, causes: [], findings: Array.from({ length: 9 }, (_, i) => f(`x.${i}`, "high")) };
   h = el.health();
-  assert.equal(h.penalty, 30, "at most 30 points");
-  assert.equal(el.statusHeadline(h), "5 topics urgent");
-  items.splice(0, 5, { tone: "warn", key: "quarantine" });
+  assert.equal(h.percent, 100 - 30, "high impact takes off at most 30");
+  assert.equal(h.tone, "warn", "70 is yellow");
+  items.push({ tone: "red", key: "disk", area: "state" }, { tone: "red", key: "backup", area: "state" });
   h = el.health();
-  assert.equal(h.percent, h.share); assert.equal(el.statusHeadline(h), "1 topic open");
+  assert.equal(h.percent, 100 - 30 - 20); assert.equal(h.tone, "red");
+  assert.equal(h.red, 2);
+  el.data = { ...el.data, findings: [] };
+  items.splice(0, 3, { tone: "red", key: "disk", area: "state" });
+  h = el.health();
+  assert.equal([h.percent, h.tone].join(), "90,warn", "an urgent state topic is never green");
   // the calculation opens from the ring
-  el.todoItems = () => [{ tone: "red", key: "outages", count: 8 }];
   el.view = "overview"; el.render();
   assert.ok(shadow.innerHTML.includes("data-health-why") && !shadow.innerHTML.includes('class="healthwhy"'));
   el.healthWhy = true; el.render();
@@ -3919,7 +3925,7 @@ test("the findings tiles carry a sparkline for the status, the total and each cl
   assert.ok((html.match(/class="spark"/g) || []).length >= 3);
   assert.ok(el.sparkline("class:unused", "bad").includes("+3"));
   assert.ok(el.sparkline("class:missing", "bad").includes("±0"));
-  assert.ok(html.includes(`${el.health().share} %`), "the tile shows the share its line draws, not the number with the tasks taken off");
+  assert.ok(html.includes(`${el.health().percent} %`), "the tile shows the score");
 });
 
 test("an entity row shows the id in mono under the name and the extra facts in a line of their own", () => {

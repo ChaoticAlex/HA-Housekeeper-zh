@@ -77,8 +77,13 @@ const ACTION_TYPES = ["entity", "device", "config_entry", "automation", "script"
 // Objects whose overview sums up what is known in groups ("Known about …"); scenes keep the facts card.
 const KNOWN_TYPES = ["entity", "device", "config_entry", "automation", "script"];
 // The ring of the status: points off for each urgent topic, and the most that can come off.
-const HEALTH_PENALTY_URGENT = 10;
-const HEALTH_PENALTY_MAX = 30;
+// The status is a score from 100: each entry of the findings list takes points off by its impact (points each, at most),
+// each urgent topic of the state area takes 10 off (at most 30). Green from 90, yellow from 70.
+const HEALTH_POINTS = { high: [5, 30], medium: [2, 20], low: [1, 10] };
+const HEALTH_STATE_POINTS = 10;
+const HEALTH_STATE_MAX = 30;
+const HEALTH_GREEN = 90;
+const HEALTH_YELLOW = 70;
 const LABEL_TYPES = ["entity", "automation", "script", "scene"];
 
 const NAV = [
@@ -143,7 +148,7 @@ const CAUSE_OWN_RULES = ["config_entry.not_loaded", "device.down", "app.stopped_
 const CRITICAL_CLASSES = ["broken_reference", "unavailable", "problem"];
 
 // Object types the housekeeping status is calculated from.
-const HEALTH_TYPES = ["entity", "automation", "script", "scene"];
+const HEALTH_TYPES = ["entity", "automation", "script", "scene", "config_entry", "device"];
 
 // One CSV cell, quoted. Text a spreadsheet would run as a formula (leading =, +, -, @) gets a leading
 // apostrophe; numbers, also negative ones as text such as "-3.5", stay numbers.
