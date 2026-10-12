@@ -25,11 +25,8 @@ class DbHealthMixin {
     if (f.kind === "growth") return this.t("dbGrowth", { recent: size(f.recent_bytes), base: size(f.base_bytes) });
     if (f.kind === "duplicates") return this.t("dbDuplicates", { n: n(f.groups), more: f.capped ? "+" : "", list: this.dbSeriesList(f.series) });
     if (f.kind === "missing_hours") {
-      const list = (rows) => rows.map(s => `${this.esc(s.name || s.statistic_id)} (${this.t("dbMissingHours", { n: n(s.own ?? s.missing) })})`).join(", ");
-      if (!f.gap_hours) return this.t("dbMissing", { n: n(f.series_total), list: list(f.series) });
-      const own = f.series.filter(s => s.own >= 6);
-      const shared = this.t("dbMissingShared", { n: n(f.series_total), hours: n(f.gap_hours), count: n(f.gaps_total) });
-      return `${shared} ${f.own_series ? this.t("dbMissingOwn", { n: n(f.own_series), list: list(own.slice(0, 5)) }) : this.t("dbMissingOnlyShared")}`;
+      if (!f.gap_hours) return this.t("dbMissingOwnOnly", { n: n(f.series_total) });
+      return `${this.t("dbMissingShared", { n: n(f.series_total), hours: n(f.gap_hours), count: n(f.gaps_total) })} ${f.own_series ? this.t("dbMissingOwn", { n: n(f.own_series) }) : this.t("dbMissingOnlyShared")}`;
     }
     if (f.kind === "statistics_issues") return this.t("dbIssues", { n: n(f.series_total), list: f.series.map(s => `${this.esc(s.name || s.statistic_id)} (${s.types.map(type => this.t(`dbIssue_${type}`) === `dbIssue_${type}` ? type : this.t(`dbIssue_${type}`)).join(", ")})`).join(", ") });
     return this.t("dbRecorderGap", { n: n(f.gaps), longest: this.relDuration(f.longest_seconds), latest: this.formatDate(new Date(f.latest[0].start * 1000).toISOString()) });
@@ -40,11 +37,26 @@ class DbHealthMixin {
     if (f.kind !== "missing_hours" || !(f.gaps?.length || f.series?.length)) return "";
     const gapRows = (f.gaps || []).map(g => `<div class="row rel"><span class="tile ${g.cause === "restart" ? "mute" : "warn"}"><ha-icon icon="${g.cause === "restart" ? "mdi:restart" : "mdi:database-clock-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(this.formatDate(new Date(g.start * 1000).toISOString()))} – ${this.esc(this.formatDate(new Date(g.end * 1000).toISOString()))}</strong><small>${this.t("dbMissingHours", { n: this.formatNumber(g.hours) })} · ${this.t(`dbGapCause_${g.cause}`)}</small></span></div>`);
     const gapPage = this.paginate("dbgaps", gapRows), gaps = gapPage.rows.join("") + gapPage.footer;
-    const seriesRows = f.series.map(s => { const obj = this.findObject(`entity:${s.statistic_id}`); const name = this.esc(s.name || s.statistic_id); return `<tr${obj ? ` data-object="${this.esc(`entity:${s.statistic_id}`)}" tabindex="0" role="button"` : ' class="static"'}><td>${this.nameCell(s.name || s.statistic_id, s.statistic_id, "span")}</td><td data-label="${this.esc(this.t("dbColOwn"))}">${this.formatNumber(s.own)}</td><td data-label="${this.esc(this.t("dbColShared"))}">${this.formatNumber(s.shared)}</td><td data-label="${this.esc(this.t("dbColMissing"))}">${this.formatNumber(s.missing)}</td></tr>`; });
-    const seriesPage = this.paginate("dbseries", seriesRows), rows = seriesPage.rows.join("");
+    const shared = Boolean(f.gap_hours);
+    const sorts = [
+      { key: "name", label: "utName", dir: "asc", get: x => x.name || x.statistic_id },
+      { key: "own", label: "dbColOwn", dir: "desc", get: x => x.own ?? 0 },
+      ...(shared ? [{ key: "shared", label: "dbColShared", dir: "desc", get: x => x.shared ?? 0 }] : []),
+      { key: "missing", label: "dbColMissing", dir: "desc", get: x => x.missing ?? 0 },
+    ];
+    const num = key => x => this.formatNumber(x[key] ?? 0);
+    const table = this.sysList("dbseries", f.series, {
+      sort: "missing", dir: "desc", sorts, text: x => `${x.name || ""} ${x.statistic_id}`, tie: x => x.statistic_id, empty: "dbSeriesNone",
+      rowAttrs: x => this.findObject(`entity:${x.statistic_id}`) ? `data-object="${this.esc(`entity:${x.statistic_id}`)}" tabindex="0" role="button"` : 'class="static"',
+      columns: [
+        { key: "name", label: "utName", dir: "asc", cell: x => this.nameCell(x.name || x.statistic_id, x.statistic_id) },
+        { key: "own", label: "dbColOwn", dir: "desc", cell: num("own") },
+        ...(shared ? [{ key: "shared", label: "dbColShared", dir: "desc", cell: num("shared") }] : []),
+        { key: "missing", label: "dbColMissing", dir: "desc", cell: num("missing") },
+      ],
+    });
     const more = f.series_total > f.series.length ? `<p class="factnote">${this.t("relUnstableMore", { shown: f.series.length, total: f.series_total })}</p>` : "";
-    const table = rows ? `<div class="tablewrap lt"><table><thead><tr><th scope="col">${this.t("dbColSeries")}</th><th scope="col">${this.t("dbColOwn")}</th><th scope="col">${this.t("dbColShared")}</th><th scope="col">${this.t("dbColMissing")}</th></tr></thead><tbody>${rows}</tbody></table></div>${seriesPage.footer}${more}` : "";
-    return `<details class="howto dbextra"><summary>${this.t("dbDetails", { gaps: this.formatNumber(f.gaps_total || 0), series: this.formatNumber(f.series_total) })}</summary>${f.gaps?.length ? `<div class="sectionlabel">${this.t("dbGapsTitle")}</div>${gaps}` : ""}<div class="sectionlabel">${this.t("dbSeriesTitle")}</div>${table}</details>`;
+    return `<div class="dbextra">${f.gaps?.length ? `<div class="sectionlabel">${this.t("dbGapsTitle")}</div>${gaps}` : ""}<div class="sectionlabel">${this.t("dbSeriesTitle", { n: this.formatNumber(f.series_total) })}</div>${table}${more}</div>`;
   }
 
   dbFindingRow(f) {

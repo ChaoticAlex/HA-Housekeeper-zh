@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Recorder, Datenbank:** „Fehlende Stunden in Statistiken“ ist verständlicher: ein kurzer Satz sagt, ob die Lücken alle Sensoren oder nur einzelne betreffen, darunter steht offen die Liste „Sensoren mit den meisten Lücken“ als sortierbare, durchsuchbare Tabelle wie die anderen Listen (Spalte „Gemeinsame“ nur, wenn es gemeinsame Lücken gibt).
 - **Läufe:** Die Liste „Alle gezählten Läufe“ ist auf großen Bildschirmen besser lesbar: die Namensspalte ist schmaler, die Zahlen stehen näher am Namen.
 - **Läufe:** Die Detailseite einer Automation oder eines Skripts zeigt den Verlauf der Läufe über 30 Tage statt 7 (die Zahlen und die Liste bleiben bei 7 Tagen).
 - **Befunde:** Die Seite hat einen klareren Aufbau: ein Panel mit den Reitern Offen, Neu, Bekannt … und „Zuletzt behoben“ (statt eines Faltbereichs darüber). Suche und Filter stehen zuerst; im Reiter „Offen“ folgen zuerst die Ausfälle als aufklappbare Gruppe, dann die einzelnen Befunde. Die Auswahl-Knöpfe erscheinen erst nach dem ersten Markieren; vorher gibt es nur das Kästchen „Seite auswählen“.

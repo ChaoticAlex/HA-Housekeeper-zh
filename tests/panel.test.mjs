@@ -2724,7 +2724,7 @@ test("missing statistics hours say what all series lack, name the periods and li
     gaps: [{ start: 1_000_000, end: 1_072_000, hours: 20, cause: "recorder" }],
     series: [{ statistic_id: "sensor.b", name: "B <i>", missing: 30, shared: 20, own: 10 }, { statistic_id: "sensor.a", name: "A", missing: 20, shared: 20, own: 0 }] };
   const text = el.dbFindingText(f);
-  assert.ok(text.includes("20 hours are missing from all series at once") && text.includes("1 series have gaps of their own"));
+  assert.ok(text.includes("20 hours are missing from all series at once") && text.includes("single sensors have gaps of their own"));
   const extra = el.dbFindingExtra(f);
   assert.ok(extra.includes("The recorder was not running") && extra.includes("B &lt;i&gt;") && !extra.includes("<i>"));
   assert.ok(el.dbFindingExtra({ kind: "growth" }) === "");
