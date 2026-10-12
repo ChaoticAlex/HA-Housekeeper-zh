@@ -2435,7 +2435,7 @@ class FindingsMixin {
 
   findSelBar(pageRows) {
     const n = this.findSel.size;
-    this._findPage = pageRows.flatMap(f => (f.cause ? [{ key: f.cause.finding_key }] : f.members ? f.members : [f])).map(f => f.key).filter(Boolean);
+    this._findPage = pageRows.flatMap(f => (f.cause ? [{ key: this.causeSelKey(f.cause) }] : f.members ? f.members : [f])).map(f => f.key).filter(Boolean);
     if (!pageRows.length && !n) return "";
     // Nothing picked: only the box that picks the page. The actions appear with the first pick.
     if (!n) return `<div class="toolbar selhead"><label class="selall"><input type="checkbox" class="selbox" data-fsel-page> ${this.t("selectPage")}</label></div>`;
@@ -2456,13 +2456,25 @@ class FindingsMixin {
   }
 
   async hideSelectedFindings() {
-    const keys = [...this.findSel].filter(key => this.data.findings.some(f => f.key === key && !f.ignored));
+    const keys = [...this.findSel].filter(key => this.isMarkKey(key) || this.data.findings.some(f => f.key === key && !f.ignored));
     await this.runBulk(keys, async key => {
+      if (this.isMarkKey(key)) return this.markIntegration(key);
       await this._hass.callWS({ type: "ha_housekeeper/ignore", finding_key: key, ignored: true });
       const finding = this.data.findings.find(f => f.key === key);
       if (finding) { finding.ignored = true; finding.ignored_by = "user"; }
     });
+    if (keys.some(key => this.isMarkKey(key))) await this.refreshData();
     this.render();
+  }
+
+  // An outage that has no finding yet is picked as "mark:config_entry:<id>": known, snoozed and hidden then set the
+  // mark "offline on purpose" on the integration, which takes it out of the list as long as it holds.
+  isMarkKey(key) { return key.startsWith("mark:"); }
+
+  async markIntegration(key, reason = "", days = 0) {
+    const msg = { type: "ha_housekeeper/mark_set", object_type: "config_entry", object_id: key.split(":").slice(2).join(":"), kind: "expected_offline", reason };
+    if (Number(days)) msg.days = Number(days);
+    await this._hass.callWS(msg);
   }
 
   findingTitle(f) {
@@ -6944,9 +6956,13 @@ class CausesMixin {
 
   // One entry of the list for a cause: a row with a red counter ("12 follow-ups"); it opens into the chain below it
   // (causes and then the findings they explain), each with its own counter. A cause without any follow-up is a plain row.
-  // The box that picks the outage's own finding, so it can be hidden, marked as known or snoozed with others at once.
+  // What the box of an outage picks: its own finding, or, while it has none yet (the wait is not over), the integration itself.
+  causeSelKey(c) { return c.finding_key || (c.object_type === "config_entry" && !c.virtual ? `mark:config_entry:${c.object_id}` : ""); }
+
+  // The box that picks an outage, so it can be hidden, marked as known or snoozed with others at once.
   causeBox(c) {
-    return c.finding_key ? `<input type="checkbox" class="selbox" data-fsel="${this.esc(c.finding_key)}" ${this.findSel.has(c.finding_key) ? "checked" : ""} aria-label="${this.esc(c.name)}">` : "";
+    const key = this.causeSelKey(c);
+    return key ? `<input type="checkbox" class="selbox" data-fsel="${this.esc(key)}" ${this.findSel.has(key) ? "checked" : ""} aria-label="${this.esc(c.name)}">` : "";
   }
 
   causeEntry(c) {
@@ -8781,8 +8797,9 @@ class FindingStatusMixin {
     if (b.kind === "label") return this.makeLabelPlan();
     if (b.kind === "area") return this.makeAreaPlan();
     if (b.kind === "known" && !b.reason.trim()) { b.error = "decideNeedReason"; this.render(); return; }
-    const keys = [...this.findSel].filter(key => this.data.findings.some(f => f.key === key && !f.ignored));
+    const keys = [...this.findSel].filter(key => this.isMarkKey(key) || this.data.findings.some(f => f.key === key && !f.ignored));
     const failed = await this.runBulk(keys, async key => {
+      if (this.isMarkKey(key)) return this.markIntegration(key, b.reason.trim(), b.kind === "snoozed" ? b.days : 0);
       const msg = { type: "ha_housekeeper/ignore", finding_key: key, ignored: true, kind: b.kind === "known" ? "keep" : "snooze", reason: b.reason.trim() };
       if (b.kind === "snoozed") msg.days = Number(b.days);
       await this._hass.callWS(msg);
@@ -8792,6 +8809,7 @@ class FindingStatusMixin {
         finding.ignore_info = { kind: msg.kind, reason: msg.reason, until: msg.days ? new Date(Date.now() + msg.days * 864e5).toISOString() : null, at: new Date().toISOString() };
       }
     });
+    if (keys.some(key => this.isMarkKey(key))) await this.refreshData();
     if (!failed) this.bulk = null;
     this.render();
   }

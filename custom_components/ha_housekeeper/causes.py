@@ -178,6 +178,9 @@ def apply_causes(
         own = outage.get(item["object_id"])
         if own is not None and own.get("ignored"):
             continue  # known, snoozed, hidden or marked: the outage is no longer news
+        mark = item.get("mark")
+        if own is None and mark and mark["kind"] != "keep" and not item.get("mark_due"):
+            continue  # no finding yet (within the wait), but marked: nothing to report
         ids = provided.get(item["object_id"], [])
         followers = [by_object[i] for i in ids if i in by_object and "cause_id" not in by_object[i]]
         cause = _cause("integration_down", item, followers, users, ids, [own] if own else None)

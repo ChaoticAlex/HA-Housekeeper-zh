@@ -189,8 +189,9 @@ class FindingStatusMixin {
     if (b.kind === "label") return this.makeLabelPlan();
     if (b.kind === "area") return this.makeAreaPlan();
     if (b.kind === "known" && !b.reason.trim()) { b.error = "decideNeedReason"; this.render(); return; }
-    const keys = [...this.findSel].filter(key => this.data.findings.some(f => f.key === key && !f.ignored));
+    const keys = [...this.findSel].filter(key => this.isMarkKey(key) || this.data.findings.some(f => f.key === key && !f.ignored));
     const failed = await this.runBulk(keys, async key => {
+      if (this.isMarkKey(key)) return this.markIntegration(key, b.reason.trim(), b.kind === "snoozed" ? b.days : 0);
       const msg = { type: "ha_housekeeper/ignore", finding_key: key, ignored: true, kind: b.kind === "known" ? "keep" : "snooze", reason: b.reason.trim() };
       if (b.kind === "snoozed") msg.days = Number(b.days);
       await this._hass.callWS(msg);
@@ -200,6 +201,7 @@ class FindingStatusMixin {
         finding.ignore_info = { kind: msg.kind, reason: msg.reason, until: msg.days ? new Date(Date.now() + msg.days * 864e5).toISOString() : null, at: new Date().toISOString() };
       }
     });
+    if (keys.some(key => this.isMarkKey(key))) await this.refreshData();
     if (!failed) this.bulk = null;
     this.render();
   }

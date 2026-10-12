@@ -174,7 +174,7 @@ class FindingsMixin {
 
   findSelBar(pageRows) {
     const n = this.findSel.size;
-    this._findPage = pageRows.flatMap(f => (f.cause ? [{ key: f.cause.finding_key }] : f.members ? f.members : [f])).map(f => f.key).filter(Boolean);
+    this._findPage = pageRows.flatMap(f => (f.cause ? [{ key: this.causeSelKey(f.cause) }] : f.members ? f.members : [f])).map(f => f.key).filter(Boolean);
     if (!pageRows.length && !n) return "";
     // Nothing picked: only the box that picks the page. The actions appear with the first pick.
     if (!n) return `<div class="toolbar selhead"><label class="selall"><input type="checkbox" class="selbox" data-fsel-page> ${this.t("selectPage")}</label></div>`;
@@ -195,13 +195,25 @@ class FindingsMixin {
   }
 
   async hideSelectedFindings() {
-    const keys = [...this.findSel].filter(key => this.data.findings.some(f => f.key === key && !f.ignored));
+    const keys = [...this.findSel].filter(key => this.isMarkKey(key) || this.data.findings.some(f => f.key === key && !f.ignored));
     await this.runBulk(keys, async key => {
+      if (this.isMarkKey(key)) return this.markIntegration(key);
       await this._hass.callWS({ type: "ha_housekeeper/ignore", finding_key: key, ignored: true });
       const finding = this.data.findings.find(f => f.key === key);
       if (finding) { finding.ignored = true; finding.ignored_by = "user"; }
     });
+    if (keys.some(key => this.isMarkKey(key))) await this.refreshData();
     this.render();
+  }
+
+  // An outage that has no finding yet is picked as "mark:config_entry:<id>": known, snoozed and hidden then set the
+  // mark "offline on purpose" on the integration, which takes it out of the list as long as it holds.
+  isMarkKey(key) { return key.startsWith("mark:"); }
+
+  async markIntegration(key, reason = "", days = 0) {
+    const msg = { type: "ha_housekeeper/mark_set", object_type: "config_entry", object_id: key.split(":").slice(2).join(":"), kind: "expected_offline", reason };
+    if (Number(days)) msg.days = Number(days);
+    await this._hass.callWS(msg);
   }
 
   findingTitle(f) {

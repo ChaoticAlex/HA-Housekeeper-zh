@@ -40,9 +40,13 @@ class CausesMixin {
 
   // One entry of the list for a cause: a row with a red counter ("12 follow-ups"); it opens into the chain below it
   // (causes and then the findings they explain), each with its own counter. A cause without any follow-up is a plain row.
-  // The box that picks the outage's own finding, so it can be hidden, marked as known or snoozed with others at once.
+  // What the box of an outage picks: its own finding, or, while it has none yet (the wait is not over), the integration itself.
+  causeSelKey(c) { return c.finding_key || (c.object_type === "config_entry" && !c.virtual ? `mark:config_entry:${c.object_id}` : ""); }
+
+  // The box that picks an outage, so it can be hidden, marked as known or snoozed with others at once.
   causeBox(c) {
-    return c.finding_key ? `<input type="checkbox" class="selbox" data-fsel="${this.esc(c.finding_key)}" ${this.findSel.has(c.finding_key) ? "checked" : ""} aria-label="${this.esc(c.name)}">` : "";
+    const key = this.causeSelKey(c);
+    return key ? `<input type="checkbox" class="selbox" data-fsel="${this.esc(key)}" ${this.findSel.has(key) ? "checked" : ""} aria-label="${this.esc(c.name)}">` : "";
   }
 
   causeEntry(c) {

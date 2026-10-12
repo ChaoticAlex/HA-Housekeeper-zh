@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Behoben
+
+- **Befunde:** Auch ein Ausfall, für den noch kein Befund besteht (die Wartezeit „Mindestdauer nicht verfügbar“ läuft noch), lässt sich ankreuzen. „Bekannt“, „Zurückstellen“ und „Ausblenden“ setzen dann den Vermerk „Absichtlich offline“ an der Integration (mit Begründung und Frist); solange er gilt, steht der Ausfall nicht in der Liste.
+
+### English
+
+#### Fixed
+
+- **Findings:** An outage that has no finding yet (the wait “Minimum days unavailable” is still running) can be ticked too. “Known”, “Snooze” and “Hide” then set the mark “Offline on purpose” on the integration (with reason and review date); while it holds, the outage is not in the list.
+
 ## 1.5.1 - 2026-10-12
 
 ### Geändert

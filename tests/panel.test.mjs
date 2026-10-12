@@ -2882,6 +2882,19 @@ test("Done lists what a plan fixed and what ended by itself; objects removed or 
   assert.ok(html.includes("Object removed (not fixed)"));
 });
 
+test("an outage without a finding is picked by its integration and marked instead of hidden", async () => {
+  const { el } = panel("en");
+  const calls = [];
+  const c = { id: "integration_down:e1", kind: "integration_down", object_type: "config_entry", object_id: "e1", name: "Hue", follower_count: 0, total_followers: 0, child_ids: [], consumers: {}, impact: "none" };
+  el.data = { ...DATA, findings: [], causes: [c] };
+  assert.ok(el.findingsView().includes('data-fsel="mark:config_entry:e1"'));
+  el._hass = { language: "en", callWS: async msg => { calls.push(msg); return msg.type === "ha_housekeeper/inventory" ? { ...DATA, findings: [], causes: [] } : {}; } };
+  el.findSel = new Set(["mark:config_entry:e1"]);
+  await el.hideSelectedFindings();
+  assert.equal(JSON.stringify(calls[0]), JSON.stringify({ type: "ha_housekeeper/mark_set", object_type: "config_entry", object_id: "e1", kind: "expected_offline", reason: "" }));
+  assert.equal(el.causeList().length, 0);
+});
+
 test("an object shows the rules it breaks on its overview, and nothing when there are none", () => {
   const { el } = panel("en", { setTimeout: () => 0 });
   const mk = (id, ignored) => ({ object_type: "entity", object_id: id, name: id, key: `policy.entity_area|${id}|`, ignored, by: null });
