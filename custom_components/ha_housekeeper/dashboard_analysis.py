@@ -60,7 +60,9 @@ def extract_entity_references(
                 walk(child, f"{path}/{index}", key)
         elif isinstance(value, str):
             if key in keys and ENTITY_ID.match(value):
-                add(value, path, "certain")
+                # auto-entities fills `this.entity_id` per found entity at runtime
+                if not value.startswith("this."):
+                    add(value, path, "certain")
             elif "{{" in value or "[[[" in value or "states" in value:
                 for match in ENTITY_IN_TEXT.findall(value):
                     if match in known_entities:

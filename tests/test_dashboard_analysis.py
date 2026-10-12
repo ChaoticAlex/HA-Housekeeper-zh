@@ -56,6 +56,13 @@ def test_free_text_values_are_not_references() -> None:
     assert extract_dashboard_references(None, KNOWN) == []
 
 
+def test_auto_entities_placeholder_is_not_a_reference() -> None:
+    card = {"type": "custom:auto-entities", "card": {"entity": "this.entity_id"}}
+    config = {"views": [{"cards": [card]}]}
+
+    assert extract_dashboard_references(config, KNOWN) == []
+
+
 def test_helper_options_reference_their_source_entities() -> None:
     from custom_components.ha_housekeeper.dashboard_analysis import extract_helper_references
 
