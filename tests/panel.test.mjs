@@ -4412,3 +4412,20 @@ test("a sort alone can be saved as a view, and the save button goes away when th
   st.dir = "desc";
   assert.ok(el.viewsControl("inv").includes("data-lview-save"), "a change against the chosen view can be saved");
 });
+
+test("the coverage of a scan shows in the overview as one line, lists each source with its reason, and names the source behind a not-checked ending", () => {
+  const { el } = panel("en");
+  const cov = (extra = []) => [{ source: "registry", state: "checked", reason: null }, { source: "apps", state: "absent", reason: "no_supervisor" }, ...extra];
+  el.data = { ...DATA, meta: { ...DATA.meta, scanned_at: "2026-10-12T20:22:00+00:00", coverage: cov([{ source: "dashboards", state: "checked", reason: null }]) } };
+  assert.ok(el.scanCoverageLine().includes("all 2 sources read") && !el.scanCoverageLine().includes("warn"), "absent sources do not count; grey while all is read");
+  el.data.meta.coverage = cov([{ source: "dashboards", state: "partial", reason: "unreadable", read: 3, failed: 1 }, { source: "statistics", state: "skipped", reason: "not_ready" }]);
+  const line = el.scanCoverageLine();
+  assert.ok(line.includes("Check: 1 of 3 sources") && line.includes("Dashboards, Long-term statistics") && line.includes("data-cov-details") && line.includes('class="tile warn"'));
+  const card = el.scanCoverageCard();
+  assert.ok(card.indexOf("Long-term statistics") < card.indexOf("Registry") && card.indexOf("Registry") < card.indexOf(">Apps<"), "gaps first, absent last");
+  assert.ok(card.includes("3 read, 1 not") && card.includes("Not present") && card.includes("No Supervisor"));
+  el.data.meta.coverage = undefined;
+  assert.equal(el.scanCoverageLine(), ""); assert.equal(el.scanCoverageCard(), "");
+  assert.equal(el.endedSourceLabel({ rule_id: "dashboard.missing_entity" }), "Source not read: Dashboards");
+  assert.equal(el.endedSourceLabel({ rule_id: "entity.state_unavailable" }), "not checked");
+});

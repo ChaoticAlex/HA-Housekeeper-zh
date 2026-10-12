@@ -87,6 +87,8 @@ def make_checkpoint(snapshot: dict[str, Any]) -> dict[str, Any]:
         "rules": {
             name: snapshot["meta"][name] for name in SETTING_RULES if name in snapshot["meta"]
         },
+        # Sources this scan could not read: what is missing from it is unknown, not gone.
+        "unchecked": sorted(snapshot["meta"].get("unchecked") or []),
     }
 
 
@@ -98,6 +100,13 @@ def diff_checkpoints(base: dict[str, Any], snapshot: dict[str, Any]) -> dict[str
     old = {(t, oid): s for t, objs in base["objects"].items() for oid, s in objs.items()}
     now = {(t, oid): s for t, objs in current["objects"].items() for oid, s in objs.items()}
 
+    # An object of a source that one of the two scans could not read did not appear or vanish: it was unseen.
+    unchecked = set(snapshot["meta"].get("unchecked") or [])
+    unread = unchecked | set(base.get("unchecked") or [])
+
+    def is_unread(t: str, oid: str) -> bool:
+        return t in unread or f"{t}:{oid}" in unread
+
     new_objects = [
         {
             "object_type": t,
@@ -106,8 +115,18 @@ def diff_checkpoints(base: dict[str, Any], snapshot: dict[str, Any]) -> dict[str
             "status": now[(t, oid)],
         }
         for (t, oid) in now.keys() - old.keys()
+        if not is_unread(t, oid)
     ]
-    removed_objects = [{"object_type": t, "object_id": oid} for (t, oid) in old.keys() - now.keys()]
+    removed_objects = [
+        {"object_type": t, "object_id": oid}
+        for (t, oid) in old.keys() - now.keys()
+        if not is_unread(t, oid)
+    ]
+    unread_objects = [
+        {"object_type": t, "object_id": oid}
+        for (t, oid) in old.keys() ^ now.keys()
+        if is_unread(t, oid)
+    ]
     status_changes = [
         {
             "object_type": t,
@@ -129,7 +148,6 @@ def diff_checkpoints(base: dict[str, Any], snapshot: dict[str, Any]) -> dict[str
         if name in (base.get("rules") or {}) and base["rules"][name] != current["rules"].get(name)
     }
     reworded = set().union(*(SETTING_RULES[name] for name in changed)) if changed else set()
-    unchecked = set(snapshot["meta"].get("unchecked") or [])
     resolved_findings = []
     ended_findings = []
     for key in sorted(base_findings - set(current["findings"])):
@@ -156,6 +174,7 @@ def diff_checkpoints(base: dict[str, Any], snapshot: dict[str, Any]) -> dict[str
         "scanned_at": current["at"],
         "new_objects": cut(new_objects),
         "removed_objects": cut(removed_objects),
+        "unread_objects": {"total": len(unread_objects)},
         "status_changes": cut(status_changes),
         "new_findings": cut(new_findings),
         "resolved_findings": cut(resolved_findings),

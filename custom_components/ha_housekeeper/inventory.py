@@ -62,6 +62,7 @@ from .dashboard_analysis import (
 )
 from .db_health import database_summary
 from .entry_states import EntryStateHistory
+from .scan_coverage import ScanCoverage
 from .scan_health import ScanHealth
 from .events import EventLog
 from .goals import GoalStore
@@ -664,6 +665,7 @@ class InventoryScanner:
         self._recorder_available = False
         # What the scan in progress could not read: "dashboard", "dashboard:<id>" or "app".
         self._unchecked: set[str] = set()
+        self.coverage = ScanCoverage()
         self._lock = asyncio.Lock()
         self._snapshot: dict[str, Any] | None = None
         self._details: dict[str, dict[str, Any]] = {}
@@ -860,6 +862,7 @@ class InventoryScanner:
         # so a slow phase on a large installation shows here first.
         timing: dict[str, float] = {}
         self._unchecked = set()
+        self.coverage.reset()
         mark = time.monotonic()
 
         def lap(phase: str) -> None:
@@ -930,6 +933,13 @@ class InventoryScanner:
                 if item["custom"] and item["domain"] in hacs:
                     item["hacs"] = hacs[item["domain"]]
         apps = await _app_inventory(self.hass, self._unchecked)
+        self.coverage.checked("registry")
+        if not supervisor_token():
+            self.coverage.absent("apps", "no_supervisor")
+        elif "app" in self._unchecked:
+            self.coverage.skipped("apps", "not_reachable")
+        else:
+            self.coverage.checked("apps")
 
         lap("devices")
         self.status.update(phase="automations", progress=60)
@@ -943,6 +953,7 @@ class InventoryScanner:
             existing_objects
         )
         energy, energy_edges = await self._energy_inventory(existing_objects)
+        self.coverage.checked("automations")
         dashboards.extend(energy)
         dashboard_edges.extend(energy_edges)
         helper_edges, helper_findings = self._helper_inventory(existing_objects)
@@ -1108,6 +1119,12 @@ class InventoryScanner:
             database = await database_summary(self.hass, self.events)
         except Exception:  # noqa: BLE001 - the overview works without the size of the database
             database = None
+            self.coverage.skipped("database", "unreadable")
+        else:
+            if database is None:
+                self.coverage.absent("database", "no_recorder")
+            else:
+                self.coverage.checked("database")
 
         lap("finalizing")
         _LOGGER.debug("Scan took %.2f s: %s", sum(timing.values()), timing)
@@ -1115,6 +1132,7 @@ class InventoryScanner:
             "meta": {
                 "scan_timing": timing,
                 "unchecked": sorted(self._unchecked),
+                "coverage": self.coverage.report(),
                 "storage": storage,
                 "database": database,
                 "scanned_at": observed_at.isoformat(),
@@ -1341,6 +1359,8 @@ class InventoryScanner:
         """Inspect automations or scripts through Home Assistant runtime APIs."""
         component = self._runtime_component(domain)
         if component is None:
+            if domain in self.hass.config.components:
+                self.coverage.skipped("automations", f"{domain}_not_ready")
             return [], [], []
 
         items: list[dict[str, Any]] = []
@@ -1528,14 +1548,17 @@ class InventoryScanner:
         """Long-term statistics known to the recorder; empty without a recorder."""
         self._recorder_available = False
         if "recorder" not in self.hass.config.components:
+            self.coverage.absent("statistics", "no_recorder")
             return []
         try:
             from homeassistant.components.recorder.statistics import async_list_statistic_ids
 
             statistics = await async_list_statistic_ids(self.hass)
         except Exception:  # The recorder may be unavailable or still starting.
+            self.coverage.skipped("statistics", "not_ready")
             return []
         self._recorder_available = True
+        self.coverage.checked("statistics")
         return list(statistics)
 
     async def _energy_inventory(
@@ -1543,6 +1566,7 @@ class InventoryScanner:
     ) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
         """Describe the Energy dashboard through the entities its preferences use."""
         if "energy" not in self.hass.config.components:
+            self.coverage.absent("energy", "not_set_up")
             return [], []
         try:
             from homeassistant.components.energy.data import async_get_manager
@@ -1551,7 +1575,9 @@ class InventoryScanner:
             preferences = manager.data
         except Exception:  # Energy is optional and may not be configured.
             self._unchecked.add("dashboard:energy")
+            self.coverage.skipped("energy", "unreadable")
             return [], []
+        self.coverage.checked("energy")
         references = extract_entity_references(
             preferences, existing["entity"], ENERGY_KEYS, "SHOWS"
         )
@@ -1589,22 +1615,26 @@ class InventoryScanner:
             from homeassistant.components.lovelace.const import LOVELACE_DATA
         except ImportError:
             self._unchecked.add("dashboard")
+            self.coverage.skipped("dashboards", "unavailable")
             return [], [], []
         lovelace = self.hass.data.get(LOVELACE_DATA)
         if lovelace is None:
             self._unchecked.add("dashboard")
+            self.coverage.skipped("dashboards", "not_ready")
             return [], [], []
 
         dashboards: list[dict[str, Any]] = []
         edges: list[dict[str, str]] = []
         findings: list[dict[str, Any]] = []
         configs: dict[str, Any] = {}
+        unreadable = 0
         for url_path, dashboard in lovelace.dashboards.items():
             try:
                 config = await dashboard.async_load(False)
             except Exception:  # Auto-generated, missing or invalid dashboards have nothing to read.
                 # One that had findings before and cannot be read now has not become clean.
                 self._unchecked.add(f"dashboard:{url_path or 'lovelace'}")
+                unreadable += 1
                 continue
             object_id = url_path or "lovelace"
             configs[object_id] = config
@@ -1654,6 +1684,14 @@ class InventoryScanner:
             resources = None
         for item in dashboards:
             item["health"] = dashboard_health(configs[item["object_id"]], views_of, resources)
+        if unreadable:
+            self.coverage.partial(
+                "dashboards", "unreadable", read=len(dashboards), failed=unreadable
+            )
+        elif resources is None:
+            self.coverage.partial("dashboards", "resources_unknown")
+        else:
+            self.coverage.checked("dashboards")
         return dashboards, edges, findings
 
     def _scene_inventory(

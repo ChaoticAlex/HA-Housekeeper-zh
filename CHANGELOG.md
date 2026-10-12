@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Prüfabdeckung:** Housekeeper zeigt jetzt, welche Quellen der letzte Scan gelesen hat: eine Zeile in der Übersicht („Prüfung: 5 von 6 Quellen“, gelb mit den Namen, wenn etwas fehlt) und eine Liste in Einstellungen, Info mit Zustand und Grund je Quelle (Register, Automationen, Dashboards, Energie-Dashboard, Apps, Langzeitstatistik, Datenbank). Der Scan-Zustandssensor nennt die nicht gelesenen Quellen. Objekte einer Quelle, die ein Scan nicht lesen konnte, zählen im Vergleich weder als neu noch als entfernt; ein beendeter Befund nennt die nicht gelesene Quelle.
 - **Gespeicherte Ansichten:** Auch eine reine Sortierung (Spalte oder Richtung) lässt sich jetzt als Ansicht speichern. Der Knopf erscheint, sobald sich Suche, Filter oder Sortierung von der Standardliste unterscheiden, bei gewählter Ansicht nur, wenn sich etwas gegenüber dieser Ansicht geändert hat.
 - **Detailseiten:** Was du über ein Objekt entschieden hast, steht jetzt in einem Band über den Reitern: ein als bekannt, zurückgestellt oder ausgeblendeter Befund mit Art, Frist und Grund (mit „Wieder aufnehmen“) und ein Vermerk (mit „Ändern“ und „Entfernen“). Die Karte „Bekannt über …“ nennt dieselbe Entscheidung statt „Der Befund ist ausgeblendet“.
 - **Änderungen:** Der Verlauf der Scans zeigt zunächst nur die neuesten Zeilen, damit das Ergebnis des Vergleichs sichtbar bleibt; „Alle anzeigen“ öffnet die ganze Liste. Die Auswahl „Vergleichen mit“ sitzt im Kopf des Verlaufs, gespeicherte Scans tragen den Wochentag im Titel, und ein Satz erklärt den Balken.
@@ -104,6 +105,7 @@
 
 ### English
 
+- **Check coverage:** Housekeeper now shows which sources the last scan read: a line in the overview ("Check: 5 of 6 sources", yellow with the names when something is missing) and a list in Settings, Info with the state and reason per source (registry, automations, dashboards, Energy dashboard, apps, long-term statistics, database). The scan health sensor names the sources that were not read. Objects of a source a scan could not read count neither as new nor as removed in the comparison; an ended finding names the source that was not read.
 - **Saved views:** A sort alone (column or direction) can now be saved as a view. The button appears as soon as the search, a filter or the sort differs from the default list, and with a view chosen only when something differs from that view.
 - **Detail pages:** What you decided about an object now shows in a band above the tabs: a finding marked as known, snoozed or hidden with kind, date and reason (with "Take back") and a mark (with "Change" and "Remove"). The card "Known about …" names the same decision instead of "The finding is hidden".
 - **Changes:** The scan history first shows only the newest rows so the result of the comparison stays visible; "Show all" opens the whole list. The "Compare with" choice sits in the head of the history, stored scans carry the weekday in their title, and a sentence explains the bar.

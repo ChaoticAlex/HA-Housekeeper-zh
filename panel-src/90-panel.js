@@ -747,6 +747,7 @@ class HAHousekeeperPanel extends HTMLElement {
       this.noteJump(el.dataset.safe); this.view = el.dataset.safe; this.pages = {}; this.selected = null;
       this.render();
     });
+    root.querySelectorAll("[data-cov-details]").forEach(el => el.onclick = () => { this.settingsTab = "info"; this.noteJump?.("settings"); this.view = "settings"; this.pages = {}; this.render(); });
     root.querySelectorAll("[data-jump]").forEach(el => el.onclick = () => {
       this.noteJump(el.dataset.jump);
       this.view = el.dataset.jump; this.pages = {};

@@ -260,6 +260,17 @@ async def test_scan_health_tells_a_failed_and_an_old_scan_from_a_good_one(hass: 
     assert ir.async_get(hass).async_get_issue(DOMAIN, SCAN_ISSUE_ID) is None
 
 
+async def test_a_scan_says_which_sources_it_read_and_which_it_could_not(hass: HomeAssistant) -> None:
+    """An empty list must not look the same as a source that was never read."""
+    scanner = InventoryScanner(hass)
+    snapshot = await scanner.async_scan()
+    by_source = {item["source"]: item for item in snapshot["meta"]["coverage"]}
+    assert by_source["registry"]["state"] == "checked"
+    assert by_source["apps"] == {"source": "apps", "state": "absent", "reason": "no_supervisor"}
+    assert by_source["dashboards"]["state"] == "skipped"  # no Lovelace in this test instance
+    assert "dashboard" in snapshot["meta"]["unchecked"]
+
+
 async def test_scan_creates_and_clears_repairs_hints(hass: HomeAssistant) -> None:
     """Findings become aggregated, non-fixable issues that disappear once resolved."""
     from homeassistant.helpers import issue_registry as ir

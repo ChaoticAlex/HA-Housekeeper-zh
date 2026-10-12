@@ -111,6 +111,23 @@ def test_a_finding_that_vanished_unread_or_under_a_changed_setting_is_not_resolv
     assert diff_checkpoints(old, new)["resolved_findings"]["total"] == 2
 
 
+def test_objects_of_an_unread_source_neither_appear_nor_vanish_between_two_scans() -> None:
+    objects = [("entity", "sensor.a", "active")]
+    dash = [("dashboard", "home", "active")]
+    full = make_checkpoint(_snapshot("2026-10-06T10:00:00+00:00", objects + dash))
+    blind = _snapshot("2026-10-07T10:00:00+00:00", objects)
+    blind["meta"]["unchecked"] = ["dashboard:home"]
+    gone = diff_checkpoints(full, blind)
+    assert gone["removed_objects"]["total"] == 0 and gone["unread_objects"]["total"] == 1
+    # the other way round: a baseline that could not read it does not make it "new" now
+    blind_base = make_checkpoint(blind)
+    back = diff_checkpoints(blind_base, _snapshot("2026-10-08T10:00:00+00:00", objects + dash))
+    assert back["new_objects"]["total"] == 0 and back["unread_objects"]["total"] == 1
+    # read in both scans, a removal is still a removal
+    real = diff_checkpoints(full, _snapshot("2026-10-09T10:00:00+00:00", objects))
+    assert real["removed_objects"]["total"] == 1 and real["unread_objects"]["total"] == 0
+
+
 def test_identical_scans_have_no_differences() -> None:
     snap = _snapshot("2026-10-07T10:00:00+00:00", [("entity", "sensor.a", "active")], [FINDING])
     diff = diff_checkpoints(make_checkpoint(snap), snap)

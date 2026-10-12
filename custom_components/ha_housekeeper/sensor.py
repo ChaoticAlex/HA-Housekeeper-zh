@@ -20,6 +20,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN, NAME, SIGNAL_SCAN_COMPLETE
+from .scan_coverage import gaps
 from .scan_health import STATES
 
 COUNT_KEYS = (
@@ -127,6 +128,8 @@ class ScanHealthSensor(HousekeeperSensor):
     def _update(self) -> None:
         scanner = self.hass.data.get(DOMAIN, {}).get("scanner")
         report = scanner.health_report() if scanner else None
+        meta = ((scanner.snapshot if scanner else None) or {}).get("meta") or {}
+        unread = gaps(meta.get("coverage") or [])
         self._attr_native_value = report["state"] if report else None
         # The kind of error and the phase, not the text: that can carry paths and would stay in the history.
         self._attr_extra_state_attributes = (
@@ -137,6 +140,7 @@ class ScanHealthSensor(HousekeeperSensor):
                 "error_class": report["error_class"],
                 "consecutive_failures": report["consecutive_failures"],
                 "last_duration_seconds": report["last_duration"],
+                "unread_sources": unread,
             }
             if report
             else {}
