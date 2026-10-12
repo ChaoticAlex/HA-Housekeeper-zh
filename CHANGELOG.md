@@ -33,6 +33,9 @@
 
 ### English
 
+- **Risk level with a reason:** In Access & data flow a legend explains what High, Medium and Low mean; pointing at a level shows the reason, and the detail page of an integration spells it out.
+- **Calmer page headers:** Storage & system, Access & data flow, Credentials, Reliability, Exposure, Policies, Runs, Recorder and Maintenance show the subtitle under the title and a slim line with "As of" and "Refresh"; the tab tiles are flatter.
+- **Custom cards with a status:** The list of dashboard resources shows whether the file is missing, whether a dashboard uses the card, or that this cannot be told.
 - **Storage & system** (Operation): disk, RAM and CPU use, system storage by category, apps and the largest consumers under `/config`.
 - **Access & data flow** (Security): system access and cloud data flow of the integrations with a risk level, with a Supervisor also the rights of the apps.
 - **Credentials** (Security): which integrations store passwords, tokens or keys and whether a value is set. Housekeeper never shows the values.
@@ -41,6 +44,17 @@
 - **Overview shows the system:** a new "System" card with disk, memory and processor. A task appears once the disk is 85 % full, an urgent one at 95 %.
 - **Tab "Access & data"** on the detail page of an integration: system access, data flow and credentials (never a value); a red line in its overview for a high system access.
 - **Apps as objects:** With a Supervisor, installed apps are in the inventory (status, version, update) and have a detail page with rights, load and storage. No findings, no changes to apps.
+- **Apps and integrations:** If an integration probably depends on an app (host name in its configuration), the app shows the tab "Relations". The match is always "probable".
+- **Finding "App stopped":** If an app is stopped and an integration that probably depends on it fails, Housekeeper reports it.
+- **Finding "Integration not loaded":** An active entry that has not been loaded for more than an hour now appears in the findings, with the cause from Home Assistant.
+- **Marks for integrations and apps:** "Offline on purpose", "Seasonal" and "Spare device" hide the outage findings.
+- **Outages:** The "Outages" card offers "Mark as known", "Snooze" and "Hide" for integrations that are not loaded; a finding no longer appears twice in the list.
+- **Numbers in the menu:** Maintenance (missed goals) and Policies (violations) show a number; Inventory no longer does.
+- **Blocked automations:** An automation whose triggers all point to failed entities is reported as a finding.
+- **Missing services:** Automations and scripts that call a service that no longer exists are reported as a finding; if several call the same one, it appears as one cause in the outages.
+- **Automations without effect:** Findings for automations and scripts whose actions all target failed entities, and for conditions that can never be true. A blocked automation can be switched off with a plan.
+- **Webhooks:** Access & data flow shows which automations a webhook can start and whether it can also be reached from outside.
+- **Before/after:** The "Runs" tab compares errors before and after a change to the configuration.
 - **Sidebar button:** opens Home Assistant's sidebar when it is hidden.
 - **Apps & integrations** (Inventory): apps and integrations by domain in one list, with version, status, entities and devices; the inventory also has a "Core / Custom" filter.
 - **Page of an integration:** core and custom integrations have their own detail page with all entries, entities and devices, reliability, and access and data; for custom ones also the folder and its size.
