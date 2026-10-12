@@ -170,10 +170,14 @@ class SystemMixin {
     });
   }
 
+  // The load of an app as the Supervisor measured it, for the two app lists.
+  sysAppRam(a) { return a.memory_usage === null || a.memory_usage === undefined ? "–" : `${this.formatBytes(a.memory_usage)}${a.memory_limit ? ` / ${this.formatBytes(a.memory_limit)}` : ""}`; }
+
+  sysAppCpu(a) { return a.cpu_percent === null || a.cpu_percent === undefined ? "–" : `${this.formatNumber(Math.round(a.cpu_percent * 10) / 10)} %`; }
+
   sysApps(apps) {
     const max = Math.max(0, ...apps.map(a => a.size_bytes || 0));
-    const ram = a => (a.memory_usage === null || a.memory_usage === undefined ? "–" : `${this.formatBytes(a.memory_usage)}${a.memory_limit ? ` / ${this.formatBytes(a.memory_limit)}` : ""}`);
-    const cpu = a => (a.cpu_percent === null || a.cpu_percent === undefined ? "–" : `${this.formatNumber(Math.round(a.cpu_percent * 10) / 10)} %`);
+    const ram = a => this.sysAppRam(a), cpu = a => this.sysAppCpu(a);
     const running = a => a.state === "started";
     return this.sysList("sysapps", apps, {
       sort: "ram", dir: "desc",

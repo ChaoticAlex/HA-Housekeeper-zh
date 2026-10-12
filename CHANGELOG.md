@@ -27,7 +27,7 @@
 - **Webhooks:** Zugriffe & Datenfluss zeigt, welche Automationen ein Webhook starten kann und ob er auch von außen erreichbar ist.
 - **Vorher/nachher:** Der Reiter „Läufe“ vergleicht Fehler vor und nach einer Änderung der Konfiguration.
 - **Seitenleisten-Knopf:** öffnet die Seitenleiste von Home Assistant, wenn sie ausgeblendet ist.
-- **Apps & Integrationen** (Bestand): Apps und Integrationen nach Domain in einer Liste, mit Version, Status, Entitäten und Geräten; im Inventar gibt es dazu einen Filter „Core / Custom“.
+- **Apps & Integrationen** (Bestand): Apps (mit CPU und RAM) und Integrationen nach Domain in einer Liste, mit Version, Status, Entitäten und Geräten; im Inventar gibt es dazu einen Filter „Core / Custom“.
 - **Seite einer Integration:** Core und Custom haben eine eigene Detailseite mit allen Einträgen, Entitäten und Geräten, Zuverlässigkeit sowie Zugriffen und Daten; bei Custom auch Ordner und Größe.
 - **Sonstiges** (Speicher & System): Custom Cards, Blueprints und die übrigen Ordner und Dateien unter `/config` stehen in einem Reiter.
 
@@ -56,7 +56,7 @@
 - **Webhooks:** Access & data flow shows which automations a webhook can start and whether it can also be reached from outside.
 - **Before/after:** The "Runs" tab compares errors before and after a change to the configuration.
 - **Sidebar button:** opens Home Assistant's sidebar when it is hidden.
-- **Apps & integrations** (Inventory): apps and integrations by domain in one list, with version, status, entities and devices; the inventory also has a "Core / Custom" filter.
+- **Apps & integrations** (Inventory): apps (with CPU and RAM) and integrations by domain in one list, with version, status, entities and devices; the inventory also has a "Core / Custom" filter.
 - **Page of an integration:** core and custom integrations have their own detail page with all entries, entities and devices, reliability, and access and data; for custom ones also the folder and its size.
 - **Other** (Storage & system): custom cards, blueprints and the remaining folders and files under `/config` share one tab.
 
