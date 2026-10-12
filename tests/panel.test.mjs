@@ -2929,10 +2929,15 @@ test("automation diagnostics: quality dimensions, criteria, coverage, comparison
   let html = el.qualityView();
   assert.ok(html.includes("Hall") && html.includes("Reliability") && html.includes("Restart safety") && html.includes('title="Many errors'));
   assert.ok(!html.includes("Overall"), "no single score");
-  await el.openDiag("automation.hall");
+  assert.ok(!html.includes("data-diag-open"), "the overview has no diagnosis column");
+  const hall = { object_type: "automation", object_id: "automation.hall", name: "Hall" };
+  assert.ok(el.detailTabs(hall, "automation:automation.hall").some(([id]) => id === "diagnosis"), "the detail page has a diagnosis tab");
+  el.diag.loadedFor = "automation.hall";
+  await el.loadDiag("automation.hall");
   el.folds = { diag_more: true };
-  html = el.qualityView();
-  assert.ok(html.includes("Diagnosis: Hall") && html.includes("No success criterion defined") && html.includes("never reached") && html.includes("Compare") && html.includes("Test run"));
+  html = el.diagTab(hall);
+  assert.equal(el.diag.sel, "automation.hall");
+  assert.ok(html.includes("Reliability") && html.includes("No success criterion defined") && html.includes("never reached") && html.includes("Compare") && html.includes("Test run"));
   el.editCriteria("automation.hall");
   el.diag.draft.push({ targets: [{ entity_id: "light.hall", state: "on" }], within: "5", hold: "0" });
   await el.saveCriteria();

@@ -293,6 +293,7 @@ class DiagnosisMixin {
     if (NOTE_TYPES.includes(item.object_type)) tabs.push(["history", "tabHistory", this.historyCount(item)]);
     if (this.runsRow(item)) tabs.push(["runs", "runsTab"]);
     if (this.reliabilityRow(item)) tabs.push(["reliability", "relTab"]);
+    if (this.diagRow(item)) tabs.splice(tabs.findIndex(([id]) => id === "technical"), 0, ["diagnosis", "diagTab"]);
     if (item.object_type === "config_entry") tabs.push(["access", "accTab", null, this.accessTone(item)]);
     return tabs;
   }
@@ -301,7 +302,7 @@ class DiagnosisMixin {
     const base = this.selected;
     const item = { ...base, ...(this.details.get(this.objectKey(base)) || {}) };
     const key = this.objectKey(item);
-    if (["automation", "script"].includes(item.object_type)) this.ensureRuns();
+    if (["automation", "script"].includes(item.object_type)) { this.ensureRuns(); this.ensureQuality(); }
     if (item.object_type === "config_entry" || item.object_type === "integration") this.ensureReliability();
     if (item.object_type === "integration" && item.custom && this.detailTab === "overview") this.sysEnsure("storage"); // the folder size
     if (item.object_type === "integration" && this.detailTab === "access") { this.sysEnsure("dataflow"); this.sysEnsure("secrets"); }
@@ -334,6 +335,7 @@ class DiagnosisMixin {
     if (tab === "relations") return `<div class="stack">${this.relationsCard(key)}</div>`;
     if (tab === "flow") return this.flowCard(item, key);
     if (tab === "history") return this.historyTab(item);
+    if (tab === "diagnosis") return this.diagTab(item);
     if (tab === "runs") return this.runsDetailCard(this.runsRow(item));
     if (tab === "reliability") return this.reliabilityDetailCard(this.reliabilityRow(item));
     if (tab === "access") return item.object_type === "app" ? this.appAccessCard(item) : this.accessDetailCard(item);

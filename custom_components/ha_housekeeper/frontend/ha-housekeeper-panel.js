@@ -4321,6 +4321,7 @@ class DiagnosisMixin {
     if (NOTE_TYPES.includes(item.object_type)) tabs.push(["history", "tabHistory", this.historyCount(item)]);
     if (this.runsRow(item)) tabs.push(["runs", "runsTab"]);
     if (this.reliabilityRow(item)) tabs.push(["reliability", "relTab"]);
+    if (this.diagRow(item)) tabs.splice(tabs.findIndex(([id]) => id === "technical"), 0, ["diagnosis", "diagTab"]);
     if (item.object_type === "config_entry") tabs.push(["access", "accTab", null, this.accessTone(item)]);
     return tabs;
   }
@@ -4329,7 +4330,7 @@ class DiagnosisMixin {
     const base = this.selected;
     const item = { ...base, ...(this.details.get(this.objectKey(base)) || {}) };
     const key = this.objectKey(item);
-    if (["automation", "script"].includes(item.object_type)) this.ensureRuns();
+    if (["automation", "script"].includes(item.object_type)) { this.ensureRuns(); this.ensureQuality(); }
     if (item.object_type === "config_entry" || item.object_type === "integration") this.ensureReliability();
     if (item.object_type === "integration" && item.custom && this.detailTab === "overview") this.sysEnsure("storage"); // the folder size
     if (item.object_type === "integration" && this.detailTab === "access") { this.sysEnsure("dataflow"); this.sysEnsure("secrets"); }
@@ -4362,6 +4363,7 @@ class DiagnosisMixin {
     if (tab === "relations") return `<div class="stack">${this.relationsCard(key)}</div>`;
     if (tab === "flow") return this.flowCard(item, key);
     if (tab === "history") return this.historyTab(item);
+    if (tab === "diagnosis") return this.diagTab(item);
     if (tab === "runs") return this.runsDetailCard(this.runsRow(item));
     if (tab === "reliability") return this.reliabilityDetailCard(this.reliabilityRow(item));
     if (tab === "access") return item.object_type === "app" ? this.appAccessCard(item) : this.accessDetailCard(item);
@@ -6800,7 +6802,7 @@ class ExchangeMixin {
 Object.assign(TEXT.de, {
   qualityTab: "Übersicht", runsTabRuns: "Läufe",
   scTab: "Skripte", scTabHint: "Alle Skripte und wer sie nutzt", scSumNoCaller: "Ohne Aufrufer", scColCallers: "Aufgerufen von", scNoCaller: "niemand", scAuto1: "1 Automation", scAutoN: "{n} Automationen", scScript1: "1 Skript", scScriptN: "{n} Skripte", scFilterCallers: "Alle Aufrufer", scWithCallers: "Mit Aufrufer", scWithoutCallers: "Ohne Aufrufer", scNone: "Keine Skripte gefunden.", scCallersHint: "Zählt Automationen und Skripte, die dieses Skript aufrufen.",
-  ovColDiag: "Diagnose", ovSumAll: "Alle", ovSumActive: "Aktiv", ovSumOff: "Deaktiviert", ovSumProblem: "Mit Problem", ovSumErrors: "Mit Fehlern", ovSumNever: "Nie gelaufen",
+  ovSumAll: "Alle", ovSumActive: "Aktiv", ovSumOff: "Deaktiviert", ovSumProblem: "Mit Problem", ovSumErrors: "Mit Fehlern", ovSumNever: "Nie gelaufen",
   ovFilterState: "Alle Status", ovStateOn: "Aktiv", ovStateOff: "Deaktiviert", ovFilterLevel: "Alle Stufen", ovLevelProblem: "Problem oder Prüfen", ovLevelAny: "Auch Hinweise", ovFilterRuns: "Alle Läufe", ovRunsErrors: "Mit Fehlern", ovRunsNever: "Nie gelaufen", ovColWorst: "Qualität", ovNoRuns: "In den gezählten Läufen nie ausgelöst.",
   qualityHint: "Alle Automationen mit Status, Läufen und sieben getrennten Blickwinkeln, bewusst ohne Gesamtnote. „Unbekannt“ heißt: dazu gibt es noch nichts zu beurteilen.",
   qualityLoading: "Die Qualität wird zusammengestellt …", qualityNone: "Keine Automationen gefunden.", qualityRefresh: "Neu berechnen",
@@ -6810,7 +6812,7 @@ Object.assign(TEXT.de, {
   dr_no_criteria: "Kein Erfolgskriterium definiert", dr_not_yet_checked: "Noch nicht ausgelöst, seit es ein Kriterium gibt", dr_missed: "{missed} verfehlt, {ok} erreicht (7 Tage)", dr_reached: "{ok} erreicht (7 Tage)",
   dr_no_description: "Keine Beschreibung", dr_large: "Groß: viele Trigger oder Aktionen", dr_deep: "Tief verschachtelt", dr_no_config: "Konfiguration nicht lesbar", dr_no_effect: "Läufe enden meist an Bedingungen", dr_conflict: "{count} mögliche Konflikte",
   dr_failing: "Viele Fehler", dr_never_ok: "Nie erfolgreich", dr_overlap: "Läufe überschneiden sich", dr_burst: "Ungewöhnlich oft", dr_long_run: "Ungewöhnlich lange Läufe", dr_after_update: "Mehr Fehler seit einem Update", dr_long_wait: "Lange Wartezeit", dr_wait_no_timeout: "Warten ohne Timeout",
-  diagOpen: "Details", diagClose: "Schließen", diagFor: "Diagnose: {name}",
+  diagTab: "Diagnose",
   critTitle: "Erfolgskriterien", critHint: "Du legst fest, was die Automation erreichen soll. Nach jeder Auslösung wird einmal nach der Frist geprüft. Gespeichert werden nur Zähler.",
   critType: "Art", critTypeState: "Zielzustand", critTypeCall: "Dienst aufgerufen", critService: "Dienst", critCallLine: "ruft {service} auf",
   critCallHint: "Erreicht, wenn genau dieser Lauf der Automation den Dienst aufruft (Benachrichtigung oder Skript). Aufrufe aus anderen Quellen zählen nie.",
@@ -6821,7 +6823,7 @@ Object.assign(TEXT.de, {
 Object.assign(TEXT.en, {
   qualityTab: "Overview", runsTabRuns: "Runs",
   scTab: "Scripts", scTabHint: "All scripts and who uses them", scSumNoCaller: "No caller", scColCallers: "Called by", scNoCaller: "nobody", scAuto1: "1 automation", scAutoN: "{n} automations", scScript1: "1 script", scScriptN: "{n} scripts", scFilterCallers: "All callers", scWithCallers: "With a caller", scWithoutCallers: "Without a caller", scNone: "No scripts found.", scCallersHint: "Counts the automations and scripts that call this script.",
-  ovColDiag: "Diagnosis", ovSumAll: "All", ovSumActive: "Active", ovSumOff: "Disabled", ovSumProblem: "With a problem", ovSumErrors: "With errors", ovSumNever: "Never ran",
+  ovSumAll: "All", ovSumActive: "Active", ovSumOff: "Disabled", ovSumProblem: "With a problem", ovSumErrors: "With errors", ovSumNever: "Never ran",
   ovFilterState: "All states", ovStateOn: "Active", ovStateOff: "Disabled", ovFilterLevel: "All levels", ovLevelProblem: "Problem or check", ovLevelAny: "Including notes", ovFilterRuns: "All runs", ovRunsErrors: "With errors", ovRunsNever: "Never ran", ovColWorst: "Quality", ovNoRuns: "Never triggered in the counted runs.",
   qualityHint: "Seven separate views of each automation, deliberately without an overall grade. “Unknown” means there is nothing to judge by yet.",
   qualityLoading: "Putting the quality together …", qualityNone: "No automations found.", qualityRefresh: "Recalculate",
@@ -6831,7 +6833,7 @@ Object.assign(TEXT.en, {
   dr_no_criteria: "No success criterion defined", dr_not_yet_checked: "Not triggered since there is a criterion", dr_missed: "{missed} missed, {ok} reached (7 days)", dr_reached: "{ok} reached (7 days)",
   dr_no_description: "No description", dr_large: "Large: many triggers or actions", dr_deep: "Deeply nested", dr_no_config: "Configuration not readable", dr_no_effect: "Runs mostly end at conditions", dr_conflict: "{count} possible conflicts",
   dr_failing: "Many errors", dr_never_ok: "Never succeeds", dr_overlap: "Runs overlap", dr_burst: "Unusually often", dr_long_run: "Unusually long runs", dr_after_update: "More errors since an update", dr_long_wait: "Long wait", dr_wait_no_timeout: "Waiting without a timeout",
-  diagOpen: "Details", diagClose: "Close", diagFor: "Diagnosis: {name}",
+  diagTab: "Diagnosis",
   critTitle: "Success criteria", critHint: "You define what the automation should achieve. After every trigger, one check is made after the time limit. Only counters are kept.",
   critType: "Kind", critTypeState: "Target state", critTypeCall: "Service called", critService: "Service", critCallLine: "calls {service}",
   critCallHint: "Reached when exactly this run of the automation calls the service (a notification or a script). Calls from other sources never count.",
@@ -6893,7 +6895,6 @@ class DiagnosticsMixin {
       { key: "runs", label: "runsColRuns", dir: "desc", cell: o => num(o.runs) },
       { key: "errors", label: "runsColErrors", dir: "desc", cell: o => num(o.errors) },
       ...DIM_ORDER.map(dimCol),
-      { key: "diag", label: "ovColDiag", sortable: false, cell: o => `<button class="btn" data-diag-open="${this.esc(o.entity_id)}">${this.t("actOpen")}</button>` },
     ];
     return this.sysList("overview", rows, {
       sort: "worst", dir: "asc",
@@ -6935,7 +6936,7 @@ class DiagnosticsMixin {
 
   qualityView() {
     return this.qualityFrame((q, head) => {
-      const d = this.diagState(), rows = this.overviewRows();
+      const rows = this.overviewRows();
       const n = x => this.formatNumber(x), count = f => n(rows.filter(f).length);
       const tiles = this.sumTiles([
         { label: this.t("ovSumAll"), value: n(rows.length), tone: "mute", lf: ["overview", "", ""] },
@@ -6947,7 +6948,7 @@ class DiagnosticsMixin {
           { label: this.t("ovSumNever"), value: count(o => o.runs === 0), tone: "mute", hint: this.t("ovNoRuns"), lf: ["overview", "runs", "never"] },
         ] : []),
       ]);
-      return `<div class="stack">${head}${tiles}<div class="panel">${this.overviewList(rows)}</div>${d.sel ? this.diagDetail(d.sel) : ""}</div>`;
+      return `<div class="stack">${head}${tiles}<div class="panel">${this.overviewList(rows)}</div></div>`;
     });
   }
 
@@ -7014,21 +7015,31 @@ class DiagnosticsMixin {
     });
   }
 
-  // Everything about one automation in one place: why each dimension is as it is, the criteria, and later the coverage, the comparison and the dry run.
-  diagDetail(entityId) {
-    const d = this.diagState(), item = d.quality?.items.find(i => i.entity_id === entityId);
-    if (!item) return "";
-    const dims = DIM_ORDER.map(id => {
-      const dim = item.dimensions[id];
-      return `<div class="row"><span class="tile ${QL_TONE[dim.level]}">${QL_MARK[dim.level]}</span><span class="row-text"><strong>${this.t(`dim_${id}`)}</strong><small>${this.esc(dim.reasons.length ? dim.reasons.map(r => this.dimReason(r)).join(" · ") : this.t(`ql_${dim.level}`))}</small></span><span class="pill ${QL_TONE[dim.level]}">${this.t(`ql_${dim.level}`)}</span></div>`;
-    }).join("");
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("diagFor", { name: this.esc(item.name) })}</h2><p>${this.esc(entityId)}</p></div><button class="btn" data-diag-close>${this.t("diagClose")}</button></div>${this.fold("diag_dims", { title: this.t("diagSecDims") }, dims, true)}${this.fold("diag_crit", { title: this.t("diagSecCriteria") }, this.criteriaCard(entityId), true)}${this.fold("diag_improve", { title: this.t("refactorTitle") }, this.refactorCard(entityId), false)}${this.fold("diag_more", { title: this.t("diagSecMore") }, this.diagExtras(entityId), false)}</section>`;
+  // The row of one automation or script in the quality numbers, for its detail page.
+  diagRow(item) {
+    const q = this.diagState().quality;
+    if (!q || !["automation", "script"].includes(item.object_type)) return null;
+    return (item.object_type === "script" ? q.scripts || [] : q.items).find(i => i.entity_id === item.object_id) || null;
   }
 
-  async openDiag(entityId) {
+  // The diagnosis tab of an automation or script: why each dimension is as it is; for an automation also the criteria,
+  // and later the coverage, the comparison and the dry run. Opening it picks the object the handlers work on.
+  diagTab(item) {
+    const row = this.diagRow(item), d = this.diagState(), id = item.object_id;
+    if (!row) return `<div class="panel">${this.skeleton("qualityLoading")}</div>`;
+    d.sel = id;
+    if (item.object_type === "automation" && d.loadedFor !== id) { d.loadedFor = id; d.draft = null; d.message = ""; this.loadDiag(id); }
+    const dims = DIM_ORDER.filter(dimId => row.dimensions[dimId]).map(dimId => {
+      const dim = row.dimensions[dimId];
+      return `<div class="row"><span class="tile ${QL_TONE[dim.level]}">${QL_MARK[dim.level]}</span><span class="row-text"><strong>${this.t(`dim_${dimId}`)}</strong><small>${this.esc(dim.reasons.length ? dim.reasons.map(r => this.dimReason(r)).join(" · ") : this.t(`ql_${dim.level}`))}</small></span><span class="pill ${QL_TONE[dim.level]}">${this.t(`ql_${dim.level}`)}</span></div>`;
+    }).join("");
+    const folds = this.fold("diag_dims", { title: this.t("diagSecDims") }, dims, true);
+    if (item.object_type === "script") return `<section class="panel">${folds}</section>`;
+    return `<section class="panel">${folds}${this.fold("diag_crit", { title: this.t("diagSecCriteria") }, this.criteriaCard(id), true)}${this.fold("diag_improve", { title: this.t("refactorTitle") }, this.refactorCard(id), false)}${this.fold("diag_more", { title: this.t("diagSecMore") }, this.diagExtras(id), false)}</section>`;
+  }
+
+  async loadDiag(entityId) {
     const d = this.diagState();
-    d.sel = entityId; d.draft = null; d.message = "";
-    this.render();
     try { d.criteria[entityId] = await this._hass.callWS({ type: "ha_housekeeper/criteria", entity_id: entityId }); } catch (_) { /* shown as empty */ }
     this.render();
     await this.loadRefactor?.(entityId);
@@ -7079,8 +7090,6 @@ class DiagnosticsMixin {
   bindDiagnostics(root) {
     const d = () => this.diagState();
     root.querySelector("[data-quality-refresh]")?.addEventListener("click", () => this.loadQuality());
-    root.querySelectorAll("[data-diag-open]").forEach(el => el.onclick = () => this.openDiag(el.dataset.diagOpen));
-    root.querySelector("[data-diag-close]")?.addEventListener("click", () => { d().sel = ""; d().draft = null; this.render(); });
     root.querySelector("[data-crit-edit]")?.addEventListener("click", ev => this.editCriteria(ev.currentTarget.dataset.critEdit));
     root.querySelector("[data-crit-cancel]")?.addEventListener("click", () => { d().draft = null; this.render(); });
     root.querySelector("[data-crit-save]")?.addEventListener("click", () => this.saveCriteria());
