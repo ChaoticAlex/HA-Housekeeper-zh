@@ -1,10 +1,15 @@
 // LayoutMixin: the pieces every long view shares (a row of key figures and tabs for its sections); mixed in by 99-register.js.
 class LayoutMixin {
-  // A row of key figures. tile: { label, value, sub, tone ("ok"|"warn"|"red"|"mute"), tab, filter } where tab ("view|id") makes it a button.
+  // A row of key figures. tile: { label, value, sub, tone ("ok"|"warn"|"red"|"mute"), tab, filter, lf } where tab ("view|id") makes it a button; lf ([list id, filter name, value]) sets that list filter, an empty name clears them all.
   sumTiles(tiles) {
     const cells = tiles.filter(Boolean).map(t => {
       const inner = `<span class="sumlabel">${this.esc(t.label)}</span><b class="sumvalue">${t.value}</b>${t.sub ? `<small>${t.sub}</small>` : ""}${t.spark ? `<span class="spark-row">${t.spark}</span>` : ""}`;
       if (t.filter !== undefined) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-finding-filter="${this.esc(t.filter)}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
+      if (t.lf) {
+        const [id, name, value] = t.lf, f = this.lv[id]?.f || {};
+        const active = name ? f[name] === value : !Object.values(f).some(Boolean);
+        return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-lf-set="${this.esc(t.lf.join("|"))}" aria-pressed="${active}">${inner}</button>`;
+      }
       if (t.attr) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} ${t.attr[0]}="${this.esc(t.attr[1])}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
       if (t.unref) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-unref-tab="${t.unref}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
       if (t.inv !== undefined) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-inv-filter="${this.esc(t.inv)}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;

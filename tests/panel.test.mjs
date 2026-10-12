@@ -2046,7 +2046,7 @@ test("the runs view loads once per visit and counts again on request", async () 
   const calls = [];
   el._hass.callWS = async msg => { calls.push(msg); return RUNS; };
   const drain = async () => { while (queue.length) await queue.shift()(); };
-  el.data = DATA; el.view = "runs";
+  el.data = DATA; el.view = "runs"; el.viewTab = { runs: "runs" };
   el.ensureRuns(); el.ensureRuns(); el.render();
   await drain();
   assert.equal(calls.length, 1);
@@ -2141,7 +2141,7 @@ test("slow recorder views ask again by themselves while another calculation hold
 
 test("the runs view searches and filters the table and the list of what stands out, and sorts by column", () => {
   const { el } = panel("en");
-  el.data = DATA; el.runs = RUNS; el.view = "runs"; el._runsRequested = true;
+  el.data = DATA; el.runs = RUNS; el.view = "runs"; el.viewTab = { runs: "runs" }; el._runsRequested = true;
   assert.ok(!el.runsView().includes('data-lq="runs"'), "a short list needs no search box");
   const st = el.lvState("runs", "runs", "desc");
   st.q = "nacht";
@@ -2243,9 +2243,10 @@ test("polish: the to-do list groups by urgency, the cleanup view has tabs, the q
   el.view = "cleanup"; el.journal = []; el._journalRequested = true; el.purges = [{ at: "2026-10-01T10:00:00+00:00", removed: ["sensor.a"], skipped: [], states: false }];
   const html = el.cleanupView();
   assert.ok(html.includes('data-view-tab="cleanup|entities"') && html.includes('data-view-tab="cleanup|devices"') && html.includes('data-view-tab="cleanup|unused"') && html.includes('data-view-tab="cleanup|stats"') && html.includes('data-view-tab="cleanup|purges"'));
-  el.diag = { quality: { items: [{ entity_id: "automation.ok", name: "Fine", status: "on", worst: "ok", dimensions: Object.fromEntries(["integrity", "reliability", "effectiveness", "maintainability", "restart_safety", "efficiency", "conflicts"].map(id => [id, { level: "ok", reasons: [] }])) }] }, issuesOnly: true, criteria: {}, detail: {} };
+  el.diag = { quality: { items: [{ entity_id: "automation.ok", name: "Fine", status: "on", worst: "ok", dimensions: Object.fromEntries(["integrity", "reliability", "effectiveness", "maintainability", "restart_safety", "efficiency", "conflicts"].map(id => [id, { level: "ok", reasons: [] }])) }] }, criteria: {}, detail: {} };
   el._qualityRequested = true;
-  assert.ok(el.qualityView().includes("No automation with a problem or note."));
+  el.lvState("overview", "worst", "asc").f.level = "problem";
+  assert.ok(el.qualityView().includes("data-lf-set="));
 });
 
 test("open previews can be selected and merged into one plan; a ran plan cannot", async () => {

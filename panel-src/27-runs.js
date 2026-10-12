@@ -96,6 +96,7 @@ class RunsMixin {
     if (st.f.type && row.object_type !== st.f.type) return false;
     if (st.f.outcome === "errors" && !row.errors) return false;
     if (st.f.outcome === "flagged" && !row.findings.length) return false;
+    if (st.f.outcome === "never" && !row.findings.some(f => f.kind === "never_ok")) return false;
     return true;
   }
 
@@ -103,7 +104,7 @@ class RunsMixin {
     this.setExporter("runs", "runs", [this.t("runsColName"), "ID", this.t("runsColRuns"), this.t("runsColErrors"), this.t("runsColConditions"), `${this.t("runsColDuration")} (ms, mean)`, `${this.t("runsColDuration")} (ms, max)`], () => rows.map(r => [r.name, r.entity_id, r.runs, r.errors, r.conditions, r.mean_ms ?? "", r.max_ms ?? ""]));
     return this.listBar("runs", { columns: [{ key: "runs", label: "runsColRuns" }, { key: "errors", label: "runsColErrors" }, { key: "conditions", label: "runsColConditions" }, { key: "duration", label: "runsColDuration" }, { key: "trend", label: "runsColTrend" }], sorts: this.runsSorts(), filters: [
       { name: "type", all: this.t("allTypes"), options: [["automation", this.t("automation")], ["script", this.t("script")]] },
-      { name: "outcome", all: this.t("runsAllOutcomes"), options: [["errors", this.t("runsOnlyErrors")], ["flagged", this.t("runsOnlyFlagged")]] },
+      { name: "outcome", all: this.t("runsAllOutcomes"), options: [["errors", this.t("runsOnlyErrors")], ["flagged", this.t("runsOnlyFlagged")], ["never", this.t("ovRunsNever")]] },
     ] });
   }
 
@@ -142,11 +143,11 @@ class RunsMixin {
   // Two tabs: the counted runs, and the quality of each automation (46-diagnostics.js).
   runsView() {
     const tabs = [
+      { id: "overview", icon: "mdi:clipboard-pulse-outline", label: this.t("qualityTab"), hint: this.t("runsTileQualityHint"), tone: "mute" },
       { id: "runs", icon: "mdi:run-fast", label: this.t("runsTabRuns"), hint: this.t("runsTileRunsHint"), tone: "mute" },
-      { id: "quality", icon: "mdi:clipboard-pulse-outline", label: this.t("qualityTab"), hint: this.t("runsTileQualityHint"), tone: "mute" },
     ];
-    const open = this.viewTabOf("runs", tabs, "runs");
-    if (open === "quality") return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${this.qualityView()}</div>`;
+    const open = this.viewTabOf("runs", tabs, "overview");
+    if (open === "overview") return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${this.qualityView()}</div>`;
     return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${this.runsListView()}</div>`;
   }
 
@@ -173,9 +174,9 @@ class RunsMixin {
     const allFlagged = r.items.filter(row => row.findings.length).length;
     const tiles = this.sumTiles([
       { label: this.t("runsSumRuns"), value: this.formatNumber(runTotal), sub: this.t("runsSumOf", { n: this.formatNumber(everyCounted.length) }), tone: "mute" },
-      { label: this.t("runsColErrors"), value: this.formatNumber(errorTotal), sub: runTotal ? this.t("runsSumShare", { n: this.formatNumber(Math.round((1000 * errorTotal) / runTotal) / 10) }) : "", tone: errorTotal ? "warn" : "ok" },
-      { label: this.t("runsSumFlagged"), value: this.formatNumber(allFlagged), tone: allFlagged ? "warn" : "ok" },
-      { label: this.t("runsSumNeverOk"), value: this.formatNumber(neverOk), tone: neverOk ? "red" : "ok" },
+      { label: this.t("runsColErrors"), value: this.formatNumber(errorTotal), sub: runTotal ? this.t("runsSumShare", { n: this.formatNumber(Math.round((1000 * errorTotal) / runTotal) / 10) }) : "", tone: errorTotal ? "warn" : "ok", lf: ["runs", "outcome", "errors"] },
+      { label: this.t("runsSumFlagged"), value: this.formatNumber(allFlagged), tone: allFlagged ? "warn" : "ok", lf: ["runs", "outcome", "flagged"] },
+      { label: this.t("runsSumNeverOk"), value: this.formatNumber(neverOk), tone: neverOk ? "red" : "ok", lf: ["runs", "outcome", "never"] },
     ]);
     return `<div class="stack">${head}${tiles}<div class="panel">${coverage}${bar}${attention}</div>${this.conflictsPanel(r)}${all}</div>`;
   }

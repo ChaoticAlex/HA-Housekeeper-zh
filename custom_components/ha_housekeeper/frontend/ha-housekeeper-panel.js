@@ -5029,6 +5029,7 @@ class RunsMixin {
     if (st.f.type && row.object_type !== st.f.type) return false;
     if (st.f.outcome === "errors" && !row.errors) return false;
     if (st.f.outcome === "flagged" && !row.findings.length) return false;
+    if (st.f.outcome === "never" && !row.findings.some(f => f.kind === "never_ok")) return false;
     return true;
   }
 
@@ -5036,7 +5037,7 @@ class RunsMixin {
     this.setExporter("runs", "runs", [this.t("runsColName"), "ID", this.t("runsColRuns"), this.t("runsColErrors"), this.t("runsColConditions"), `${this.t("runsColDuration")} (ms, mean)`, `${this.t("runsColDuration")} (ms, max)`], () => rows.map(r => [r.name, r.entity_id, r.runs, r.errors, r.conditions, r.mean_ms ?? "", r.max_ms ?? ""]));
     return this.listBar("runs", { columns: [{ key: "runs", label: "runsColRuns" }, { key: "errors", label: "runsColErrors" }, { key: "conditions", label: "runsColConditions" }, { key: "duration", label: "runsColDuration" }, { key: "trend", label: "runsColTrend" }], sorts: this.runsSorts(), filters: [
       { name: "type", all: this.t("allTypes"), options: [["automation", this.t("automation")], ["script", this.t("script")]] },
-      { name: "outcome", all: this.t("runsAllOutcomes"), options: [["errors", this.t("runsOnlyErrors")], ["flagged", this.t("runsOnlyFlagged")]] },
+      { name: "outcome", all: this.t("runsAllOutcomes"), options: [["errors", this.t("runsOnlyErrors")], ["flagged", this.t("runsOnlyFlagged")], ["never", this.t("ovRunsNever")]] },
     ] });
   }
 
@@ -5075,11 +5076,11 @@ class RunsMixin {
   // Two tabs: the counted runs, and the quality of each automation (46-diagnostics.js).
   runsView() {
     const tabs = [
+      { id: "overview", icon: "mdi:clipboard-pulse-outline", label: this.t("qualityTab"), hint: this.t("runsTileQualityHint"), tone: "mute" },
       { id: "runs", icon: "mdi:run-fast", label: this.t("runsTabRuns"), hint: this.t("runsTileRunsHint"), tone: "mute" },
-      { id: "quality", icon: "mdi:clipboard-pulse-outline", label: this.t("qualityTab"), hint: this.t("runsTileQualityHint"), tone: "mute" },
     ];
-    const open = this.viewTabOf("runs", tabs, "runs");
-    if (open === "quality") return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${this.qualityView()}</div>`;
+    const open = this.viewTabOf("runs", tabs, "overview");
+    if (open === "overview") return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${this.qualityView()}</div>`;
     return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${this.runsListView()}</div>`;
   }
 
@@ -5106,9 +5107,9 @@ class RunsMixin {
     const allFlagged = r.items.filter(row => row.findings.length).length;
     const tiles = this.sumTiles([
       { label: this.t("runsSumRuns"), value: this.formatNumber(runTotal), sub: this.t("runsSumOf", { n: this.formatNumber(everyCounted.length) }), tone: "mute" },
-      { label: this.t("runsColErrors"), value: this.formatNumber(errorTotal), sub: runTotal ? this.t("runsSumShare", { n: this.formatNumber(Math.round((1000 * errorTotal) / runTotal) / 10) }) : "", tone: errorTotal ? "warn" : "ok" },
-      { label: this.t("runsSumFlagged"), value: this.formatNumber(allFlagged), tone: allFlagged ? "warn" : "ok" },
-      { label: this.t("runsSumNeverOk"), value: this.formatNumber(neverOk), tone: neverOk ? "red" : "ok" },
+      { label: this.t("runsColErrors"), value: this.formatNumber(errorTotal), sub: runTotal ? this.t("runsSumShare", { n: this.formatNumber(Math.round((1000 * errorTotal) / runTotal) / 10) }) : "", tone: errorTotal ? "warn" : "ok", lf: ["runs", "outcome", "errors"] },
+      { label: this.t("runsSumFlagged"), value: this.formatNumber(allFlagged), tone: allFlagged ? "warn" : "ok", lf: ["runs", "outcome", "flagged"] },
+      { label: this.t("runsSumNeverOk"), value: this.formatNumber(neverOk), tone: neverOk ? "red" : "ok", lf: ["runs", "outcome", "never"] },
     ]);
     return `<div class="stack">${head}${tiles}<div class="panel">${coverage}${bar}${attention}</div>${this.conflictsPanel(r)}${all}</div>`;
   }
@@ -5684,11 +5685,16 @@ class PoliciesMixin {
 
 // LayoutMixin: the pieces every long view shares (a row of key figures and tabs for its sections); mixed in by 99-register.js.
 class LayoutMixin {
-  // A row of key figures. tile: { label, value, sub, tone ("ok"|"warn"|"red"|"mute"), tab, filter } where tab ("view|id") makes it a button.
+  // A row of key figures. tile: { label, value, sub, tone ("ok"|"warn"|"red"|"mute"), tab, filter, lf } where tab ("view|id") makes it a button; lf ([list id, filter name, value]) sets that list filter, an empty name clears them all.
   sumTiles(tiles) {
     const cells = tiles.filter(Boolean).map(t => {
       const inner = `<span class="sumlabel">${this.esc(t.label)}</span><b class="sumvalue">${t.value}</b>${t.sub ? `<small>${t.sub}</small>` : ""}${t.spark ? `<span class="spark-row">${t.spark}</span>` : ""}`;
       if (t.filter !== undefined) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-finding-filter="${this.esc(t.filter)}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
+      if (t.lf) {
+        const [id, name, value] = t.lf, f = this.lv[id]?.f || {};
+        const active = name ? f[name] === value : !Object.values(f).some(Boolean);
+        return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-lf-set="${this.esc(t.lf.join("|"))}" aria-pressed="${active}">${inner}</button>`;
+      }
       if (t.attr) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} ${t.attr[0]}="${this.esc(t.attr[1])}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
       if (t.unref) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-unref-tab="${t.unref}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
       if (t.inv !== undefined) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-inv-filter="${this.esc(t.inv)}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
@@ -6664,8 +6670,10 @@ class ExchangeMixin {
 
 // Automation diagnostics: quality dimensions, success criteria, coverage, trace comparison and the dry run (see quality.py, criteria.py, coverage.py, trace_compare.py, dry_run.py); mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
-  qualityTab: "Qualität", runsTabRuns: "Läufe",
-  qualityHint: "Sieben getrennte Blickwinkel je Automation, bewusst ohne Gesamtnote. „Unbekannt“ heißt: dazu gibt es noch nichts zu beurteilen.",
+  qualityTab: "Übersicht", runsTabRuns: "Läufe",
+  ovColDiag: "Diagnose", ovSumAll: "Alle", ovSumActive: "Aktiv", ovSumOff: "Deaktiviert", ovSumProblem: "Mit Problem", ovSumErrors: "Mit Fehlern", ovSumNever: "Nie gelaufen",
+  ovFilterState: "Alle Status", ovStateOn: "Aktiv", ovStateOff: "Deaktiviert", ovFilterLevel: "Alle Stufen", ovLevelProblem: "Problem oder Prüfen", ovLevelAny: "Auch Hinweise", ovFilterRuns: "Alle Läufe", ovRunsErrors: "Mit Fehlern", ovRunsNever: "Nie gelaufen", ovColWorst: "Qualität", ovNoRuns: "In den gezählten Läufen nie ausgelöst.",
+  qualityHint: "Alle Automationen mit Status, Läufen und sieben getrennten Blickwinkeln, bewusst ohne Gesamtnote. „Unbekannt“ heißt: dazu gibt es noch nichts zu beurteilen.",
   qualityLoading: "Die Qualität wird zusammengestellt …", qualityNone: "Keine Automationen gefunden.", qualityRefresh: "Neu berechnen",
   dim_integrity: "Integrität", dim_reliability: "Zuverlässigkeit", dim_effectiveness: "Wirksamkeit", dim_maintainability: "Wartbarkeit", dim_restart_safety: "Restart-Festigkeit", dim_efficiency: "Effizienz", dim_conflicts: "Konflikte",
   ql_ok: "In Ordnung", ql_info: "Hinweis", ql_warn: "Prüfen", ql_red: "Problem", ql_unknown: "Unbekannt",
@@ -6682,7 +6690,9 @@ Object.assign(TEXT.de, {
   actCriteria: "Ziele von Automationen verfehlt", actCriteriaHint: "Mindestens eine Automation verfehlt ihr Erfolgskriterium immer wieder.",
 });
 Object.assign(TEXT.en, {
-  qualityTab: "Quality", runsTabRuns: "Runs",
+  qualityTab: "Overview", runsTabRuns: "Runs",
+  ovColDiag: "Diagnosis", ovSumAll: "All", ovSumActive: "Active", ovSumOff: "Disabled", ovSumProblem: "With a problem", ovSumErrors: "With errors", ovSumNever: "Never ran",
+  ovFilterState: "All states", ovStateOn: "Active", ovStateOff: "Disabled", ovFilterLevel: "All levels", ovLevelProblem: "Problem or check", ovLevelAny: "Including notes", ovFilterRuns: "All runs", ovRunsErrors: "With errors", ovRunsNever: "Never ran", ovColWorst: "Quality", ovNoRuns: "Never triggered in the counted runs.",
   qualityHint: "Seven separate views of each automation, deliberately without an overall grade. “Unknown” means there is nothing to judge by yet.",
   qualityLoading: "Putting the quality together …", qualityNone: "No automations found.", qualityRefresh: "Recalculate",
   dim_integrity: "Integrity", dim_reliability: "Reliability", dim_effectiveness: "Effectiveness", dim_maintainability: "Maintainability", dim_restart_safety: "Restart safety", dim_efficiency: "Efficiency", dim_conflicts: "Conflicts",
@@ -6732,25 +6742,75 @@ class DiagnosticsMixin {
     return `<span class="pill ${QL_TONE[dim.level]}" title="${this.esc(dim.reasons.map(r => this.dimReason(r)).join(" · "))}">${QL_MARK[dim.level]}</span>`;
   }
 
-  qualityRow(item) {
-    const dots = DIM_ORDER.map(id => `<td aria-label="${this.esc(this.t(`dim_${id}`))}: ${this.esc(this.t(`ql_${item.dimensions[id].level}`))}">${this.dimDot(item.dimensions[id])}</td>`).join("");
-    return `<tr><td>${this.nameCell(item.name, item.entity_id)}<span class="qlight" aria-hidden="true">${DIM_ORDER.map(id => `<i class="${QL_TONE[item.dimensions[id].level]}" title="${this.esc(this.t(`dim_${id}`))}"></i>`).join("")}</span></td>${dots}<td><button class="btn" data-diag-open="${this.esc(item.entity_id)}">${this.t("diagOpen")}</button></td></tr>`;
+  // One row per automation: the quality rows joined with the counted runs (runs are null until they are loaded).
+  overviewRows() {
+    const byId = new Map((this.runs?.items || []).map(r => [r.entity_id, r]));
+    return (this.diagState().quality?.items || []).map(i => {
+      const r = byId.get(i.entity_id);
+      return { ...i, runs: this.runs ? r?.runs ?? 0 : null, errors: this.runs ? r?.errors ?? 0 : null };
+    });
+  }
+
+  overviewList(rows) {
+    const rank = { red: 0, warn: 1, info: 2, ok: 3, unknown: 4 };
+    const off = o => o.status === "disabled", problem = o => o.worst === "red" || o.worst === "warn";
+    const dimCol = id => ({ key: id, label: `dim_${id}`, dir: "asc", cell: o => `<span aria-label="${this.esc(this.t(`dim_${id}`))}: ${this.esc(this.t(`ql_${o.dimensions[id].level}`))}">${this.dimDot(o.dimensions[id])}</span>` });
+    const num = v => (v === null ? "–" : this.esc(this.formatNumber(v)));
+    const columns = [
+      { key: "name", label: "utName", cell: o => `${this.nameCell(o.name, o.entity_id)}<span class="qlight" aria-hidden="true">${DIM_ORDER.map(id => `<i class="${QL_TONE[o.dimensions[id].level]}" title="${this.esc(this.t(`dim_${id}`))}"></i>`).join("")}</span>` },
+      { key: "state", label: "sysColState", dir: "asc", cell: o => this.pill(o.status) },
+      { key: "runs", label: "runsColRuns", dir: "desc", cell: o => num(o.runs) },
+      { key: "errors", label: "runsColErrors", dir: "desc", cell: o => num(o.errors) },
+      ...DIM_ORDER.map(dimCol),
+      { key: "diag", label: "ovColDiag", sortable: false, cell: o => `<button class="btn" data-diag-open="${this.esc(o.entity_id)}">${this.t("actOpen")}</button>` },
+    ];
+    return this.sysList("overview", rows, {
+      sort: "worst", dir: "asc",
+      sorts: [
+        { key: "worst", label: "ovColWorst", dir: "asc", get: o => rank[o.worst] },
+        { key: "name", label: "utName", dir: "asc", get: o => o.name },
+        { key: "state", label: "sysColState", dir: "asc", get: o => o.status },
+        { key: "runs", label: "runsColRuns", dir: "desc", get: o => o.runs },
+        { key: "errors", label: "runsColErrors", dir: "desc", get: o => o.errors },
+        ...DIM_ORDER.map(id => ({ key: id, label: `dim_${id}`, dir: "asc", get: o => rank[o.dimensions[id].level] })),
+      ],
+      filters: [
+        { name: "state", all: this.t("ovFilterState"), options: [["on", this.t("ovStateOn")], ["off", this.t("ovStateOff")]] },
+        { name: "level", all: this.t("ovFilterLevel"), options: [["problem", this.t("ovLevelProblem")], ["any", this.t("ovLevelAny")]] },
+        { name: "runs", all: this.t("ovFilterRuns"), options: [["errors", this.t("ovRunsErrors")], ["never", this.t("ovRunsNever")]] },
+      ],
+      filterFns: {
+        state: (o, v) => off(o) === (v === "off"),
+        level: (o, v) => (v === "problem" ? problem(o) : o.worst !== "ok" && o.worst !== "unknown"),
+        runs: (o, v) => (v === "errors" ? o.errors > 0 : o.runs === 0),
+      },
+      text: o => `${o.name} ${o.entity_id}`, tie: o => o.entity_id, empty: "qualityNoneNext", columns,
+      rowAttrs: o => `data-object="${this.esc(`automation:${o.entity_id}`)}" tabindex="0" role="button" aria-label="${this.esc(o.name)}"`,
+      exportName: "automations", header: [this.t("utName"), "ID", this.t("sysColState"), this.t("runsColRuns"), this.t("runsColErrors"), ...DIM_ORDER.map(id => this.t(`dim_${id}`))],
+      rows: o => [o.name, o.entity_id, o.status || "", o.runs ?? "", o.errors ?? "", ...DIM_ORDER.map(id => this.t(`ql_${o.dimensions[id].level}`))],
+    });
   }
 
   qualityView() {
     this.ensureQuality();
+    this.ensureRuns();
     const d = this.diagState(), q = d.quality;
     const head = this.pageBar({ at: this.loadedAt("quality"), loading: d.loading, attr: "data-quality-refresh" });
     if (d.error) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(d.error)}</div></div></div>`;
     if (!q) return `<div class="stack">${head}<div class="panel">${this.skeleton("qualityLoading")}</div></div>`;
-    const issue = i => i.worst === "red" || i.worst === "warn" || i.worst === "info";
-    const items = d.issuesOnly ? q.items.filter(issue) : q.items;  // the backend sends them worst first
-    const sorted = d.byName ? [...items].sort((a, b) => a.name.localeCompare(b.name)) : items;
-    const bar = `<div class="listbar"><label><input type="checkbox" data-quality-issues ${d.issuesOnly ? "checked" : ""}> ${this.t("qualityOnlyIssues")}</label><label><input type="checkbox" data-quality-byname ${d.byName ? "checked" : ""}> ${this.t("qualityName")}</label></div>`;
-    const header = `<tr><th>${this.t("utName")}</th>${DIM_ORDER.map(id => `<th>${this.t(`dim_${id}`)}</th>`).join("")}<th></th></tr>`;
-    const empty = d.issuesOnly && q.items.length ? this.t("qualityNoIssues") : this.t("qualityNoneNext");
-    const table = sorted.length ? `<div class="tablewrap lt qualitytable"><table><thead>${header}</thead><tbody>${sorted.map(i => this.qualityRow(i)).join("")}</tbody></table></div>` : `<div class="emptymsg">${empty}</div>`;
-    return `<div class="stack">${head}<div class="panel">${q.items.length ? bar : ""}${table}</div>${d.sel ? this.diagDetail(d.sel) : ""}</div>`;
+    const rows = this.overviewRows();
+    const n = x => this.formatNumber(x), count = f => n(rows.filter(f).length);
+    const tiles = this.sumTiles([
+      { label: this.t("ovSumAll"), value: n(rows.length), tone: "mute", lf: ["overview", "", ""] },
+      { label: this.t("ovSumActive"), value: count(o => o.status !== "disabled"), tone: "ok", lf: ["overview", "state", "on"] },
+      { label: this.t("ovSumOff"), value: count(o => o.status === "disabled"), tone: "mute", lf: ["overview", "state", "off"] },
+      { label: this.t("ovSumProblem"), value: count(o => o.worst === "red" || o.worst === "warn"), tone: rows.some(o => o.worst === "red") ? "red" : rows.some(o => o.worst === "warn") ? "warn" : "ok", lf: ["overview", "level", "problem"] },
+      ...(this.runs ? [
+        { label: this.t("ovSumErrors"), value: count(o => o.errors > 0), tone: rows.some(o => o.errors > 0) ? "warn" : "ok", lf: ["overview", "runs", "errors"] },
+        { label: this.t("ovSumNever"), value: count(o => o.runs === 0), tone: "mute", hint: this.t("ovNoRuns"), lf: ["overview", "runs", "never"] },
+      ] : []),
+    ]);
+    return `<div class="stack">${head}${tiles}<div class="panel">${this.overviewList(rows)}</div>${d.sel ? this.diagDetail(d.sel) : ""}</div>`;
   }
 
   // Everything about one automation in one place: why each dimension is as it is, the criteria, and later the coverage, the comparison and the dry run.
@@ -6817,8 +6877,6 @@ class DiagnosticsMixin {
 
   bindDiagnostics(root) {
     const d = () => this.diagState();
-    root.querySelector("[data-quality-issues]")?.addEventListener("change", ev => { d().issuesOnly = ev.target.checked; this.render(); });
-    root.querySelector("[data-quality-byname]")?.addEventListener("change", ev => { d().byName = ev.target.checked; this.render(); });
     root.querySelector("[data-quality-refresh]")?.addEventListener("click", () => this.loadQuality());
     root.querySelectorAll("[data-diag-open]").forEach(el => el.onclick = () => this.openDiag(el.dataset.diagOpen));
     root.querySelector("[data-diag-close]")?.addEventListener("click", () => { d().sel = ""; d().draft = null; this.render(); });
@@ -7001,8 +7059,8 @@ Object.assign(TEXT.de, {
   actNow: "Jetzt", actSoon: "Bald", actSoonSub: "Nicht dringend, zum Aufklappen anklicken",
   cleanupTabNew: "Neuer Plan", cleanupTabJournal: "Pläne und Journal", cleanupTabPurges: "Gelöschte Statistiken",
   journalEmptyNext: "Noch kein Plan. Wähle unter „Neuer Plan“ Kandidaten aus und lege einen Plan an.",
-  qualityOnlyIssues: "Nur mit Problem oder Hinweis", qualityAll: "Alle", qualityWorst: "Schlechteste zuerst", qualityName: "Nach Name",
-  qualityNoneNext: "Keine Automationen gefunden. Sie erscheinen nach dem nächsten Scan.", qualityNoIssues: "Keine Automation mit Problem oder Hinweis.",
+  
+  qualityNoneNext: "Keine Automationen gefunden. Sie erscheinen nach dem nächsten Scan.",
   mergeButton: "Ausgewählte zusammenführen ({count})", mergeSelect: "Plan zum Zusammenführen auswählen", mergeDone: "{count} Pläne zu einem zusammengeführt. Bewertung und Zahlen sind frisch berechnet.", mergeConflicts: "Zusammengeführt. {count} Objekte wurden nicht übernommen, weil sie in den Plänen verschieden angefragt waren: {list}",
   diagSecDims: "Bewertung", diagSecCriteria: "Erfolgskriterien", diagSecMore: "Abdeckung, Vergleich und Testlauf",
 });
@@ -7010,8 +7068,8 @@ Object.assign(TEXT.en, {
   actNow: "Now", actSoon: "Soon", actSoonSub: "Not urgent, click to open",
   cleanupTabNew: "New plan", cleanupTabJournal: "Plans and journal", cleanupTabPurges: "Deleted statistics",
   journalEmptyNext: "No plan yet. Pick candidates under “New plan” and create one.",
-  qualityOnlyIssues: "Only with a problem or note", qualityAll: "All", qualityWorst: "Worst first", qualityName: "By name",
-  qualityNoneNext: "No automations found. They appear after the next scan.", qualityNoIssues: "No automation with a problem or note.",
+  
+  qualityNoneNext: "No automations found. They appear after the next scan.",
   mergeButton: "Merge selected ({count})", mergeSelect: "Select plan to merge", mergeDone: "{count} plans merged into one. Verdicts and numbers are freshly calculated.", mergeConflicts: "Merged. {count} objects were left out because the plans asked for them in different ways: {list}",
   diagSecDims: "Assessment", diagSecCriteria: "Success criteria", diagSecMore: "Coverage, comparison and test run",
 });
@@ -8112,7 +8170,7 @@ Object.assign(TEXT.de, {
   healthScore: "{percent} % der Objekte ohne Befund", healthTasks: "{count} Aufgaben offen", healthNoTasks: "keine offenen Aufgaben", healthTip: "{affected} von {base} bewerteten Objekten sind betroffen; gezählt werden Objekte, nicht einzelne Befunde. Die Zahl im Ring ist der abgerundete Anteil ohne Befund, minus 10 Punkte je dringendes Thema (höchstens 30): kaputte Integrationen, neue kritische Befunde, Backup-Probleme. Die übrigen Themen färben den Ring nur gelb. Ausgeblendete Befunde und die Datenbankprüfung zählen nicht. Mehr per Klick auf den Ring.",
   repair: "Reparieren", repairSubtitle: "Bestehende Daten und Verweise korrigieren oder auf etwas Neues umstellen. Housekeeper zeigt erst eine Vorschau; geschrieben wird erst nach deiner Bestätigung.", repairDryRun: "Nichts wird geändert, bis du die Vorschau bestätigst.",
   journalSubtitle: "Alle Pläne aus Aufräumen und Reparieren: was geändert wurde, was geprüft wurde und was sich rückgängig machen lässt.",
- relTileIntHint: "Verfügbarkeit {avail} in {window}", relTilePill: "{n} auffällig", relTileUnstableHint: "Entitäten, die oft zwischen Zuständen wechseln", recTileLoadRows: "{n} Einträge pro Tag ({window})", recTileLoadHint: "Welche Entitäten den Recorder füllen", recTileCostsTop: "Größter Posten: {name} ({share} %)", recTileCostsHint: "Wer wie viel Platz belegt", recTileDbHint: "Größe, Wachstum und Aufbewahrung", polTileRulesHint: "{on} eingeschaltet", polTileViolationsHint: "Verstöße gegen eingeschaltete Regeln", polTileHidden: "{n} ausgeblendet", expoTileFindingsHint: "Was du prüfen oder wissen solltest", expoTileSourceHint: "{n} Entitäten freigegeben", runsTileRunsHint: "Gezählte Läufe von Automationen und Skripten", runsTileQualityHint: "Sieben Blickwinkel je Automation",
+ relTileIntHint: "Verfügbarkeit {avail} in {window}", relTilePill: "{n} auffällig", relTileUnstableHint: "Entitäten, die oft zwischen Zuständen wechseln", recTileLoadRows: "{n} Einträge pro Tag ({window})", recTileLoadHint: "Welche Entitäten den Recorder füllen", recTileCostsTop: "Größter Posten: {name} ({share} %)", recTileCostsHint: "Wer wie viel Platz belegt", recTileDbHint: "Größe, Wachstum und Aufbewahrung", polTileRulesHint: "{on} eingeschaltet", polTileViolationsHint: "Verstöße gegen eingeschaltete Regeln", polTileHidden: "{n} ausgeblendet", expoTileFindingsHint: "Was du prüfen oder wissen solltest", expoTileSourceHint: "{n} Entitäten freigegeben", runsTileRunsHint: "Gezählte Läufe von Automationen und Skripten", runsTileQualityHint: "Alle Automationen auf einen Blick",
   cleanupTabEntities: "Entitäten deaktivieren", cleanupTabDevices: "Geräte deaktivieren", cleanupTabQuarantine: "Quarantäne und Entfernen", cleanupReadyCount: "{count} bereit", cleanupTileEntitiesHint: "Verwaist oder lange nicht verfügbar", cleanupTileDevicesHint: "Geräte ohne funktionierende Entität", cleanupTileQuarantineHint: "Frühestens nach {days} Tagen entfernbar", cleanupTileUnusedHint: "Entitäten ohne bekannte Verwendung", cleanupTileStatsHint: "Reste in der Datenbank löschen", cleanupTilePurgesHint: "Was schon gelöscht wurde", qTypeEntities: "Entitäten ({count})", qTypeDevices: "Geräte ({count})",
   repairTitle: "Was möchtest du reparieren?", repairHint: "Wähle eine Aufgabe. Jede führt in Schritten durch, mit Vorschau und Bestätigung.", repairBack: "Alle Aufgaben", repairFound: "{count} Funde", repairNotChecked: "nicht geprüft", repairNoneFound: "keine Funde",
   repairTaskCounter: "Sensorfehler bereinigen", repairTaskCounterHint: "Falsche Werte in Zählern und Messwerten korrigieren, zum Beispiel ein Zähler, der kurz sinkt, oder ein Ausschlag auf 85 °C.",
@@ -8154,7 +8212,7 @@ Object.assign(TEXT.en, {
   healthScore: "{percent}% of objects without a finding", healthTasks: "{count} tasks open", healthNoTasks: "no open tasks", healthTip: "{affected} of {base} rated objects are affected; objects are counted, not single findings. The number in the ring is the share without a finding, rounded down, minus 10 points for each urgent topic (at most 30): broken integrations, new critical findings, backup problems. The other topics only turn the ring amber. Hidden findings and the database check do not count. More with a click on the ring.",
   repair: "Repair", repairSubtitle: "Correct existing data and references, or switch them over to something new. Housekeeper shows a preview first; nothing is written until you confirm.", repairDryRun: "Nothing is changed until you confirm the preview.",
   journalSubtitle: "Every plan from Tidy up and Repair: what changed, what was checked and what can be undone.",
- relTileIntHint: "Availability {avail} over {window}", relTilePill: "{n} need a look", relTileUnstableHint: "Entities that often change between states", recTileLoadRows: "{n} rows a day ({window})", recTileLoadHint: "Which entities fill the recorder", recTileCostsTop: "Biggest item: {name} ({share} %)", recTileCostsHint: "Who takes how much space", recTileDbHint: "Size, growth and retention", polTileRulesHint: "{on} switched on", polTileViolationsHint: "Violations of the rules that are on", polTileHidden: "{n} hidden", expoTileFindingsHint: "What you should check or know", expoTileSourceHint: "{n} entities exposed", runsTileRunsHint: "Counted runs of automations and scripts", runsTileQualityHint: "Seven views of each automation",
+ relTileIntHint: "Availability {avail} over {window}", relTilePill: "{n} need a look", relTileUnstableHint: "Entities that often change between states", recTileLoadRows: "{n} rows a day ({window})", recTileLoadHint: "Which entities fill the recorder", recTileCostsTop: "Biggest item: {name} ({share} %)", recTileCostsHint: "Who takes how much space", recTileDbHint: "Size, growth and retention", polTileRulesHint: "{on} switched on", polTileViolationsHint: "Violations of the rules that are on", polTileHidden: "{n} hidden", expoTileFindingsHint: "What you should check or know", expoTileSourceHint: "{n} entities exposed", runsTileRunsHint: "Counted runs of automations and scripts", runsTileQualityHint: "All automations at a glance",
   cleanupTabEntities: "Disable entities", cleanupTabDevices: "Disable devices", cleanupTabQuarantine: "Quarantine and removal", cleanupReadyCount: "{count} ready", cleanupTileEntitiesHint: "Orphaned or unavailable for a long time", cleanupTileDevicesHint: "Devices without a working entity", cleanupTileQuarantineHint: "Removable after {days} days at the earliest", cleanupTileUnusedHint: "Entities with no known use", cleanupTileStatsHint: "Delete leftovers in the database", cleanupTilePurgesHint: "What has been deleted already", qTypeEntities: "Entities ({count})", qTypeDevices: "Devices ({count})",
   repairTitle: "What would you like to repair?", repairHint: "Pick a task. Each one leads through the steps, with a preview and a confirmation.", repairBack: "All tasks", repairFound: "{count} found", repairNotChecked: "not checked", repairNoneFound: "none found",
   repairTaskCounter: "Repair sensor errors", repairTaskCounterHint: "Correct wrong values in counters and measurements, for example a counter that briefly falls, or a spike to 85 °C.",
@@ -12509,6 +12567,12 @@ class HAHousekeeperPanel extends HTMLElement {
     });
     root.querySelectorAll("[data-decide-cancel]").forEach(el => el.onclick = () => { this.decide = null; this.render(); });
     root.querySelectorAll("[data-finding-after]").forEach(el => el.onclick = () => { this.findingAfter = !this.findingAfter; this.pages = {}; this.render(); });
+    root.querySelectorAll("[data-lf-set]").forEach(el => el.onclick = () => {
+      const [id, name, value] = el.dataset.lfSet.split("|"), st = this.lv[id];
+      if (!st) return;
+      if (!name) st.f = {}; else if (st.f[name] === value) delete st.f[name]; else st.f[name] = value;
+      this.pages = {}; this.persistLv(id); this.render();
+    });
     root.querySelectorAll("[data-finding-filter]").forEach(el => el.onclick = () => { this.findingFilter = el.dataset.findingFilter; this.pages = {}; this.render(); });
     const searchField = (selector, setter) => {
       const input = root.querySelector(selector);

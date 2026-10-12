@@ -1,7 +1,9 @@
 // Automation diagnostics: quality dimensions, success criteria, coverage, trace comparison and the dry run (see quality.py, criteria.py, coverage.py, trace_compare.py, dry_run.py); mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
-  qualityTab: "Qualität", runsTabRuns: "Läufe",
-  qualityHint: "Sieben getrennte Blickwinkel je Automation, bewusst ohne Gesamtnote. „Unbekannt“ heißt: dazu gibt es noch nichts zu beurteilen.",
+  qualityTab: "Übersicht", runsTabRuns: "Läufe",
+  ovColDiag: "Diagnose", ovSumAll: "Alle", ovSumActive: "Aktiv", ovSumOff: "Deaktiviert", ovSumProblem: "Mit Problem", ovSumErrors: "Mit Fehlern", ovSumNever: "Nie gelaufen",
+  ovFilterState: "Alle Status", ovStateOn: "Aktiv", ovStateOff: "Deaktiviert", ovFilterLevel: "Alle Stufen", ovLevelProblem: "Problem oder Prüfen", ovLevelAny: "Auch Hinweise", ovFilterRuns: "Alle Läufe", ovRunsErrors: "Mit Fehlern", ovRunsNever: "Nie gelaufen", ovColWorst: "Qualität", ovNoRuns: "In den gezählten Läufen nie ausgelöst.",
+  qualityHint: "Alle Automationen mit Status, Läufen und sieben getrennten Blickwinkeln, bewusst ohne Gesamtnote. „Unbekannt“ heißt: dazu gibt es noch nichts zu beurteilen.",
   qualityLoading: "Die Qualität wird zusammengestellt …", qualityNone: "Keine Automationen gefunden.", qualityRefresh: "Neu berechnen",
   dim_integrity: "Integrität", dim_reliability: "Zuverlässigkeit", dim_effectiveness: "Wirksamkeit", dim_maintainability: "Wartbarkeit", dim_restart_safety: "Restart-Festigkeit", dim_efficiency: "Effizienz", dim_conflicts: "Konflikte",
   ql_ok: "In Ordnung", ql_info: "Hinweis", ql_warn: "Prüfen", ql_red: "Problem", ql_unknown: "Unbekannt",
@@ -18,7 +20,9 @@ Object.assign(TEXT.de, {
   actCriteria: "Ziele von Automationen verfehlt", actCriteriaHint: "Mindestens eine Automation verfehlt ihr Erfolgskriterium immer wieder.",
 });
 Object.assign(TEXT.en, {
-  qualityTab: "Quality", runsTabRuns: "Runs",
+  qualityTab: "Overview", runsTabRuns: "Runs",
+  ovColDiag: "Diagnosis", ovSumAll: "All", ovSumActive: "Active", ovSumOff: "Disabled", ovSumProblem: "With a problem", ovSumErrors: "With errors", ovSumNever: "Never ran",
+  ovFilterState: "All states", ovStateOn: "Active", ovStateOff: "Disabled", ovFilterLevel: "All levels", ovLevelProblem: "Problem or check", ovLevelAny: "Including notes", ovFilterRuns: "All runs", ovRunsErrors: "With errors", ovRunsNever: "Never ran", ovColWorst: "Quality", ovNoRuns: "Never triggered in the counted runs.",
   qualityHint: "Seven separate views of each automation, deliberately without an overall grade. “Unknown” means there is nothing to judge by yet.",
   qualityLoading: "Putting the quality together …", qualityNone: "No automations found.", qualityRefresh: "Recalculate",
   dim_integrity: "Integrity", dim_reliability: "Reliability", dim_effectiveness: "Effectiveness", dim_maintainability: "Maintainability", dim_restart_safety: "Restart safety", dim_efficiency: "Efficiency", dim_conflicts: "Conflicts",
@@ -68,25 +72,75 @@ class DiagnosticsMixin {
     return `<span class="pill ${QL_TONE[dim.level]}" title="${this.esc(dim.reasons.map(r => this.dimReason(r)).join(" · "))}">${QL_MARK[dim.level]}</span>`;
   }
 
-  qualityRow(item) {
-    const dots = DIM_ORDER.map(id => `<td aria-label="${this.esc(this.t(`dim_${id}`))}: ${this.esc(this.t(`ql_${item.dimensions[id].level}`))}">${this.dimDot(item.dimensions[id])}</td>`).join("");
-    return `<tr><td>${this.nameCell(item.name, item.entity_id)}<span class="qlight" aria-hidden="true">${DIM_ORDER.map(id => `<i class="${QL_TONE[item.dimensions[id].level]}" title="${this.esc(this.t(`dim_${id}`))}"></i>`).join("")}</span></td>${dots}<td><button class="btn" data-diag-open="${this.esc(item.entity_id)}">${this.t("diagOpen")}</button></td></tr>`;
+  // One row per automation: the quality rows joined with the counted runs (runs are null until they are loaded).
+  overviewRows() {
+    const byId = new Map((this.runs?.items || []).map(r => [r.entity_id, r]));
+    return (this.diagState().quality?.items || []).map(i => {
+      const r = byId.get(i.entity_id);
+      return { ...i, runs: this.runs ? r?.runs ?? 0 : null, errors: this.runs ? r?.errors ?? 0 : null };
+    });
+  }
+
+  overviewList(rows) {
+    const rank = { red: 0, warn: 1, info: 2, ok: 3, unknown: 4 };
+    const off = o => o.status === "disabled", problem = o => o.worst === "red" || o.worst === "warn";
+    const dimCol = id => ({ key: id, label: `dim_${id}`, dir: "asc", cell: o => `<span aria-label="${this.esc(this.t(`dim_${id}`))}: ${this.esc(this.t(`ql_${o.dimensions[id].level}`))}">${this.dimDot(o.dimensions[id])}</span>` });
+    const num = v => (v === null ? "–" : this.esc(this.formatNumber(v)));
+    const columns = [
+      { key: "name", label: "utName", cell: o => `${this.nameCell(o.name, o.entity_id)}<span class="qlight" aria-hidden="true">${DIM_ORDER.map(id => `<i class="${QL_TONE[o.dimensions[id].level]}" title="${this.esc(this.t(`dim_${id}`))}"></i>`).join("")}</span>` },
+      { key: "state", label: "sysColState", dir: "asc", cell: o => this.pill(o.status) },
+      { key: "runs", label: "runsColRuns", dir: "desc", cell: o => num(o.runs) },
+      { key: "errors", label: "runsColErrors", dir: "desc", cell: o => num(o.errors) },
+      ...DIM_ORDER.map(dimCol),
+      { key: "diag", label: "ovColDiag", sortable: false, cell: o => `<button class="btn" data-diag-open="${this.esc(o.entity_id)}">${this.t("actOpen")}</button>` },
+    ];
+    return this.sysList("overview", rows, {
+      sort: "worst", dir: "asc",
+      sorts: [
+        { key: "worst", label: "ovColWorst", dir: "asc", get: o => rank[o.worst] },
+        { key: "name", label: "utName", dir: "asc", get: o => o.name },
+        { key: "state", label: "sysColState", dir: "asc", get: o => o.status },
+        { key: "runs", label: "runsColRuns", dir: "desc", get: o => o.runs },
+        { key: "errors", label: "runsColErrors", dir: "desc", get: o => o.errors },
+        ...DIM_ORDER.map(id => ({ key: id, label: `dim_${id}`, dir: "asc", get: o => rank[o.dimensions[id].level] })),
+      ],
+      filters: [
+        { name: "state", all: this.t("ovFilterState"), options: [["on", this.t("ovStateOn")], ["off", this.t("ovStateOff")]] },
+        { name: "level", all: this.t("ovFilterLevel"), options: [["problem", this.t("ovLevelProblem")], ["any", this.t("ovLevelAny")]] },
+        { name: "runs", all: this.t("ovFilterRuns"), options: [["errors", this.t("ovRunsErrors")], ["never", this.t("ovRunsNever")]] },
+      ],
+      filterFns: {
+        state: (o, v) => off(o) === (v === "off"),
+        level: (o, v) => (v === "problem" ? problem(o) : o.worst !== "ok" && o.worst !== "unknown"),
+        runs: (o, v) => (v === "errors" ? o.errors > 0 : o.runs === 0),
+      },
+      text: o => `${o.name} ${o.entity_id}`, tie: o => o.entity_id, empty: "qualityNoneNext", columns,
+      rowAttrs: o => `data-object="${this.esc(`automation:${o.entity_id}`)}" tabindex="0" role="button" aria-label="${this.esc(o.name)}"`,
+      exportName: "automations", header: [this.t("utName"), "ID", this.t("sysColState"), this.t("runsColRuns"), this.t("runsColErrors"), ...DIM_ORDER.map(id => this.t(`dim_${id}`))],
+      rows: o => [o.name, o.entity_id, o.status || "", o.runs ?? "", o.errors ?? "", ...DIM_ORDER.map(id => this.t(`ql_${o.dimensions[id].level}`))],
+    });
   }
 
   qualityView() {
     this.ensureQuality();
+    this.ensureRuns();
     const d = this.diagState(), q = d.quality;
     const head = this.pageBar({ at: this.loadedAt("quality"), loading: d.loading, attr: "data-quality-refresh" });
     if (d.error) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(d.error)}</div></div></div>`;
     if (!q) return `<div class="stack">${head}<div class="panel">${this.skeleton("qualityLoading")}</div></div>`;
-    const issue = i => i.worst === "red" || i.worst === "warn" || i.worst === "info";
-    const items = d.issuesOnly ? q.items.filter(issue) : q.items;  // the backend sends them worst first
-    const sorted = d.byName ? [...items].sort((a, b) => a.name.localeCompare(b.name)) : items;
-    const bar = `<div class="listbar"><label><input type="checkbox" data-quality-issues ${d.issuesOnly ? "checked" : ""}> ${this.t("qualityOnlyIssues")}</label><label><input type="checkbox" data-quality-byname ${d.byName ? "checked" : ""}> ${this.t("qualityName")}</label></div>`;
-    const header = `<tr><th>${this.t("utName")}</th>${DIM_ORDER.map(id => `<th>${this.t(`dim_${id}`)}</th>`).join("")}<th></th></tr>`;
-    const empty = d.issuesOnly && q.items.length ? this.t("qualityNoIssues") : this.t("qualityNoneNext");
-    const table = sorted.length ? `<div class="tablewrap lt qualitytable"><table><thead>${header}</thead><tbody>${sorted.map(i => this.qualityRow(i)).join("")}</tbody></table></div>` : `<div class="emptymsg">${empty}</div>`;
-    return `<div class="stack">${head}<div class="panel">${q.items.length ? bar : ""}${table}</div>${d.sel ? this.diagDetail(d.sel) : ""}</div>`;
+    const rows = this.overviewRows();
+    const n = x => this.formatNumber(x), count = f => n(rows.filter(f).length);
+    const tiles = this.sumTiles([
+      { label: this.t("ovSumAll"), value: n(rows.length), tone: "mute", lf: ["overview", "", ""] },
+      { label: this.t("ovSumActive"), value: count(o => o.status !== "disabled"), tone: "ok", lf: ["overview", "state", "on"] },
+      { label: this.t("ovSumOff"), value: count(o => o.status === "disabled"), tone: "mute", lf: ["overview", "state", "off"] },
+      { label: this.t("ovSumProblem"), value: count(o => o.worst === "red" || o.worst === "warn"), tone: rows.some(o => o.worst === "red") ? "red" : rows.some(o => o.worst === "warn") ? "warn" : "ok", lf: ["overview", "level", "problem"] },
+      ...(this.runs ? [
+        { label: this.t("ovSumErrors"), value: count(o => o.errors > 0), tone: rows.some(o => o.errors > 0) ? "warn" : "ok", lf: ["overview", "runs", "errors"] },
+        { label: this.t("ovSumNever"), value: count(o => o.runs === 0), tone: "mute", hint: this.t("ovNoRuns"), lf: ["overview", "runs", "never"] },
+      ] : []),
+    ]);
+    return `<div class="stack">${head}${tiles}<div class="panel">${this.overviewList(rows)}</div>${d.sel ? this.diagDetail(d.sel) : ""}</div>`;
   }
 
   // Everything about one automation in one place: why each dimension is as it is, the criteria, and later the coverage, the comparison and the dry run.
@@ -153,8 +207,6 @@ class DiagnosticsMixin {
 
   bindDiagnostics(root) {
     const d = () => this.diagState();
-    root.querySelector("[data-quality-issues]")?.addEventListener("change", ev => { d().issuesOnly = ev.target.checked; this.render(); });
-    root.querySelector("[data-quality-byname]")?.addEventListener("change", ev => { d().byName = ev.target.checked; this.render(); });
     root.querySelector("[data-quality-refresh]")?.addEventListener("click", () => this.loadQuality());
     root.querySelectorAll("[data-diag-open]").forEach(el => el.onclick = () => this.openDiag(el.dataset.diagOpen));
     root.querySelector("[data-diag-close]")?.addEventListener("click", () => { d().sel = ""; d().draft = null; this.render(); });
