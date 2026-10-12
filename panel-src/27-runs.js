@@ -54,10 +54,10 @@ class RunsMixin {
     return `<button class="row" data-object="${this.esc(`${row.object_type}:${row.entity_id}`)}"><span class="tile ${tone}"><ha-icon icon="${row.object_type === "script" ? "mdi:script-text-outline" : "mdi:robot-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(row.name)}</strong>${this.rowId(row.entity_id, counts)}${this.runsFindingLines(row)}</span></button>`;
   }
 
-  runsTrend(row) {
-    const max = Math.max(1, ...row.per_day);
-    const bars = row.per_day.map(n => `<i style="height:${Math.round((n / max) * 100)}%"></i>`).join("");
-    return `<span class="runspark" role="img" aria-label="${this.esc(this.t("runsTrendLabel", { values: row.per_day.join(", ") }))}">${bars}</span>`;
+  runsTrend(row, days = row.per_day) {
+    const max = Math.max(1, ...days);
+    const bars = days.map(n => `<i style="height:${Math.round((n / max) * 100)}%"></i>`).join("");
+    return `<span class="runspark" role="img" aria-label="${this.esc(this.t("runsTrendLabel", { values: days.join(", ") }))}">${bars}</span>`;
   }
 
   // Possible conflicts and loops between automations; only shown when the check found something.
@@ -139,7 +139,7 @@ class RunsMixin {
     const c = row.change;
     const side = s => this.t("runsChangeSide", { errors: this.formatNumber(s.errors), runs: this.formatNumber(s.runs) });
     const change = c ? `<div class="pad"><p class="factnote"><ha-icon icon="mdi:source-commit"></ha-icon> ${this.esc(this.t("runsChange", { date: this.formatDate(c.at), after: side(c.after), before: side(c.before) }))}</p></div>` : "";
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("runsTab")}</h2><p>${since}</p></div></div><div class="pad"><dl class="kv">${facts}<dt>${this.t("runsColTrend")}</dt><dd>${this.runsTrend(row)}</dd></dl></div>${change}${notes}${this.howCounted("runsFootnote")}</section>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("runsTab")}</h2><p>${since}</p></div></div><div class="pad"><dl class="kv">${facts}<dt>${this.t("runsTrend30")}</dt><dd>${this.runsTrend(row, row.per_day_30 || row.per_day)}</dd></dl></div>${change}${notes}${this.howCounted("runsFootnote")}</section>`;
   }
 
   // Two tabs: the counted runs, and the quality of each automation (46-diagnostics.js).

@@ -31,6 +31,7 @@ from .runs import (
 )
 
 WINDOW_DAYS = 7
+TREND_DAYS = 30  # the run history of the detail page
 BASELINE_DAYS = 28  # the days before the window that give an automation its own normal
 MIN_BASELINE_DAYS = 7
 FAIL_MIN_ERRORS = 3
@@ -337,6 +338,12 @@ def evaluate(
                         "c"
                     ][RUNS]
                     for back in range(WINDOW_DAYS - 1, -1, -1)
+                ],
+                "per_day_30": [
+                    (days.get((today - timedelta(days=back)).isoformat()) or {"c": [0] * FIELDS})[
+                        "c"
+                    ][RUNS]
+                    for back in range(TREND_DAYS - 1, -1, -1)
                 ],
                 "lower_bound": any(entry.get("lo") for entry in window),
                 "change": before_after(

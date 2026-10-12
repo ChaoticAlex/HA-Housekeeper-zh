@@ -252,6 +252,7 @@ def test_ignored_and_unknown_automations_are_left_out_and_rows_are_ranked() -> N
     assert [r["entity_id"] for r in muted["items"]] == ["automation.other"]
     row = result["items"][0]
     assert row["per_day"] == [0, 0, 0, 0, 0, 0, 10] and row["errors"] == 8
+    assert len(row["per_day_30"]) == 30 and row["per_day_30"][-1] == 10
 
 
 def test_a_script_is_keyed_by_its_entity_id() -> None:
