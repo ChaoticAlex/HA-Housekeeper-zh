@@ -81,7 +81,7 @@ class OverviewMixin {
     if (missed) items.push({ key: "criteria", tone: "warn", icon: "mdi:target", label: "actCriteria", hint: "actCriteriaHint", count: missed, view: "runs" });
     const fresh = (this.trend?.new_findings?.items || []).filter(f => !f.ignored && CRITICAL_CLASSES.includes(f.classification)).length;
     if (fresh) items.push({ key: "critical", tone: "red", icon: "mdi:alert-circle-outline", label: "actNewCritical", hint: "actNewCriticalHint", count: fresh, view: "findingsNav", filter: "" });
-    // A nearly full disk, from the light read of the overview; red from 95 % takes points off the ring like any urgent topic.
+    // A nearly full disk, from the light read of the overview; red from 90 % takes points off the ring like any urgent topic.
     this.ensureSysLight();
     const disk = this.sysLight?.disk;
     if (disk?.percent >= SYS_WARN_PERCENT) {

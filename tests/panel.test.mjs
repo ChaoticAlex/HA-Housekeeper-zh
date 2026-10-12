@@ -4256,15 +4256,15 @@ test("the menu button for Home Assistant's sidebar shows when the sidebar is hid
   assert.ok(events[0].bubbles && events[0].composed, "the event leaves the shadow root");
 });
 
-test("the overview shows the system card and a disk row from 85 %, red from 95 %", () => {
+test("the overview shows the system card and a disk row from 75 %, red from 90 %", () => {
   const { el } = panel("en");
   el.data = DATA; el._sysLightFor = el.data;
   el.sysLight = { disk: { percent: 60, free: 4e9, total: 1e10 }, ram: { percent: 40, used: 1e9, total: 2e9 }, cpu: { percent: 12 } };
   assert.ok(el.systemCard().includes("System") && el.systemCard().includes("60 %") && el.systemCard().includes('data-jump="storage"'));
   assert.ok(!el.todoItems().some(i => i.key === "disk"));
-  el.sysLight.disk.percent = 88;
+  el.sysLight.disk.percent = 80;
   assert.equal(el.todoItems().find(i => i.key === "disk").tone, "warn");
-  el.sysLight.disk.percent = 96;
+  el.sysLight.disk.percent = 92;
   assert.equal(el.todoItems().find(i => i.key === "disk").tone, "red");
   el.sysLight = null;
   assert.equal(el.systemCard(), "");

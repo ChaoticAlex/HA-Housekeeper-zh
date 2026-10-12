@@ -2,7 +2,7 @@
 // All three only read. A page loads on its first visit; its refresh button reads again.
 // A page and the WebSocket command it asks.
 const SYS_COMMANDS = { storage: "system_usage", dataflow: "access", secrets: "sensitive_fields" };
-const SYS_WARN_PERCENT = 85, SYS_RED_PERCENT = 95;
+const SYS_WARN_PERCENT = 75, SYS_RED_PERCENT = 90;
 
 class SystemMixin {
   sysState(name) {

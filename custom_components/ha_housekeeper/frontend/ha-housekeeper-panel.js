@@ -1971,7 +1971,7 @@ class OverviewMixin {
     if (missed) items.push({ key: "criteria", tone: "warn", icon: "mdi:target", label: "actCriteria", hint: "actCriteriaHint", count: missed, view: "runs" });
     const fresh = (this.trend?.new_findings?.items || []).filter(f => !f.ignored && CRITICAL_CLASSES.includes(f.classification)).length;
     if (fresh) items.push({ key: "critical", tone: "red", icon: "mdi:alert-circle-outline", label: "actNewCritical", hint: "actNewCriticalHint", count: fresh, view: "findingsNav", filter: "" });
-    // A nearly full disk, from the light read of the overview; red from 95 % takes points off the ring like any urgent topic.
+    // A nearly full disk, from the light read of the overview; red from 90 % takes points off the ring like any urgent topic.
     this.ensureSysLight();
     const disk = this.sysLight?.disk;
     if (disk?.percent >= SYS_WARN_PERCENT) {
@@ -5984,7 +5984,7 @@ class SearchPagesMixin {
   searchPages() {
     const pages = [];
     for (const [group, views] of NAV_GROUPS) {
-      for (const view of views) pages.push({ view, label: this.t(view), path: this.t(group), words: SEARCH_WORDS[view] || "" });
+      for (const view of views) pages.push({ view, label: this.t(view), path: group === NAV_GROUPS[0][0] ? "" : this.t(group), words: SEARCH_WORDS[view] || "" });
     }
     pages.push({ view: "settings", label: this.t("settings"), path: "", words: SEARCH_WORDS.settings });
     for (const [id, , labelKey] of this.settingsTabs()) pages.push({ view: "settings", settingsTab: id, label: this.t(labelKey), path: this.t("settings"), words: SEARCH_WORDS[id] || "" });
@@ -11462,7 +11462,7 @@ class BatteryTableMixin {
 // All three only read. A page loads on its first visit; its refresh button reads again.
 // A page and the WebSocket command it asks.
 const SYS_COMMANDS = { storage: "system_usage", dataflow: "access", secrets: "sensitive_fields" };
-const SYS_WARN_PERCENT = 85, SYS_RED_PERCENT = 95;
+const SYS_WARN_PERCENT = 75, SYS_RED_PERCENT = 90;
 
 class SystemMixin {
   sysState(name) {
@@ -13223,7 +13223,8 @@ class HAHousekeeperPanel extends HTMLElement {
     if (view === "settings") return this.t("title");
     if (view === "overview") return this.t("navGroupOverview");
     const group = NAV_GROUPS.find(([, views]) => views.includes(view));
-    return group ? this.t(group[0]) : this.t("navGroupOverview");
+    // The first group holds the entries that stand alone in the bar; it is no heading.
+    return group ? (group === NAV_GROUPS[0] ? "" : this.t(group[0])) : this.t("navGroupOverview");
   }
 
   // "just now", "3 min ago", "5 h ago", "2 days ago" for the scan time shown next to the scan button.
@@ -13271,7 +13272,7 @@ class HAHousekeeperPanel extends HTMLElement {
     const graphBack = this.view === "graph" && this.graphSelected && this.graphBackLabel() ? `<button class="btn" data-action="graph-back"><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("backTo")} ${this.esc(this.graphBackLabel())}</button>` : "";
     const viewBack = from ? `<button class="btn" data-action="view-back"><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("backTo")} ${this.t(from.view)}</button>` : "";
     const back = graphBack || viewBack ? `<div class="crumbs">${viewBack}${graphBack}</div>` : "";
-    return `${back}<div class="heading"><div><p class="eyebrow">${this.eyebrowFor(this.view)}</p><h1>${title}${INFO_SUB_VIEWS.includes(this.view) ? this.infoTip(sub) : ""}${["cleanup", "repair", "journal"].includes(this.view) ? this.infoTip(this.t("cleanupDryRun"), true) : ""}</h1>${VIEW_HINT[this.view] ? `<span class="sub">${this.t(VIEW_HINT[this.view])}</span>` : INFO_SUB_VIEWS.includes(this.view) ? "" : `<span class="sub">${sub}</span>`}</div>
+    return `${back}<div class="heading"><div>${this.eyebrowFor(this.view) ? `<p class="eyebrow">${this.eyebrowFor(this.view)}</p>` : ""}<h1>${title}${INFO_SUB_VIEWS.includes(this.view) ? this.infoTip(sub) : ""}${["cleanup", "repair", "journal"].includes(this.view) ? this.infoTip(this.t("cleanupDryRun"), true) : ""}</h1>${VIEW_HINT[this.view] ? `<span class="sub">${this.t(VIEW_HINT[this.view])}</span>` : INFO_SUB_VIEWS.includes(this.view) ? "" : `<span class="sub">${sub}</span>`}</div>
       <div class="head-actions">${modePill}${ago}<button class="btn primary" data-action="scan" ${this.busy || this.cleanupRunning() ? 'disabled aria-busy="true"' : ""} title="${this.esc(this.t("scanHint"))}">${this.scanButtonInner()}</button></div></div>${this.warmupBanner()}${this.healthBanner()}`;
   }
 

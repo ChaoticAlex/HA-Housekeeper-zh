@@ -47,7 +47,7 @@ class SearchPagesMixin {
   searchPages() {
     const pages = [];
     for (const [group, views] of NAV_GROUPS) {
-      for (const view of views) pages.push({ view, label: this.t(view), path: this.t(group), words: SEARCH_WORDS[view] || "" });
+      for (const view of views) pages.push({ view, label: this.t(view), path: group === NAV_GROUPS[0][0] ? "" : this.t(group), words: SEARCH_WORDS[view] || "" });
     }
     pages.push({ view: "settings", label: this.t("settings"), path: "", words: SEARCH_WORDS.settings });
     for (const [id, , labelKey] of this.settingsTabs()) pages.push({ view: "settings", settingsTab: id, label: this.t(labelKey), path: this.t("settings"), words: SEARCH_WORDS[id] || "" });

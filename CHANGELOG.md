@@ -63,7 +63,7 @@
 - **Zugangsdaten** (Sicherheit): welche Integrationen Passwörter, Tokens oder Schlüssel gespeichert haben und ob ein Wert hinterlegt ist. Werte zeigt Housekeeper nie.
 - **Ausfälle statt drei Listen:** Eine Integration mit Problem steht jetzt auch ohne auffällige Entitäten unter „Befunde“ (Block „Ausfälle“). Auf der Übersicht gibt es dafür eine Zeile, „Benötigt Aufmerksamkeit“ heißt „Wichtigste Befunde“ (Ausfälle zuerst), die Karte „Integrationen mit Problemen“ entfällt.
 - **Menü neu geordnet:** Neue Gruppe „Sicherheit“ (Freigaben, Zugriffe & Datenfluss, Zugangsdaten). Speicher & System steht unter Betrieb. Aufräumen, Reparieren und Journal bilden die Gruppe „Bereinigen“, „Erkunden“ heißt „Bestand“ (Inventar, Abhängigkeiten, Änderungen). Die Leiste hat damit sieben Einträge.
-- **Übersicht zeigt das System:** Neue Karte „System“ mit Datenträger, Speicher und Prozessor. Ab 85 % belegtem Datenträger steht eine Aufgabe in der Liste, ab 95 % eine dringende.
+- **Übersicht zeigt das System:** Neue Karte „System“ mit Datenträger, Speicher und Prozessor. Ab 75 % belegtem Datenträger steht eine Aufgabe in der Liste, ab 90 % eine dringende.
 - **Reiter „Zugriffe & Daten“** auf der Detailseite einer Integration: Systemzugriff, Datenfluss und Zugangsdaten (nie ein Wert); bei hohem Systemzugriff eine rote Zeile in der Übersicht.
 - **Apps als Objekte:** Mit Supervisor stehen installierte Apps im Inventar (Status, Version, Update) und haben eine Detailseite mit Rechten, Last und Speicher. Keine Befunde, keine Änderungen an Apps.
 - **Apps und Integrationen:** Hängt eine Integration vermutlich an einer App (Hostname in der Konfiguration), zeigt die App den Reiter „Beziehungen“. Die Zuordnung ist immer „vermutet“.
@@ -92,6 +92,7 @@
 
 ### Behoben
 
+- **Befunde:** Über dem Titel stand die Überschrift „Aktionen“, ein Rest der Menügruppe, die nur noch aus „Befunde“ besteht. Sie entfällt, ebenso als Pfad in der Suche.
 - **Menüleiste:** Auf Fenstern, die für alle Menüpunkte zu schmal sind (etwa zwischen 860 und 1400 Pixeln), wurde die Leiste rechts abgeschnitten. Sie wechselt jetzt in den „Menü“-Knopf mit einer Liste darunter, sobald sie nicht passt, und zeigt wieder die volle Leiste, wenn der Platz reicht.
 - **Scan-Verlauf:** „Je Tag der letzte Scan“ zählt den Tag jetzt in der Zeit von Home Assistant statt in UTC. Vorher konnten zwei Scans desselben Tages nebeneinander stehen und ein anderer Tag fehlen; bereits gespeicherte Doppel verschwinden beim Laden.
 - **Sammelaktionen bei Befunden:** Scheitert eine Anfrage mitten in einer Auswahl, bleiben die fehlgeschlagenen Befunde ausgewählt und das Formular offen; die Meldung nennt „x von y erledigt“. Ein neuer Versuch sendet nur die übrigen.
@@ -153,7 +154,7 @@
 - **Credentials** (Security): which integrations store passwords, tokens or keys and whether a value is set. Housekeeper never shows the values.
 - **Outages instead of three lists:** An integration with a problem now appears under "Findings" even when no entity is flagged (block "Outages"). The overview has one row for it, "Needs attention" is now "Most important findings" (outages first), and the card "Integrations with problems" is gone.
 - **Menu reordered:** New group "Security" (Exposure, Access & data flow, Credentials). Storage & system is under Operation. Clean up, Repair and Journal form the group "Clean up", "Explore" is now "Catalog" (Inventory, Dependencies, Changes). The bar has seven entries.
-- **Overview shows the system:** a new "System" card with disk, memory and processor. A task appears once the disk is 85 % full, an urgent one at 95 %.
+- **Overview shows the system:** a new "System" card with disk, memory and processor. A task appears once the disk is 75 % full, an urgent one at 90 %.
 - **Tab "Access & data"** on the detail page of an integration: system access, data flow and credentials (never a value); a red line in its overview for a high system access.
 - **Apps as objects:** With a Supervisor, installed apps are in the inventory (status, version, update) and have a detail page with rights, load and storage. No findings, no changes to apps.
 - **Apps and integrations:** If an integration probably depends on an app (host name in its configuration), the app shows the tab "Relations". The match is always "probable".
@@ -182,6 +183,7 @@
 
 ### Fixed
 
+- **Findings:** The heading “Actions” above the title was a leftover of the menu group that now consists of “Findings” only. It is gone, also as the path in the search.
 - **Menu bar:** On windows too narrow for all menu items (roughly between 860 and 1400 pixels) the bar was cut off on the right. It now changes into the "Menu" button with a list below it as soon as it does not fit, and shows the full bar again when there is room.
 - **Scan history:** "the last scan of each day" now counts the day in Home Assistant's time zone instead of UTC. Before, two scans of the same day could sit side by side while another day was missing; doubles already stored disappear on load.
 - **Bulk actions on findings:** If a request fails in the middle of a selection, the failed findings stay selected and the form stays open; the message says "x of y done". A retry sends only the rest.
