@@ -84,7 +84,7 @@ class MaintenanceMixin {
     ]) : "";
     const statRows = (c.statistics || []).slice(0, 10).map(s => `<div class="row rel"><span class="tile mute"><ha-icon icon="mdi:chart-line"></ha-icon></span><span class="row-text"><strong>${this.esc(s.statistic_id)}</strong><small>${this.formatNumber(s.rows)}</small></span></div>`).join("");
     const snippet = this.excludeCard(this.suggestedExclusions(), { only: false });
-    return `<div class="stack">${head("", "data-costs-load data-refresh")}${tiles}<p class="factnote">${this.esc(summary)}</p>${snippet}${list}${statRows ? `<div class="panelhead" style="border-top:1px solid var(--hk-border)"><div><h3>${this.t("recorderStats")}</h3></div></div>${statRows}` : ""}</div></div>`;
+    return `<div class="stack">${head("", "data-costs-load data-refresh")}${tiles}<p class="factnote">${this.esc(summary)}</p>${snippet}${list}${statRows ? this.fold("recorder_stats", { title: this.t("recorderStats"), pill: this.formatNumber((c.statistics || []).slice(0, 10).length) }, statRows, false) : ""}</div></div>`;
   }
 
   // One line per check; `level` decides the colour.

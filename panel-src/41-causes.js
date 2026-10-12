@@ -44,7 +44,10 @@ class CausesMixin {
       const body = `${own}${pg.rows.join("")}${pg.footer}`;
       return this.fold(`cause_${c.id}`, head, body + decide, false);
     }).join("");
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("causesTitle")}</h2><p>${this.t("causesSub", { n: this.formatNumber(causes.length), m: this.formatNumber(this.data.findings.filter(f => !f.cause_id && !f.ignored).length) })}</p></div></div>${rows}</div>`;
+    const sub = this.t("causesSub", { n: this.formatNumber(causes.length), m: this.formatNumber(this.data.findings.filter(f => !f.cause_id && !f.ignored).length) });
+    // From four causes on the heading folds, so the list of findings below does not sink; up to five stay open.
+    if (causes.length > 3) return `<div class="panel">${this.fold("causes_all", { tone: "red", title: this.t("causesTitle"), sub, pill: this.formatNumber(causes.length) }, rows, causes.length <= 5)}</div>`;
+    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("causesTitle")}</h2><p>${sub}</p></div></div>${rows}</div>`;
   }
 
   // What can be decided about an outage that is a finding of its own: known, snoozed, hidden.

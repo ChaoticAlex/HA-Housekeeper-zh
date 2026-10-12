@@ -4608,7 +4608,7 @@ class MaintenanceMixin {
     ]) : "";
     const statRows = (c.statistics || []).slice(0, 10).map(s => `<div class="row rel"><span class="tile mute"><ha-icon icon="mdi:chart-line"></ha-icon></span><span class="row-text"><strong>${this.esc(s.statistic_id)}</strong><small>${this.formatNumber(s.rows)}</small></span></div>`).join("");
     const snippet = this.excludeCard(this.suggestedExclusions(), { only: false });
-    return `<div class="stack">${head("", "data-costs-load data-refresh")}${tiles}<p class="factnote">${this.esc(summary)}</p>${snippet}${list}${statRows ? `<div class="panelhead" style="border-top:1px solid var(--hk-border)"><div><h3>${this.t("recorderStats")}</h3></div></div>${statRows}` : ""}</div></div>`;
+    return `<div class="stack">${head("", "data-costs-load data-refresh")}${tiles}<p class="factnote">${this.esc(summary)}</p>${snippet}${list}${statRows ? this.fold("recorder_stats", { title: this.t("recorderStats"), pill: this.formatNumber((c.statistics || []).slice(0, 10).length) }, statRows, false) : ""}</div></div>`;
   }
 
   // One line per check; `level` decides the colour.
@@ -6444,7 +6444,10 @@ class CausesMixin {
       const body = `${own}${pg.rows.join("")}${pg.footer}`;
       return this.fold(`cause_${c.id}`, head, body + decide, false);
     }).join("");
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("causesTitle")}</h2><p>${this.t("causesSub", { n: this.formatNumber(causes.length), m: this.formatNumber(this.data.findings.filter(f => !f.cause_id && !f.ignored).length) })}</p></div></div>${rows}</div>`;
+    const sub = this.t("causesSub", { n: this.formatNumber(causes.length), m: this.formatNumber(this.data.findings.filter(f => !f.cause_id && !f.ignored).length) });
+    // From four causes on the heading folds, so the list of findings below does not sink; up to five stay open.
+    if (causes.length > 3) return `<div class="panel">${this.fold("causes_all", { tone: "red", title: this.t("causesTitle"), sub, pill: this.formatNumber(causes.length) }, rows, causes.length <= 5)}</div>`;
+    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("causesTitle")}</h2><p>${sub}</p></div></div>${rows}</div>`;
   }
 
   // What can be decided about an outage that is a finding of its own: known, snoozed, hidden.

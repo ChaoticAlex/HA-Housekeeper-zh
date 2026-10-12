@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Ausfälle und Recorder-Kosten kürzer:** Bei vielen Ursachen lässt sich die Karte einklappen, und die Statistik unter den Recorder-Kosten ist ein eingeklappter Bereich mit Zahl.
 - **Läufe ohne zweite Liste:** Die Befunde („nie erfolgreich“, „bricht ab“ …) stehen jetzt in der Tabelle unter dem Namen; die Kachel „Auffällig“ filtert sie. Die möglichen Konflikte stehen eingeklappt mit Zahl unter der Tabelle.
 - **Kacheln erkennbar:** Eine Zahl ohne Klick ist flach, ein Filter trägt einen Trichter und ist markiert (mit Haken), solange er wirkt, ein Link auf eine andere Seite einen Pfeil. Ein zweiter Klick hebt jeden Filter wieder auf, die Liste kommt ins Bild, und über der Liste steht „Filter aktiv“ mit „Zurücksetzen“.
 - **Reparieren wie Aufräumen:** Die Aufgaben stehen als kompakte Kacheln oben und bleiben beim Arbeiten stehen; ein Wechsel braucht kein „Zurück“ mehr. Der Hinweis zum bestätigten Plan sitzt auch hier hinter dem farbigen (i).
