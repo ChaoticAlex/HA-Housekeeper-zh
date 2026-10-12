@@ -142,6 +142,8 @@ def apply_marks(
         finding.pop("mark", None)
         if finding.get("rule_id") == "config_entry.not_loaded":
             keys = (mark_key("config_entry", finding["object_id"]),)
+        elif finding.get("rule_id") == "device.down":
+            keys = (mark_key("device", finding["object_id"]),)
         elif finding.get("rule_id") == "app.stopped_in_use":
             keys = (
                 mark_key("app", finding["object_id"]),

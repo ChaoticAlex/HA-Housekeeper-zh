@@ -32,7 +32,7 @@ from .automation_blocked import blocked_automation_findings, dead_effect_finding
 from .backup_health import AttestStore, backup_health
 from .battery_care import BatteryStore
 from .battery_kind import apply_battery_kinds
-from .causes import apply_causes
+from .causes import apply_causes, device_down_findings
 from .cleanup import JournalStore, is_child_device, quarantine_entries, recurring_devices
 from .cleanup_exec import CleanupRunner
 from .config_changes import ChangeStore, fingerprint
@@ -1067,6 +1067,7 @@ class InventoryScanner:
             )
             + _config_entry_findings(integrations, observed_at, self.min_unavailable_days)
         )
+        findings += device_down_findings(entities, devices, findings)
 
         quarantine = quarantine_entries(self.journal.plans, [*entities, *devices])
         recurring = recurring_devices(

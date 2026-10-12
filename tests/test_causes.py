@@ -51,24 +51,111 @@ def test_a_failed_integration_collects_its_unavailable_entities() -> None:
     assert [f.get("cause_id") for f in findings] == ["integration_down:e1", None, None]
 
 
+def _device_finding(**extra):
+    return {
+        "rule_id": "device.down",
+        "object_id": "d1",
+        "classification": "problem",
+        "key": "device.down|d1|",
+        "ignored": False,
+        **extra,
+    }
+
+
 def test_a_working_integration_is_no_cause_and_a_dead_device_is() -> None:
     objects = [{**ENTRY, "status": "active"}, DEVICE]
     objects += [_entity(f"sensor.{n}", config_entry_id="e1", device_id="d1") for n in "abc"]
     findings = [_finding(f"sensor.{n}") for n in "abc"]
-    causes = apply_causes(objects, [], findings)
-    assert [(c["kind"], c["follower_count"]) for c in causes] == [("device_down", 3)]
-    objects[3]["status"] = "active"
-    assert apply_causes(objects, [], findings) == [], "one entity works: no pattern"
-    assert all("cause_id" not in f for f in findings), "old causes are cleared"
-    assert apply_causes(objects[:3], [], findings[:2]) == [], "fewer than three entities"
-
-
-def test_the_integration_wins_over_the_device() -> None:
-    objects = [ENTRY, DEVICE] + [
-        _entity(f"sensor.{n}", config_entry_id="e1", device_id="d1") for n in "abc"
+    assert apply_causes(objects, [], findings) == [], "no finding of the device: no cause"
+    own = _device_finding()
+    causes = apply_causes(objects, [], [*findings, own])
+    assert [(c["kind"], c["follower_count"], c["finding_key"]) for c in causes] == [
+        ("device_down", 3, own["key"])
     ]
-    findings = [_finding(f"sensor.{n}") for n in "abc"]
-    assert [c["kind"] for c in apply_causes(objects, [], findings)] == ["integration_down"]
+    assert own["cause_id"] == "device_down:d1"
+    assert apply_causes(objects, [], [*findings, _device_finding(ignored=True)]) == [], "decided"
+    assert all("cause_id" not in f for f in findings), "old causes are cleared"
+
+
+def test_the_device_hangs_below_the_integration_and_the_integration_below_its_app() -> None:
+    objects = [
+        {"object_type": "app", "object_id": "mosquitto", "name": "Mosquitto", "status": "stopped"},
+        ENTRY,
+        {**DEVICE, "config_entry_ids": ["e1"]},
+    ] + [_entity(f"sensor.{n}", config_entry_id="e1", device_id="d1") for n in "abc"]
+    entity_findings = [_finding(f"sensor.{n}") for n in "abc"]
+    app_finding = {
+        "rule_id": "app.stopped_in_use",
+        "object_id": "mosquitto",
+        "affected_object": "e1",
+        "classification": "problem",
+        "key": "app.stopped_in_use|mosquitto|e1",
+        "ignored": False,
+    }
+    causes = {
+        c["id"]: c
+        for c in apply_causes(objects, [], [*entity_findings, _device_finding(), app_finding])
+    }
+    assert set(causes) == {"app_down:mosquitto", "integration_down:e1", "device_down:d1"}
+    assert causes["device_down:d1"]["parent_id"] == "integration_down:e1"
+    assert causes["integration_down:e1"]["parent_id"] == "app_down:mosquitto"
+    assert causes["app_down:mosquitto"]["child_ids"] == ["integration_down:e1"]
+    assert {i: c["follower_count"] for i, c in causes.items()} == {
+        "app_down:mosquitto": 0,
+        "integration_down:e1": 0,
+        "device_down:d1": 3,
+    }
+    assert causes["app_down:mosquitto"]["total_followers"] == 3, "the totals run up the chain"
+    assert {f["cause_id"] for f in entity_findings} == {"device_down:d1"}
+    assert app_finding["cause_id"] == "app_down:mosquitto"
+
+
+def test_a_missing_target_is_a_cause_only_when_several_point_to_it() -> None:
+    def broken(domain, kind, object_id, target):
+        return {
+            "rule_id": f"{domain}.missing_{kind}",
+            "object_id": object_id,
+            "affected_object": target,
+            "classification": "broken_reference",
+            "key": f"{domain}.missing_{kind}|{object_id}|{target}",
+            "ignored": False,
+        }
+
+    findings = [
+        broken("automation", "entity", "automation.a", "sensor.gone"),
+        broken("dashboard", "entity", "main", "sensor.gone"),
+        broken("automation", "entity", "automation.a", "sensor.alone"),
+        broken("script", "service", "script.s", "x.y"),
+        broken("automation", "service", "automation.b", "x.y"),
+        broken("automation", "area", "automation.c", "gone_area"),
+    ]
+    causes = apply_causes([], [], findings)
+    assert sorted((c["kind"], c["object_id"], c["follower_count"]) for c in causes) == [
+        ("entity_missing", "sensor.gone", 2),
+        ("service_missing", "x.y", 2),
+    ]
+    assert all(c["virtual"] and c["parent_id"] is None for c in causes)
+    assert findings[0]["cause_id"] == "entity_missing:sensor.gone"
+    assert "cause_id" not in findings[2]
+
+
+def test_a_device_is_down_when_all_its_entities_are_and_one_has_a_finding() -> None:
+    from custom_components.ha_housekeeper.causes import device_down_findings
+
+    entities = [
+        _entity(f"sensor.{n}", device_id="d1", status_since=f"2026-10-0{i}T00:00:00+00:00")
+        for i, n in enumerate("abc", start=1)
+    ]
+    devices = [DEVICE, {**DEVICE, "object_id": "d2"}]
+    flagged = [_finding("sensor.a")]
+    found = device_down_findings(entities, devices, flagged)
+    assert [(f["rule_id"], f["object_id"], f["first_detected_at"]) for f in found] == [
+        ("device.down", "d1", "2026-10-03T00:00:00+00:00")
+    ]
+    assert device_down_findings(entities, devices, []) == [], "too early: no entity finding yet"
+    assert device_down_findings(entities[:2], devices, flagged) == [], "fewer than three entities"
+    entities[0]["status"] = "active"
+    assert device_down_findings(entities, devices, flagged) == [], "one entity works"
 
 
 def test_an_integration_that_is_down_is_a_cause_even_without_follow_up_findings() -> None:

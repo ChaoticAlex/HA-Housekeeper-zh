@@ -138,6 +138,8 @@ const STATUS_TONE = {
 };
 
 // Finding classes that call for action when they are new.
+// The findings that belong to a cause itself (an integration, a device, an app); the others are its follow-up findings.
+const CAUSE_OWN_RULES = ["config_entry.not_loaded", "device.down", "app.stopped_in_use"];
 const CRITICAL_CLASSES = ["broken_reference", "unavailable", "problem"];
 
 // Object types the housekeeping status is calculated from.

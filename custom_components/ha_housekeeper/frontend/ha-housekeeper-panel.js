@@ -33,7 +33,7 @@ const TEXT = {
     integration_disabled: "Zugehörige Integration wurde deaktiviert",
     device_disabled: "Zugehöriges Gerät wurde deaktiviert",
     device_missing: "Zugehöriges Gerät existiert nicht mehr in der Geräte-Registry",
-    config_entry_missing: "Zugehöriger Konfigurationseintrag fehlt", "config_entry.not_loaded": "Integration nicht geladen", "automation.blocked": "Automation kann nicht starten: alle Auslöser sind ausgefallen", "automation.dead_actions": "Automation ändert nichts: alle Aktionen zielen auf ausgefallene Entitäten", "script.dead_actions": "Skript ändert nichts: alle Aktionen zielen auf ausgefallene Entitäten", "automation.dead_condition": "Eine Bedingung kann nie wahr werden: ausgefallene Entität", "app.stopped_in_use": "App gestoppt, Integration hängt vermutlich daran",
+    config_entry_missing: "Zugehöriger Konfigurationseintrag fehlt", "config_entry.not_loaded": "Integration nicht geladen", "device.down": "Gerät ganz ausgefallen", "automation.blocked": "Automation kann nicht starten: alle Auslöser sind ausgefallen", "automation.dead_actions": "Automation ändert nichts: alle Aktionen zielen auf ausgefallene Entitäten", "script.dead_actions": "Skript ändert nichts: alle Aktionen zielen auf ausgefallene Entitäten", "automation.dead_condition": "Eine Bedingung kann nie wahr werden: ausgefallene Entität", "app.stopped_in_use": "App gestoppt, Integration hängt vermutlich daran",
     state_missing: "Entität ist registriert, besitzt aber keinen Zustand",
     state_unavailable: "Integration meldet den Zustand unavailable",
     state_unknown: "Integration meldet den Zustand unknown", state_available: "Zustand ist verfügbar",
@@ -215,7 +215,7 @@ const TEXT = {
     integration_disabled: "Related integration was disabled",
     device_disabled: "Related device was disabled",
     device_missing: "Related device no longer exists in the device registry",
-    config_entry_missing: "Related config entry is missing", "config_entry.not_loaded": "Integration not loaded", "automation.blocked": "Automation cannot start: all its triggers are out of order", "automation.dead_actions": "Automation changes nothing: all its actions target dead entities", "script.dead_actions": "Script changes nothing: all its actions target dead entities", "automation.dead_condition": "A condition can never be true: dead entity", "app.stopped_in_use": "App stopped, an integration probably depends on it",
+    config_entry_missing: "Related config entry is missing", "config_entry.not_loaded": "Integration not loaded", "device.down": "Device is down completely", "automation.blocked": "Automation cannot start: all its triggers are out of order", "automation.dead_actions": "Automation changes nothing: all its actions target dead entities", "script.dead_actions": "Script changes nothing: all its actions target dead entities", "automation.dead_condition": "A condition can never be true: dead entity", "app.stopped_in_use": "App stopped, an integration probably depends on it",
     state_missing: "Entity is registered but has no state",
     state_unavailable: "Integration reports unavailable",
     state_unknown: "Integration reports unknown", state_available: "State is available",
@@ -507,6 +507,8 @@ const STATUS_TONE = {
 };
 
 // Finding classes that call for action when they are new.
+// The findings that belong to a cause itself (an integration, a device, an app); the others are its follow-up findings.
+const CAUSE_OWN_RULES = ["config_entry.not_loaded", "device.down", "app.stopped_in_use"];
 const CRITICAL_CLASSES = ["broken_reference", "unavailable", "problem"];
 
 // Object types the housekeeping status is calculated from.
@@ -6881,6 +6883,8 @@ class CausesMixin {
   // One headline per cause with the counts of what it touches; the follow-up findings sit in a fold.
   causeCounts(c) {
     if (c.kind === "service_missing") return this.t("causeCallers", { n: this.formatNumber(c.follower_count) });
+    if (c.virtual) return this.t("causeUsers", { n: this.formatNumber(c.follower_count) });
+    if (c.kind === "app_down") return this.t("causeBelow", { n: this.formatNumber(c.child_ids.length) });
     if (!c.follower_count && !Object.keys(c.consumers || {}).length) return this.t("causeNone");
     const parts = [this.t("causeN_entity", { n: this.formatNumber(c.follower_count) }), ...["automation", "script", "dashboard"].filter(k => c.consumers?.[k]).map(k => this.t(`causeN_${k}`, { n: c.consumers[k] }))];
     return this.t("causeCounts", { parts: parts.join(", ") });
@@ -6889,18 +6893,18 @@ class CausesMixin {
   // "3 integrations, 1 device" for the to-do row.
   outagesHint(causes) {
     const n = kind => causes.filter(c => c.kind === kind).length;
-    return [n("integration_down") ? this.t("outageIntegrations", { n: n("integration_down") }) : "", n("device_down") ? this.t("outageDevices", { n: n("device_down") }) : "", n("service_missing") ? this.t("outageServices", { n: n("service_missing") }) : ""].filter(Boolean).join(", ");
+    return [n("integration_down") ? this.t("outageIntegrations", { n: n("integration_down") }) : "", n("device_down") ? this.t("outageDevices", { n: n("device_down") }) : "", n("service_missing") ? this.t("outageServices", { n: n("service_missing") }) : "", n("app_down") ? this.t("outageApps", { n: n("app_down") }) : "", causes.filter(c => c.virtual && c.kind !== "service_missing").length ? this.t("outageTargets", { n: causes.filter(c => c.virtual && c.kind !== "service_missing").length }) : ""].filter(Boolean).join(", ");
   }
 
   causesCard() {
     const causes = this.causeList();
     if (!causes.length) return "";
-    const followers = id => (this.data.findings || []).filter(f => f.cause_id === id && !f.ignored && f.rule_id !== "config_entry.not_loaded");
+    const followers = id => (this.data.findings || []).filter(f => f.cause_id === id && !f.ignored && !CAUSE_OWN_RULES.includes(f.rule_id));
     const rows = causes.map(c => {
       const head = { tone: "red", title: this.esc(this.t(`cause_${c.kind}`, { name: c.name })), sub: [this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · "), pill: this.t("causeFollowers", { n: this.formatNumber(c.follower_count) }) };
       const decide = this.causeDecide(c);
       if (!c.follower_count) return `<button class="row rel" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${head.title}</strong><small>${this.esc(head.sub)}</small></span></button>${decide}`;
-      const own = c.kind === "service_missing" ? "" : `<button class="row" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span></button>`;
+      const own = c.virtual ? "" : `<button class="row" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span></button>`;
       const pg = this.paginate(`cause_${c.id}`, followers(c.id).map(f => this.findingRow(f)));
       const body = `${own}${pg.rows.join("")}${pg.footer}`;
       return this.fold(`cause_${c.id}`, head, body + decide, false);
@@ -6922,14 +6926,14 @@ class CausesMixin {
   // The number the findings are counted by: every outage once and every finding without an outage behind it; the follow-up findings of an outage are not counted again.
   findingTotal() { return this.causeList().length + this.data.findings.filter(f => !f.cause_id && !f.ignored).length; }
 
-  followerCount() { return this.data.findings.filter(f => f.cause_id && !f.ignored && f.rule_id !== "config_entry.not_loaded").length; }
+  followerCount() { return this.data.findings.filter(f => f.cause_id && !f.ignored && !CAUSE_OWN_RULES.includes(f.rule_id)).length; }
 }
 Object.assign(TEXT.de, {
   causesTitle: "Ausfälle", causesGroup: "Ausfälle ({n})", causesHint: "Behebe zuerst diese, sie erklären oft viele Befunde.", singleGroup: "Einzelne Befunde ({n})", causesSub: "{n} Ausfälle (Ursachen) · {m} einzelne Befunde. Behebe zuerst die Ausfälle, sie erklären oft viele Befunde.",
   causeNone: "keine Entität betroffen", outageIntegrations: "{n} Integrationen", outageDevices: "{n} Geräte", singleFindings: "Einzelne Befunde",
   logTitle: "Im HA-Log", logLine: "Im HA-Log: {what}, zuletzt {when}", logLevel_warning: "{n}× Warnung", logLevel_error: "{n}× Fehler", logLevel_critical: "{n}× kritischer Fehler",
   cause_integration_down: "Integration {name} ist nicht geladen", cause_device_down: "Gerät {name} ist ganz ausgefallen",
-  causeFollowers: "{n} Folgebefunde", cause_service_missing: "Dienst {name} existiert nicht", causeCallers: "{n} Automationen und Skripte rufen ihn auf", outageServices: "{n} fehlende Dienste", causeState: "Zustand: {state}", causeUses_automation: "{n} Automationen betroffen", causeUses_script: "{n} Skripte betroffen", causeUses_dashboard: "{n} Dashboards betroffen",
+  causeFollowers: "{n} Folgebefunde", cause_app_down: "App {name} ist gestoppt", cause_entity_missing: "Entität {name} existiert nicht", cause_device_missing: "Gerät {name} existiert nicht", cause_area_missing: "Bereich {name} existiert nicht", causeUsers: "{n} Automationen, Skripte oder Dashboards verweisen darauf", causeBelow: "{n} Integrationen hängen vermutlich daran", outageApps: "{n} Apps", outageTargets: "{n} fehlende Ziele", cause_service_missing: "Dienst {name} existiert nicht", causeCallers: "{n} Automationen und Skripte rufen ihn auf", outageServices: "{n} fehlende Dienste", causeState: "Zustand: {state}", causeUses_automation: "{n} Automationen betroffen", causeUses_script: "{n} Skripte betroffen", causeUses_dashboard: "{n} Dashboards betroffen",
   causeShow: "Folgebefunde anzeigen", findingsFollowSub: "dazu {n} Folgebefunde der Ausfälle", causeHide: "Folgebefunde ausblenden", actOutages: "Ausfälle",
 });
 Object.assign(TEXT.en, {
@@ -6937,7 +6941,7 @@ Object.assign(TEXT.en, {
   causeNone: "no entity affected", outageIntegrations: "{n} integrations", outageDevices: "{n} devices", singleFindings: "Single findings",
   logTitle: "In the HA log", logLine: "In the HA log: {what}, last {when}", logLevel_warning: "{n}× warning", logLevel_error: "{n}× error", logLevel_critical: "{n}× critical error",
   cause_integration_down: "Integration {name} is not loaded", cause_device_down: "Device {name} is down completely",
-  causeFollowers: "{n} follow-up findings", cause_service_missing: "Service {name} does not exist", causeCallers: "{n} automations and scripts call it", outageServices: "{n} missing services", causeState: "State: {state}", causeUses_automation: "{n} automations affected", causeUses_script: "{n} scripts affected", causeUses_dashboard: "{n} dashboards affected",
+  causeFollowers: "{n} follow-up findings", cause_app_down: "App {name} is stopped", cause_entity_missing: "Entity {name} does not exist", cause_device_missing: "Device {name} does not exist", cause_area_missing: "Area {name} does not exist", causeUsers: "{n} automations, scripts or dashboards point to it", causeBelow: "{n} integrations probably depend on it", outageApps: "{n} apps", outageTargets: "{n} missing targets", cause_service_missing: "Service {name} does not exist", causeCallers: "{n} automations and scripts call it", outageServices: "{n} missing services", causeState: "State: {state}", causeUses_automation: "{n} automations affected", causeUses_script: "{n} scripts affected", causeUses_dashboard: "{n} dashboards affected",
   causeShow: "Show follow-up findings", findingsFollowSub: "plus {n} follow-up findings of the outages", causeHide: "Hide follow-up findings", actOutages: "Outages",
 });
 

@@ -96,8 +96,11 @@ def test_a_mark_of_an_integration_or_an_app_hides_its_failure_findings() -> None
         finding("config_entry.not_loaded", "e2"),
         finding("app.stopped_in_use", "tail", "e3"),
         finding("app.stopped_in_use", "other", "e4"),
+        finding("device.down", "d1"),
+        finding("device.down", "d2"),
     ]
     marks = {
+        "device:d1": _mark("expected_offline"),
         "config_entry:e1": _mark("seasonal"),
         "config_entry:e3": _mark("expected_offline"),
         "app:other": _mark("spare"),
@@ -108,4 +111,6 @@ def test_a_mark_of_an_integration_or_an_app_hides_its_failure_findings() -> None
         None,
         "mark",
         "mark",
+        "mark",
+        None,
     ]

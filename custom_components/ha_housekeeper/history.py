@@ -40,7 +40,7 @@ HEALTH_TYPES = ("entity", "automation", "script", "scene")
 # The rules whose outcome depends on a setting: when it changed between two scans, findings that
 # vanished were not repaired, the rule just reads differently now.
 SETTING_RULES = {
-    "min_unavailable_days": {"entity.state_unavailable", "config_entry.not_loaded"},
+    "min_unavailable_days": {"entity.state_unavailable", "config_entry.not_loaded", "device.down"},
     "unused_automation_days": {
         "automation.disabled_long",
         "automation.stale",
