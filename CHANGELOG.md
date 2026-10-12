@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Zuverlässigkeit: Setup-Fehler:** Die Integrationen-Tabelle hat eine sortierbare Spalte „Setup-Fehler“ und eine Kachel dazu; die Detailseite nennt einen möglichen Grund (Gerät offline, Zugang, zu früher Start, Neustart nötig).
 - **Zuverlässigkeit als Tabellen:** Integrationen und instabile Entitäten stehen in sortierbaren Listen (Verfügbarkeit, Ausfälle, längster Ausfall, letzte Störung, Veränderung; Episoden, pro Tag, Dauer, Muster) mit klickbaren Kacheln, Filtern und CSV-Export.
 - **Recorder: Auffälligkeiten als Tabelle:** Die Auffälligkeiten stehen in einer sortierbaren Liste (Zeilen pro Tag, lauteste Stunde, Anteil ohne neuen Zustand) mit klickbaren Kacheln und Filtern; ein Klick auf die Zeile öffnet die Details, mehrere Entitäten lassen sich per Checkbox für den Ausschluss auswählen.
 - **Skripte als eigener Reiter:** Unter „Automationen“ listet der Reiter „Skripte“ alle Skripte mit Läufen, Fehlern, vier Blickwinkeln und der Spalte „Aufgerufen von“ (Automationen und Skripte, die das Skript nutzen); Skripte ohne Aufrufer sind schnell zu finden.
@@ -45,6 +46,7 @@
 
 ### English
 
+- **Reliability: setup failures:** The integrations table has a sortable "Setup failures" column and a tile for it; the detail page names a possible cause (device offline, access, starting too early, restart needed).
 - **Reliability as tables:** Integrations and unstable entities are sortable lists (availability, outages, longest outage, last disruption, change; episodes, per day, duration, pattern) with clickable tiles, filters and CSV export.
 - **Recorder: findings as a table:** The findings are a sortable list (rows per day, loudest hour, share without a new state) with clickable tiles and filters; clicking a row opens the details, and several entities can be ticked for exclusion.
 - **Scripts in a tab of their own:** Under "Automations" the "Scripts" tab lists every script with runs, errors, four views and a "Called by" column (the automations and scripts that use the script), so scripts nobody calls are easy to find.

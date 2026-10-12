@@ -3098,6 +3098,11 @@ test("the batteries view shows the forecast with groups and the reminders, which
   assert.ok(el.remDialog().includes("data-rem-save") && el.remDialog().includes("New reminder") && !el.remindersCard().includes("data-rem-save"), "the form is a dialog, the card keeps its button");
   const row = el.relRowBody({ title: "Hue", domain: "hue", entities: 3, availability: 99, setup: { count: 2, days: 7, last: "2026-10-08T10:00:00+00:00", state: "setup_retry" } });
   assert.ok(row.includes("Setup failures: 2 in 7 days") && row.includes("Currently in state setup_retry"));
+  assert.equal(el.relSetupHint({ availability: 90, setup: { count: 3, days: 7 } }), "relHintOffline");
+  assert.equal(el.relSetupHint({ availability: 99.9, setup: { count: 3, days: 7 } }), "relHintEarly");
+  assert.equal(el.relSetupHint({ availability: 99, setup: { count: 1, days: 7, state: "setup_error" } }), "relHintError");
+  assert.equal(el.relSetupHint({ availability: 99 }), null);
+  assert.ok(el.relSetupCell({ count: 2, days: 7, last: "2026-10-08T10:00:00+00:00" }).includes("2 in 7 days"));
 });
 
 test("findings get a status: known, snoozed, hidden, new and in work, and the list filters by it", async () => {
