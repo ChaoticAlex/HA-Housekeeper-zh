@@ -102,10 +102,11 @@ const NAV = [
 
 // The sidebar groups every view but "settings", which stands alone at the foot.
 const NAV_GROUPS = [
-  ["navGroupActions", ["overview", "findingsNav", "cleanup", "repair"]],
-  ["navGroupMaintain", ["maintenance", "batteries", "reminders", "policies", "exposure"]],
-  ["navGroupOperation", ["reliability", "runs", "recorder"]],
-  ["navGroupExplore", ["inventory", "graph", "changes", "journal", "storage", "dataflow", "secrets"]],
+  ["navGroupActions", ["overview", "findingsNav", "cleanup", "repair", "journal"]],
+  ["navGroupMaintain", ["maintenance", "batteries", "reminders", "policies"]],
+  ["navGroupOperation", ["reliability", "runs", "recorder", "storage"]],
+  ["navGroupSecurity", ["exposure", "dataflow", "secrets"]],
+  ["navGroupExplore", ["inventory", "graph", "changes"]],
 ];
 const BUSY_RETRIES = 12, BUSY_WAIT_MS = 8000; // another recorder query holds the lock: ask again by itself
 const NAV_ICONS = { ...Object.fromEntries(NAV), unreferenced: "mdi:link-variant-off" };

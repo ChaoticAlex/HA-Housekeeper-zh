@@ -1415,9 +1415,9 @@ test("the navigation groups every view once, with settings at the foot", () => {
   el.render();
   const html = shadow.innerHTML;
   const menus = [...html.matchAll(/<div class="navmenu[^"]*"><button[^>]*data-menu="([^"]+)"/g)].map(m => m[1]);
-  assert.equal(JSON.stringify(menus), JSON.stringify(["navGroupMaintain", "navGroupOperation", "navGroupExplore"]), "three menus after the direct entries");
+  assert.equal(JSON.stringify(menus), JSON.stringify(["navGroupMaintain", "navGroupOperation", "navGroupSecurity", "navGroupExplore"]), "four menus after the direct entries");
   assert.ok(html.includes('<nav class="topnav" id="topnav" aria-label="Main navigation">'));
-  const order = ["overview", "findingsNav", "cleanup", "repair", "maintenance", "batteries", "reliability", "inventory", "changes", "journal", "settings"].map(v => html.indexOf(`data-view="${v}"`));
+  const order = ["overview", "findingsNav", "cleanup", "repair", "journal", "maintenance", "batteries", "reliability", "inventory", "changes", "settings"].map(v => html.indexOf(`data-view="${v}"`));
   assert.ok(order.every((at, i) => at > 0 && (i === 0 || at > order[i - 1])), "views keep their order and settings comes last");
   assert.equal((html.match(/aria-current="page"/g) || []).length, 1, "one current entry");
   assert.ok(/data-view="cleanup"\s+aria-current="page"/.test(html));
@@ -3973,11 +3973,11 @@ function systemPanel(lang = "en") {
   return { ...env, calls };
 }
 
-test("the three new pages sit under Explore and render in both languages", () => {
+test("the three new pages sit under Operation and Security and render in both languages", () => {
   const { NAV_GROUPS, TEXT } = loadPanel();
-  const explore = NAV_GROUPS.find(([label]) => label === "navGroupExplore")[1];
-  for (const view of ["storage", "dataflow", "secrets"]) {
-    assert.ok(explore.includes(view), view);
+  const group = label => NAV_GROUPS.find(([name]) => name === label)[1];
+  for (const [view, label] of [["storage", "navGroupOperation"], ["dataflow", "navGroupSecurity"], ["secrets", "navGroupSecurity"]]) {
+    assert.ok(group(label).includes(view), view);
     for (const lang of ["de", "en"]) assert.ok(TEXT[lang][view] && TEXT[lang][`${view}Subtitle`], `${lang} ${view}`);
   }
   for (const lang of ["de", "en"]) {

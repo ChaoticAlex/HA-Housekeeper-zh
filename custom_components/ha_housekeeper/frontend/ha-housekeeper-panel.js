@@ -463,10 +463,11 @@ const NAV = [
 
 // The sidebar groups every view but "settings", which stands alone at the foot.
 const NAV_GROUPS = [
-  ["navGroupActions", ["overview", "findingsNav", "cleanup", "repair"]],
-  ["navGroupMaintain", ["maintenance", "batteries", "reminders", "policies", "exposure"]],
-  ["navGroupOperation", ["reliability", "runs", "recorder"]],
-  ["navGroupExplore", ["inventory", "graph", "changes", "journal", "storage", "dataflow", "secrets"]],
+  ["navGroupActions", ["overview", "findingsNav", "cleanup", "repair", "journal"]],
+  ["navGroupMaintain", ["maintenance", "batteries", "reminders", "policies"]],
+  ["navGroupOperation", ["reliability", "runs", "recorder", "storage"]],
+  ["navGroupSecurity", ["exposure", "dataflow", "secrets"]],
+  ["navGroupExplore", ["inventory", "graph", "changes"]],
 ];
 const BUSY_RETRIES = 12, BUSY_WAIT_MS = 8000; // another recorder query holds the lock: ask again by itself
 const NAV_ICONS = { ...Object.fromEntries(NAV), unreferenced: "mdi:link-variant-off" };
@@ -7943,7 +7944,7 @@ Object.assign(TEXT.de, {
   maintHintBackup: "Backups prüfen und schützen.", maintHintPreflight: "Vor einem Update auf Probleme prüfen.", maintHintBlueprints: "Blueprints, die fehlen oder defekt sind.", maintHintDevices: "Entfernte Geräte ansehen.", maintHintWindow: "Zeitraum für Wartung und Neustarts.", maintHintGoals: "Eigene Grenzen für „in Ordnung“.",
   actRepairValues: "Werte reparieren", actHintRepair: "Falsche Werte im Verlauf und in der Statistik ersetzen.", actMeter: "Zähler wechseln", actHintMeter: "Die Statistik bei einem neuen Zähler fortführen.", actExchange: "Gerät austauschen", actHintExchange: "Durch ein neues Gerät ersetzen und alles übernehmen.",
   actHintReplace: "Überall durch eine andere Entität ersetzen.", actHintDisable: "Erst deaktivieren; nach der Wartezeit entfernen.",
-  navGroupActions: "Aktionen",
+  navGroupActions: "Aktionen", navGroupSecurity: "Sicherheit",
   err_cleanup_busy: "Ein Plan läuft gerade. Housekeeper lädt die Ansicht neu, sobald er fertig ist.", 
   
   goalMissedTitle: "{goal}: Ziel verfehlt", goalsLine: "Wartungsziele: {met} von {total} erfüllt", hintsTitle: "Hinweise",
@@ -7985,7 +7986,7 @@ Object.assign(TEXT.en, {
   maintHintBackup: "Check and protect backups.", maintHintPreflight: "Check for problems before an update.", maintHintBlueprints: "Blueprints that are missing or broken.", maintHintDevices: "Look at removed devices.", maintHintWindow: "A period for maintenance and restarts.", maintHintGoals: "Your own limits for what in order means.",
   actRepairValues: "Repair values", actHintRepair: "Replace wrong values in the history and the statistics.", actMeter: "Replace the meter", actHintMeter: "Carry the statistics on with a new meter.", actExchange: "Exchange the device", actHintExchange: "Replace it with a new device and carry everything over.",
   actHintReplace: "Replace it with another entity everywhere.", actHintDisable: "Disable first; remove after the waiting time.",
-  navGroupActions: "Actions",
+  navGroupActions: "Actions", navGroupSecurity: "Security",
   err_cleanup_busy: "A plan is running. Housekeeper reloads the view as soon as it has finished.", 
   
   goalMissedTitle: "{goal}: goal missed", goalsLine: "Maintenance goals: {met} of {total} met", hintsTitle: "Hints",
