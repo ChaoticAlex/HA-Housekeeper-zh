@@ -82,6 +82,9 @@
 
 ### Behoben
 
+- **Webhooks:** Hat eine Automation mehrere Webhook-Auslöser, gilt sie als offen, sobald einer von außen erreichbar ist (vorher zählte nur der erste). Deaktivierte Automationen sind gekennzeichnet und zählen nicht als offen.
+- **Pläne:** Ein einzelner fehlgeschlagener Statusabruf beendet die Fortschrittsanzeige nicht mehr; sie versucht es erneut und weist darauf hin. Ein fehlgeschlagener Abbruch meldet das jetzt.
+- **Reparaturhinweise:** Nur nicht verfügbare, verwaiste und defekte Verweise lösen noch einen Hinweis aus; andere Befunde (zum Beispiel eine nicht geladene Integration) erscheinen nicht mehr unter „nicht verfügbare Entitäten“.
 - **Läufe: Klick auf „Fehler“:** Die Karte oben zeigte „Keine Treffer“, obwohl die Tabelle darunter die Automationen mit Fehlern auflistete; die leere Meldung entfällt jetzt.
 - Unter einem Ausfall zeigte die Karte „Ausfälle“ höchstens 20 Folgebefunde, auch wenn die Zahl mehr nannte. Jetzt gibt es Seiten.
 
@@ -150,6 +153,9 @@
 
 ### Fixed
 
+- **Webhooks:** An automation with several webhook triggers now counts as open as soon as one of them is reachable from outside (before, only the first one counted). Disabled automations are marked and do not count as open.
+- **Plans:** A single failed status request no longer ends the progress display; it retries and says so. A failed cancel now reports that.
+- **Repairs hints:** Only unavailable, orphaned and broken-reference findings raise a hint; other findings (for example an integration that is not loaded) no longer show up as "unavailable entities".
 - **Runs: click on "Errors":** The card on top said "No matches" although the table below listed the automations with errors; the empty message is gone.
 - Under an outage the "Outages" card showed at most 20 follow-up findings even when the number said more. It now has pages.
 

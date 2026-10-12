@@ -18,25 +18,22 @@ ISSUE_FILTERS = {
 ISSUE_IDS = ("orphaned_entities", "unavailable_entities", "broken_automations")
 
 
-def _category(finding: dict[str, Any]) -> str:
-    if finding["classification"] == "broken_reference":
-        return "broken_automations"
-    if finding["classification"] == "orphaned":
-        return "orphaned_entities"
-    return "unavailable_entities"
+CATEGORIES = {
+    "broken_reference": "broken_automations",
+    "orphaned": "orphaned_entities",
+    "unavailable": "unavailable_entities",
+}
 
 
 def async_sync_issues(hass: HomeAssistant, findings: list[dict[str, Any]]) -> None:
     """Create, update or clear the hints. Housekeeper never offers a fix."""
     counts = dict.fromkeys(ISSUE_IDS, 0)
     for finding in findings:
-        # Duplicate suspects and unused automations are hints for the panel, not repairs.
-        if not finding.get("ignored") and finding["classification"] not in {
-            "possible_duplicate",
-            "unused",
-            "stale",
-        }:
-            counts[_category(finding)] += 1
+        # Only these three kinds are repairs; every other kind (duplicates, unused, stale,
+        # failed config entries, ...) stays a finding in the panel, so no hint links to an empty filter.
+        category = CATEGORIES.get(finding["classification"])
+        if category and not finding.get("ignored"):
+            counts[category] += 1
 
     for issue_id, count in counts.items():
         if count:

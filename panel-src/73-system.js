@@ -266,7 +266,7 @@ class SystemMixin {
       const sys = entries.filter(e => e.access.length || e.gps || e.camera);
       const cloud = entries.filter(e => e.external);
       const appList = r.apps || [];
-      const hooks = r.webhooks || [], hooksOpen = hooks.filter(w => !w.local_only).length;
+      const hooks = r.webhooks || [], hooksOpen = hooks.filter(w => !w.local_only && w.enabled !== false).length;
       const open = this.viewTabOf("dataflow", [{ id: "sys" }, { id: "cloud" }, ...(r.apps_available ? [{ id: "apps" }] : []), ...(hooks.length ? [{ id: "hooks" }] : [])], "sys");
       const high = id => this.lv?.[id]?.f?.risk === "high";
       const risks = [["high", this.t("accRisk_high")], ["medium", this.t("accRisk_medium")], ["low", this.t("accRisk_low")]];
@@ -310,9 +310,9 @@ class SystemMixin {
         text: w => `${w.name} ${w.object_id}`,
         rowAttrs: w => `data-object="automation:${this.esc(w.object_id)}" tabindex="0" role="button" aria-label="${this.esc(w.name)}"`,
         columns: [
-          { key: "name", label: "accColAutomation", cell: w => this.nameCell(w.name, w.object_id) },
+          { key: "name", label: "accColAutomation", cell: w => this.nameCell(w.name, w.object_id) + (w.enabled === false ? ` <span class="pill mute">${this.t("accDisabled")}</span>` : "") },
           { key: "methods", label: "accColMethods", sortable: false, cell: w => this.accPills(w.methods.length ? w.methods : [this.t("accAnyMethod")], "mute") },
-          { key: "open", label: "accColReach", cell: w => `<span class="pill ${w.local_only ? "ok" : "warn"}">${this.t(w.local_only ? "accHookLocal" : "accHookOpen")}</span>` },
+          { key: "open", label: "accColReach", cell: w => `<span class="pill ${w.local_only ? "ok" : w.enabled === false ? "mute" : "warn"}">${this.t(w.local_only ? "accHookLocal" : "accHookOpen")}</span>` },
         ],
         exportName: "webhooks", header: [this.t("accColAutomation"), "ID", this.t("accColReach")], rows: w => [w.name, w.object_id, this.t(w.local_only ? "accHookLocal" : "accHookOpen")],
       });

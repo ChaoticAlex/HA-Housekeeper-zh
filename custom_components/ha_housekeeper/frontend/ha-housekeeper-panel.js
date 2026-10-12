@@ -3007,20 +3007,29 @@ class CleanupMixin {
     this.render();
   }
 
-  async cancelPlan() { try { await this._hass.callWS({ type: "ha_housekeeper/plan_cancel" }); } catch (_) { /* nothing running */ } }
+  async cancelPlan() {
+    try { await this._hass.callWS({ type: "ha_housekeeper/plan_cancel" }); }
+    catch (_) { this.toast(this.t("planCancelFailed"), true); }
+  }
 
   // Follow a running plan until it stops; the plan object is replaced everywhere it is shown.
   async pollPlan(planId) {
     this._polling = planId;
-    let tries = 0;
+    let tries = 0, failed = 0;
     while (this._polling === planId) {
       try {
         const res = await this._hass.callWS({ type: "ha_housekeeper/plan_status", plan_id: planId });
+        failed = 0;
         this.adoptPlan(res.plan); this.planProgress = res.progress; this.render();
         const verifying = res.plan.status === "executed" && !res.plan.verification && (tries += 1) < 60;
         if (!res.progress.running && res.plan.status !== "running" && !verifying) break;
-      } catch (_) { break; }
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch (_) {
+        // A single failed poll must not end the follow-up: the plan keeps running on the server.
+        failed += 1;
+        if (failed === 1) this.toast(this.t("planStatusLost"), true);
+        if (failed >= 15) break;
+      }
+      await new Promise(resolve => setTimeout(resolve, Math.min(1000 * (failed + 1), 5000)));
     }
     this._polling = null; this.planProgress = null;
     if (this.plan?.plan_id === planId && ["verified", "executed", "partial", "aborted"].includes(this.plan.status)) this.toast(this.t(`toast_${this.plan.status}`));
@@ -8577,7 +8586,7 @@ Object.assign(TEXT.de, {
   findUnhide: "Wieder einblenden", findUnhidden: "{n} Befunde wieder eingeblendet",
   firstScan: "Der erste Scan läuft: {percent} %", groupOpen: "{count} offen", readOnly: "Nur lesen", canChange: "Kann ändern", readOnlyHint: "Diese Seite ändert nichts.", canChangeHint: "Von hier aus lassen sich Pläne erstellen und ausführen. Geändert wird erst nach deiner Bestätigung.",
   outcomeUndoYes: "Rückgängig ist möglich, solange sich die Objekte nicht geändert haben.", outcomeUndoBackup: "Nur per Backup rückgängig.", outcomeUndoMixed: "Teils rückgängig machbar, teils nur per Backup.",
-  backupFailHint: "Prüfe unter Einstellungen → System → Backups, ob ein Backup-Ziel erreichbar ist, und lies das Protokoll unter Einstellungen → System → Protokolle.", previewReady: "Vorschau erstellt", toast_verified: "Plan abgeschlossen und geprüft", toast_executed: "Plan ausgeführt", toast_partial: "Plan nur teilweise ausgeführt", toast_aborted: "Plan abgebrochen",
+  backupFailHint: "Prüfe unter Einstellungen → System → Backups, ob ein Backup-Ziel erreichbar ist, und lies das Protokoll unter Einstellungen → System → Protokolle.", previewReady: "Vorschau erstellt", toast_verified: "Plan abgeschlossen und geprüft", toast_executed: "Plan ausgeführt", toast_partial: "Plan nur teilweise ausgeführt", toast_aborted: "Plan abgebrochen", planStatusLost: "Der Planstatus lässt sich gerade nicht abrufen. Der Plan läuft weiter, Housekeeper versucht es erneut.", planCancelFailed: "Der Abbruch ist nicht bestätigt. Der Plan läuft möglicherweise weiter. Bereits ausgeführte Schritte werden durch einen Abbruch nicht zurückgenommen.",
   backupAgo: "vor {age}", backupOpen: "Details", bhResult: "Prüfungen",
   visitSince: "Seit deinem letzten Besuch ({ago})", visitAdded: "{n} neue Befunde", visitGone: "{n} erledigt",
   loadingShort: "lädt …", resetFilters: "Filter zurücksetzen", showSelectedOnly: "Nur Ausgewählte zeigen", showAll: "Alle zeigen",
@@ -8620,7 +8629,7 @@ Object.assign(TEXT.en, {
   findUnhide: "Show again", findUnhidden: "{n} findings shown again",
   firstScan: "The first scan is running: {percent} %", groupOpen: "{count} open", readOnly: "Read only", canChange: "Can change", readOnlyHint: "This page changes nothing.", canChangeHint: "Plans can be created and run from here. Nothing changes before you confirm.",
   outcomeUndoYes: "Undo is possible as long as the objects have not changed.", outcomeUndoBackup: "Undo only from the backup.", outcomeUndoMixed: "Partly undoable, partly only from the backup.",
-  backupFailHint: "Check under Settings → System → Backups that a backup location is reachable, and read the log under Settings → System → Logs.", previewReady: "Preview created", toast_verified: "Plan completed and verified", toast_executed: "Plan executed", toast_partial: "Plan only partly executed", toast_aborted: "Plan aborted",
+  backupFailHint: "Check under Settings → System → Backups that a backup location is reachable, and read the log under Settings → System → Logs.", previewReady: "Preview created", toast_verified: "Plan completed and verified", toast_executed: "Plan executed", toast_partial: "Plan only partly executed", toast_aborted: "Plan aborted", planStatusLost: "The plan status cannot be read right now. The plan keeps running, Housekeeper will try again.", planCancelFailed: "The cancellation is not confirmed. The plan may still be running. Steps that already ran are not undone by cancelling.",
   backupAgo: "{age} ago", backupOpen: "Details", bhResult: "Checks",
   visitSince: "Since your last visit ({ago})", visitAdded: "{n} new findings", visitGone: "{n} resolved",
   loadingShort: "loading …", resetFilters: "Reset filters", showSelectedOnly: "Show selected only", showAll: "Show all",
@@ -11262,7 +11271,7 @@ class SystemMixin {
       const sys = entries.filter(e => e.access.length || e.gps || e.camera);
       const cloud = entries.filter(e => e.external);
       const appList = r.apps || [];
-      const hooks = r.webhooks || [], hooksOpen = hooks.filter(w => !w.local_only).length;
+      const hooks = r.webhooks || [], hooksOpen = hooks.filter(w => !w.local_only && w.enabled !== false).length;
       const open = this.viewTabOf("dataflow", [{ id: "sys" }, { id: "cloud" }, ...(r.apps_available ? [{ id: "apps" }] : []), ...(hooks.length ? [{ id: "hooks" }] : [])], "sys");
       const high = id => this.lv?.[id]?.f?.risk === "high";
       const risks = [["high", this.t("accRisk_high")], ["medium", this.t("accRisk_medium")], ["low", this.t("accRisk_low")]];
@@ -11306,9 +11315,9 @@ class SystemMixin {
         text: w => `${w.name} ${w.object_id}`,
         rowAttrs: w => `data-object="automation:${this.esc(w.object_id)}" tabindex="0" role="button" aria-label="${this.esc(w.name)}"`,
         columns: [
-          { key: "name", label: "accColAutomation", cell: w => this.nameCell(w.name, w.object_id) },
+          { key: "name", label: "accColAutomation", cell: w => this.nameCell(w.name, w.object_id) + (w.enabled === false ? ` <span class="pill mute">${this.t("accDisabled")}</span>` : "") },
           { key: "methods", label: "accColMethods", sortable: false, cell: w => this.accPills(w.methods.length ? w.methods : [this.t("accAnyMethod")], "mute") },
-          { key: "open", label: "accColReach", cell: w => `<span class="pill ${w.local_only ? "ok" : "warn"}">${this.t(w.local_only ? "accHookLocal" : "accHookOpen")}</span>` },
+          { key: "open", label: "accColReach", cell: w => `<span class="pill ${w.local_only ? "ok" : w.enabled === false ? "mute" : "warn"}">${this.t(w.local_only ? "accHookLocal" : "accHookOpen")}</span>` },
         ],
         exportName: "webhooks", header: [this.t("accColAutomation"), "ID", this.t("accColReach")], rows: w => [w.name, w.object_id, this.t(w.local_only ? "accHookLocal" : "accHookOpen")],
       });

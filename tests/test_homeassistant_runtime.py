@@ -220,6 +220,18 @@ async def test_low_battery_threshold_is_configurable(hass: HomeAssistant) -> Non
     assert snapshot["meta"]["low_batteries"] == 1
 
 
+async def test_repairs_hints_only_cover_entity_and_reference_findings(hass: HomeAssistant) -> None:
+    """A failed config entry stays a panel finding; it must not raise "unavailable entities"."""
+    from homeassistant.helpers import issue_registry as ir
+
+    from custom_components.ha_housekeeper.issues import async_sync_issues
+
+    async_sync_issues(hass, [{"classification": "problem"}, {"classification": "something_new"}])
+    assert ir.async_get(hass).async_get_issue(DOMAIN, "unavailable_entities") is None
+    async_sync_issues(hass, [{"classification": "unavailable"}])
+    assert ir.async_get(hass).async_get_issue(DOMAIN, "unavailable_entities") is not None
+
+
 async def test_scan_creates_and_clears_repairs_hints(hass: HomeAssistant) -> None:
     """Findings become aggregated, non-fixable issues that disappear once resolved."""
     from homeassistant.helpers import issue_registry as ir

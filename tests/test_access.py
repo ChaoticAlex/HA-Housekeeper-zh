@@ -187,10 +187,19 @@ def test_webhooks_are_open_unless_local_only_and_never_show_the_id() -> None:
                 {"platform": "webhook", "webhook_id": "SECRET-2", "local_only": False},
             ),
             automation("automation.c", {"trigger": "state", "entity_id": "light.x"}),
+            {
+                **automation("automation.d", {"trigger": "webhook", "webhook_id": "SECRET-3"}),
+                "triggers": [
+                    {"trigger": "webhook", "webhook_id": "SECRET-3"},
+                    {"trigger": "webhook", "webhook_id": "SECRET-4", "local_only": False},
+                ],
+            },
         ]
     )
+    # One row per automation; a later open trigger makes the whole row open.
     assert [(w["object_id"], w["local_only"]) for w in found] == [
         ("automation.b", False),
+        ("automation.d", False),
         ("automation.a", True),
     ]
     assert "SECRET" not in str(found)

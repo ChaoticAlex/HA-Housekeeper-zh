@@ -277,22 +277,27 @@ def webhook_triggers(automations: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for item in automations:
         if item["object_type"] != "automation":
             continue
-        for trigger in item.get("triggers") or []:
-            if not isinstance(trigger, dict):
-                continue
-            if (trigger.get("trigger") or trigger.get("platform")) != "webhook":
-                continue
-            methods = trigger.get("allowed_methods")
-            found.append(
-                {
-                    "object_id": item["object_id"],
-                    "name": item.get("name") or item["object_id"],
-                    "enabled": item["status"] != "disabled",
-                    "local_only": trigger.get("local_only") is not False,
-                    "methods": [str(m) for m in methods] if isinstance(methods, list) else [],
-                }
-            )
-            break
+        triggers = [
+            t
+            for t in item.get("triggers") or []
+            if isinstance(t, dict) and (t.get("trigger") or t.get("platform")) == "webhook"
+        ]
+        if not triggers:
+            continue
+        # One row per automation: a single open trigger makes it reachable from outside.
+        methods: list[str] = []
+        for trigger in triggers:
+            if isinstance(trigger.get("allowed_methods"), list):
+                methods += [str(m) for m in trigger["allowed_methods"] if str(m) not in methods]
+        found.append(
+            {
+                "object_id": item["object_id"],
+                "name": item.get("name") or item["object_id"],
+                "enabled": item["status"] != "disabled",
+                "local_only": all(t.get("local_only") is not False for t in triggers),
+                "methods": methods,
+            }
+        )
     found.sort(key=lambda w: (w["local_only"], str(w["name"]).lower()))
     return found
 

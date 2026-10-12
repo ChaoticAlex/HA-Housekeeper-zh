@@ -267,20 +267,29 @@ class CleanupMixin {
     this.render();
   }
 
-  async cancelPlan() { try { await this._hass.callWS({ type: "ha_housekeeper/plan_cancel" }); } catch (_) { /* nothing running */ } }
+  async cancelPlan() {
+    try { await this._hass.callWS({ type: "ha_housekeeper/plan_cancel" }); }
+    catch (_) { this.toast(this.t("planCancelFailed"), true); }
+  }
 
   // Follow a running plan until it stops; the plan object is replaced everywhere it is shown.
   async pollPlan(planId) {
     this._polling = planId;
-    let tries = 0;
+    let tries = 0, failed = 0;
     while (this._polling === planId) {
       try {
         const res = await this._hass.callWS({ type: "ha_housekeeper/plan_status", plan_id: planId });
+        failed = 0;
         this.adoptPlan(res.plan); this.planProgress = res.progress; this.render();
         const verifying = res.plan.status === "executed" && !res.plan.verification && (tries += 1) < 60;
         if (!res.progress.running && res.plan.status !== "running" && !verifying) break;
-      } catch (_) { break; }
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch (_) {
+        // A single failed poll must not end the follow-up: the plan keeps running on the server.
+        failed += 1;
+        if (failed === 1) this.toast(this.t("planStatusLost"), true);
+        if (failed >= 15) break;
+      }
+      await new Promise(resolve => setTimeout(resolve, Math.min(1000 * (failed + 1), 5000)));
     }
     this._polling = null; this.planProgress = null;
     if (this.plan?.plan_id === planId && ["verified", "executed", "partial", "aborted"].includes(this.plan.status)) this.toast(this.t(`toast_${this.plan.status}`));
