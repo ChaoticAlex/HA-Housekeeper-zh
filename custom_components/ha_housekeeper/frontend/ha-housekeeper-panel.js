@@ -1370,7 +1370,7 @@ class StylesMixin {
       button.ring{border:0;padding:0;cursor:pointer;color:inherit;font:inherit}button.ring:focus-visible{outline:2px solid var(--hk-blue);outline-offset:3px}.healthwhy{display:grid;gap:6px;max-width:560px;margin:-4px 0 14px;padding:14px 16px;border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-soft)}.healthwhy .row{display:flex;justify-content:space-between;gap:16px;padding:0;border:0;background:transparent}.healthwhy .row.minus{color:var(--hk-muted)}.healthwhy .row.total{border-top:1px solid var(--hk-border);padding-top:6px;font-weight:700}.healthwhy small{color:var(--hk-muted)}.healthwhy .btn{justify-self:start}
       .btn.small{padding:5px 11px;font-size:calc(13px*var(--hk-fs,1))}.notehint{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 16px}.notehint small{display:block;color:var(--hk-muted)}.row.seeall{justify-content:flex-start;color:var(--hk-blue-text);font-weight:600}.logfilters{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.logfilters .chip{cursor:pointer}.logfilters .chip.on{border-color:var(--hk-blue);color:var(--hk-blue-text)}.logsuggest{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:12px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 9%,transparent)}
       .hamenu{display:grid;place-items:center;flex:none;width:40px;height:40px;margin:0 -10px 0 -6px;padding:0;border:0;border-radius:50%;background:none;color:inherit}.hamenu:hover{background:var(--hk-soft)}.hamenu:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px}.hamenu ha-icon{--mdc-icon-size:24px}.sysmeter{display:block;height:6px;margin-top:6px;border-radius:99px;background:var(--hk-soft);overflow:hidden}.sysmeter i{display:block;height:100%;border-radius:99px;background:var(--hk-green)}.sysmeter.warn i{background:var(--hk-amber)}.sysmeter.red i{background:var(--hk-red)}.sysmeter.mute i{background:var(--hk-gray)}.sysshare{display:block;width:100%;min-width:120px;height:8px;margin-top:2px;border-radius:99px;background:var(--hk-soft);overflow:hidden}.sysshare i{display:block;height:100%;border-radius:99px;background:var(--hk-green)}.tablewrap.lt.acc td{white-space:normal}.pills{display:flex;flex-wrap:wrap;gap:4px}@media(min-width:641px){.sysnav .navtiles{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(min-width:1300px){.sysnav .navtiles{grid-template-columns:repeat(6,minmax(0,1fr))}}
-      .intentry{margin:4px 2px 0;font-size:15px}
+      .intentry{margin:4px 2px 0;font-size:15px}.syssec{margin:18px 16px 6px;font-size:15px}.syssec:first-child{margin-top:12px}
       ${this.themeCss()}
     </style>`;
   }
@@ -10145,6 +10145,7 @@ class BatteryKindMixin {
 
 // Texts for storage and system, access and data flow, the credential overview and the sidebar button; merged into TEXT.
 Object.assign(TEXT.de, {
+  sysTabMisc: "Sonstiges", sysTabMiscHint: "Karten, Blueprints, übrige Ordner", sysSecOther: "Weitere Ordner und Dateien in /config", sysNoOther: "Außer den bekannten Orten wurde unter /config nichts Messbares gefunden.", sysOtherMore: "Dazu {n} kleinere Einträge mit zusammen {size}.", sysKindFolder: "Ordner", sysKindFile: "Datei",
   sysCustomEntries: "{n} Einträge", sysCustomNoEntry: "Kein Konfigurationseintrag: Ordner ohne eingerichtete Integration (etwa Bibliothek oder noch nicht eingerichtet)",
   haMenu: "Seitenleiste von Home Assistant öffnen",
   storage: "Speicher & System", storageSubtitle: "Belegung von Datenträger, Arbeitsspeicher und CPU und die größten Speicherverbraucher. Liest nur; es wird nichts geändert und nichts gespeichert.",
@@ -10198,6 +10199,7 @@ Object.assign(TEXT.de, {
   secFootnote: "Housekeeper erkennt Zugangsdaten am Namen eines Feldes in der Konfiguration einer Integration (password, token, api_key, secret, webhook, pin) und prüft nur, ob es leer ist. Werte, Auszüge davon und ihre Länge werden weder gelesen noch angezeigt noch exportiert. Die Erkennung ist ein Hinweis: Zugangsdaten unter einem anderen Namen fehlen, und ein Feld mit so einem Namen kann etwas Harmloses enthalten. Ein Klick auf eine Zeile öffnet die Integration in Home Assistant, dort lassen sich die Zugangsdaten ändern. Es wird nichts geändert und nichts gespeichert.",
 });
 Object.assign(TEXT.en, {
+  sysTabMisc: "Other", sysTabMiscHint: "cards, blueprints, remaining folders", sysSecOther: "Other folders and files in /config", sysNoOther: "Apart from the known places, nothing measurable was found under /config.", sysOtherMore: "Plus {n} smaller entries totalling {size}.", sysKindFolder: "Folder", sysKindFile: "File",
   sysCustomEntries: "{n} entries", sysCustomNoEntry: "No config entry: a folder without a set-up integration (for example a library, or not set up yet)",
   haMenu: "Open the Home Assistant sidebar",
   storage: "Storage & system", storageSubtitle: "Use of disk, memory and CPU and the largest consumers of space. Only reads; nothing is changed and nothing is stored.",
@@ -10540,11 +10542,10 @@ class SystemMixin {
         { id: "consumers", icon: "mdi:folder-outline", label: this.t("sysTabConsumers"), hint: this.t("sysTabConsumersHint"), count: r.breakdown.length },
         { id: "custom", icon: "mdi:puzzle-outline", label: this.t("sysTabCustom"), hint: this.t("sysTabCustomHint"), count: r.custom_integrations.length },
         { id: "apps", icon: "mdi:package-variant-closed", label: this.t("sysTabApps"), hint: this.t("sysTabAppsHint"), count: r.apps.length, ...(sup ? {} : noSup) },
-        { id: "cards", icon: "mdi:cards-outline", label: this.t("sysTabCards"), hint: this.t("sysTabCardsHint"), count: r.cards.length, ...(r.cards.some(c => c.status === "missing") ? { tone: "red" } : {}) },
-        { id: "blueprints", icon: "mdi:floor-plan", label: this.t("sysTabBlueprints"), hint: this.t("sysTabBlueprintsHint"), count: r.blueprints.length },
+        { id: "misc", icon: "mdi:dots-horizontal-circle-outline", label: this.t("sysTabMisc"), hint: this.t("sysTabMiscHint"), count: r.cards.length + r.blueprints.length + (r.other || []).length + (r.other_rest?.count || 0), ...(r.cards.some(c => c.status === "missing") ? { tone: "red" } : {}) },
       ];
       const open = this.viewTabOf("storage", tabs.filter(x => !x.disabled), sup && cats.length ? "categories" : "consumers");
-      const body = { categories: () => this.sysCategories(cats), consumers: () => this.sysConsumers(r.breakdown), custom: () => this.sysCustom(r.custom_integrations), apps: () => this.sysApps(r.apps), cards: () => this.sysCards(r.cards), blueprints: () => this.sysBlueprints(r.blueprints) }[open]();
+      const body = { categories: () => this.sysCategories(cats), consumers: () => this.sysConsumers(r.breakdown), custom: () => this.sysCustom(r.custom_integrations), apps: () => this.sysApps(r.apps), misc: () => this.sysMisc(r) }[open]();
       return `<div class="stack">${head}${tiles}<div class="sysnav">${this.navTiles("storage", tabs, open, this.t("storage"), true)}</div><div class="panel">${body}${this.howCounted("sysFootnote")}</div></div>`;
     });
   }
@@ -10651,6 +10652,23 @@ class SystemMixin {
       columns: [{ key: "name", label: "sysColUrl", cell: c => this.nameCell(file(c), c.url) }, { key: "type", label: "sysColType", sortable: false, cell: c => `<span class="pill mute">${this.esc(c.type || "–")}</span>` }, { key: "status", label: "sysColState", sortable: false, cell: c => this.cardStatus(c) }, ...cols],
       exportName: "storage-custom-cards", header: [this.t("sysColUrl"), this.t("sysColType"), this.t("sysColState"), "Bytes"], rows: c => [c.url, c.type, c.status, c.bytes ?? ""],
     });
+  }
+
+  // Everything that is not a place of its own: the dashboard cards, the blueprints and the other entries under /config.
+  sysMisc(r) {
+    const part = (title, body) => `<h3 class="syssec">${this.esc(this.t(title))}</h3>${body}`;
+    return `${part("sysTabCards", this.sysCards(r.cards))}${part("sysTabBlueprints", this.sysBlueprints(r.blueprints))}${part("sysSecOther", this.sysOther(r.other || [], r.other_rest))}`;
+  }
+
+  sysOther(items, rest) {
+    const max = Math.max(0, ...items.map(x => x.bytes));
+    const more = rest?.count ? `<p class="factnote">${this.esc(this.t("sysOtherMore", { n: this.formatNumber(rest.count), size: this.formatBytes(rest.bytes) }))}</p>` : "";
+    return `${this.sysList("sysother", items, {
+      sort: "size", dir: "desc", sorts: [...this.sysBySize(), { key: "name", label: "sysColName", dir: "asc", get: x => x.name }],
+      text: x => x.name, tie: x => x.name, empty: "sysNoOther",
+      columns: [{ key: "name", label: "sysColName", cell: x => this.nameCell(x.name, this.t(x.dir ? "sysKindFolder" : "sysKindFile")) }, ...this.sysSizeColumns(max)],
+      exportName: "storage-other", header: [this.t("sysColName"), this.t("sysColType"), "Bytes"], rows: x => [x.name, x.dir ? "folder" : "file", x.bytes],
+    })}${more}`;
   }
 
   sysBlueprints(items) {

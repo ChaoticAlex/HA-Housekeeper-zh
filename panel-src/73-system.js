@@ -100,11 +100,10 @@ class SystemMixin {
         { id: "consumers", icon: "mdi:folder-outline", label: this.t("sysTabConsumers"), hint: this.t("sysTabConsumersHint"), count: r.breakdown.length },
         { id: "custom", icon: "mdi:puzzle-outline", label: this.t("sysTabCustom"), hint: this.t("sysTabCustomHint"), count: r.custom_integrations.length },
         { id: "apps", icon: "mdi:package-variant-closed", label: this.t("sysTabApps"), hint: this.t("sysTabAppsHint"), count: r.apps.length, ...(sup ? {} : noSup) },
-        { id: "cards", icon: "mdi:cards-outline", label: this.t("sysTabCards"), hint: this.t("sysTabCardsHint"), count: r.cards.length, ...(r.cards.some(c => c.status === "missing") ? { tone: "red" } : {}) },
-        { id: "blueprints", icon: "mdi:floor-plan", label: this.t("sysTabBlueprints"), hint: this.t("sysTabBlueprintsHint"), count: r.blueprints.length },
+        { id: "misc", icon: "mdi:dots-horizontal-circle-outline", label: this.t("sysTabMisc"), hint: this.t("sysTabMiscHint"), count: r.cards.length + r.blueprints.length + (r.other || []).length + (r.other_rest?.count || 0), ...(r.cards.some(c => c.status === "missing") ? { tone: "red" } : {}) },
       ];
       const open = this.viewTabOf("storage", tabs.filter(x => !x.disabled), sup && cats.length ? "categories" : "consumers");
-      const body = { categories: () => this.sysCategories(cats), consumers: () => this.sysConsumers(r.breakdown), custom: () => this.sysCustom(r.custom_integrations), apps: () => this.sysApps(r.apps), cards: () => this.sysCards(r.cards), blueprints: () => this.sysBlueprints(r.blueprints) }[open]();
+      const body = { categories: () => this.sysCategories(cats), consumers: () => this.sysConsumers(r.breakdown), custom: () => this.sysCustom(r.custom_integrations), apps: () => this.sysApps(r.apps), misc: () => this.sysMisc(r) }[open]();
       return `<div class="stack">${head}${tiles}<div class="sysnav">${this.navTiles("storage", tabs, open, this.t("storage"), true)}</div><div class="panel">${body}${this.howCounted("sysFootnote")}</div></div>`;
     });
   }
@@ -211,6 +210,23 @@ class SystemMixin {
       columns: [{ key: "name", label: "sysColUrl", cell: c => this.nameCell(file(c), c.url) }, { key: "type", label: "sysColType", sortable: false, cell: c => `<span class="pill mute">${this.esc(c.type || "–")}</span>` }, { key: "status", label: "sysColState", sortable: false, cell: c => this.cardStatus(c) }, ...cols],
       exportName: "storage-custom-cards", header: [this.t("sysColUrl"), this.t("sysColType"), this.t("sysColState"), "Bytes"], rows: c => [c.url, c.type, c.status, c.bytes ?? ""],
     });
+  }
+
+  // Everything that is not a place of its own: the dashboard cards, the blueprints and the other entries under /config.
+  sysMisc(r) {
+    const part = (title, body) => `<h3 class="syssec">${this.esc(this.t(title))}</h3>${body}`;
+    return `${part("sysTabCards", this.sysCards(r.cards))}${part("sysTabBlueprints", this.sysBlueprints(r.blueprints))}${part("sysSecOther", this.sysOther(r.other || [], r.other_rest))}`;
+  }
+
+  sysOther(items, rest) {
+    const max = Math.max(0, ...items.map(x => x.bytes));
+    const more = rest?.count ? `<p class="factnote">${this.esc(this.t("sysOtherMore", { n: this.formatNumber(rest.count), size: this.formatBytes(rest.bytes) }))}</p>` : "";
+    return `${this.sysList("sysother", items, {
+      sort: "size", dir: "desc", sorts: [...this.sysBySize(), { key: "name", label: "sysColName", dir: "asc", get: x => x.name }],
+      text: x => x.name, tie: x => x.name, empty: "sysNoOther",
+      columns: [{ key: "name", label: "sysColName", cell: x => this.nameCell(x.name, this.t(x.dir ? "sysKindFolder" : "sysKindFile")) }, ...this.sysSizeColumns(max)],
+      exportName: "storage-other", header: [this.t("sysColName"), this.t("sysColType"), "Bytes"], rows: x => [x.name, x.dir ? "folder" : "file", x.bytes],
+    })}${more}`;
   }
 
   sysBlueprints(items) {

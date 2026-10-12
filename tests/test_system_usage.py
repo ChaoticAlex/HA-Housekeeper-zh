@@ -49,6 +49,21 @@ def test_breakdown_sums_the_database_with_its_journal_and_lists_custom_integrati
     assert [c["domain"] for c in result["custom_integrations"]] == ["b", "a"]
 
 
+def test_unlisted_entries_under_config_are_named_and_the_rest_is_summed(tmp_path) -> None:
+    write(tmp_path / "home-assistant_v2.db", 10)
+    write(tmp_path / "www" / "a.js", 10)
+    write(tmp_path / ".storage" / "core", 300)
+    write(tmp_path / "packages" / "p.yaml", 40)
+    write(tmp_path / "notes.txt", 5)
+    result = storage_breakdown(str(tmp_path))
+    assert [(e["name"], e["dir"], e["bytes"]) for e in result["other"]] == [
+        (".storage", True, 300),
+        ("packages", True, 40),
+        ("notes.txt", False, 5),
+    ]
+    assert result["other_rest"] == {"count": 0, "bytes": 0}
+
+
 def test_card_paths_stay_inside_the_configuration(tmp_path) -> None:
     config = str(tmp_path)
     assert card_path(config, "/local/card.js?v=1").endswith(os.path.join("www", "card.js"))

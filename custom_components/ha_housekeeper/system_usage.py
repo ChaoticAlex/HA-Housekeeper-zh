@@ -75,6 +75,31 @@ def _inside(path: str, base: str) -> bool:
     return real == root or real.startswith(root + os.sep)
 
 
+OTHER_LIMIT = 25  # the largest unlisted entries are named; the remainder is one line
+_DB_PREFIX = "home-assistant_v2.db"  # the database and its journal are counted with the known places
+
+
+def other_entries(config_dir: str) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    """Entries directly under the configuration directory that are not one of the known places.
+
+    Returns the largest ones (name, kind, bytes) and the sum and count of the rest.
+    """
+    known = {rel for _target, rel, _kind in STORAGE_TARGETS}
+    found: list[dict[str, Any]] = []
+    try:
+        for entry in os.scandir(config_dir):
+            if entry.name in known or entry.name.startswith(_DB_PREFIX) or entry.is_symlink():
+                continue
+            size = path_size(entry.path)
+            if size > 0:
+                found.append({"name": entry.name, "dir": entry.is_dir(), "bytes": size})
+    except OSError as err:
+        _LOGGER.debug("The configuration directory cannot be read: %s", err)
+    found.sort(key=lambda item: item["bytes"], reverse=True)
+    tail = found[OTHER_LIMIT:]
+    return found[:OTHER_LIMIT], {"count": len(tail), "bytes": sum(item["bytes"] for item in tail)}
+
+
 def storage_breakdown(config_dir: str) -> dict[str, Any]:
     """The known places under the configuration directory and every custom integration."""
     items: list[dict[str, Any]] = []
@@ -101,7 +126,8 @@ def storage_breakdown(config_dir: str) -> dict[str, Any]:
         except OSError as err:
             _LOGGER.debug("custom_components cannot be read: %s", err)
     custom.sort(key=lambda item: item["bytes"], reverse=True)
-    return {"breakdown": items, "custom_integrations": custom}
+    other, rest = other_entries(config_dir)
+    return {"breakdown": items, "custom_integrations": custom, "other": other, "other_rest": rest}
 
 
 def card_path(config_dir: str, url: str) -> str | None:
@@ -288,7 +314,7 @@ def collect_local(config_dir: str) -> dict[str, Any]:
         storage = storage_breakdown(config_dir)
     except Exception as err:
         _LOGGER.warning("Storage breakdown failed: %s", err)
-        storage = {"breakdown": [], "custom_integrations": []}
+        storage = {"breakdown": [], "custom_integrations": [], "other": [], "other_rest": {"count": 0, "bytes": 0}}
     return {
         "cpu": {"percent": cpu_percent(), "count": os.cpu_count()},
         "load": load_avg,
@@ -576,6 +602,8 @@ async def system_usage(
         "categories": supervisor.get("categories") or {},
         "breakdown": storage["breakdown"],
         "custom_integrations": storage["custom_integrations"],
+        "other": storage["other"],
+        "other_rest": storage["other_rest"],
         "apps": apps,
         "apps_memory": sum(app.get("memory_usage") or 0 for app in apps),
         # Paths are relative to the configuration directory; the absolute path stays on the server.

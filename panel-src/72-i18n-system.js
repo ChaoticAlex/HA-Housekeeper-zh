@@ -1,5 +1,6 @@
 // Texts for storage and system, access and data flow, the credential overview and the sidebar button; merged into TEXT.
 Object.assign(TEXT.de, {
+  sysTabMisc: "Sonstiges", sysTabMiscHint: "Karten, Blueprints, übrige Ordner", sysSecOther: "Weitere Ordner und Dateien in /config", sysNoOther: "Außer den bekannten Orten wurde unter /config nichts Messbares gefunden.", sysOtherMore: "Dazu {n} kleinere Einträge mit zusammen {size}.", sysKindFolder: "Ordner", sysKindFile: "Datei",
   sysCustomEntries: "{n} Einträge", sysCustomNoEntry: "Kein Konfigurationseintrag: Ordner ohne eingerichtete Integration (etwa Bibliothek oder noch nicht eingerichtet)",
   haMenu: "Seitenleiste von Home Assistant öffnen",
   storage: "Speicher & System", storageSubtitle: "Belegung von Datenträger, Arbeitsspeicher und CPU und die größten Speicherverbraucher. Liest nur; es wird nichts geändert und nichts gespeichert.",
@@ -53,6 +54,7 @@ Object.assign(TEXT.de, {
   secFootnote: "Housekeeper erkennt Zugangsdaten am Namen eines Feldes in der Konfiguration einer Integration (password, token, api_key, secret, webhook, pin) und prüft nur, ob es leer ist. Werte, Auszüge davon und ihre Länge werden weder gelesen noch angezeigt noch exportiert. Die Erkennung ist ein Hinweis: Zugangsdaten unter einem anderen Namen fehlen, und ein Feld mit so einem Namen kann etwas Harmloses enthalten. Ein Klick auf eine Zeile öffnet die Integration in Home Assistant, dort lassen sich die Zugangsdaten ändern. Es wird nichts geändert und nichts gespeichert.",
 });
 Object.assign(TEXT.en, {
+  sysTabMisc: "Other", sysTabMiscHint: "cards, blueprints, remaining folders", sysSecOther: "Other folders and files in /config", sysNoOther: "Apart from the known places, nothing measurable was found under /config.", sysOtherMore: "Plus {n} smaller entries totalling {size}.", sysKindFolder: "Folder", sysKindFile: "File",
   sysCustomEntries: "{n} entries", sysCustomNoEntry: "No config entry: a folder without a set-up integration (for example a library, or not set up yet)",
   haMenu: "Open the Home Assistant sidebar",
   storage: "Storage & system", storageSubtitle: "Use of disk, memory and CPU and the largest consumers of space. Only reads; nothing is changed and nothing is stored.",
