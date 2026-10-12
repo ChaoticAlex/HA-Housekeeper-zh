@@ -494,6 +494,7 @@ async def _ws_setup(hass: HomeAssistant, hass_ws_client):
     scanner = InventoryScanner(hass)
     hass.data[DOMAIN]["scanner"] = scanner
     await scanner.async_initialize()
+    scanner.protection.mode = "full"  # a new install starts read-only
     assert await async_setup_component(hass, "websocket_api", {})
     return scanner, await hass_ws_client(hass)
 

@@ -25,6 +25,7 @@ async def make_scanner(hass: HomeAssistant) -> InventoryScanner:
     hass.data.setdefault(DOMAIN, {})
     scanner = InventoryScanner(hass)
     await scanner.async_initialize()
+    scanner.protection.mode = "full"  # a new install starts read-only; these tests run plans
     hass.data[DOMAIN]["scanner"] = scanner
     return scanner
 
@@ -820,3 +821,21 @@ async def test_assigning_an_area_suggests_from_the_device_runs_and_undoes(
         area_data={device.id: again},
     )["actions"][0]
     assert blocked["reasons"] == ["has_area"]
+
+
+async def test_a_new_install_starts_read_only_and_one_with_scan_data_keeps_full(
+    hass: HomeAssistant,
+) -> None:
+    from homeassistant.helpers.storage import Store
+
+    from custom_components.ha_housekeeper.const import STORAGE_KEY, STORAGE_VERSION
+
+    fresh = InventoryScanner(hass)
+    await fresh.protection.async_load()
+    assert fresh.protection.mode == "read_only"
+
+    await fresh.protection._store.async_remove()  # forget the saved mode, then an old scan exists
+    await Store(hass, STORAGE_VERSION, STORAGE_KEY).async_save({"items": {}})
+    old = InventoryScanner(hass)
+    await old.protection.async_load()
+    assert old.protection.mode == "full"

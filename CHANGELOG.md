@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Schutzmodus startet schreibgeschützt:** Eine neue Installation beginnt im Modus „nur lesen“; Änderungen schaltest du unter Einstellungen → Sicherheit bewusst frei. Bestehende Installationen behalten „voll“.
 - **Zuverlässigkeit: Setup-Fehler:** Die Integrationen-Tabelle hat eine sortierbare Spalte „Setup-Fehler“ und eine Kachel dazu; die Detailseite nennt einen möglichen Grund (Gerät offline, Zugang, zu früher Start, Neustart nötig).
 - **Zuverlässigkeit als Tabellen:** Integrationen und instabile Entitäten stehen in sortierbaren Listen (Verfügbarkeit, Ausfälle, längster Ausfall, letzte Störung, Veränderung; Episoden, pro Tag, Dauer, Muster) mit klickbaren Kacheln, Filtern und CSV-Export.
 - **Recorder: Auffälligkeiten als Tabelle:** Die Auffälligkeiten stehen in einer sortierbaren Liste (Zeilen pro Tag, lauteste Stunde, Anteil ohne neuen Zustand) mit klickbaren Kacheln und Filtern; ein Klick auf die Zeile öffnet die Details, mehrere Entitäten lassen sich per Checkbox für den Ausschluss auswählen.
@@ -46,6 +47,7 @@
 
 ### English
 
+- **Protection mode starts read-only:** A new install begins in "read only"; you release changes on purpose under Settings → Security. Existing installs keep "full".
 - **Reliability: setup failures:** The integrations table has a sortable "Setup failures" column and a tile for it; the detail page names a possible cause (device offline, access, starting too early, restart needed).
 - **Reliability as tables:** Integrations and unstable entities are sortable lists (availability, outages, longest outage, last disruption, change; episodes, per day, duration, pattern) with clickable tiles, filters and CSV export.
 - **Recorder: findings as a table:** The findings are a sortable list (rows per day, loudest hour, share without a new state) with clickable tiles and filters; clicking a row opens the details, and several entities can be ticked for exclusion.
