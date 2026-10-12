@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Zuverlässigkeit als Tabellen:** Integrationen und instabile Entitäten stehen in sortierbaren Listen (Verfügbarkeit, Ausfälle, längster Ausfall, letzte Störung, Veränderung; Episoden, pro Tag, Dauer, Muster) mit klickbaren Kacheln, Filtern und CSV-Export.
 - **Recorder: Auffälligkeiten als Tabelle:** Die Auffälligkeiten stehen in einer sortierbaren Liste (Zeilen pro Tag, lauteste Stunde, Anteil ohne neuen Zustand) mit klickbaren Kacheln und Filtern; ein Klick auf die Zeile öffnet die Details, mehrere Entitäten lassen sich per Checkbox für den Ausschluss auswählen.
 - **Skripte als eigener Reiter:** Unter „Automationen“ listet der Reiter „Skripte“ alle Skripte mit Läufen, Fehlern, vier Blickwinkeln und der Spalte „Aufgerufen von“ (Automationen und Skripte, die das Skript nutzen); Skripte ohne Aufrufer sind schnell zu finden.
 - **Automationen: neue Übersicht:** Der Reiter „Übersicht“ (vorher „Qualität“) listet alle Automationen mit Status, Läufen, Fehlern und den sieben Blickwinkeln, auch deaktivierte und nie gelaufene. Die Liste hat Suche, Filter, Sortierung nach jeder Spalte, Seitenumbruch und CSV-Export; die Zeile öffnet die Detailseite. Die Kacheln oben sind klickbar und filtern, ebenso die Kacheln unter „Läufe“.
@@ -44,6 +45,7 @@
 
 ### English
 
+- **Reliability as tables:** Integrations and unstable entities are sortable lists (availability, outages, longest outage, last disruption, change; episodes, per day, duration, pattern) with clickable tiles, filters and CSV export.
 - **Recorder: findings as a table:** The findings are a sortable list (rows per day, loudest hour, share without a new state) with clickable tiles and filters; clicking a row opens the details, and several entities can be ticked for exclusion.
 - **Scripts in a tab of their own:** Under "Automations" the "Scripts" tab lists every script with runs, errors, four views and a "Called by" column (the automations and scripts that use the script), so scripts nobody calls are easy to find.
 - **Automations: new overview:** The "Overview" tab (formerly "Quality") lists every automation with state, runs, errors and the seven views, including disabled ones and ones that never ran. The list has search, filters, sorting by any column, paging and CSV export; a row opens the detail page. The tiles above are clickable and filter, and so are the tiles under "Runs".

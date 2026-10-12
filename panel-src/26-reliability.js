@@ -68,12 +68,6 @@ class ReliabilityMixin {
     return `<span class="tile ${tone}"><ha-icon icon="mdi:lan-connect"></ha-icon></span><span class="row-text"><strong>${this.esc(item.title)}</strong>${lines.map(line => `<small>${line}</small>`).join("")}${flags.length ? `<span class="relflags">${flags.join(" ")}</span>` : ""}</span><span class="pill ${tone}">${percent === null ? "—" : `${this.formatNumber(percent)} %`}</span>`;
   }
 
-  relRow(item) {
-    const key = `config_entry:${item.entry_id}`;
-    const open = this.findObject(key) ? ` data-object="${this.esc(key)}"` : "";
-    return `<${open ? "button" : "div"} class="row${open ? " rel" : ""}"${open}>${this.relRowBody(item)}</${open ? "button" : "div"}>`;
-  }
-
   // The row of one config entry in the loaded numbers, for its detail page.
   reliabilityRow(item) {
     if (item.object_type !== "config_entry") return null;
@@ -92,6 +86,39 @@ class ReliabilityMixin {
     return `<section class="panel"><div class="panelhead"><div><h2>${this.t("relTab")}</h2><p>${this.t(r.window_days === 1 ? "relWindow1" : "relWindow7")}${r.stale || r.age_seconds ? ` · ${this.t("relAgeNote", { when: this.relTime(new Date(r.computed_at * 1000).toISOString()) })}` : ""}</p></div></div>${summary}<div class="sectionlabel">${this.t("relAffected", { n: this.formatNumber(row.affected_total || 0) })}</div>${list || `<p class="factnote">${this.t("relNoAffected")}</p>`}${more}</section>`;
   }
 
+  relEntryState(e) { return e.reauth ? "reauth" : e.state && e.state !== "loaded" ? "notloaded" : ""; }
+
+  // One row per integration entry: the numbers sit in columns so the list sorts by them; the sentences live on the detail page.
+  relEntriesList(r) {
+    const tone = p => (p === null || p === undefined ? "mute" : p >= 99.5 ? "ok" : p >= 95 ? "warn" : "red");
+    const num = v => (v === null || v === undefined ? "–" : this.esc(this.formatNumber(v)));
+    const compare = Boolean(r.comparison?.available);
+    const delta = e => (e.delta === null || e.delta === undefined ? null : e.delta);
+    const columns = [
+      { key: "title", label: "utName", cell: e => this.nameCell(e.title, `${e.domain || ""} · ${this.t("relEntities", { n: e.entities })}`) },
+      { key: "status", label: "relColStatus", sortable: false, cell: e => [e.reauth ? `<span class="pill red">${this.t("relReauth")}</span>` : "", e.state && e.state !== "loaded" ? `<span class="pill warn">${this.esc(e.state)}</span>` : "", e.shared_outages && e.layer === "cloud" ? `<span class="pill mute">${this.t("relLayerCloud")}</span>` : ""].filter(Boolean).join(" ") },
+      { key: "avail", label: "relSortAvail", dir: "asc", cell: e => (e.availability === null || e.availability === undefined ? "–" : `<span class="pill ${tone(e.availability)}">${this.esc(this.formatNumber(e.availability))} %</span>`) },
+      { key: "outages", label: "relSortOutages", dir: "desc", cell: e => num(e.shared_outages) },
+      { key: "longest", label: "relColLongest", dir: "desc", cell: e => (e.shared_outages ? this.esc(this.relDuration(e.longest_outage)) : "–") },
+      { key: "last", label: "relColLast", dir: "desc", cell: e => (e.last_disruption ? this.esc(`${this.formatDate(new Date(e.last_disruption.end * 1000).toISOString())}, ${this.relDuration(e.last_disruption.seconds)}`) : this.esc(this.t("relNoDisruption"))) },
+      ...(compare ? [{ key: "delta", label: "relColDelta", dir: "asc", cell: e => (delta(e) === null ? "–" : this.esc(`${delta(e) > 0 ? "+" : delta(e) < 0 ? "−" : "±"}${this.formatNumber(Math.abs(delta(e)))}`)) }] : []),
+    ];
+    return this.sysList("relentries", r.entries, {
+      sort: "avail", dir: "asc",
+      sorts: [
+        ...this.relSorts(),
+        { key: "longest", label: "relColLongest", dir: "desc", get: e => e.longest_outage ?? null },
+        { key: "last", label: "relColLast", dir: "desc", get: e => e.last_disruption?.end ?? null },
+        ...(compare ? [{ key: "delta", label: "relColDelta", dir: "asc", get: delta }] : []),
+      ],
+      filters: [{ name: "state", all: this.t("relAllStates"), options: [["outages", this.t("relOnlyOutages")], ["reauth", this.t("relOnlyReauth")], ["notloaded", this.t("relOnlyNotLoaded")]] }],
+      filterFns: { state: (e, v) => (v === "outages" ? e.shared_outages > 0 : this.relEntryState(e) === v) },
+      text: e => [e.title, e.domain].join(" "), tie: e => e.title, empty: "relEmpty", columns,
+      rowAttrs: e => (this.findObject(`config_entry:${e.entry_id}`) ? `data-object="${this.esc(`config_entry:${e.entry_id}`)}" tabindex="0" role="button" aria-label="${this.esc(e.title)}"` : 'class="static"'),
+      exportName: "reliability", header: [this.t("utName"), "Domain", this.t("relSortAvail"), this.t("relSortOutages"), this.t("relColLongest")], rows: e => [e.title, e.domain, e.availability ?? "", e.shared_outages ?? 0, e.longest_outage ?? ""],
+    });
+  }
+
   reliabilityView() {
     this.ensureReliability();
     const r = this.reliability;
@@ -108,15 +135,7 @@ class ReliabilityMixin {
     const th = r.thresholds || {};
     const cov = r.coverage;
     const coverage = cov && cov.observed_share !== null && cov.observed_share !== undefined ? this.coverageNote(this.t("relCoverage", { days: r.window_days, withData: this.formatNumber(cov.with_data), known: this.formatNumber(cov.known), share: cov.observed_share })) : "";
-    this.lvState("relentries", "avail", "asc");
-    const entries = this.refine("relentries", r.entries, { text: e => [e.title, e.domain].join(" "), sorts: this.relSorts(), tie: e => e.title, filters: {
-      state: (e, v) => v === "outages" ? e.shared_outages > 0 : v === "reauth" ? e.reauth : e.state && e.state !== "loaded",
-    } });
-    const bar = r.entries.length > 5 || this.lv.relentries.q ? this.listBar("relentries", { sorts: this.relSorts(), filters: [
-      { name: "state", all: this.t("relAllStates"), options: [["outages", this.t("relOnlyOutages")], ["reauth", this.t("relOnlyReauth")], ["notloaded", this.t("relOnlyNotLoaded")]] },
-    ] }) : "";
-    const pg = this.paginate("relentries", entries);
-    const list = entries.length ? pg.rows.map(item => this.relRow(item)).join("") : `<div class="emptymsg">${this.t("noMatches")}</div>`;
+    const list = this.relEntriesList(r);
     const u = r.unstable || { total: 0, entities: {} };
     const flapping = Object.values(u.entities || {}).filter(e => e.level === "flapping").length;
     const outages = r.entries.filter(e => e.shared_outages > 0).length;
@@ -125,13 +144,19 @@ class ReliabilityMixin {
     const overall = counted ? r.entries.reduce((n, e) => n + (e.availability === null || e.availability === undefined ? 0 : e.availability * e.entities), 0) / counted : null;
     const availText = overall === null ? "–" : `${this.formatNumber(Math.round(overall * 10) / 10)} %`;
     const odd = r.entries.filter(e => e.shared_outages > 0 || e.reauth || (e.state && e.state !== "loaded")).length;
+    const tiles = this.sumTiles([
+      { label: this.t("relSumAll"), value: this.formatNumber(r.entries.length), tone: "mute", lf: ["relentries", "", ""] },
+      { label: this.t("relOnlyOutages"), value: this.formatNumber(outages), tone: outages ? "warn" : "ok", lf: ["relentries", "state", "outages"] },
+      { label: this.t("relOnlyReauth"), value: this.formatNumber(r.entries.filter(e => e.reauth).length), tone: r.entries.some(e => e.reauth) ? "red" : "ok", lf: ["relentries", "state", "reauth"] },
+      { label: this.t("relOnlyNotLoaded"), value: this.formatNumber(r.entries.filter(e => e.state && e.state !== "loaded").length), tone: r.entries.some(e => e.state && e.state !== "loaded") ? "warn" : "ok", lf: ["relentries", "state", "notloaded"] },
+    ]);
     const tabs = [
       { id: "integrations", icon: "mdi:puzzle-outline", label: this.t("relTabIntegrations"), hint: this.t("relTileIntHint", { avail: availText, window: this.t(r.window_days === 1 ? "relWindow1" : "relWindow7") }), count: r.entries.length, tone: outages || attention ? "warn" : "ok", pill: odd ? this.t("relTilePill", { n: this.formatNumber(odd) }) : "", pillTone: attention ? "red" : "warn" },
       { id: "unstable", icon: "mdi:pulse", label: this.t("relTabUnstable"), hint: this.t("relTileUnstableHint"), count: u.total || 0, tone: flapping ? "red" : u.total ? "warn" : "ok", pill: flapping ? this.t("relSumFlapping", { n: this.formatNumber(flapping) }) : "" },
     ];
     const open = this.viewTabOf("reliability", tabs, u.total && !outages ? "unstable" : "integrations");
-    const body = open === "unstable" ? this.unstableCard(r) : `<div class="panel">${coverage}${bar}${loading}${list}${pg.footer}${this.howCounted("relFootnote", { days: r.window_days, share: th.shared_share_percent ?? 80, entities: th.shared_min_entities ?? 3, minutes: Math.round((th.shared_min_seconds ?? 300) / 60) })}</div>`;
-    return `<div class="stack">${head}${this.navTiles("reliability", tabs, open, this.t("reliability"), true)}${body}</div>`;
+    const body = open === "unstable" ? this.unstableCard(r) : `<div class="panel">${coverage}${loading}${list}${this.howCounted("relFootnote", { days: r.window_days, share: th.shared_share_percent ?? 80, entities: th.shared_min_entities ?? 3, minutes: Math.round((th.shared_min_seconds ?? 300) / 60) })}</div>`;
+    return `<div class="stack">${head}${this.navTiles("reliability", tabs, open, this.t("reliability"), true)}${open === "integrations" ? tiles : ""}${body}</div>`;
   }
 
   // The numbers behind "unstable" or "flapping" as lines of text; also used on the entity's detail page.
@@ -140,12 +165,6 @@ class ReliabilityMixin {
     if (item.pattern_hour !== null && item.pattern_hour !== undefined) lines.push(this.t("relPattern", { from: String(item.pattern_hour).padStart(2, "0"), to: String((item.pattern_hour + 2) % 24).padStart(2, "0") }));
     if (item.used) lines.push(this.t("relFollowers", { n: item.used }));
     return lines;
-  }
-
-  unstableRow(item, days) {
-    const tone = item.level === "flapping" ? "red" : "warn";
-    const lines = [`${this.esc(item.entity_id)}${item.entry_title ? ` · ${this.esc(item.entry_title)}` : ""}`, ...this.unstableLines(item, days)];
-    return `<button class="row" data-object="entity:${this.esc(item.entity_id)}"><span class="tile ${tone}"><ha-icon icon="mdi:swap-vertical"></ha-icon></span><span class="row-text"><strong>${this.esc(item.name)}</strong>${lines.map(line => `<small>${line}</small>`).join("")}</span><span class="pill ${tone}">${this.t(item.level === "flapping" ? "relFlapping" : "relUnstable")}</span></button>`;
   }
 
   // The stability of an entity for its detail page, from numbers that already exist: it never starts the recorder query.
@@ -182,13 +201,25 @@ class ReliabilityMixin {
       { key: "rate", label: "relSortRate", dir: "desc", get: item => item.per_day },
       { key: "duration", label: "relSortDuration", dir: "desc", get: item => item.total_seconds },
     ];
-    this.lvState("relunstable", "rank", "asc");
-    const rows = this.refine("relunstable", u.items, { text: item => [item.name, item.entity_id, item.entry_title].join(" "), sorts, tie: item => item.entity_id, filters: { level: (item, v) => item.level === v } });
-    const bar = u.items.length > 5 || this.lv.relunstable.q ? this.listBar("relunstable", { sorts, filters: [
-      { name: "level", all: this.t("relAllStates"), options: [["flapping", this.t("relOnlyFlapping")], ["unstable", this.t("relOnlyUnstable")]] },
-    ] }) : "";
-    const pg = this.paginate("relunstable", rows);
-    const list = rows.length ? pg.rows.map(item => this.unstableRow(item, r.window_days)).join("") : `<div class="emptymsg">${this.t("noMatches")}</div>`;
-    return `<div class="panel">${head}${bar}${list}${pg.footer}${more}${this.howCounted("relUnstableFootnote", { episodes: th.unstable_min_episodes ?? 3, rate: this.formatNumber(th.unstable_per_day ?? 0.5), flap: this.formatNumber(th.flapping_per_day ?? 1.5) })}</div>`;
+    const tone = item => (item.level === "flapping" ? "red" : "warn");
+    const pattern = item => (item.pattern_hour === null || item.pattern_hour === undefined ? null : `${String(item.pattern_hour).padStart(2, "0")}–${String((item.pattern_hour + 2) % 24).padStart(2, "0")}`);
+    const list = this.sysList("relunstable", u.items, {
+      sort: "rank", dir: "asc",
+      sorts: [...sorts, { key: "pattern", label: "relColPattern", dir: "asc", get: item => item.pattern_hour ?? null }],
+      filters: [{ name: "level", all: this.t("relAllStates"), options: [["flapping", this.t("relOnlyFlapping")], ["unstable", this.t("relOnlyUnstable")]] }],
+      filterFns: { level: (item, v) => item.level === v },
+      text: item => [item.name, item.entity_id, item.entry_title].join(" "), tie: item => item.entity_id, empty: "relUnstableNone",
+      rowAttrs: item => `data-object="entity:${this.esc(item.entity_id)}" tabindex="0" role="button" aria-label="${this.esc(item.name)}"`,
+      columns: [
+        { key: "name", label: "utName", cell: item => this.nameCell(item.name, `${item.entity_id}${item.entry_title ? ` · ${item.entry_title}` : ""}`) },
+        { key: "level", label: "relColLevel", sortable: false, cell: item => `<span class="pill ${tone(item)}">${this.t(item.level === "flapping" ? "relFlapping" : "relUnstable")}</span>` },
+        { key: "episodes", label: "relSortEpisodes", dir: "desc", cell: item => this.esc(this.formatNumber(item.episodes)) },
+        { key: "rate", label: "relSortRate", dir: "desc", cell: item => this.esc(this.formatNumber(item.per_day)) },
+        { key: "duration", label: "relSortDuration", dir: "desc", cell: item => this.esc(this.relDuration(item.total_seconds)) },
+        { key: "pattern", label: "relColPattern", dir: "asc", cell: item => this.esc(pattern(item) || "–") },
+      ],
+      exportName: "reliability-unstable", header: [this.t("utName"), "ID", this.t("relSortEpisodes"), this.t("relSortRate"), this.t("relSortDuration")], rows: item => [item.name, item.entity_id, item.episodes, item.per_day, item.total_seconds],
+    });
+    return `<div class="panel">${head}${list}${more}${this.howCounted("relUnstableFootnote", { episodes: th.unstable_min_episodes ?? 3, rate: this.formatNumber(th.unstable_per_day ?? 0.5), flap: this.formatNumber(th.flapping_per_day ?? 1.5) })}</div>`;
   }
 }
