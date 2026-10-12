@@ -66,7 +66,7 @@ const TEXT = {
     impactScope: "Betrachtet werden das Objekt und {count} zugehörige Entitäten.", impactScopeOne: "Betrachtet wird nur dieses Objekt.",
     impactLimits: "Nicht geprüft: automatisch erzeugte Dashboards, dynamische Templates, die Zustandshistorie im Recorder und externe Systeme.",
     changes: "Änderungen", changesSubtitle: "Was sich verändert hat: seit einem früheren Scan und was du im Logbuch festgehalten hast.", compareWith: "Vergleichen mit", previousScan: "Letzter Scan davor",
-    historyTitle: "Verlauf der Scans", historyHint: "Je Tag bleibt der letzte Scan {days} Tage erhalten. Eigene Punkte bleiben, bis du sie löschst. Ein Klick wählt einen Punkt als Vergleichsbasis.", historyBuilding: "Der Verlauf baut sich auf: Housekeeper speichert den letzten Scan jedes Tages {days} Tage lang (einstellbar unter Einstellungen). Weitere Vergleichspunkte erscheinen mit jedem neuen Tag.", currentScan: "Aktueller Scan", storedScan: "Gespeicherter Scan", historyCounts: "{objects} Objekte · {findings} Befunde", optHistoryDays: "Scan-Verlauf aufbewahren (Tage)",
+    historyTitle: "Verlauf der Scans", historyHint: "Je Tag bleibt der letzte Scan {days} Tage erhalten. Eigene Punkte bleiben, bis du sie löschst. Ein Klick wählt einen Punkt als Vergleichsbasis. Der Balken zeigt die Zahl der Befunde.", historyAll: "Alle {n} anzeigen", historyLess: "Weniger anzeigen", historyBuilding: "Der Verlauf baut sich auf: Housekeeper speichert den letzten Scan jedes Tages {days} Tage lang (einstellbar unter Einstellungen). Weitere Vergleichspunkte erscheinen mit jedem neuen Tag.", currentScan: "Aktueller Scan", storedScan: "Gespeicherter Scan", historyCounts: "{objects} Objekte · {findings} Befunde", optHistoryDays: "Scan-Verlauf aufbewahren (Tage)",
     noChanges: "Keine Änderungen seit diesem Scan.",
     statusChanges: "Statuswechsel", newFindings: "Neue Befunde", resolvedFindings: "Behobene Befunde", newObjects: "Neue Objekte", removedObjects: "Entfernte Objekte",
     worsened: "Verschlechtert", changedLabel: "Geändert", improved: "Verbessert", gone: "Nicht mehr vorhanden", comparedWith: "Vergleich mit dem Scan vom",
@@ -248,7 +248,7 @@ const TEXT = {
     impactScope: "Covers this object and {count} related entities.", impactScopeOne: "Covers only this object.",
     impactLimits: "Not checked: auto-generated dashboards, dynamic templates, the state history in the recorder, and external systems.",
     changes: "Changes", changesSubtitle: "What changed: since an earlier scan, and what you noted in the logbook.", compareWith: "Compare with", previousScan: "Previous scan",
-    historyTitle: "Scan history", historyHint: "The last scan of each day is kept for {days} days. Your own points stay until you delete them. Click one to use it as the comparison base.", historyBuilding: "The history is building up: Housekeeper keeps the last scan of each day for {days} days (adjustable in Settings). More comparison points appear with each new day.", currentScan: "Current scan", storedScan: "Stored scan", historyCounts: "{objects} objects · {findings} findings", optHistoryDays: "Keep scan history for (days)",
+    historyTitle: "Scan history", historyHint: "The last scan of each day is kept for {days} days. Your own points stay until you delete them. Click one to use it as the comparison base. The bar shows the number of findings.", historyAll: "Show all {n}", historyLess: "Show fewer", historyBuilding: "The history is building up: Housekeeper keeps the last scan of each day for {days} days (adjustable in Settings). More comparison points appear with each new day.", currentScan: "Current scan", storedScan: "Stored scan", historyCounts: "{objects} objects · {findings} findings", optHistoryDays: "Keep scan history for (days)",
     noChanges: "No changes since this scan.",
     statusChanges: "Status changes", newFindings: "New findings", resolvedFindings: "Resolved findings", newObjects: "New objects", removedObjects: "Removed objects",
     worsened: "Worse", changedLabel: "Changed", improved: "Better", gone: "No longer present", comparedWith: "Compared with the scan from",
@@ -2487,6 +2487,8 @@ Object.assign(TEXT.en, {
 });
 
 // ChangesMixin: methods of the panel element, mixed into the class in 99-register.js.
+const HISTORY_PREVIEW = 5;
+
 class ChangesMixin {
   async loadCompare() {
     this.compareLoading = true; this.render();
@@ -2508,14 +2510,32 @@ class ChangesMixin {
       const selected = !r.now && r.id === this.compareBaseline;
       const label = r.now ? this.t("currentScan") : r.pinned ? this.pinLabel(r) : r.id === "previous" ? this.t("previousScan") : this.t("storedScan");
       const when = r.pinned ? this.formatDate(r.at) : label;
-      const title = r.now || !r.pinned ? `${label} · ${this.esc(this.formatDate(r.at))}` : `${this.esc(label)}`;
-      const inner = `<span class="tile ${selected ? "" : "mute"}"><ha-icon icon="${r.now ? "mdi:clock-check-outline" : r.pinned ? "mdi:pin-outline" : "mdi:history"}"></ha-icon></span><span class="row-text"><strong>${title}</strong><small>${r.pinned ? `${this.t("storedPin")} · ${this.esc(when)} · ` : ""}${this.t("historyCounts", { objects: this.formatNumber(r.objects || 0), findings: this.formatNumber(r.findings || 0) })}</small><span class="bar" style="margin-top:4px"><i style="width:${Math.round(((r.findings || 0) / max) * 100)}%"></i></span></span>${r.pinned ? this.pinActions(r) : pill}`;
-      if (r.now) return { at: r.at, html: `<div class="row rel">${inner}</div>` };
-      if (r.pinned) return { at: r.at, html: `<div class="row rel ${selected ? "sel" : ""}" role="button" tabindex="0" data-baseline="${this.esc(r.id)}">${inner}</div>` };
-      return { at: r.at, html: `<button class="row rel ${selected ? "sel" : ""}" data-baseline="${this.esc(r.id)}">${inner}</button>` };
+      const plain = !r.now && !r.pinned && r.id !== "previous";
+      const title = plain ? this.esc(this.scanDay(r.at)) : r.now || !r.pinned ? `${label} · ${this.esc(this.formatDate(r.at))}` : `${this.esc(label)}`;
+      const inner = `<span class="tile ${selected ? "" : "mute"}"><ha-icon icon="${r.now ? "mdi:clock-check-outline" : r.pinned ? "mdi:pin-outline" : "mdi:history"}"></ha-icon></span><span class="row-text"><strong>${title}</strong><small>${r.pinned ? `${this.t("storedPin")} · ${this.esc(when)} · ` : plain ? `${this.esc(label)} · ` : ""}${this.t("historyCounts", { objects: this.formatNumber(r.objects || 0), findings: this.formatNumber(r.findings || 0) })}</small><span class="bar" style="margin-top:4px"><i style="width:${Math.round(((r.findings || 0) / max) * 100)}%"></i></span></span>${r.pinned ? this.pinActions(r) : pill}`;
+      if (r.now) return { selected, html: `<div class="row rel">${inner}</div>` };
+      if (r.pinned) return { selected, html: `<div class="row rel ${selected ? "sel" : ""}" role="button" tabindex="0" data-baseline="${this.esc(r.id)}">${inner}</div>` };
+      return { selected, html: `<button class="row rel ${selected ? "sel" : ""}" data-baseline="${this.esc(r.id)}">${inner}</button>` };
     });
-    const pg = this.paginate("history", scans.map(e => e.html));
-    return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("historyTitle")}</h2><p>${this.t("historyHint", { days: c.retention_days ?? 30 })}</p></div><div class="actions">${this.pinHeadButton()}</div></div>${pg.rows.join("")}${pg.footer}</section>`;
+    // Closed, the list shows the newest few (and the chosen one) so the result of the comparison is not pushed off the screen.
+    const collapsed = scans.length > HISTORY_PREVIEW + 1 && !this.historyAll;
+    const list = collapsed ? scans.filter((e, i) => i < HISTORY_PREVIEW || e.selected) : scans;
+    const pg = collapsed ? { rows: list.map(e => e.html), footer: "" } : this.paginate("history", list.map(e => e.html));
+    const toggle = scans.length > HISTORY_PREVIEW + 1 ? `<div class="tablefoot"><button class="link" data-history-all>${collapsed ? this.t("historyAll", { n: this.formatNumber(scans.length) }) : this.t("historyLess")}</button></div>` : "";
+    const hint = baselines.length <= 1 ? `<p class="factnote" style="margin:10px 16px">${this.t("historyBuilding", { days: c.retention_days ?? 30 })}</p>` : "";
+    return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("historyTitle")}</h2><p>${this.t("historyHint", { days: c.retention_days ?? 30 })}</p></div><div class="actions">${this.baselineSelect(baselines)}${this.pinHeadButton()}</div></div>${hint}${pg.rows.join("")}${pg.footer}${toggle}</section>`;
+  }
+
+  // The weekday, day, month and time of a stored scan, in the language of the panel.
+  scanDay(at) {
+    try { return new Intl.DateTimeFormat(this.lang, { weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }).format(new Date(at)); }
+    catch (_) { return at; }
+  }
+
+  // The label and the choice of the comparison base: the same as a click on a row, for the keyboard and screen readers.
+  baselineSelect(baselines) {
+    const options = baselines.map(b => `<option value="${this.esc(b.id)}" ${b.id === this.compareBaseline ? "selected" : ""}>${b.id === "previous" ? `${this.t("previousScan")} · ` : b.pinned ? `${this.esc(this.t("storedPin"))}: ${this.esc(b.name || "")} · ` : ""}${this.esc(this.formatDate(b.at))}</option>`).join("");
+    return options ? `<label for="baseline" style="color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))">${this.t("compareWith")}</label><select id="baseline">${options}</select>` : "";
   }
 
   // The report of the changes as Markdown, for the baseline closest to a week back (loaded first when another is set).
@@ -2559,9 +2579,9 @@ class ChangesMixin {
     if (!c) return `${this.skeleton("loading")}`;
     this.ensureCorrelations();
     const baselines = c.baselines || [];
-    const options = baselines.map(b => `<option value="${this.esc(b.id)}" ${b.id === this.compareBaseline ? "selected" : ""}>${b.id === "previous" ? `${this.t("previousScan")} · ` : b.pinned ? `${this.esc(this.t("storedPin"))}: ${this.esc(b.name || "")} · ` : ""}${this.esc(this.formatDate(b.at))}</option>`).join("");
+    const options = this.baselineSelect(baselines);
     const hint = baselines.length <= 1 ? `<p class="factnote" style="margin:10px 0 0">${this.t("historyBuilding", { days: c.retention_days ?? 30 })}</p>` : "";
-    const picker = options ? `<div class="panel u-mb14"><div class="filters" style="grid-template-columns:auto minmax(220px,360px)"><label style="align-self:center;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))">${this.t("compareWith")}</label><select id="baseline">${options}</select></div>${hint}</div>` : "";
+    const picker = options ? `<div class="panel u-mb14"><div class="filters" style="grid-template-columns:auto minmax(220px,360px)">${options}</div>${hint}</div>` : "";
     if (!c.available) {
       const meta = this.data?.meta || {};
       const why = meta.preliminary ? this.t("noBaselinePreliminary") : this.t("noBaselineOneScan", { hours: meta.scan_interval_hours || 24 });
@@ -2608,7 +2628,7 @@ class ChangesMixin {
     // One section is open at a time: the one a tile picked, else the first with entries; the heading of each carries its number.
     const filled = sections.filter(([, , part]) => part.total), first = filled[0]?.[0];
     const panels = filled.map(([label, , part]) => `<div class="panel u-mb14">${this.fold(`chg_${label}`, { tone: label === "newFindings" ? "warn" : label === "resolvedFindings" ? "ok" : "mute", title: this.t(label), pill: this.formatNumber(part.total) }, `${body[label]}${more(part)}`, label === first, this.changesCat ? this.changesCat === label : undefined)}</div>`).join("");
-    return `${picker}${this.historyTimeline(c, baselines)}<p class="sub" style="margin:0 0 14px">${this.t("comparedWith")} <b>${this.formatDate(c.baseline_at)}</b> <button class="btn quiet" data-weekly title="${this.esc(this.t("weeklyHint"))}">${this.t("weeklyBtn")}</button></p>${cards}${this.corrGroupsCard()}${total ? `<div class="panel u-mb14">${bar}</div>${panels}` : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("noChanges")}</div></div>`}`;
+    return `${this.historyTimeline(c, baselines)}<p class="sub" style="margin:0 0 14px">${this.t("comparedWith")} <b>${this.formatDate(c.baseline_at)}</b> <button class="btn quiet" data-weekly title="${this.esc(this.t("weeklyHint"))}">${this.t("weeklyBtn")}</button></p>${cards}${this.corrGroupsCard()}${total ? `<div class="panel u-mb14">${bar}</div>${panels}` : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("noChanges")}</div></div>`}`;
   }
 }
 
@@ -13126,6 +13146,7 @@ class HAHousekeeperPanel extends HTMLElement {
     };
     searchField("#query", v => { this.query = v; this.pages = {}; });
     root.querySelectorAll("[data-baseline]").forEach(b => b.addEventListener("click", () => { this.compareBaseline = b.dataset.baseline; this.pages = {}; this.loadCompare(); }));
+    root.querySelector("[data-history-all]")?.addEventListener("click", () => { this.historyAll = !this.historyAll; this.pages = {}; this.render(); });
     const bl = root.querySelector("#baseline"); if (bl) bl.onchange = () => { this.compareBaseline = bl.value; this.pages = {}; this.loadCompare(); };
     const tf = root.querySelector("#typeFilter"); if (tf) tf.onchange = () => { this.typeFilter = tf.value; this.pages = {}; this.render(); };
     const hi = root.querySelector("#helperIdle"); if (hi) hi.onchange = () => { this.helperIdle = hi.value; this.pages = {}; this.render(); };

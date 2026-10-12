@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
+from homeassistant.util import dt as dt_util
 
 from .const import DEFAULT_HISTORY_DAYS, HISTORY_STORAGE_KEY, STORAGE_VERSION
 from .hygiene import finding_key as _finding_key
@@ -170,6 +171,25 @@ def checkpoint_counts(checkpoint: dict[str, Any]) -> dict[str, int]:
     }
 
 
+def _local_day(at: str) -> str:
+    """The calendar day of a timestamp in Home Assistant's time zone, the day the panel shows."""
+    try:
+        moment = datetime.fromisoformat(at)
+    except ValueError:
+        return at[:10]
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=UTC)
+    return dt_util.as_local(moment).date().isoformat()
+
+
+def _one_per_day(checkpoints: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Keep the last checkpoint of each local day (older files counted the day in UTC)."""
+    last: dict[str, dict[str, Any]] = {}
+    for checkpoint in sorted(checkpoints, key=lambda cp: cp["at"]):
+        last[_local_day(checkpoint["at"])] = checkpoint
+    return list(last.values())
+
+
 def _age_cutoff(at: str, days: int) -> str:
     """ISO timestamp ``days`` before ``at``; checkpoints older than this are dropped."""
     try:
@@ -197,7 +217,7 @@ class ScanHistory:
         self._latest = _valid_checkpoint(data.get("latest"))
         self._previous = _valid_checkpoint(data.get("previous"))
         daily = data.get("daily")
-        self._daily = (
+        self._daily = _one_per_day(
             [cp for cp in daily if _valid_checkpoint(cp)] if isinstance(daily, list) else []
         )
         pinned = data.get("pinned")
@@ -212,7 +232,7 @@ class ScanHistory:
         checkpoint = make_checkpoint(snapshot)
         if self._latest is not None:
             self._previous = self._latest
-            if self._latest["at"][:10] != checkpoint["at"][:10]:
+            if _local_day(self._latest["at"]) != _local_day(checkpoint["at"]):
                 self._daily = [*self._daily, self._latest]
         if self._daily:
             cutoff = _age_cutoff(checkpoint["at"], self.retention_days)
@@ -279,7 +299,7 @@ class ScanHistory:
         """Totals per day for the sparklines: the stored days plus the latest scan, oldest first."""
         checkpoints = list(self._daily)
         if self._latest is not None:
-            if checkpoints and checkpoints[-1]["at"][:10] == self._latest["at"][:10]:
+            if checkpoints and _local_day(checkpoints[-1]["at"]) == _local_day(self._latest["at"]):
                 checkpoints.pop()
             checkpoints.append(self._latest)
         return {

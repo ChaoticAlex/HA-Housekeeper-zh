@@ -4364,3 +4364,18 @@ test("the settings list every file Housekeeper keeps with size and purpose, grou
   assert.ok(html.includes("Audit trail") && html.includes("Your entries and settings") && html.includes("Other"));
   assert.ok(el.storedFiles({ storage: {} }).includes("No data stored yet"));
 });
+
+test("a long history of scans shows only the newest rows until asked, keeps the chosen base visible and has the choice in its head", () => {
+  const { el, shadow } = panel("en");
+  const days = Array.from({ length: 12 }, (_, i) => ({ id: `2026-09-${String(20 - i).padStart(2, "0")}T08:00:00+00:00`, at: `2026-09-${String(20 - i).padStart(2, "0")}T08:00:00+00:00`, objects: 5, findings: 1 }));
+  el.compare = { ...COMPARE, baselines: [{ id: "previous", at: "2026-09-21T08:00:00+00:00", objects: 5, findings: 1 }, ...days], current: { objects: 5, findings: 1 }, retention_days: 30 };
+  el.compareBaseline = days[10].id;
+  el.view = "changes"; el.render();
+  const rows = () => (shadow.innerHTML.match(/data-baseline=/g) || []).length;
+  assert.equal(rows(), 5, "the newest four besides the current scan, plus the chosen one");
+  assert.ok(shadow.innerHTML.includes("Show all 14") && shadow.innerHTML.includes('id="baseline"'));
+  assert.ok(shadow.innerHTML.indexOf('id="baseline"') < shadow.innerHTML.indexOf("data-baseline="), "the choice sits in the head of the history");
+  el.historyAll = true; el.render();
+  assert.equal(rows(), 13, "all stored scans, listed once the history is opened");
+  assert.ok(shadow.innerHTML.includes("Show fewer"));
+});

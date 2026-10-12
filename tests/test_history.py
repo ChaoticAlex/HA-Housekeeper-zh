@@ -245,3 +245,22 @@ def test_a_pinned_scan_point_is_named_compared_kept_beyond_the_retention_and_del
         history.pin(_snapshot(f"2026-11-{day + 1:02d}T08:00:00+00:00", []), str(day))
     with pytest.raises(PinError):
         history.pin(_snapshot("2026-12-01T08:00:00+00:00", []), "one too many")
+
+
+def test_the_day_of_a_scan_is_counted_in_the_local_time_zone(hass) -> None:
+    from zoneinfo import ZoneInfo
+
+    from homeassistant.util import dt as dt_util
+
+    previous = dt_util.DEFAULT_TIME_ZONE
+    dt_util.set_default_time_zone(ZoneInfo("Europe/Berlin"))
+    try:
+        history = ScanHistory(hass)
+        # 00:15 and 21:54 local on 10 October are 22:15 UTC on the 9th and 19:54 UTC on the 10th
+        for at in ("2026-10-09T22:15:00+00:00", "2026-10-10T19:54:00+00:00", "2026-10-11T08:00:00+00:00"):
+            history.record(_snapshot(at, [("entity", "x.a", "active")]))
+        history.record(_snapshot("2026-10-11T20:00:00+00:00", [("entity", "x.a", "active")]))
+        # both scans belong to the 10th, so only the later one is kept for that day
+        assert [cp["at"] for cp in history._daily] == ["2026-10-10T19:54:00+00:00"]
+    finally:
+        dt_util.set_default_time_zone(previous)
