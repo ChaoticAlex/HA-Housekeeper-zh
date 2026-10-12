@@ -282,6 +282,11 @@ class UnusedMixin {
     const head = `<div class="panelhead"><div><h2>${this.t("btTitle")}</h2><p>${this.t("btHint")}</p></div><div class="actions"><button class="btn" data-bt-refresh ${this.batteryTrendLoading ? "disabled" : ""}>${this.t("backupRefresh")}</button></div></div>`;
     const body = list.length ? this.batteryTable(list) : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t(all.length ? "noMatches" : "noBatteries")}</div>`;
     this.ensureBatteryTrend();
-    return `<div class="stack">${chips}${this.batteryNeed()}${this.batteryForecastCard(all)}<div class="panel">${head}${this.filterNote(this.batteryFilter === "low" ? [this.t("batteryLow")] : [], 'data-battery-filter="all"')}${bar}${body}${notes}</div>${this.batteryKindCard()}</div>`;
+    // The list is the page; the forecast and the kinds are other questions and only show as tabs when they have something.
+    const forecast = this.batteryForecastCard(all), kinds = this.batteryKindCard();
+    const tabs = [{ id: "list", label: this.t("tabBatList") }, forecast ? { id: "forecast", label: this.t("tabBatForecast") } : null, kinds ? { id: "kinds", label: this.t("tabBatKinds") } : null].filter(Boolean);
+    const open = this.viewTabOf("batteries", tabs, "list");
+    const listTab = `${this.batteryNeed()}<div class="panel">${head}${this.filterNote(this.batteryFilter === "low" ? [this.t("batteryLow")] : [], 'data-battery-filter="all"')}${bar}${body}${notes}</div>`;
+    return `<div class="stack">${chips}${tabs.length > 1 ? this.viewTabBar("batteries", tabs, open) : ""}${open === "forecast" ? forecast : open === "kinds" ? kinds : listTab}</div>`;
   }
 }

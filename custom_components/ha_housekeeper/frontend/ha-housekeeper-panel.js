@@ -4042,7 +4042,12 @@ class UnusedMixin {
     const head = `<div class="panelhead"><div><h2>${this.t("btTitle")}</h2><p>${this.t("btHint")}</p></div><div class="actions"><button class="btn" data-bt-refresh ${this.batteryTrendLoading ? "disabled" : ""}>${this.t("backupRefresh")}</button></div></div>`;
     const body = list.length ? this.batteryTable(list) : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t(all.length ? "noMatches" : "noBatteries")}</div>`;
     this.ensureBatteryTrend();
-    return `<div class="stack">${chips}${this.batteryNeed()}${this.batteryForecastCard(all)}<div class="panel">${head}${this.filterNote(this.batteryFilter === "low" ? [this.t("batteryLow")] : [], 'data-battery-filter="all"')}${bar}${body}${notes}</div>${this.batteryKindCard()}</div>`;
+    // The list is the page; the forecast and the kinds are other questions and only show as tabs when they have something.
+    const forecast = this.batteryForecastCard(all), kinds = this.batteryKindCard();
+    const tabs = [{ id: "list", label: this.t("tabBatList") }, forecast ? { id: "forecast", label: this.t("tabBatForecast") } : null, kinds ? { id: "kinds", label: this.t("tabBatKinds") } : null].filter(Boolean);
+    const open = this.viewTabOf("batteries", tabs, "list");
+    const listTab = `${this.batteryNeed()}<div class="panel">${head}${this.filterNote(this.batteryFilter === "low" ? [this.t("batteryLow")] : [], 'data-battery-filter="all"')}${bar}${body}${notes}</div>`;
+    return `<div class="stack">${chips}${tabs.length > 1 ? this.viewTabBar("batteries", tabs, open) : ""}${open === "forecast" ? forecast : open === "kinds" ? kinds : listTab}</div>`;
   }
 }
 
@@ -7536,7 +7541,7 @@ Object.assign(TEXT.en, {
 
 // Texts for the statistics and dashboard policy rules; merged into TEXT.
 Object.assign(TEXT.de, {
-  filterOn: "Filter aktiv", filterReset: "Zurücksetzen",
+  filterOn: "Filter aktiv", filterReset: "Zurücksetzen", tabBatList: "Liste", tabBatForecast: "Prognose", tabBatKinds: "Arten",
   sysTabAppsHint: "CPU, RAM und Daten je App",
   polRule_statistics_unit: "Statistik: Einheit passt nicht mehr", polDesc_statistics_unit: "Die Einheit der Entität weicht von der Einheit der Langzeitstatistik ab, und der Recorder kann sie nicht umrechnen. Neue Werte passen dann nicht zu den alten. Nur Metadaten werden gelesen.", polAlso_statistics_unit: "Statistik → Entität: {ids}",
   polRule_statistics_class: "Statistik: Zustandsklasse passt nicht mehr", polDesc_statistics_class: "Die Zustandsklasse der Entität (Messwert oder Zähler) passt nicht zu den gespeicherten Statistikdaten. Verläufe lassen sich dann nicht zusammen auswerten. Nur Metadaten werden gelesen; Sprünge und Rücksetzer in den Werten prüft Housekeeper nicht.", polAlso_statistics_class: "Statistik → Entität: {ids}",
@@ -7556,7 +7561,7 @@ Object.assign(TEXT.de, {
   polRule_hacs_blocked: "HACS-Update braucht neuere Home-Assistant-Version", polDesc_hacs_blocked: "Für eine über HACS installierte Integration wartet ein Update, das HACS nicht installiert, weil es eine neuere Home-Assistant-Version verlangt als die laufende. Nur ein Hinweis; erst Home Assistant aktualisieren.", polAlso_hacs_blocked: "{ids}",
 });
 Object.assign(TEXT.en, {
-  filterOn: "Filter on", filterReset: "Reset",
+  filterOn: "Filter on", filterReset: "Reset", tabBatList: "List", tabBatForecast: "Forecast", tabBatKinds: "Kinds",
   sysTabAppsHint: "CPU, RAM and data per app",
   polRule_statistics_unit: "Statistics: unit no longer fits", polDesc_statistics_unit: "The unit of the entity differs from the unit of its long-term statistics and the recorder cannot convert it. New values then do not fit the old ones. Only metadata is read.", polAlso_statistics_unit: "Statistics → entity: {ids}",
   polRule_statistics_class: "Statistics: state class no longer fits", polDesc_statistics_class: "The state class of the entity (measurement or total) does not match the stored statistics. Histories cannot be read together. Only metadata is read; jumps and resets in the values are not checked.", polAlso_statistics_class: "Statistics → entity: {ids}",
