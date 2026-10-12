@@ -881,6 +881,17 @@ test("the start banner names the step and counts the warm-up down", () => {
   assert.ok(el.warmupBanner().includes("Step 3 of 3") && el.warmupBanner().includes("40%"));
 });
 
+test("the recorder load header shows rows, entities and events as figures and names what was left out", () => {
+  const { el } = panel("en");
+  el.data = { ...DATA }; el._stormsRequested = 1; el._exposureRequested = true;
+  el.storms = { ...STORMS, window_days: 7, per_day: 58857, excluded: { ignored: 2, disabled: 0, permanent: 1 } };
+  const html = el.stormsView();
+  assert.ok(html.includes("in the last 7 days") && html.includes("a day") && html.includes("have written") && html.includes("in the events table"));
+  assert.ok(html.includes("2 hidden") && html.includes("1 down all the time") && !html.includes("0 disabled"));
+  el.storms = { ...STORMS, excluded: {} };
+  assert.ok(el.stormsView().includes("in the last 24 hours") && !el.stormsView().includes('class="exchips"'));
+});
+
 test("a dry-run plan is confirmed, typed, executed with progress, and can be undone", async () => {
   const { el, shadow } = panel("en");
   el.data = { ...DATA, objects: [{ object_type: "entity", object_id: "sensor.a", name: "A", status: "orphaned" }, { object_type: "entity", object_id: "sensor.b", name: "B", status: "orphaned" }], edges: [], findings: [] };

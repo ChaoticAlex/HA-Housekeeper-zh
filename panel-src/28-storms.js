@@ -160,7 +160,12 @@ class StormsMixin {
       ...["storm", "no_new_state", "attribute_flood", "integration_share", "event_burst"].map(k => ({ k, n: groups.filter(g => g.items.some(f => f.kind === k)).length })).filter(x => x.n).map(x => ({ label: this.t(`stormKind_${x.k}`), value: this.formatNumber(x.n), tone: x.k === "storm" || x.k === "integration_share" ? "red" : "warn", lf: ["stormfind", "kind", x.k] })),
     ]) : "";
     const attention = groups.length ? `<p class="factnote">${this.t("stormGroupHint")}</p>${this.stormLegend(r)}${this.excludeCard([])}${this.stormGroupsList(groups)}<p class="factnote">${this.t("stormWhatToDo")}</p>` : `<div class="emptymsg">${this.t("stormNone")}</div>`;
-    const summary = `<p class="factnote">${this.t("stormSummary", { rows: this.formatNumber(r.total_rows), perDay: this.formatNumber(r.per_day), entities: this.formatNumber(r.entity_count), events: this.formatNumber(r.event_total) })}</p>`;
+    const days = r.window_days || 1, f = n => this.formatNumber(n);
+    const stats = this.sumTiles([
+      { label: this.t("stormStatRows"), value: f(r.total_rows), sub: this.esc(days > 1 ? this.t("stormSubRowsDays", { days, perDay: f(r.per_day) }) : this.t("stormSubRowsDay")), tone: "mute" },
+      { label: this.t("stormStatEntities"), value: f(r.entity_count), sub: this.esc(this.t("stormSubEntities")), tone: "mute" },
+      { label: this.t("stormStatEvents"), value: f(r.event_total), sub: this.esc(this.t("stormSubEvents")), tone: "mute" },
+    ]);
     const entry = this.stormEntry && r.integrations.find(g => g.entry_id === this.stormEntry);
     const ofEntry = entry ? r.entities.filter(item => item.entry_id === entry.entry_id) : r.entities;
     const shownEntities = this.exOnlySug ? ofEntry.filter(item => this.excludeInfo(item.entity_id, item.per_day, item.excluded).suggest) : ofEntry;
@@ -178,7 +183,9 @@ class StormsMixin {
       return `<div class="row evrow"><span class="tile ${ahead ? "warn" : "mute"}"><ha-icon icon="mdi:flash-outline"></ha-icon></span><span class="row-text"><strong class="mono">${this.esc(e.type)}</strong>${ahead ? ` <span class="pill warn">${this.t("evAhead")}</span>` : ""}${what !== key ? `<small class="exwhy">${this.esc(what)}</small>` : ""}<span class="bar" style="margin-top:6px"><i style="width:${Math.max(1, Math.round((e.count / topEvent) * 100))}%"></i></span></span><span class="evnum"><strong>${this.formatNumber(e.count)}</strong><small>${this.t("evShare", { share, perDay: this.formatNumber(Math.round(e.count / eventDays)) })}</small></span></div>`;
     };
     const events = r.events.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormEvents")}</h2><p>${this.t("stormEventsHint")}</p></div></div>${r.events.map(eventRow).join("")}<details class="howto"><summary>${this.t("evWhenTitle")}</summary><p class="factnote">${this.t("evWhen")}</p></details><p class="factnote">${this.t("evFoot")}</p>${this.howCounted("stormFootnote")}</div>` : "";
-    const left = this.excludedText(r.excluded);
+    const ex = r.excluded || {};
+    const chips = [["ignored", "exclIgnored", "mdi:eye-off-outline"], ["disabled", "exclDisabled", "mdi:power-plug-off-outline"], ["permanent", "exclPermanent", "mdi:link-off"]].filter(([k]) => ex[k]).map(([k, key, icon]) => `<span class="exchip"><ha-icon icon="${icon}"></ha-icon>${this.esc(this.t(key, { n: this.formatNumber(ex[k]) }))}</span>`).join("");
+    const left = chips ? `<div class="exchips">${chips}${this.infoTip(this.t("stormExclTip"))}</div>` : "";
     // The sections are tabs, so the lower ones are not hidden far down the page.
     const warn = r.findings.some(f => f.kind === "storm" || f.kind === "integration_share");
     const tabs = [
@@ -189,6 +196,6 @@ class StormsMixin {
     ].filter(Boolean);
     const open = this.viewTabOf("recload", tabs, r.findings.length ? "findings" : "entities");
     const body = open === "entities" ? table : open === "shares" ? shares : open === "events" ? events : `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormTabFindings")}</h2></div></div>${attention}</div>`;
-    return `<div class="stack">${head}<div class="panel">${loading}${summary}${left ? `<p class="factnote">${left}</p>` : ""}</div>${this.viewTabBar("recload", tabs, open)}${open === "findings" ? tiles : ""}${body}</div>`;
+    return `<div class="stack">${head}${loading}${stats}${left}${this.viewTabBar("recload", tabs, open)}${open === "findings" ? tiles : ""}${body}</div>`;
   }
 }

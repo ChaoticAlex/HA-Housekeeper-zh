@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Recorder, Last:** Zeilen, Entitäten und Ereignisse stehen als drei beschriftete Kennzahlen statt in einem Satz; was nicht mitgezählt wird (ausgeblendet, deaktiviert, dauerhaft ausgefallen), steht als eigene Marken mit Erklärung darunter.
 - **Reparieren:** Die Karte „Sensorfehler bereinigen“ hat jetzt ihren Titel wie die anderen, und die Titel der Karten tragen den Namen ihrer Kachel („Sensorfehler bereinigen“, „Zähler wechseln“).
 - **Übersicht:** Drei Zonen statt zwei Spalten: oben Status und Aufgaben, in der Mitte „Wichtigste Befunde“ (höchstens fünf Zeilen) mit dem Inventarstatus darunter neben den Hinweisen, unten System, Datenbank und Vergleich als Zustandskarten. Die Karte „Nach Objekttyp“ entfällt (das Inventar zeigt die Typen). In der System-Karte steht der Wert jetzt rechts und der Balken darunter.
 - **Inventar:** Statt der Kacheln zeigt ein Ring mit Tabelle die Objekttypen: die fünf größten, der Rest auf Knopfdruck. Eine Zeile filtert die Liste, ein zweiter Klick hebt den Filter auf; die Spalten „Nicht verfügbar“ und „Verwaist“ filtern nach Typ und Zustand zugleich.
@@ -71,6 +72,7 @@
 
 ### English
 
+- **Recorder, load:** Rows, entities and events are three labelled figures instead of one sentence; what is not counted (hidden, disabled, down all the time) shows as marks of its own with an explanation.
 - **Repair:** The “Repair sensor errors” card now has its title like the others, and the card titles carry the name of their tile (“Repair sensor errors”, “Replace a meter”).
 - **Overview:** Three zones instead of two columns: status and tasks on top, “Top findings” (five rows at most) with the inventory status below it beside the notes in the middle, and system, database and comparison as state cards at the bottom. The “By object type” card is gone (the inventory shows the types). In the System card the value now sits on the right and the bar below it.
 - **Inventory:** A ring with a table replaces the tiles and shows the object types: the five largest, the rest on request. A row filters the list and a second click lifts the filter; the unavailable and orphaned columns filter by type and state together.
