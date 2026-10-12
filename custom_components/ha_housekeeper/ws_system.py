@@ -13,10 +13,11 @@ from .access import access_report
 from .const import DOMAIN
 from .inventory import InventoryScanner
 from .sensitive_fields import sensitive_fields
-from .system_usage import system_usage
+from .system_usage import system_light, system_usage
 from .ws_common import _versioned, with_scanner
 
 SYSTEM_TIMEOUT = 90  # seconds; the Supervisor's disk walk and the size of www can take a while
+LIGHT_TIMEOUT = 20  # the Supervisor's host info and a short CPU sample
 ACCESS_TIMEOUT = 45  # the Supervisor answers for every app
 
 
@@ -34,6 +35,26 @@ async def websocket_system_usage(
     try:
         async with asyncio.timeout(SYSTEM_TIMEOUT):
             result = await system_usage(hass)
+    except Exception as err:
+        connection.send_error(msg["id"], "system_failed", f"{type(err).__name__}: {err}")
+        return
+    connection.send_result(msg["id"], _versioned(result))
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/system_light"})
+@websocket_api.async_response
+@with_scanner
+async def websocket_system_light(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """Disk, memory and CPU for the overview, without the slow folder walk. Read-only."""
+    try:
+        async with asyncio.timeout(LIGHT_TIMEOUT):
+            result = await system_light(hass)
     except Exception as err:
         connection.send_error(msg["id"], "system_failed", f"{type(err).__name__}: {err}")
         return
@@ -78,5 +99,6 @@ def websocket_sensitive_fields(
 def async_register(hass: HomeAssistant) -> None:
     """Register the storage, access and credential-overview commands."""
     websocket_api.async_register_command(hass, websocket_system_usage)
+    websocket_api.async_register_command(hass, websocket_system_light)
     websocket_api.async_register_command(hass, websocket_access)
     websocket_api.async_register_command(hass, websocket_sensitive_fields)

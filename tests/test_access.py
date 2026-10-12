@@ -85,7 +85,7 @@ async def test_access_needs_an_administrator(
     hass.data[DOMAIN]["scanner"] = InventoryScanner(hass)
     assert await async_setup_component(hass, "websocket_api", {})
     client = await hass_ws_client(hass, hass_read_only_access_token)
-    for command in ("access", "system_usage"):
+    for command in ("access", "system_usage", "system_light"):
         await client.send_json_auto_id({"type": f"{DOMAIN}/{command}"})
         answer = await client.receive_json()
         assert answer["success"] is False and answer["error"]["code"] == "unauthorized", command

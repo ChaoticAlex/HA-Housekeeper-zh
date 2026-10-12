@@ -9,6 +9,7 @@
 - **Zugangsdaten** (Erkunden): welche Integrationen Passwörter, Tokens oder Schlüssel gespeichert haben und ob ein Wert hinterlegt ist. Werte zeigt Housekeeper nie.
 - **Ausfälle statt drei Listen:** Eine Integration mit Problem steht jetzt auch ohne auffällige Entitäten unter „Befunde“ (Block „Ausfälle“). Auf der Übersicht gibt es dafür eine Zeile, „Benötigt Aufmerksamkeit“ heißt „Wichtigste Befunde“ (Ausfälle zuerst), die Karte „Integrationen mit Problemen“ entfällt.
 - **Menü neu geordnet:** Neue Gruppe „Sicherheit“ (Freigaben, Zugriffe & Datenfluss, Zugangsdaten). Speicher & System steht unter Betrieb, Erkunden enthält nur noch Nachschlagen: Inventar, Abhängigkeiten, Änderungen und Journal.
+- **Übersicht zeigt das System:** Neue Karte „System“ mit Datenträger, Speicher und Prozessor. Ab 85 % belegtem Datenträger steht eine Aufgabe in der Liste, ab 95 % eine dringende.
 - **Seitenleisten-Knopf:** öffnet die Seitenleiste von Home Assistant, wenn sie ausgeblendet ist.
 
 ### English
@@ -18,6 +19,7 @@
 - **Credentials** (Explore): which integrations store passwords, tokens or keys and whether a value is set. Housekeeper never shows the values.
 - **Outages instead of three lists:** An integration with a problem now appears under "Findings" even when no entity is flagged (block "Outages"). The overview has one row for it, "Needs attention" is now "Most important findings" (outages first), and the card "Integrations with problems" is gone.
 - **Menu reordered:** New group "Security" (Exposure, Access & data flow, Credentials). Storage & system is under Operation, and Explore holds only lookups: Inventory, Dependencies, Changes and Journal.
+- **Overview shows the system:** a new "System" card with disk, memory and processor. A task appears once the disk is 85 % full, an urgent one at 95 %.
 - **Sidebar button:** opens Home Assistant's sidebar when it is hidden.
 
 ## 1.4.0 - 2026-10-11

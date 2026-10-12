@@ -527,3 +527,21 @@ async def system_usage(hass: HomeAssistant) -> dict[str, Any]:
         "cards_total": cards_total,
         "blueprints": blueprints,
     }
+
+
+async def system_light(hass: HomeAssistant) -> dict[str, Any]:
+    """Disk, memory and CPU only, for the overview; no folder is walked (system_usage does that)."""
+    config_dir = hass.config.config_dir
+
+    def local() -> dict[str, Any]:
+        return {"cpu": cpu_percent(), "ram": memory()["ram"], "disk": disk_usage(config_dir)}
+
+    read, info = await asyncio.gather(
+        hass.async_add_executor_job(local), supervisor_get(hass, "/host/info")
+    )
+    # The host's data disk says more than the container's file system where a Supervisor runs.
+    return {
+        "disk": host_disk(info) or read["disk"],
+        "ram": read["ram"],
+        "cpu": {"percent": read["cpu"]},
+    }

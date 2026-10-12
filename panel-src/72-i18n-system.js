@@ -4,6 +4,8 @@ Object.assign(TEXT.de, {
   storage: "Speicher & System", storageSubtitle: "Belegung von Datenträger, Arbeitsspeicher und CPU und die größten Speicherverbraucher. Liest nur; es wird nichts geändert und nichts gespeichert.",
   dataflow: "Zugriffe & Datenfluss", dataflowSubtitle: "Welche Integrationen auf System, Funk, Kameras oder den Standort zugreifen, welche Daten ins Internet schicken und welche Rechte die Apps haben. Liest nur.",
   sysRefresh: "Neu lesen", sysAsOf: "Stand: {time}",
+  sysOvTitle: "System", sysOvHint: "Datenträger, Speicher und Prozessor jetzt", sysFreeOf: "{free} frei von {total}",
+  todoDiskFull: "Datenträger fast voll", todoDiskNear: "Datenträger füllt sich", todoDiskHint: "{pct} belegt, {free} frei. Was den Platz braucht, zeigt Speicher & System.",
 
   sysTitle: "Speicher & System", sysHint: "Datenträger, Arbeitsspeicher und CPU", sysLoading: "Speicher und System werden gelesen …",
   sysIntro: "Hier siehst du, wie voll Datenträger und Arbeitsspeicher sind und wofür der Platz draufgeht. Ein Klick auf eine Kachel zeigt die Liste dazu.",
@@ -50,6 +52,8 @@ Object.assign(TEXT.en, {
   storage: "Storage & system", storageSubtitle: "Use of disk, memory and CPU and the largest consumers of space. Only reads; nothing is changed and nothing is stored.",
   dataflow: "Access & data flow", dataflowSubtitle: "Which integrations reach the system, radios, cameras or the location, which send data to the internet and which rights the apps have. Only reads.",
   sysRefresh: "Read again", sysAsOf: "As of {time}",
+  sysOvTitle: "System", sysOvHint: "Disk, memory and processor right now", sysFreeOf: "{free} free of {total}",
+  todoDiskFull: "Disk almost full", todoDiskNear: "Disk is filling up", todoDiskHint: "{pct} used, {free} free. Storage & system shows what takes the space.",
 
   sysTitle: "Storage & system", sysHint: "Disk, memory and CPU", sysLoading: "Reading storage and system …",
   sysIntro: "Here you see how full the disk and the memory are and what takes up the space. A click on a tile shows its list.",

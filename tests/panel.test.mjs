@@ -3074,7 +3074,7 @@ test("the batteries view shows the forecast with groups and the reminders, which
   el.view = "batteries";
   el.data = { ...DATA, reminders: [{ id: "r1", name: "Water filter", interval_days: 90, last_done: "2026-07-01", history: ["2026-07-01"], due: "2026-09-29", days_left: -10, state: "due", note: "" }] };
   el.batteryTrend = { available: true, busy: false, unknown: 2, groups: [{ from_days: 14, to_days: 27, entity_ids: ["sensor.a", "sensor.b"] }], rows: [{ entity_id: "sensor.a", name: "Door", level: 40, slope: -1, days_left: 20, state: "falling", points: 12 }] };
-  el._btRequested = true;
+  el._btRequested = true; el._sysLightFor = el.data;
   el._hass = { language: "en", callWS: async msg => { calls.push(msg); return { reminders: [] }; } };
   const forecast = el.batteryNeed();
   assert.ok(forecast.includes("Batteries needed in the next 30 days") && forecast.includes("20 days"));
@@ -4073,4 +4073,18 @@ test("the menu button for Home Assistant's sidebar shows when the sidebar is hid
   el.toggleHaSidebar();
   assert.equal(events[0].type, "hass-toggle-menu");
   assert.ok(events[0].bubbles && events[0].composed, "the event leaves the shadow root");
+});
+
+test("the overview shows the system card and a disk row from 85 %, red from 95 %", () => {
+  const { el } = panel("en");
+  el.data = DATA; el._sysLightFor = el.data;
+  el.sysLight = { disk: { percent: 60, free: 4e9, total: 1e10 }, ram: { percent: 40, used: 1e9, total: 2e9 }, cpu: { percent: 12 } };
+  assert.ok(el.systemCard().includes("System") && el.systemCard().includes("60 %") && el.systemCard().includes('data-jump="storage"'));
+  assert.ok(!el.todoItems().some(i => i.key === "disk"));
+  el.sysLight.disk.percent = 88;
+  assert.equal(el.todoItems().find(i => i.key === "disk").tone, "warn");
+  el.sysLight.disk.percent = 96;
+  assert.equal(el.todoItems().find(i => i.key === "disk").tone, "red");
+  el.sysLight = null;
+  assert.equal(el.systemCard(), "");
 });

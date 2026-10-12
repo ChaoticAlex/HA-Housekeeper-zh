@@ -31,6 +31,13 @@ class OverviewMixin {
     if (missed) items.push({ key: "criteria", tone: "warn", icon: "mdi:target", label: "actCriteria", hint: "actCriteriaHint", count: missed, view: "runs" });
     const fresh = (this.trend?.new_findings?.items || []).filter(f => !f.ignored && CRITICAL_CLASSES.includes(f.classification)).length;
     if (fresh) items.push({ key: "critical", tone: "red", icon: "mdi:alert-circle-outline", label: "actNewCritical", hint: "actNewCriticalHint", count: fresh, view: "findingsNav", filter: "" });
+    // A nearly full disk, from the light read of the overview; red from 95 % takes points off the ring like any urgent topic.
+    this.ensureSysLight();
+    const disk = this.sysLight?.disk;
+    if (disk?.percent >= SYS_WARN_PERCENT) {
+      const tone = disk.percent >= SYS_RED_PERCENT ? "red" : "warn";
+      items.push({ key: "disk", tone, icon: "mdi:harddisk", label: tone === "red" ? "todoDiskFull" : "todoDiskNear", hintText: this.t("todoDiskHint", { pct: this.sysPercent(disk.percent), free: this.formatBytes(disk.free ?? 0) }), view: "storage" });
+    }
     const stale = this.staleScan();
     if (stale) {
       const age = stale.hours >= 48 ? this.t("daysValue", { n: Math.round(stale.hours / 24) }) : `${stale.hours} h`;
@@ -178,7 +185,7 @@ class OverviewMixin {
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p></div>
       <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
       ${this.sinceVisitLine()}${this.todoCard()}<div class="grid2"><div class="stack">${this.inventoryStatusCard()}${this.topFindingsCard(findings)}</div>
-      <div class="stack">${this.databaseCard()}${this.trendCard()}${this.cleanupCard()}
+      <div class="stack">${this.systemCard()}${this.databaseCard()}${this.trendCard()}${this.cleanupCard()}
       <div class="panel"><div class="panelhead"><h2>${this.t("byType")}</h2></div><div class="types">${["entity", "device", "config_entry", "automation", "script", "scene", "dashboard", "area", "floor", "label"].filter(t => types[t]).map(type => `<button class="type" data-type-jump="${type}">${this.tile(type)}<span>${this.t(type)}</span><b>${this.formatNumber(types[type])}</b></button>`).join("")}</div></div></div></div>`;
   }
 
@@ -210,6 +217,36 @@ class OverviewMixin {
       } catch (_) { return; }
       if (this.dbFirst && this.view === "overview") this.render();
     }, 0);
+  }
+
+  // Disk, memory and CPU in three bars; read once per data set with a command that walks no folder.
+  ensureSysLight() {
+    if (this._sysLightFor === this.data || !this._hass?.callWS) return;
+    this._sysLightFor = this.data;
+    this.loadSysLight(this.data);
+  }
+
+  async loadSysLight(data) {
+    try {
+      const result = await this._hass.callWS({ type: "ha_housekeeper/system_light" });
+      if (this.data !== data) return;
+      this.sysLight = result;
+      this.render(); // the to-do list and the ring count a nearly full disk, in every view
+    } catch (_) { if (this.data === data) this.sysLight = null; }
+  }
+
+  systemCard() {
+    const r = this.sysLight;
+    if (!r) return "";
+    const disk = r.disk || {}, ram = r.ram || {}, cpu = r.cpu || {};
+    const bar = (label, part, sub) => part.percent === null || part.percent === undefined ? "" : `<div class="fact"><span>${this.esc(label)}</span><b>${this.esc(this.sysPercent(part.percent))}${sub ? `<small>${this.esc(sub)}</small>` : ""}</b>${this.sysMeter(part.percent)}</div>`;
+    const rows = [
+      bar(this.t("sysDiskUsed"), disk, disk.free !== undefined && disk.free !== null ? this.t("sysFreeOf", { free: this.formatBytes(disk.free), total: this.formatBytes(disk.total) }) : ""),
+      bar(this.t("sysRam"), ram, ram.total ? this.t("sysOf", { used: this.formatBytes(ram.used), total: this.formatBytes(ram.total) }) : ""),
+      bar(this.t("sysCpu"), cpu, ""),
+    ].join("");
+    if (!rows) return "";
+    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("sysOvTitle")}</h2><p>${this.t("sysOvHint")}</p></div><button class="link" data-jump="storage">${this.t("dbOvDetails")} <ha-icon icon="mdi:chevron-right"></ha-icon></button></div><div class="facts">${rows}</div></div>`;
   }
 
   // Size of the recorder database from two file stats taken during the scan; the table queries stay in the Recorder view.
