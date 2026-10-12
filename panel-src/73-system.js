@@ -250,13 +250,15 @@ class SystemMixin {
       const cloud = entries.filter(e => e.external);
       const highCount = entries.filter(e => e.risk === "high").length;
       const appList = r.apps || [];
-      const open = this.viewTabOf("dataflow", [{ id: "sys" }, { id: "cloud" }, ...(r.apps_available ? [{ id: "apps" }] : [])], "sys");
+      const hooks = r.webhooks || [], hooksOpen = hooks.filter(w => !w.local_only).length;
+      const open = this.viewTabOf("dataflow", [{ id: "sys" }, { id: "cloud" }, ...(r.apps_available ? [{ id: "apps" }] : []), ...(hooks.length ? [{ id: "hooks" }] : [])], "sys");
       const high = id => this.lv?.[id]?.f?.risk === "high";
       const tiles = this.sumTiles([
         { label: this.t("accSumTotal"), value: this.esc(this.formatNumber(entries.length)), tone: "mute" },
         { label: this.t("accSumAccess"), value: this.esc(this.formatNumber(sys.length)), tone: sys.length ? "warn" : "ok", attr: ["data-acc-show", "sys"], active: open === "sys" && !high("accsys") },
         { label: this.t("accSumHigh"), value: this.esc(this.formatNumber(highCount)), tone: highCount ? "red" : "ok", attr: ["data-acc-show", "sys|high"], active: open === "sys" && high("accsys") },
         { label: this.t("accSumExternal"), value: this.esc(this.formatNumber(cloud.length)), tone: cloud.length ? "warn" : "ok", attr: ["data-acc-show", "cloud"], active: open === "cloud" },
+        hooks.length ? { label: this.t("accSumHooks"), value: this.esc(this.formatNumber(hooksOpen)), sub: this.esc(this.t("accSumHooksSub", { n: this.formatNumber(hooks.length) })), tone: hooksOpen ? "warn" : "ok", attr: ["data-acc-show", "hooks"], active: open === "hooks" } : null,
         r.apps_available ? { label: this.t("accSumApps"), value: this.esc(this.formatNumber(appList.filter(a => a.risk === "high").length)), sub: this.esc(this.t("accSumAppsSub", { n: this.formatNumber(appList.length) })), tone: appList.some(a => a.risk === "high") ? "red" : "ok", attr: ["data-acc-show", "apps|high"], active: open === "apps" && high("accapps") } : null,
       ]);
       const risks = [["high", this.t("accRisk_high")], ["medium", this.t("accRisk_medium")], ["low", this.t("accRisk_low")]];
@@ -294,6 +296,18 @@ class SystemMixin {
         ],
         exportName: "cloud-data-flow", header: [this.t("accColIntegration"), "Domain", this.t("accColTarget"), this.t("accColIot"), this.t("accColFlow"), this.t("accColRisk")], rows: e => [e.title, e.domain, target(e).join("; "), iot(e), flows(e).join("; "), this.t(`accRisk_${e.risk}`)],
       });
+      const hookTable = this.sysList("acchooks", hooks, {
+        sort: "open", dir: "asc", cls: "acc", tie: w => w.object_id, empty: "accNoneHooks",
+        sorts: [{ key: "open", label: "accColReach", dir: "asc", get: w => Number(w.local_only) }, { key: "name", label: "accColAutomation", dir: "asc", get: w => w.name }],
+        text: w => `${w.name} ${w.object_id}`,
+        rowAttrs: w => `data-object="automation:${this.esc(w.object_id)}" tabindex="0" role="button" aria-label="${this.esc(w.name)}"`,
+        columns: [
+          { key: "name", label: "accColAutomation", cell: w => this.nameCell(w.name, w.object_id) },
+          { key: "methods", label: "accColMethods", sortable: false, cell: w => this.accPills(w.methods.length ? w.methods : [this.t("accAnyMethod")], "mute") },
+          { key: "open", label: "accColReach", cell: w => `<span class="pill ${w.local_only ? "ok" : "warn"}">${this.t(w.local_only ? "accHookLocal" : "accHookOpen")}</span>` },
+        ],
+        exportName: "webhooks", header: [this.t("accColAutomation"), "ID", this.t("accColReach")], rows: w => [w.name, w.object_id, this.t(w.local_only ? "accHookLocal" : "accHookOpen")],
+      });
       const chip = id => high(id) ? `<div class="pad"><button class="pill red" data-acc-clear="${id}" title="${this.esc(this.t("accClearFilter"))}">${this.esc(`${this.t("accColRisk")}: ${this.t("accRisk_high")}`)} ✕</button></div>` : "";
       const panel = (title, hint, id, body) => `<div class="panel"><div class="panelhead"><div><h2>${this.t(title)}</h2><p>${this.t(hint)}</p></div></div>${chip(id)}${body}</div>`;
       const tabs = [
@@ -301,7 +315,9 @@ class SystemMixin {
         { id: "cloud", icon: "mdi:cloud-outline", label: this.t("accCloudTitle"), hint: this.t("accCloudHint"), count: cloud.length },
         r.apps_available ? { id: "apps", icon: "mdi:package-variant-closed", label: this.t("accAppsTitle"), hint: this.t("accAppsHint"), count: appList.length } : { id: "apps", icon: "mdi:package-variant-closed", label: this.t("accAppsTitle"), hint: this.t("accAppsNoSupervisor"), disabled: true },
       ];
-      const body = open === "cloud" ? panel("accCloudTitle", "accCloudHint", "acccloud", cloudTable)
+      if (hooks.length) tabs.push({ id: "hooks", icon: "mdi:webhook", label: this.t("accHooksTitle"), hint: this.t("accHooksHint"), count: hooks.length });
+      const body = open === "hooks" ? panel("accHooksTitle", "accHooksHint", "acchooks", hookTable)
+        : open === "cloud" ? panel("accCloudTitle", "accCloudHint", "acccloud", cloudTable)
         : open === "apps" ? panel("accAppsTitle", "accAppsHint", "accapps", this.accAppsTable(appList, risks, sorts.find(x => x.key === "risk")))
         : panel("accSysTitle", "accSysHint", "accsys", sysTable);
       return `<div class="stack"><div class="panel">${head}</div>${tiles}<div class="sysnav">${this.navTiles("dataflow", tabs, open, this.t("dataflow"))}</div>${body}<div class="panel">${this.howCounted("accFootnote")}</div></div>`;

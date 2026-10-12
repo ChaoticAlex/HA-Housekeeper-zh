@@ -259,7 +259,39 @@ async def apps_report(hass: HomeAssistant) -> dict[str, Any]:
     return {"available": True, "apps": apps}
 
 
-async def access_report(hass: HomeAssistant) -> dict[str, Any]:
+def webhook_triggers(automations: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Automations that a webhook can start: a call from outside reaches them unless ``local_only``.
+
+    Home Assistant answers a webhook for anyone who knows its ID; ``local_only`` (the default)
+    limits that to the local network. The ID is never returned, only whether it is open.
+    """
+    found = []
+    for item in automations:
+        if item["object_type"] != "automation":
+            continue
+        for trigger in item.get("triggers") or []:
+            if not isinstance(trigger, dict):
+                continue
+            if (trigger.get("trigger") or trigger.get("platform")) != "webhook":
+                continue
+            methods = trigger.get("allowed_methods")
+            found.append(
+                {
+                    "object_id": item["object_id"],
+                    "name": item.get("name") or item["object_id"],
+                    "enabled": item["status"] != "disabled",
+                    "local_only": trigger.get("local_only") is not False,
+                    "methods": [str(m) for m in methods] if isinstance(methods, list) else [],
+                }
+            )
+            break
+    found.sort(key=lambda w: (w["local_only"], str(w["name"]).lower()))
+    return found
+
+
+async def access_report(
+    hass: HomeAssistant, automations: list[dict[str, Any]] | None = None
+) -> dict[str, Any]:
     """System access and data flow of every config entry (ignored discoveries left out) and the
     rights of the installed apps (only with a Supervisor)."""
     entries = [e for e in hass.config_entries.async_entries() if e.source != "ignore"]
@@ -286,6 +318,7 @@ async def access_report(hass: HomeAssistant) -> dict[str, Any]:
         "entries": items,
         "apps": apps["apps"],
         "apps_available": apps["available"],
+        "webhooks": webhook_triggers(automations or []),
         "with_access": sum(1 for i in items if i["access"]),
         "external": sum(1 for i in items if i["external"]),
         "high": sum(1 for i in items if i["risk"] == "high"),

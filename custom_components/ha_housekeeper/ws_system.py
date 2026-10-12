@@ -74,7 +74,14 @@ async def websocket_access(
     """System access and data flow of the integrations, rights of the apps. Read-only."""
     try:
         async with asyncio.timeout(ACCESS_TIMEOUT):
-            result = await access_report(hass)
+            result = await access_report(
+                hass,
+                [
+                    item
+                    for item in (scanner.snapshot or {}).get("objects", [])
+                    if item["object_type"] == "automation"
+                ],
+            )
     except Exception as err:
         connection.send_error(msg["id"], "access_failed", f"{type(err).__name__}: {err}")
         return

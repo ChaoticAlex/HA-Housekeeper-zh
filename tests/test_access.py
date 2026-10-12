@@ -162,3 +162,32 @@ async def test_apps_report_reads_every_app_and_marks_one_without_answer(
         assert await module.apps_report(hass) == {"available": False, "apps": []}
         result = await access_report(hass)
     assert result["apps_available"] is False and result["apps"] == []
+
+
+def test_webhooks_are_open_unless_local_only_and_never_show_the_id() -> None:
+    from custom_components.ha_housekeeper.access import webhook_triggers
+
+    def automation(object_id, trigger, status="active"):
+        return {
+            "object_type": "automation",
+            "object_id": object_id,
+            "name": object_id,
+            "status": status,
+            "triggers": [trigger],
+        }
+
+    found = webhook_triggers(
+        [
+            automation("automation.a", {"trigger": "webhook", "webhook_id": "SECRET-1"}),
+            automation(
+                "automation.b",
+                {"platform": "webhook", "webhook_id": "SECRET-2", "local_only": False},
+            ),
+            automation("automation.c", {"trigger": "state", "entity_id": "light.x"}),
+        ]
+    )
+    assert [(w["object_id"], w["local_only"]) for w in found] == [
+        ("automation.b", False),
+        ("automation.a", True),
+    ]
+    assert "SECRET" not in str(found)

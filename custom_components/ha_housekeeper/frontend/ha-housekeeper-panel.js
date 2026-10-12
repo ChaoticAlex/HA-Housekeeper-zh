@@ -10145,7 +10145,7 @@ Object.assign(TEXT.de, {
   accDetSet: "hinterlegt", accDetEmpty: "leer", accDetNever: "Werte zeigt Housekeeper nie", accDetAllFlow: "Alle Zugriffe & Datenfluss", accDetAllSecrets: "Alle Zugangsdaten",
   accAlertHigh: "Hoher Systemzugriff: {list}", accAlertMore: "Details im Reiter",
   accAppTab: "Rechte", accAppLoad: "Last & Speicher", accAppConfig: "Konfiguration", accAppTotal: "Gesamt", appVersion: "Version", appRepository: "Quelle", appStage: "Entwicklungsstand", appUpdate: "Update auf {version}", appHint: "Installierte App (Add-on), wie der Supervisor sie meldet. Housekeeper liest nur und ändert nichts an Apps.",
-  accClearFilter: "Filter aufheben", accSumApps: "Apps mit hohem Risiko", accSumAppsSub: "von {n} Apps", accAppsTitle: "Apps", accAppsHint: "Rechte der installierten Apps, wie der Supervisor sie beschreibt", accColApp: "App", accColRights: "Rechte",
+  accClearFilter: "Filter aufheben", accSumApps: "Apps mit hohem Risiko", accSumHooks: "Webhooks von außen", accSumHooksSub: "von {n} Webhooks", accHooksTitle: "Webhooks", accHooksHint: "Automationen, die ein Webhook starten kann. Offen heißt: nicht auf das lokale Netz beschränkt, wer die ID kennt, kann sie auslösen. Die ID zeigt Housekeeper nie.", accNoneHooks: "Keine Automation mit Webhook-Auslöser.", accColAutomation: "Automation", accColMethods: "Methoden", accColReach: "Erreichbar", accAnyMethod: "alle", accHookLocal: "nur lokal", accHookOpen: "offen (auch von außen)", accSumAppsSub: "von {n} Apps", accAppsTitle: "Apps", accAppsHint: "Rechte der installierten Apps, wie der Supervisor sie beschreibt", accColApp: "App", accColRights: "Rechte",
   accAppsNoSupervisor: "Apps gibt es nur mit Home Assistant OS oder Supervised.", accNoneApps: "Keine Apps installiert.", accAppNoRights: "keine besonderen Rechte", accAppUnchecked: "Der Supervisor hat zu dieser App nicht geantwortet.", accAppUncheckedShort: "nicht prüfbar",
   accApp_full_access: "Voller Hardwarezugriff", accApp_privileged: "Privilegiert", accApp_host_pid: "Host-Prozesse (PID)", accApp_docker_api: "Docker-API (wie Root)", accApp_host_ipc: "Host-IPC", accApp_host_dbus: "Host-D-Bus", accApp_host_network: "Host-Netzwerk", accApp_supervisor_api: "Supervisor-API", accApp_ha_api: "Home-Assistant-API", accApp_auth_api: "Login-Prüfung (Auth-API)", accApp_gpio: "GPIO", accApp_usb: "USB", accApp_devices: "Geräte", accApp_apparmor_off: "AppArmor aus",
   accExternal: "extern", accGps: "Standort (Tracker)", accCamera: "Kamera-Entitäten", accDisabled: "deaktiviert",
@@ -10198,7 +10198,7 @@ Object.assign(TEXT.en, {
   accDetSet: "set", accDetEmpty: "empty", accDetNever: "Housekeeper never shows values", accDetAllFlow: "All access & data flow", accDetAllSecrets: "All credentials",
   accAlertHigh: "High system access: {list}", accAlertMore: "Details in the tab",
   accAppTab: "Rights", accAppLoad: "Load & storage", accAppConfig: "Configuration", accAppTotal: "Total", appVersion: "Version", appRepository: "Source", appStage: "Stage", appUpdate: "Update to {version}", appHint: "Installed app (add-on) as the Supervisor reports it. Housekeeper only reads and changes nothing about apps.",
-  accClearFilter: "Remove the filter", accSumApps: "Apps with high risk", accSumAppsSub: "of {n} apps", accAppsTitle: "Apps", accAppsHint: "Rights of the installed apps as the Supervisor describes them", accColApp: "App", accColRights: "Rights",
+  accClearFilter: "Remove the filter", accSumApps: "Apps with high risk", accSumHooks: "Webhooks from outside", accSumHooksSub: "of {n} webhooks", accHooksTitle: "Webhooks", accHooksHint: "Automations a webhook can start. Open means: not limited to the local network, anyone who knows the ID can trigger them. Housekeeper never shows the ID.", accNoneHooks: "No automation with a webhook trigger.", accColAutomation: "Automation", accColMethods: "Methods", accColReach: "Reachable", accAnyMethod: "any", accHookLocal: "local only", accHookOpen: "open (also from outside)", accSumAppsSub: "of {n} apps", accAppsTitle: "Apps", accAppsHint: "Rights of the installed apps as the Supervisor describes them", accColApp: "App", accColRights: "Rights",
   accAppsNoSupervisor: "Apps exist only with Home Assistant OS or Supervised.", accNoneApps: "No apps installed.", accAppNoRights: "no special rights", accAppUnchecked: "The Supervisor did not answer for this app.", accAppUncheckedShort: "cannot be checked",
   accApp_full_access: "Full hardware access", accApp_privileged: "Privileged", accApp_host_pid: "Host processes (PID)", accApp_docker_api: "Docker API (like root)", accApp_host_ipc: "Host IPC", accApp_host_dbus: "Host D-Bus", accApp_host_network: "Host network", accApp_supervisor_api: "Supervisor API", accApp_ha_api: "Home Assistant API", accApp_auth_api: "Login check (Auth API)", accApp_gpio: "GPIO", accApp_usb: "USB", accApp_devices: "Devices", accApp_apparmor_off: "AppArmor off",
   accExternal: "external", accGps: "Location (trackers)", accCamera: "Camera entities", accDisabled: "disabled",
@@ -10655,13 +10655,15 @@ class SystemMixin {
       const cloud = entries.filter(e => e.external);
       const highCount = entries.filter(e => e.risk === "high").length;
       const appList = r.apps || [];
-      const open = this.viewTabOf("dataflow", [{ id: "sys" }, { id: "cloud" }, ...(r.apps_available ? [{ id: "apps" }] : [])], "sys");
+      const hooks = r.webhooks || [], hooksOpen = hooks.filter(w => !w.local_only).length;
+      const open = this.viewTabOf("dataflow", [{ id: "sys" }, { id: "cloud" }, ...(r.apps_available ? [{ id: "apps" }] : []), ...(hooks.length ? [{ id: "hooks" }] : [])], "sys");
       const high = id => this.lv?.[id]?.f?.risk === "high";
       const tiles = this.sumTiles([
         { label: this.t("accSumTotal"), value: this.esc(this.formatNumber(entries.length)), tone: "mute" },
         { label: this.t("accSumAccess"), value: this.esc(this.formatNumber(sys.length)), tone: sys.length ? "warn" : "ok", attr: ["data-acc-show", "sys"], active: open === "sys" && !high("accsys") },
         { label: this.t("accSumHigh"), value: this.esc(this.formatNumber(highCount)), tone: highCount ? "red" : "ok", attr: ["data-acc-show", "sys|high"], active: open === "sys" && high("accsys") },
         { label: this.t("accSumExternal"), value: this.esc(this.formatNumber(cloud.length)), tone: cloud.length ? "warn" : "ok", attr: ["data-acc-show", "cloud"], active: open === "cloud" },
+        hooks.length ? { label: this.t("accSumHooks"), value: this.esc(this.formatNumber(hooksOpen)), sub: this.esc(this.t("accSumHooksSub", { n: this.formatNumber(hooks.length) })), tone: hooksOpen ? "warn" : "ok", attr: ["data-acc-show", "hooks"], active: open === "hooks" } : null,
         r.apps_available ? { label: this.t("accSumApps"), value: this.esc(this.formatNumber(appList.filter(a => a.risk === "high").length)), sub: this.esc(this.t("accSumAppsSub", { n: this.formatNumber(appList.length) })), tone: appList.some(a => a.risk === "high") ? "red" : "ok", attr: ["data-acc-show", "apps|high"], active: open === "apps" && high("accapps") } : null,
       ]);
       const risks = [["high", this.t("accRisk_high")], ["medium", this.t("accRisk_medium")], ["low", this.t("accRisk_low")]];
@@ -10699,6 +10701,18 @@ class SystemMixin {
         ],
         exportName: "cloud-data-flow", header: [this.t("accColIntegration"), "Domain", this.t("accColTarget"), this.t("accColIot"), this.t("accColFlow"), this.t("accColRisk")], rows: e => [e.title, e.domain, target(e).join("; "), iot(e), flows(e).join("; "), this.t(`accRisk_${e.risk}`)],
       });
+      const hookTable = this.sysList("acchooks", hooks, {
+        sort: "open", dir: "asc", cls: "acc", tie: w => w.object_id, empty: "accNoneHooks",
+        sorts: [{ key: "open", label: "accColReach", dir: "asc", get: w => Number(w.local_only) }, { key: "name", label: "accColAutomation", dir: "asc", get: w => w.name }],
+        text: w => `${w.name} ${w.object_id}`,
+        rowAttrs: w => `data-object="automation:${this.esc(w.object_id)}" tabindex="0" role="button" aria-label="${this.esc(w.name)}"`,
+        columns: [
+          { key: "name", label: "accColAutomation", cell: w => this.nameCell(w.name, w.object_id) },
+          { key: "methods", label: "accColMethods", sortable: false, cell: w => this.accPills(w.methods.length ? w.methods : [this.t("accAnyMethod")], "mute") },
+          { key: "open", label: "accColReach", cell: w => `<span class="pill ${w.local_only ? "ok" : "warn"}">${this.t(w.local_only ? "accHookLocal" : "accHookOpen")}</span>` },
+        ],
+        exportName: "webhooks", header: [this.t("accColAutomation"), "ID", this.t("accColReach")], rows: w => [w.name, w.object_id, this.t(w.local_only ? "accHookLocal" : "accHookOpen")],
+      });
       const chip = id => high(id) ? `<div class="pad"><button class="pill red" data-acc-clear="${id}" title="${this.esc(this.t("accClearFilter"))}">${this.esc(`${this.t("accColRisk")}: ${this.t("accRisk_high")}`)} ✕</button></div>` : "";
       const panel = (title, hint, id, body) => `<div class="panel"><div class="panelhead"><div><h2>${this.t(title)}</h2><p>${this.t(hint)}</p></div></div>${chip(id)}${body}</div>`;
       const tabs = [
@@ -10706,7 +10720,9 @@ class SystemMixin {
         { id: "cloud", icon: "mdi:cloud-outline", label: this.t("accCloudTitle"), hint: this.t("accCloudHint"), count: cloud.length },
         r.apps_available ? { id: "apps", icon: "mdi:package-variant-closed", label: this.t("accAppsTitle"), hint: this.t("accAppsHint"), count: appList.length } : { id: "apps", icon: "mdi:package-variant-closed", label: this.t("accAppsTitle"), hint: this.t("accAppsNoSupervisor"), disabled: true },
       ];
-      const body = open === "cloud" ? panel("accCloudTitle", "accCloudHint", "acccloud", cloudTable)
+      if (hooks.length) tabs.push({ id: "hooks", icon: "mdi:webhook", label: this.t("accHooksTitle"), hint: this.t("accHooksHint"), count: hooks.length });
+      const body = open === "hooks" ? panel("accHooksTitle", "accHooksHint", "acchooks", hookTable)
+        : open === "cloud" ? panel("accCloudTitle", "accCloudHint", "acccloud", cloudTable)
         : open === "apps" ? panel("accAppsTitle", "accAppsHint", "accapps", this.accAppsTable(appList, risks, sorts.find(x => x.key === "risk")))
         : panel("accSysTitle", "accSysHint", "accsys", sysTable);
       return `<div class="stack"><div class="panel">${head}</div>${tiles}<div class="sysnav">${this.navTiles("dataflow", tabs, open, this.t("dataflow"))}</div>${body}<div class="panel">${this.howCounted("accFootnote")}</div></div>`;
