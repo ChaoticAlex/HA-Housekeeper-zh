@@ -2026,11 +2026,11 @@ class OverviewMixin {
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p></div>
       <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", total, total ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
       ${this.todoCard()}<div class="ovzone">${this.cleanupCard()}${this.trendCard()}${this.inventoryStatusCard()}</div>
-      <div class="ovzone">${this.systemCard()}${this.databaseCard()}${this.backupCard()}</div>`;
+      <div class="ovzone">${this.systemCard()}${this.databaseCard()}${this.backupSummaryCard()}</div>`;
   }
 
   // The backup in three lines: the newest backup, the last automatic run and the overall result. The rest is in Maintenance.
-  backupCard() {
+  backupSummaryCard() {
     const b = this.backup;
     if (!b?.available) return "";
     const checks = b.checks || [], by = id => checks.find(c => c.id === id);
