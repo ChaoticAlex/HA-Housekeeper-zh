@@ -35,6 +35,7 @@ BATTERY_STORAGE_KEY: Final = f"{DOMAIN}.batteries"
 WINDOW_STORAGE_KEY: Final = f"{DOMAIN}.window"
 NOTIFY_STORAGE_KEY: Final = f"{DOMAIN}.notify"
 STALE_STORAGE_KEY: Final = f"{DOMAIN}.stale"
+SCAN_HEALTH_STORAGE_KEY: Final = f"{DOMAIN}.scan_health"
 LOAD_STORAGE_KEY: Final = f"{DOMAIN}.load"
 STORAGE_VERSION: Final = 1
 

@@ -98,6 +98,8 @@ async def _send_inventory_result(
     except Exception as err:
         connection.send_error(msg["id"], "scan_failed", f"{type(err).__name__}: {err}")
         return
+    # The snapshot is from the last success; the health says whether it is still being refreshed.
+    result = {**result, "meta": {**result["meta"], "scan_health": scanner.health_report()}}
     connection.send_result(msg["id"], _versioned(result))
 
 
@@ -138,7 +140,15 @@ def websocket_status(
     """Return scan progress without triggering work."""
     warmup = {"booting": scanner.booting, "seconds_left": scanner.warmup_seconds_left}
     connection.send_result(
-        msg["id"], _versioned({**scanner.status, "writing": write_holder(hass), "warmup": warmup})
+        msg["id"],
+        _versioned(
+            {
+                **scanner.status,
+                "writing": write_holder(hass),
+                "warmup": warmup,
+                "health": scanner.health_report(),
+            }
+        ),
     )
 
 

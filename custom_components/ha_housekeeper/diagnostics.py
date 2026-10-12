@@ -32,6 +32,8 @@ async def async_get_config_entry_diagnostics(
         "home_assistant": HA_VERSION,
         "loaded": True,
         "scan_status": {**scanner.status, "last_error": error.split(":", 1)[0] if error else None},
+        # Without the error text: it can name entities or paths.
+        "scan_health": {**scanner.health_report(), "error": None},
         "meta": snapshot["meta"] if snapshot else None,
         "edge_count": len(snapshot["edges"]) if snapshot else 0,
         "findings_by_rule": dict(Counter(item["rule_id"] for item in findings)),

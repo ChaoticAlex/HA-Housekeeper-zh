@@ -42,6 +42,14 @@
     "broken_automations": {
       "title": "{count} Befunde mit fehlenden Referenzen",
       "description": "Housekeeper hat {count} Verweise auf Entitäten, Geräte oder Bereiche gefunden, die nicht mehr existieren, in Automationen, Skripten, Szenen, Dashboards, Gruppen oder Helfern. [In Housekeeper anzeigen]({link}). Es wird nichts automatisch geändert."
+    },
+    "scan_failing": {
+      "title": "Housekeeper-Scans schlagen fehl",
+      "description": "Die letzten Scans sind in der Phase „{phase}“ fehlgeschlagen ({kind}). Zahlen und Befunde stammen vom letzten erfolgreichen Scan ({last}) und können veraltet sein. [Housekeeper öffnen]({link}) für den Fehlertext. Es wird nichts automatisch geändert."
+    },
+    "scan_stale": {
+      "title": "Housekeeper hat länger nicht gescannt",
+      "description": "Seit {last} war kein Scan erfolgreich. Zahlen und Befunde können veraltet sein. [Housekeeper öffnen]({link}). Es wird nichts automatisch geändert."
     }
   },
   "entity": {
@@ -69,6 +77,15 @@
       },
       "last_scan": {
         "name": "Letzter Scan"
+      },
+      "scan_health": {
+        "name": "Scan-Zustand",
+        "state": {
+          "ok": "In Ordnung",
+          "stale": "Veraltet",
+          "failed": "Fehlgeschlagen",
+          "preliminary": "Vorläufig"
+        }
       }
     }
   }

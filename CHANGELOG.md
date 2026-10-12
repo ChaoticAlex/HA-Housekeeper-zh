@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Scan-Zustand:** Schlägt ein Scan fehl oder bleibt er lange aus, zeigt das Panel ein Band mit der Phase und dem letzten erfolgreichen Scan; die Zahlen stammen dann von einem älteren Stand. Ein neuer Diagnose-Sensor „Scan-Zustand“ (in Ordnung, veraltet, fehlgeschlagen, vorläufig) steht für Dashboards und Automationen bereit, und bei anhaltendem Problem erscheint ein Reparaturhinweis.
 - **Kacheln der Unterseiten:** Aufräumen, Recorder und Apps & Integrationen zeigen unter der Beschreibung eine Zeile mit Hinweisen (zum Beispiel „2 mit Problem“, „9,5 GB“, „751 mit Statistik“). Die Kacheln sind dadurch gleich hoch und springen beim Laden nicht mehr; lange Beschreibungen enden mit „…“. In Aufräumen teilen sich die letzten zwei Kacheln die Zeile, und die Zahlenzeile von „Nicht verwendet“ ist in die Kachel gewandert.
 - **Apps & Integrationen:** Die obere Kennzahlenreihe entfällt. Die drei Kacheln (Apps, Core, Custom) sind breiter, der Text bricht nicht mehr um, und sie tragen die Hinweise selbst: laufende Apps, belegter Platz, Updates und Integrationen mit Problem.
 - **Bestand:** In der Ansicht „Nach Objekttyp“ hebt der Ring den Abschnitt hervor, über dem die Maus liegt oder dessen Tabellenzeile sie berührt; umgekehrt leuchtet die Zeile auf, wenn die Maus auf dem Ringabschnitt liegt.
@@ -97,6 +98,7 @@
 
 ### English
 
+- **Scan health:** If a scan fails or does not run for a long time, the panel shows a banner with the phase and the last successful scan; the numbers then come from an older state. A new diagnostic sensor "Scan health" (OK, outdated, failed, preliminary) is available for dashboards and automations, and a lasting problem raises a repairs hint.
 - **Recorder, load:** Rows, entities and events are three labelled figures instead of one sentence; what is not counted (hidden, disabled, down all the time) shows as marks of its own with an explanation.
 - **Repair:** The “Repair sensor errors” card now has its title like the others, and the card titles carry the name of their tile (“Repair sensor errors”, “Replace a meter”).
 - **Overview:** Three zones instead of two columns: status and tasks on top, “Top findings” (five rows at most) with the inventory status below it beside the notes in the middle, and system, database and comparison as state cards at the bottom. The “By object type” card is gone (the inventory shows the types). In the System card the value now sits on the right and the bar below it.

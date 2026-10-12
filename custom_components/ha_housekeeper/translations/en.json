@@ -42,6 +42,14 @@
     "broken_automations": {
       "title": "{count} findings with missing references",
       "description": "Housekeeper found {count} references to entities, devices or areas that no longer exist, in automations, scripts, scenes, dashboards, groups or helpers. [Show in Housekeeper]({link}). Nothing is changed automatically."
+    },
+    "scan_failing": {
+      "title": "Housekeeper scans keep failing",
+      "description": "The last scans failed in phase \"{phase}\" ({kind}). The counts and findings come from the last successful scan ({last}) and may be outdated. [Open Housekeeper]({link}) for the error text. Nothing is changed automatically."
+    },
+    "scan_stale": {
+      "title": "Housekeeper has not scanned for a while",
+      "description": "No scan succeeded since {last}. The counts and findings may be outdated. [Open Housekeeper]({link}). Nothing is changed automatically."
     }
   },
   "entity": {
@@ -69,6 +77,15 @@
       },
       "last_scan": {
         "name": "Last scan"
+      },
+      "scan_health": {
+        "name": "Scan health",
+        "state": {
+          "ok": "OK",
+          "stale": "Outdated",
+          "failed": "Failed",
+          "preliminary": "Preliminary"
+        }
       }
     }
   }

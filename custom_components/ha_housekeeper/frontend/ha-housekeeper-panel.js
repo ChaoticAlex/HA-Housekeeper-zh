@@ -1806,6 +1806,16 @@ class OverviewMixin {
     return `<div class="panel u-mb14" data-warmup><div class="row"><span class="tile warn"><ha-icon icon="mdi:timer-sand"></ha-icon></span><span class="row-text">${this.warmupInner()}</span></div></div>`;
   }
 
+  // A scan that failed, or none that succeeded for a long time: the counts shown then come from an older scan.
+  healthBanner() {
+    const h = this.data?.meta?.scan_health;
+    if (!h || !["failed", "stale"].includes(h.state)) return "";
+    const last = h.last_success_at ? this.formatDate(h.last_success_at) : "–";
+    const text = h.state === "failed" ? this.t("healthFailed", { phase: h.failed_phase || "–", last }) : this.t("healthStale", { last });
+    const more = h.state === "failed" ? [this.t("healthTries", { n: h.consecutive_failures }), h.error].filter(Boolean).join(" · ") : this.t("healthStaleHint");
+    return `<div class="panel u-mb14" data-scan-health><div class="row"><span class="tile ${h.state === "failed" ? "red" : "warn"}"><ha-icon icon="mdi:heart-broken-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(text)}</strong><small class="u-m0">${this.esc(more)}</small></span></div></div>`;
+  }
+
   warmupInner() {
     const w = this._warm || {}, left = w.until ? Math.max(0, Math.round((w.until - Date.now()) / 1000)) : null;
     const st = this.scanStatus;
@@ -8589,7 +8599,7 @@ Object.assign(TEXT.en, {
 
 // Navigation split: Cleanup (remove what is not needed), Repair (fix what stays) and the shared Journal.
 Object.assign(TEXT.de, {
-  findUnhide: "Wieder einblenden", findUnhidden: "{n} Befunde wieder eingeblendet", bulkPartial: "{done} von {total} erledigt, {failed} fehlgeschlagen ({detail}). Die fehlgeschlagenen bleiben ausgewählt; ein neuer Versuch sendet nur diese.", viewsFull: "Es sind höchstens {n} gespeicherte Ansichten möglich. Lösche eine Ansicht oder speichere unter dem Namen einer vorhandenen.",
+  findUnhide: "Wieder einblenden", findUnhidden: "{n} Befunde wieder eingeblendet", healthFailed: "Der letzte Scan ist in der Phase „{phase}“ fehlgeschlagen. Die Zahlen stammen vom letzten erfolgreichen Scan ({last}).", healthStale: "Seit {last} war kein Scan erfolgreich. Die Zahlen können veraltet sein.", healthTries: "{n} Fehlversuche in Folge", healthStaleHint: "Der regelmäßige Scan ist ausgeblieben. Starte einen Scan von Hand; schlägt er fehl, steht der Grund hier.", bulkPartial: "{done} von {total} erledigt, {failed} fehlgeschlagen ({detail}). Die fehlgeschlagenen bleiben ausgewählt; ein neuer Versuch sendet nur diese.", viewsFull: "Es sind höchstens {n} gespeicherte Ansichten möglich. Lösche eine Ansicht oder speichere unter dem Namen einer vorhandenen.",
   firstScan: "Der erste Scan läuft: {percent} %", groupOpen: "{count} offen", readOnly: "Nur lesen", canChange: "Kann ändern", readOnlyHint: "Diese Seite ändert nichts.", canChangeHint: "Von hier aus lassen sich Pläne erstellen und ausführen. Geändert wird erst nach deiner Bestätigung.",
   outcomeUndoYes: "Rückgängig ist möglich, solange sich die Objekte nicht geändert haben.", outcomeUndoBackup: "Nur per Backup rückgängig.", outcomeUndoMixed: "Teils rückgängig machbar, teils nur per Backup.",
   backupFailHint: "Prüfe unter Einstellungen → System → Backups, ob ein Backup-Ziel erreichbar ist, und lies das Protokoll unter Einstellungen → System → Protokolle.", previewReady: "Vorschau erstellt", toast_verified: "Plan abgeschlossen und geprüft", toast_executed: "Plan ausgeführt", toast_partial: "Plan nur teilweise ausgeführt", toast_aborted: "Plan abgebrochen", planStatusLost: "Der Planstatus lässt sich gerade nicht abrufen. Der Plan läuft weiter, Housekeeper versucht es erneut.", planCancelFailed: "Der Abbruch ist nicht bestätigt. Der Plan läuft möglicherweise weiter. Bereits ausgeführte Schritte werden durch einen Abbruch nicht zurückgenommen.",
@@ -8632,7 +8642,7 @@ Object.assign(TEXT.de, {
   repairTaskExchange: "Gerät austauschen", repairTaskExchangeHint: "Ein defektes Gerät durch ein neues ersetzen und alles übernehmen.",
 });
 Object.assign(TEXT.en, {
-  findUnhide: "Show again", findUnhidden: "{n} findings shown again", bulkPartial: "{done} of {total} done, {failed} failed ({detail}). The failed ones stay selected; a retry sends only those.", viewsFull: "At most {n} saved views are possible. Delete one, or save under the name of an existing view.",
+  findUnhide: "Show again", findUnhidden: "{n} findings shown again", healthFailed: "The last scan failed in phase \"{phase}\". The numbers come from the last successful scan ({last}).", healthStale: "No scan has succeeded since {last}. The numbers may be outdated.", healthTries: "{n} failures in a row", healthStaleHint: "The regular scan did not run. Start a scan by hand; if it fails, the reason shows here.", bulkPartial: "{done} of {total} done, {failed} failed ({detail}). The failed ones stay selected; a retry sends only those.", viewsFull: "At most {n} saved views are possible. Delete one, or save under the name of an existing view.",
   firstScan: "The first scan is running: {percent} %", groupOpen: "{count} open", readOnly: "Read only", canChange: "Can change", readOnlyHint: "This page changes nothing.", canChangeHint: "Plans can be created and run from here. Nothing changes before you confirm.",
   outcomeUndoYes: "Undo is possible as long as the objects have not changed.", outcomeUndoBackup: "Undo only from the backup.", outcomeUndoMixed: "Partly undoable, partly only from the backup.",
   backupFailHint: "Check under Settings → System → Backups that a backup location is reachable, and read the log under Settings → System → Logs.", previewReady: "Preview created", toast_verified: "Plan completed and verified", toast_executed: "Plan executed", toast_partial: "Plan only partly executed", toast_aborted: "Plan aborted", planStatusLost: "The plan status cannot be read right now. The plan keeps running, Housekeeper will try again.", planCancelFailed: "The cancellation is not confirmed. The plan may still be running. Steps that already ran are not undone by cancelling.",
@@ -12354,6 +12364,8 @@ class HAHousekeeperPanel extends HTMLElement {
       this.applyUrl();
     } catch (err) {
       this.error = this.errText(err);
+      // The counts on screen stay from the last good scan: say that this scan failed.
+      try { const s = await this._hass.callWS({ type: "ha_housekeeper/status" }); if (this.data?.meta && s.health) this.data.meta.scan_health = s.health; } catch (_) { /* the banner shows with the next load */ }
       // A plan that is running or a Home Assistant that is still starting only delays the first picture: ask again.
       if (["cleanup_busy", "warming_up"].includes(err?.code)) this.retryWarmup(10000);
     } finally {
@@ -12803,7 +12815,7 @@ class HAHousekeeperPanel extends HTMLElement {
     const viewBack = from ? `<button class="btn" data-action="view-back"><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("backTo")} ${this.t(from.view)}</button>` : "";
     const back = graphBack || viewBack ? `<div class="crumbs">${viewBack}${graphBack}</div>` : "";
     return `${back}<div class="heading"><div><p class="eyebrow">${this.eyebrowFor(this.view)}</p><h1>${title}${INFO_SUB_VIEWS.includes(this.view) ? this.infoTip(sub) : ""}${["cleanup", "repair", "journal"].includes(this.view) ? this.infoTip(this.t("cleanupDryRun"), true) : ""}</h1>${VIEW_HINT[this.view] ? `<span class="sub">${this.t(VIEW_HINT[this.view])}</span>` : INFO_SUB_VIEWS.includes(this.view) ? "" : `<span class="sub">${sub}</span>`}</div>
-      <div class="head-actions">${modePill}${ago}<button class="btn primary" data-action="scan" ${this.busy || this.cleanupRunning() ? 'disabled aria-busy="true"' : ""} title="${this.esc(this.t("scanHint"))}">${this.scanButtonInner()}</button></div></div>${this.warmupBanner()}`;
+      <div class="head-actions">${modePill}${ago}<button class="btn primary" data-action="scan" ${this.busy || this.cleanupRunning() ? 'disabled aria-busy="true"' : ""} title="${this.esc(this.t("scanHint"))}">${this.scanButtonInner()}</button></div></div>${this.warmupBanner()}${this.healthBanner()}`;
   }
 
   content() {

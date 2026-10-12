@@ -255,6 +255,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entry.async_on_unload(async_track_time_interval(hass, _schedule_replies, timedelta(minutes=30)))
     entry.async_on_unload(async_call_later(hass, WARMUP_SECONDS + 120, _schedule_replies))
 
+    # A scan that never comes cannot report itself: look at the age of the last success every hour.
+    @callback
+    def _check_scan_health(_: Any) -> None:
+        scanner.async_check_health()
+
+    entry.async_on_unload(async_track_time_interval(hass, _check_scan_health, timedelta(hours=1)))
+
     # Regular scans keep the comparison history, findings and hints current.
     interval_hours = entry.options.get(CONF_SCAN_INTERVAL_HOURS, DEFAULT_SCAN_INTERVAL_HOURS)
     if interval_hours > 0:

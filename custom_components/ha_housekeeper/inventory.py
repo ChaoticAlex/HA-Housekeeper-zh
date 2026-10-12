@@ -62,6 +62,7 @@ from .dashboard_analysis import (
 )
 from .db_health import database_summary
 from .entry_states import EntryStateHistory
+from .scan_health import ScanHealth
 from .events import EventLog
 from .goals import GoalStore
 from .hacs import hacs_by_domain
@@ -77,7 +78,7 @@ from .hygiene import (
 )
 from .ignored import IgnoreStore
 from .impact import apply_impact
-from .issues import async_sync_issues
+from .issues import async_sync_issues, async_sync_scan_issue
 from .load_history import LoadStore
 from .log_facts import log_facts
 from .maintenance import PreflightStore
@@ -638,6 +639,7 @@ class InventoryScanner:
         self.protection = ProtectionStore(hass)
         self.signals = SignalStore(hass)
         self.entry_states = EntryStateHistory(hass)
+        self.health = ScanHealth(hass)
         self.reminders = ReminderStore(hass)
         self.notes = NoteStore(hass)
         self.batteries = BatteryStore(hass)
@@ -691,6 +693,7 @@ class InventoryScanner:
         await self.protection.async_load()
         await self.signals.async_load()
         await self.entry_states.async_load()
+        await self.health.async_load()
         await self.reminders.async_load()
         await self.notes.async_load()
         await self.batteries.async_load()
@@ -731,6 +734,8 @@ class InventoryScanner:
         """Scan registries and states. Concurrent callers share serialized work."""
         async with self._lock:
             self.status.update(running=True, phase="registries", progress=5, last_error=None)
+            began = time.monotonic()
+            self.health.started(datetime.now(UTC))
             try:
                 # Decided before the states are read: a scan that began during the warm-up stays
                 # preliminary even if the warm-up ends while it runs.
@@ -761,16 +766,28 @@ class InventoryScanner:
                     self.hass.async_create_background_task(
                         self._announce(snapshot), "HA Housekeeper events"
                     )
-                async_dispatcher_send(self.hass, SIGNAL_SCAN_COMPLETE)
+                self.health.succeeded(datetime.now(UTC), time.monotonic() - began, preliminary)
+                self.async_check_health()
                 self.status.update(running=False, phase="complete", progress=100)
                 return snapshot
             except Exception as err:
+                self.health.failed(datetime.now(UTC), str(self.status.get("phase")), err)
                 self.status.update(
                     running=False,
                     phase="failed",
                     last_error=f"{type(err).__name__}: {err}",
                 )
+                self.async_check_health()
                 raise
+
+    def health_report(self) -> dict[str, Any]:
+        """The scan health as the panel and the sensor read it."""
+        return self.health.report(datetime.now(UTC), self.scan_interval_hours)
+
+    def async_check_health(self) -> None:
+        """Raise or clear the repair hint for a scan that keeps failing, and tell the sensor."""
+        async_sync_scan_issue(self.hass, self.health_report())
+        async_dispatcher_send(self.hass, SIGNAL_SCAN_COMPLETE)
 
     async def _announce(self, snapshot: dict[str, Any]) -> None:
         """Fire the events for situations that are new since the last scan."""

@@ -232,6 +232,34 @@ async def test_repairs_hints_only_cover_entity_and_reference_findings(hass: Home
     assert ir.async_get(hass).async_get_issue(DOMAIN, "unavailable_entities") is not None
 
 
+async def test_scan_health_tells_a_failed_and_an_old_scan_from_a_good_one(hass: HomeAssistant) -> None:
+    """The last good counts stay on screen after a failed scan; the health says so, and only a lasting failure is a repair."""
+    from homeassistant.helpers import issue_registry as ir
+
+    from custom_components.ha_housekeeper.issues import SCAN_ISSUE_ID, async_sync_scan_issue
+
+    health = InventoryScanner(hass).health
+    now = datetime.now(UTC)
+    health.started(now)
+    health.succeeded(now, 2.0, False)
+    assert health.report(now, 24)["state"] == "ok"
+    assert health.report(now + timedelta(hours=73), 24)["state"] == "stale"
+    assert health.report(now + timedelta(days=30), 0)["state"] == "ok"  # only on request: never overdue
+
+    for n in range(3):
+        health.failed(now + timedelta(minutes=n + 1), "automations", RuntimeError("boom"))
+        report = health.report(now + timedelta(minutes=10), 24)
+        assert report["state"] == "failed" and report["needs_repair"] is (n == 2)
+        async_sync_scan_issue(hass, report)
+    assert ir.async_get(hass).async_get_issue(DOMAIN, SCAN_ISSUE_ID) is not None
+
+    health.succeeded(now + timedelta(minutes=20), 2.0, False)
+    report = health.report(now + timedelta(minutes=21), 24)
+    assert report["state"] == "ok" and report["failed_phase"] is None
+    async_sync_scan_issue(hass, report)
+    assert ir.async_get(hass).async_get_issue(DOMAIN, SCAN_ISSUE_ID) is None
+
+
 async def test_scan_creates_and_clears_repairs_hints(hass: HomeAssistant) -> None:
     """Findings become aggregated, non-fixable issues that disappear once resolved."""
     from homeassistant.helpers import issue_registry as ir

@@ -1717,6 +1717,17 @@ test("a bulk action keeps the failed findings selected, and a full list of saved
   assert.ok(!el._views.demo.some(v => v.name === "new") && el._views.demo[9].name === "v9");
 });
 
+test("the scan health banner shows only for a failed or an old scan, with the phase and the last good scan", () => {
+  const { el } = panel("en");
+  const meta = state => ({ ...DATA.meta, scan_health: { state, failed_phase: "automations", last_success_at: "2026-10-11T14:02:00+00:00", consecutive_failures: 3, error: "RuntimeError: boom" } });
+  el.data = { ...DATA, meta: meta("ok") };
+  assert.equal(el.healthBanner(), "");
+  el.data = { ...DATA, meta: meta("failed") };
+  assert.ok(el.healthBanner().includes("automations") && el.healthBanner().includes("3 failures in a row") && el.healthBanner().includes("boom"));
+  el.data = { ...DATA, meta: meta("stale") };
+  assert.ok(el.healthBanner().includes("No scan has succeeded since"));
+});
+
 test("blueprints tab, notification switch, diagnostics without names and the weekly report", async () => {
   const { el, shadow, downloads } = panel("en");
   el.view = "maintenance"; el.viewTab = { maintenance: "blueprints" };

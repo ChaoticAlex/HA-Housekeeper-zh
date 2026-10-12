@@ -18,6 +18,16 @@ class OverviewMixin {
     return `<div class="panel u-mb14" data-warmup><div class="row"><span class="tile warn"><ha-icon icon="mdi:timer-sand"></ha-icon></span><span class="row-text">${this.warmupInner()}</span></div></div>`;
   }
 
+  // A scan that failed, or none that succeeded for a long time: the counts shown then come from an older scan.
+  healthBanner() {
+    const h = this.data?.meta?.scan_health;
+    if (!h || !["failed", "stale"].includes(h.state)) return "";
+    const last = h.last_success_at ? this.formatDate(h.last_success_at) : "–";
+    const text = h.state === "failed" ? this.t("healthFailed", { phase: h.failed_phase || "–", last }) : this.t("healthStale", { last });
+    const more = h.state === "failed" ? [this.t("healthTries", { n: h.consecutive_failures }), h.error].filter(Boolean).join(" · ") : this.t("healthStaleHint");
+    return `<div class="panel u-mb14" data-scan-health><div class="row"><span class="tile ${h.state === "failed" ? "red" : "warn"}"><ha-icon icon="mdi:heart-broken-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(text)}</strong><small class="u-m0">${this.esc(more)}</small></span></div></div>`;
+  }
+
   warmupInner() {
     const w = this._warm || {}, left = w.until ? Math.max(0, Math.round((w.until - Date.now()) / 1000)) : null;
     const st = this.scanStatus;

@@ -14,11 +14,13 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.const import EntityCategory
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN, NAME, SIGNAL_SCAN_COMPLETE
+from .scan_health import STATES
 
 COUNT_KEYS = (
     ("findings", "mdi:alert-outline"),
@@ -66,11 +68,26 @@ DESCRIPTIONS = (
 )
 
 
+HEALTH_DESCRIPTION = SensorEntityDescription(
+    key="scan_health",
+    translation_key="scan_health",
+    icon="mdi:heart-pulse",
+    device_class=SensorDeviceClass.ENUM,
+    options=list(STATES),
+    entity_category=EntityCategory.DIAGNOSTIC,
+)
+
+
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Create the Housekeeper sensors."""
-    async_add_entities(HousekeeperSensor(entry, description) for description in DESCRIPTIONS)
+    async_add_entities(
+        [
+            *(HousekeeperSensor(entry, description) for description in DESCRIPTIONS),
+            ScanHealthSensor(entry, HEALTH_DESCRIPTION),
+        ]
+    )
 
 
 class HousekeeperSensor(SensorEntity):
@@ -102,3 +119,25 @@ class HousekeeperSensor(SensorEntity):
         scanner = self.hass.data.get(DOMAIN, {}).get("scanner")
         values = compute_values(scanner.snapshot if scanner else None)
         self._attr_native_value = values.get(self.entity_description.key)
+
+
+class ScanHealthSensor(HousekeeperSensor):
+    """Whether the scans run. Unlike the counts it also speaks when the last scan failed or is old."""
+
+    def _update(self) -> None:
+        scanner = self.hass.data.get(DOMAIN, {}).get("scanner")
+        report = scanner.health_report() if scanner else None
+        self._attr_native_value = report["state"] if report else None
+        # The kind of error and the phase, not the text: that can carry paths and would stay in the history.
+        self._attr_extra_state_attributes = (
+            {
+                "last_attempt": report["last_attempt_at"],
+                "last_success": report["last_success_at"],
+                "failed_phase": report["failed_phase"],
+                "error_class": report["error_class"],
+                "consecutive_failures": report["consecutive_failures"],
+                "last_duration_seconds": report["last_duration"],
+            }
+            if report
+            else {}
+        )
