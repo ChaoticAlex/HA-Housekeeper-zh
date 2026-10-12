@@ -2594,7 +2594,7 @@ test("the top bar search finds entities, devices and automations, best match fir
   el.quickQuery = "signify bsb"; assert.equal(JSON.stringify(el.quickResults().map(o => o.object_id)), JSON.stringify(["dev1"]), "manufacturer and model count");
   el.quickQuery = "küche"; el.quickOpen = true;
   const html = el.quickSearchBox();
-  assert.ok(html.includes('role="combobox"') && html.includes('role="listbox"') && html.includes("data-quick-item"));
+  assert.ok(html.includes('role="combobox"') && html.includes('role="listbox"') && html.includes("data-quick-entry"));
   assert.ok(html.includes("&lt;b&gt;Küche&lt;/b&gt; böse") && !html.includes("<b>Küche</b>"));
   el.quickQuery = "zzzz"; assert.ok(el.quickSearchBox().includes("No results"));
 });
@@ -4465,4 +4465,32 @@ test("a top bar that does not fit changes into the menu button instead of being 
   el.fitNav(bar(1400, 1400));
   assert.ok(!classes.has("compact") && el.navCompact === false, "it fits again: the full bar");
   el.fitNav({ querySelector: () => null });
+});
+
+test("the search finds pages, settings tabs and finding filters, puts the better matching block first, and opens them", () => {
+  const { el } = panel("en");
+  const known = { rule_id: "entity.state_unavailable", object_id: "sensor.spare", classification: "unavailable", confidence: 0.75, key: "k1", ignored: true, ignored_by: "user", ignore_info: { kind: "keep", reason: "Spare" } };
+  el.data = { ...DATA, meta: { ...DATA.meta, status_counts: { active: 2, unavailable: 4 } }, findings: [...DATA.findings, known] };
+  const kinds = query => { el.quickQuery = query; return el.quickEntries().map(e => `${e.kind}:${e.label || e.item?.object_id}`); };
+  assert.equal(kinds("k").length, 0, "one letter does not search");
+  const known1 = kinds("known");
+  assert.equal(known1[0], "filter:Findings: Known", "a filter that matches best comes first");
+  assert.ok(kinds("battery").includes("page:Batteries"), "a page by its name");
+  assert.ok(kinds("backup").includes("page:Maintenance"), "a page by a keyword");
+  assert.ok(kinds("dunkel").includes("page:Appearance") && kinds("dark").includes("page:Appearance"), "keywords in both languages");
+  assert.ok(kinds("unavailable").includes("filter:Inventory: Unavailable"), "an object status with its count");
+  assert.equal(kinds("bekannt").filter(x => x.startsWith("filter")).length, 1, "German words for a state");
+  // opening
+  el.quickQuery = "known"; el.quickOpen = true;
+  const html = el.quickSearchBox();
+  assert.ok(html.includes('class="grp"') && html.includes("Filters") && html.includes("data-quick-entry=\"0\""));
+  el.quickGo(el.quickEntries()[0]);
+  assert.equal(el.view, "findingsNav"); assert.equal(el.findingStatus, "known"); assert.equal(el.quickQuery, ""); assert.equal(el.quickOpen, false);
+  el.quickQuery = "appearance"; el.quickGo(el.quickEntries().find(e => e.settingsTab === "look"));
+  assert.equal(el.view, "settings"); assert.equal(el.settingsTab, "look");
+  el.quickQuery = "unavailable"; el.quickGo(el.quickEntries().find(e => e.objectStatus === "unavailable"));
+  assert.equal(el.view, "inventory"); assert.equal(el.statusFilter, "unavailable");
+  const bar = el.topbar();
+  assert.ok(bar.includes('aria-label="Settings"') && bar.includes("nav iconly") && !bar.includes('data-view="overview" ><ha-icon') , "settings is the gear");
+  assert.ok(bar.includes('class="brand') && bar.includes("brandtext") && !bar.includes('class="nav  active" data-view="overview"') && !bar.includes('class="nav " data-view="overview"'), "the brand carries the overview");
 });

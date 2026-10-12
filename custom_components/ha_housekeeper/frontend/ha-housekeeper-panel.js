@@ -1280,6 +1280,7 @@ function navCompactRules(compact) {
     [".nav.active", "box-shadow:none;background:linear-gradient(var(--hk-blue),var(--hk-blue)) left top/3px 100% no-repeat,color-mix(in srgb,var(--hk-blue) 8%,transparent)"],
     [".navend", "margin:0;display:block"],
     [".navend .nav", "width:100%"],
+    [".nav.iconly span", "display:inline"],
   ];
   const own = selector => (selector === ".top" || selector.startsWith(".top.") ? selector.replace(".top", ".top.compact") : `.top.compact ${selector}`);
   const list = rules.map(([selector, body]) => `${compact ? own(selector) : selector}{${body}}`).join("");
@@ -1300,8 +1301,8 @@ class StylesMixin {
       .safeitem:hover{color:var(--hk-text)}.safeitem .dot{width:8px;height:8px;border-radius:50%;background:var(--hk-muted)}.safeitem .dot.ok{background:var(--hk-green,#2e7d32)}.safeitem .dot.warn{background:var(--hk-amber,#b26a00)}.safeitem .dot.red{background:var(--hk-red,#c62828)}
       @media(max-width:860px){.safebar{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;padding:6px 12px}}
       .top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:22px;padding:0 clamp(16px,2.4vw,32px);min-height:calc(60px*var(--hk-fs,1));border-bottom:1px solid var(--hk-border);background:var(--hk-surface)}
-      .brand{display:flex;align-items:center;gap:10px;flex:none}.brandmark{width:34px;height:34px;display:grid;place-items:center;flex:none}.brandmark img{width:34px;height:34px;object-fit:contain}.brandmark ha-icon{display:none}.brandmark.nologo{border-radius:10px;color:#fff;background:linear-gradient(135deg,#0394d5,#087dbb)}.brandmark.nologo ha-icon{display:block}.brand strong{font-weight:600;font-size:calc(17px*var(--hk-fs,1));white-space:nowrap}
-      .topnav{flex:1;min-width:0;display:flex;align-items:stretch;align-self:stretch;gap:2px}.navmenu{position:relative;display:flex;align-items:stretch}.navend{margin-left:auto;display:flex;align-items:stretch;gap:8px}.quick{position:relative;display:flex;align-items:center;align-self:center}.quick>ha-icon{position:absolute;left:8px;--mdc-icon-size:18px;color:var(--hk-muted);pointer-events:none}.quick input{width:150px;max-width:100%;min-height:36px;padding:0 10px 0 32px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.quick input:focus{outline:2px solid var(--hk-blue);outline-offset:0}.quicklist{position:absolute;top:calc(100% + 6px);right:0;z-index:30;width:min(380px,90vw);max-height:60vh;overflow:auto;margin:0;padding:6px;list-style:none;border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-surface);box-shadow:0 8px 24px rgba(0,0,0,.14)}.quicklist li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;padding:8px;border-radius:8px;cursor:pointer}.quicklist li.on,.quicklist li:hover{background:color-mix(in srgb,var(--hk-blue) 10%,transparent)}.quicklist li.none{display:block;color:var(--hk-muted);cursor:default}.row.jrow{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap}.jrow .row-text{flex:1 1 220px}.jrow .tile{flex:none}.jrow input[type=checkbox]{flex:none}.jbtns{display:flex;gap:8px;margin-left:auto}.quicklist .row-text{min-width:0}.quicklist small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media(max-width:860px){.quick{display:flex;margin:6px 0}.quick input{width:100%}.navend{flex-direction:column;align-items:stretch}}.navhead{display:none;padding:10px 12px 2px;color:var(--hk-muted);font-size:calc(10.5px*var(--hk-fs,1));font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+      .brand{display:flex;align-items:center;gap:10px;flex:none;padding:0;border:0;background:none;color:inherit;text-align:left;cursor:pointer}.brandtext{display:grid;gap:1px}.brand small{font-size:calc(11px*var(--hk-fs,1));line-height:1.1;color:var(--hk-muted);font-weight:500}.brand:hover small{color:var(--hk-text)}.brand.active small{color:var(--hk-blue-text);font-weight:700}.nav.iconly span{display:none}.brandmark{width:34px;height:34px;display:grid;place-items:center;flex:none}.brandmark img{width:34px;height:34px;object-fit:contain}.brandmark ha-icon{display:none}.brandmark.nologo{border-radius:10px;color:#fff;background:linear-gradient(135deg,#0394d5,#087dbb)}.brandmark.nologo ha-icon{display:block}.brand strong{font-weight:600;font-size:calc(17px*var(--hk-fs,1));white-space:nowrap}
+      .topnav{flex:1;min-width:0;display:flex;align-items:stretch;align-self:stretch;gap:2px}.navmenu{position:relative;display:flex;align-items:stretch}.navend{margin-left:auto;display:flex;align-items:stretch;gap:8px}.quick{position:relative;display:flex;align-items:center;align-self:center}.quick>ha-icon{position:absolute;left:8px;--mdc-icon-size:18px;color:var(--hk-muted);pointer-events:none}.quick input{width:190px;max-width:100%;min-height:36px;padding:0 10px 0 32px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.quick input:focus{outline:2px solid var(--hk-blue);outline-offset:0}.quicklist{position:absolute;top:calc(100% + 6px);right:0;z-index:30;width:min(380px,90vw);max-height:60vh;overflow:auto;margin:0;padding:6px;list-style:none;border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-surface);box-shadow:0 8px 24px rgba(0,0,0,.14)}.quicklist li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;padding:8px;border-radius:8px;cursor:pointer}.quicklist li.on,.quicklist li:hover{background:color-mix(in srgb,var(--hk-blue) 10%,transparent)}.quicklist li.grp{display:block;padding:8px 8px 2px;font-size:calc(11px*var(--hk-fs,1));letter-spacing:.04em;text-transform:uppercase;color:var(--hk-muted);cursor:default}.quicklist li.grp:hover{background:none}.quicklist li.none{display:block;color:var(--hk-muted);cursor:default}.row.jrow{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap}.jrow .row-text{flex:1 1 220px}.jrow .tile{flex:none}.jrow input[type=checkbox]{flex:none}.jbtns{display:flex;gap:8px;margin-left:auto}.quicklist .row-text{min-width:0}.quicklist small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media(max-width:860px){.quick{display:flex;margin:6px 0}.quick input{width:100%}.navend{flex-direction:column;align-items:stretch}}.navhead{display:none;padding:10px 12px 2px;color:var(--hk-muted);font-size:calc(10.5px*var(--hk-fs,1));font-weight:600;letter-spacing:.06em;text-transform:uppercase}
       .nav{min-height:44px;display:inline-flex;align-items:center;gap:8px;padding:0 12px;border:0;border-bottom:3px solid transparent;border-radius:0;color:var(--hk-muted);background:transparent;font-weight:500;white-space:nowrap}.nav:hover{color:var(--hk-text);background:var(--hk-soft)}.nav ha-icon{--mdc-icon-size:20px}.nav .caret{--mdc-icon-size:16px;margin-left:-2px}
       .navpop{display:none;position:absolute;top:100%;left:0;min-width:210px;padding:6px;border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-surface);box-shadow:0 8px 24px rgba(0,0,0,.14)}.navmenu.open .navpop{display:grid;gap:2px}.navpop .nav{min-height:40px;border-bottom:0;border-radius:8px}.navpop .nav.active{box-shadow:none;background-image:linear-gradient(var(--hk-blue),var(--hk-blue));background-size:3px 100%;background-repeat:no-repeat;background-position:left top}
       .nav.active{color:var(--hk-blue-text);border-bottom-color:var(--hk-blue);font-weight:600}.nav em{min-width:22px;padding:2px 6px;border-radius:10px;color:var(--hk-muted);background:var(--hk-soft);font-size:calc(11px*var(--hk-fs,1));font-style:normal;text-align:center}.nav.group-active{color:var(--hk-blue-text);border-bottom-color:var(--hk-blue);font-weight:600}.navtoggle{display:none;margin-left:auto;min-height:40px;align-items:center;gap:6px;padding:0 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit}
@@ -5934,6 +5935,116 @@ class ExposureMixin {
   }
 }
 
+// SearchPagesMixin: the top-bar search finds pages, settings tabs and finding filters, not only objects.
+// The words are German and English together, so a page is found in either language. Mixed into the panel in 99-register.js.
+Object.assign(TEXT.de, { quickGroupPages: "Seiten", quickGroupFilters: "Filter", quickGroupObjects: "Objekte", quickFilterHint: "Liste filtern" });
+Object.assign(TEXT.en, { quickGroupPages: "Pages", quickGroupFilters: "Filters", quickGroupObjects: "Objects", quickFilterHint: "Filter the list" });
+
+const SEARCH_WORDS = {
+  overview: "start home status gesundheit zustand health",
+  findingsNav: "befunde probleme fehler hinweise findings problems issues",
+  cleanup: "aufräumen bereinigen löschen entfernen quarantäne cleanup delete remove quarantine",
+  repair: "reparieren zähler umziehen ersetzen austauschen repair counter meter replace exchange",
+  journal: "journal pläne rückgängig verlauf plans undo history",
+  maintenance: "wartung backup sicherung wiederherstellung update ziele maintenance restore goals",
+  batteries: "batterien batterie akku schwach batteries battery low",
+  reminders: "erinnerungen wartung filter reminders due",
+  policies: "richtlinien regeln policies rules",
+  reliability: "zuverlässigkeit ausfälle instabil reliability outages unstable",
+  runs: "läufe automationen ausführungen runs automations traces",
+  recorder: "recorder datenbank statistik größe database statistics size",
+  storage: "speicher system festplatte arbeitsspeicher cpu storage disk memory",
+  exposure: "freigabe assist sprachassistent exposure voice",
+  dataflow: "zugriff datenfluss webhook zugang access data flow",
+  secrets: "zugangsdaten passwörter schlüssel geheimnisse credentials secrets tokens passwords",
+  inventory: "bestand objekte entitäten geräte inventory objects entities devices",
+  components: "komponenten integrationen apps add-ons components integrations",
+  graph: "abhängigkeiten beziehungen netz graph dependencies relations",
+  changes: "änderungen vergleich scan-vergleich logbuch changes compare logbook",
+  settings: "einstellungen optionen konfiguration settings options preferences",
+  look: "darstellung theme dunkel hell schrift farbe appearance dark light font",
+  protection: "schutz schutzmodus sicherheit protection mode",
+  scan: "scan schwellen intervall tage threshold interval",
+  notify: "benachrichtigung meldung notification message",
+  goals: "ziele goals",
+  hidden: "ausgeblendet ignoriert hidden ignored",
+  info: "info version speichert daten diagnose prüfung quellen dauer about stored diagnostics coverage timing",
+  compare: "scan-vergleich verlauf vergleich scans history compare",
+  logbook: "logbuch notizen logbook notes",
+};
+// What a person may type for a finding status, besides its label.
+const SEARCH_STATE_WORDS = {
+  "": "offen open", new: "neu new", inwork: "in arbeit work", known: "bekannt behalten known keep",
+  snoozed: "später zurückgestellt snoozed later", hidden: "ausgeblendet ignoriert hidden ignored", fixed: "behoben repariert fixed repaired",
+};
+const SEARCH_PAGE_LIMIT = 5, SEARCH_FILTER_LIMIT = 5;
+
+class SearchPagesMixin {
+  // Every page of the menu, the tabs of Settings and of Changes, as { view, tab?, label, path, words }.
+  searchPages() {
+    const pages = [];
+    for (const [group, views] of NAV_GROUPS) {
+      for (const view of views) pages.push({ view, label: this.t(view), path: this.t(group), words: SEARCH_WORDS[view] || "" });
+    }
+    pages.push({ view: "settings", label: this.t("settings"), path: "", words: SEARCH_WORDS.settings });
+    for (const [id, , labelKey] of this.settingsTabs()) pages.push({ view: "settings", settingsTab: id, label: this.t(labelKey), path: this.t("settings"), words: SEARCH_WORDS[id] || "" });
+    pages.push({ view: "changes", viewTab: "compare", label: this.t("tabScans"), path: this.t("changes"), words: SEARCH_WORDS.compare });
+    pages.push({ view: "changes", viewTab: "logbook", label: this.t("logbook"), path: this.t("changes"), words: SEARCH_WORDS.logbook });
+    return pages;
+  }
+
+  // The filters a person could set by hand: a status of the findings and a status of the objects, with how many each shows.
+  searchFilters() {
+    const filters = [];
+    const states = ["", "new", "inwork", "known", "snoozed", "hidden", "fixed"];
+    for (const state of states) {
+      const count = state === "" ? this.findingTotal() : state === "fixed" ? this.fixedLately().length : this.statusCount(state);
+      if (count) filters.push({ findingStatus: state, label: `${this.t("findingsNav")}: ${this.t(state === "" ? "stateOpen" : `state_${state}`)}`, count, words: SEARCH_STATE_WORDS[state] });
+    }
+    for (const [status, count] of Object.entries(this.data?.meta?.status_counts || {})) {
+      if (count && status !== "active") filters.push({ objectStatus: status, label: `${this.t("inventory")}: ${this.t(status)}`, count, words: `${status} ${SEARCH_WORDS.inventory}` });
+    }
+    return filters;
+  }
+
+  // Matching entries of one list, best first: the label starts with the first word, contains it, or only the extra words do.
+  searchMatch(list, query, limit) {
+    const terms = String(query).toLowerCase().split(/\s+/).filter(Boolean);
+    if (!terms.length) return [];
+    const found = [];
+    for (const entry of list) {
+      const label = String(entry.label).toLowerCase(), hay = `${label} ${String(entry.path || "").toLowerCase()} ${entry.words || ""}`;
+      if (terms.every(term => hay.includes(term))) found.push({ entry, rank: label.startsWith(terms[0]) ? 0 : label.includes(terms[0]) ? 1 : 2 });
+    }
+    return found.sort((a, b) => a.rank - b.rank).slice(0, limit).map(f => ({ ...f.entry, rank: f.rank }));
+  }
+
+  // The list the search box shows and the keyboard walks: pages and filters (the better matching block first), then objects.
+  quickEntries() {
+    const query = this.quickQuery;
+    if (query.trim().length < 2) return [];
+    const pages = this.searchMatch(this.searchPages(), query, SEARCH_PAGE_LIMIT).map(e => ({ ...e, kind: "page" }));
+    const filters = this.searchMatch(this.searchFilters(), query, SEARCH_FILTER_LIMIT).map(e => ({ ...e, kind: "filter" }));
+    const objects = this.quickResults().map(item => ({ kind: "object", item }));
+    const filtersFirst = filters.length && (!pages.length || filters[0].rank < pages[0].rank);
+    return [...(filtersFirst ? [...filters, ...pages] : [...pages, ...filters]), ...objects];
+  }
+
+  quickGo(entry) {
+    if (entry.kind === "object") return this.quickPick(this.objectKey(entry.item));
+    this.quickQuery = ""; this.quickOpen = false; this.quickIndex = 0; this.menuOpen = null; this.navOpen = false;
+    const view = entry.kind === "filter" ? (entry.objectStatus ? "inventory" : "findingsNav") : entry.view;
+    if (view !== this.view) this.noteJump(view);
+    this.view = view; this.pages = {}; this.selected = null; this.trail = []; this.graphTrail = []; this.graphOrigin = null;
+    if (entry.settingsTab) this.settingsTab = entry.settingsTab;
+    if (entry.viewTab) (this.viewTab ||= {})[view] = entry.viewTab;
+    if (entry.kind === "filter" && entry.objectStatus) { this.statusFilter = entry.objectStatus; this.typeFilter = ""; this.originFilter = ""; }
+    if (entry.kind === "filter" && !entry.objectStatus) this.findingStatus = entry.findingStatus;
+    this.render();
+    if (view === "changes" && !this.compare) this.loadCompare();
+  }
+}
+
 // SearchMixin: one search box in the top bar for entities, devices, integrations, automations and scripts.
 const QUICK_TYPES = ["entity", "device", "config_entry", "automation", "script"];
 const QUICK_LIMIT = 12;
@@ -5963,13 +6074,25 @@ class SearchMixin {
 
   quickSearchBox() {
     if (!this.data) return "";
-    const results = this.quickOpen ? this.quickResults() : [];
-    const active = Math.min(this.quickIndex, Math.max(results.length - 1, 0));
+    const entries = this.quickOpen ? this.quickEntries() : [];
+    const active = Math.min(this.quickIndex, Math.max(entries.length - 1, 0));
+    let heading = "";
+    const rows = entries.map((entry, i) => {
+      const group = entry.kind === "object" ? "quickGroupObjects" : entry.kind === "filter" ? "quickGroupFilters" : "quickGroupPages";
+      const head = group !== heading ? `<li class="grp" role="presentation">${this.t(group)}</li>` : "";
+      heading = group;
+      const attrs = `role="option" id="quick-opt-${i}" aria-selected="${i === active}" data-quick-entry="${i}" class="${i === active ? "on" : ""}"`;
+      if (entry.kind === "object") {
+        const item = entry.item;
+        return `${head}<li ${attrs}>${this.tile(item.object_type)}<span class="row-text"><strong>${this.esc(item.name)}</strong><small>${this.esc(this.t(item.object_type))} · ${this.esc(item.object_id)}</small></span></li>`;
+      }
+      const icon = entry.kind === "filter" ? "mdi:filter-outline" : NAV_ICONS[entry.view] || "mdi:compass-outline";
+      const note = entry.kind === "filter" ? `${this.t("quickFilterHint")} · ${this.formatNumber(entry.count)}` : entry.path;
+      return `${head}<li ${attrs}><span class="tile mute"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.esc(entry.label)}</strong>${note ? `<small>${this.esc(note)}</small>` : ""}</span></li>`;
+    }).join("");
     const list = this.quickOpen && this.quickQuery.trim().length >= 2
-      ? `<ul class="quicklist" id="quick-list" role="listbox" aria-label="${this.esc(this.t("quickLabel"))}">${results.length
-        ? results.map((item, i) => `<li role="option" id="quick-opt-${i}" aria-selected="${i === active}" data-quick-item="${this.esc(this.objectKey(item))}" class="${i === active ? "on" : ""}">${this.tile(item.object_type)}<span class="row-text"><strong>${this.esc(item.name)}</strong><small>${this.esc(this.t(item.object_type))} · ${this.esc(item.object_id)}</small></span></li>`).join("")
-        : `<li class="none">${this.t("quickNone")}</li>`}</ul>` : "";
-    return `<div class="quick"><ha-icon icon="mdi:magnify"></ha-icon><input type="search" data-quick autocomplete="off" role="combobox" aria-expanded="${Boolean(list)}" aria-controls="quick-list" aria-autocomplete="list" ${list && results.length ? `aria-activedescendant="quick-opt-${active}"` : ""} placeholder="${this.esc(this.t("quickPlaceholder"))}" aria-label="${this.esc(this.t("quickLabel"))}" value="${this.esc(this.quickQuery)}">${list}</div>`;
+      ? `<ul class="quicklist" id="quick-list" role="listbox" aria-label="${this.esc(this.t("quickLabel"))}">${entries.length ? rows : `<li class="none">${this.t("quickNone")}</li>`}</ul>` : "";
+    return `<div class="quick"><ha-icon icon="mdi:magnify"></ha-icon><input type="search" data-quick autocomplete="off" role="combobox" aria-expanded="${Boolean(list)}" aria-controls="quick-list" aria-autocomplete="list" ${list && entries.length ? `aria-activedescendant="quick-opt-${active}"` : ""} placeholder="${this.esc(this.t("quickPlaceholder"))}" aria-label="${this.esc(this.t("quickLabel"))}" value="${this.esc(this.quickQuery)}">${list}</div>`;
   }
 
   quickPick(key) {
@@ -5985,7 +6108,7 @@ class SearchMixin {
       input.oninput = () => { this.quickQuery = input.value; this.quickOpen = true; this.quickIndex = 0; this.scheduleRender(); };
       input.onfocus = () => { if (this.quickQuery && !this.quickOpen) { this.quickOpen = true; this.render(); } };
       input.onkeydown = ev => {
-        const results = this.quickResults();
+        const results = this.quickEntries();
         if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
           if (!results.length) return;
           ev.preventDefault();
@@ -5994,14 +6117,14 @@ class SearchMixin {
           this.render();
         } else if (ev.key === "Enter" && results.length) {
           ev.preventDefault();
-          this.quickPick(this.objectKey(results[Math.min(this.quickIndex, results.length - 1)]));
+          this.quickGo(results[Math.min(this.quickIndex, results.length - 1)]);
         } else if (ev.key === "Escape" && (this.quickOpen || this.quickQuery)) {
           ev.stopPropagation();
           this.quickQuery = ""; this.quickOpen = false; this.render();
         }
       };
     }
-    root.querySelectorAll("[data-quick-item]").forEach(el => el.onclick = () => this.quickPick(el.dataset.quickItem));
+    root.querySelectorAll("[data-quick-entry]").forEach(el => el.onclick = () => { const entry = this.quickEntries()[Number(el.dataset.quickEntry)]; if (entry) this.quickGo(entry); });
     if (!this._quickBound && root.addEventListener) {
       this._quickBound = true;
       root.addEventListener("click", ev => {
@@ -13052,16 +13175,17 @@ class HAHousekeeperPanel extends HTMLElement {
     const missedGoals = (this.goals?.goals || []).filter(g => g.state === "missed").length;
     const violations = (this.policies?.rules || []).filter(r => r.enabled).reduce((n, r) => n + (r.count || 0), 0);
     const counts = this.data ? { findingsNav: this.findingTotal(), batteries: this.lowBatteries().length || undefined, reminders: (this.data.reminders || []).filter(r => r.state === "due").length || undefined, cleanup: this.readyQuarantine() || undefined, repair: this.counterScan?.items?.length || undefined, maintenance: missedGoals || undefined, policies: violations || undefined } : {};
-    const item = view => `<button class="nav ${this.view === view ? "active" : ""}" data-view="${view}" ${this.view === view ? 'aria-current="page"' : ""}><ha-icon icon="${NAV_ICONS[view]}"></ha-icon><span>${this.t(view)}</span>${counts[view] !== undefined ? `<em>${counts[view]}</em>` : ""}</button>`;
+    // Settings is the gear alone in the bar (its name is the tooltip and the label for screen readers); in the list of the narrow bar it shows its name.
+    const item = view => `<button class="nav${view === "settings" ? " iconly" : ""} ${this.view === view ? "active" : ""}" data-view="${view}" ${this.view === view ? 'aria-current="page"' : ""}${view === "settings" ? ` aria-label="${this.esc(this.t(view))}" title="${this.esc(this.t(view))}"` : ""}><ha-icon icon="${NAV_ICONS[view]}"></ha-icon><span>${this.t(view)}</span>${counts[view] !== undefined ? `<em>${counts[view]}</em>` : ""}</button>`;
     const [direct, ...menus] = NAV_GROUPS;
     const menu = ([label, views]) => {
       const open = this.menuOpen === label;
       const sum = views.reduce((n, v) => n + (typeof counts[v] === "number" ? counts[v] : 0), 0);
       return `<div class="navmenu${open ? " open" : ""}"><button class="nav menubtn ${views.includes(this.view) ? "group-active" : ""}" data-menu="${label}" aria-expanded="${open}" aria-controls="menu-${label}"><span>${this.t(label)}</span>${sum ? `<em aria-label="${this.esc(this.t("groupOpen", { count: sum }))}">${sum}</em>` : ""}<ha-icon class="caret" icon="mdi:chevron-down"></ha-icon></button><div class="navpop" id="menu-${label}" role="group" aria-label="${this.esc(this.t(label))}"><p class="navhead" aria-hidden="true">${this.t(label)}</p>${views.map(item).join("")}</div></div>`;
     };
-    return `<header class="top${this.navCompact ? " compact" : ""}${this.navOpen ? " open" : ""}">${this.haMenuButton()}<div class="brand"><span class="brandmark"><img src="/ha_housekeeper/logo.png" alt="" onerror="this.parentNode.classList.add('nologo');this.remove()"><ha-icon icon="mdi:broom"></ha-icon></span><strong>${this.t("title")}</strong></div>
+    return `<header class="top${this.navCompact ? " compact" : ""}${this.navOpen ? " open" : ""}">${this.haMenuButton()}<button class="brand${this.view === "overview" ? " active" : ""}" data-view="overview" ${this.view === "overview" ? 'aria-current="page"' : ""}><span class="brandmark"><img src="/ha_housekeeper/logo.png" alt="" onerror="this.parentNode.classList.add('nologo');this.remove()"><ha-icon icon="mdi:broom"></ha-icon></span><span class="brandtext"><strong>${this.t("title")}</strong><small>${this.t("overview")}</small></span></button>
       <button class="navtoggle" data-navtoggle aria-expanded="${Boolean(this.navOpen)}" aria-controls="topnav"><ha-icon icon="mdi:menu"></ha-icon><span>${this.t("navMenu")}</span></button>
-      <nav class="topnav" id="topnav" aria-label="${this.esc(this.t("navMain"))}">${direct[1].map(item).join("")}${menus.map(menu).join("")}<div class="navend">${this.quickSearchBox()}${item("settings")}</div></nav></header>`;
+      <nav class="topnav" id="topnav" aria-label="${this.esc(this.t("navMain"))}">${direct[1].filter(view => view !== "overview").map(item).join("")}${menus.map(menu).join("")}<div class="navend">${this.quickSearchBox()}${item("settings")}</div></nav></header>`;
   }
 
   // A top bar that does not fit its width changes into the menu button with a list, as on a phone, instead of being cut off.
@@ -13548,7 +13672,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, ScanCoverageMixin, ScanTimingMixin, SparklineMixin, BrokenCardsMixin, SystemMixin, ComponentsMixin, IntegrationPageMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, SearchPagesMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, ScanCoverageMixin, ScanTimingMixin, SparklineMixin, BrokenCardsMixin, SystemMixin, ComponentsMixin, IntegrationPageMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }
