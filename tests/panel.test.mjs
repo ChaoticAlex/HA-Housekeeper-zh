@@ -4250,6 +4250,6 @@ test("the findings of the load view are a sortable table with the numbers in col
   el.storms = STORMS;
   const html = el.stormsView();
   assert.ok(html.includes('data-lf-set="stormfind||"') && html.includes('data-lf-set="stormfind|kind|storm"'));
-  assert.ok(html.includes("Rows/day") && html.includes("72,000") && html.includes('data-object="entity:sensor.laut"') && html.includes('data-storm-mark="sensor.laut"'));
+  assert.ok(html.includes("Rows/day") && html.includes("72,000") && html.includes('data-object="entity:sensor.laut"') && html.includes('data-exsel="sensor.laut"') && html.includes("Nothing selected"));
   assert.ok(!html.includes("stormgroup"));
 });

@@ -956,11 +956,11 @@ Object.assign(TEXT.de, {
   stormTitle: "Last im Recorder", stormLoading: "Der Recorder wird ausgewertet. Das kann bei einer großen Datenbank einige Sekunden dauern …",
   stormNone: "Nichts schreibt auffällig viel.", stormSummary: "Im Zeitraum: {rows} Zeilen ({perDay} pro Tag) von {entities} Entitäten und {events} Ereignisse.",
   stormKind_storm: "Sturm", stormKind_attribute_flood: "Große Zeilen", stormKind_no_new_state: "Nur Attribute", stormKind_integration_share: "Großer Anteil", stormKind_event_burst: "Ereignisflut",
-  stormColKinds: "Markierungen", stormColPerDay: "Zeilen/Tag", stormColPeak: "Lauteste Stunde", stormColNoNew: "Ohne neuen Zustand", stormColAction: "Aktion", stormFilterKind: "Alle Markierungen",
+  stormColKinds: "Markierungen", stormColPerDay: "Zeilen/Tag", stormColPeak: "Lauteste Stunde", stormColNoNew: "Ohne neuen Zustand", stormColAction: "Aktion", stormColSelect: "Auswahl", stormFilterKind: "Alle Markierungen",
   stormGroupHint: "Hier steht, was die Datenbank ungewöhnlich stark füllt. Eine Entität steht nur einmal da, auch wenn mehrere Gründe zutreffen.", stormLegendTitle: "Was bedeuten die Markierungen?",
   stormLegStorm: "Sehr viele Zeilen: ab {peak} in einer Stunde oder ab {day} an einem Tag.", stormLegFlood: "Jede Zeile trägt viele Attribute mit (im Mittel ab {kb} KB), bei mindestens {min} Zeilen pro Tag.",
   stormLegNoNew: "Der Wert bleibt gleich, nur Attribute ändern sich: bei mindestens {share} % der Zeilen und {min} Zeilen pro Tag.", stormLegShare: "Eine Integration verursacht mindestens {share} % aller Zeilen (ab {min} pro Tag).", stormLegBurst: "Ein Ereignistyp (außer state_changed) kommt mindestens {count} Mal vor.",
-  stormFilterAll: "Alle", stormGroupEntities: "Entitäten", stormGroupIntegrations: "Integrationen", stormGroupEvents: "Ereignisse", stormDependsLabel: "Wird gebraucht", stormDependsNote: "Ein Ausschluss nimmt dort den Verlauf.", stormMarkExclude: "Für Ausschluss vormerken", stormDetails: "Details öffnen", stormShowEntities: "Entitäten der Integration zeigen", stormOnlyEntry: "Nur {title}: {shown} von {total} Entitäten (gezeigt werden die lautesten)", stormEntryClear: "Alle zeigen",
+  stormFilterAll: "Alle", stormGroupEntities: "Entitäten", stormGroupIntegrations: "Integrationen", stormGroupEvents: "Ereignisse", stormDependsLabel: "Wird gebraucht", stormDependsNote: "Ein Ausschluss nimmt dort den Verlauf.", stormDetails: "Details öffnen", stormShowEntities: "Entitäten der Integration zeigen", stormOnlyEntry: "Nur {title}: {shown} von {total} Entitäten (gezeigt werden die lautesten)", stormEntryClear: "Alle zeigen",
   stormWhatToDo: "Was kann ich tun? Ausschließen (Text für die configuration.yaml, Housekeeper schreibt nichts), die Aktualisierung der Quelle selten stellen oder den Verlauf kürzen. „Für Ausschluss vormerken“ hakt die Entität unter „Lauteste Entitäten“ an.",
   stormStorm: "{perDay} Zeilen pro Tag, in der lautesten Stunde {peak}.", stormFlood: "{perDay} Zeilen am letzten Tag, im Mittel {kb} KB Attribute je Zeile.",
   stormNoNew: "{share} % der Zeilen sind Updates ohne neuen Zustand ({perDay} pro Tag): nur Attribute ändern sich.", stormShare: "Etwa {share} % der Last im Recorder ({perDay} Zeilen pro Tag).",
@@ -982,11 +982,11 @@ Object.assign(TEXT.en, {
   stormTitle: "Recorder load", stormLoading: "Evaluating the recorder. On a large database this can take a few seconds …",
   stormNone: "Nothing writes unusually much.", stormSummary: "In the period: {rows} rows ({perDay} a day) from {entities} entities and {events} events.",
   stormKind_storm: "Storm", stormKind_attribute_flood: "Large rows", stormKind_no_new_state: "Attributes only", stormKind_integration_share: "Large share", stormKind_event_burst: "Event flood",
-  stormColKinds: "Markers", stormColPerDay: "Rows/day", stormColPeak: "Loudest hour", stormColNoNew: "No new state", stormColAction: "Action", stormFilterKind: "All markers",
+  stormColKinds: "Markers", stormColPerDay: "Rows/day", stormColPeak: "Loudest hour", stormColNoNew: "No new state", stormColAction: "Action", stormColSelect: "Select", stormFilterKind: "All markers",
   stormGroupHint: "This is what fills the database unusually fast. An entity appears only once, even when several reasons apply.", stormLegendTitle: "What do the marks mean?",
   stormLegStorm: "Very many rows: from {peak} in one hour or from {day} on one day.", stormLegFlood: "Each row carries many attributes (on average from {kb} KB), at {min} rows a day or more.",
   stormLegNoNew: "The value stays the same, only attributes change: in at least {share} % of the rows and {min} rows a day.", stormLegShare: "One integration causes at least {share} % of all rows (from {min} a day).", stormLegBurst: "An event type (other than state_changed) occurs at least {count} times.",
-  stormFilterAll: "All", stormGroupEntities: "Entities", stormGroupIntegrations: "Integrations", stormGroupEvents: "Events", stormDependsLabel: "In use", stormDependsNote: "An exclusion takes the history away there.", stormMarkExclude: "Mark for exclusion", stormDetails: "Open details", stormShowEntities: "Show the integration's entities", stormOnlyEntry: "Only {title}: {shown} of {total} entities (the loudest are listed)", stormEntryClear: "Show all",
+  stormFilterAll: "All", stormGroupEntities: "Entities", stormGroupIntegrations: "Integrations", stormGroupEvents: "Events", stormDependsLabel: "In use", stormDependsNote: "An exclusion takes the history away there.", stormDetails: "Open details", stormShowEntities: "Show the integration's entities", stormOnlyEntry: "Only {title}: {shown} of {total} entities (the loudest are listed)", stormEntryClear: "Show all",
   stormWhatToDo: "What can I do? Exclude (text for configuration.yaml, Housekeeper writes nothing), set the source to update less often, or trim the history. “Mark for exclusion” ticks the entity under “Loudest entities”.",
   stormStorm: "{perDay} rows a day, {peak} in the busiest hour.", stormFlood: "{perDay} rows on the last day, {kb} KB of attributes per row on average.",
   stormNoNew: "{share} % of the rows are updates without a new state ({perDay} a day): only attributes change.", stormShare: "About {share} % of the recorder load ({perDay} rows a day).",
@@ -5178,17 +5178,17 @@ class StormsMixin {
     const perDay = g => g.items.map(f => f.per_day ?? f.count).find(v => v !== undefined) ?? null;
     const peak = g => this.stormGroupFact(g, "storm", "peak_hour");
     const share = g => this.stormGroupFact(g, "no_new_state", "share");
-    const marked = g => g.type === "entities" && (this.excludeSel.has(g.items[0].entity_id) || this.excludedIds().has(g.items[0].entity_id));
     const target = g => (g.type === "entities" ? `entity:${g.items[0].entity_id}` : g.type === "integrations" && g.items[0].entry_id && this.findObject(`config_entry:${g.items[0].entry_id}`) ? `config_entry:${g.items[0].entry_id}` : "");
     const kindsOf = g => g.items.map(f => f.kind);
     const present = ["storm", "attribute_flood", "no_new_state", "integration_share", "event_burst"].filter(k => groups.some(g => kindsOf(g).includes(k)));
     const columns = [
+      { key: "sel", label: "stormColSelect", sortable: false, cell: g => (g.type === "entities" ? this.excludeBox(g.items[0].entity_id) : "") },
       { key: "name", label: "utName", cell: g => { const chain = g.items.map(f => this.stormFollowers(f.followers)).find(Boolean); return `${this.nameCell(title(g), g.type === "entities" && g.items[0].entity_id !== title(g) ? g.items[0].entity_id : "")}${chain ? `<small class="muted">${this.esc(chain)}</small>` : ""}`; } },
       { key: "kinds", label: "stormColKinds", sortable: false, cell: g => g.items.map(f => `<span class="pill ${tone(f)}">${this.t(`stormKind_${f.kind}`)}</span>`).join(" ") },
       { key: "perDay", label: "stormColPerDay", dir: "desc", cell: g => num(perDay(g)) },
       { key: "peak", label: "stormColPeak", dir: "desc", cell: g => num(peak(g)) },
       { key: "share", label: "stormColNoNew", dir: "desc", cell: g => (share(g) === null ? "–" : `${this.esc(this.formatNumber(share(g)))} %`) },
-      { key: "mark", label: "stormColAction", sortable: false, cell: g => (g.type === "entities" ? `<button class="btn quiet" data-storm-mark="${this.esc(g.items[0].entity_id)}" ${marked(g) ? "disabled" : ""}>${this.t("stormMarkExclude")}</button>` : g.type === "integrations" && g.items[0].entry_id ? this.stormEntryButton(g.items[0].entry_id) : "") },
+      { key: "mark", label: "stormColAction", sortable: false, cell: g => (g.type === "integrations" && g.items[0].entry_id ? this.stormEntryButton(g.items[0].entry_id) : "") },
     ];
     return this.sysList("stormfind", groups, {
       sort: "perDay", dir: "desc",
@@ -5282,7 +5282,7 @@ class StormsMixin {
       { label: this.t("stormFilterAll"), value: this.formatNumber(groups.length), tone: "mute", lf: ["stormfind", "", ""] },
       ...["storm", "no_new_state", "attribute_flood", "integration_share", "event_burst"].map(k => ({ k, n: groups.filter(g => g.items.some(f => f.kind === k)).length })).filter(x => x.n).map(x => ({ label: this.t(`stormKind_${x.k}`), value: this.formatNumber(x.n), tone: x.k === "storm" || x.k === "integration_share" ? "red" : "warn", lf: ["stormfind", "kind", x.k] })),
     ]) : "";
-    const attention = groups.length ? `<p class="factnote">${this.t("stormGroupHint")}</p>${this.stormLegend(r)}${this.stormGroupsList(groups)}<p class="factnote">${this.t("stormWhatToDo")}</p>` : `<div class="emptymsg">${this.t("stormNone")}</div>`;
+    const attention = groups.length ? `<p class="factnote">${this.t("stormGroupHint")}</p>${this.stormLegend(r)}${this.excludeCard([])}${this.stormGroupsList(groups)}<p class="factnote">${this.t("stormWhatToDo")}</p>` : `<div class="emptymsg">${this.t("stormNone")}</div>`;
     const summary = `<p class="factnote">${this.t("stormSummary", { rows: this.formatNumber(r.total_rows), perDay: this.formatNumber(r.per_day), entities: this.formatNumber(r.entity_count), events: this.formatNumber(r.event_total) })}</p>`;
     const entry = this.stormEntry && r.integrations.find(g => g.entry_id === this.stormEntry);
     const ofEntry = entry ? r.entities.filter(item => item.entry_id === entry.entry_id) : r.entities;
@@ -12810,7 +12810,6 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-rel-window]").forEach(el => el.onclick = () => { this.relWindow = Number(el.dataset.relWindow); this.reliability = null; this.pages.relentries = 1; this.pages.relunstable = 1; this.loadReliability(); });
     root.querySelectorAll("[data-storm-entry]").forEach(el => el.onclick = () => { this.stormEntry = el.dataset.stormEntry; this.pages.stormentities = 1; (this.viewTab ||= {}).recload = "entities"; this.render(); });
     root.querySelector("[data-storm-entry-clear]")?.addEventListener("click", () => { this.stormEntry = ""; this.pages.stormentities = 1; this.render(); });
-    root.querySelectorAll("[data-storm-mark]").forEach(el => el.onclick = () => { this.excludeSel.add(el.dataset.stormMark); (this.viewTab ||= {}).recload = "entities"; this.render(); });
     root.querySelectorAll("[data-storm-window]").forEach(el => el.onclick = () => { this.stormsWindow = Number(el.dataset.stormWindow); this.storms = null; this.pages.stormfind = 1; this.pages.stormentities = 1; this.loadStorms(); });
     root.querySelector("[data-storm-refresh]")?.addEventListener("click", () => this.loadStorms(true));
     root.querySelector("[data-rel-refresh]")?.addEventListener("click", () => this.loadReliability(true));

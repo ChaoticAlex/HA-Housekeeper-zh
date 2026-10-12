@@ -55,17 +55,17 @@ class StormsMixin {
     const perDay = g => g.items.map(f => f.per_day ?? f.count).find(v => v !== undefined) ?? null;
     const peak = g => this.stormGroupFact(g, "storm", "peak_hour");
     const share = g => this.stormGroupFact(g, "no_new_state", "share");
-    const marked = g => g.type === "entities" && (this.excludeSel.has(g.items[0].entity_id) || this.excludedIds().has(g.items[0].entity_id));
     const target = g => (g.type === "entities" ? `entity:${g.items[0].entity_id}` : g.type === "integrations" && g.items[0].entry_id && this.findObject(`config_entry:${g.items[0].entry_id}`) ? `config_entry:${g.items[0].entry_id}` : "");
     const kindsOf = g => g.items.map(f => f.kind);
     const present = ["storm", "attribute_flood", "no_new_state", "integration_share", "event_burst"].filter(k => groups.some(g => kindsOf(g).includes(k)));
     const columns = [
+      { key: "sel", label: "stormColSelect", sortable: false, cell: g => (g.type === "entities" ? this.excludeBox(g.items[0].entity_id) : "") },
       { key: "name", label: "utName", cell: g => { const chain = g.items.map(f => this.stormFollowers(f.followers)).find(Boolean); return `${this.nameCell(title(g), g.type === "entities" && g.items[0].entity_id !== title(g) ? g.items[0].entity_id : "")}${chain ? `<small class="muted">${this.esc(chain)}</small>` : ""}`; } },
       { key: "kinds", label: "stormColKinds", sortable: false, cell: g => g.items.map(f => `<span class="pill ${tone(f)}">${this.t(`stormKind_${f.kind}`)}</span>`).join(" ") },
       { key: "perDay", label: "stormColPerDay", dir: "desc", cell: g => num(perDay(g)) },
       { key: "peak", label: "stormColPeak", dir: "desc", cell: g => num(peak(g)) },
       { key: "share", label: "stormColNoNew", dir: "desc", cell: g => (share(g) === null ? "–" : `${this.esc(this.formatNumber(share(g)))} %`) },
-      { key: "mark", label: "stormColAction", sortable: false, cell: g => (g.type === "entities" ? `<button class="btn quiet" data-storm-mark="${this.esc(g.items[0].entity_id)}" ${marked(g) ? "disabled" : ""}>${this.t("stormMarkExclude")}</button>` : g.type === "integrations" && g.items[0].entry_id ? this.stormEntryButton(g.items[0].entry_id) : "") },
+      { key: "mark", label: "stormColAction", sortable: false, cell: g => (g.type === "integrations" && g.items[0].entry_id ? this.stormEntryButton(g.items[0].entry_id) : "") },
     ];
     return this.sysList("stormfind", groups, {
       sort: "perDay", dir: "desc",
@@ -159,7 +159,7 @@ class StormsMixin {
       { label: this.t("stormFilterAll"), value: this.formatNumber(groups.length), tone: "mute", lf: ["stormfind", "", ""] },
       ...["storm", "no_new_state", "attribute_flood", "integration_share", "event_burst"].map(k => ({ k, n: groups.filter(g => g.items.some(f => f.kind === k)).length })).filter(x => x.n).map(x => ({ label: this.t(`stormKind_${x.k}`), value: this.formatNumber(x.n), tone: x.k === "storm" || x.k === "integration_share" ? "red" : "warn", lf: ["stormfind", "kind", x.k] })),
     ]) : "";
-    const attention = groups.length ? `<p class="factnote">${this.t("stormGroupHint")}</p>${this.stormLegend(r)}${this.stormGroupsList(groups)}<p class="factnote">${this.t("stormWhatToDo")}</p>` : `<div class="emptymsg">${this.t("stormNone")}</div>`;
+    const attention = groups.length ? `<p class="factnote">${this.t("stormGroupHint")}</p>${this.stormLegend(r)}${this.excludeCard([])}${this.stormGroupsList(groups)}<p class="factnote">${this.t("stormWhatToDo")}</p>` : `<div class="emptymsg">${this.t("stormNone")}</div>`;
     const summary = `<p class="factnote">${this.t("stormSummary", { rows: this.formatNumber(r.total_rows), perDay: this.formatNumber(r.per_day), entities: this.formatNumber(r.entity_count), events: this.formatNumber(r.event_total) })}</p>`;
     const entry = this.stormEntry && r.integrations.find(g => g.entry_id === this.stormEntry);
     const ofEntry = entry ? r.entities.filter(item => item.entry_id === entry.entry_id) : r.entities;
