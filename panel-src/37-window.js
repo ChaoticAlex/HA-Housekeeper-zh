@@ -92,7 +92,7 @@ class WindowMixin {
 
   windowCard() {
     this.ensureWindow();
-    const head = `<div class="panelhead"><div><h2>${this.t("winTitle")} <span class="pill warn">${this.t("winExperimental")}</span></h2><p>${this.t("winHint")}</p></div></div>`;
+    const head = `<p class="factnote pad">${this.t("winHint")}</p>`;  // the tool bar above the card carries the "experimental" label; the title is on the tile
     const w = this.win;
     if (!w) return `<div class="panel">${head}${this.skeleton("loading")}</div>`;
     const error = this.winError ? `<div class="error">${this.esc(this.winError)}</div>` : "";

@@ -56,7 +56,7 @@ class BackupCleanupMixin {
 
   backupCleanupCard() {
     this.ensureBackupCleanup();
-    const head = `<div class="panelhead"><div><h2>${this.t("bkcTitle")}</h2><p>${this.t("bkcHint")}</p></div></div>`;
+    const head = `<p class="factnote pad">${this.t("bkcHint")}</p>`;  // the title is on the tile of the tab
     if (this.bkcError) return `<div class="panel">${head}<div class="error">${this.esc(this.bkcError)}</div></div>`;
     const d = this.bkc;
     if (!d) return `<div class="panel">${head}${this.skeleton("bkcLoading")}</div>`;
