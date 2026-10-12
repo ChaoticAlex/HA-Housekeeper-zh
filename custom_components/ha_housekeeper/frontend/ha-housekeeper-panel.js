@@ -10099,7 +10099,7 @@ Object.assign(TEXT.de, {
   accKind_system_root: "System/Root-Zugriff", accKind_shell: "Shell-Ausführung", accKind_radio: "Funk/Gerät", accKind_hardware: "Hardware", accKind_network: "Netzwerk", accKind_database: "Datenbank", accKind_camera: "Kamera", accKind_location: "GPS/Standort", accKind_geocoding: "Geocoding", accKind_weather: "Wetter (standortabhängig)", accKind_cloud_api: "Cloud-API", accKind_cloud: "Cloud",
   accFlow_local: "lokal", accFlow_external: "extern", accFlow_cloud: "Cloud", accFlow_system: "System", accFlow_database: "Datenbank", accFlow_network: "Netzwerk", accFlow_gps: "GPS", accFlow_storage: "Speicher", accFlow_phone: "Telefon", accFlow_push: "Push",
   accIot_cloud_polling: "Cloud, fragt ab", accIot_cloud_push: "Cloud, meldet selbst", accIot_local_polling: "lokal, fragt ab", accIot_local_push: "lokal, meldet selbst", accIot_calculated: "berechnet", accIot_assumed_state: "angenommener Zustand",
-  accSumApps: "Apps mit hohem Risiko", accSumAppsSub: "von {n} Apps", accAppsTitle: "Apps", accAppsHint: "Rechte der installierten Apps, wie der Supervisor sie beschreibt", accColApp: "App", accColRights: "Rechte",
+  accClearFilter: "Filter aufheben", accSumApps: "Apps mit hohem Risiko", accSumAppsSub: "von {n} Apps", accAppsTitle: "Apps", accAppsHint: "Rechte der installierten Apps, wie der Supervisor sie beschreibt", accColApp: "App", accColRights: "Rechte",
   accAppsNoSupervisor: "Apps gibt es nur mit Home Assistant OS oder Supervised.", accNoneApps: "Keine Apps installiert.", accAppNoRights: "keine besonderen Rechte", accAppUnchecked: "Der Supervisor hat zu dieser App nicht geantwortet.", accAppUncheckedShort: "nicht prüfbar",
   accApp_full_access: "Voller Hardwarezugriff", accApp_privileged: "Privilegiert", accApp_host_pid: "Host-Prozesse (PID)", accApp_docker_api: "Docker-API (wie Root)", accApp_host_ipc: "Host-IPC", accApp_host_dbus: "Host-D-Bus", accApp_host_network: "Host-Netzwerk", accApp_supervisor_api: "Supervisor-API", accApp_ha_api: "Home-Assistant-API", accApp_auth_api: "Login-Prüfung (Auth-API)", accApp_gpio: "GPIO", accApp_usb: "USB", accApp_devices: "Geräte", accApp_apparmor_off: "AppArmor aus",
   accExternal: "extern", accGps: "Standort (Tracker)", accCamera: "Kamera-Entitäten", accDisabled: "deaktiviert",
@@ -10147,7 +10147,7 @@ Object.assign(TEXT.en, {
   accKind_system_root: "System/root access", accKind_shell: "Shell commands", accKind_radio: "Radio/device", accKind_hardware: "Hardware", accKind_network: "Network", accKind_database: "Database", accKind_camera: "Camera", accKind_location: "GPS/location", accKind_geocoding: "Geocoding", accKind_weather: "Weather (location based)", accKind_cloud_api: "Cloud API", accKind_cloud: "Cloud",
   accFlow_local: "local", accFlow_external: "external", accFlow_cloud: "cloud", accFlow_system: "system", accFlow_database: "database", accFlow_network: "network", accFlow_gps: "GPS", accFlow_storage: "storage", accFlow_phone: "phone", accFlow_push: "push",
   accIot_cloud_polling: "cloud, polls", accIot_cloud_push: "cloud, pushes", accIot_local_polling: "local, polls", accIot_local_push: "local, pushes", accIot_calculated: "calculated", accIot_assumed_state: "assumed state",
-  accSumApps: "Apps with high risk", accSumAppsSub: "of {n} apps", accAppsTitle: "Apps", accAppsHint: "Rights of the installed apps as the Supervisor describes them", accColApp: "App", accColRights: "Rights",
+  accClearFilter: "Remove the filter", accSumApps: "Apps with high risk", accSumAppsSub: "of {n} apps", accAppsTitle: "Apps", accAppsHint: "Rights of the installed apps as the Supervisor describes them", accColApp: "App", accColRights: "Rights",
   accAppsNoSupervisor: "Apps exist only with Home Assistant OS or Supervised.", accNoneApps: "No apps installed.", accAppNoRights: "no special rights", accAppUnchecked: "The Supervisor did not answer for this app.", accAppUncheckedShort: "cannot be checked",
   accApp_full_access: "Full hardware access", accApp_privileged: "Privileged", accApp_host_pid: "Host processes (PID)", accApp_docker_api: "Docker API (like root)", accApp_host_ipc: "Host IPC", accApp_host_dbus: "Host D-Bus", accApp_host_network: "Host network", accApp_supervisor_api: "Supervisor API", accApp_ha_api: "Home Assistant API", accApp_auth_api: "Login check (Auth API)", accApp_gpio: "GPIO", accApp_usb: "USB", accApp_devices: "Devices", accApp_apparmor_off: "AppArmor off",
   accExternal: "external", accGps: "Location (trackers)", accCamera: "Camera entities", accDisabled: "disabled",
@@ -10601,13 +10601,16 @@ class SystemMixin {
       const entries = r.entries || [];
       const sys = entries.filter(e => e.access.length || e.gps || e.camera);
       const cloud = entries.filter(e => e.external);
-      const high = entries.filter(e => e.risk === "high").length;
+      const highCount = entries.filter(e => e.risk === "high").length;
+      const appList = r.apps || [];
+      const open = this.viewTabOf("dataflow", [{ id: "sys" }, { id: "cloud" }, ...(r.apps_available ? [{ id: "apps" }] : [])], "sys");
+      const high = id => this.lv?.[id]?.f?.risk === "high";
       const tiles = this.sumTiles([
         { label: this.t("accSumTotal"), value: this.esc(this.formatNumber(entries.length)), tone: "mute" },
-        { label: this.t("accSumAccess"), value: this.esc(this.formatNumber(sys.length)), tone: sys.length ? "warn" : "ok" },
-        { label: this.t("accSumHigh"), value: this.esc(this.formatNumber(high)), tone: high ? "red" : "ok" },
-        { label: this.t("accSumExternal"), value: this.esc(this.formatNumber(cloud.length)), tone: cloud.length ? "warn" : "ok" },
-        r.apps_available ? { label: this.t("accSumApps"), value: this.esc(this.formatNumber((r.apps || []).filter(a => a.risk === "high").length)), sub: this.esc(this.t("accSumAppsSub", { n: this.formatNumber((r.apps || []).length) })), tone: (r.apps || []).some(a => a.risk === "high") ? "red" : "ok" } : null,
+        { label: this.t("accSumAccess"), value: this.esc(this.formatNumber(sys.length)), tone: sys.length ? "warn" : "ok", attr: ["data-acc-show", "sys"], active: open === "sys" && !high("accsys") },
+        { label: this.t("accSumHigh"), value: this.esc(this.formatNumber(highCount)), tone: highCount ? "red" : "ok", attr: ["data-acc-show", "sys|high"], active: open === "sys" && high("accsys") },
+        { label: this.t("accSumExternal"), value: this.esc(this.formatNumber(cloud.length)), tone: cloud.length ? "warn" : "ok", attr: ["data-acc-show", "cloud"], active: open === "cloud" },
+        r.apps_available ? { label: this.t("accSumApps"), value: this.esc(this.formatNumber(appList.filter(a => a.risk === "high").length)), sub: this.esc(this.t("accSumAppsSub", { n: this.formatNumber(appList.length) })), tone: appList.some(a => a.risk === "high") ? "red" : "ok", attr: ["data-acc-show", "apps|high"], active: open === "apps" && high("accapps") } : null,
       ]);
       const risks = [["high", this.t("accRisk_high")], ["medium", this.t("accRisk_medium")], ["low", this.t("accRisk_low")]];
       const riskOrder = { high: 0, medium: 1, low: 2 };
@@ -10644,9 +10647,17 @@ class SystemMixin {
         ],
         exportName: "cloud-data-flow", header: [this.t("accColIntegration"), "Domain", this.t("accColTarget"), this.t("accColIot"), this.t("accColFlow"), this.t("accColRisk")], rows: e => [e.title, e.domain, target(e).join("; "), iot(e), flows(e).join("; "), this.t(`accRisk_${e.risk}`)],
       });
-      const panel = (title, hint, body) => `<div class="panel"><div class="panelhead"><div><h2>${this.t(title)}</h2><p>${this.t(hint)}</p></div></div>${body}</div>`;
-      const apps = r.apps_available ? this.accAppsTable(r.apps || [], risks, sorts.find(x => x.key === "risk")) : `<div class="emptymsg">${this.t("accAppsNoSupervisor")}</div>`;
-      return `<div class="stack"><div class="panel">${head}</div>${tiles}${panel("accSysTitle", "accSysHint", sysTable)}${panel("accCloudTitle", "accCloudHint", cloudTable)}${panel("accAppsTitle", "accAppsHint", apps)}<div class="panel">${this.howCounted("accFootnote")}</div></div>`;
+      const chip = id => high(id) ? `<div class="pad"><button class="pill red" data-acc-clear="${id}" title="${this.esc(this.t("accClearFilter"))}">${this.esc(`${this.t("accColRisk")}: ${this.t("accRisk_high")}`)} ✕</button></div>` : "";
+      const panel = (title, hint, id, body) => `<div class="panel"><div class="panelhead"><div><h2>${this.t(title)}</h2><p>${this.t(hint)}</p></div></div>${chip(id)}${body}</div>`;
+      const tabs = [
+        { id: "sys", icon: "mdi:shield-key-outline", label: this.t("accSysTitle"), hint: this.t("accSysHint"), count: sys.length },
+        { id: "cloud", icon: "mdi:cloud-outline", label: this.t("accCloudTitle"), hint: this.t("accCloudHint"), count: cloud.length },
+        r.apps_available ? { id: "apps", icon: "mdi:package-variant-closed", label: this.t("accAppsTitle"), hint: this.t("accAppsHint"), count: appList.length } : { id: "apps", icon: "mdi:package-variant-closed", label: this.t("accAppsTitle"), hint: this.t("accAppsNoSupervisor"), disabled: true },
+      ];
+      const body = open === "cloud" ? panel("accCloudTitle", "accCloudHint", "acccloud", cloudTable)
+        : open === "apps" ? panel("accAppsTitle", "accAppsHint", "accapps", this.accAppsTable(appList, risks, sorts.find(x => x.key === "risk")))
+        : panel("accSysTitle", "accSysHint", "accsys", sysTable);
+      return `<div class="stack"><div class="panel">${head}</div>${tiles}<div class="sysnav">${this.navTiles("dataflow", tabs, open, this.t("dataflow"))}</div>${body}<div class="panel">${this.howCounted("accFootnote")}</div></div>`;
     }, "accIntro");
   }
 
@@ -10725,6 +10736,13 @@ class SystemMixin {
       this.showTip(el); globalThis.clearTimeout?.(this._tipHide);
       this._tipHide = globalThis.setTimeout?.(() => this.hideTip(), 6000);
     }));
+    // A key figure of Access & data flow opens its list, with or without the filter for high risk.
+    root.querySelectorAll("[data-acc-show]").forEach(el => el.onclick = () => {
+      const [tab, filter] = el.dataset.accShow.split("|"), id = { sys: "accsys", cloud: "acccloud", apps: "accapps" }[tab];
+      (this.viewTab ||= {}).dataflow = tab;
+      this.lvState(id, "risk", "asc").f.risk = filter ? "high" : ""; this.persistLv(id); this.pages = {}; this.render();
+    });
+    root.querySelectorAll("[data-acc-clear]").forEach(el => el.onclick = () => { this.lvState(el.dataset.accClear, "risk", "asc").f.risk = ""; this.persistLv(el.dataset.accClear); this.pages = {}; this.render(); });
     root.querySelector("[data-ha-menu]")?.addEventListener("click", () => this.toggleHaSidebar());
     // Rows that lead into Home Assistant (apps) open with Enter and Space like the other rows.
     root.querySelectorAll("tr[data-ha-path]").forEach(el => el.onkeydown = ev => {

@@ -4014,14 +4014,23 @@ test("without a Supervisor the categories and apps tiles are switched off and th
   assert.ok(html.includes("Recorder database"), "the consumers under /config are the first list");
 });
 
-test("access and data flow show system access and the cloud on one page", () => {
+test("access and data flow show one list at a time, chosen by the tiles, and the high-risk filter can be removed", () => {
   const { el, shadow } = systemPanel();
   el.view = "dataflow";
   el.render();
-  const html = shadow.innerHTML;
+  let html = shadow.innerHTML;
   assert.ok(html.includes("System access & data flow") && html.includes("Cloud data flow"));
   assert.ok(html.includes("Radio/device (Zigbee)") && html.includes('class="pill red">High'));
+  assert.ok(!html.includes("cloud, polls"), "the cloud list is not open by default");
+  el.pickViewTab("dataflow|cloud");
+  html = shadow.innerHTML;
   assert.ok(html.includes("cloud, polls"), "the IoT class is translated");
+  el.lvState("accsys", "risk", "asc").f.risk = "high"; el.pickViewTab("dataflow|sys");
+  html = shadow.innerHTML;
+  assert.ok(html.includes('data-acc-clear="accsys"'), "the filter shows as a chip");
+  el.lvState("accsys", "risk", "asc").f.risk = ""; el.render();
+  assert.ok(!shadow.innerHTML.includes("data-acc-clear"));
+  html = shadow.innerHTML;
   assert.ok(!html.includes("Hue</strong>"), "an integration without access or cloud is not listed");
 });
 
@@ -4045,6 +4054,8 @@ test("the rights of the apps show under access and data flow, or why they are mi
   el.view = "dataflow";
   el.render();
   let html = shadow.innerHTML;
+  el.pickViewTab("dataflow|apps");
+  html = shadow.innerHTML;
   assert.ok(html.includes("Voller Hardwarezugriff") && html.includes("Supervisor-API (manager)"));
   assert.ok(html.includes("&lt;b&gt;SSH&lt;/b&gt;") && !html.includes("<b>SSH</b>"), "app names are escaped");
   assert.ok(html.includes('data-ha-path="/hassio/addon/core_ssh/info"'), "a row opens the app in Home Assistant");
