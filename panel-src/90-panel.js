@@ -823,6 +823,7 @@ class HAHousekeeperPanel extends HTMLElement {
       if (!name) st.f = {}; else if (st.f[name] === value) delete st.f[name]; else st.f[name] = value;
       this.pages = {}; this.persistLv(id); this.render(); this.showList();
     });
+    root.querySelectorAll("[data-changes-cat]").forEach(el => el.onclick = () => { const v = el.dataset.changesCat; this.changesCat = this.changesCat === v ? "" : v; this.render(); this.showList(); });
     root.querySelectorAll("[data-finding-reset]").forEach(el => el.onclick = () => { this.findingFilter = ""; this.findingAfter = false; this.pages = {}; this.render(); });
     root.querySelectorAll("[data-finding-filter]").forEach(el => el.onclick = () => { const v = el.dataset.findingFilter; this.findingFilter = v && this.findingFilter === v ? "" : v; this.pages = {}; this.render(); this.showList(); });
     const searchField = (selector, setter) => {
@@ -951,7 +952,7 @@ class HAHousekeeperPanel extends HTMLElement {
       const kind = el.dataset.bhSave, date = root.querySelector(`[data-bh-date="${kind}"]`)?.value;
       this.loadBackup({ type: "ha_housekeeper/backup_attest", kind, ...(date ? { date } : {}) });
     });
-    root.querySelectorAll("[data-fold]").forEach(el => el.onclick = () => { this.folds = { ...this.folds, [el.dataset.fold]: el.getAttribute("aria-expanded") !== "true" }; this.render(); });
+    root.querySelectorAll("[data-fold]").forEach(el => el.onclick = () => { if (el.dataset.fold.startsWith("chg_")) this.changesCat = ""; this.folds = { ...this.folds, [el.dataset.fold]: el.getAttribute("aria-expanded") !== "true" }; this.render(); });
     root.querySelectorAll("[data-expo-all]").forEach(el => el.onclick = () => { this.expoAll = { ...this.expoAll, [el.dataset.expoAll]: true }; this.render(); });
     root.querySelectorAll("[data-bh-clear]").forEach(el => el.onclick = () => this.loadBackup({ type: "ha_housekeeper/backup_attest", kind: el.dataset.bhClear, clear: true }));
     root.querySelector("[data-pf-refresh]")?.addEventListener("click", () => this.loadPreflight());

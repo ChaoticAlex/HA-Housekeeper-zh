@@ -2420,7 +2420,7 @@ class ChangesMixin {
       ["removedObjects", "mdi:minus-circle-outline", c.removed_objects],
     ];
     const total = sections.reduce((n, [, , part]) => n + part.total, 0);
-    const cards = this.sumTiles(sections.map(([label, , part]) => ({ label: this.t(label), value: this.formatNumber(part.total), tone: !part.total ? "mute" : label === "resolvedFindings" ? "ok" : label === "newFindings" ? "warn" : "mute" })));
+    const cards = this.sumTiles(sections.map(([label, , part]) => ({ label: this.t(label), value: this.formatNumber(part.total), tone: !part.total ? "mute" : label === "resolvedFindings" ? "ok" : label === "newFindings" ? "warn" : "mute", ...(part.total ? { attr: ["data-changes-cat", label], active: this.changesCat === label } : {}) })));
     const more = part => part.total > part.items.length ? `<p class="factnote">${this.t("moreItems", { count: part.total - part.items.length })}</p>` : "";
     const st = this.lvState("changes", "", "asc"), query = st.q.trim().toLowerCase();
     const typeOf = it => it.object_type || String(it.rule_id || "").split(".")[0];
@@ -2449,7 +2449,9 @@ class ChangesMixin {
       newObjects: paged("newObjects", c.new_objects.items, o => objectRow(o, `${this.t(o.object_type)} · ${o.object_id}`, this.pill(o.status))),
       removedObjects: paged("removedObjects", c.removed_objects.items, o => objectRow(o, `${this.t(o.object_type)} · ${this.t("gone")}`, "")),
     };
-    const panels = sections.filter(([, , part]) => part.total).map(([label, , part]) => `<section class="panel u-mb14"><div class="panelhead"><h2>${this.t(label)}</h2><span class="date">${this.formatNumber(part.total)}</span></div>${body[label]}${more(part)}</section>`).join("");
+    // One section is open at a time: the one a tile picked, else the first with entries; the heading of each carries its number.
+    const filled = sections.filter(([, , part]) => part.total), first = filled[0]?.[0];
+    const panels = filled.map(([label, , part]) => `<div class="panel u-mb14">${this.fold(`chg_${label}`, { tone: label === "newFindings" ? "warn" : label === "resolvedFindings" ? "ok" : "mute", title: this.t(label), pill: this.formatNumber(part.total) }, `${body[label]}${more(part)}`, label === first, this.changesCat ? this.changesCat === label : undefined)}</div>`).join("");
     return `${picker}${this.historyTimeline(c, baselines)}<p class="sub" style="margin:0 0 14px">${this.t("comparedWith")} <b>${this.formatDate(c.baseline_at)}</b> <button class="btn quiet" data-weekly title="${this.esc(this.t("weeklyHint"))}">${this.t("weeklyBtn")}</button></p>${cards}${this.corrGroupsCard()}${total ? `<div class="panel u-mb14">${bar}</div>${panels}` : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("noChanges")}</div></div>`}`;
   }
 }
@@ -12779,6 +12781,7 @@ class HAHousekeeperPanel extends HTMLElement {
       if (!name) st.f = {}; else if (st.f[name] === value) delete st.f[name]; else st.f[name] = value;
       this.pages = {}; this.persistLv(id); this.render(); this.showList();
     });
+    root.querySelectorAll("[data-changes-cat]").forEach(el => el.onclick = () => { const v = el.dataset.changesCat; this.changesCat = this.changesCat === v ? "" : v; this.render(); this.showList(); });
     root.querySelectorAll("[data-finding-reset]").forEach(el => el.onclick = () => { this.findingFilter = ""; this.findingAfter = false; this.pages = {}; this.render(); });
     root.querySelectorAll("[data-finding-filter]").forEach(el => el.onclick = () => { const v = el.dataset.findingFilter; this.findingFilter = v && this.findingFilter === v ? "" : v; this.pages = {}; this.render(); this.showList(); });
     const searchField = (selector, setter) => {
@@ -12907,7 +12910,7 @@ class HAHousekeeperPanel extends HTMLElement {
       const kind = el.dataset.bhSave, date = root.querySelector(`[data-bh-date="${kind}"]`)?.value;
       this.loadBackup({ type: "ha_housekeeper/backup_attest", kind, ...(date ? { date } : {}) });
     });
-    root.querySelectorAll("[data-fold]").forEach(el => el.onclick = () => { this.folds = { ...this.folds, [el.dataset.fold]: el.getAttribute("aria-expanded") !== "true" }; this.render(); });
+    root.querySelectorAll("[data-fold]").forEach(el => el.onclick = () => { if (el.dataset.fold.startsWith("chg_")) this.changesCat = ""; this.folds = { ...this.folds, [el.dataset.fold]: el.getAttribute("aria-expanded") !== "true" }; this.render(); });
     root.querySelectorAll("[data-expo-all]").forEach(el => el.onclick = () => { this.expoAll = { ...this.expoAll, [el.dataset.expoAll]: true }; this.render(); });
     root.querySelectorAll("[data-bh-clear]").forEach(el => el.onclick = () => this.loadBackup({ type: "ha_housekeeper/backup_attest", kind: el.dataset.bhClear, clear: true }));
     root.querySelector("[data-pf-refresh]")?.addEventListener("click", () => this.loadPreflight());
