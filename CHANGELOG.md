@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Detailseiten:** Was du über ein Objekt entschieden hast, steht jetzt in einem Band über den Reitern: ein als bekannt, zurückgestellt oder ausgeblendeter Befund mit Art, Frist und Grund (mit „Wieder aufnehmen“) und ein Vermerk (mit „Ändern“ und „Entfernen“). Die Karte „Bekannt über …“ nennt dieselbe Entscheidung statt „Der Befund ist ausgeblendet“.
 - **Änderungen:** Der Verlauf der Scans zeigt zunächst nur die neuesten Zeilen, damit das Ergebnis des Vergleichs sichtbar bleibt; „Alle anzeigen“ öffnet die ganze Liste. Die Auswahl „Vergleichen mit“ sitzt im Kopf des Verlaufs, gespeicherte Scans tragen den Wochentag im Titel, und ein Satz erklärt den Balken.
 - **Einstellungen, Info:** „Was Housekeeper speichert“ listet jetzt alle eigenen Dateien mit Zweck, Größe und letzter Änderung, in Gruppen und mit der Gesamtgröße. Es werden nur Art und Größe gezeigt, nie Inhalte.
 - **Ende eines Befunds:** „Behobene Befunde“ zählt nur noch Befunde, deren Objekt weiter existiert. Verschwindet ein Befund, weil sein Objekt entfernt wurde, die Prüfung (zum Beispiel eines Dashboards oder der Apps) nicht lesen konnte oder sich eine Einstellung wie die Ausfalldauer geändert hat, steht er in einer eigenen Rubrik „Ohne Reparatur beendet“ mit dem Grund. Die Zahl „behoben“ kann dadurch kleiner ausfallen als bisher.
@@ -102,6 +103,7 @@
 
 ### English
 
+- **Detail pages:** What you decided about an object now shows in a band above the tabs: a finding marked as known, snoozed or hidden with kind, date and reason (with "Take back") and a mark (with "Change" and "Remove"). The card "Known about …" names the same decision instead of "The finding is hidden".
 - **Changes:** The scan history first shows only the newest rows so the result of the comparison stays visible; "Show all" opens the whole list. The "Compare with" choice sits in the head of the history, stored scans carry the weekday in their title, and a sentence explains the bar.
 - **Settings, Info:** "What Housekeeper stores" now lists all of its own files with purpose, size and last change, in groups and with the total size. Only kind and size are shown, never contents.
 - **End of a finding:** "Resolved findings" now counts only findings whose object still exists. A finding that disappears because its object was removed, the check (for example of a dashboard or the apps) could not read it, or a setting such as the outage duration changed is listed under "Ended without a repair" with the reason. The "resolved" number can therefore be smaller than before.

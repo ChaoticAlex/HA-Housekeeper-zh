@@ -4,7 +4,32 @@
 const NEW_FINDING_DAYS = 7, FIXED_DAYS = 30, ACTIVE_PLAN = ["dry_run", "backup", "running"];
 const FINDING_STATES = ["new", "inwork", "known", "snoozed", "hidden"];
 
+Object.assign(TEXT.de, {
+  bandChange: "Ändern", bandUndo: "Wieder aufnehmen", bandByLabel: "Per Label ausgeblendet", bandMark: "Markiert: {kind}", bandRemoveMark: "Entfernen",
+});
+Object.assign(TEXT.en, {
+  bandChange: "Change", bandUndo: "Take back", bandByLabel: "Hidden by a label", bandMark: "Marked: {kind}", bandRemoveMark: "Remove",
+});
+
 class FindingStatusMixin {
+  // What the person decided about this object, above all tabs of its page: a decided finding (known, snoozed, hidden) and a mark.
+  statusBand(item, key) {
+    const change = this.hasActionsTab(item, key) ? `<button class="btn" data-detail-tab="actions">${this.t("bandChange")}</button>` : "";
+    const rows = (this.data?.findings || []).filter(f => f.ignored && f.ignored_by !== "mark" && this.findingKey(f) === key).map(f => {
+      const info = f.ignore_info, byLabel = f.ignored_by === "label";
+      const title = byLabel ? this.t("bandByLabel") : info ? this.t(`decideKind_${info.kind}`) : this.t("ignoredLabel");
+      const until = info?.until ? this.t("decideUntil", { date: this.formatDate(info.until) }) : "";
+      const note = [until, info?.reason].filter(Boolean).join(" · ");
+      const undo = f.ignored_by === "user" ? `<button class="btn" data-ignore="${this.esc(f.key)}" data-ignore-value="0">${this.t("bandUndo")}</button>` : "";
+      return `<div class="row" data-status-band="finding"><span class="tile mute"><ha-icon icon="mdi:bookmark-check-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(title)}</strong><small>${this.esc([this.findingTitle(f), note].filter(Boolean).join(" · "))}</small></span>${change}${undo}</div>`;
+    });
+    if (item.mark) {
+      const clear = MARK_TYPES.includes(item.object_type) ? `<button class="btn quiet" data-mark-clear="${this.esc(key)}">${this.t("bandRemoveMark")}</button>` : "";
+      rows.push(`<div class="row" data-status-band="mark"><span class="tile ${item.mark_due ? "warn" : "mute"}"><ha-icon icon="mdi:bookmark-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(this.t("bandMark", { kind: this.t(`mark_${item.mark.kind}`) }))}</strong><small>${this.esc(this.markLine(item.mark))}${item.mark_due ? ` · ${this.t("markDue")}` : ""}</small></span>${change}${clear}</div>`);
+    }
+    return rows.length ? `<div class="panel u-mb14">${rows.join("")}</div>` : "";
+  }
+
   // The objects of drafted or running plans, and those a finished plan changed lately; rebuilt when the journal changes.
   planSets() {
     if (this._planSets?.journal === this.journal) return this._planSets;

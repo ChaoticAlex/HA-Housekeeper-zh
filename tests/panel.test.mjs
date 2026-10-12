@@ -4379,3 +4379,19 @@ test("a long history of scans shows only the newest rows until asked, keeps the 
   assert.equal(rows(), 13, "all stored scans, listed once the history is opened");
   assert.ok(shadow.innerHTML.includes("Show fewer"));
 });
+
+test("the page of an object tells what was decided about it: a decided finding with kind, date and reason, a label, and a mark", () => {
+  const { el } = panel("en");
+  const item = { object_type: "entity", object_id: "sensor.spare", name: "Spare", status: "unavailable", mark: { kind: "seasonal", reason: "Summer only", until: "2026-11-01T00:00:00+00:00" } };
+  const key = "entity:sensor.spare";
+  const f = (extra) => ({ rule_id: "entity.state_unavailable", object_id: "sensor.spare", classification: "unavailable", confidence: 0.75, key: "k1", ignored: true, ignored_by: "user", ...extra });
+  el.data = { ...DATA, findings: [f({ ignore_info: { kind: "keep", until: "2026-12-01T00:00:00+00:00", reason: "Spare <b>sensor</b>" } })] };
+  let html = el.statusBand(item, key);
+  assert.ok(html.includes("data-status-band=\"finding\"") && html.includes("Spare &lt;b&gt;sensor&lt;/b&gt;") && !html.includes("<b>sensor</b>"), "kind and reason of the decision, escaped");
+  assert.ok(html.includes('data-ignore="k1"') && html.includes('data-ignore-value="0"') && html.includes("data-status-band=\"mark\"") && html.includes("Marked:") && html.includes('data-mark-clear="entity:sensor.spare"'));
+  el.data = { ...DATA, findings: [f({ ignored_by: "label", ignore_info: null })] };
+  html = el.statusBand({ ...item, mark: null }, key);
+  assert.ok(html.includes("Hidden by a label") && !html.includes("data-ignore="), "a label cannot be taken back here");
+  el.data = { ...DATA, findings: [f({ ignored: false, ignored_by: null })] };
+  assert.equal(el.statusBand({ ...item, mark: null }, key), "");
+});

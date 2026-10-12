@@ -4630,6 +4630,7 @@ class DiagnosisMixin {
       <div class="panel detailhead">${this.tile(item.object_type, tone)}<div><div class="headpills">${this.pill(item.status)}<span class="pill mute">${this.t(item.object_type)}</span></div><h1>${this.esc(item.name)}</h1><span class="id">${this.esc(item.object_id)}</span></div>
       <div class="actions">${path ? `<button class="btn" data-ha-path="${this.esc(path)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("openInHA")}</button>` : ""}<button class="btn" data-graph-open="${this.esc(item.object_type === "integration" ? this.objectKey(item.entries[0]) : key)}"><ha-icon icon="mdi:source-fork"></ha-icon>${this.t("showInGraph")}</button>${["entity", "device", "area", "automation", "script", "scene", "dashboard"].includes(item.object_type) ? `<button class="btn" data-xp-from="${this.esc(key)}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button>` : ""}</div></div>
       <div class="panel sumline">${summary}</div>
+      ${this.statusBand(item, key)}
       <div class="tabs" role="tablist" aria-label="${this.esc(this.t("tabsLabel"))}">${tablist}</div>
       <div role="tabpanel" id="hk-tabpanel" aria-labelledby="hk-tab-${tab}" tabindex="0">${tab === "overview" ? this.accessAlert(item) : ""}${this.detailPanel(tab, item, key)}</div>`;
   }
@@ -8373,7 +8374,32 @@ Object.assign(TEXT.en, {
 const NEW_FINDING_DAYS = 7, FIXED_DAYS = 30, ACTIVE_PLAN = ["dry_run", "backup", "running"];
 const FINDING_STATES = ["new", "inwork", "known", "snoozed", "hidden"];
 
+Object.assign(TEXT.de, {
+  bandChange: "Ändern", bandUndo: "Wieder aufnehmen", bandByLabel: "Per Label ausgeblendet", bandMark: "Markiert: {kind}", bandRemoveMark: "Entfernen",
+});
+Object.assign(TEXT.en, {
+  bandChange: "Change", bandUndo: "Take back", bandByLabel: "Hidden by a label", bandMark: "Marked: {kind}", bandRemoveMark: "Remove",
+});
+
 class FindingStatusMixin {
+  // What the person decided about this object, above all tabs of its page: a decided finding (known, snoozed, hidden) and a mark.
+  statusBand(item, key) {
+    const change = this.hasActionsTab(item, key) ? `<button class="btn" data-detail-tab="actions">${this.t("bandChange")}</button>` : "";
+    const rows = (this.data?.findings || []).filter(f => f.ignored && f.ignored_by !== "mark" && this.findingKey(f) === key).map(f => {
+      const info = f.ignore_info, byLabel = f.ignored_by === "label";
+      const title = byLabel ? this.t("bandByLabel") : info ? this.t(`decideKind_${info.kind}`) : this.t("ignoredLabel");
+      const until = info?.until ? this.t("decideUntil", { date: this.formatDate(info.until) }) : "";
+      const note = [until, info?.reason].filter(Boolean).join(" · ");
+      const undo = f.ignored_by === "user" ? `<button class="btn" data-ignore="${this.esc(f.key)}" data-ignore-value="0">${this.t("bandUndo")}</button>` : "";
+      return `<div class="row" data-status-band="finding"><span class="tile mute"><ha-icon icon="mdi:bookmark-check-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(title)}</strong><small>${this.esc([this.findingTitle(f), note].filter(Boolean).join(" · "))}</small></span>${change}${undo}</div>`;
+    });
+    if (item.mark) {
+      const clear = MARK_TYPES.includes(item.object_type) ? `<button class="btn quiet" data-mark-clear="${this.esc(key)}">${this.t("bandRemoveMark")}</button>` : "";
+      rows.push(`<div class="row" data-status-band="mark"><span class="tile ${item.mark_due ? "warn" : "mute"}"><ha-icon icon="mdi:bookmark-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(this.t("bandMark", { kind: this.t(`mark_${item.mark.kind}`) }))}</strong><small>${this.esc(this.markLine(item.mark))}${item.mark_due ? ` · ${this.t("markDue")}` : ""}</small></span>${change}${clear}</div>`);
+    }
+    return rows.length ? `<div class="panel u-mb14">${rows.join("")}</div>` : "";
+  }
+
   // The objects of drafted or running plans, and those a finished plan changed lately; rebuilt when the journal changes.
   planSets() {
     if (this._planSets?.journal === this.journal) return this._planSets;
@@ -9836,7 +9862,7 @@ Object.assign(TEXT.de, {
   knownRunning: "Zustand", knownDevice: "Gerät", knownAttrs: "Eigenschaften", knownUnit: "Einheit", knownClass: "Geräteklasse", knownStateClass: "Zustandsklasse",
   knownWriteRate: "Schreibrate", knownRate: "{n} Einträge pro Tag", knownRank: "Platz {n} der lautesten", knownShare: "etwa {share} % aller Einträge", knownExcluded: "Wird nicht aufgezeichnet (Recorder-Filter)", knownQuiet: "Nicht unter den {n} lautesten Entitäten",
   knownUsedIn: "Verwendet in", knownUsedNone: "Nirgends verwendet", knownAssist: "Für Assistenten", knownAssistYes: "Freigegeben für {list}", knownAssistNo: "Nicht freigegeben",
-  knownArea: "Bereich", knownIgnored: "Ignoriert", knownIgnoredYes: "Der Befund ist ausgeblendet", knownLog: "Logbuch", knownLogLine: "{n} Einträge, zuletzt „{title}“ am {date}", knownLogOne: "„{title}“ am {date}", knownCorr: "Zeitlicher Zusammenhang",
+  knownArea: "Bereich", knownIgnored: "Entscheidung", knownIgnoredYes: "Der Befund ist ausgeblendet", knownLog: "Logbuch", knownLogLine: "{n} Einträge, zuletzt „{title}“ am {date}", knownLogOne: "„{title}“ am {date}", knownCorr: "Zeitlicher Zusammenhang",
 });
 Object.assign(TEXT.en, {
   knownTitleDevice: "Known about this device", knownTitleEntry: "Known about this integration", knownTitleAutomation: "Known about this automation", knownTitleScript: "Known about this script",
@@ -9858,7 +9884,7 @@ Object.assign(TEXT.en, {
   knownRunning: "State", knownDevice: "Device", knownAttrs: "Properties", knownUnit: "Unit", knownClass: "Device class", knownStateClass: "State class",
   knownWriteRate: "Write rate", knownRate: "{n} records a day", knownRank: "Rank {n} of the loudest", knownShare: "about {share} % of all records", knownExcluded: "Not recorded (recorder filter)", knownQuiet: "Not among the {n} loudest entities",
   knownUsedIn: "Used in", knownUsedNone: "Used nowhere", knownAssist: "For assistants", knownAssistYes: "Exposed to {list}", knownAssistNo: "Not exposed",
-  knownArea: "Area", knownIgnored: "Ignored", knownIgnoredYes: "The finding is hidden", knownLog: "Logbook", knownLogLine: "{n} entries, latest “{title}” on {date}", knownLogOne: "“{title}” on {date}", knownCorr: "Connection in time",
+  knownArea: "Area", knownIgnored: "Decision", knownIgnoredYes: "The finding is hidden", knownLog: "Logbook", knownLogLine: "{n} entries, latest “{title}” on {date}", knownLogOne: "“{title}” on {date}", knownCorr: "Connection in time",
 });
 
 class KnownMixin {
@@ -9910,7 +9936,7 @@ class KnownMixin {
     // Rules and care
     const care = [this.knownLine(finding ? "warn" : "ok", t("finding"), finding ? `${this.pill(finding.classification)}<small>${t("certainty")}: ${Math.round(finding.confidence * 100)} %</small>` : t("noFinding"), "knownSrcRules")];
     if (item.mark) care.push(this.knownMarkLine(item));
-    if (finding?.ignored) care.push(this.knownLine("mute", t("knownIgnored"), t("knownIgnoredYes"), "knownSrcDecisions"));
+    if (finding?.ignored) care.push(this.knownLine("mute", t("knownIgnored"), this.esc(finding.mark ? this.markLine(finding.mark) : this.decisionLabel(finding)), "knownSrcDecisions"));
     const quarantined = this.quarantineOf(id);
     if (quarantined) care.push(this.knownLine("warn", t("quarantine"), `${t("quarantineFact", { date: this.formatDate(quarantined.since), days: this.daysSince(quarantined.since) })}<span class="factaction">${this.releaseControl(quarantined)}</span>`, "knownSrcDecisions"));
     // History

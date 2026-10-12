@@ -20,7 +20,7 @@ Object.assign(TEXT.de, {
   knownRunning: "Zustand", knownDevice: "Gerät", knownAttrs: "Eigenschaften", knownUnit: "Einheit", knownClass: "Geräteklasse", knownStateClass: "Zustandsklasse",
   knownWriteRate: "Schreibrate", knownRate: "{n} Einträge pro Tag", knownRank: "Platz {n} der lautesten", knownShare: "etwa {share} % aller Einträge", knownExcluded: "Wird nicht aufgezeichnet (Recorder-Filter)", knownQuiet: "Nicht unter den {n} lautesten Entitäten",
   knownUsedIn: "Verwendet in", knownUsedNone: "Nirgends verwendet", knownAssist: "Für Assistenten", knownAssistYes: "Freigegeben für {list}", knownAssistNo: "Nicht freigegeben",
-  knownArea: "Bereich", knownIgnored: "Ignoriert", knownIgnoredYes: "Der Befund ist ausgeblendet", knownLog: "Logbuch", knownLogLine: "{n} Einträge, zuletzt „{title}“ am {date}", knownLogOne: "„{title}“ am {date}", knownCorr: "Zeitlicher Zusammenhang",
+  knownArea: "Bereich", knownIgnored: "Entscheidung", knownIgnoredYes: "Der Befund ist ausgeblendet", knownLog: "Logbuch", knownLogLine: "{n} Einträge, zuletzt „{title}“ am {date}", knownLogOne: "„{title}“ am {date}", knownCorr: "Zeitlicher Zusammenhang",
 });
 Object.assign(TEXT.en, {
   knownTitleDevice: "Known about this device", knownTitleEntry: "Known about this integration", knownTitleAutomation: "Known about this automation", knownTitleScript: "Known about this script",
@@ -42,7 +42,7 @@ Object.assign(TEXT.en, {
   knownRunning: "State", knownDevice: "Device", knownAttrs: "Properties", knownUnit: "Unit", knownClass: "Device class", knownStateClass: "State class",
   knownWriteRate: "Write rate", knownRate: "{n} records a day", knownRank: "Rank {n} of the loudest", knownShare: "about {share} % of all records", knownExcluded: "Not recorded (recorder filter)", knownQuiet: "Not among the {n} loudest entities",
   knownUsedIn: "Used in", knownUsedNone: "Used nowhere", knownAssist: "For assistants", knownAssistYes: "Exposed to {list}", knownAssistNo: "Not exposed",
-  knownArea: "Area", knownIgnored: "Ignored", knownIgnoredYes: "The finding is hidden", knownLog: "Logbook", knownLogLine: "{n} entries, latest “{title}” on {date}", knownLogOne: "“{title}” on {date}", knownCorr: "Connection in time",
+  knownArea: "Area", knownIgnored: "Decision", knownIgnoredYes: "The finding is hidden", knownLog: "Logbook", knownLogLine: "{n} entries, latest “{title}” on {date}", knownLogOne: "“{title}” on {date}", knownCorr: "Connection in time",
 });
 
 class KnownMixin {
@@ -94,7 +94,7 @@ class KnownMixin {
     // Rules and care
     const care = [this.knownLine(finding ? "warn" : "ok", t("finding"), finding ? `${this.pill(finding.classification)}<small>${t("certainty")}: ${Math.round(finding.confidence * 100)} %</small>` : t("noFinding"), "knownSrcRules")];
     if (item.mark) care.push(this.knownMarkLine(item));
-    if (finding?.ignored) care.push(this.knownLine("mute", t("knownIgnored"), t("knownIgnoredYes"), "knownSrcDecisions"));
+    if (finding?.ignored) care.push(this.knownLine("mute", t("knownIgnored"), this.esc(finding.mark ? this.markLine(finding.mark) : this.decisionLabel(finding)), "knownSrcDecisions"));
     const quarantined = this.quarantineOf(id);
     if (quarantined) care.push(this.knownLine("warn", t("quarantine"), `${t("quarantineFact", { date: this.formatDate(quarantined.since), days: this.daysSince(quarantined.since) })}<span class="factaction">${this.releaseControl(quarantined)}</span>`, "knownSrcDecisions"));
     // History
