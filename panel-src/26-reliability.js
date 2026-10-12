@@ -96,13 +96,14 @@ class ReliabilityMixin {
     this.ensureReliability();
     const r = this.reliability;
     const windows = [[1, "relWindow1"], [7, "relWindow7"]].map(([days, key]) => `<button class="chip ${this.relWindow === days ? "active" : ""}" data-rel-window="${days}" aria-pressed="${this.relWindow === days}">${this.t(key)}</button>`).join("") + `<button class="chip ${this.relCompare ? "active" : ""}" data-rel-compare aria-pressed="${this.relCompare}">${this.t("relCompare")}</button>`;
-    const took = this.tookNote(r);
-    const head = `<div class="panelhead"><div><h2>${this.t("relTitle")}</h2><p>${this.t("relHint")}${took}</p></div><div class="actions" style="display:flex;gap:8px;flex-wrap:wrap">${windows}<button class="btn" data-rel-refresh ${this.relLoading ? "disabled" : ""}>${this.t("relRefresh")}</button></div></div>`;
-    if (this.relError) return `<div class="panel">${head}<div class="error">${this.esc(this.relError)}</div></div>`;
-    if (!r) return `<div class="panel">${head}${this.skeleton("relLoading")}</div>`;
-    if (!r.available) return `<div class="panel">${head}<p class="factnote">${this.t("relNoRecorder")}</p></div>`;
-    if (r.busy) return `<div class="panel">${head}${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p></div>`;
-    if (!r.entries.length) return `<div class="panel">${head}<div class="emptymsg">${this.t("relEmpty")}</div></div>`;
+    const aged = Boolean(r?.computed_at && (r.stale || r.age_seconds >= 60)), took = aged ? "" : this.tookNote(r).replace(/^ · /, "");
+    const head = this.pageBar({ left: `${windows}${took ? `<span>${this.esc(took)}</span>` : ""}`, at: r?.computed_at ? new Date(r.computed_at * 1000).toISOString() : null, loading: this.relLoading, attr: "data-rel-refresh" });
+    const alone = inner => `<div class="stack">${head}<div class="panel">${inner}</div></div>`;
+    if (this.relError) return alone(`<div class="error">${this.esc(this.relError)}</div>`);
+    if (!r) return alone(this.skeleton("relLoading"));
+    if (!r.available) return alone(`<p class="factnote">${this.t("relNoRecorder")}</p>`);
+    if (r.busy) return alone(`${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p>`);
+    if (!r.entries.length) return alone(`<div class="emptymsg">${this.t("relEmpty")}</div>`);
     const loading = this.relLoading ? `<p class="factnote">${this.t("relLoading")}</p>` : "";
     const th = r.thresholds || {};
     const cov = r.coverage;
@@ -129,9 +130,8 @@ class ReliabilityMixin {
       { id: "unstable", icon: "mdi:pulse", label: this.t("relTabUnstable"), hint: this.t("relTileUnstableHint"), count: u.total || 0, tone: flapping ? "red" : u.total ? "warn" : "ok", pill: flapping ? this.t("relSumFlapping", { n: this.formatNumber(flapping) }) : "" },
     ];
     const open = this.viewTabOf("reliability", tabs, u.total && !outages ? "unstable" : "integrations");
-    const intHead = `<div class="panelhead"><div><h2>${this.t("relTabIntegrations")}</h2><p>${this.t("relIntHint")}</p></div></div>`;
-    const body = open === "unstable" ? this.unstableCard(r) : `<div class="panel">${intHead}${coverage}${bar}${loading}${list}${pg.footer}${this.howCounted("relFootnote", { days: r.window_days, share: th.shared_share_percent ?? 80, entities: th.shared_min_entities ?? 3, minutes: Math.round((th.shared_min_seconds ?? 300) / 60) })}</div>`;
-    return `<div class="stack"><div class="panel">${head}</div>${this.navTiles("reliability", tabs, open, this.t("reliability"))}${body}</div>`;
+    const body = open === "unstable" ? this.unstableCard(r) : `<div class="panel">${coverage}${bar}${loading}${list}${pg.footer}${this.howCounted("relFootnote", { days: r.window_days, share: th.shared_share_percent ?? 80, entities: th.shared_min_entities ?? 3, minutes: Math.round((th.shared_min_seconds ?? 300) / 60) })}</div>`;
+    return `<div class="stack">${head}${this.navTiles("reliability", tabs, open, this.t("reliability"), true)}${body}</div>`;
   }
 
   // The numbers behind "unstable" or "flapping" as lines of text; also used on the entity's detail page.
@@ -171,7 +171,7 @@ class ReliabilityMixin {
   unstableCard(r) {
     const u = r.unstable, th = r.thresholds || {};
     if (!u) return "";
-    const head = `<div class="panelhead"><div><h2>${this.t("relUnstableTitle")}</h2><p>${this.t("relUnstableHint")}</p></div></div>${r.coverage ? this.coverageNote(this.t("relUnstableCoverage", { days: r.window_days, withData: this.formatNumber(r.coverage.with_data) }) + ` ${this.excludedText(u.excluded)}`.trimEnd()) : ""}`;
+    const head = `${r.coverage ? this.coverageNote(this.t("relUnstableCoverage", { days: r.window_days, withData: this.formatNumber(r.coverage.with_data) }) + ` ${this.excludedText(u.excluded)}`.trimEnd()) : ""}`;
     if (!u.items.length) return `<div class="panel">${head}<div class="emptymsg">${this.t("relUnstableNone")}</div></div>`;
     const more = u.total > u.items.length ? `<p class="factnote">${this.t("relUnstableMore", { shown: u.items.length, total: u.total })}</p>` : "";
     const rank = new Map(u.items.map((item, i) => [item, i]));

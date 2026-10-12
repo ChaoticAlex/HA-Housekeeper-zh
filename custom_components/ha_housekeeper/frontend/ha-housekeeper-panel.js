@@ -509,7 +509,7 @@ const csvCell = v => {
 };
 // Pages whose subtitle only explains what the page does or does not do; it sits behind an (i) after the title.
 // Pages whose subtitle stays visible under the title; the long text sits behind the (i).
-const VIEW_HINT = { storage: "sysHint", dataflow: "accHint", secrets: "secHint" };
+const VIEW_HINT = { storage: "sysHint", dataflow: "accHint", secrets: "secHint", reliability: "relHint", exposure: "expoHint", policies: "polHint" };
 const INFO_SUB_VIEWS = ["exposure", "maintenance", "repair", "policies", "recorder", "reliability", "storage", "dataflow", "secrets"];
 
 // Texts for step C of the cleanup (devices, replacing references); merged into TEXT.
@@ -800,7 +800,7 @@ Object.assign(TEXT.en, {
 // Texts for the reliability view; merged into TEXT.
 Object.assign(TEXT.de, {
   reliability: "Zuverlässigkeit", reliabilitySubtitle: "Wie verfügbar die Entitäten jeder Integration waren und wann sie gemeinsam ausfielen. Liest nur den Recorder.",
-  relTitle: "Integrationen nach Verfügbarkeit", relHint: "Schlechteste zuerst. Gerechnet aus den Zuständen im Recorder",
+  relHint: "Schlechteste zuerst. Gerechnet aus den Zuständen im Recorder",
   relWindow1: "24 Stunden", relWindow7: "7 Tage", relRefresh: "Neu berechnen", relLoading: "Der Recorder wird ausgewertet. Das kann bei einer großen Datenbank einige Sekunden dauern …",
   relTab: "Zuverlässigkeit", relAllStates: "Alle Zustände", relOnlyOutages: "Mit gemeinsamen Ausfällen", relOnlyReauth: "Neue Anmeldung nötig", relOnlyNotLoaded: "Nicht geladen", relSortAvail: "Verfügbarkeit", relSortOutages: "Ausfälle", relAgeNote: "Stand: {when}", relFactAvail: "Verfügbarkeit ({days} Tage)", relAffected: "Entitäten mit Ausfallzeit ({n})", relAffectedMore: "Gezeigt werden die {shown} mit der niedrigsten Verfügbarkeit von {total}.", relNoAffected: "Keine Entität dieses Eintrags war im Zeitraum nicht verfügbar.", relOpenEntry: "Integration öffnen",
   stability: "Stabilität", stabilityOk: "Stabil im Zeitraum", stabilityMissing: "Noch nicht berechnet. Die Ansicht Zuverlässigkeit rechnet es aus.", cause_unstable: "Die Entität fällt immer wieder aus: {level}.", hint_unstable: "Prüfe Verbindung, Netz und Integration des Geräts; die Zahlen stehen in der Ansicht Zuverlässigkeit.",
@@ -811,18 +811,18 @@ Object.assign(TEXT.de, {
   relShared: "{n} gemeinsame Ausfälle, längster {longest}", relSharedOne: "1 gemeinsamer Ausfall, {longest}", relLayerCloud: "wahrscheinlich Cloud oder API (Vermutung)", relLayerLocal: "wahrscheinlich Gerät, Netz oder Integration (Vermutung)",
   relReauth: "Neu anmelden offen", relLastShared: "Letzter gemeinsamer Ausfall bis {date} ({duration})", relLastSingle: "Letzte Störung bis {date} ({duration})", relNoDisruption: "Keine Störung",
   relMinutes: "{n} Min.", relHours: "{n} Std.", relDays: "{n} Tage",
-  relUnstableTitle: "Instabile Entitäten", relUnstableHint: "Fallen immer wieder aus und kommen zurück. Entitäten mit Folgeobjekten stehen weiter oben.", relUnstableNone: "Keine Entität fällt auffällig oft aus.", relUnstableCoverage: "Beobachtet: {days} Tage, {withData} Entitäten mit Daten. Ausfälle während gemeinsamer Ausfälle sind herausgerechnet; sie zählen für die Integration.",
+  relUnstableNone: "Keine Entität fällt auffällig oft aus.", relUnstableCoverage: "Beobachtet: {days} Tage, {withData} Entitäten mit Daten. Ausfälle während gemeinsamer Ausfälle sind herausgerechnet; sie zählen für die Integration.",
   relUnstable: "instabil", relFlapping: "flatternd", relEpisodes: "{n} Ausfälle in {days} Tagen ({rate} pro Tag) · zusammen {total}, im Mittel {mean}",
   relPattern: "wiederkehrend, meist zwischen {from} und {to} Uhr", relFollowers: "wird von {n} Automationen, Skripten oder Szenen verwendet", relUnstableMore: "{shown} von {total} Entitäten gezeigt.",
   relUnstableFootnote: "Instabil: mindestens {episodes} Ausfälle und {rate} pro Tag, flatternd ab {flap} pro Tag. Ausfälle während eines gemeinsamen Ausfalls der Integration zählen für die Integration, nicht für die Entität. Dauerhaft ausgefallene, deaktivierte und ignorierte Entitäten fehlen.",
   relCoverage: "Letzte {days} Tage · {withData} von {known} Entitäten mit Daten · im Mittel {share} % des Zeitraums beobachtet (neue Entitäten kürzer).",
   relCompare: "Mit Zeitraum davor vergleichen", relDelta: "{delta} Prozentpunkte gegenüber dem Zeitraum davor ({before} %)", relDeltaNone: "Für den Zeitraum davor liegen keine Daten vor.",
   relFootnote: "Verfügbarkeit: Anteil der Zeit ohne „nicht verfügbar“ in den letzten {days} Tagen, gerechnet ab der ersten Meldung im Zeitraum. Ein gemeinsamer Ausfall heißt: mindestens {share} % der Entitäten des Eintrags, mindestens {entities}, mindestens {minutes} Minuten zugleich nicht verfügbar. Ein Ausfall, der vor dem Zeitraum begann, zählt erst ab der ersten Meldung darin.",
-  relIntHint: "Schlechteste zuerst. Verfügbarkeit je Integration, gerechnet aus den Zuständen ihrer Entitäten.", relSortRank: "Standard", relSortEpisodes: "Ausfälle", relSortRate: "Ausfälle pro Tag", relSortDuration: "Gesamtdauer", relOnlyFlapping: "Nur flatternd", relOnlyUnstable: "Nur instabil",
+  relSortRank: "Standard", relSortEpisodes: "Ausfälle", relSortRate: "Ausfälle pro Tag", relSortDuration: "Gesamtdauer", relOnlyFlapping: "Nur flatternd", relOnlyUnstable: "Nur instabil",
 });
 Object.assign(TEXT.en, {
   reliability: "Reliability", reliabilitySubtitle: "How available each integration's entities were and when they failed together. Only reads the recorder.",
-  relTitle: "Integrations by availability", relHint: "Worst first. Calculated from the states in the recorder",
+  relHint: "Worst first. Calculated from the states in the recorder",
   relWindow1: "24 hours", relWindow7: "7 days", relRefresh: "Recalculate", relLoading: "Evaluating the recorder. On a large database this can take a few seconds …",
   relTab: "Reliability", relAllStates: "All states", relOnlyOutages: "With shared outages", relOnlyReauth: "Re-authentication open", relOnlyNotLoaded: "Not loaded", relSortAvail: "Availability", relSortOutages: "Outages", relAgeNote: "As of {when}", relFactAvail: "Availability ({days} days)", relAffected: "Entities with downtime ({n})", relAffectedMore: "Showing the {shown} with the lowest availability of {total}.", relNoAffected: "No entity of this entry was unavailable in the period.", relOpenEntry: "Open integration",
   stability: "Stability", stabilityOk: "Stable in the period", stabilityMissing: "Not calculated yet. The Reliability view calculates it.", cause_unstable: "The entity keeps failing: {level}.", hint_unstable: "Check the connection, network and integration of the device; the numbers are in the Reliability view.",
@@ -833,14 +833,14 @@ Object.assign(TEXT.en, {
   relShared: "{n} shared outages, longest {longest}", relSharedOne: "1 shared outage, {longest}", relLayerCloud: "probably the cloud or its API (a guess)", relLayerLocal: "probably the device, the network or the integration (a guess)",
   relReauth: "Re-authentication open", relLastShared: "Last shared outage until {date} ({duration})", relLastSingle: "Last disruption until {date} ({duration})", relNoDisruption: "No disruption",
   relMinutes: "{n} min", relHours: "{n} h", relDays: "{n} days",
-  relUnstableTitle: "Unstable entities", relUnstableHint: "They keep failing and coming back. Entities with dependants come first.", relUnstableNone: "No entity fails unusually often.", relUnstableCoverage: "Observed: {days} days, {withData} entities with data. Failures during shared outages are taken out; they count for the integration.",
+  relUnstableNone: "No entity fails unusually often.", relUnstableCoverage: "Observed: {days} days, {withData} entities with data. Failures during shared outages are taken out; they count for the integration.",
   relUnstable: "unstable", relFlapping: "flapping", relEpisodes: "{n} failures in {days} days ({rate} a day) · {total} in all, {mean} on average",
   relPattern: "recurring, mostly between {from} and {to} o'clock", relFollowers: "used by {n} automations, scripts or scenes", relUnstableMore: "{shown} of {total} entities shown.",
   relUnstableFootnote: "Unstable: at least {episodes} failures and {rate} a day, flapping from {flap} a day. Failures during a shared outage of the integration count for the integration, not the entity. Entities that are down all the time, disabled or ignored are left out.",
   relCoverage: "Last {days} days · {withData} of {known} entities with data · on average {share} % of the period observed (new entities less).",
   relCompare: "Compare with the period before", relDelta: "{delta} percentage points against the period before ({before} %)", relDeltaNone: "There is no data for the period before.",
   relFootnote: "Availability: the share of time without “unavailable” in the last {days} days, counted from the first report in the period. A shared outage means at least {share} % of the entry's entities, at least {entities}, were unavailable together for at least {minutes} minutes. An outage that began before the period counts from the first report in it.",
-  relIntHint: "Worst first. Availability per integration, calculated from the states of its entities.", relSortRank: "Default", relSortEpisodes: "Outages", relSortRate: "Outages per day", relSortDuration: "Total duration", relOnlyFlapping: "Flapping only", relOnlyUnstable: "Unstable only",
+  relSortRank: "Default", relSortEpisodes: "Outages", relSortRate: "Outages per day", relSortDuration: "Total duration", relOnlyFlapping: "Flapping only", relOnlyUnstable: "Unstable only",
 });
 
 // Texts for the automation runs view; merged into TEXT.
@@ -1111,9 +1111,9 @@ class ThemeMixin {
 
 // Texts for the exposure view; merged into TEXT.
 Object.assign(TEXT.de, {
-  expoIntro: "Hier siehst du, welche Entitäten Sprachassistenten (Assist, Alexa, Google Assistant) und HomeKit-Bridges erreichen können, und was dabei auffällt. Ein Klick auf eine Kachel zeigt die Entitäten.", expoSumEntities: "Entitäten freigegeben", expoSumFindings: "Auffälligkeiten", expoTabFindings: "Auffälligkeiten", expoFindingsHint: "Freigaben, die einen Blick wert sind: nicht mehr vorhandene oder deaktivierte Entitäten, sensible Geräte, doppelte Sprachnamen und verwaiste Webhooks.", expoSourceHint: "{n} Entitäten sind für {name} freigegeben.", expoAlso: "auch: {list}", expoCapped: "Gezeigt werden die ersten {n}.", expoNoneFor: "Für diese Quelle ist nichts freigegeben.", expoInactiveText: "Nicht eingerichtet: es ist nichts freigegeben.",
+  expoSumEntities: "Entitäten freigegeben", expoSumFindings: "Auffälligkeiten", expoTabFindings: "Auffälligkeiten", expoSourceHint: "{n} Entitäten sind für {name} freigegeben.", expoAlso: "auch: {list}", expoCapped: "Gezeigt werden die ersten {n}.", expoNoneFor: "Für diese Quelle ist nichts freigegeben.", expoInactiveText: "Nicht eingerichtet: es ist nichts freigegeben.",
   exposure: "Freigaben", exposureSubtitle: "Welche Entitäten Sprachassistenten und Bridges erreichen können. Liest nur; es wird nichts geändert und nichts gespeichert.",
-  expoTitle: "Freigaben", expoHint: "Assist, Alexa, Google Assistant und HomeKit", expoLoading: "Die Freigaben werden gelesen …",
+  expoHint: "Assist, Alexa, Google Assistant und HomeKit", expoLoading: "Die Freigaben werden gelesen …",
   expoNone: "Nichts Auffälliges bei den Freigaben.", expoHint2: "Hinweis", expoWarn: "Prüfen",
   expoAssistants: "Assistenten und Bridges", expoFindings: "Auffälligkeiten",
   expoName_conversation: "Assist", expoName_cloud_alexa: "Alexa", expoName_cloud_google_assistant: "Google Assistant", expoName_homekit: "HomeKit",
@@ -1133,9 +1133,9 @@ Object.assign(TEXT.de, {
   expoFootnote: "Housekeeper liest je Assistent, welche Entitäten Home Assistant freigibt, bei HomeKit nur den gespeicherten Entitäts-Filter der Bridge. Passwörter, Tokens, Ports und Webhook-IDs werden nie gelesen oder angezeigt. Wenn eine Quelle nicht antwortet, steht „nicht prüfbar“, nie „nicht freigegeben“. Sprachnamen gelten als gleich, wenn sie sich nur in Groß- und Kleinschreibung, Leerzeichen oder Umlauten unterscheiden.",
 });
 Object.assign(TEXT.en, {
-  expoIntro: "Here you see which entities voice assistants (Assist, Alexa, Google Assistant) and HomeKit bridges can reach, and what stands out. A click on a tile shows the entities.", expoSumEntities: "entities exposed", expoSumFindings: "Findings", expoTabFindings: "Findings", expoFindingsHint: "Exposures worth a look: entities that are gone or disabled, sensitive devices, duplicate voice names and orphaned webhooks.", expoSourceHint: "{n} entities are exposed to {name}.", expoAlso: "also: {list}", expoCapped: "The first {n} are shown.", expoNoneFor: "Nothing is exposed to this source.", expoInactiveText: "Not set up: nothing is exposed.",
+  expoSumEntities: "entities exposed", expoSumFindings: "Findings", expoTabFindings: "Findings", expoSourceHint: "{n} entities are exposed to {name}.", expoAlso: "also: {list}", expoCapped: "The first {n} are shown.", expoNoneFor: "Nothing is exposed to this source.", expoInactiveText: "Not set up: nothing is exposed.",
   exposure: "Exposure", exposureSubtitle: "Which entities voice assistants and bridges can reach. Only reads; nothing is changed and nothing is stored.",
-  expoTitle: "Exposure", expoHint: "Assist, Alexa, Google Assistant and HomeKit", expoLoading: "Reading the exposure …",
+  expoHint: "Assist, Alexa, Google Assistant and HomeKit", expoLoading: "Reading the exposure …",
   expoNone: "Nothing unusual in the exposure.", expoHint2: "Note", expoWarn: "Check",
   expoAssistants: "Assistants and bridges", expoFindings: "Findings",
   expoName_conversation: "Assist", expoName_cloud_alexa: "Alexa", expoName_cloud_google_assistant: "Google Assistant", expoName_homekit: "HomeKit",
@@ -1377,7 +1377,7 @@ Object.assign(TEXT.de, {
   polAllRules: "Alle Regeln", polNoViolations: "Keine Verstöße.", polSumRules: "Regeln an", polSumViolations: "Verstöße", polSumHidden: "Ausgeblendet", polTabViolations: "Verstöße", polTabRules: "Regeln",
   policies: "Richtlinien", policiesSubtitle: "Eigene Regeln für Ordnung in Home Assistant. Hinweise, keine Defekte; liest nur.",
   polObjTitle: "Richtlinien · {n} Verstöße", polObjTitleOne: "Richtlinien · 1 Verstoß", polObjHint: "Regeln, gegen die dieses Objekt verstößt. Ausgeblendete Verstöße stehen nicht hier.", polObjAll: "Alle Richtlinien",
-  polTitle: "Qualitätsrichtlinien", polHint: "Schalte ein, was in deiner Installation gelten soll. Alle Regeln sind zunächst aus.", polLoading: "Richtlinien werden geprüft",
+  polHint: "Schalte ein, was in deiner Installation gelten soll. Alle Regeln sind zunächst aus.", polLoading: "Richtlinien werden geprüft",
   polOff: "aus", polCount: "{n} Verstöße", polCountOne: "1 Verstoß", polNone: "Keine Verstöße", polNoneOn: "Schalte oben eine Regel ein, um Verstöße zu sehen.",
   polRule_entity_area: "Entität ohne Bereich", polDesc_entity_area: "Entitäten von physischen Geräten brauchen einen Bereich, eigenen oder den des Geräts. Diagnose-, Konfigurations- und deaktivierte Entitäten und Dienst-Geräte zählen nicht.",
   polRule_device_area: "Gerät ohne Bereich", polDesc_device_area: "Aktive Geräte brauchen einen Bereich. Dienst-Geräte, Untergeräte, deaktivierte und leere Geräte zählen nicht.",
@@ -1396,7 +1396,7 @@ Object.assign(TEXT.en, {
   polAllRules: "All rules", polNoViolations: "No violations.", polSumRules: "Rules on", polSumViolations: "Violations", polSumHidden: "Hidden", polTabViolations: "Violations", polTabRules: "Rules",
   policies: "Policies", policiesSubtitle: "Your own rules for tidiness in Home Assistant. Hints, not defects; only reads.",
   polObjTitle: "Policies · {n} violations", polObjTitleOne: "Policies · 1 violation", polObjHint: "Rules this object breaks. Hidden violations are not shown here.", polObjAll: "All policies",
-  polTitle: "Quality policies", polHint: "Switch on what should apply to your installation. All rules start off.", polLoading: "Checking policies",
+  polHint: "Switch on what should apply to your installation. All rules start off.", polLoading: "Checking policies",
   polOff: "off", polCount: "{n} violations", polCountOne: "1 violation", polNone: "No violations", polNoneOn: "Switch on a rule above to see violations.",
   polRule_entity_area: "Entity without an area", polDesc_entity_area: "Entities of physical devices need an area, their own or the device's. Diagnostic, configuration and disabled entities and service devices do not count.",
   polRule_device_area: "Device without an area", polDesc_device_area: "Active devices need an area. Service devices, sub-devices, disabled and empty devices do not count.",
@@ -4776,13 +4776,14 @@ class ReliabilityMixin {
     this.ensureReliability();
     const r = this.reliability;
     const windows = [[1, "relWindow1"], [7, "relWindow7"]].map(([days, key]) => `<button class="chip ${this.relWindow === days ? "active" : ""}" data-rel-window="${days}" aria-pressed="${this.relWindow === days}">${this.t(key)}</button>`).join("") + `<button class="chip ${this.relCompare ? "active" : ""}" data-rel-compare aria-pressed="${this.relCompare}">${this.t("relCompare")}</button>`;
-    const took = this.tookNote(r);
-    const head = `<div class="panelhead"><div><h2>${this.t("relTitle")}</h2><p>${this.t("relHint")}${took}</p></div><div class="actions" style="display:flex;gap:8px;flex-wrap:wrap">${windows}<button class="btn" data-rel-refresh ${this.relLoading ? "disabled" : ""}>${this.t("relRefresh")}</button></div></div>`;
-    if (this.relError) return `<div class="panel">${head}<div class="error">${this.esc(this.relError)}</div></div>`;
-    if (!r) return `<div class="panel">${head}${this.skeleton("relLoading")}</div>`;
-    if (!r.available) return `<div class="panel">${head}<p class="factnote">${this.t("relNoRecorder")}</p></div>`;
-    if (r.busy) return `<div class="panel">${head}${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p></div>`;
-    if (!r.entries.length) return `<div class="panel">${head}<div class="emptymsg">${this.t("relEmpty")}</div></div>`;
+    const aged = Boolean(r?.computed_at && (r.stale || r.age_seconds >= 60)), took = aged ? "" : this.tookNote(r).replace(/^ · /, "");
+    const head = this.pageBar({ left: `${windows}${took ? `<span>${this.esc(took)}</span>` : ""}`, at: r?.computed_at ? new Date(r.computed_at * 1000).toISOString() : null, loading: this.relLoading, attr: "data-rel-refresh" });
+    const alone = inner => `<div class="stack">${head}<div class="panel">${inner}</div></div>`;
+    if (this.relError) return alone(`<div class="error">${this.esc(this.relError)}</div>`);
+    if (!r) return alone(this.skeleton("relLoading"));
+    if (!r.available) return alone(`<p class="factnote">${this.t("relNoRecorder")}</p>`);
+    if (r.busy) return alone(`${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p>`);
+    if (!r.entries.length) return alone(`<div class="emptymsg">${this.t("relEmpty")}</div>`);
     const loading = this.relLoading ? `<p class="factnote">${this.t("relLoading")}</p>` : "";
     const th = r.thresholds || {};
     const cov = r.coverage;
@@ -4809,9 +4810,8 @@ class ReliabilityMixin {
       { id: "unstable", icon: "mdi:pulse", label: this.t("relTabUnstable"), hint: this.t("relTileUnstableHint"), count: u.total || 0, tone: flapping ? "red" : u.total ? "warn" : "ok", pill: flapping ? this.t("relSumFlapping", { n: this.formatNumber(flapping) }) : "" },
     ];
     const open = this.viewTabOf("reliability", tabs, u.total && !outages ? "unstable" : "integrations");
-    const intHead = `<div class="panelhead"><div><h2>${this.t("relTabIntegrations")}</h2><p>${this.t("relIntHint")}</p></div></div>`;
-    const body = open === "unstable" ? this.unstableCard(r) : `<div class="panel">${intHead}${coverage}${bar}${loading}${list}${pg.footer}${this.howCounted("relFootnote", { days: r.window_days, share: th.shared_share_percent ?? 80, entities: th.shared_min_entities ?? 3, minutes: Math.round((th.shared_min_seconds ?? 300) / 60) })}</div>`;
-    return `<div class="stack"><div class="panel">${head}</div>${this.navTiles("reliability", tabs, open, this.t("reliability"))}${body}</div>`;
+    const body = open === "unstable" ? this.unstableCard(r) : `<div class="panel">${coverage}${bar}${loading}${list}${pg.footer}${this.howCounted("relFootnote", { days: r.window_days, share: th.shared_share_percent ?? 80, entities: th.shared_min_entities ?? 3, minutes: Math.round((th.shared_min_seconds ?? 300) / 60) })}</div>`;
+    return `<div class="stack">${head}${this.navTiles("reliability", tabs, open, this.t("reliability"), true)}${body}</div>`;
   }
 
   // The numbers behind "unstable" or "flapping" as lines of text; also used on the entity's detail page.
@@ -4851,7 +4851,7 @@ class ReliabilityMixin {
   unstableCard(r) {
     const u = r.unstable, th = r.thresholds || {};
     if (!u) return "";
-    const head = `<div class="panelhead"><div><h2>${this.t("relUnstableTitle")}</h2><p>${this.t("relUnstableHint")}</p></div></div>${r.coverage ? this.coverageNote(this.t("relUnstableCoverage", { days: r.window_days, withData: this.formatNumber(r.coverage.with_data) }) + ` ${this.excludedText(u.excluded)}`.trimEnd()) : ""}`;
+    const head = `${r.coverage ? this.coverageNote(this.t("relUnstableCoverage", { days: r.window_days, withData: this.formatNumber(r.coverage.with_data) }) + ` ${this.excludedText(u.excluded)}`.trimEnd()) : ""}`;
     if (!u.items.length) return `<div class="panel">${head}<div class="emptymsg">${this.t("relUnstableNone")}</div></div>`;
     const more = u.total > u.items.length ? `<p class="factnote">${this.t("relUnstableMore", { shown: u.items.length, total: u.total })}</p>` : "";
     const rank = new Map(u.items.map((item, i) => [item, i]));
@@ -5304,7 +5304,7 @@ class DbHealthMixin {
 class ExposureMixin {
   async loadExposure() {
     this.exposureLoading = true; this.exposureError = ""; this.render();
-    try { this.exposure = await this._hass.callWS({ type: "ha_housekeeper/exposure" }); }
+    try { this.exposure = await this._hass.callWS({ type: "ha_housekeeper/exposure" }); this.exposureAt = new Date().toISOString(); }
     catch (err) { this.exposureError = err?.message || String(err); }
     this.exposureLoading = false; this.render();
   }
@@ -5376,9 +5376,9 @@ class ExposureMixin {
   exposureView() {
     this.ensureExposure();
     const r = this.exposure;
-    const head = `<div class="panelhead"><div><h2>${this.t("expoTitle")}</h2><p>${this.t("expoHint")}</p></div><div class="actions"><button class="btn" data-expo-refresh ${this.exposureLoading ? "disabled" : ""}>${this.t("relRefresh")}</button></div></div>`;
-    if (this.exposureError) return `<div class="panel">${head}<div class="error">${this.esc(this.exposureError)}</div></div>`;
-    if (!r) return `<div class="panel">${head}${this.skeleton("expoLoading")}</div>`;
+    const head = this.pageBar({ at: this.exposureAt, loading: this.exposureLoading, attr: "data-expo-refresh" });
+    if (this.exposureError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.exposureError)}</div></div></div>`;
+    if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("expoLoading")}</div></div>`;
     const sources = this.expoSources(r);
     const live = sources.filter(x => x.status === "ok");
     const warn = r.findings.filter(f => f.level === "warn").length;
@@ -5397,9 +5397,9 @@ class ExposureMixin {
       const bar = itemCount >= 6 || q ? this.listBar("exposure", { sorts: [] }) : "";
       const shown = q ? r.findings.filter(f => (f.items || []).some(item => [item.name, item.entity_id, ...(item.assistants || [])].join(" ").toLowerCase().includes(q))) : r.findings;
       const rows = shown.length ? this.expoSection("expoToCheck", shown.filter(f => f.level === "warn")) + this.expoSection("expoToNote", shown.filter(f => f.level !== "warn")) : q ? `<div class="emptymsg">${this.t("noMatches")}</div>` : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("expoNone")}</div>`;
-      body = `<div class="panel"><div class="panelhead"><div><h2>${this.t("expoTabFindings")}</h2><p>${this.t("expoFindingsHint")}</p></div></div>${bar}${rows}${this.howCounted("expoFootnote")}</div>`;
+      body = `<div class="panel">${bar}${rows}${this.howCounted("expoFootnote")}</div>`;
     } else body = this.expoSourceTab(r, sources.find(x => x.id === open));
-    return `<div class="stack"><div class="panel">${head}<p class="factnote">${this.t("expoIntro")}</p></div>${this.navTiles("exposure", tabs, open, this.t("exposure"))}${body}</div>`;
+    return `<div class="stack">${head}${this.navTiles("exposure", tabs, open, this.t("exposure"), true)}${body}</div>`;
   }
 }
 
@@ -5485,7 +5485,7 @@ class SearchMixin {
 class PoliciesMixin {
   async loadPolicies() {
     this.policiesLoading = true; this.policiesError = ""; this.render();
-    try { this.policies = await this._hass.callWS({ type: "ha_housekeeper/policies" }); }
+    try { this.policies = await this._hass.callWS({ type: "ha_housekeeper/policies" }); this.policiesAt = new Date().toISOString(); }
     catch (err) { this.policiesError = err?.message || String(err); }
     this.policiesLoading = false; this.render();
   }
@@ -5605,10 +5605,10 @@ class PoliciesMixin {
     this.ensurePolicies();
     const r = this.policies;
     const anyHidden = r?.rules?.some(rule => rule.ignored);
-    const actions = `${anyHidden ? `<button class="btn" data-policy-hidden>${this.t(this.policyShowHidden ? "polHideHidden" : "polShowHidden")}</button>` : ""}<button class="btn" data-policy-refresh ${this.policiesLoading ? "disabled" : ""}>${this.t("relRefresh")}</button>`;
-    const head = `<div class="panelhead"><div><h2>${this.t("polTitle")}</h2><p>${this.t("polHint")}</p></div><div class="actions">${actions}</div></div>`;
-    if (this.policiesError) return `<div class="panel">${head}<div class="error">${this.esc(this.policiesError)}</div></div>`;
-    if (!r) return `<div class="panel">${head}${this.skeleton("polLoading")}</div>`;
+    const left = anyHidden ? `<button class="chip ${this.policyShowHidden ? "active" : ""}" data-policy-hidden aria-pressed="${Boolean(this.policyShowHidden)}">${this.t(this.policyShowHidden ? "polHideHidden" : "polShowHidden")}</button>` : "";
+    const head = this.pageBar({ left, at: this.policiesAt, loading: this.policiesLoading, attr: "data-policy-refresh" });
+    if (this.policiesError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.policiesError)}</div></div></div>`;
+    if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("polLoading")}</div></div>`;
     const on = r.rules.filter(rule => rule.enabled);
     const violations = on.reduce((n, rule) => n + rule.count, 0);
     const hidden = on.reduce((n, rule) => n + (rule.ignored || 0), 0);
@@ -5620,7 +5620,7 @@ class PoliciesMixin {
     const body = open === "rules"
       ? `<div class="panel">${r.rules.map(rule => this.polRuleBlock(rule)).join("")}${on.length ? "" : `<p class="factnote">${this.t("polNoneOn")}</p>`}${this.howCounted("polFootnote")}</div>`
       : this.polViolations(r);
-    return `<div class="stack"><div class="panel">${head}</div>${this.navTiles("policies", tabs, open, this.t("policies"))}${body}</div>`;
+    return `<div class="stack">${head}${this.navTiles("policies", tabs, open, this.t("policies"), true)}${body}</div>`;
   }
 }
 

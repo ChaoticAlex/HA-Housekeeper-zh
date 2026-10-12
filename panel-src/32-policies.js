@@ -2,7 +2,7 @@
 class PoliciesMixin {
   async loadPolicies() {
     this.policiesLoading = true; this.policiesError = ""; this.render();
-    try { this.policies = await this._hass.callWS({ type: "ha_housekeeper/policies" }); }
+    try { this.policies = await this._hass.callWS({ type: "ha_housekeeper/policies" }); this.policiesAt = new Date().toISOString(); }
     catch (err) { this.policiesError = err?.message || String(err); }
     this.policiesLoading = false; this.render();
   }
@@ -122,10 +122,10 @@ class PoliciesMixin {
     this.ensurePolicies();
     const r = this.policies;
     const anyHidden = r?.rules?.some(rule => rule.ignored);
-    const actions = `${anyHidden ? `<button class="btn" data-policy-hidden>${this.t(this.policyShowHidden ? "polHideHidden" : "polShowHidden")}</button>` : ""}<button class="btn" data-policy-refresh ${this.policiesLoading ? "disabled" : ""}>${this.t("relRefresh")}</button>`;
-    const head = `<div class="panelhead"><div><h2>${this.t("polTitle")}</h2><p>${this.t("polHint")}</p></div><div class="actions">${actions}</div></div>`;
-    if (this.policiesError) return `<div class="panel">${head}<div class="error">${this.esc(this.policiesError)}</div></div>`;
-    if (!r) return `<div class="panel">${head}${this.skeleton("polLoading")}</div>`;
+    const left = anyHidden ? `<button class="chip ${this.policyShowHidden ? "active" : ""}" data-policy-hidden aria-pressed="${Boolean(this.policyShowHidden)}">${this.t(this.policyShowHidden ? "polHideHidden" : "polShowHidden")}</button>` : "";
+    const head = this.pageBar({ left, at: this.policiesAt, loading: this.policiesLoading, attr: "data-policy-refresh" });
+    if (this.policiesError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.policiesError)}</div></div></div>`;
+    if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("polLoading")}</div></div>`;
     const on = r.rules.filter(rule => rule.enabled);
     const violations = on.reduce((n, rule) => n + rule.count, 0);
     const hidden = on.reduce((n, rule) => n + (rule.ignored || 0), 0);
@@ -137,6 +137,6 @@ class PoliciesMixin {
     const body = open === "rules"
       ? `<div class="panel">${r.rules.map(rule => this.polRuleBlock(rule)).join("")}${on.length ? "" : `<p class="factnote">${this.t("polNoneOn")}</p>`}${this.howCounted("polFootnote")}</div>`
       : this.polViolations(r);
-    return `<div class="stack"><div class="panel">${head}</div>${this.navTiles("policies", tabs, open, this.t("policies"))}${body}</div>`;
+    return `<div class="stack">${head}${this.navTiles("policies", tabs, open, this.t("policies"), true)}${body}</div>`;
   }
 }

@@ -148,5 +148,5 @@ const csvCell = v => {
 };
 // Pages whose subtitle only explains what the page does or does not do; it sits behind an (i) after the title.
 // Pages whose subtitle stays visible under the title; the long text sits behind the (i).
-const VIEW_HINT = { storage: "sysHint", dataflow: "accHint", secrets: "secHint" };
+const VIEW_HINT = { storage: "sysHint", dataflow: "accHint", secrets: "secHint", reliability: "relHint", exposure: "expoHint", policies: "polHint" };
 const INFO_SUB_VIEWS = ["exposure", "maintenance", "repair", "policies", "recorder", "reliability", "storage", "dataflow", "secrets"];

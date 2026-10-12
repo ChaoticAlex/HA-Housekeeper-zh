@@ -1,8 +1,8 @@
 // Texts for the exposure view; merged into TEXT.
 Object.assign(TEXT.de, {
-  expoIntro: "Hier siehst du, welche Entitäten Sprachassistenten (Assist, Alexa, Google Assistant) und HomeKit-Bridges erreichen können, und was dabei auffällt. Ein Klick auf eine Kachel zeigt die Entitäten.", expoSumEntities: "Entitäten freigegeben", expoSumFindings: "Auffälligkeiten", expoTabFindings: "Auffälligkeiten", expoFindingsHint: "Freigaben, die einen Blick wert sind: nicht mehr vorhandene oder deaktivierte Entitäten, sensible Geräte, doppelte Sprachnamen und verwaiste Webhooks.", expoSourceHint: "{n} Entitäten sind für {name} freigegeben.", expoAlso: "auch: {list}", expoCapped: "Gezeigt werden die ersten {n}.", expoNoneFor: "Für diese Quelle ist nichts freigegeben.", expoInactiveText: "Nicht eingerichtet: es ist nichts freigegeben.",
+  expoSumEntities: "Entitäten freigegeben", expoSumFindings: "Auffälligkeiten", expoTabFindings: "Auffälligkeiten", expoSourceHint: "{n} Entitäten sind für {name} freigegeben.", expoAlso: "auch: {list}", expoCapped: "Gezeigt werden die ersten {n}.", expoNoneFor: "Für diese Quelle ist nichts freigegeben.", expoInactiveText: "Nicht eingerichtet: es ist nichts freigegeben.",
   exposure: "Freigaben", exposureSubtitle: "Welche Entitäten Sprachassistenten und Bridges erreichen können. Liest nur; es wird nichts geändert und nichts gespeichert.",
-  expoTitle: "Freigaben", expoHint: "Assist, Alexa, Google Assistant und HomeKit", expoLoading: "Die Freigaben werden gelesen …",
+  expoHint: "Assist, Alexa, Google Assistant und HomeKit", expoLoading: "Die Freigaben werden gelesen …",
   expoNone: "Nichts Auffälliges bei den Freigaben.", expoHint2: "Hinweis", expoWarn: "Prüfen",
   expoAssistants: "Assistenten und Bridges", expoFindings: "Auffälligkeiten",
   expoName_conversation: "Assist", expoName_cloud_alexa: "Alexa", expoName_cloud_google_assistant: "Google Assistant", expoName_homekit: "HomeKit",
@@ -22,9 +22,9 @@ Object.assign(TEXT.de, {
   expoFootnote: "Housekeeper liest je Assistent, welche Entitäten Home Assistant freigibt, bei HomeKit nur den gespeicherten Entitäts-Filter der Bridge. Passwörter, Tokens, Ports und Webhook-IDs werden nie gelesen oder angezeigt. Wenn eine Quelle nicht antwortet, steht „nicht prüfbar“, nie „nicht freigegeben“. Sprachnamen gelten als gleich, wenn sie sich nur in Groß- und Kleinschreibung, Leerzeichen oder Umlauten unterscheiden.",
 });
 Object.assign(TEXT.en, {
-  expoIntro: "Here you see which entities voice assistants (Assist, Alexa, Google Assistant) and HomeKit bridges can reach, and what stands out. A click on a tile shows the entities.", expoSumEntities: "entities exposed", expoSumFindings: "Findings", expoTabFindings: "Findings", expoFindingsHint: "Exposures worth a look: entities that are gone or disabled, sensitive devices, duplicate voice names and orphaned webhooks.", expoSourceHint: "{n} entities are exposed to {name}.", expoAlso: "also: {list}", expoCapped: "The first {n} are shown.", expoNoneFor: "Nothing is exposed to this source.", expoInactiveText: "Not set up: nothing is exposed.",
+  expoSumEntities: "entities exposed", expoSumFindings: "Findings", expoTabFindings: "Findings", expoSourceHint: "{n} entities are exposed to {name}.", expoAlso: "also: {list}", expoCapped: "The first {n} are shown.", expoNoneFor: "Nothing is exposed to this source.", expoInactiveText: "Not set up: nothing is exposed.",
   exposure: "Exposure", exposureSubtitle: "Which entities voice assistants and bridges can reach. Only reads; nothing is changed and nothing is stored.",
-  expoTitle: "Exposure", expoHint: "Assist, Alexa, Google Assistant and HomeKit", expoLoading: "Reading the exposure …",
+  expoHint: "Assist, Alexa, Google Assistant and HomeKit", expoLoading: "Reading the exposure …",
   expoNone: "Nothing unusual in the exposure.", expoHint2: "Note", expoWarn: "Check",
   expoAssistants: "Assistants and bridges", expoFindings: "Findings",
   expoName_conversation: "Assist", expoName_cloud_alexa: "Alexa", expoName_cloud_google_assistant: "Google Assistant", expoName_homekit: "HomeKit",

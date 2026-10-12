@@ -2,7 +2,7 @@
 class ExposureMixin {
   async loadExposure() {
     this.exposureLoading = true; this.exposureError = ""; this.render();
-    try { this.exposure = await this._hass.callWS({ type: "ha_housekeeper/exposure" }); }
+    try { this.exposure = await this._hass.callWS({ type: "ha_housekeeper/exposure" }); this.exposureAt = new Date().toISOString(); }
     catch (err) { this.exposureError = err?.message || String(err); }
     this.exposureLoading = false; this.render();
   }
@@ -74,9 +74,9 @@ class ExposureMixin {
   exposureView() {
     this.ensureExposure();
     const r = this.exposure;
-    const head = `<div class="panelhead"><div><h2>${this.t("expoTitle")}</h2><p>${this.t("expoHint")}</p></div><div class="actions"><button class="btn" data-expo-refresh ${this.exposureLoading ? "disabled" : ""}>${this.t("relRefresh")}</button></div></div>`;
-    if (this.exposureError) return `<div class="panel">${head}<div class="error">${this.esc(this.exposureError)}</div></div>`;
-    if (!r) return `<div class="panel">${head}${this.skeleton("expoLoading")}</div>`;
+    const head = this.pageBar({ at: this.exposureAt, loading: this.exposureLoading, attr: "data-expo-refresh" });
+    if (this.exposureError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.exposureError)}</div></div></div>`;
+    if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("expoLoading")}</div></div>`;
     const sources = this.expoSources(r);
     const live = sources.filter(x => x.status === "ok");
     const warn = r.findings.filter(f => f.level === "warn").length;
@@ -95,8 +95,8 @@ class ExposureMixin {
       const bar = itemCount >= 6 || q ? this.listBar("exposure", { sorts: [] }) : "";
       const shown = q ? r.findings.filter(f => (f.items || []).some(item => [item.name, item.entity_id, ...(item.assistants || [])].join(" ").toLowerCase().includes(q))) : r.findings;
       const rows = shown.length ? this.expoSection("expoToCheck", shown.filter(f => f.level === "warn")) + this.expoSection("expoToNote", shown.filter(f => f.level !== "warn")) : q ? `<div class="emptymsg">${this.t("noMatches")}</div>` : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("expoNone")}</div>`;
-      body = `<div class="panel"><div class="panelhead"><div><h2>${this.t("expoTabFindings")}</h2><p>${this.t("expoFindingsHint")}</p></div></div>${bar}${rows}${this.howCounted("expoFootnote")}</div>`;
+      body = `<div class="panel">${bar}${rows}${this.howCounted("expoFootnote")}</div>`;
     } else body = this.expoSourceTab(r, sources.find(x => x.id === open));
-    return `<div class="stack"><div class="panel">${head}<p class="factnote">${this.t("expoIntro")}</p></div>${this.navTiles("exposure", tabs, open, this.t("exposure"))}${body}</div>`;
+    return `<div class="stack">${head}${this.navTiles("exposure", tabs, open, this.t("exposure"), true)}${body}</div>`;
   }
 }
