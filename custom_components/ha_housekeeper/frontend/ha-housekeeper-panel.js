@@ -33,7 +33,7 @@ const TEXT = {
     integration_disabled: "Zugehörige Integration wurde deaktiviert",
     device_disabled: "Zugehöriges Gerät wurde deaktiviert",
     device_missing: "Zugehöriges Gerät existiert nicht mehr in der Geräte-Registry",
-    config_entry_missing: "Zugehöriger Konfigurationseintrag fehlt", "config_entry.not_loaded": "Integration nicht geladen", "app.stopped_in_use": "App gestoppt, Integration hängt vermutlich daran",
+    config_entry_missing: "Zugehöriger Konfigurationseintrag fehlt", "config_entry.not_loaded": "Integration nicht geladen", "automation.blocked": "Automation kann nicht starten: alle Auslöser sind ausgefallen", "app.stopped_in_use": "App gestoppt, Integration hängt vermutlich daran",
     state_missing: "Entität ist registriert, besitzt aber keinen Zustand",
     state_unavailable: "Integration meldet den Zustand unavailable",
     state_unknown: "Integration meldet den Zustand unknown", state_available: "Zustand ist verfügbar",
@@ -211,7 +211,7 @@ const TEXT = {
     integration_disabled: "Related integration was disabled",
     device_disabled: "Related device was disabled",
     device_missing: "Related device no longer exists in the device registry",
-    config_entry_missing: "Related config entry is missing", "config_entry.not_loaded": "Integration not loaded", "app.stopped_in_use": "App stopped, an integration probably depends on it",
+    config_entry_missing: "Related config entry is missing", "config_entry.not_loaded": "Integration not loaded", "automation.blocked": "Automation cannot start: all its triggers are out of order", "app.stopped_in_use": "App stopped, an integration probably depends on it",
     state_missing: "Entity is registered but has no state",
     state_unavailable: "Integration reports unavailable",
     state_unknown: "Integration reports unknown", state_available: "State is available",
@@ -2075,6 +2075,8 @@ class FindingsMixin {
     const title = object?.name || finding.object_id;
     const subtitle = finding.rule_id === "entity.possible_duplicate"
       ? `${this.t("duplicateOf")} ${this.esc(finding.affected_object)}`
+      : finding.rule_id === "automation.blocked"
+        ? this.esc((finding.evidence?.[0]?.entities || []).slice(0, 3).join(", ") + ((finding.evidence?.[0]?.total || 0) > 3 ? " …" : ""))
       : finding.rule_id === "automation.goal_missed"
         ? this.esc(this.goalLine(finding))
         : finding.rule_id === "entity.stale"

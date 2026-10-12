@@ -28,6 +28,7 @@ from .automation_analysis import (
     summarize_automation_config,
     summarize_script_config,
 )
+from .automation_blocked import blocked_automation_findings
 from .backup_health import AttestStore, backup_health
 from .battery_care import BatteryStore
 from .battery_kind import apply_battery_kinds
@@ -1002,6 +1003,11 @@ class InventoryScanner:
             finding["key"] = finding_key(finding)
             self._mark_ignored(finding, entity_registry_entries)
         apply_marks(objects, findings, self.marks.items)
+        blocked = blocked_automation_findings(automations, findings)
+        for finding in blocked:
+            finding["key"] = finding_key(finding)
+            self._mark_ignored(finding, entity_registry_entries)
+        findings.extend(blocked)
         apply_battery_kinds(objects, self.batteries.kinds)
         apply_impact(objects, edges, findings)
         causes = apply_causes(objects, edges, findings)

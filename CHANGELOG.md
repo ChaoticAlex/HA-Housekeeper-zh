@@ -18,6 +18,7 @@
 - **Vermerke für Integrationen und Apps:** „Absichtlich offline“, „Saisonal“ und „Reservegerät“ blenden die Ausfall-Befunde aus.
 - **Ausfälle:** Die Karte „Ausfälle“ bietet „Bekannt“, „Zurückstellen“ und „Ausblenden“ für nicht geladene Integrationen; ein Befund steht nicht mehr doppelt in der Liste.
 - **Zahlen im Menü:** Wartung (verfehlte Ziele) und Richtlinien (Verstöße) zeigen eine Zahl; Bestand nicht mehr.
+- **Blockierte Automationen:** Eine Automation, deren Auslöser alle auf ausgefallene Entitäten zeigen, wird als Befund gemeldet.
 - **Seitenleisten-Knopf:** öffnet die Seitenleiste von Home Assistant, wenn sie ausgeblendet ist.
 
 ### English
