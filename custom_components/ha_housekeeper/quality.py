@@ -29,6 +29,8 @@ LIMIT = 300
 RANK = {"red": 0, "warn": 1, "info": 2, "unknown": 3, "ok": 4}
 RELIABILITY_KINDS = {"failing", "never_ok", "overlap", "burst", "long_run", "after_update"}
 RESTART_KINDS = {"long_wait", "wait_no_timeout"}
+SCRIPT_DIMENSIONS = ("integrity", "reliability", "maintainability", "efficiency")
+SCRIPT_SERVICES = {"turn_on", "turn_off", "toggle", "reload"}  # the other script.* services call one script by name
 STALE = {"disabled", "unavailable", "orphaned", "unknown"}
 THRESHOLDS = {
     "large_actions": LARGE_ACTIONS,
@@ -62,6 +64,52 @@ def _worst(levels: list[str]) -> str:
     return min(levels, key=RANK.__getitem__) if levels else "ok"
 
 
+def _called_scripts(node: Any) -> set[str]:
+    """Script entities a list of actions calls by name (``script.my_script``), through any nesting."""
+    found: set[str] = set()
+    if isinstance(node, list):
+        for child in node:
+            found |= _called_scripts(child)
+    elif isinstance(node, dict):
+        for key, value in node.items():
+            if key in ("service", "action") and isinstance(value, str) and value.startswith("script."):
+                if value[7:] not in SCRIPT_SERVICES:
+                    found.add(value)
+            else:
+                found |= _called_scripts(value)
+    return found
+
+
+def _script_callers(
+    snapshot: dict[str, Any], actions_of: Any, script_actions_of: Any
+) -> dict[str, dict[str, set[str]]]:
+    """Script entity -> the automations and scripts that call it, by name or as a target."""
+    callers: dict[str, dict[str, set[str]]] = {}
+
+    def add(script: str, kind: str, entity_id: str) -> None:
+        if script != entity_id:
+            callers.setdefault(script, {"automation": set(), "script": set()})[kind].add(entity_id)
+
+    sources = {
+        f"{o['object_type']}:{o['object_id']}"
+        for o in snapshot["objects"]
+        if o["object_type"] in ("automation", "script")
+    }
+    for edge in snapshot["edges"]:
+        target = str(edge["target"])
+        if edge["source"] in sources and target.startswith("entity:script.") and edge["relation"] == "TARGETS":
+            kind, _, entity_id = str(edge["source"]).partition(":")
+            add(target[7:], kind, entity_id)
+    for obj in snapshot["objects"]:
+        kind = obj["object_type"]
+        if kind not in ("automation", "script"):
+            continue
+        actions = (actions_of if kind == "automation" else script_actions_of)(obj["object_id"])
+        for script in _called_scripts(actions):
+            add(script, kind, obj["object_id"])
+    return callers
+
+
 def build(
     snapshot: dict[str, Any],
     runs: dict[str, Any],
@@ -69,8 +117,9 @@ def build(
     criteria: CriteriaStore,
     today: date,
     actions_of: Any,
+    script_actions_of: Any = lambda entity_id: None,
 ) -> dict[str, Any]:
-    """One row per automation with its seven dimensions, the worst first."""
+    """One row per automation with its seven dimensions and one per script with four, the worst first."""
     objects = {o["object_id"]: o for o in snapshot["objects"] if o["object_type"] == "entity"}
     rows_by_entity = {row["entity_id"]: row for row in runs.get("items", [])}
     broken: dict[str, int] = {}
@@ -87,16 +136,19 @@ def build(
     for item in conflict_items:
         for automation in item["automations"]:
             clashes.setdefault(automation["entity_id"], []).append(item)
+    callers = _script_callers(snapshot, actions_of, script_actions_of)
     rows = []
+    script_rows = []
     for obj in snapshot["objects"]:
-        if obj["object_type"] != "automation":
+        kind = obj["object_type"]
+        if kind not in ("automation", "script"):
             continue
         entity_id = obj["object_id"]
         row = rows_by_entity.get(entity_id)
         findings = {f["kind"]: f for f in (row or {}).get("findings", [])}
         dims: dict[str, dict[str, Any]] = {}
 
-        count, gone = broken.get(entity_id, 0), stale.get(f"automation:{entity_id}", set())
+        count, gone = broken.get(entity_id, 0), stale.get(f"{kind}:{entity_id}", set())
         if count:
             dims["integrity"] = _dimension("red", {"key": "broken", "count": count})
         elif gone:
@@ -136,7 +188,7 @@ def build(
                 obj.get("trigger_count") or 0
             ) > LARGE_TRIGGERS:
                 reasons.append({"key": "large"})
-            if _depth(actions_of(entity_id)) >= DEEP_NESTING:
+            if _depth((actions_of if kind == "automation" else script_actions_of)(entity_id)) >= DEEP_NESTING:
                 reasons.append({"key": "deep"})
             level = "warn" if any(r["key"] != "no_description" for r in reasons) else "info"
             dims["maintainability"] = _dimension(level if reasons else "ok", *reasons)
@@ -161,20 +213,29 @@ def build(
             )
         else:
             dims["conflicts"] = _dimension("ok")
-        rows.append(
-            {
-                "entity_id": entity_id,
-                "name": obj.get("name") or entity_id,
-                "status": obj.get("status"),
-                "dimensions": dims,
-                "worst": _worst([d["level"] for d in dims.values() if d["level"] != "unknown"]),
-            }
-        )
+        if kind == "script":
+            dims = {key: dims[key] for key in SCRIPT_DIMENSIONS}
+        item = {
+            "entity_id": entity_id,
+            "name": obj.get("name") or entity_id,
+            "status": obj.get("status"),
+            "dimensions": dims,
+            "worst": _worst([d["level"] for d in dims.values() if d["level"] != "unknown"]),
+        }
+        if kind == "script":
+            used = callers.get(entity_id, {"automation": set(), "script": set()})
+            script_rows.append({**item, "callers": {k: len(v) for k, v in used.items()}})
+        else:
+            rows.append(item)
     rows.sort(key=lambda r: (RANK[r["worst"]], r["name"]))
+    script_rows.sort(key=lambda r: (RANK[r["worst"]], r["name"]))
     return {
         "checked": len(rows),
         "total": len(rows),
         "items": rows[:LIMIT],
+        "scripts": script_rows[:LIMIT],
+        "scripts_total": len(script_rows),
         "dimensions": list(DIMENSIONS),
+        "script_dimensions": list(SCRIPT_DIMENSIONS),
         "thresholds": THRESHOLDS,
     }

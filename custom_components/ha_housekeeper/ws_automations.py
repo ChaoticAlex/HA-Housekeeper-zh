@@ -77,6 +77,7 @@ async def websocket_automation_quality(
         scanner.criteria,
         datetime.now(UTC).date(),
         lambda entity_id: (scanner.get_details("automation", entity_id) or {}).get("actions"),
+        lambda entity_id: (scanner.get_details("script", entity_id) or {}).get("actions"),
     )
     connection.send_result(msg["id"], _versioned(result))
 

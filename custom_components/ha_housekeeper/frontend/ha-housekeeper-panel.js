@@ -5078,10 +5078,12 @@ class RunsMixin {
     const tabs = [
       { id: "overview", icon: "mdi:clipboard-pulse-outline", label: this.t("qualityTab"), hint: this.t("runsTileQualityHint"), tone: "mute" },
       { id: "runs", icon: "mdi:run-fast", label: this.t("runsTabRuns"), hint: this.t("runsTileRunsHint"), tone: "mute" },
+      { id: "scripts", icon: "mdi:script-text-outline", label: this.t("scTab"), hint: this.t("scTabHint"), tone: "mute" },
     ];
     const open = this.viewTabOf("runs", tabs, "overview");
     if (open === "overview") return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${this.qualityView()}</div>`;
-    return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${this.runsListView()}</div>`;
+    const body = open === "scripts" ? this.scriptsView() : this.runsListView();
+    return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${body}</div>`;
   }
 
   runsListView() {
@@ -6671,6 +6673,7 @@ class ExchangeMixin {
 // Automation diagnostics: quality dimensions, success criteria, coverage, trace comparison and the dry run (see quality.py, criteria.py, coverage.py, trace_compare.py, dry_run.py); mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
   qualityTab: "Übersicht", runsTabRuns: "Läufe",
+  scTab: "Skripte", scTabHint: "Alle Skripte und wer sie nutzt", scSumNoCaller: "Ohne Aufrufer", scColCallers: "Aufgerufen von", scNoCaller: "niemand", scAuto1: "1 Automation", scAutoN: "{n} Automationen", scScript1: "1 Skript", scScriptN: "{n} Skripte", scFilterCallers: "Alle Aufrufer", scWithCallers: "Mit Aufrufer", scWithoutCallers: "Ohne Aufrufer", scNone: "Keine Skripte gefunden.", scCallersHint: "Zählt Automationen und Skripte, die dieses Skript aufrufen.",
   ovColDiag: "Diagnose", ovSumAll: "Alle", ovSumActive: "Aktiv", ovSumOff: "Deaktiviert", ovSumProblem: "Mit Problem", ovSumErrors: "Mit Fehlern", ovSumNever: "Nie gelaufen",
   ovFilterState: "Alle Status", ovStateOn: "Aktiv", ovStateOff: "Deaktiviert", ovFilterLevel: "Alle Stufen", ovLevelProblem: "Problem oder Prüfen", ovLevelAny: "Auch Hinweise", ovFilterRuns: "Alle Läufe", ovRunsErrors: "Mit Fehlern", ovRunsNever: "Nie gelaufen", ovColWorst: "Qualität", ovNoRuns: "In den gezählten Läufen nie ausgelöst.",
   qualityHint: "Alle Automationen mit Status, Läufen und sieben getrennten Blickwinkeln, bewusst ohne Gesamtnote. „Unbekannt“ heißt: dazu gibt es noch nichts zu beurteilen.",
@@ -6691,6 +6694,7 @@ Object.assign(TEXT.de, {
 });
 Object.assign(TEXT.en, {
   qualityTab: "Overview", runsTabRuns: "Runs",
+  scTab: "Scripts", scTabHint: "All scripts and who uses them", scSumNoCaller: "No caller", scColCallers: "Called by", scNoCaller: "nobody", scAuto1: "1 automation", scAutoN: "{n} automations", scScript1: "1 script", scScriptN: "{n} scripts", scFilterCallers: "All callers", scWithCallers: "With a caller", scWithoutCallers: "Without a caller", scNone: "No scripts found.", scCallersHint: "Counts the automations and scripts that call this script.",
   ovColDiag: "Diagnosis", ovSumAll: "All", ovSumActive: "Active", ovSumOff: "Disabled", ovSumProblem: "With a problem", ovSumErrors: "With errors", ovSumNever: "Never ran",
   ovFilterState: "All states", ovStateOn: "Active", ovStateOff: "Disabled", ovFilterLevel: "All levels", ovLevelProblem: "Problem or check", ovLevelAny: "Including notes", ovFilterRuns: "All runs", ovRunsErrors: "With errors", ovRunsNever: "Never ran", ovColWorst: "Quality", ovNoRuns: "Never triggered in the counted runs.",
   qualityHint: "Seven separate views of each automation, deliberately without an overall grade. “Unknown” means there is nothing to judge by yet.",
@@ -6710,6 +6714,7 @@ Object.assign(TEXT.en, {
   actCriteria: "Automation goals missed", actCriteriaHint: "At least one automation misses its success criterion again and again.",
 });
 
+const SCRIPT_DIM_ORDER = ["integrity", "reliability", "maintainability", "efficiency"];
 const DIM_ORDER = ["integrity", "reliability", "effectiveness", "maintainability", "restart_safety", "efficiency", "conflicts"];
 const QL_TONE = { ok: "ok", info: "mute", warn: "warn", red: "red", unknown: "mute" };
 const QL_MARK = { ok: "✓", info: "i", warn: "!", red: "✗", unknown: "?" };
@@ -6743,9 +6748,9 @@ class DiagnosticsMixin {
   }
 
   // One row per automation: the quality rows joined with the counted runs (runs are null until they are loaded).
-  overviewRows() {
+  overviewRows(items = this.diagState().quality?.items || []) {
     const byId = new Map((this.runs?.items || []).map(r => [r.entity_id, r]));
-    return (this.diagState().quality?.items || []).map(i => {
+    return items.map(i => {
       const r = byId.get(i.entity_id);
       return { ...i, runs: this.runs ? r?.runs ?? 0 : null, errors: this.runs ? r?.errors ?? 0 : null };
     });
@@ -6791,26 +6796,96 @@ class DiagnosticsMixin {
     });
   }
 
-  qualityView() {
+  // Loading and error frame shared by the automation overview and the script list; build(quality, head) returns the page.
+  qualityFrame(build) {
     this.ensureQuality();
     this.ensureRuns();
     const d = this.diagState(), q = d.quality;
     const head = this.pageBar({ at: this.loadedAt("quality"), loading: d.loading, attr: "data-quality-refresh" });
     if (d.error) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(d.error)}</div></div></div>`;
     if (!q) return `<div class="stack">${head}<div class="panel">${this.skeleton("qualityLoading")}</div></div>`;
-    const rows = this.overviewRows();
-    const n = x => this.formatNumber(x), count = f => n(rows.filter(f).length);
-    const tiles = this.sumTiles([
-      { label: this.t("ovSumAll"), value: n(rows.length), tone: "mute", lf: ["overview", "", ""] },
-      { label: this.t("ovSumActive"), value: count(o => o.status !== "disabled"), tone: "ok", lf: ["overview", "state", "on"] },
-      { label: this.t("ovSumOff"), value: count(o => o.status === "disabled"), tone: "mute", lf: ["overview", "state", "off"] },
-      { label: this.t("ovSumProblem"), value: count(o => o.worst === "red" || o.worst === "warn"), tone: rows.some(o => o.worst === "red") ? "red" : rows.some(o => o.worst === "warn") ? "warn" : "ok", lf: ["overview", "level", "problem"] },
-      ...(this.runs ? [
-        { label: this.t("ovSumErrors"), value: count(o => o.errors > 0), tone: rows.some(o => o.errors > 0) ? "warn" : "ok", lf: ["overview", "runs", "errors"] },
-        { label: this.t("ovSumNever"), value: count(o => o.runs === 0), tone: "mute", hint: this.t("ovNoRuns"), lf: ["overview", "runs", "never"] },
-      ] : []),
-    ]);
-    return `<div class="stack">${head}${tiles}<div class="panel">${this.overviewList(rows)}</div>${d.sel ? this.diagDetail(d.sel) : ""}</div>`;
+    return build(q, head);
+  }
+
+  qualityView() {
+    return this.qualityFrame((q, head) => {
+      const d = this.diagState(), rows = this.overviewRows();
+      const n = x => this.formatNumber(x), count = f => n(rows.filter(f).length);
+      const tiles = this.sumTiles([
+        { label: this.t("ovSumAll"), value: n(rows.length), tone: "mute", lf: ["overview", "", ""] },
+        { label: this.t("ovSumActive"), value: count(o => o.status !== "disabled"), tone: "ok", lf: ["overview", "state", "on"] },
+        { label: this.t("ovSumOff"), value: count(o => o.status === "disabled"), tone: "mute", lf: ["overview", "state", "off"] },
+        { label: this.t("ovSumProblem"), value: count(o => o.worst === "red" || o.worst === "warn"), tone: rows.some(o => o.worst === "red") ? "red" : rows.some(o => o.worst === "warn") ? "warn" : "ok", lf: ["overview", "level", "problem"] },
+        ...(this.runs ? [
+          { label: this.t("ovSumErrors"), value: count(o => o.errors > 0), tone: rows.some(o => o.errors > 0) ? "warn" : "ok", lf: ["overview", "runs", "errors"] },
+          { label: this.t("ovSumNever"), value: count(o => o.runs === 0), tone: "mute", hint: this.t("ovNoRuns"), lf: ["overview", "runs", "never"] },
+        ] : []),
+      ]);
+      return `<div class="stack">${head}${tiles}<div class="panel">${this.overviewList(rows)}</div>${d.sel ? this.diagDetail(d.sel) : ""}</div>`;
+    });
+  }
+
+  // The scripts: the same joined rows as the overview, with the four dimensions that apply and who calls each script.
+  scriptCallers(o) {
+    const { automation: a, script: s } = o.callers;
+    const parts = [a ? (a === 1 ? this.t("scAuto1") : this.t("scAutoN", { n: this.formatNumber(a) })) : "", s ? (s === 1 ? this.t("scScript1") : this.t("scScriptN", { n: this.formatNumber(s) })) : ""].filter(Boolean);
+    return parts.length ? this.esc(parts.join(" · ")) : `<span class="pill warn">${this.t("scNoCaller")}</span>`;
+  }
+
+  scriptsList(rows) {
+    const rank = { red: 0, warn: 1, info: 2, ok: 3, unknown: 4 };
+    const total = o => o.callers.automation + o.callers.script, problem = o => o.worst === "red" || o.worst === "warn";
+    const num = v => (v === null ? "–" : this.esc(this.formatNumber(v)));
+    const dimCol = id => ({ key: id, label: `dim_${id}`, dir: "asc", cell: o => `<span aria-label="${this.esc(this.t(`dim_${id}`))}: ${this.esc(this.t(`ql_${o.dimensions[id].level}`))}">${this.dimDot(o.dimensions[id])}</span>` });
+    const columns = [
+      { key: "name", label: "utName", cell: o => `${this.nameCell(o.name, o.entity_id)}<span class="qlight" aria-hidden="true">${SCRIPT_DIM_ORDER.map(id => `<i class="${QL_TONE[o.dimensions[id].level]}" title="${this.esc(this.t(`dim_${id}`))}"></i>`).join("")}</span>` },
+      { key: "runs", label: "runsColRuns", dir: "desc", cell: o => num(o.runs) },
+      { key: "errors", label: "runsColErrors", dir: "desc", cell: o => num(o.errors) },
+      ...SCRIPT_DIM_ORDER.map(dimCol),
+      { key: "callers", label: "scColCallers", dir: "asc", cell: o => this.scriptCallers(o) },
+    ];
+    return this.sysList("scripts", rows, {
+      sort: "worst", dir: "asc",
+      sorts: [
+        { key: "worst", label: "ovColWorst", dir: "asc", get: o => rank[o.worst] },
+        { key: "name", label: "utName", dir: "asc", get: o => o.name },
+        { key: "runs", label: "runsColRuns", dir: "desc", get: o => o.runs },
+        { key: "errors", label: "runsColErrors", dir: "desc", get: o => o.errors },
+        ...SCRIPT_DIM_ORDER.map(id => ({ key: id, label: `dim_${id}`, dir: "asc", get: o => rank[o.dimensions[id].level] })),
+        { key: "callers", label: "scColCallers", dir: "asc", get: total },
+      ],
+      filters: [
+        { name: "level", all: this.t("ovFilterLevel"), options: [["problem", this.t("ovLevelProblem")], ["any", this.t("ovLevelAny")]] },
+        { name: "callers", all: this.t("scFilterCallers"), options: [["used", this.t("scWithCallers")], ["none", this.t("scWithoutCallers")]] },
+        { name: "runs", all: this.t("ovFilterRuns"), options: [["errors", this.t("ovRunsErrors")], ["never", this.t("ovRunsNever")]] },
+      ],
+      filterFns: {
+        level: (o, v) => (v === "problem" ? problem(o) : o.worst !== "ok" && o.worst !== "unknown"),
+        callers: (o, v) => (total(o) === 0) === (v === "none"),
+        runs: (o, v) => (v === "errors" ? o.errors > 0 : o.runs === 0),
+      },
+      text: o => `${o.name} ${o.entity_id}`, tie: o => o.entity_id, empty: "scNone", columns,
+      rowAttrs: o => `data-object="${this.esc(`script:${o.entity_id}`)}" tabindex="0" role="button" aria-label="${this.esc(o.name)}"`,
+      exportName: "scripts", header: [this.t("utName"), "ID", this.t("runsColRuns"), this.t("runsColErrors"), ...SCRIPT_DIM_ORDER.map(id => this.t(`dim_${id}`)), this.t("scColCallers")],
+      rows: o => [o.name, o.entity_id, o.runs ?? "", o.errors ?? "", ...SCRIPT_DIM_ORDER.map(id => this.t(`ql_${o.dimensions[id].level}`)), total(o)],
+    });
+  }
+
+  scriptsView() {
+    return this.qualityFrame((q, head) => {
+      const rows = this.overviewRows(q.scripts || []);
+      const n = x => this.formatNumber(x), count = f => n(rows.filter(f).length);
+      const tiles = this.sumTiles([
+        { label: this.t("ovSumAll"), value: n(rows.length), tone: "mute", lf: ["scripts", "", ""] },
+        { label: this.t("scSumNoCaller"), value: count(o => o.callers.automation + o.callers.script === 0), tone: rows.some(o => o.callers.automation + o.callers.script === 0) ? "warn" : "ok", hint: this.t("scCallersHint"), lf: ["scripts", "callers", "none"] },
+        { label: this.t("ovSumProblem"), value: count(o => o.worst === "red" || o.worst === "warn"), tone: rows.some(o => o.worst === "red") ? "red" : rows.some(o => o.worst === "warn") ? "warn" : "ok", lf: ["scripts", "level", "problem"] },
+        ...(this.runs ? [
+          { label: this.t("ovSumErrors"), value: count(o => o.errors > 0), tone: rows.some(o => o.errors > 0) ? "warn" : "ok", lf: ["scripts", "runs", "errors"] },
+          { label: this.t("ovSumNever"), value: count(o => o.runs === 0), tone: "mute", hint: this.t("ovNoRuns"), lf: ["scripts", "runs", "never"] },
+        ] : []),
+      ]);
+      return `<div class="stack">${head}${tiles}<div class="panel">${this.scriptsList(rows)}</div></div>`;
+    });
   }
 
   // Everything about one automation in one place: why each dimension is as it is, the criteria, and later the coverage, the comparison and the dry run.

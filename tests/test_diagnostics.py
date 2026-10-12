@@ -368,3 +368,26 @@ async def test_a_call_criterion_counts_only_calls_of_its_own_run(hass: HomeAssis
     assert store.stats(AUTO, dt_util.utcnow().date()) == {"ok": 2, "missed": 2}
     store.cancel_all()
     unsub()
+
+
+def test_scripts_get_four_dimensions_and_count_their_callers(hass: HomeAssistant) -> None:
+    snapshot = _snapshot()
+    for name in ("used", "lonely"):
+        snapshot["objects"].append(
+            {"object_type": "script", "object_id": f"script.{name}", "name": name, "status": "active"}
+        )
+    snapshot["objects"].append(
+        {"object_type": "script", "object_id": "script.boss", "name": "boss", "status": "active"}
+    )
+    snapshot["edges"].append(
+        {"source": f"automation:{AUTO}", "target": "entity:script.used", "relation": "TARGETS"}
+    )
+    calls = {"script.boss": [{"sequence": [{"action": "script.used"}, {"service": "script.turn_on"}]}]}
+    result = build(
+        snapshot, {"items": []}, [], CriteriaStore(hass), TODAY, lambda entity_id: [], calls.get
+    )
+    scripts = {r["entity_id"]: r for r in result["scripts"]}
+    assert list(scripts["script.used"]["dimensions"]) == result["script_dimensions"]
+    assert scripts["script.used"]["callers"] == {"automation": 1, "script": 1}
+    assert scripts["script.lonely"]["callers"] == {"automation": 0, "script": 0}
+    assert len(result["items"]) == 2 and result["scripts_total"] == 3

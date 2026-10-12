@@ -2249,6 +2249,15 @@ test("polish: the to-do list groups by urgency, the cleanup view has tabs, the q
   assert.ok(el.qualityView().includes("data-lf-set="));
 });
 
+test("the scripts tab lists scripts with their callers", () => {
+  const { el } = panel("en");
+  const dims = Object.fromEntries(["integrity", "reliability", "maintainability", "efficiency"].map(id => [id, { level: "ok", reasons: [] }]));
+  el.diag = { quality: { items: [], scripts: [{ entity_id: "script.lonely", name: "Lonely", status: "active", worst: "ok", dimensions: dims, callers: { automation: 0, script: 0 } }, { entity_id: "script.used", name: "Used", status: "active", worst: "ok", dimensions: dims, callers: { automation: 2, script: 1 } }] }, criteria: {}, detail: {} };
+  el._qualityRequested = true; el._runsRequested = true;
+  const html = el.scriptsView();
+  assert.ok(html.includes('data-object="script:script.lonely"') && html.includes("nobody") && html.includes("2 automations · 1 script"));
+});
+
 test("open previews can be selected and merged into one plan; a ran plan cannot", async () => {
   const { el, shadow } = panel("en");
   el.data = { ...DATA, objects: [], edges: [], findings: [], quarantine: [] };

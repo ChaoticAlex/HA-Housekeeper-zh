@@ -145,10 +145,12 @@ class RunsMixin {
     const tabs = [
       { id: "overview", icon: "mdi:clipboard-pulse-outline", label: this.t("qualityTab"), hint: this.t("runsTileQualityHint"), tone: "mute" },
       { id: "runs", icon: "mdi:run-fast", label: this.t("runsTabRuns"), hint: this.t("runsTileRunsHint"), tone: "mute" },
+      { id: "scripts", icon: "mdi:script-text-outline", label: this.t("scTab"), hint: this.t("scTabHint"), tone: "mute" },
     ];
     const open = this.viewTabOf("runs", tabs, "overview");
     if (open === "overview") return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${this.qualityView()}</div>`;
-    return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${this.runsListView()}</div>`;
+    const body = open === "scripts" ? this.scriptsView() : this.runsListView();
+    return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${body}</div>`;
   }
 
   runsListView() {
