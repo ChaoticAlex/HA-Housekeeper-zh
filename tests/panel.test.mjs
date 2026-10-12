@@ -30,6 +30,7 @@ function loadPanel(extra = {}) {
   return { PanelClass, downloads, TEXT: context.TEXT, NAV: context.NAV, NAV_GROUPS: context.NAV_GROUPS, OPTION_FIELDS: context.OPTION_FIELDS, csvCell: context.csvCell, shadow };
 }
 
+const entriesOf = el => el.causeEntries().map(c => el.causeEntry(c)).join("");
 const DATA = {
   meta: { scanned_at: "2026-10-07T10:00:00+00:00", object_count: 3, status_counts: { active: 2, orphaned: 1 }, type_counts: { entity: 3 } },
   objects: [
@@ -2838,13 +2839,30 @@ test("follow-up findings of a cause stay folded until asked for, and the export 
   assert.deepEqual(el.collapseFollowers(el.visibleFindings()).map(x => x.object_id), ["sensor.c"]);
   assert.equal(el.exportRows().length, 3);
   const html = el.findingsView();
-  assert.ok(html.includes("Integration Cloud is not loaded") && html.includes("2 follow-up findings") && html.includes("data-toggle-followers"));
-  assert.ok(el.causesCard().includes("1 automations affected") && el.causesCard().includes("timeout"));
+  assert.ok(html.includes("Integration Cloud is not loaded") && html.includes("2 follow-ups") && html.includes("explains 2 more findings") && html.includes("data-toggle-followers"));
+  assert.ok(entriesOf(el).includes("1 automations affected") && entriesOf(el).includes("timeout"));
   el.showFollowers = true;
   assert.equal(el.collapseFollowers(el.visibleFindings()).length, 3);
   assert.equal(el.todoItems().some(i => i.key === "outages"), true);
   el.data = { ...el.data, causes: [{ ...cause, follower_count: 0, consumers: {} }] };
-  assert.ok(el.causesCard().includes("no entity affected") && el.causesCard().split("data-fold=").length === 2, "an outage without follow-ups is a plain row inside the one fold of the group");
+  assert.ok(entriesOf(el).includes("no entity affected") && entriesOf(el).split("data-fold=").length === 1, "an outage without follow-ups is a plain row, not a fold");
+});
+
+test("the findings list is one list: a chain is one entry with a counter and opens into its parts; the flat list names the cause", () => {
+  const { el } = panel("en");
+  const f = (id, cause) => ({ rule_id: "entity.state_unavailable", object_id: id, classification: "unavailable", confidence: 0.75, key: id, ignored: false, cause_id: cause });
+  const app = { id: "app_down:a", kind: "app_down", object_type: "app", object_id: "a", name: "Zigbee2MQTT", follower_count: 0, total_followers: 2, child_ids: ["integration_down:e1"], parent_id: null, consumers: {}, impact: "high" };
+  const integ = { id: "integration_down:e1", kind: "integration_down", object_type: "config_entry", object_id: "e1", name: "MQTT", follower_count: 2, total_followers: 2, child_ids: [], parent_id: app.id, consumers: {}, impact: "high" };
+  el.data = { ...DATA, findings: [f("sensor.a", integ.id), f("sensor.b", integ.id), f("sensor.c")], causes: [app, integ] };
+  assert.equal(el.findingTotal(), 2, "the chain is one entry, the single finding another");
+  el.folds = { [`cause_${app.id}`]: true, [`cause_${integ.id}`]: true };
+  const html = el.findingsView();
+  assert.ok(html.includes("App Zigbee2MQTT is stopped") && html.includes("2 follow-ups") && html.includes("Integration MQTT is not loaded") && html.includes("sensor.a") && html.includes("sensor.c"));
+  assert.ok(!html.includes("Single findings"), "no separate groups");
+  el.findingWithFollowers = true;
+  assert.ok(!el.findingsView().includes("sensor.c"), "the filter keeps only entries with follow-ups");
+  el.findingWithFollowers = false; el.showFollowers = true;
+  assert.ok(el.findingsView().includes("Follow-up of MQTT"));
 });
 
 test("an object shows the rules it breaks on its overview, and nothing when there are none", () => {
@@ -3031,7 +3049,7 @@ test("the health card names the score and the count; the safety line shows backu
   el.journal = [{ plan_id: "c", status: "verified", finished_at: "2026-10-08T10:00:00+00:00", undoable: false }];
   assert.ok(el.safetyBar().includes("backup restore only"));
   el.data = { ...DATA, causes: [{ id: "integration_down:x", kind: "integration_down", object_type: "config_entry", object_id: "x", name: "Zigbee", follower_count: 47, consumers: { automation: 12, dashboard: 2 } }] };
-  assert.ok(el.causesCard().includes("47 entities, 12 automations, 2 dashboards affected"));
+  assert.ok(entriesOf(el).includes("47 entities, 12 automations, 2 dashboards affected"));
 });
 
 test("removing offers the recorder choice and sends it with the plan only when it is not 'keep'", async () => {
@@ -4350,10 +4368,10 @@ test("a cause with more than 20 follow-up findings pages them instead of cutting
   const findings = Array.from({ length: 25 }, (_, i) => ({ rule_id: "entity.state_unavailable", object_id: `sensor.n${i}`, classification: "unavailable", confidence: 0.75, key: `k${i}`, ignored: false, cause_id: cause.id }));
   el.data = { ...DATA, findings, causes: [cause] };
   el.folds = { [`cause_${cause.id}`]: true };
-  const first = el.causesCard();
+  const first = entriesOf(el);
   assert.ok(first.includes("sensor.n0") && !first.includes("sensor.n24") && first.includes("data-lpage"));
   el.pages[`cause_${cause.id}`] = 2;
-  assert.ok(el.causesCard().includes("sensor.n24"));
+  assert.ok(entriesOf(el).includes("sensor.n24"));
 });
 
 test("tiles tell their kind: a figure is flat, a filter has a funnel and is marked when on, a link has an arrow; a filter shows its note", () => {
