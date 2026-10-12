@@ -2895,6 +2895,24 @@ test("an outage without a finding is picked by its integration and marked instea
   assert.equal(el.causeList().length, 0);
 });
 
+test("the selection bar sets a mark on every picked object that can carry one", async () => {
+  const { el } = panel("en");
+  const calls = [];
+  const obj = (type, id) => ({ object_type: type, object_id: id, name: id, status: "active" });
+  const f = (rule, id) => ({ rule_id: rule, object_id: id, classification: "unavailable", confidence: 0.9, key: `${rule}|${id}`, ignored: false, evidence: [] });
+  el.data = { ...DATA, objects: [obj("entity", "sensor.a"), obj("automation", "automation.x")], findings: [f("entity.state_unavailable", "sensor.a"), f("automation.stale", "automation.x")], causes: [] };
+  el.findSel = new Set(["entity.state_unavailable|sensor.a", "automation.stale|automation.x"]);
+  assert.equal([...el.markTargets().values()].join(), "entity:sensor.a", "an automation cannot be marked");
+  assert.ok(el.findSelBar([]).includes('data-fsel-state="mark"'));
+  el.findSel.add("mark:config_entry:e1");
+  assert.equal(el.markKindsFor(el.markTargets()).join(), "expected_offline,seasonal,spare", "an integration takes fewer kinds");
+  el._hass = { language: "en", callWS: async msg => { calls.push(JSON.stringify(msg)); return msg.type === "ha_housekeeper/inventory" ? { ...DATA, findings: [], causes: [] } : {}; } };
+  el.bulk = { kind: "mark", reason: "away", days: 30, markKind: "seasonal", error: "" };
+  await el.commitBulk();
+  assert.equal(calls.filter(c => c.includes("mark_set")).length, 2);
+  assert.ok(calls[0].includes('"object_type":"entity"') && calls[0].includes('"kind":"seasonal"') && calls[0].includes('"days":30'));
+});
+
 test("an object shows the rules it breaks on its overview, and nothing when there are none", () => {
   const { el } = panel("en", { setTimeout: () => 0 });
   const mk = (id, ignored) => ({ object_type: "entity", object_id: id, name: id, key: `policy.entity_area|${id}|`, ignored, by: null });

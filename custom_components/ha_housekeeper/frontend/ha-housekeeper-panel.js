@@ -2439,7 +2439,7 @@ class FindingsMixin {
     if (!pageRows.length && !n) return "";
     // Nothing picked: only the box that picks the page. The actions appear with the first pick.
     if (!n) return `<div class="toolbar selhead"><label class="selall"><input type="checkbox" class="selbox" data-fsel-page> ${this.t("selectPage")}</label></div>`;
-    return `<div class="toolbar"><span class="date">${this.t("selectedCount", { count: n })}</span><button class="btn quiet" data-fsel-page>${this.t("selectPage")}</button><button class="btn quiet" data-fsel-clear>${this.t("clearSelection")}</button><span class="toolgap"></span>${["hidden", "known", "snoozed"].includes(this.findingStatus) ? `<div class="fbtns"><button class="btn accent" data-fsel-unhide><ha-icon icon="mdi:eye-outline"></ha-icon>${this.t("findUnhide")}</button></div>` : `<div class="fbtns"><button class="btn" data-fsel-state="known">${this.t("fselKnown")}</button><button class="btn" data-fsel-state="snoozed">${this.t("fselSnooze")}</button>${this.selectionOnlyBroken() ? "" : `<button class="btn" data-fsel-state="label">${this.t("fselLabel")}</button>`}<button class="btn" data-fsel-hide>${this.t("findHideSelected")}</button></div>`}</div>${this.bulkForm()}`;
+    return `<div class="toolbar"><span class="date">${this.t("selectedCount", { count: n })}</span><button class="btn quiet" data-fsel-page>${this.t("selectPage")}</button><button class="btn quiet" data-fsel-clear>${this.t("clearSelection")}</button><span class="toolgap"></span>${["hidden", "known", "snoozed"].includes(this.findingStatus) ? `<div class="fbtns"><button class="btn accent" data-fsel-unhide><ha-icon icon="mdi:eye-outline"></ha-icon>${this.t("findUnhide")}</button></div>` : `<div class="fbtns"><button class="btn" data-fsel-state="known">${this.t("fselKnown")}</button><button class="btn" data-fsel-state="snoozed">${this.t("fselSnooze")}</button>${this.selectionOnlyBroken() ? "" : `<button class="btn" data-fsel-state="label">${this.t("fselLabel")}</button>`}${this.markTargets().size ? `<button class="btn" data-fsel-state="mark">${this.t("markSet")}</button>` : ""}<button class="btn" data-fsel-hide>${this.t("findHideSelected")}</button></div>`}</div>${this.bulkForm()}`;
   }
 
   // Takes the selected findings that the person had hidden, marked as known or snoozed back into the open list.
@@ -8756,10 +8756,50 @@ class FindingStatusMixin {
     return `${picker}${groups || `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("doneNone", { days })}</div>`}${note}`;
   }
 
+  // The selected rows whose object can carry a mark (entity, device, integration, app): selection key -> object key.
+  markTargets() {
+    const out = new Map();
+    for (const key of this.findSel) {
+      if (this.isMarkKey(key)) { out.set(key, key.slice(5)); continue; }
+      const finding = this.data.findings.find(f => f.key === key);
+      const objectKey = finding && this.findingKey(finding);
+      if (objectKey && MARK_TYPES.includes(objectKey.split(":")[0])) out.set(key, objectKey);
+    }
+    return out;
+  }
+
+  // The kinds every selected object accepts: integrations and apps take fewer than entities and devices.
+  markKindsFor(targets) {
+    const all = ["expected_offline", "seasonal", "spare", "keep", "replaced"], few = ["expected_offline", "seasonal", "spare"];
+    return [...targets.values()].some(k => ["config_entry", "app"].includes(k.split(":")[0])) ? few : all.filter(k => k !== "replaced");
+  }
+
+  async commitMarkBulk() {
+    const b = this.bulk, targets = this.markTargets();
+    const failed = await this.runBulk([...targets.keys()], async key => {
+      const [object_type, ...rest] = targets.get(key).split(":");
+      const msg = { type: "ha_housekeeper/mark_set", object_type, object_id: rest.join(":"), kind: b.markKind || this.markKindsFor(targets)[0], reason: b.reason.trim() };
+      if (Number(b.days)) msg.days = Number(b.days);
+      await this._hass.callWS(msg);
+    });
+    await this.refreshData();
+    if (!failed) this.bulk = null;
+    this.render();
+  }
+
   // The form under the selection bar: known or snoozed for all selected findings at once.
   bulkForm() {
     const b = this.bulk;
     if (!b) return "";
+    if (b.kind === "mark") {
+      const targets = this.markTargets(), kinds = this.markKindsFor(targets);
+      const days = [0, 30, 90, 180, 365].map(n => `<option value="${n}" ${Number(b.days) === n ? "selected" : ""}>${n ? this.t("decideDays", { n }) : this.t("markNever")}</option>`).join("");
+      return `<form class="polform bulkform" data-bulk-form><strong>${this.t("markTitle")} (${this.formatNumber(targets.size)})</strong>
+        <select data-bulk-markkind aria-label="${this.esc(this.t("markKind"))}">${kinds.map(k => `<option value="${k}" ${(b.markKind || kinds[0]) === k ? "selected" : ""}>${this.t(`mark_${k}`)}</option>`).join("")}</select>
+        <input data-bulk-reason maxlength="200" autocomplete="off" value="${this.esc(b.reason)}" aria-label="${this.esc(this.t("markReason"))}" placeholder="${this.esc(this.t("markReason"))}">
+        <select data-bulk-days aria-label="${this.esc(this.t("markReview"))}">${days}</select>
+        <button type="submit" class="btn primary">${this.t("saveOptions")}</button><button type="button" class="btn quiet" data-bulk-cancel>${this.t("cancelRun")}</button></form>`;
+    }
     if (b.kind === "area") return this.areaForm();
     if (b.kind === "label") {
       const labels = (this.data.objects || []).filter(o => o.object_type === "label").sort((x, y) => String(x.name).localeCompare(String(y.name)));
@@ -8796,6 +8836,7 @@ class FindingStatusMixin {
     if (!b) return;
     if (b.kind === "label") return this.makeLabelPlan();
     if (b.kind === "area") return this.makeAreaPlan();
+    if (b.kind === "mark") return this.commitMarkBulk();
     if (b.kind === "known" && !b.reason.trim()) { b.error = "decideNeedReason"; this.render(); return; }
     const keys = [...this.findSel].filter(key => this.isMarkKey(key) || this.data.findings.some(f => f.key === key && !f.ignored));
     const failed = await this.runBulk(keys, async key => {
@@ -8841,7 +8882,7 @@ class FindingStatusMixin {
 
   bindFindingStatus(root) {
     root.querySelectorAll("[data-fstatus]").forEach(el => el.onclick = () => { const s = el.dataset.fstatus === "open" ? "" : el.dataset.fstatus; this.findingStatus = this.findingStatus === s ? "" : s; this.pages = {}; this.render(); });
-    root.querySelectorAll("[data-fsel-state]").forEach(el => el.onclick = () => { this.bulk = { kind: el.dataset.fselState, reason: "", days: 30, error: "" }; this.render(); this.shadowRoot?.querySelector?.("[data-bulk-reason]")?.focus?.(); });
+    root.querySelectorAll("[data-fsel-state]").forEach(el => el.onclick = () => { this.bulk = { kind: el.dataset.fselState, reason: "", days: el.dataset.fselState === "mark" ? 0 : 30, markKind: "", error: "" }; this.render(); this.shadowRoot?.querySelector?.("[data-bulk-reason]")?.focus?.(); });
     root.querySelectorAll("[data-notdup]").forEach(el => el.onclick = () => this.markNotDuplicate(el.dataset.notdup));
     const form = root.querySelector("[data-bulk-form]");
     if (form) {
@@ -8852,6 +8893,8 @@ class FindingStatusMixin {
       if (label) label.onchange = ev => { this.bulk.label = ev.target.value; };
       const area = form.querySelector("[data-bulk-area]");
       if (area) area.onchange = ev => { this.bulk.area = ev.target.value; };
+      const markKind = form.querySelector("[data-bulk-markkind]");
+      if (markKind) markKind.onchange = ev => { this.bulk.markKind = ev.target.value; };
       const days = form.querySelector("[data-bulk-days]");
       if (days) days.onchange = ev => { this.bulk.days = Number(ev.target.value); };
       form.querySelector("[data-bulk-cancel]").onclick = () => { this.bulk = null; this.render(); };
