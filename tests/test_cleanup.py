@@ -318,3 +318,19 @@ def test_a_blocked_automation_may_be_disabled_but_a_working_one_may_not() -> Non
         "entity_working"
         in verdict([stuck], [], "automation.stuck", kind="remove_entity")["reasons"]
     )
+
+
+def test_the_journal_list_counts_what_was_done_and_names_the_kinds() -> None:
+    from custom_components.ha_housekeeper.cleanup import plan_summary
+
+    done = {"state": "done"}
+    plan = {
+        "plan_id": "p",
+        "actions": [
+            {"kind": "disable_entity", "object_id": "sensor.a", "result": done},
+            {"kind": "disable_entity", "object_id": "sensor.a", "result": done},
+            {"kind": "rename_entity", "object_id": "sensor.b", "result": {"state": "failed"}},
+        ],
+    }
+    listed = plan_summary(plan)
+    assert (listed["done_count"], listed["kinds"]) == (1, ["disable_entity"])

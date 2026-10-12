@@ -249,6 +249,8 @@ class PlanSummary(TypedDict):
     followup_until: str | None
     objects: list[str]
     done_objects: list[str]
+    done_count: int
+    kinds: list[str]
 
 
 class RecorderSpan(TypedDict):

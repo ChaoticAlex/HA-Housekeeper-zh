@@ -1359,8 +1359,14 @@ OBJECT_LIST_LIMIT = (
 )
 
 
+def _done(action: dict[str, Any]) -> bool:
+    return (action.get("result") or {}).get("state") == "done"
+
+
 def plan_summary(plan: dict[str, Any]) -> dict[str, Any]:
     """What the journal list shows: no actions and no restore data."""
+    actions = plan.get("actions", [])
+    done_objects = {a["object_id"] for a in actions if a.get("object_id") and _done(a)}
     return {
         "plan_id": plan["plan_id"],
         "created_at": plan.get("created_at"),
@@ -1377,13 +1383,10 @@ def plan_summary(plan: dict[str, Any]) -> dict[str, Any]:
         "objects": sorted({a["object_id"] for a in plan.get("actions", []) if a.get("object_id")})[
             :OBJECT_LIST_LIMIT
         ],
-        "done_objects": sorted(
-            {
-                a["object_id"]
-                for a in plan.get("actions", [])
-                if a.get("object_id") and (a.get("result") or {}).get("state") == "done"
-            }
-        )[:OBJECT_LIST_LIMIT],
+        "done_objects": sorted(done_objects)[:OBJECT_LIST_LIMIT],
+        # The full number and the kinds of what was done, for the "Done" list of the findings page.
+        "done_count": len(done_objects),
+        "kinds": sorted({a["kind"] for a in actions if a.get("kind") and _done(a)}),
     }
 
 

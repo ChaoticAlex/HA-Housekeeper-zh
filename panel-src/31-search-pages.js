@@ -61,7 +61,7 @@ class SearchPagesMixin {
     const filters = [];
     const states = ["", "new", "inwork", "known", "snoozed", "hidden", "fixed"];
     for (const state of states) {
-      const count = state === "" ? this.findingTotal() : state === "fixed" ? this.fixedLately().length : this.statusCount(state);
+      const count = state === "" ? this.findingTotal() : state === "fixed" ? this.doneCount() : this.statusCount(state);
       if (count) filters.push({ findingStatus: state, label: `${this.t("findingsNav")}: ${this.t(state === "" ? "stateOpen" : `state_${state}`)}`, count, words: SEARCH_STATE_WORDS[state] });
     }
     for (const [status, count] of Object.entries(this.data?.meta?.status_counts || {})) {

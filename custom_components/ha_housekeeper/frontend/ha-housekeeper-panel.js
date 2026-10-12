@@ -6021,7 +6021,7 @@ class SearchPagesMixin {
     const filters = [];
     const states = ["", "new", "inwork", "known", "snoozed", "hidden", "fixed"];
     for (const state of states) {
-      const count = state === "" ? this.findingTotal() : state === "fixed" ? this.fixedLately().length : this.statusCount(state);
+      const count = state === "" ? this.findingTotal() : state === "fixed" ? this.doneCount() : this.statusCount(state);
       if (count) filters.push({ findingStatus: state, label: `${this.t("findingsNav")}: ${this.t(state === "" ? "stateOpen" : `state_${state}`)}`, count, words: SEARCH_STATE_WORDS[state] });
     }
     for (const [status, count] of Object.entries(this.data?.meta?.status_counts || {})) {
@@ -8555,7 +8555,7 @@ Object.assign(TEXT.en, {
 // FindingStatusMixin: the status of a finding as the list shows it. Some are decided by the user (known,
 // snoozed, hidden), some follow from what Housekeeper sees (new, in work, fixed). Nothing here stores anything:
 // the decisions are the ones of the ignore list, the rest is derived from the scan and the journal of plans.
-const NEW_FINDING_DAYS = 7, FIXED_DAYS = 30, ACTIVE_PLAN = ["dry_run", "backup", "running"];
+const NEW_FINDING_DAYS = 7, DONE_PERIODS = [7, 30, 90], ACTIVE_PLAN = ["dry_run", "backup", "running"];
 const FINDING_STATES = ["new", "inwork", "known", "snoozed", "hidden"];
 
 Object.assign(TEXT.de, {
@@ -8584,16 +8584,12 @@ class FindingStatusMixin {
     return rows.length ? `<div class="panel u-mb14">${rows.join("")}</div>` : "";
   }
 
-  // The objects of drafted or running plans, and those a finished plan changed lately; rebuilt when the journal changes.
+  // The objects of drafted or running plans; rebuilt when the journal changes.
   planSets() {
     if (this._planSets?.journal === this.journal) return this._planSets;
-    const active = new Set(), done = new Map(), limit = Date.now() - FIXED_DAYS * 864e5;
-    for (const plan of this.journal || []) {
-      if (ACTIVE_PLAN.includes(plan.status)) (plan.objects || []).forEach(id => active.add(id));
-      const at = plan.finished_at ? Date.parse(plan.finished_at) : 0;
-      if (at >= limit) (plan.done_objects || []).forEach(id => { if (!done.has(id) || done.get(id) < at) done.set(id, at); });
-    }
-    this._planSets = { journal: this.journal, active, done };
+    const active = new Set();
+    for (const plan of this.journal || []) if (ACTIVE_PLAN.includes(plan.status)) (plan.objects || []).forEach(id => active.add(id));
+    this._planSets = { journal: this.journal, active };
     return this._planSets;
   }
 
@@ -8633,24 +8629,77 @@ class FindingStatusMixin {
 
   statusChips() {
     const chip = (state, label, count) => `<button class="chip ${(this.findingStatus || "") === state ? "active" : ""}" data-fstatus="${state || "open"}">${label} (${this.formatNumber(count)})</button>`;
-    const decided = FINDING_STATES.filter(s => this.statusCount(s)), fixed = this.fixedLately().length;
+    const decided = FINDING_STATES.filter(s => this.statusCount(s)), fixed = this.doneCount();
     if (!decided.length && !fixed) return "";
     return [chip("", this.t("stateOpen"), this.findingTotal()), ...decided.map(s => chip(s, this.t(`state_${s}`), this.statusCount(s))), ...(fixed ? [chip("fixed", this.t("state_fixed"), fixed)] : [])].join("");
   }
 
-  // Objects a plan changed lately that no longer have a finding: the closed cases.
-  fixedLately() {
-    const withFinding = new Set(this.data.findings.map(f => f.object_id));
-    return [...this.planSets().done].filter(([id]) => !withFinding.has(id)).sort((a, b) => b[1] - a[1]);
+  doneDays() { return this.doneDaysSel || 30; }
+
+  // The plans that finished in the chosen period and did something, newest first: one event each.
+  doneEvents() {
+    const limit = Date.now() - this.doneDays() * 864e5;
+    return (this.journal || []).filter(p => p.finished_at && Date.parse(p.finished_at) >= limit && (p.done_count ?? (p.done_objects || []).length) > 0)
+      .sort((x, y) => Date.parse(y.finished_at) - Date.parse(x.finished_at));
   }
 
-  // The closed cases of the last days as rows, for the status "fixed" of the list.
+  // What ended between two scans without a plan: read from the comparison with the scan closest to the period. Loaded when the list opens.
+  endedNow() { return this.ended?.key === `${this.doneDays()}|${this.data?.meta?.scanned_at}` && !this.ended.error ? this.ended : null; }
+
+  // Findings that went away by themselves and were not counted as done by a plan: "back in order" ones are good news.
+  endedSelf() {
+    const e = this.endedNow();
+    if (!e) return { back: [], removed: [], unread: [], other: [] };
+    const byPlan = new Set((this.journal || []).flatMap(p => p.done_objects || []));
+    const rest = list => list.filter(f => !byPlan.has(f.object_id));
+    const by = reasons => rest(e.ended).filter(f => reasons.includes(f.reason));
+    return { back: rest(e.resolved), removed: by(["object_removed"]), unread: by(["unchecked"]), other: by(["unknown", "rules_changed"]) };
+  }
+
+  // The number on the chip: plans that fixed something, plus findings that ended by themselves in good order.
+  doneCount() { return this.doneEvents().length + this.endedSelf().back.length; }
+
+  async loadEnded() {
+    const days = this.doneDays(), key = `${days}|${this.data?.meta?.scanned_at}`;
+    if (this._endedKey === key || !this._hass) return;
+    this._endedKey = key;
+    try {
+      let c = await this._hass.callWS({ type: "ha_housekeeper/compare", baseline: "previous" });
+      const want = Date.now() - days * 864e5, list = (c.baselines || []).filter(b => b.at);
+      const best = list.length ? list.reduce((x, y) => (Math.abs(Date.parse(y.at) - want) < Math.abs(Date.parse(x.at) - want) ? y : x)) : null;
+      if (best && best.id !== "previous") c = await this._hass.callWS({ type: "ha_housekeeper/compare", baseline: best.id });
+      const ok = c.available !== false;
+      this.ended = { key, since: c.baseline_at, resolved: ok ? c.resolved_findings?.items || [] : [], ended: ok ? c.ended_findings?.items || [] : [] };
+    } catch (_) { this.ended = { key, error: true }; }
+    this.render();
+  }
+
+  // "Done": what a plan fixed, and what ended by itself, in the chosen period. Only the first two groups count as fixed.
   fixedList() {
-    const fixed = this.fixedLately();
-    if (!fixed.length) return `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("fixedNone", { days: FIXED_DAYS })}</div>`;
-    const rows = fixed.map(([id, at]) => `<div class="row"><span class="tile ok"><ha-icon icon="mdi:check"></ha-icon></span><span class="row-text"><strong>${this.esc(this.findObject(`entity:${id}`)?.name || id)}</strong><small>${this.esc(id)} · ${this.formatDate(new Date(at).toISOString())}</small></span></div>`);
-    const pg = this.paginate("fixedlately", rows);
-    return `<p class="factnote">${this.t("fixedTitle", { days: FIXED_DAYS })}</p>${pg.rows.join("")}${pg.footer}`;
+    this.loadEnded();
+    const days = this.doneDays(), e = this.endedNow(), self = this.endedSelf();
+    const picker = `<label class="factnote">${this.t("donePeriod")} <select data-done-days aria-label="${this.esc(this.t("donePeriod"))}">${DONE_PERIODS.map(n => `<option value="${n}" ${n === days ? "selected" : ""}>${this.t("doneDays", { n })}</option>`).join("")}</select></label>`;
+    const planRows = this.doneEvents().map(p => {
+      const n = p.done_count ?? (p.done_objects || []).length;
+      const names = (p.done_objects || []).slice(0, 3).map(id => this.findObject(`entity:${id}`)?.name || id).join(", ") + (n > 3 ? " …" : "");
+      const kinds = (p.kinds || []).map(k => { const label = this.t(`actKind_${k}`); return label === `actKind_${k}` ? k : label; }).join(", ");
+      return `<button class="row" data-jump="journal"><span class="tile ok"><ha-icon icon="mdi:check"></ha-icon></span><span class="row-text"><strong>${this.esc(kinds || this.t("donePlan"))}</strong><small>${this.esc(this.t("doneObjects", { n: this.formatNumber(n) }))}: ${this.esc(names)} · ${this.esc(this.formatDate(p.finished_at))} · ${this.t(p.undoable ? "doneUndoYes" : "doneUndoNo")}</small></span></button>`;
+    });
+    const group = (id, title, tone, rows, open) => {
+      if (!rows.length) return "";
+      const pg = this.paginate(`done_${id}`, rows);
+      return this.fold(`done_${id}`, { tone, title: this.t(title), pill: this.formatNumber(rows.length) }, pg.rows.join("") + pg.footer, open);
+    };
+    const row = (f, tone) => `<div class="row"><span class="tile ${tone}"><ha-icon icon="mdi:${tone === "ok" ? "check" : "help-circle-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(this.findObject(`${f.rule_id.split(".")[0]}:${f.object_id}`)?.name || f.object_id)}</strong><small>${this.esc(this.findingTitle(f))}</small></span></div>`;
+    const groups = [
+      group("plan", "doneByPlan", "ok", planRows, true),
+      group("back", "doneBack", "ok", self.back.map(f => row(f, "ok")), true),
+      group("removed", "doneRemoved", "mute", self.removed.map(f => row(f, "mute")), false),
+      group("unread", "doneUnread", "mute", self.unread.map(f => row(f, "mute")), false),
+      group("other", "doneOther", "mute", self.other.map(f => row(f, "mute")), false),
+    ].join("");
+    const note = e ? `<p class="factnote">${this.esc(this.t("doneSince", { date: this.formatDate(e.since) }))}</p>` : "";
+    return `${picker}${groups || `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("doneNone", { days })}</div>`}${note}`;
   }
 
   // The form under the selection bar: known or snoozed for all selected findings at once.
@@ -8754,13 +8803,13 @@ class FindingStatusMixin {
   }
 }
 Object.assign(TEXT.de, {
-  stateOpen: "Offen", state_fixed: "Zuletzt behoben", fixedNone: "In den letzten {days} Tagen wurde nichts behoben.", stateNew: "Neu", stateInwork: "In Arbeit", state_new: "Neu", state_inwork: "In Arbeit", state_known: "Bekannt", state_snoozed: "Zurückgestellt", state_hidden: "Ausgeblendet",
-  fixedTitle: "Zuletzt behoben (letzte {days} Tage)", fselKnown: "Als bekannt markieren", fselSnooze: "Zurückstellen", fselLabel: "Label ergänzen", state_label: "Label ergänzen", labelChoose: "Label", labelNone: "Es gibt noch kein Label. Lege in Home Assistant eines an (Einstellungen → Bereiche, Labels & Zonen → Labels).", labelNoEntities: "Unter der Auswahl sind keine Entitäten, Automationen, Skripte oder Szenen.", confirmedSummaryLabel: "{count} Entitäten bekommen ein Label (nur in Home Assistant, Rückgängig entfernt es wieder).", reason_label_missing: "Das Label gibt es nicht mehr.", reason_already_labelled: "Hat dieses Label schon.", result_labeled: "Label ergänzt", undo_unlabelled: "Label wieder entfernt",
+  stateOpen: "Offen", state_fixed: "Erledigt", stateNew: "Neu", stateInwork: "In Arbeit", state_new: "Neu", state_inwork: "In Arbeit", state_known: "Bekannt", state_snoozed: "Zurückgestellt", state_hidden: "Ausgeblendet",
+  doneNone: "In den letzten {days} Tagen wurde nichts erledigt.", donePeriod: "Zeitraum", doneDays: "{n} Tage", doneByPlan: "Durch einen Plan behoben", doneBack: "Von selbst wieder in Ordnung", doneRemoved: "Objekt entfernt (nicht behoben)", doneUnread: "Quelle nicht gelesen (nicht behoben)", doneOther: "Grund unbekannt (nicht behoben)", donePlan: "Plan", doneObjects: "{n} Objekte", doneUndoYes: "rückgängig möglich: ja", doneUndoNo: "rückgängig möglich: nein", doneSince: "Verglichen mit dem Scan vom {date}.", actKind_add_label: "Label ergänzt", actKind_delete_automation: "Automation gelöscht", actKind_delete_backup: "Backup gelöscht", actKind_migrate_meter: "Zähler gewechselt", actKind_purge_statistics: "Statistiken bereinigt", actKind_trim_history: "Verlauf gekürzt", actKind_refactor_automation: "Automation umgebaut", actKind_rename_entity: "Entität umbenannt", actKind_replace_references: "Verweise ersetzt", actKind_set_area: "Bereich gesetzt", actKind_disable_entity: "Entität deaktiviert", actKind_remove_entity: "Entität entfernt", actKind_disable_device: "Gerät deaktiviert", actKind_remove_device: "Gerät entfernt", actKind_forget_device: "Gerät vergessen", actKind_repair_range: "Zählerbereich repariert", actKind_quarantine: "In Quarantäne gelegt", fselKnown: "Als bekannt markieren", fselSnooze: "Zurückstellen", fselLabel: "Label ergänzen", state_label: "Label ergänzen", labelChoose: "Label", labelNone: "Es gibt noch kein Label. Lege in Home Assistant eines an (Einstellungen → Bereiche, Labels & Zonen → Labels).", labelNoEntities: "Unter der Auswahl sind keine Entitäten, Automationen, Skripte oder Szenen.", confirmedSummaryLabel: "{count} Entitäten bekommen ein Label (nur in Home Assistant, Rückgängig entfernt es wieder).", reason_label_missing: "Das Label gibt es nicht mehr.", reason_already_labelled: "Hat dieses Label schon.", result_labeled: "Label ergänzt", undo_unlabelled: "Label wieder entfernt",
   notDuplicate: "Ist kein Duplikat", notDuplicateReason: "Kein Duplikat (bestätigt)", openTwin: "Funktionierende Entität öffnen", markKnown: "Als bekannt markieren",
 });
 Object.assign(TEXT.en, {
-  stateOpen: "Open", state_fixed: "Fixed lately", fixedNone: "Nothing was fixed in the last {days} days.", stateNew: "New", stateInwork: "In work", state_new: "New", state_inwork: "In work", state_known: "Known", state_snoozed: "Snoozed", state_hidden: "Hidden",
-  fixedTitle: "Fixed lately (last {days} days)", fselKnown: "Mark as known", fselSnooze: "Snooze", fselLabel: "Add label", state_label: "Add label", labelChoose: "Label", labelNone: "There is no label yet. Create one in Home Assistant (Settings → Areas, labels & zones → Labels).", labelNoEntities: "The selection holds no entities, automations, scripts or scenes.", confirmedSummaryLabel: "{count} entities get a label (in Home Assistant only, undo takes it off again).", reason_label_missing: "The label no longer exists.", reason_already_labelled: "Already has this label.", result_labeled: "Label added", undo_unlabelled: "label taken off again",
+  stateOpen: "Open", state_fixed: "Done", stateNew: "New", stateInwork: "In work", state_new: "New", state_inwork: "In work", state_known: "Known", state_snoozed: "Snoozed", state_hidden: "Hidden",
+  doneNone: "Nothing was done in the last {days} days.", donePeriod: "Period", doneDays: "{n} days", doneByPlan: "Fixed by a plan", doneBack: "Back in order by itself", doneRemoved: "Object removed (not fixed)", doneUnread: "Source not read (not fixed)", doneOther: "Reason unknown (not fixed)", donePlan: "Plan", doneObjects: "{n} objects", doneUndoYes: "can be undone: yes", doneUndoNo: "can be undone: no", doneSince: "Compared with the scan of {date}.", actKind_add_label: "Label added", actKind_delete_automation: "Automation deleted", actKind_delete_backup: "Backup deleted", actKind_migrate_meter: "Meter replaced", actKind_purge_statistics: "Statistics cleaned", actKind_trim_history: "History trimmed", actKind_refactor_automation: "Automation reworked", actKind_rename_entity: "Entity renamed", actKind_replace_references: "References replaced", actKind_set_area: "Area set", actKind_disable_entity: "Entity disabled", actKind_remove_entity: "Entity removed", actKind_disable_device: "Device disabled", actKind_remove_device: "Device removed", actKind_forget_device: "Device forgotten", actKind_repair_range: "Meter range repaired", actKind_quarantine: "Put in quarantine", fselKnown: "Mark as known", fselSnooze: "Snooze", fselLabel: "Add label", state_label: "Add label", labelChoose: "Label", labelNone: "There is no label yet. Create one in Home Assistant (Settings → Areas, labels & zones → Labels).", labelNoEntities: "The selection holds no entities, automations, scripts or scenes.", confirmedSummaryLabel: "{count} entities get a label (in Home Assistant only, undo takes it off again).", reason_label_missing: "The label no longer exists.", reason_already_labelled: "Already has this label.", result_labeled: "Label added", undo_unlabelled: "label taken off again",
   notDuplicate: "Not a duplicate", notDuplicateReason: "Not a duplicate (confirmed)", openTwin: "Open the working entity", markKnown: "Mark as known",
 });
 
@@ -13511,6 +13560,7 @@ class HAHousekeeperPanel extends HTMLElement {
     });
     root.querySelector("[data-toggle-followers]")?.addEventListener("click", () => { this.showFollowers = !this.showFollowers; this.pages = {}; this.render(); });
     root.querySelector("[data-with-followers]")?.addEventListener("click", () => { this.findingWithFollowers = !this.findingWithFollowers; this.pages = {}; this.render(); });
+    root.querySelector("[data-done-days]")?.addEventListener("change", e => { this.doneDaysSel = Number(e.target.value); this.pages = {}; this.render(); });
     root.querySelector("[data-finding-due]")?.addEventListener("click", () => { this.findingDue = !this.findingDue; this.pages = {}; this.render(); });
     this.bindMarks(root);
     this.bindStale(root);

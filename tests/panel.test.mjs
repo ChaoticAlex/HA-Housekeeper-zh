@@ -2865,6 +2865,21 @@ test("the findings list is one list: a chain is one entry with a counter and ope
   assert.ok(el.findingsView().includes("Follow-up of MQTT"));
 });
 
+test("Done lists what a plan fixed and what ended by itself; objects removed or sources not read are not fixed", async () => {
+  const { el } = panel("en");
+  const now = new Date().toISOString();
+  el.data = { ...DATA, findings: [] };
+  el.journal = [{ plan_id: "p1", status: "executed", finished_at: now, undoable: true, kinds: ["disable_entity"], done_count: 400, done_objects: ["sensor.z"] }];
+  el._hass = { language: "en", callWS: async () => ({ available: true, baseline_at: now, baselines: [], resolved_findings: { items: [{ rule_id: "entity.state_unavailable", object_id: "sensor.back" }, { rule_id: "entity.state_unavailable", object_id: "sensor.z" }] }, ended_findings: { items: [{ rule_id: "entity.state_unavailable", object_id: "sensor.gone", reason: "object_removed" }] } }) };
+  el.render = () => {};
+  await el.loadEnded();
+  assert.equal(el.doneCount(), 2, "the plan and the one that came back; the plan's own object is not counted twice");
+  const html = el.fixedList();
+  assert.ok(html.includes("Fixed by a plan") && html.includes("Entity disabled") && html.includes("400 objects") && html.includes("can be undone: yes"));
+  assert.ok(html.includes("Back in order by itself") && html.includes("sensor.back") && !html.includes("sensor.z</strong>"));
+  assert.ok(html.includes("Object removed (not fixed)"));
+});
+
 test("an object shows the rules it breaks on its overview, and nothing when there are none", () => {
   const { el } = panel("en", { setTimeout: () => 0 });
   const mk = (id, ignored) => ({ object_type: "entity", object_id: id, name: id, key: `policy.entity_area|${id}|`, ignored, by: null });
@@ -3195,7 +3210,7 @@ test("findings get a status: known, snoozed, hidden, new and in work, and the li
   assert.equal(keys("snoozed"), "b");
   assert.equal(keys("new"), "c");
   assert.equal(keys("inwork"), "d");
-  assert.equal(el.fixedLately().map(([id]) => id).join(), "sensor.z");
+  assert.equal(el.doneEvents().map(p => p.plan_id).join(), "p2");
   el._hass = { language: "en", callWS: async msg => { calls.push(msg); return {}; } };
   el.findSel = new Set(["c"]);
   el.bulk = { kind: "known", reason: "", days: 30, error: "" };
