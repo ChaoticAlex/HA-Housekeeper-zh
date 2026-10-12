@@ -4119,6 +4119,15 @@ test("storage shows the key figures, a red disk at 96 % and the Supervisor categ
   assert.ok(shadow.innerHTML.includes("card.js") && shadow.innerHTML.includes("Ordner") && shadow.innerHTML.includes("Motion light") && shadow.innerHTML.includes(".storage"), "cards, blueprints and the other entries share one tab");
 });
 
+test("the storage tiles draw a line from an hour of samples on, and say it is building before", () => {
+  const { el } = panel("en");
+  assert.ok(el.sysLine({ points: [], span: 0 }, 2).includes("within the first hour"));
+  const points = [0, 1, 2, 3, 4].map(i => [i * 3600, 40, 50 + i, 10, 1, 30]);
+  const html = el.sysLine({ points, span: 4 * 3600 }, 3);
+  assert.ok(html.includes("<polyline") && html.includes("last 4 h") && html.includes("peak 30"));
+  assert.ok(!el.sysLine({ points, span: 4 * 3600 }, 2).includes("peak"), "only the CPU shows a peak");
+});
+
 test("without a Supervisor only the folders show and there is nothing to switch", () => {
   const { el, shadow } = systemPanel();
   el._sys.storage.data = { ...SYSTEM, supervisor: false, categories: {}, apps: [] };

@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Speicher:** Die Kacheln Speicher, Arbeitsspeicher, Prozessor und Swap zeigen eine Kurve der letzten Tage (ein Wert alle fünf Minuten, sieben Tage lang gehalten; beim Prozessor auch die Spitze). Eine Stunde nach der Installation erscheint die erste Kurve.
 - **Speicher:** Die zwei Kacheln „Belegung“ und „Sonstiges“ sind weg; drei Chips (Nach Kategorie, Nach Ordner, Weitere) wählen die Liste, jede mit eigener Überschrift.
 - **Start von Home Assistant:** Das Banner nennt den Schritt (Home Assistant lädt, Wartezeit mit Countdown, abschließender Scan mit Fortschritt) statt nur „startet noch“.
 - **Blueprints und Detailseite:** Jede Blueprint-Art ist ein Bereich mit Zahl (offen nur, wenn es Funde gibt); auf der Detailseite einer Entität oder eines Geräts ist „Umbenennen und Bereich“ eingeklappt.
@@ -66,6 +67,7 @@
 
 ### English
 
+- **Storage:** The disk, memory, CPU and swap tiles show a line of the last days (one value every five minutes, kept for seven days; the CPU also shows its peak). The first line appears an hour after installing.
 - **Storage:** The two tiles “Usage” and “Other” are gone; three chips (By category, By folder, More) pick the list, each with its own heading.
 - **Home Assistant start:** The banner names the step (Home Assistant loading, waiting time with a countdown, final scan with progress) instead of just “still starting”.
 - **Blueprints and detail page:** Each blueprint kind is a section with its number (open only when there are findings); on the detail page of an entity or device "Rename and area" is folded.

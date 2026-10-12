@@ -78,6 +78,7 @@ from .hygiene import (
 from .ignored import IgnoreStore
 from .impact import apply_impact
 from .issues import async_sync_issues
+from .load_history import LoadStore
 from .log_facts import log_facts
 from .maintenance import PreflightStore
 from .marks import KINDS, KINDS_OF, MarkStore, apply_marks, mark_key
@@ -628,6 +629,7 @@ class InventoryScanner:
         self.events = EventLog(hass)
         self.marks = MarkStore(hass)
         self.stale = StaleStore(hass)
+        self.load = LoadStore(hass)
         self._started = datetime.now(UTC)
         self.goals = GoalStore(hass)
         self.criteria = CriteriaStore(hass)
@@ -681,6 +683,7 @@ class InventoryScanner:
         await self.events.async_load()
         await self.marks.async_load()
         await self.stale.async_load()
+        await self.load.async_load()
         await self.goals.async_load()
         await self.criteria.async_load()
         await self.coverage.async_load()

@@ -48,6 +48,7 @@ async def websocket_system_usage(
     try:
         async with asyncio.timeout(SYSTEM_TIMEOUT):
             result = await system_usage(hass, _used_card_types(scanner))
+        result["history"] = scanner.load.series()
     except Exception as err:
         connection.send_error(msg["id"], "system_failed", f"{type(err).__name__}: {err}")
         return

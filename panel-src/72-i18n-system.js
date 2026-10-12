@@ -1,6 +1,6 @@
 // Texts for storage and system, access and data flow, the credential overview and the sidebar button; merged into TEXT.
 Object.assign(TEXT.de, {
-  sysTabUsage: "Belegung", sysTabUsageHint: "Kategorien und Ordner", sysByCategory: "Nach Kategorie", sysByFolder: "Nach Ordner unter /config", sysByMisc: "Weitere", sysHeadCategory: "Belegung nach Kategorie", sysHeadFolder: "Belegung nach Ordner", sysAppsHint: "Apps und Custom-Integrationen mit Größe, CPU und RAM stehen unter",
+  sysTabUsage: "Belegung", sysTabUsageHint: "Kategorien und Ordner", sysByCategory: "Nach Kategorie", sysByFolder: "Nach Ordner unter /config", sysByMisc: "Weitere", sysLineBuilding: "Verlauf entsteht in der ersten Stunde", sysLineHours: "letzte {n} Std.", sysLineDays: "letzte {n} Tage", sysLinePeak: "Spitze {n}", sysLineLabel: "Verlauf, {span}: von {from} auf {to}", sysHeadCategory: "Belegung nach Kategorie", sysHeadFolder: "Belegung nach Ordner", sysAppsHint: "Apps und Custom-Integrationen mit Größe, CPU und RAM stehen unter",
   sysTabMisc: "Sonstiges", sysTabMiscHint: "Karten, Blueprints, übrige Ordner", sysSecOther: "Weitere Ordner und Dateien in /config", sysNoOther: "Außer den bekannten Orten wurde unter /config nichts Messbares gefunden.", sysOtherMore: "Dazu {n} kleinere Einträge mit zusammen {size}.", sysKindFolder: "Ordner", sysKindFile: "Datei",
  
   haMenu: "Seitenleiste von Home Assistant öffnen",
@@ -55,7 +55,7 @@ Object.assign(TEXT.de, {
   secFootnote: "Housekeeper erkennt Zugangsdaten am Namen eines Feldes in der Konfiguration einer Integration (password, token, api_key, secret, webhook, pin) und prüft nur, ob es leer ist. Werte, Auszüge davon und ihre Länge werden weder gelesen noch angezeigt noch exportiert. Die Erkennung ist ein Hinweis: Zugangsdaten unter einem anderen Namen fehlen, und ein Feld mit so einem Namen kann etwas Harmloses enthalten. Ein Klick auf eine Zeile öffnet die Integration in Home Assistant, dort lassen sich die Zugangsdaten ändern. Es wird nichts geändert und nichts gespeichert.",
 });
 Object.assign(TEXT.en, {
-  sysTabUsage: "Usage", sysTabUsageHint: "categories and folders", sysByCategory: "By category", sysByFolder: "By folder under /config", sysByMisc: "More", sysHeadCategory: "Usage by category", sysHeadFolder: "Usage by folder", sysAppsHint: "Apps and custom integrations with size, CPU and RAM are under",
+  sysTabUsage: "Usage", sysTabUsageHint: "categories and folders", sysByCategory: "By category", sysByFolder: "By folder under /config", sysByMisc: "More", sysLineBuilding: "The line appears within the first hour", sysLineHours: "last {n} h", sysLineDays: "last {n} days", sysLinePeak: "peak {n}", sysLineLabel: "Trend, {span}: from {from} to {to}", sysHeadCategory: "Usage by category", sysHeadFolder: "Usage by folder", sysAppsHint: "Apps and custom integrations with size, CPU and RAM are under",
   sysTabMisc: "Other", sysTabMiscHint: "cards, blueprints, remaining folders", sysSecOther: "Other folders and files in /config", sysNoOther: "Apart from the known places, nothing measurable was found under /config.", sysOtherMore: "Plus {n} smaller entries totalling {size}.", sysKindFolder: "Folder", sysKindFile: "File",
  
   haMenu: "Open the Home Assistant sidebar",

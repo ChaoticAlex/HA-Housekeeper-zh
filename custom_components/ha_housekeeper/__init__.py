@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import logging
+import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -49,6 +50,7 @@ from .inventory import InventoryScanner
 from .issues import async_clear_issues
 from .maintenance import recorder_costs
 from .runs import run_key
+from .system_usage import system_light
 from .websocket_api import async_register as async_register_websocket
 
 _LOGGER = logging.getLogger(__name__)
@@ -161,6 +163,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         scanner.events.beat(datetime.now(UTC))
 
     entry.async_on_unload(async_track_time_interval(hass, _heartbeat, timedelta(minutes=5)))
+
+    async def _sample_load(_: Any) -> None:
+        # A sample that cannot be taken is a gap in the line, nothing more.
+        try:
+            light = await system_light(hass)
+            scanner.load.record(
+                time.time(),
+                {
+                    "disk": (light.get("disk") or {}).get("percent"),
+                    "ram": (light.get("ram") or {}).get("percent"),
+                    "cpu": (light.get("cpu") or {}).get("percent"),
+                    "swap": (light.get("swap") or {}).get("percent"),
+                },
+            )
+        except Exception:
+            _LOGGER.debug("Taking a load sample failed", exc_info=True)
+
+    entry.async_on_unload(async_track_time_interval(hass, _sample_load, timedelta(minutes=5)))
     entry.async_on_unload(criteria_module.async_listen(hass, scanner.criteria))
     entry.async_on_unload(scanner.criteria.cancel_all)
 

@@ -35,6 +35,7 @@ BATTERY_STORAGE_KEY: Final = f"{DOMAIN}.batteries"
 WINDOW_STORAGE_KEY: Final = f"{DOMAIN}.window"
 NOTIFY_STORAGE_KEY: Final = f"{DOMAIN}.notify"
 STALE_STORAGE_KEY: Final = f"{DOMAIN}.stale"
+LOAD_STORAGE_KEY: Final = f"{DOMAIN}.load"
 STORAGE_VERSION: Final = 1
 
 CONF_MIN_UNAVAILABLE_DAYS: Final = "min_unavailable_days"

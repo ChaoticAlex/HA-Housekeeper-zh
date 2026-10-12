@@ -10564,7 +10564,7 @@ class BatteryKindMixin {
 
 // Texts for storage and system, access and data flow, the credential overview and the sidebar button; merged into TEXT.
 Object.assign(TEXT.de, {
-  sysTabUsage: "Belegung", sysTabUsageHint: "Kategorien und Ordner", sysByCategory: "Nach Kategorie", sysByFolder: "Nach Ordner unter /config", sysByMisc: "Weitere", sysHeadCategory: "Belegung nach Kategorie", sysHeadFolder: "Belegung nach Ordner", sysAppsHint: "Apps und Custom-Integrationen mit Größe, CPU und RAM stehen unter",
+  sysTabUsage: "Belegung", sysTabUsageHint: "Kategorien und Ordner", sysByCategory: "Nach Kategorie", sysByFolder: "Nach Ordner unter /config", sysByMisc: "Weitere", sysLineBuilding: "Verlauf entsteht in der ersten Stunde", sysLineHours: "letzte {n} Std.", sysLineDays: "letzte {n} Tage", sysLinePeak: "Spitze {n}", sysLineLabel: "Verlauf, {span}: von {from} auf {to}", sysHeadCategory: "Belegung nach Kategorie", sysHeadFolder: "Belegung nach Ordner", sysAppsHint: "Apps und Custom-Integrationen mit Größe, CPU und RAM stehen unter",
   sysTabMisc: "Sonstiges", sysTabMiscHint: "Karten, Blueprints, übrige Ordner", sysSecOther: "Weitere Ordner und Dateien in /config", sysNoOther: "Außer den bekannten Orten wurde unter /config nichts Messbares gefunden.", sysOtherMore: "Dazu {n} kleinere Einträge mit zusammen {size}.", sysKindFolder: "Ordner", sysKindFile: "Datei",
  
   haMenu: "Seitenleiste von Home Assistant öffnen",
@@ -10619,7 +10619,7 @@ Object.assign(TEXT.de, {
   secFootnote: "Housekeeper erkennt Zugangsdaten am Namen eines Feldes in der Konfiguration einer Integration (password, token, api_key, secret, webhook, pin) und prüft nur, ob es leer ist. Werte, Auszüge davon und ihre Länge werden weder gelesen noch angezeigt noch exportiert. Die Erkennung ist ein Hinweis: Zugangsdaten unter einem anderen Namen fehlen, und ein Feld mit so einem Namen kann etwas Harmloses enthalten. Ein Klick auf eine Zeile öffnet die Integration in Home Assistant, dort lassen sich die Zugangsdaten ändern. Es wird nichts geändert und nichts gespeichert.",
 });
 Object.assign(TEXT.en, {
-  sysTabUsage: "Usage", sysTabUsageHint: "categories and folders", sysByCategory: "By category", sysByFolder: "By folder under /config", sysByMisc: "More", sysHeadCategory: "Usage by category", sysHeadFolder: "Usage by folder", sysAppsHint: "Apps and custom integrations with size, CPU and RAM are under",
+  sysTabUsage: "Usage", sysTabUsageHint: "categories and folders", sysByCategory: "By category", sysByFolder: "By folder under /config", sysByMisc: "More", sysLineBuilding: "The line appears within the first hour", sysLineHours: "last {n} h", sysLineDays: "last {n} days", sysLinePeak: "peak {n}", sysLineLabel: "Trend, {span}: from {from} to {to}", sysHeadCategory: "Usage by category", sysHeadFolder: "Usage by folder", sysAppsHint: "Apps and custom integrations with size, CPU and RAM are under",
   sysTabMisc: "Other", sysTabMiscHint: "cards, blueprints, remaining folders", sysSecOther: "Other folders and files in /config", sysNoOther: "Apart from the known places, nothing measurable was found under /config.", sysOtherMore: "Plus {n} smaller entries totalling {size}.", sysKindFolder: "Folder", sysKindFile: "File",
  
   haMenu: "Open the Home Assistant sidebar",
@@ -10921,6 +10921,23 @@ class SystemMixin {
     return `<span class="sysmeter ${this.sysTone(percent)}" role="img" aria-label="${this.esc(this.sysPercent(percent))}"><i style="width:${width}%"></i></span>`;
   }
 
+  // The line of one figure over the last days (column of a history point: 1 disk, 2 RAM, 3 CPU, 4 swap); the CPU also
+  // shows its highest value. Under an hour of samples there is no line yet.
+  sysLine(history, column) {
+    const rows = (history?.points || []).filter(p => Number.isFinite(p[column]));
+    if (rows.length < 3 || (history?.span || 0) < 3600) return `<span class="spark-hint">${this.t("sysLineBuilding")}</span>`;
+    const values = rows.map(p => p[column]), n = values.length, w = 200, h = 36, pad = 4;
+    let lo = Math.min(...values), hi = Math.max(...values);
+    if (hi - lo < 10) { const mid = (hi + lo) / 2; lo = Math.max(0, mid - 5); hi = lo + 10; }
+    const x = i => pad + ((w - 2 * pad) * i) / (n - 1), y = v => h - pad - ((h - 2 * pad) * (v - lo)) / (hi - lo);
+    const hours = Math.round(history.span / 3600), days = Math.round(history.span / 86400);
+    const span = hours < 48 ? this.t("sysLineHours", { n: this.formatNumber(hours) }) : this.t("sysLineDays", { n: this.formatNumber(days) });
+    const peak = column === 3 ? Math.max(...rows.map(p => p[5] ?? 0)) : null;
+    const cap = [span, peak ? this.t("sysLinePeak", { n: this.sysPercent(peak) }) : ""].filter(Boolean).join(" · ");
+    const label = this.t("sysLineLabel", { span, from: this.sysPercent(values[0]), to: this.sysPercent(values[n - 1]) });
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${this.esc(label)}"><polyline fill="none" stroke="var(--hk-muted)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points="${values.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ")}"/><circle class="spark-end" cx="${x(n - 1).toFixed(1)}" cy="${y(values[n - 1]).toFixed(1)}" r="3.5"/></svg><span class="spark-cap">${this.esc(cap)}</span>`;
+  }
+
   // The share of a row against the largest one of its list, as a bar.
   sysShare(value, max) {
     const width = max > 0 && value > 0 ? Math.max(1, Math.round((value / max) * 100)) : 0;
@@ -10951,10 +10968,10 @@ class SystemMixin {
       const cpuSub = [cpu.count ? this.esc(this.t("sysCores", { n: cpu.count })) : "", load ? this.esc(this.t("sysLoad", { a: this.formatNumber(load["1m"]), b: this.formatNumber(load["5m"]), c: this.formatNumber(load["15m"]) })) : ""].filter(Boolean).join(" · ");
       const diskSub = disk.total ? [of(disk.used, disk.total), disk.free !== undefined && disk.free !== null ? this.esc(this.t("sysFree", { n: this.formatBytes(disk.free) })) : ""].filter(Boolean).join(" · ") : this.esc(this.t("sysUnknown"));
       const tiles = this.sumTiles([
-        { label: this.t("sysDiskUsed"), value: this.esc(this.sysPercent(disk.percent)), sub: diskSub, hint: disk.source ? this.t(`sysSrc_${disk.source}`) : "", tone: this.sysTone(disk.percent), spark: this.sysMeter(disk.percent) },
-        { label: this.t("sysRam"), value: this.esc(this.sysPercent(ram.percent)), sub: ramSub || this.esc(this.t("sysUnknown")), tone: this.sysTone(ram.percent), spark: this.sysMeter(ram.percent) },
-        { label: this.t("sysCpu"), value: this.esc(this.sysPercent(cpu.percent)), sub: cpuSub || this.esc(this.t("sysUnknown")), tone: this.sysTone(cpu.percent), spark: this.sysMeter(cpu.percent) },
-        swap.total ? { label: this.t("sysSwapLabel"), value: this.esc(this.sysPercent(swap.percent)), sub: of(swap.used, swap.total), hint: this.t("sysSwapHint"), tone: "mute", spark: this.sysMeter(swap.percent) } : null,
+        { label: this.t("sysDiskUsed"), value: this.esc(this.sysPercent(disk.percent)), sub: diskSub, hint: disk.source ? this.t(`sysSrc_${disk.source}`) : "", tone: this.sysTone(disk.percent), spark: `${this.sysMeter(disk.percent)}${this.sysLine(r.history, 1)}` },
+        { label: this.t("sysRam"), value: this.esc(this.sysPercent(ram.percent)), sub: ramSub || this.esc(this.t("sysUnknown")), tone: this.sysTone(ram.percent), spark: `${this.sysMeter(ram.percent)}${this.sysLine(r.history, 2)}` },
+        { label: this.t("sysCpu"), value: this.esc(this.sysPercent(cpu.percent)), sub: cpuSub || this.esc(this.t("sysUnknown")), tone: this.sysTone(cpu.percent), spark: `${this.sysMeter(cpu.percent)}${this.sysLine(r.history, 3)}` },
+        swap.total ? { label: this.t("sysSwapLabel"), value: this.esc(this.sysPercent(swap.percent)), sub: of(swap.used, swap.total), hint: this.t("sysSwapHint"), tone: "mute", spark: `${this.sysMeter(swap.percent)}${this.sysLine(r.history, 4)}` } : null,
       ]);
       const cats = r.categories?.children || [];
       const sup = Boolean(r.supervisor) && cats.length > 0;

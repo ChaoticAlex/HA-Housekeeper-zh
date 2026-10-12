@@ -624,7 +624,13 @@ async def system_light(hass: HomeAssistant) -> dict[str, Any]:
     config_dir = hass.config.config_dir
 
     def local() -> dict[str, Any]:
-        return {"cpu": cpu_percent(), "ram": memory()["ram"], "disk": disk_usage(config_dir)}
+        mem = memory()
+        return {
+            "cpu": cpu_percent(),
+            "ram": mem["ram"],
+            "swap": mem["swap"],
+            "disk": disk_usage(config_dir),
+        }
 
     read, info = await asyncio.gather(
         hass.async_add_executor_job(local), supervisor_get(hass, "/host/info")
@@ -633,5 +639,6 @@ async def system_light(hass: HomeAssistant) -> dict[str, Any]:
     return {
         "disk": host_disk(info) or read["disk"],
         "ram": read["ram"],
+        "swap": read["swap"],
         "cpu": {"percent": read["cpu"]},
     }
