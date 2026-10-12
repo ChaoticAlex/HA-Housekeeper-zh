@@ -95,6 +95,8 @@ class HAHousekeeperPanel extends HTMLElement {
     this._basePath = typeof window === "undefined" ? null : window.location.pathname;
     this._onPop = () => this.onPopState();
     window.addEventListener?.("popstate", this._onPop);
+    this._onResize = () => { globalThis.cancelAnimationFrame?.(this._fitFrame); this._fitFrame = globalThis.requestAnimationFrame?.(() => this.fitNav(this.shadowRoot)); };
+    window.addEventListener?.("resize", this._onResize);
     this.installFonts();
     this.render();
   }
@@ -104,6 +106,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this._gone = true;
     this.stopWarmupTicker?.();
     window.removeEventListener?.("popstate", this._onPop);
+    window.removeEventListener?.("resize", this._onResize);
     for (const name of ["_warmupTimer", "_searchTimer", "_tipTimer"]) {
       if (this[name]) globalThis.clearTimeout?.(this[name]);
       this[name] = null;
@@ -487,6 +490,7 @@ class HAHousekeeperPanel extends HTMLElement {
     if (!swapped) { root.innerHTML = `${this.styles()}${shell}`; this._styleKey = css; }
     this.restoreFocus(focus);
     this.bind();
+    this.fitNav(root);
     if (this._scrollPlan) { this._scrollPlan = false; setTimeout(() => root.querySelector("[data-plan-card]")?.scrollIntoView?.({ block: "start", behavior: "smooth" }), 30); }
     if (started !== null) console.debug(`[ha_housekeeper] render ${this.selected ? "detail" : this.view}: ${(globalThis.performance.now() - started).toFixed(1)} ms`);
     if (this.data) { this.syncGuard(); this.syncUrl(); }
@@ -550,9 +554,20 @@ class HAHousekeeperPanel extends HTMLElement {
       const sum = views.reduce((n, v) => n + (typeof counts[v] === "number" ? counts[v] : 0), 0);
       return `<div class="navmenu${open ? " open" : ""}"><button class="nav menubtn ${views.includes(this.view) ? "group-active" : ""}" data-menu="${label}" aria-expanded="${open}" aria-controls="menu-${label}"><span>${this.t(label)}</span>${sum ? `<em aria-label="${this.esc(this.t("groupOpen", { count: sum }))}">${sum}</em>` : ""}<ha-icon class="caret" icon="mdi:chevron-down"></ha-icon></button><div class="navpop" id="menu-${label}" role="group" aria-label="${this.esc(this.t(label))}"><p class="navhead" aria-hidden="true">${this.t(label)}</p>${views.map(item).join("")}</div></div>`;
     };
-    return `<header class="top${this.navOpen ? " open" : ""}">${this.haMenuButton()}<div class="brand"><span class="brandmark"><img src="/ha_housekeeper/logo.png" alt="" onerror="this.parentNode.classList.add('nologo');this.remove()"><ha-icon icon="mdi:broom"></ha-icon></span><strong>${this.t("title")}</strong></div>
+    return `<header class="top${this.navCompact ? " compact" : ""}${this.navOpen ? " open" : ""}">${this.haMenuButton()}<div class="brand"><span class="brandmark"><img src="/ha_housekeeper/logo.png" alt="" onerror="this.parentNode.classList.add('nologo');this.remove()"><ha-icon icon="mdi:broom"></ha-icon></span><strong>${this.t("title")}</strong></div>
       <button class="navtoggle" data-navtoggle aria-expanded="${Boolean(this.navOpen)}" aria-controls="topnav"><ha-icon icon="mdi:menu"></ha-icon><span>${this.t("navMenu")}</span></button>
       <nav class="topnav" id="topnav" aria-label="${this.esc(this.t("navMain"))}">${direct[1].map(item).join("")}${menus.map(menu).join("")}<div class="navend">${this.quickSearchBox()}${item("settings")}</div></nav></header>`;
+  }
+
+  // A top bar that does not fit its width changes into the menu button with a list, as on a phone, instead of being cut off.
+  // The bar is measured in its full form: if its last item sticks out, the class "compact" turns it into the button.
+  fitNav(root) {
+    const top = root?.querySelector?.(".top"), nav = top?.querySelector?.(".topnav"), end = nav?.querySelector?.(".navend");
+    if (!top || !end || typeof end.getBoundingClientRect !== "function") return;
+    top.classList.remove("compact");
+    const over = end.getBoundingClientRect().right > nav.getBoundingClientRect().right + 1 || nav.scrollWidth > nav.clientWidth + 1;
+    if (over) top.classList.add("compact");
+    this.navCompact = over;
   }
 
   // The small line above the title names the menu group the view belongs to.

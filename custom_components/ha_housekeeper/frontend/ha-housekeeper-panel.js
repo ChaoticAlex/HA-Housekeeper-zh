@@ -1264,6 +1264,30 @@ Object.assign(TEXT.en, {
 });
 
 // StylesMixin: methods of the panel element, mixed into the class in 99-register.js.
+// The rules that turn the top bar into the menu button with a list below it. They apply on a narrow window (a media
+// query) and, with the class "compact", whenever the bar does not fit its width (fitNav in 90-panel.js).
+function navCompactRules(compact) {
+  const rules = [
+    [".top", "flex-wrap:wrap;gap:8px;padding:8px 12px"],
+    [".navtoggle", "display:inline-flex"],
+    [".topnav", "display:none;flex:1 1 100%;flex-direction:column;align-items:stretch;gap:0;padding-bottom:8px"],
+    [".top.open .topnav", "display:flex"],
+    [".navmenu", "display:block"],
+    [".navmenu>.menubtn", "display:none"],
+    [".navpop", "display:grid;position:static;min-width:0;padding:0;border:0;box-shadow:none;background:transparent"],
+    [".navhead", "display:block"],
+    [".nav", "width:100%;min-height:44px;border-bottom:0;border-radius:8px"],
+    [".nav.active", "box-shadow:none;background:linear-gradient(var(--hk-blue),var(--hk-blue)) left top/3px 100% no-repeat,color-mix(in srgb,var(--hk-blue) 8%,transparent)"],
+    [".navend", "margin:0;display:block"],
+    [".navend .nav", "width:100%"],
+  ];
+  const own = selector => (selector === ".top" || selector.startsWith(".top.") ? selector.replace(".top", ".top.compact") : `.top.compact ${selector}`);
+  const list = rules.map(([selector, body]) => `${compact ? own(selector) : selector}{${body}}`).join("");
+  // On a wide window the open list floats below the bar like a menu and scrolls, instead of pushing the page down.
+  const floating = ".top.compact.open .topnav{position:absolute;top:100%;right:clamp(8px,2vw,24px);flex:none;width:min(380px,calc(100% - 16px));max-height:calc(100vh - 96px);overflow-y:auto;padding:8px;border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-surface);box-shadow:0 8px 24px rgba(0,0,0,.14)}";
+  return compact ? list + floating : list;
+}
+
 class StylesMixin {
   styles() {
     return `<style data-hk>
@@ -1384,7 +1408,7 @@ class StylesMixin {
       .code{white-space:pre-wrap;word-break:break-word;background:var(--hk-soft);border-radius:10px;padding:12px;font:calc(11px*var(--hk-fs,1))/1.55 ui-monospace,SFMono-Regular,monospace;max-height:270px;overflow:auto}
       h4{font-size:calc(12px*var(--hk-fs,1));margin:12px 0 6px;color:var(--hk-muted)}
       @media(max-width:1100px){.summary{grid-template-columns:1fr 1fr}.grid2,.detailgrid{grid-template-columns:1fr}}
-      @media(min-width:861px){.tablewrap.runs table{width:auto;min-width:min(100%,820px);max-width:100%}.tablewrap.runs th:first-child,.tablewrap.runs td:first-child{width:340px;max-width:340px}.tablewrap.runs td:not(:first-child){padding-left:20px;padding-right:20px}.tablewrap.runs th:not(:first-child){padding-left:20px;padding-right:20px}}@media(max-width:860px){.top{flex-wrap:wrap;gap:8px;padding:8px 12px}.navtoggle{display:inline-flex}.topnav{display:none;flex:1 1 100%;flex-direction:column;align-items:stretch;gap:0;padding-bottom:8px}.top.open .topnav{display:flex}.navmenu{display:block}.navmenu>.menubtn{display:none}.navpop{display:grid;position:static;min-width:0;padding:0;border:0;box-shadow:none;background:transparent}.navhead{display:block}.nav{width:100%;min-height:44px;border-bottom:0;border-radius:8px}.nav.active{box-shadow:none;background:linear-gradient(var(--hk-blue),var(--hk-blue)) left top/3px 100% no-repeat,color-mix(in srgb,var(--hk-blue) 8%,transparent)}.navend{margin:0;display:block}.navend .nav{width:100%}.main{padding:16px 12px 40px}.heading{flex-wrap:wrap}.filters{grid-template-columns:1fr}.row{grid-template-columns:auto minmax(0,1fr) auto}.row .date{display:none}.tablewrap table,.tablewrap thead,.tablewrap tbody,.tablewrap tr,.tablewrap td{display:block}.tablewrap thead{display:none}.tablewrap tr{padding:12px 14px;border-top:1px solid var(--hk-border);cursor:pointer}.tablewrap td{padding:2px 0;border:0}.tablewrap td:nth-child(2),.tablewrap td:nth-child(3){display:inline-block;margin:4px 12px 2px 0}.tablewrap td[data-label]::before{content:attr(data-label) ": ";color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.tablewrap.lt tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}.tablewrap.lt td:not(:first-child){white-space:normal}.tablewrap.lt td{display:block;margin:0}.tablewrap.lt td:first-child{grid-column:1/-1}.tablewrap.lt td[data-label]::before{display:block;margin-bottom:1px}.tablewrap.lt td:first-child{min-width:0}.tablewrap.runs tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}.tablewrap.runs td{display:block;margin:0}.tablewrap.runs td:first-child,.tablewrap.runs td:last-child{grid-column:1/-1}.tablewrap.runs td[data-label]::before{display:block;margin-bottom:1px}.tablewrap.inv td:nth-child(3)::before{content:""}.mobsort{display:flex;gap:8px}.msince{display:inline}.row-text strong,.row-text small{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}.pathcard{grid-template-columns:auto 1fr}.pathcard .btn{grid-column:1/-1}.planrow{grid-template-columns:auto minmax(0,1fr)}.planrow>span:last-child{grid-column:1/-1;justify-content:flex-start!important}.detailhead{grid-template-columns:auto 1fr}.actions{grid-column:1/-1}.check{grid-template-columns:22px 1fr auto}.check .val{grid-column:2/-1;grid-row:2;white-space:normal}}
+      @media(min-width:861px){.tablewrap.runs table{width:auto;min-width:min(100%,820px);max-width:100%}.tablewrap.runs th:first-child,.tablewrap.runs td:first-child{width:340px;max-width:340px}.tablewrap.runs td:not(:first-child){padding-left:20px;padding-right:20px}.tablewrap.runs th:not(:first-child){padding-left:20px;padding-right:20px}}${navCompactRules(true)}@media(max-width:860px){${navCompactRules(false)}.main{padding:16px 12px 40px}.heading{flex-wrap:wrap}.filters{grid-template-columns:1fr}.row{grid-template-columns:auto minmax(0,1fr) auto}.row .date{display:none}.tablewrap table,.tablewrap thead,.tablewrap tbody,.tablewrap tr,.tablewrap td{display:block}.tablewrap thead{display:none}.tablewrap tr{padding:12px 14px;border-top:1px solid var(--hk-border);cursor:pointer}.tablewrap td{padding:2px 0;border:0}.tablewrap td:nth-child(2),.tablewrap td:nth-child(3){display:inline-block;margin:4px 12px 2px 0}.tablewrap td[data-label]::before{content:attr(data-label) ": ";color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.tablewrap.lt tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}.tablewrap.lt td:not(:first-child){white-space:normal}.tablewrap.lt td{display:block;margin:0}.tablewrap.lt td:first-child{grid-column:1/-1}.tablewrap.lt td[data-label]::before{display:block;margin-bottom:1px}.tablewrap.lt td:first-child{min-width:0}.tablewrap.runs tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}.tablewrap.runs td{display:block;margin:0}.tablewrap.runs td:first-child,.tablewrap.runs td:last-child{grid-column:1/-1}.tablewrap.runs td[data-label]::before{display:block;margin-bottom:1px}.tablewrap.inv td:nth-child(3)::before{content:""}.mobsort{display:flex;gap:8px}.msince{display:inline}.row-text strong,.row-text small{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}.pathcard{grid-template-columns:auto 1fr}.pathcard .btn{grid-column:1/-1}.planrow{grid-template-columns:auto minmax(0,1fr)}.planrow>span:last-child{grid-column:1/-1;justify-content:flex-start!important}.detailhead{grid-template-columns:auto 1fr}.actions{grid-column:1/-1}.check{grid-template-columns:22px 1fr auto}.check .val{grid-column:2/-1;grid-row:2;white-space:normal}}
       /* Fixed sidebar: it stays in view while long content scrolls; Settings sits at the visible bottom edge. */
       /* Equal-width tiles on the overview and the changes view. */
       .card:has(.ring) .card-text em{overflow:visible;white-space:normal;text-overflow:clip;line-height:1.35}
@@ -12576,6 +12600,8 @@ class HAHousekeeperPanel extends HTMLElement {
     this._basePath = typeof window === "undefined" ? null : window.location.pathname;
     this._onPop = () => this.onPopState();
     window.addEventListener?.("popstate", this._onPop);
+    this._onResize = () => { globalThis.cancelAnimationFrame?.(this._fitFrame); this._fitFrame = globalThis.requestAnimationFrame?.(() => this.fitNav(this.shadowRoot)); };
+    window.addEventListener?.("resize", this._onResize);
     this.installFonts();
     this.render();
   }
@@ -12585,6 +12611,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this._gone = true;
     this.stopWarmupTicker?.();
     window.removeEventListener?.("popstate", this._onPop);
+    window.removeEventListener?.("resize", this._onResize);
     for (const name of ["_warmupTimer", "_searchTimer", "_tipTimer"]) {
       if (this[name]) globalThis.clearTimeout?.(this[name]);
       this[name] = null;
@@ -12968,6 +12995,7 @@ class HAHousekeeperPanel extends HTMLElement {
     if (!swapped) { root.innerHTML = `${this.styles()}${shell}`; this._styleKey = css; }
     this.restoreFocus(focus);
     this.bind();
+    this.fitNav(root);
     if (this._scrollPlan) { this._scrollPlan = false; setTimeout(() => root.querySelector("[data-plan-card]")?.scrollIntoView?.({ block: "start", behavior: "smooth" }), 30); }
     if (started !== null) console.debug(`[ha_housekeeper] render ${this.selected ? "detail" : this.view}: ${(globalThis.performance.now() - started).toFixed(1)} ms`);
     if (this.data) { this.syncGuard(); this.syncUrl(); }
@@ -13031,9 +13059,20 @@ class HAHousekeeperPanel extends HTMLElement {
       const sum = views.reduce((n, v) => n + (typeof counts[v] === "number" ? counts[v] : 0), 0);
       return `<div class="navmenu${open ? " open" : ""}"><button class="nav menubtn ${views.includes(this.view) ? "group-active" : ""}" data-menu="${label}" aria-expanded="${open}" aria-controls="menu-${label}"><span>${this.t(label)}</span>${sum ? `<em aria-label="${this.esc(this.t("groupOpen", { count: sum }))}">${sum}</em>` : ""}<ha-icon class="caret" icon="mdi:chevron-down"></ha-icon></button><div class="navpop" id="menu-${label}" role="group" aria-label="${this.esc(this.t(label))}"><p class="navhead" aria-hidden="true">${this.t(label)}</p>${views.map(item).join("")}</div></div>`;
     };
-    return `<header class="top${this.navOpen ? " open" : ""}">${this.haMenuButton()}<div class="brand"><span class="brandmark"><img src="/ha_housekeeper/logo.png" alt="" onerror="this.parentNode.classList.add('nologo');this.remove()"><ha-icon icon="mdi:broom"></ha-icon></span><strong>${this.t("title")}</strong></div>
+    return `<header class="top${this.navCompact ? " compact" : ""}${this.navOpen ? " open" : ""}">${this.haMenuButton()}<div class="brand"><span class="brandmark"><img src="/ha_housekeeper/logo.png" alt="" onerror="this.parentNode.classList.add('nologo');this.remove()"><ha-icon icon="mdi:broom"></ha-icon></span><strong>${this.t("title")}</strong></div>
       <button class="navtoggle" data-navtoggle aria-expanded="${Boolean(this.navOpen)}" aria-controls="topnav"><ha-icon icon="mdi:menu"></ha-icon><span>${this.t("navMenu")}</span></button>
       <nav class="topnav" id="topnav" aria-label="${this.esc(this.t("navMain"))}">${direct[1].map(item).join("")}${menus.map(menu).join("")}<div class="navend">${this.quickSearchBox()}${item("settings")}</div></nav></header>`;
+  }
+
+  // A top bar that does not fit its width changes into the menu button with a list, as on a phone, instead of being cut off.
+  // The bar is measured in its full form: if its last item sticks out, the class "compact" turns it into the button.
+  fitNav(root) {
+    const top = root?.querySelector?.(".top"), nav = top?.querySelector?.(".topnav"), end = nav?.querySelector?.(".navend");
+    if (!top || !end || typeof end.getBoundingClientRect !== "function") return;
+    top.classList.remove("compact");
+    const over = end.getBoundingClientRect().right > nav.getBoundingClientRect().right + 1 || nav.scrollWidth > nav.clientWidth + 1;
+    if (over) top.classList.add("compact");
+    this.navCompact = over;
   }
 
   // The small line above the title names the menu group the view belongs to.

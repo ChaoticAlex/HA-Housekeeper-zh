@@ -90,6 +90,7 @@
 
 ### Behoben
 
+- **Menüleiste:** Auf Fenstern, die für alle Menüpunkte zu schmal sind (etwa zwischen 860 und 1400 Pixeln), wurde die Leiste rechts abgeschnitten. Sie wechselt jetzt in den „Menü“-Knopf mit einer Liste darunter, sobald sie nicht passt, und zeigt wieder die volle Leiste, wenn der Platz reicht.
 - **Scan-Verlauf:** „Je Tag der letzte Scan“ zählt den Tag jetzt in der Zeit von Home Assistant statt in UTC. Vorher konnten zwei Scans desselben Tages nebeneinander stehen und ein anderer Tag fehlen; bereits gespeicherte Doppel verschwinden beim Laden.
 - **Sammelaktionen bei Befunden:** Scheitert eine Anfrage mitten in einer Auswahl, bleiben die fehlgeschlagenen Befunde ausgewählt und das Formular offen; die Meldung nennt „x von y erledigt“. Ein neuer Versuch sendet nur die übrigen.
 - **Gespeicherte Ansichten:** Ist die Grenze von zehn Ansichten erreicht, überschreibt eine neue Ansicht nicht mehr still die letzte, sondern weist darauf hin.
@@ -177,6 +178,7 @@
 
 ### Fixed
 
+- **Menu bar:** On windows too narrow for all menu items (roughly between 860 and 1400 pixels) the bar was cut off on the right. It now changes into the "Menu" button with a list below it as soon as it does not fit, and shows the full bar again when there is room.
 - **Scan history:** "the last scan of each day" now counts the day in Home Assistant's time zone instead of UTC. Before, two scans of the same day could sit side by side while another day was missing; doubles already stored disappear on load.
 - **Bulk actions on findings:** If a request fails in the middle of a selection, the failed findings stay selected and the form stays open; the message says "x of y done". A retry sends only the rest.
 - **Saved views:** When the limit of ten views is reached, a new view no longer silently replaces the last one, but says so.

@@ -4446,3 +4446,23 @@ test("the info page lists the phases of the last scan, longest first, and the re
   assert.equal(usage[0].fresh, undefined); assert.equal(usage.at(-1).fresh, true);
   assert.equal(el.sysState("storage").at, "2026-10-12T20:00:00+00:00", "the page shows when the sizes were read");
 });
+
+test("a top bar that does not fit changes into the menu button instead of being cut off, and goes back once it fits", () => {
+  const { el } = panel("en");
+  el.navCompact = true;
+  assert.ok(el.topbar().includes('class="top compact"'), "the state survives a render");
+  el.navCompact = false;
+  assert.ok(el.topbar().includes('class="top"'));
+  const classes = new Set();
+  const rect = right => ({ getBoundingClientRect: () => ({ right }) });
+  const bar = (navRight, endRight) => {
+    const end = rect(endRight), nav = { ...rect(navRight), scrollWidth: navRight, clientWidth: navRight, querySelector: () => end };
+    const top = { classList: { remove: c => classes.delete(c), add: c => classes.add(c) }, querySelector: () => nav };
+    return { querySelector: () => top };
+  };
+  el.fitNav(bar(900, 1400));
+  assert.ok(classes.has("compact") && el.navCompact === true, "the last item sticks out: compact");
+  el.fitNav(bar(1400, 1400));
+  assert.ok(!classes.has("compact") && el.navCompact === false, "it fits again: the full bar");
+  el.fitNav({ querySelector: () => null });
+});
