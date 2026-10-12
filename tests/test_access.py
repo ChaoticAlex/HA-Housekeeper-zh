@@ -52,6 +52,9 @@ def test_classify_risk_follows_access_location_and_cloud() -> None:
     assert dwd["external"] and dwd["risk"] == "medium" and not dwd["access"]
     assert classify("reolink", "local_push", {"camera"})["risk"] == "high"
     assert classify("hue", "local_push", {"light"})["risk"] == "low"
+    assert classify("zha", "local_polling", {"device_tracker"})["risk_reasons"] == ["radio", "gps"]
+    assert classify("dwd_weather", "cloud_polling", set())["risk_reasons"] == ["cloud"]
+    assert classify("hue", "local_push", {"light"})["risk_reasons"] == []
 
 
 async def test_access_report_on_config_entries(hass: HomeAssistant) -> None:

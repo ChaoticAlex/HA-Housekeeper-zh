@@ -3951,7 +3951,7 @@ const SYSTEM = {
 const ACCESS = {
   with_access: 1, external: 1, high: 1,
   entries: [
-    { entry_id: "E2", domain: "zha", title: "Zigbee", iot_class: "local_polling", disabled: false, access: [{ kind: "radio", detail: "Zigbee" }], flows: [], gps: false, camera: false, external: false, risk: "high" },
+    { entry_id: "E2", domain: "zha", title: "Zigbee", iot_class: "local_polling", disabled: false, access: [{ kind: "radio", detail: "Zigbee" }], flows: [], gps: false, camera: false, external: false, risk: "high", risk_reasons: ["radio"] },
     { entry_id: "E3", domain: "dwd_weather", title: "Weather", iot_class: "cloud_polling", disabled: false, access: [], flows: [], gps: false, camera: false, external: true, risk: "medium" },
     { entry_id: "E4", domain: "hue", title: "Hue", iot_class: "local_push", disabled: false, access: [], flows: [], gps: false, camera: false, external: false, risk: "low" },
   ],
@@ -4022,7 +4022,8 @@ test("access and data flow show one list at a time, chosen by the tiles, and the
   let html = shadow.innerHTML;
   assert.ok(html.includes("System access &amp; data flow") && html.includes("Cloud data flow"));
   assert.ok(!html.includes('class="sumtiles"'), "the tabs carry the numbers, there is no second row of key figures");
-  assert.ok(html.includes("Radio/device (Zigbee)") && html.includes('class="pill red">High'));
+  assert.ok(html.includes("Radio/device (Zigbee)") && html.includes('class="pill red" title="High because: Radio/device (Zigbee)">High'));
+  assert.ok(html.includes("Risk: High = access to the system"), "the legend says what the levels mean");
   assert.ok(!html.includes("cloud, polls"), "the cloud list is not open by default");
   el.pickViewTab("dataflow|cloud");
   html = shadow.innerHTML;

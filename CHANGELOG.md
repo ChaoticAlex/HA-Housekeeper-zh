@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Risikostufe mit Begründung:** Bei Zugriffe & Datenfluss sagt eine Legende, was Hoch, Mittel und Niedrig bedeuten; die Stufe nennt beim Daraufzeigen den Grund, und die Detailseite einer Integration schreibt ihn aus.
 - **Ruhigere Seitenköpfe:** Speicher & System, Zugriffe & Datenfluss, Zugangsdaten, Zuverlässigkeit, Freigaben, Richtlinien, Läufe, Recorder und Wartung zeigen den Untertitel unter dem Titel und eine schmale Zeile mit „Stand“ und „Aktualisieren“; die Reiterkacheln sind flacher.
 - **Custom Cards mit Status:** Die Liste der Dashboard-Ressourcen zeigt, ob die Datei fehlt, ob ein Dashboard die Karte nutzt oder ob das nicht zu erkennen ist.
 - **Speicher & System** (Betrieb): Belegung von Datenträger, RAM und CPU, Systemspeicher nach Kategorie, Apps und die größten Verbraucher unter `/config`.

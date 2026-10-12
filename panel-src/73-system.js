@@ -230,7 +230,27 @@ class SystemMixin {
     return labels;
   }
 
-  accRiskPill(risk) { return `<span class="pill ${{ high: "red", medium: "warn", low: "ok" }[risk] || "mute"}">${this.t(`accRisk_${risk}`)}</span>`; }
+  // The risk level; `why` (text) shows when the pointer rests on it.
+  accRiskPill(risk, why = "") { return `<span class="pill ${{ high: "red", medium: "warn", low: "ok" }[risk] || "mute"}"${why ? ` title="${this.esc(why)}"` : ""}>${this.t(`accRisk_${risk}`)}</span>`; }
+
+  // Why a level was given: the reasons the backend names, with the detail of the access ("Zigbee"); nothing when it names none.
+  accWhy(risk, labels, low = "accWhyLow") {
+    if (risk === "low") return this.t(low);
+    return labels.length ? this.t(risk === "high" ? "accWhyHigh" : "accWhyMedium", { list: labels.join(", ") }) : "";
+  }
+
+  accEntryWhy(e) {
+    const label = token => {
+      if (token === "gps") return this.t("accGps");
+      if (token === "camera") return this.t("accCamera");
+      if (token === "cloud") return this.t("accReasonCloud");
+      const a = e.access.find(x => x.kind === token);
+      return `${this.t(`accKind_${token}`)}${a?.detail ? ` (${a.detail})` : ""}`;
+    };
+    return this.accWhy(e.risk, (e.risk_reasons || []).map(label));
+  }
+
+  accAppWhy(a) { return a.risk ? this.accWhy(a.risk, a.access.filter(x => x.level === a.risk).map(x => this.accAppRight(x)), "accWhyLowApp") : ""; }
 
   accIntegrationCell(e) {
     const disabled = e.disabled ? ` <span class="pill mute">${this.t("accDisabled")}</span>` : "";
@@ -267,7 +287,7 @@ class SystemMixin {
           { key: "name", label: "accColIntegration", cell: e => this.accIntegrationCell(e) },
           { key: "access", label: "accColAccess", sortable: false, cell: e => this.accPills(this.accAccessLabels(e), "warn") },
           { key: "flow", label: "accColFlow", sortable: false, cell: e => this.accPills(flows(e)) },
-          { key: "risk", label: "accColRisk", cell: e => this.accRiskPill(e.risk) },
+          { key: "risk", label: "accColRisk", cell: e => this.accRiskPill(e.risk, this.accEntryWhy(e)) },
         ],
         exportName: "system-access", header: [this.t("accColIntegration"), "Domain", this.t("accColAccess"), this.t("accColFlow"), this.t("accColRisk")], rows: e => [e.title, e.domain, this.accAccessLabels(e).join("; "), flows(e).join("; "), this.t(`accRisk_${e.risk}`)],
       });
@@ -283,7 +303,7 @@ class SystemMixin {
           { key: "target", label: "accColTarget", sortable: false, cell: e => this.accPills(target(e)) },
           { key: "iot", label: "accColIot", sortable: false, cell: e => this.esc(iot(e)) },
           { key: "flow", label: "accColFlow", sortable: false, cell: e => this.accPills(flows(e), "mute") },
-          { key: "risk", label: "accColRisk", cell: e => this.accRiskPill(e.risk) },
+          { key: "risk", label: "accColRisk", cell: e => this.accRiskPill(e.risk, this.accEntryWhy(e)) },
         ],
         exportName: "cloud-data-flow", header: [this.t("accColIntegration"), "Domain", this.t("accColTarget"), this.t("accColIot"), this.t("accColFlow"), this.t("accColRisk")], rows: e => [e.title, e.domain, target(e).join("; "), iot(e), flows(e).join("; "), this.t(`accRisk_${e.risk}`)],
       });
@@ -300,7 +320,7 @@ class SystemMixin {
         exportName: "webhooks", header: [this.t("accColAutomation"), "ID", this.t("accColReach")], rows: w => [w.name, w.object_id, this.t(w.local_only ? "accHookLocal" : "accHookOpen")],
       });
       const chip = id => high(id) ? `<div class="pad"><button class="pill red" data-acc-clear="${id}" title="${this.esc(this.t("accClearFilter"))}">${this.esc(`${this.t("accColRisk")}: ${this.t("accRisk_high")}`)} ✕</button></div>` : "";
-      const panel = (id, body) => `<div class="panel">${chip(id)}${body}</div>`;
+      const panel = (id, body, legend = "accLegend") => `<div class="panel">${chip(id)}${legend ? `<p class="factnote">${this.t(legend)}</p>` : ""}${body}</div>`;
       const hi = list => list.filter(e => e.risk === "high").length;
       const tone = (n, level = "red") => (n ? level : "ok");
       const tabs = [
@@ -309,9 +329,9 @@ class SystemMixin {
         r.apps_available ? { id: "apps", icon: "mdi:package-variant-closed", label: this.t("accAppsTitle"), hint: this.t("accAppsHint"), count: appList.length, tone: tone(hi(appList)), ...(hi(appList) ? { pill: this.t("accTabHigh", { n: this.formatNumber(hi(appList)) }), pillTone: "red" } : {}) } : { id: "apps", icon: "mdi:package-variant-closed", label: this.t("accAppsTitle"), hint: this.t("accAppsNoSupervisor"), disabled: true },
       ];
       if (hooks.length) tabs.push({ id: "hooks", icon: "mdi:webhook", label: this.t("accHooksTitle"), hint: this.t("accHooksHint"), count: hooks.length, tone: tone(hooksOpen, "warn"), ...(hooksOpen ? { pill: this.t("accTabOpen", { n: this.formatNumber(hooksOpen) }), pillTone: "warn" } : {}) });
-      const body = open === "hooks" ? panel("acchooks", hookTable)
+      const body = open === "hooks" ? panel("acchooks", hookTable, "")
         : open === "cloud" ? panel("acccloud", cloudTable)
-        : open === "apps" ? panel("accapps", this.accAppsTable(appList, risks, sorts.find(x => x.key === "risk")))
+        : open === "apps" ? panel("accapps", this.accAppsTable(appList, risks, sorts.find(x => x.key === "risk")), "accLegendApps")
         : panel("accsys", sysTable);
       return `<div class="stack">${head}${this.navTiles("dataflow", tabs, open, this.t("dataflow"), true)}${body}<div class="panel">${this.howCounted("accFootnote")}</div></div>`;
     }, e => `<span>${this.esc(this.t("sysChecked", { n: this.formatNumber((e.entries || []).length) }))}</span>`);
@@ -341,7 +361,7 @@ class SystemMixin {
         { key: "name", label: "accColApp", cell: a => this.nameCell(a.name, a.slug) },
         { key: "state", label: "sysColState", sortable: false, cell: a => `<span class="pill ${running(a) ? "ok" : "mute"}">${this.t(running(a) ? "sysAppRunning" : "sysAppStopped")}</span>` },
         { key: "rights", label: "accColRights", sortable: false, cell: rights },
-        { key: "risk", label: "accColRisk", cell: a => (a.risk ? this.accRiskPill(a.risk) : `<span class="pill mute">${this.t("accAppUncheckedShort")}</span>`) },
+        { key: "risk", label: "accColRisk", cell: a => (a.risk ? this.accRiskPill(a.risk, this.accAppWhy(a)) : `<span class="pill mute">${this.t("accAppUncheckedShort")}</span>`) },
       ],
       exportName: "app-rights", header: [this.t("accColApp"), "Slug", this.t("sysColState"), this.t("accColRights"), this.t("accColRisk")], rows: a => [a.name, a.slug, a.state || "", a.access.map(x => this.accAppRight(x)).join("; "), a.risk ? this.t(`accRisk_${a.risk}`) : ""],
     });
@@ -379,7 +399,7 @@ class SystemMixin {
     const rights = app.access.length
       ? app.access.map(x => `<div class="row static"><span class="row-text"><strong>${this.esc(this.accAppRight(x))}</strong></span><span class="pill ${tone[x.level] || "mute"}">${this.t(`accRisk_${x.level}`)}</span></div>`).join("")
       : `<div class="emptymsg">${this.t(app.checked ? "accAppNoRights" : "accAppUnchecked")}</div>`;
-    const head = `<div class="panelhead"><div><h2>${this.t("accColRights")}</h2><p>${this.t("accAppsHint")}</p></div>${app.risk ? this.accRiskPill(app.risk) : ""}</div>`;
+    const head = `<div class="panelhead"><div><h2>${this.t("accColRights")}</h2><p>${this.t("accAppsHint")}</p></div>${app.risk ? this.accRiskPill(app.risk, this.accAppWhy(app)) : ""}</div>`;
     return `<div class="stack"><section class="panel">${head}${rights}</section><section class="panel"><div class="pad"><small><button class="link" data-jump="dataflow">${this.t("accDetAllFlow")}</button></small></div></section></div>`;
   }
 
@@ -427,7 +447,7 @@ class SystemMixin {
     const section = (title, body) => `<section class="panel"><div class="panelhead"><h2>${this.t(title)}</h2></div>${body}</section>`;
     const none = key => `<div class="emptymsg">${this.t(key)}</div>`;
     const access = e && (e.access.length || e.gps || e.camera)
-      ? `<div class="facts"><div class="fact"><span>${this.t("accColAccess")}</span><b>${this.accPills(this.accAccessLabels(e), "warn")}</b></div><div class="fact"><span>${this.t("accColRisk")}</span><b>${this.accRiskPill(e.risk)}</b></div></div>`
+      ? `<div class="facts"><div class="fact"><span>${this.t("accColAccess")}</span><b>${this.accPills(this.accAccessLabels(e), "warn")}</b></div><div class="fact"><span>${this.t("accColRisk")}</span><b>${this.accRiskPill(e.risk, this.accEntryWhy(e))}</b></div></div>${this.accEntryWhy(e) ? `<p class="factnote">${this.esc(this.accEntryWhy(e))}</p>` : ""}`
       : none("accDetNoAccess");
     const flows = e && e.flows?.length ? e.flows.map(f => this.t(`accFlow_${f}`)) : [];
     const iot = e?.iot_class ? (TEXT[this.lang][`accIot_${e.iot_class}`] ? this.t(`accIot_${e.iot_class}`) : e.iot_class) : "";

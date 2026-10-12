@@ -145,8 +145,16 @@ def classify(domain: str, iot_class: str | None, entity_domains: set[str]) -> di
         risk = "medium"
     else:
         risk = "low"
+    reasons: list[str] = []
+    kinds = list(dict.fromkeys(a["kind"] for a in access))
+    if risk == "high":
+        reasons = [kind for kind in kinds if kind in SYSTEM_KINDS]
+        reasons += (["gps"] if gps else []) + (["camera"] if camera else [])
+    elif risk == "medium":
+        reasons = kinds + (["cloud"] if external else [])
     return {
         "access": access,
+        "risk_reasons": reasons,
         "flows": sorted(flows),
         "gps": gps,
         "camera": camera,
