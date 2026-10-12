@@ -1,7 +1,7 @@
-// SystemMixin: the pages "Storage & system" and "Access & data flow" under Explore; mixed in by 99-register.js.
+// SystemMixin: the pages "Storage & system", "Access & data flow" and "Credentials" under Explore; mixed in by 99-register.js.
 // All three only read. A page loads on its first visit; its refresh button reads again.
-// Page and WebSocket command; another page can add itself (see 75-credentials.js).
-const SYS_COMMANDS = { storage: "system_usage", dataflow: "access" };
+// A page and the WebSocket command it asks.
+const SYS_COMMANDS = { storage: "system_usage", dataflow: "access", secrets: "sensitive_fields" };
 const SYS_WARN_PERCENT = 85, SYS_RED_PERCENT = 95;
 
 class SystemMixin {
@@ -312,6 +312,48 @@ class SystemMixin {
         { key: "risk", label: "accColRisk", cell: a => (a.risk ? this.accRiskPill(a.risk) : `<span class="pill mute">${this.t("accAppUncheckedShort")}</span>`) },
       ],
       exportName: "app-rights", header: [this.t("accColApp"), "Slug", this.t("sysColState"), this.t("accColRights"), this.t("accColRisk")], rows: a => [a.name, a.slug, a.state || "", a.access.map(x => this.accAppRight(x)).join("; "), a.risk ? this.t(`accRisk_${a.risk}`) : ""],
+    });
+  }
+
+  // ---------------------------------------------------------------- Credentials
+
+  // Which integrations hold credentials, of what kind, and whether a value is set. Never a value.
+  secretsView() {
+    return this.sysFrame("secrets", "secTitle", "secHint", "secLoading", (r, head) => {
+      const entries = r.entries || [];
+      const count = (e, set) => e.fields.filter(f => f.set === set).length;
+      const kinds = e => [...new Set(e.fields.map(f => f.kind))];
+      const empty = entries.reduce((n, e) => n + count(e, false), 0);
+      const tiles = this.sumTiles([
+        { label: this.t("secSumEntries"), value: this.esc(this.formatNumber(entries.length)), tone: "mute" },
+        { label: this.t("secSumSet"), value: this.esc(this.formatNumber(entries.reduce((n, e) => n + count(e, true), 0))), tone: "mute" },
+        { label: this.t("secSumEmpty"), value: this.esc(this.formatNumber(empty)), sub: this.esc(this.t("secSumEmptySub")), tone: empty ? "warn" : "ok" },
+      ]);
+      const state = e => (count(e, false) === 0 ? "set" : count(e, true) === 0 ? "empty" : "part");
+      const stateCell = e => `<span class="pill ${{ set: "ok", part: "warn", empty: "warn" }[state(e)]}">${this.esc(this.t("secState", { n: count(e, true), total: e.fields.length }))}</span>`;
+      const kindNames = e => kinds(e).map(k => this.t(`secKind_${k}`));
+      const names = e => e.fields.map(f => f.key).join(", ");
+      const table = this.sysList("seclist", entries, {
+        sort: "name", dir: "asc", cls: "acc", tie: e => e.entry_id,
+        sorts: [{ key: "name", label: "accColIntegration", dir: "asc", get: e => `${e.domain} ${e.title}` }, { key: "state", label: "secColState", dir: "desc", get: e => ({ empty: 2, part: 1, set: 0 })[state(e)] }],
+        filters: [
+          { name: "kind", all: this.t("secAllKinds"), options: ["password", "token", "api_key", "secret", "webhook", "pin"].map(k => [k, this.t(`secKind_${k}`)]) },
+          { name: "state", all: this.t("secAllStates"), options: [["set", this.t("secStateSet")], ["part", this.t("secStatePart")], ["empty", this.t("secStateEmpty")]] },
+        ],
+        filterFns: { kind: (e, v) => kinds(e).includes(v), state: (e, v) => state(e) === v },
+        text: e => `${e.domain} ${e.title} ${names(e)} ${kindNames(e).join(" ")}`, empty: "secNone",
+        rowAttrs: e => `data-ha-path="${this.esc(`/config/integrations/integration/${encodeURIComponent(e.domain)}`)}" tabindex="0" role="link" aria-label="${this.esc(this.t("secOpen", { name: e.title || e.domain }))}"`,
+        columns: [
+          { key: "name", label: "accColIntegration", cell: e => this.accIntegrationCell(e) },
+          { key: "kind", label: "secColKind", sortable: false, cell: e => this.accPills(kindNames(e)) },
+          { key: "fields", label: "secColFields", sortable: false, cell: e => `<span class="muted">${this.esc(names(e))}</span>` },
+          { key: "state", label: "secColState", dir: "desc", cell: stateCell },
+          { key: "open", label: "secColOpen", sortable: false, cell: () => `<ha-icon icon="mdi:open-in-new"></ha-icon>` },
+        ],
+        exportName: "credential-fields", header: [this.t("accColIntegration"), "Domain", this.t("secColKind"), this.t("secColFields"), this.t("secColSetCount"), this.t("secColEmptyCount")],
+        rows: e => [e.title, e.domain, kindNames(e).join("; "), names(e), count(e, true), count(e, false)],
+      });
+      return `<div class="stack"><div class="panel">${head}<div class="pad"><p class="factnote">${this.t("secIntro")}</p></div></div>${tiles}<div class="panel"><div class="panelhead"><div><h2>${this.t("secListTitle")}</h2><p>${this.t("secListHint")}</p></div></div>${table}${this.howCounted("secFootnote")}</div></div>`;
     });
   }
 

@@ -3952,6 +3952,10 @@ const ACCESS = {
   ],
 };
 
+const SECRETS = { entries: [
+  { entry_id: "c1", domain: "demo_cloud", title: "<i>Demo</i>", disabled: false, fields: [{ source: "data", key: "password", kind: "password", set: true }, { source: "data", key: "token.access_token", kind: "token", set: false }] },
+] };
+
 function systemPanel(lang = "en") {
   const env = panel(lang);
   const calls = [];
@@ -3959,6 +3963,7 @@ function systemPanel(lang = "en") {
   env.el._sys = {
     storage: { data: SYSTEM, requested: true, loading: false, error: "", at: null },
     dataflow: { data: ACCESS, requested: true, loading: false, error: "", at: null },
+    secrets: { data: SECRETS, requested: true, loading: false, error: "", at: null },
   };
   return { ...env, calls };
 }
@@ -3966,7 +3971,7 @@ function systemPanel(lang = "en") {
 test("the three new pages sit under Explore and render in both languages", () => {
   const { NAV_GROUPS, TEXT } = loadPanel();
   const explore = NAV_GROUPS.find(([label]) => label === "navGroupExplore")[1];
-  for (const view of ["storage", "dataflow"]) {
+  for (const view of ["storage", "dataflow", "secrets"]) {
     assert.ok(explore.includes(view), view);
     for (const lang of ["de", "en"]) assert.ok(TEXT[lang][view] && TEXT[lang][`${view}Subtitle`], `${lang} ${view}`);
   }
@@ -4013,6 +4018,17 @@ test("access and data flow show system access and the cloud on one page", () => 
   assert.ok(html.includes("Radio/device (Zigbee)") && html.includes('class="pill red">High'));
   assert.ok(html.includes("cloud, polls"), "the IoT class is translated");
   assert.ok(!html.includes("Hue</strong>"), "an integration without access or cloud is not listed");
+});
+
+test("the credential overview shows kind and set or empty, links to Home Assistant and has no value to show", () => {
+  const { el, shadow } = systemPanel("de");
+  el.view = "secrets";
+  el.render();
+  const html = shadow.innerHTML;
+  assert.ok(html.includes("Passwort") && html.includes("Token") && html.includes("1 von 2"));
+  assert.ok(html.includes('data-ha-path="/config/integrations/integration/demo_cloud"'), "a row opens the integration in Home Assistant");
+  assert.ok(html.includes("&lt;i&gt;Demo&lt;/i&gt;") && !html.includes("<i>Demo</i>"), "titles are escaped");
+  assert.ok(!/reveal|credential_reveal/i.test(html), "nothing to reveal");
 });
 
 test("the rights of the apps show under access and data flow, or why they are missing", () => {

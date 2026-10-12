@@ -453,6 +453,7 @@ const NAV = [
   ["journal", "mdi:clipboard-text-clock-outline"],
   ["storage", "mdi:harddisk"],
   ["dataflow", "mdi:transit-connection-variant"],
+  ["secrets", "mdi:key-variant"],
   ["maintenance", "mdi:wrench-clock"],
   ["exposure", "mdi:shield-search"],
   ["policies", "mdi:clipboard-check-outline"],
@@ -469,7 +470,7 @@ const NAV_GROUPS = [
   ["navGroupActions", ["overview", "findingsNav", "cleanup", "repair"]],
   ["navGroupMaintain", ["maintenance", "batteries", "reminders", "policies", "exposure"]],
   ["navGroupOperation", ["reliability", "runs", "recorder"]],
-  ["navGroupExplore", ["inventory", "graph", "changes", "journal", "storage", "dataflow"]],
+  ["navGroupExplore", ["inventory", "graph", "changes", "journal", "storage", "dataflow", "secrets"]],
 ];
 const BUSY_RETRIES = 12, BUSY_WAIT_MS = 8000; // another recorder query holds the lock: ask again by itself
 const NAV_ICONS = { ...Object.fromEntries(NAV), unreferenced: "mdi:link-variant-off" };
@@ -10023,7 +10024,7 @@ class BatteryKindMixin {
   }
 }
 
-// Texts for storage and system, access and data flow, and the sidebar button; merged into TEXT.
+// Texts for storage and system, access and data flow, the credential overview and the sidebar button; merged into TEXT.
 Object.assign(TEXT.de, {
   haMenu: "Seitenleiste von Home Assistant öffnen",
   storage: "Speicher & System", storageSubtitle: "Belegung von Datenträger, Arbeitsspeicher und CPU und die größten Speicherverbraucher. Liest nur; es wird nichts geändert und nichts gespeichert.",
@@ -10059,6 +10060,16 @@ Object.assign(TEXT.de, {
   accExternal: "extern", accGps: "Standort (Tracker)", accCamera: "Kamera-Entitäten", accDisabled: "deaktiviert",
   accNoneSys: "Keine Integration mit Systemzugriff erkannt.", accNoneCloud: "Kein Datenfluss zu externen Diensten erkannt.",
   accFootnote: "Systemzugriff und Datenfluss leitet Housekeeper aus dem Namen der Integration ab (zha → Zigbee-Funk, mobile_app → Standort), einen Cloud-Datenfluss außerdem aus der IoT-Klasse cloud_polling oder cloud_push; Tracker- und Kamera-Entitäten zählen als Standort und Kamera. Die Einordnung ist ein Hinweis, kein Beweis. Hoch: Zugriff auf System, Shell oder Funk, Kameras oder Standort. Mittel: Daten gehen nach außen oder ein anderer Zugriff. Ignorierte Funde fehlen. Die Rechte der Apps meldet der Supervisor; hoch ist, was auf dem Host Root gleichkommt (voller Hardwarezugriff, Privilegien, Docker-API, Host-Prozesse, Supervisor-Rolle admin oder manager), mittel sind Host-Netzwerk, Zugriff auf Home Assistant oder Logins und ein abgeschaltetes AppArmor. Ein Klick auf eine App öffnet sie in Home Assistant. Es wird nichts geändert und nichts gespeichert.",
+  secrets: "Zugangsdaten", secretsSubtitle: "Welche Integrationen Zugangsdaten gespeichert haben, von welcher Art und ob ein Wert hinterlegt ist. Werte zeigt Housekeeper nie. Liest nur.",
+  secTitle: "Zugangsdaten", secHint: "Gespeicherte Zugangsdaten der Integrationen, ohne Werte", secLoading: "Die Integrationen werden durchgesehen …",
+  secIntro: "Hier siehst du, welche Integrationen Passwörter, Tokens oder Schlüssel gespeichert haben und ob dazu ein Wert hinterlegt ist. Die Werte selbst zeigt Housekeeper nicht. Zum Ändern öffnet ein Klick auf eine Zeile die Integration in Home Assistant.",
+  secSumEntries: "Integrationen mit Zugangsdaten", secSumSet: "Felder mit Wert", secSumEmpty: "Felder ohne Wert", secSumEmptySub: "Feld vorhanden, aber leer",
+  secListTitle: "Integrationen", secListHint: "Art der Zugangsdaten und ob ein Wert hinterlegt ist",
+  secColKind: "Art", secColFields: "Felder", secColState: "Hinterlegt", secColOpen: "In Home Assistant", secColSetCount: "Felder mit Wert", secColEmptyCount: "Felder ohne Wert",
+  secState: "{n} von {total}", secStateSet: "alle hinterlegt", secStatePart: "teilweise", secStateEmpty: "nichts hinterlegt", secAllKinds: "Alle Arten", secAllStates: "Alle Zustände",
+  secKind_password: "Passwort", secKind_token: "Token", secKind_api_key: "API-Schlüssel", secKind_secret: "Secret", secKind_webhook: "Webhook", secKind_pin: "PIN",
+  secNone: "Keine Integration mit gespeicherten Zugangsdaten erkannt.", secOpen: "{name} in Home Assistant öffnen",
+  secFootnote: "Housekeeper erkennt Zugangsdaten am Namen eines Feldes in der Konfiguration einer Integration (password, token, api_key, secret, webhook, pin) und prüft nur, ob es leer ist. Werte, Auszüge davon und ihre Länge werden weder gelesen noch angezeigt noch exportiert. Die Erkennung ist ein Hinweis: Zugangsdaten unter einem anderen Namen fehlen, und ein Feld mit so einem Namen kann etwas Harmloses enthalten. Ein Klick auf eine Zeile öffnet die Integration in Home Assistant, dort lassen sich die Zugangsdaten ändern. Es wird nichts geändert und nichts gespeichert.",
 });
 Object.assign(TEXT.en, {
   haMenu: "Open the Home Assistant sidebar",
@@ -10095,6 +10106,16 @@ Object.assign(TEXT.en, {
   accExternal: "external", accGps: "Location (trackers)", accCamera: "Camera entities", accDisabled: "disabled",
   accNoneSys: "No integration with system access found.", accNoneCloud: "No data flow to external services found.",
   accFootnote: "Housekeeper derives system access and data flow from the name of the integration (zha → Zigbee radio, mobile_app → location) and a cloud data flow also from the IoT class cloud_polling or cloud_push; tracker and camera entities count as location and camera. The classification is a hint, not a proof. High: access to the system, shell or radio, cameras or the location. Medium: data goes outside or another access. Ignored discoveries are left out. The rights of the apps come from the Supervisor; high is what equals root on the host (full hardware access, privileges, Docker API, host processes, Supervisor role admin or manager), medium is the host network, access to Home Assistant or logins, and AppArmor switched off. A click on an app opens it in Home Assistant. Nothing is changed and nothing is stored.",
+  secrets: "Credentials", secretsSubtitle: "Which integrations store credentials, of what kind, and whether a value is set. Housekeeper never shows the values. Only reads.",
+  secTitle: "Credentials", secHint: "Stored credentials of the integrations, without values", secLoading: "Looking through the integrations …",
+  secIntro: "Here you see which integrations store passwords, tokens or keys and whether a value is set for them. Housekeeper does not show the values. To change one, a click on a row opens the integration in Home Assistant.",
+  secSumEntries: "Integrations with credentials", secSumSet: "Fields with a value", secSumEmpty: "Fields without a value", secSumEmptySub: "field exists but is empty",
+  secListTitle: "Integrations", secListHint: "Kind of credentials and whether a value is set",
+  secColKind: "Kind", secColFields: "Fields", secColState: "Set", secColOpen: "In Home Assistant", secColSetCount: "Fields with a value", secColEmptyCount: "Fields without a value",
+  secState: "{n} of {total}", secStateSet: "all set", secStatePart: "partly", secStateEmpty: "nothing set", secAllKinds: "All kinds", secAllStates: "All states",
+  secKind_password: "Password", secKind_token: "Token", secKind_api_key: "API key", secKind_secret: "Secret", secKind_webhook: "Webhook", secKind_pin: "PIN",
+  secNone: "No integration with stored credentials found.", secOpen: "Open {name} in Home Assistant",
+  secFootnote: "Housekeeper recognises credentials by the name of a field in an integration's configuration (password, token, api_key, secret, webhook, pin) and only checks whether it is empty. Values, parts of them and their length are neither read nor shown nor exported. The detection is a hint: credentials under another name are missing, and a field with such a name may hold something harmless. A click on a row opens the integration in Home Assistant, where the credentials can be changed. Nothing is changed and nothing is stored.",
 });
 
 // The Batteries view as one table: level, type and forecast side by side, and the need of the next 30 days above it.
@@ -10284,10 +10305,10 @@ class BatteryTableMixin {
   }
 }
 
-// SystemMixin: the pages "Storage & system" and "Access & data flow" under Explore; mixed in by 99-register.js.
+// SystemMixin: the pages "Storage & system", "Access & data flow" and "Credentials" under Explore; mixed in by 99-register.js.
 // All three only read. A page loads on its first visit; its refresh button reads again.
-// Page and WebSocket command; another page can add itself (see 75-credentials.js).
-const SYS_COMMANDS = { storage: "system_usage", dataflow: "access" };
+// A page and the WebSocket command it asks.
+const SYS_COMMANDS = { storage: "system_usage", dataflow: "access", secrets: "sensitive_fields" };
 const SYS_WARN_PERCENT = 85, SYS_RED_PERCENT = 95;
 
 class SystemMixin {
@@ -10598,6 +10619,48 @@ class SystemMixin {
         { key: "risk", label: "accColRisk", cell: a => (a.risk ? this.accRiskPill(a.risk) : `<span class="pill mute">${this.t("accAppUncheckedShort")}</span>`) },
       ],
       exportName: "app-rights", header: [this.t("accColApp"), "Slug", this.t("sysColState"), this.t("accColRights"), this.t("accColRisk")], rows: a => [a.name, a.slug, a.state || "", a.access.map(x => this.accAppRight(x)).join("; "), a.risk ? this.t(`accRisk_${a.risk}`) : ""],
+    });
+  }
+
+  // ---------------------------------------------------------------- Credentials
+
+  // Which integrations hold credentials, of what kind, and whether a value is set. Never a value.
+  secretsView() {
+    return this.sysFrame("secrets", "secTitle", "secHint", "secLoading", (r, head) => {
+      const entries = r.entries || [];
+      const count = (e, set) => e.fields.filter(f => f.set === set).length;
+      const kinds = e => [...new Set(e.fields.map(f => f.kind))];
+      const empty = entries.reduce((n, e) => n + count(e, false), 0);
+      const tiles = this.sumTiles([
+        { label: this.t("secSumEntries"), value: this.esc(this.formatNumber(entries.length)), tone: "mute" },
+        { label: this.t("secSumSet"), value: this.esc(this.formatNumber(entries.reduce((n, e) => n + count(e, true), 0))), tone: "mute" },
+        { label: this.t("secSumEmpty"), value: this.esc(this.formatNumber(empty)), sub: this.esc(this.t("secSumEmptySub")), tone: empty ? "warn" : "ok" },
+      ]);
+      const state = e => (count(e, false) === 0 ? "set" : count(e, true) === 0 ? "empty" : "part");
+      const stateCell = e => `<span class="pill ${{ set: "ok", part: "warn", empty: "warn" }[state(e)]}">${this.esc(this.t("secState", { n: count(e, true), total: e.fields.length }))}</span>`;
+      const kindNames = e => kinds(e).map(k => this.t(`secKind_${k}`));
+      const names = e => e.fields.map(f => f.key).join(", ");
+      const table = this.sysList("seclist", entries, {
+        sort: "name", dir: "asc", cls: "acc", tie: e => e.entry_id,
+        sorts: [{ key: "name", label: "accColIntegration", dir: "asc", get: e => `${e.domain} ${e.title}` }, { key: "state", label: "secColState", dir: "desc", get: e => ({ empty: 2, part: 1, set: 0 })[state(e)] }],
+        filters: [
+          { name: "kind", all: this.t("secAllKinds"), options: ["password", "token", "api_key", "secret", "webhook", "pin"].map(k => [k, this.t(`secKind_${k}`)]) },
+          { name: "state", all: this.t("secAllStates"), options: [["set", this.t("secStateSet")], ["part", this.t("secStatePart")], ["empty", this.t("secStateEmpty")]] },
+        ],
+        filterFns: { kind: (e, v) => kinds(e).includes(v), state: (e, v) => state(e) === v },
+        text: e => `${e.domain} ${e.title} ${names(e)} ${kindNames(e).join(" ")}`, empty: "secNone",
+        rowAttrs: e => `data-ha-path="${this.esc(`/config/integrations/integration/${encodeURIComponent(e.domain)}`)}" tabindex="0" role="link" aria-label="${this.esc(this.t("secOpen", { name: e.title || e.domain }))}"`,
+        columns: [
+          { key: "name", label: "accColIntegration", cell: e => this.accIntegrationCell(e) },
+          { key: "kind", label: "secColKind", sortable: false, cell: e => this.accPills(kindNames(e)) },
+          { key: "fields", label: "secColFields", sortable: false, cell: e => `<span class="muted">${this.esc(names(e))}</span>` },
+          { key: "state", label: "secColState", dir: "desc", cell: stateCell },
+          { key: "open", label: "secColOpen", sortable: false, cell: () => `<ha-icon icon="mdi:open-in-new"></ha-icon>` },
+        ],
+        exportName: "credential-fields", header: [this.t("accColIntegration"), "Domain", this.t("secColKind"), this.t("secColFields"), this.t("secColSetCount"), this.t("secColEmptyCount")],
+        rows: e => [e.title, e.domain, kindNames(e).join("; "), names(e), count(e, true), count(e, false)],
+      });
+      return `<div class="stack"><div class="panel">${head}<div class="pad"><p class="factnote">${this.t("secIntro")}</p></div></div>${tiles}<div class="panel"><div class="panelhead"><div><h2>${this.t("secListTitle")}</h2><p>${this.t("secListHint")}</p></div></div>${table}${this.howCounted("secFootnote")}</div></div>`;
     });
   }
 
@@ -11535,6 +11598,7 @@ class HAHousekeeperPanel extends HTMLElement {
       policies: [this.t("policies"), this.t("policiesSubtitle")],
       storage: [this.t("storage"), this.t("storageSubtitle")],
       dataflow: [this.t("dataflow"), this.t("dataflowSubtitle")],
+      secrets: [this.t("secrets"), this.t("secretsSubtitle")],
     };
     const [title, sub] = titles[this.view] || titles.overview;
     const writes = ["cleanup", "repair", "maintenance", "policies"].includes(this.view);
@@ -11571,6 +11635,7 @@ class HAHousekeeperPanel extends HTMLElement {
     if (this.view === "runs") return this.runsView();
     if (this.view === "storage") return this.storageView();
     if (this.view === "dataflow") return this.dataflowView();
+    if (this.view === "secrets") return this.secretsView();
     if (this.view === "graph") return this.graph();
     return this.overview();
   }

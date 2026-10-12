@@ -601,6 +601,7 @@ class HAHousekeeperPanel extends HTMLElement {
       policies: [this.t("policies"), this.t("policiesSubtitle")],
       storage: [this.t("storage"), this.t("storageSubtitle")],
       dataflow: [this.t("dataflow"), this.t("dataflowSubtitle")],
+      secrets: [this.t("secrets"), this.t("secretsSubtitle")],
     };
     const [title, sub] = titles[this.view] || titles.overview;
     const writes = ["cleanup", "repair", "maintenance", "policies"].includes(this.view);
@@ -637,6 +638,7 @@ class HAHousekeeperPanel extends HTMLElement {
     if (this.view === "runs") return this.runsView();
     if (this.view === "storage") return this.storageView();
     if (this.view === "dataflow") return this.dataflowView();
+    if (this.view === "secrets") return this.secretsView();
     if (this.view === "graph") return this.graph();
     return this.overview();
   }

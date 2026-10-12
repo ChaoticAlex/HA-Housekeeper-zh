@@ -4,15 +4,18 @@
 
 ### Neu
 
-- **Speicher & System** (Erkunden): Belegung von Datenträger, RAM und CPU mit Swap und Last; Systemspeicher nach Kategorie und Apps (mit Supervisor), die größten Verbraucher unter `/config`, Custom-Integrationen, Custom Cards und Blueprints mit ihrer Größe. Jede Liste sortierbar, durchsuchbar und als CSV exportierbar.
-- **Zugriffe & Datenfluss** (Erkunden): Systemzugriffe mit Datenfluss und Risikostufe sowie der Cloud-Datenfluss der Integrationen auf einer Seite; mit Supervisor dazu die Rechte jeder App (voller Hardwarezugriff, Privilegien, Docker-API, Host-Netzwerk, Supervisor-Rolle, AppArmor) mit Risikostufe.
-- **Seitenleisten-Knopf:** Ist die Seitenleiste von Home Assistant ausgeblendet (schmaler Bildschirm oder „immer ausblenden“), öffnet ein Menüknopf im Kopf des Panels sie wieder.
+- **Speicher & System** (Erkunden): Belegung von Datenträger, RAM und CPU, Systemspeicher nach Kategorie, Apps und die größten Verbraucher unter `/config`.
+- **Zugriffe & Datenfluss** (Erkunden): Systemzugriffe und Cloud-Datenfluss der Integrationen mit Risikostufe, mit Supervisor auch die Rechte der Apps.
+- **Zugangsdaten** (Erkunden): welche Integrationen Passwörter, Tokens oder Schlüssel gespeichert haben und ob ein Wert hinterlegt ist. Werte zeigt Housekeeper nie.
+- **Seitenleisten-Knopf:** öffnet die Seitenleiste von Home Assistant, wenn sie ausgeblendet ist.
 
 ### English
 
-- **Storage & system** (Explore): disk, RAM and CPU use with swap and load; system storage by category and apps (with a Supervisor), the largest consumers under `/config`, custom integrations, custom cards and blueprints with their size. Every list sortable, searchable and exportable as CSV.
-- **Access & data flow** (Explore): system access with data flow and a risk level, and the cloud data flow of the integrations on one page; with a Supervisor also the rights of every app (full hardware access, privileges, Docker API, host network, Supervisor role, AppArmor) with a risk level.
-- **Sidebar button:** when Home Assistant's sidebar is hidden (narrow screen or "always hidden"), a menu button in the panel's header opens it again.
+- **Storage & system** (Explore): disk, RAM and CPU use, system storage by category, apps and the largest consumers under `/config`.
+- **Access & data flow** (Explore): system access and cloud data flow of the integrations with a risk level, with a Supervisor also the rights of the apps.
+- **Credentials** (Explore): which integrations store passwords, tokens or keys and whether a value is set. Housekeeper never shows the values.
+- **Sidebar button:** opens Home Assistant's sidebar when it is hidden.
+
 ## 1.4.0 - 2026-10-11
 
 Defekte Referenzen in Dashboards sind jetzt lesbar und gruppiert.

@@ -12,6 +12,7 @@ from homeassistant.core import HomeAssistant, callback
 from .access import access_report
 from .const import DOMAIN
 from .inventory import InventoryScanner
+from .sensitive_fields import sensitive_fields
 from .system_usage import system_usage
 from .ws_common import _versioned, with_scanner
 
@@ -59,8 +60,23 @@ async def websocket_access(
     connection.send_result(msg["id"], _versioned(result))
 
 
+@websocket_api.require_admin
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/sensitive_fields"})
+@callback
+@with_scanner
+def websocket_sensitive_fields(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """Which config entries hold credentials, of what kind and whether set. Never a value."""
+    connection.send_result(msg["id"], _versioned(sensitive_fields(hass)))
+
+
 @callback
 def async_register(hass: HomeAssistant) -> None:
-    """Register the storage and access commands."""
+    """Register the storage, access and credential-overview commands."""
     websocket_api.async_register_command(hass, websocket_system_usage)
     websocket_api.async_register_command(hass, websocket_access)
+    websocket_api.async_register_command(hass, websocket_sensitive_fields)

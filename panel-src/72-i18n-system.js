@@ -1,4 +1,4 @@
-// Texts for storage and system, access and data flow, and the sidebar button; merged into TEXT.
+// Texts for storage and system, access and data flow, the credential overview and the sidebar button; merged into TEXT.
 Object.assign(TEXT.de, {
   haMenu: "Seitenleiste von Home Assistant öffnen",
   storage: "Speicher & System", storageSubtitle: "Belegung von Datenträger, Arbeitsspeicher und CPU und die größten Speicherverbraucher. Liest nur; es wird nichts geändert und nichts gespeichert.",
@@ -34,6 +34,16 @@ Object.assign(TEXT.de, {
   accExternal: "extern", accGps: "Standort (Tracker)", accCamera: "Kamera-Entitäten", accDisabled: "deaktiviert",
   accNoneSys: "Keine Integration mit Systemzugriff erkannt.", accNoneCloud: "Kein Datenfluss zu externen Diensten erkannt.",
   accFootnote: "Systemzugriff und Datenfluss leitet Housekeeper aus dem Namen der Integration ab (zha → Zigbee-Funk, mobile_app → Standort), einen Cloud-Datenfluss außerdem aus der IoT-Klasse cloud_polling oder cloud_push; Tracker- und Kamera-Entitäten zählen als Standort und Kamera. Die Einordnung ist ein Hinweis, kein Beweis. Hoch: Zugriff auf System, Shell oder Funk, Kameras oder Standort. Mittel: Daten gehen nach außen oder ein anderer Zugriff. Ignorierte Funde fehlen. Die Rechte der Apps meldet der Supervisor; hoch ist, was auf dem Host Root gleichkommt (voller Hardwarezugriff, Privilegien, Docker-API, Host-Prozesse, Supervisor-Rolle admin oder manager), mittel sind Host-Netzwerk, Zugriff auf Home Assistant oder Logins und ein abgeschaltetes AppArmor. Ein Klick auf eine App öffnet sie in Home Assistant. Es wird nichts geändert und nichts gespeichert.",
+  secrets: "Zugangsdaten", secretsSubtitle: "Welche Integrationen Zugangsdaten gespeichert haben, von welcher Art und ob ein Wert hinterlegt ist. Werte zeigt Housekeeper nie. Liest nur.",
+  secTitle: "Zugangsdaten", secHint: "Gespeicherte Zugangsdaten der Integrationen, ohne Werte", secLoading: "Die Integrationen werden durchgesehen …",
+  secIntro: "Hier siehst du, welche Integrationen Passwörter, Tokens oder Schlüssel gespeichert haben und ob dazu ein Wert hinterlegt ist. Die Werte selbst zeigt Housekeeper nicht. Zum Ändern öffnet ein Klick auf eine Zeile die Integration in Home Assistant.",
+  secSumEntries: "Integrationen mit Zugangsdaten", secSumSet: "Felder mit Wert", secSumEmpty: "Felder ohne Wert", secSumEmptySub: "Feld vorhanden, aber leer",
+  secListTitle: "Integrationen", secListHint: "Art der Zugangsdaten und ob ein Wert hinterlegt ist",
+  secColKind: "Art", secColFields: "Felder", secColState: "Hinterlegt", secColOpen: "In Home Assistant", secColSetCount: "Felder mit Wert", secColEmptyCount: "Felder ohne Wert",
+  secState: "{n} von {total}", secStateSet: "alle hinterlegt", secStatePart: "teilweise", secStateEmpty: "nichts hinterlegt", secAllKinds: "Alle Arten", secAllStates: "Alle Zustände",
+  secKind_password: "Passwort", secKind_token: "Token", secKind_api_key: "API-Schlüssel", secKind_secret: "Secret", secKind_webhook: "Webhook", secKind_pin: "PIN",
+  secNone: "Keine Integration mit gespeicherten Zugangsdaten erkannt.", secOpen: "{name} in Home Assistant öffnen",
+  secFootnote: "Housekeeper erkennt Zugangsdaten am Namen eines Feldes in der Konfiguration einer Integration (password, token, api_key, secret, webhook, pin) und prüft nur, ob es leer ist. Werte, Auszüge davon und ihre Länge werden weder gelesen noch angezeigt noch exportiert. Die Erkennung ist ein Hinweis: Zugangsdaten unter einem anderen Namen fehlen, und ein Feld mit so einem Namen kann etwas Harmloses enthalten. Ein Klick auf eine Zeile öffnet die Integration in Home Assistant, dort lassen sich die Zugangsdaten ändern. Es wird nichts geändert und nichts gespeichert.",
 });
 Object.assign(TEXT.en, {
   haMenu: "Open the Home Assistant sidebar",
@@ -70,4 +80,14 @@ Object.assign(TEXT.en, {
   accExternal: "external", accGps: "Location (trackers)", accCamera: "Camera entities", accDisabled: "disabled",
   accNoneSys: "No integration with system access found.", accNoneCloud: "No data flow to external services found.",
   accFootnote: "Housekeeper derives system access and data flow from the name of the integration (zha → Zigbee radio, mobile_app → location) and a cloud data flow also from the IoT class cloud_polling or cloud_push; tracker and camera entities count as location and camera. The classification is a hint, not a proof. High: access to the system, shell or radio, cameras or the location. Medium: data goes outside or another access. Ignored discoveries are left out. The rights of the apps come from the Supervisor; high is what equals root on the host (full hardware access, privileges, Docker API, host processes, Supervisor role admin or manager), medium is the host network, access to Home Assistant or logins, and AppArmor switched off. A click on an app opens it in Home Assistant. Nothing is changed and nothing is stored.",
+  secrets: "Credentials", secretsSubtitle: "Which integrations store credentials, of what kind, and whether a value is set. Housekeeper never shows the values. Only reads.",
+  secTitle: "Credentials", secHint: "Stored credentials of the integrations, without values", secLoading: "Looking through the integrations …",
+  secIntro: "Here you see which integrations store passwords, tokens or keys and whether a value is set for them. Housekeeper does not show the values. To change one, a click on a row opens the integration in Home Assistant.",
+  secSumEntries: "Integrations with credentials", secSumSet: "Fields with a value", secSumEmpty: "Fields without a value", secSumEmptySub: "field exists but is empty",
+  secListTitle: "Integrations", secListHint: "Kind of credentials and whether a value is set",
+  secColKind: "Kind", secColFields: "Fields", secColState: "Set", secColOpen: "In Home Assistant", secColSetCount: "Fields with a value", secColEmptyCount: "Fields without a value",
+  secState: "{n} of {total}", secStateSet: "all set", secStatePart: "partly", secStateEmpty: "nothing set", secAllKinds: "All kinds", secAllStates: "All states",
+  secKind_password: "Password", secKind_token: "Token", secKind_api_key: "API key", secKind_secret: "Secret", secKind_webhook: "Webhook", secKind_pin: "PIN",
+  secNone: "No integration with stored credentials found.", secOpen: "Open {name} in Home Assistant",
+  secFootnote: "Housekeeper recognises credentials by the name of a field in an integration's configuration (password, token, api_key, secret, webhook, pin) and only checks whether it is empty. Values, parts of them and their length are neither read nor shown nor exported. The detection is a hint: credentials under another name are missing, and a field with such a name may hold something harmless. A click on a row opens the integration in Home Assistant, where the credentials can be changed. Nothing is changed and nothing is stored.",
 });
