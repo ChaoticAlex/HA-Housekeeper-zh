@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.5.0 - 2026-10-12
+
 ### Geändert
 
 - **Kompaktere Menüleiste:** Damit die Leiste oben schmaler wird und seltener in den „Menü“-Knopf wechseln muss, ist sie umgebaut: „Housekeeper“ mit dem Wort „Übersicht“ darunter ist jetzt der Weg zur Übersicht und ersetzt den Menüpunkt „Übersicht“, und die Einstellungen sind in der Leiste nur noch das Zahnrad (der Name steht als Tooltip und in der Liste des Menü-Knopfs). Das Suchfeld ist dafür etwas breiter.
