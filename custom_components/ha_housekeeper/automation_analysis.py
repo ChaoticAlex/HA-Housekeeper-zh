@@ -13,6 +13,7 @@ REFERENCE_KEYS = {
     "area_id": "area",
     "floor_id": "floor",
     "label_id": "label",
+    "tag_id": "tag",
 }
 
 
@@ -145,6 +146,9 @@ def missing_references(
             continue
         # `scene.none` and the like are the usual "nothing chosen" default of blueprint inputs.
         if kind == "entity" and object_id.partition(".")[2] == "none":
+            continue
+        # Only a trigger waiting for a tag is broken without it: scanning an unknown tag creates it.
+        if kind == "tag" and reference.get("relation") != "TRIGGERS_ON":
             continue
         known = existing.get(kind)
         if known is not None and object_id not in known:

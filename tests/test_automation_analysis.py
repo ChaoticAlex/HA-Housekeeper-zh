@@ -95,6 +95,18 @@ def test_missing_references_ignore_dynamic_and_existing_targets() -> None:
     assert [item["object_id"] for item in missing] == ["light.missing", "missing-device"]
 
 
+def test_unknown_tag_is_missing_only_for_a_trigger_and_only_with_a_tag_store() -> None:
+    config = {
+        "triggers": [{"trigger": "tag", "tag_id": "gone"}],
+        "actions": [{"action": "tag.scan_tag", "data": {"tag_id": "new"}}],
+    }
+    references = analysis.extract_references(config)
+
+    missing = analysis.missing_references(references, {"tag": {"kept"}})
+    assert [item["object_id"] for item in missing] == ["gone"]
+    assert analysis.missing_references(references, {"entity": set()}) == []
+
+
 def test_none_entity_is_a_blueprint_placeholder_not_missing() -> None:
     references = [
         {"kind": "entity", "object_id": "scene.none"},

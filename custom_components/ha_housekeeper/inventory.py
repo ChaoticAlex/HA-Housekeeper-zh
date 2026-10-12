@@ -1263,7 +1263,7 @@ class InventoryScanner:
             "floors": fr.async_get(self.hass),
             "labels": lr.async_get(self.hass),
         }
-        return {
+        existing = {
             "entity": {
                 entry.entity_id for entry in _registry_entries(er.async_get(self.hass).entities)
             }
@@ -1273,6 +1273,11 @@ class InventoryScanner:
             "floor": {entry.floor_id for entry in _registry_entries(registries["floors"].floors)},
             "label": {entry.label_id for entry in _registry_entries(registries["labels"].labels)},
         }
+        # Without a readable tag store there is no "tag" key, so nothing is reported as missing.
+        tags = getattr(self.hass.data.get("tag"), "data", None)
+        if isinstance(tags, dict):
+            existing["tag"] = {str(tag_id) for tag_id in tags}
+        return existing
 
     def _runtime_component(self, domain: str) -> Any | None:
         """Return a loaded entity component such as automation or script."""

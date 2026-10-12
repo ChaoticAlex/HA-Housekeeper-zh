@@ -24,6 +24,7 @@
 - **Zahlen im Menü:** Wartung (verfehlte Ziele) und Richtlinien (Verstöße) zeigen eine Zahl; Bestand nicht mehr.
 - **Blockierte Automationen:** Eine Automation, deren Auslöser alle auf ausgefallene Entitäten zeigen, wird als Befund gemeldet.
 - **Fehlende Dienste:** Automationen und Skripte, die einen Dienst aufrufen, den es nicht mehr gibt, werden als Befund gemeldet; rufen mehrere denselben auf, steht er als eine Ursache in den Ausfällen.
+- **Fehlende Tags:** Eine Automation, die auf einen Tag (NFC/QR) wartet, den es nicht mehr gibt, wird als Befund gemeldet.
 - **Automationen ohne Wirkung:** Befunde für Automationen und Skripte, deren Aktionen alle auf ausgefallene Entitäten zielen, und für Bedingungen, die nie wahr werden. Eine blockierte Automation lässt sich per Plan ausschalten.
 - **Webhooks:** Zugriffe & Datenfluss zeigt, welche Automationen ein Webhook starten kann und ob er auch von außen erreichbar ist.
 - **Vorher/nachher:** Der Reiter „Läufe“ vergleicht Fehler vor und nach einer Änderung der Konfiguration.
@@ -55,6 +56,7 @@
 - **Numbers in the menu:** Maintenance (missed goals) and Policies (violations) show a number; Inventory no longer does.
 - **Blocked automations:** An automation whose triggers all point to failed entities is reported as a finding.
 - **Missing services:** Automations and scripts that call a service that no longer exists are reported as a finding; if several call the same one, it appears as one cause in the outages.
+- **Missing tags:** An automation that waits for a tag (NFC/QR) that no longer exists is reported as a finding.
 - **Automations without effect:** Findings for automations and scripts whose actions all target failed entities, and for conditions that can never be true. A blocked automation can be switched off with a plan.
 - **Webhooks:** Access & data flow shows which automations a webhook can start and whether it can also be reached from outside.
 - **Before/after:** The "Runs" tab compares errors before and after a change to the configuration.
