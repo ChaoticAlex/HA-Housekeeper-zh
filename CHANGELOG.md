@@ -82,6 +82,7 @@
 
 ### Behoben
 
+- **Kacheln der Unterseiten:** Das Symbol sitzt jetzt mittig in der Kachel und hat mehr Abstand zum Text.
 - **Webhooks:** Hat eine Automation mehrere Webhook-Auslöser, gilt sie als offen, sobald einer von außen erreichbar ist (vorher zählte nur der erste). Deaktivierte Automationen sind gekennzeichnet und zählen nicht als offen.
 - **Pläne:** Ein einzelner fehlgeschlagener Statusabruf beendet die Fortschrittsanzeige nicht mehr; sie versucht es erneut und weist darauf hin. Ein fehlgeschlagener Abbruch meldet das jetzt.
 - **Reparaturhinweise:** Nur nicht verfügbare, verwaiste und defekte Verweise lösen noch einen Hinweis aus; andere Befunde (zum Beispiel eine nicht geladene Integration) erscheinen nicht mehr unter „nicht verfügbare Entitäten“.
@@ -153,6 +154,7 @@
 
 ### Fixed
 
+- **Sub-page tiles:** The icon is now vertically centred in the tile and has more room to the text.
 - **Webhooks:** An automation with several webhook triggers now counts as open as soon as one of them is reachable from outside (before, only the first one counted). Disabled automations are marked and do not count as open.
 - **Plans:** A single failed status request no longer ends the progress display; it retries and says so. A failed cancel now reports that.
 - **Repairs hints:** Only unavailable, orphaned and broken-reference findings raise a hint; other findings (for example an integration that is not loaded) no longer show up as "unavailable entities".
