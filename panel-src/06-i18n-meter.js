@@ -1,7 +1,7 @@
 // Texts for the meter migration and the maintenance assistant; merged into TEXT.
 Object.assign(TEXT.de, {
   kindMeter: "Zählerwechsel (Statistik fortführen / ID übernehmen, mit Backup)",
-  meterTitle: "Zählerwechsel", meterHint: "Führt die Historie eines ersetzten Zählers mit dem neuen zusammen. Die Langzeitstatistik des alten Zählers wird vor die des neuen kopiert und die Summe des neuen um den alten Endstand verschoben; die Rohwerte des neuen Zählers bleiben unverändert. Alternativ oder zusätzlich übernimmt der neue Zähler die ID des alten, sodass Automationen, Dashboards und das Energie-Dashboard ohne Umschreiben weiterlaufen. Überlappende Werte werden nie überschrieben. Vor jedem Lauf entsteht ein Home-Assistant-Backup.",
+  meterTitle: "Zähler wechseln", meterHint: "Führt die Historie eines ersetzten Zählers mit dem neuen zusammen. Die Langzeitstatistik des alten Zählers wird vor die des neuen kopiert und die Summe des neuen um den alten Endstand verschoben; die Rohwerte des neuen Zählers bleiben unverändert. Alternativ oder zusätzlich übernimmt der neue Zähler die ID des alten, sodass Automationen, Dashboards und das Energie-Dashboard ohne Umschreiben weiterlaufen. Überlappende Werte werden nie überschrieben. Vor jedem Lauf entsteht ein Home-Assistant-Backup.",
   meterOld: "Alter Zähler", meterNew: "Neuer Zähler", meterMode: "Was soll passieren?",
   meterModeBoth: "Statistik fortführen und ID übernehmen (empfohlen)", meterModeStatistics: "Nur Statistik fortführen (neue ID bleibt)", meterModeId: "Nur ID übernehmen (Statistik bleibt getrennt)",
   meterCopy: "{count} Stundenwerte von {from} bis {to} werden vor die Reihe des neuen Zählers kopiert.", meterSwitch: "Umschaltpunkt: {date}",
@@ -42,7 +42,7 @@ Object.assign(TEXT.de, {
 });
 Object.assign(TEXT.en, {
   kindMeter: "Meter change (continue statistics / take over ID, with backup)",
-  meterTitle: "Meter change", meterHint: "Joins the history of a replaced meter with the new one. The old meter's long-term statistics are copied in front of the new ones and the new total is shifted by the old final reading; the raw readings of the new meter stay as they are. Alternatively or additionally the new meter takes over the old one's ID, so automations, dashboards and the Energy dashboard keep working without rewriting. Overlapping values are never overwritten. A Home Assistant backup is created before every run.",
+  meterTitle: "Replace a meter", meterHint: "Joins the history of a replaced meter with the new one. The old meter's long-term statistics are copied in front of the new ones and the new total is shifted by the old final reading; the raw readings of the new meter stay as they are. Alternatively or additionally the new meter takes over the old one's ID, so automations, dashboards and the Energy dashboard keep working without rewriting. Overlapping values are never overwritten. A Home Assistant backup is created before every run.",
   meterOld: "Old meter", meterNew: "New meter", meterMode: "What should happen?",
   meterModeBoth: "Continue statistics and take over the ID (recommended)", meterModeStatistics: "Continue statistics only (new ID stays)", meterModeId: "Take over the ID only (statistics stay separate)",
   meterCopy: "{count} hourly values from {from} to {to} are copied in front of the new meter's series.", meterSwitch: "Switch point: {date}",

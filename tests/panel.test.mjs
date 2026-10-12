@@ -1096,7 +1096,7 @@ test("the meter assistant offers the modes and sends the pair with the plan", as
   el.data = data; el.journal = []; el.view = "repair"; el.repairTask = "migrate_meter"; el.cleanupKind = "migrate_meter";
   el.render();
   let html = shadow.innerHTML;
-  assert.ok(html.includes("Meter change") && html.includes('data-picker="meterOld"'));
+  assert.ok(html.includes("Replace a meter") && html.includes('data-picker="meterOld"'));
   assert.ok(html.includes("Statistics and ID") && /data-plan-create\s+disabled/.test(html));
   el.meterOld = "sensor.meter_old"; el.meterNew = "sensor.meter_new"; el.meterMode = "statistics";
   el.render();
