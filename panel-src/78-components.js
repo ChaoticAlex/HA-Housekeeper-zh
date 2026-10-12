@@ -2,17 +2,17 @@
 // reliability numbers and the storage page already know and links to the detail pages; it keeps no numbers of its own.
 Object.assign(TEXT.de, {
   components: "Apps & Integrationen", componentsSubtitle: "Was installiert ist und ob es läuft: Apps und Integrationen nach Domain, mit Version, Status und Umfang. Liest nur, die Zahlen kommen aus dem Scan.",
-  compTabApps: "Apps", compTabAppsHint: "Status, CPU, RAM, Daten", compTabIntegrations: "Integrationen", compTabIntegrationsHint: "nach Domain",
+  compTabApps: "Apps", compTabAppsHint: "Status, CPU, RAM, Daten", compTabCore: "Core-Integrationen", compTabCoreHint: "von Home Assistant, nach Domain", compTabCustom: "Custom-Integrationen", compTabCustomHint: "Version, Updates, Ordnergröße", compSumSize: "{size} belegt",
   compEntries: "{n} Einträge", compNoApps: "Keine Apps (kein Supervisor oder keine installiert).", compNoIntegrations: "Keine Integrationen gefunden.",
-  compSumApps: "Apps", compSumRunning: "laufen", compSumIntegrations: "Integrationen", compSumCustom: "davon Custom", compSumProblem: "mit Problem", compSumUpdates: "Updates über HACS", compSumAppUpdates: "App-Updates", compColLatest: "Neueste Version", compFilterHacs: "HACS", compFilterUpdate: "Update verfügbar", compFilterViaHacs: "Über HACS",
+  compSumApps: "Apps", compSumRunning: "laufen", compSumCore: "Core-Integrationen", compSumCustomInt: "Custom-Integrationen", compSumProblem: "mit Problem", compSumUpdates: "Updates über HACS", compSumAppUpdates: "App-Updates", compColLatest: "Neueste Version", compFilterHacs: "HACS", compFilterUpdate: "Update verfügbar", compFilterViaHacs: "Über HACS",
   compColVersion: "Version", compColEntries: "Einträge", compColDevices: "Geräte", compColAvail: "Verfügbarkeit", compColOrigin: "Herkunft", compUpdate: "Update", compUpdateHint: "Neuere Version: {v}",
   compAvailHint: "Schlechtester Wert der Einträge; erscheint, sobald die Zuverlässigkeit berechnet ist.", compSizeHint: "Ordnergröße; erscheint, sobald „Speicher & System“ geladen ist.",
 });
 Object.assign(TEXT.en, {
   components: "Apps & integrations", componentsSubtitle: "What is installed and whether it runs: apps and integrations by domain, with version, status and scope. Read-only; the numbers come from the scan.",
-  compTabApps: "Apps", compTabAppsHint: "state, CPU, RAM, data", compTabIntegrations: "Integrations", compTabIntegrationsHint: "by domain",
+  compTabApps: "Apps", compTabAppsHint: "state, CPU, RAM, data", compTabCore: "Core integrations", compTabCoreHint: "from Home Assistant, by domain", compTabCustom: "Custom integrations", compTabCustomHint: "version, updates, folder size", compSumSize: "{size} used",
   compEntries: "{n} entries", compNoApps: "No apps (no Supervisor, or none installed).", compNoIntegrations: "No integrations found.",
-  compSumApps: "Apps", compSumRunning: "running", compSumIntegrations: "Integrations", compSumCustom: "of them custom", compSumProblem: "with a problem", compSumUpdates: "Updates via HACS", compSumAppUpdates: "App updates", compColLatest: "Latest version", compFilterHacs: "HACS", compFilterUpdate: "Update available", compFilterViaHacs: "Via HACS",
+  compSumApps: "Apps", compSumRunning: "running", compSumCore: "Core integrations", compSumCustomInt: "Custom integrations", compSumProblem: "with a problem", compSumUpdates: "Updates via HACS", compSumAppUpdates: "App updates", compColLatest: "Latest version", compFilterHacs: "HACS", compFilterUpdate: "Update available", compFilterViaHacs: "Via HACS",
   compColVersion: "Version", compColEntries: "Entries", compColDevices: "Devices", compColAvail: "Availability", compColOrigin: "Origin", compUpdate: "Update", compUpdateHint: "Newer version: {v}",
   compAvailHint: "Worst value of the entries; appears once reliability is calculated.", compSizeHint: "Folder size; appears once Storage & system is loaded.",
 });
@@ -52,14 +52,13 @@ class ComponentsMixin {
     return this.nameCell(g.name, sub);
   }
 
-  compIntegrationsList(items) {
+  compIntegrationsList(items, name) {
     const hasSize = items.some(g => g.bytes !== null);
     const hasAvail = items.some(g => g.avail !== null);
     const max = Math.max(0, ...items.map(g => g.bytes || 0));
     const origin = g => this.t(g.custom ? "originKindCustom" : "originKindCore");
     const columns = [
       { key: "name", label: "sysColIntegration", cell: g => this.compNameCell(g) },
-      { key: "origin", label: "compColOrigin", cell: g => `<span class="pill ${g.custom ? "violet" : "mute"}">${this.esc(origin(g))}</span>` },
       { key: "version", label: "compColVersion", cell: g => `${this.esc(g.version || "–")}${g.hacs?.pending_update ? ` <span class="pill warn" title="${this.esc(this.t("compUpdateHint", { v: g.hacs.available_version || "" }))}">${this.t("compUpdate")}</span>` : ""}` },
       { key: "state", label: "sysColState", cell: g => this.pill(g.status) },
       { key: "entities", label: "entities", dir: "desc", cell: g => this.esc(this.formatNumber(g.entities)) },
@@ -67,7 +66,7 @@ class ComponentsMixin {
       ...(hasAvail ? [{ key: "avail", label: "compColAvail", dir: "asc", cell: g => (g.avail === null ? "–" : `${this.esc(this.formatNumber(Math.round(g.avail * 10) / 10))} %`) }] : []),
       ...(hasSize ? [{ key: "size", label: "sysColSize", dir: "desc", cell: g => (g.bytes === null ? "–" : `${this.esc(this.formatBytes(g.bytes))}${this.sysShare(g.bytes, max)}`) }] : []),
     ];
-    return this.sysList("compint", items, {
+    return this.sysList(`compint_${name}`, items, {
       sort: "name", dir: "asc",
       sorts: [
         { key: "name", label: "sysColIntegration", dir: "asc", get: g => g.name },
@@ -77,10 +76,9 @@ class ComponentsMixin {
         ...(hasAvail ? [{ key: "avail", label: "compColAvail", dir: "asc", get: g => g.avail }] : []),
       ],
       filters: [
-        { name: "origin", all: this.t("allOrigins"), options: [["core", this.t("originKindCore")], ["custom", this.t("originKindCustom")]] },
         ...(items.some(g => g.hacs) ? [{ name: "hacs", all: this.t("compFilterHacs"), options: [["update", this.t("compFilterUpdate")], ["hacs", this.t("compFilterViaHacs")]] }] : []),
       ],
-      filterFns: { origin: (g, v) => g.custom === (v === "custom"), hacs: (g, v) => (v === "update" ? Boolean(g.hacs?.pending_update) : Boolean(g.hacs)) },
+      filterFns: { hacs: (g, v) => (v === "update" ? Boolean(g.hacs?.pending_update) : Boolean(g.hacs)) },
       text: g => `${g.name} ${g.domain}`, tie: g => g.domain, empty: "compNoIntegrations",
       rowAttrs: g => this.compRowAttrs(g), columns,
       exportName: "integrations", header: [this.t("sysColIntegration"), "Domain", this.t("compColOrigin"), this.t("compColVersion"), this.t("sysColState"), this.t("compColEntries"), this.t("entities"), this.t("compColDevices"), this.t("intHacsAvailable"), this.t("compUpdate")],
@@ -129,22 +127,32 @@ class ComponentsMixin {
   componentsView() {
     const apps = (this.data?.objects || []).filter(o => o.object_type === "app");
     const ints = this.compIntegrations();
+    const core = ints.filter(g => !g.custom), custom = ints.filter(g => g.custom);
+    const storage = this.sysState("storage").data;
+    // Disk space only once "Storage & system" is loaded; apps without a figure add nothing.
+    const sum = list => (list.some(x => x !== null && x !== undefined) ? list.reduce((t, x) => t + (x || 0), 0) : null);
+    const appBytes = storage ? sum(apps.map(a => (storage.apps || []).find(u => u.slug === a.object_id)?.size_bytes)) : null;
+    const customBytes = storage ? sum(custom.map(g => g.bytes)) : null;
+    const size = b => (b === null ? "" : this.t("compSumSize", { size: this.formatBytes(b) }));
+    const withSize = (text, b) => [text, size(b)].filter(Boolean).join(" · ");
     const tabs = [
-      { id: "apps", icon: "mdi:apps", label: this.t("compTabApps"), hint: this.t("compTabAppsHint"), count: apps.length },
-      { id: "integrations", icon: "mdi:puzzle-outline", label: this.t("compTabIntegrations"), hint: this.t("compTabIntegrationsHint"), count: ints.length },
+      { id: "apps", icon: "mdi:apps", label: this.t("compTabApps"), hint: withSize(this.t("compTabAppsHint"), appBytes), count: apps.length },
+      { id: "core", icon: "mdi:puzzle-outline", label: this.t("compTabCore"), hint: this.t("compTabCoreHint"), count: core.length },
+      { id: "custom", icon: "mdi:puzzle-plus-outline", label: this.t("compTabCustom"), hint: withSize(this.t("compTabCustomHint"), customBytes), count: custom.length },
     ];
-    const open = this.viewTabOf("components", tabs, "integrations");
+    const open = this.viewTabOf("components", tabs, "core");
     const n = f => this.formatNumber(f);
     const problems = ints.filter(g => g.status === "problem").length, updates = ints.filter(g => g.hacs?.pending_update).length, appUpdates = apps.filter(a => a.update_available).length;
     const tiles = this.sumTiles([
-      { label: this.t("compSumApps"), value: n(apps.length), sub: `${n(apps.filter(a => a.state === "started").length)} ${this.t("compSumRunning")}`, tone: "mute" },
-      { label: this.t("compSumIntegrations"), value: n(ints.length), sub: `${n(ints.filter(g => g.custom).length)} ${this.t("compSumCustom")}`, tone: "mute" },
+      { label: this.t("compSumApps"), value: n(apps.length), sub: withSize(`${n(apps.filter(a => a.state === "started").length)} ${this.t("compSumRunning")}`, appBytes), tone: "mute" },
+      { label: this.t("compSumCore"), value: n(core.length), tone: "mute" },
+      { label: this.t("compSumCustomInt"), value: n(custom.length), sub: size(customBytes), tone: "mute" },
       problems ? { label: this.t("compSumProblem"), value: n(problems), tone: "red" } : null,
       updates ? { label: this.t("compSumUpdates"), value: n(updates), tone: "warn" } : null,
       appUpdates ? { label: this.t("compSumAppUpdates"), value: n(appUpdates), tone: "warn" } : null,
     ]);
-    if (open === "apps" && apps.length) this.sysEnsure("storage"); // CPU, RAM and data of the apps
-    const body = open === "apps" ? this.compAppsList(apps) : this.compIntegrationsList(ints);
+    if (apps.length || custom.length) this.sysEnsure("storage"); // CPU, RAM and data of the apps, folder sizes of custom integrations
+    const body = open === "apps" ? this.compAppsList(apps) : this.compIntegrationsList(open === "custom" ? custom : core, open);
     return `<div class="stack">${tiles}<div class="sysnav">${this.navTiles("components", tabs, open, this.t("components"), true)}</div><div class="panel">${body}</div></div>`;
   }
 }

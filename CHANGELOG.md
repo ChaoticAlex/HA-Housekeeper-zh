@@ -28,7 +28,7 @@
 - **Webhooks:** Zugriffe & Datenfluss zeigt, welche Automationen ein Webhook starten kann und ob er auch von außen erreichbar ist.
 - **Vorher/nachher:** Der Reiter „Läufe“ vergleicht Fehler vor und nach einer Änderung der Konfiguration.
 - **Seitenleisten-Knopf:** öffnet die Seitenleiste von Home Assistant, wenn sie ausgeblendet ist.
-- **Apps & Integrationen** (Bestand): Apps (mit CPU und RAM) und Integrationen nach Domain in einer Liste, mit Version, Status, Entitäten und Geräten; im Inventar gibt es dazu einen Filter „Core / Custom“.
+- **Apps & Integrationen** (Bestand): Apps (mit CPU, RAM und Daten) sowie Core- und Custom-Integrationen in eigenen Reitern, mit Version, Status, Entitäten und Geräten; der belegte Speicher der Apps und der Custom-Integrationen steht summiert in Kachel und Reiter. Im Inventar gibt es dazu einen Filter „Core / Custom“.
 - **Seite einer Integration:** Core und Custom haben eine eigene Detailseite mit allen Einträgen, Entitäten und Geräten, Zuverlässigkeit sowie Zugriffen und Daten; bei Custom auch Ordner und Größe.
 - **HACS-Updates:** Bei Custom-Integrationen, die HACS installiert hat, zeigen die Seite der Integration und die Liste „Apps & Integrationen“ die installierte und die neueste Version samt Hinweis auf ein Update; die Liste lässt sich danach filtern. Bei Apps zeigt die Liste die neueste Version, eine Kachel „App-Updates“ und einen Filter „Update verfügbar“.
 - **Sonstiges** (Speicher & System): Custom Cards, Blueprints und die übrigen Ordner und Dateien unter `/config` stehen in einem Reiter.
@@ -59,7 +59,7 @@
 - **Webhooks:** Access & data flow shows which automations a webhook can start and whether it can also be reached from outside.
 - **Before/after:** The "Runs" tab compares errors before and after a change to the configuration.
 - **Sidebar button:** opens Home Assistant's sidebar when it is hidden.
-- **Apps & integrations** (Inventory): apps (with CPU and RAM) and integrations by domain in one list, with version, status, entities and devices; the inventory also has a "Core / Custom" filter.
+- **Apps & integrations** (Inventory): apps (with CPU, RAM and data) and core and custom integrations in tabs of their own, with version, status, entities and devices; the disk space of the apps and of the custom integrations is shown as a sum in the tile and the tab. The inventory also has a "Core / Custom" filter.
 - **Page of an integration:** core and custom integrations have their own detail page with all entries, entities and devices, reliability, and access and data; for custom ones also the folder and its size.
 - **HACS updates:** For custom integrations installed by HACS, the integration page and the "Apps & integrations" list show the installed and the newest version with a note about an update; the list can be filtered by it. For apps the list shows the newest version, an "App updates" tile and an "Update available" filter.
 - **Other** (Storage & system): custom cards, blueprints and the remaining folders and files under `/config` share one tab.
