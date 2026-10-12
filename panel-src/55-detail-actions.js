@@ -72,7 +72,7 @@ class DetailActionsMixin {
     if (!labels.length) return null;
     const chosen = this.actLabel && labels.some(l => l.object_id === this.actLabel) ? this.actLabel : labels[0].object_id;
     return `<select data-act-label aria-label="${this.esc(this.t("labelChoose"))}">${labels.map(l => `<option value="${this.esc(l.object_id)}" ${chosen === l.object_id ? "selected" : ""}>${this.esc(l.name)}</option>`).join("")}</select>
-      <button class="btn primary" data-act-label-plan="${this.esc(item.object_id)}" ${this.planBusy ? "disabled" : ""}>${this.t(short ? "actLabelPreviewShort" : "actLabelPreview")}</button>`;
+      <button class="btn primary" data-act-label-plan="${this.esc(item.object_id)}" ${this.planBusy ? 'disabled aria-busy="true"' : ""}>${this.t(short ? "actLabelPreviewShort" : "actLabelPreview")}</button>`;
   }
 
   labelForm(item) {

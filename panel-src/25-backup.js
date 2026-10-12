@@ -84,7 +84,7 @@ class BackupMixin {
 
   bhBackups(list) {
     if (!list?.length) return "";
-    const backupRows = list.map(b => `<tr><td>${this.formatDate(b.date)}</td><td>${this.formatBytes(b.size)}</td><td>${this.bhList(b.agents)}</td><td>${this.t(b.protected ? "bhYes" : "bhNo")}</td></tr>`);
+    const backupRows = list.map(b => `<tr><td>${this.formatDate(b.date)}</td><td data-label="${this.t("bhColSize")}">${this.formatBytes(b.size)}</td><td data-label="${this.t("bhColTargets")}">${this.bhList(b.agents)}</td><td data-label="${this.t("bhColProtected")}">${this.t(b.protected ? "bhYes" : "bhNo")}</td></tr>`);
     const pg = this.paginate("bhbackups", backupRows), rows = pg.rows.join("");
     return `<div class="sectionlabel">${this.t("bhListTitle")}</div><div class="tablewrap"><table><thead><tr><th>${this.t("bhColDate")}</th><th>${this.t("bhColSize")}</th><th>${this.t("bhColTargets")}</th><th>${this.t("bhColProtected")}</th></tr></thead><tbody>${rows}</tbody></table></div>${pg.footer}`;
   }

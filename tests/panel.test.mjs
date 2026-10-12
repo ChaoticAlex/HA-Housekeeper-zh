@@ -1700,6 +1700,23 @@ test("the sort and filter of a list come back, the search text does not; finding
   assert.equal(el.exportRows().length, 1);
 });
 
+test("a bulk action keeps the failed findings selected, and a full list of saved views is not overwritten", async () => {
+  const { el } = panel("en");
+  const toasts = [];
+  el.toast = text => toasts.push(text);
+  el.data = { ...DATA, findings: ["k1", "k2", "k3"].map(key => ({ ...DATA.findings[0], key, ignored: false })) };
+  el.findSel = new Set(["k1", "k2", "k3"]);
+  el._hass = { callWS: async msg => { if (msg.finding_key === "k2") throw new Error("boom"); return {}; } };
+  await el.hideSelectedFindings();
+  assert.deepEqual([...el.findSel], ["k2"]);
+  assert.ok(toasts[0].startsWith("2 of 3 done, 1 failed"));
+  el._views = { demo: Array.from({ length: 10 }, (_, i) => ({ name: `v${i}`, q: "", f: {}, sort: "name", dir: "asc" })) };
+  el.lvState("demo", "name", "asc");
+  el.commitView("demo", "new");
+  assert.equal(el._views.demo.length, 10);
+  assert.ok(!el._views.demo.some(v => v.name === "new") && el._views.demo[9].name === "v9");
+});
+
 test("blueprints tab, notification switch, diagnostics without names and the weekly report", async () => {
   const { el, shadow, downloads } = panel("en");
   el.view = "maintenance"; el.viewTab = { maintenance: "blueprints" };

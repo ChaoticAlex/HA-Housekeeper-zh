@@ -30,7 +30,7 @@ class ScanPointsMixin {
   }
 
   pinHeadButton() {
-    return `<button class="btn primary" data-pin-add ${this.busy || this.cleanupRunning() ? "disabled" : ""}><ha-icon icon="mdi:pin-outline"></ha-icon>${this.t("pinSet")}</button>`;
+    return `<button class="btn primary" data-pin-add ${this.busy || this.cleanupRunning() ? 'disabled aria-busy="true"' : ""}><ha-icon icon="mdi:pin-outline"></ha-icon>${this.t("pinSet")}</button>`;
   }
 
   // The name of a stored scan point, or its time when it has none.

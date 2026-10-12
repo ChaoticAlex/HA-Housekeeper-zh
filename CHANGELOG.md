@@ -82,6 +82,9 @@
 
 ### Behoben
 
+- **Sammelaktionen bei Befunden:** Scheitert eine Anfrage mitten in einer Auswahl, bleiben die fehlgeschlagenen Befunde ausgewählt und das Formular offen; die Meldung nennt „x von y erledigt“. Ein neuer Versuch sendet nur die übrigen.
+- **Gespeicherte Ansichten:** Ist die Grenze von zehn Ansichten erreicht, überschreibt eine neue Ansicht nicht mehr still die letzte, sondern weist darauf hin.
+- **Darstellung:** Gesperrte Knöpfe drehen ihr Symbol nur noch bei laufender Arbeit, nicht mehr bei fehlender Auswahl; Grün und Gelb folgen überall dem Theme; die Tabellen „Nach Objekttyp“ und Backups tragen auf dem Handy ihre Spaltenbezeichnungen.
 - **Übersicht:** „Schwache Batterien: Ziel verfehlt“ führt jetzt zu „Pflegen → Batterien“ statt zum Inventar.
 - **Recorder aufräumen:** Statistiken löschen und Verlauf kürzen laufen für jede Entität einzeln: Scheitert eine, laufen die übrigen weiter und der Grund steht bei der betroffenen. Vorher stoppte der Lauf nach dem ersten Fehler. Bei einem gemeinsamen Problem (Recorder beschäftigt oder nicht verfügbar) stoppt er weiter.
 - **Verweise ersetzen, Umbenennen:** Betreffen mehrere Schritte eines Plans dieselbe Automation oder dieselbe Quelle, brach der Lauf nach dem ersten Schritt mit „Eine Konfiguration wurde nach der Vorschau geändert“ ab. Die eigenen Änderungen früherer Schritte zählen jetzt nicht mehr als fremde Änderung.
@@ -157,6 +160,9 @@
 
 ### Fixed
 
+- **Bulk actions on findings:** If a request fails in the middle of a selection, the failed findings stay selected and the form stays open; the message says "x of y done". A retry sends only the rest.
+- **Saved views:** When the limit of ten views is reached, a new view no longer silently replaces the last one, but says so.
+- **Appearance:** Disabled buttons only spin their icon while work is running, no longer when a selection is missing; green and amber follow the theme everywhere; the "By type" and backup tables show their column labels on a phone.
 - **Overview:** "Weak batteries: goal missed" now leads to "Maintain → Batteries" instead of the inventory.
 - **Recorder cleanup:** Deleting statistics and trimming history now run per entity: if one fails, the others carry on and the reason is shown on the affected one. Before, the run stopped at the first failure. It still stops on a shared problem (recorder busy or unavailable).
 - **Replace references, rename:** When several steps of a plan touched the same automation or source, the run stopped after the first step with "A configuration was changed after the preview". The changes made by earlier steps of the same run no longer count as foreign changes.

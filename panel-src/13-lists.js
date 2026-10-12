@@ -276,7 +276,9 @@ class ListsMixin {
     const store = this.viewsStore(), list = (store[id] ||= []);
     const view = { name, q: st.q, f: Object.fromEntries(Object.entries(st.f).filter(([, v]) => v)), sort: st.sort, dir: st.dir };
     const at = list.findIndex(v => v.name === name);
-    if (at >= 0) list[at] = view; else if (list.length < VIEWS_LIMIT) list.push(view); else list[list.length - 1] = view;
+    // A full list never loses a saved view silently: the form stays open until one is deleted or a name is reused.
+    if (at < 0 && list.length >= VIEWS_LIMIT) { this.toast(this.t("viewsFull", { n: VIEWS_LIMIT }), true); return; }
+    if (at >= 0) list[at] = view; else list.push(view);
     st.view = name; this.viewNaming = null; this.persistViews(); this.render();
     this.shadowRoot?.querySelector?.(`[data-lview-save="${id}"]`)?.focus?.();
   }

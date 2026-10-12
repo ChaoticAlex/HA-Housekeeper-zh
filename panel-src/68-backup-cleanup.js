@@ -110,7 +110,7 @@ class BackupCleanupMixin {
 
   autoDeleteButton(finding) {
     if (!["automation.never_triggered", "automation.stale", "automation.disabled_long"].includes(finding.rule_id)) return "";
-    return `<button class="btn quiet" data-auto-delete="${this.esc(finding.object_id)}" ${this.planBusy ? "disabled" : ""}>${this.t("autoDelete")}</button>`;
+    return `<button class="btn quiet" data-auto-delete="${this.esc(finding.object_id)}" ${this.planBusy ? 'disabled aria-busy="true"' : ""}>${this.t("autoDelete")}</button>`;
   }
 
   bindBackupCleanup(root) {

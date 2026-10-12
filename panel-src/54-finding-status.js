@@ -84,7 +84,7 @@ class FindingStatusMixin {
       if (!labels.length) return `<div class="polform bulkform"><small>${this.t("labelNone")}</small><button type="button" class="btn quiet" data-bulk-cancel>${this.t("cancelRun")}</button></div>`;
       return `<form class="polform bulkform" data-bulk-form><strong>${this.t("state_label")}</strong>
         <select data-bulk-label aria-label="${this.esc(this.t("labelChoose"))}">${labels.map(l => `<option value="${this.esc(l.object_id)}" ${b.label === l.object_id ? "selected" : ""}>${this.esc(l.name)}</option>`).join("")}</select>
-        <button type="submit" class="btn primary" ${this.planBusy ? "disabled" : ""}>${this.t("refactorPlan")}</button><button type="button" class="btn quiet" data-bulk-cancel>${this.t("cancelRun")}</button>
+        <button type="submit" class="btn primary" ${this.planBusy ? 'disabled aria-busy="true"' : ""}>${this.t("refactorPlan")}</button><button type="button" class="btn quiet" data-bulk-cancel>${this.t("cancelRun")}</button>
         ${b.error ? `<small class="error" role="alert">${this.esc(this.t(b.error))}</small>` : ""}</form>`;
     }
     const days = [7, 30, 90, 365].map(n => `<option value="${n}" ${Number(b.days) === n ? "selected" : ""}>${this.t("decideDays", { n })}</option>`).join("");
@@ -116,21 +116,33 @@ class FindingStatusMixin {
     if (b.kind === "area") return this.makeAreaPlan();
     if (b.kind === "known" && !b.reason.trim()) { b.error = "decideNeedReason"; this.render(); return; }
     const keys = [...this.findSel].filter(key => this.data.findings.some(f => f.key === key && !f.ignored));
-    try {
-      for (const key of keys) {
-        const msg = { type: "ha_housekeeper/ignore", finding_key: key, ignored: true, kind: b.kind === "known" ? "keep" : "snooze", reason: b.reason.trim() };
-        if (b.kind === "snoozed") msg.days = Number(b.days);
-        await this._hass.callWS(msg);
-        const finding = this.data.findings.find(f => f.key === key);
-        if (finding) {
-          finding.ignored = true; finding.ignored_by = "user"; finding.resurfaced = false;
-          finding.ignore_info = { kind: msg.kind, reason: msg.reason, until: msg.days ? new Date(Date.now() + msg.days * 864e5).toISOString() : null, at: new Date().toISOString() };
-        }
+    const failed = await this.runBulk(keys, async key => {
+      const msg = { type: "ha_housekeeper/ignore", finding_key: key, ignored: true, kind: b.kind === "known" ? "keep" : "snooze", reason: b.reason.trim() };
+      if (b.kind === "snoozed") msg.days = Number(b.days);
+      await this._hass.callWS(msg);
+      const finding = this.data.findings.find(f => f.key === key);
+      if (finding) {
+        finding.ignored = true; finding.ignored_by = "user"; finding.resurfaced = false;
+        finding.ignore_info = { kind: msg.kind, reason: msg.reason, until: msg.days ? new Date(Date.now() + msg.days * 864e5).toISOString() : null, at: new Date().toISOString() };
       }
-      this._rev++;
-    } catch (err) { this.failed(err); }
-    this.bulk = null; this.findSel.clear();
+    });
+    if (!failed) this.bulk = null;
     this.render();
+  }
+
+  // Sends one request per selected finding. Done ones leave the selection; failed ones stay selected, so
+  // a retry sends only those. Returns the number of failures; the toast says "n of m done, k failed".
+  async runBulk(keys, send) {
+    let done = 0, failed = 0, last = null;
+    for (const key of keys) {
+      try { await send(key); done += 1; this.findSel.delete(key); } catch (err) { failed += 1; last = err; }
+    }
+    if (done) this._rev++;
+    if (failed) {
+      this.noteError("action", last);
+      this.toast(this.t("bulkPartial", { done, total: keys.length, failed, detail: this.errText(last) }), true);
+    }
+    return failed;
   }
 
   // "This is no duplicate": a known finding with the reason filled in.

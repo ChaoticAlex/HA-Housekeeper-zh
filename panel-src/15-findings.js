@@ -164,30 +164,22 @@ class FindingsMixin {
   async unhideSelectedFindings() {
     const keys = [...this.findSel].filter(key => this.data.findings.some(f => f.key === key && f.ignored && f.ignored_by === "user"));
     let done = 0;
-    try {
-      for (const key of keys) {
-        await this._hass.callWS({ type: "ha_housekeeper/ignore", finding_key: key, ignored: false });
-        const finding = this.data.findings.find(f => f.key === key);
-        if (finding) { finding.ignored = false; finding.ignored_by = null; finding.ignore_info = null; done += 1; }
-      }
-      this._rev++;
-    } catch (err) { this.failed(err); }
-    this.findSel.clear();
+    const failed = await this.runBulk(keys, async key => {
+      await this._hass.callWS({ type: "ha_housekeeper/ignore", finding_key: key, ignored: false });
+      const finding = this.data.findings.find(f => f.key === key);
+      if (finding) { finding.ignored = false; finding.ignored_by = null; finding.ignore_info = null; done += 1; }
+    });
     this.render();
-    this.toast(this.t("findUnhidden", { n: done }));
+    if (!failed) this.toast(this.t("findUnhidden", { n: done }));
   }
 
   async hideSelectedFindings() {
     const keys = [...this.findSel].filter(key => this.data.findings.some(f => f.key === key && !f.ignored));
-    try {
-      for (const key of keys) {
-        await this._hass.callWS({ type: "ha_housekeeper/ignore", finding_key: key, ignored: true });
-        const finding = this.data.findings.find(f => f.key === key);
-        if (finding) { finding.ignored = true; finding.ignored_by = "user"; }
-      }
-      this._rev++;
-    } catch (err) { this.failed(err); }
-    this.findSel.clear();
+    await this.runBulk(keys, async key => {
+      await this._hass.callWS({ type: "ha_housekeeper/ignore", finding_key: key, ignored: true });
+      const finding = this.data.findings.find(f => f.key === key);
+      if (finding) { finding.ignored = true; finding.ignored_by = "user"; }
+    });
     this.render();
   }
 
