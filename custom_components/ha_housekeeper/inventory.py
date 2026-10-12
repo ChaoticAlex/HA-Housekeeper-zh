@@ -76,7 +76,7 @@ from .ignored import IgnoreStore
 from .impact import apply_impact
 from .issues import async_sync_issues
 from .maintenance import PreflightStore
-from .marks import MarkStore, apply_marks, mark_key
+from .marks import KINDS, KINDS_OF, MarkStore, apply_marks, mark_key
 from .notes import NoteStore
 from .notify import NotifyStore, async_announce
 from .observations import ObservationStore
@@ -1123,7 +1123,9 @@ class InventoryScanner:
         target: str | None = None,
         by: str | None = None,
     ) -> str | None:
-        """Mark an entity or device; the reason it failed, or None."""
+        """Mark an entity, device, integration or app; the reason it failed, or None."""
+        if kind not in KINDS_OF.get(object_type, KINDS):
+            return "kind_not_allowed"
         snapshot = self._snapshot or {}
         known = {(item["object_type"], item["object_id"]) for item in snapshot.get("objects", [])}
         if (object_type, object_id) not in known:

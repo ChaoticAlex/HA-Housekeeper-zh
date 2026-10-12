@@ -1,7 +1,8 @@
 """Notes on objects that tell Housekeeper what to expect: offline on purpose, seasonal, a spare, keep.
 
 Stored by Housekeeper only; Home Assistant stays untouched. A mark of an object hides the
-"not available" findings of that object (of a device: of its entities), never a broken reference.
+"not available" findings of that object (of a device: of its entities; of an integration or app: its
+"not loaded" and "app stopped" findings), never a broken reference.
 "Keep" also blocks every cleanup step on the object. A mark with a review date that has passed no
 longer hides anything; the finding comes back as due.
 """
@@ -20,7 +21,11 @@ from .ignored import REASON_LIMIT, due
 SAVE_DELAY = 10
 KINDS = ("expected_offline", "seasonal", "spare", "keep", "replaced")
 HIDING_KINDS = ("expected_offline", "seasonal", "spare", "replaced")  # "keep" hides nothing
-OBJECT_TYPES = ("entity", "device")
+OBJECT_TYPES = ("entity", "device", "config_entry", "app")
+KINDS_OF = {  # what an integration or an app can be marked as; "keep" and "replaced" need an entity or device
+    "config_entry": ("expected_offline", "seasonal", "spare"),
+    "app": ("expected_offline", "seasonal", "spare"),
+}
 ITEM_LIMIT = 2000
 TARGET_LIMIT = 255
 
@@ -135,13 +140,21 @@ def apply_marks(
             item["marked_keep"] = True
     for finding in findings:
         finding.pop("mark", None)
-        if finding["classification"] not in ("unavailable", "stale"):
+        if finding.get("rule_id") == "config_entry.not_loaded":
+            keys = (mark_key("config_entry", finding["object_id"]),)
+        elif finding.get("rule_id") == "app.stopped_in_use":
+            keys = (
+                mark_key("app", finding["object_id"]),
+                mark_key("config_entry", finding.get("affected_object") or ""),
+            )
+        elif finding["classification"] in ("unavailable", "stale"):
+            entity_id = finding["object_id"]
+            keys = (
+                mark_key("entity", entity_id),
+                mark_key("device", device_of.get(entity_id) or ""),
+            )
+        else:
             continue
-        entity_id = finding["object_id"]
-        keys = (
-            mark_key("entity", entity_id),
-            mark_key("device", device_of.get(entity_id) or ""),
-        )
         for key in keys:
             mark = marks.get(key)
             if mark is None or mark["kind"] not in HIDING_KINDS:

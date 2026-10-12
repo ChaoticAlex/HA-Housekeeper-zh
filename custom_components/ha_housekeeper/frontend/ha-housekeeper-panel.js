@@ -430,6 +430,7 @@ const SEARCH_DEBOUNCE_MS = 150;
 
 // What can carry a label: everything with an entry in the entity registry.
 // Objects whose page keeps reading on the overview and puts everything that changes something under the tab "Actions".
+const MARK_TYPES = ["entity", "device", "config_entry", "app"];
 const ACTION_TYPES = ["entity", "device", "config_entry", "automation", "script", "scene"];
 // Objects whose overview sums up what is known in groups ("Known about …"); scenes keep the facts card.
 const KNOWN_TYPES = ["entity", "device", "config_entry", "automation", "script"];
@@ -6064,7 +6065,9 @@ class MarksMixin {
 
   // The form to set or change a mark (kind, reason, target for "replaced", review date).
   markFormHtml(f, key) {
-    const kinds = ["expected_offline", "seasonal", "spare", "keep", "replaced"].map(k => `<option value="${k}" ${f.kind === k ? "selected" : ""}>${this.t(`mark_${k}`)}</option>`).join("");
+    const type = key.split(":")[0];
+    const allowed = ["config_entry", "app"].includes(type) ? ["expected_offline", "seasonal", "spare"] : ["expected_offline", "seasonal", "spare", "keep", "replaced"];
+    const kinds = allowed.map(k => `<option value="${k}" ${f.kind === k ? "selected" : ""}>${this.t(`mark_${k}`)}</option>`).join("");
     const days = [0, 30, 90, 180, 365].map(n => `<option value="${n}" ${Number(f.days) === n ? "selected" : ""}>${n ? this.t("decideDays", { n }) : this.t("markNever")}</option>`).join("");
     const target = f.kind === "replaced" ? `<input data-mark-target maxlength="255" autocomplete="off" value="${this.esc(f.target)}" aria-label="${this.esc(this.t("markTarget"))}" placeholder="${this.esc(this.t("markTarget"))}">` : "";
     return `<form class="pad polform" data-mark-form="${this.esc(key)}"><select data-mark-kind aria-label="${this.esc(this.t("markKind"))}">${kinds}</select>
@@ -6075,7 +6078,7 @@ class MarksMixin {
   }
 
   markCard(item) {
-    if (item.object_type !== "entity" && item.object_type !== "device") return "";
+    if (!MARK_TYPES.includes(item.object_type)) return "";
     const f = this.markForm, key = this.objectKey(item), mark = item.mark;
     const head = `<div class="panelhead"><div><h2>${this.t("markTitle")}</h2><p>${this.t("markHint")}</p></div></div>`;
     if (f && f.key === key) return `<section class="panel">${head}${this.markFormHtml(f, key)}</section>`;
@@ -6087,7 +6090,7 @@ class MarksMixin {
 
   // The same as rows of the tab "Actions": the mark with its buttons, or the form below its title while it is edited.
   markRows(item) {
-    if (item.object_type !== "entity" && item.object_type !== "device") return [];
+    if (!MARK_TYPES.includes(item.object_type)) return [];
     const f = this.markForm, key = this.objectKey(item), mark = item.mark;
     if (f && f.key === key) return [this.actRow(this.t("markTitle"), this.t("markHint"), ""), `<div class="actblock">${this.markFormHtml(f, key)}</div>`];
     if (!mark) return [this.actRow(this.t("markTitle"), `${this.t("markNone")} ${this.t("markHint")}`, `<button class="btn" data-mark-open="${this.esc(key)}"><ha-icon icon="mdi:bookmark-plus-outline"></ha-icon>${this.t("markSet")}</button>`)];
@@ -7860,7 +7863,7 @@ class DetailActionsMixin {
   // Whether the tab "Actions" has anything to show for this object: findings to decide, buttons, a label or an edit form.
   hasActionsTab(item, key) {
     if (!ACTION_TYPES.includes(item.object_type)) return false;
-    return Boolean(this.findingRows(key) || this.fixItems(item, key).items.length || this.labelForm(item) || this.detailEditCard(item) || this.entityTrimCard(item) || this.staleCard(item));
+    return Boolean(this.findingRows(key) || this.fixItems(item, key).items.length || this.labelForm(item) || this.detailEditCard(item) || this.entityTrimCard(item) || this.staleCard(item) || (item.object_type === "config_entry" && (item.mark || item.status === "problem") && this.markRows(item).length));
   }
 
   // The tab "Actions" of an object: everything that changes something as rows in one card, grouped by purpose.
@@ -10731,7 +10734,7 @@ class SystemMixin {
       item.stage && item.stage !== "stable" ? fact("appStage", this.esc(item.stage)) : "",
     ].join("");
     const text = item.description ? `<div class="pad"><p class="factnote">${this.esc(item.description)}</p></div>` : "";
-    return `<div class="stack"><section class="panel"><div class="panelhead"><div><h2>${this.t("app")}</h2><p>${this.t("appHint")}</p></div></div><div class="facts">${rows}</div>${text}</section></div>`;
+    return `<div class="stack"><section class="panel"><div class="panelhead"><div><h2>${this.t("app")}</h2><p>${this.t("appHint")}</p></div></div><div class="facts">${rows}</div>${text}</section>${item.mark || item.status === "stopped" ? this.markCard(item) : ""}</div>`;
   }
 
   appAccessCard(item) {

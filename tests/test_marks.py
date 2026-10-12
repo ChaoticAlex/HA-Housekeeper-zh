@@ -79,3 +79,33 @@ def test_keep_hides_nothing_but_blocks_cleanup_of_the_object_and_its_entities() 
 def test_a_stored_mark_of_an_unknown_shape_is_dropped() -> None:
     assert _clean({"kind": "nope"}) is None and _clean("x") is None
     assert _clean({"kind": "keep", "reason": "x" * 500})["reason"] == "x" * 200
+
+
+def test_a_mark_of_an_integration_or_an_app_hides_its_failure_findings() -> None:
+    def finding(rule, object_id, affected=None):
+        return {
+            "rule_id": rule,
+            "object_id": object_id,
+            "classification": "problem",
+            "ignored": False,
+            "affected_object": affected,
+        }
+
+    findings = [
+        finding("config_entry.not_loaded", "e1"),
+        finding("config_entry.not_loaded", "e2"),
+        finding("app.stopped_in_use", "tail", "e3"),
+        finding("app.stopped_in_use", "other", "e4"),
+    ]
+    marks = {
+        "config_entry:e1": _mark("seasonal"),
+        "config_entry:e3": _mark("expected_offline"),
+        "app:other": _mark("spare"),
+    }
+    apply_marks([], findings, marks, NOW)
+    assert [f["ignored_by"] if f["ignored"] else None for f in findings] == [
+        "mark",
+        None,
+        "mark",
+        "mark",
+    ]

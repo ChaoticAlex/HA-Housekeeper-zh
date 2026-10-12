@@ -42,7 +42,7 @@ class DetailActionsMixin {
   // Whether the tab "Actions" has anything to show for this object: findings to decide, buttons, a label or an edit form.
   hasActionsTab(item, key) {
     if (!ACTION_TYPES.includes(item.object_type)) return false;
-    return Boolean(this.findingRows(key) || this.fixItems(item, key).items.length || this.labelForm(item) || this.detailEditCard(item) || this.entityTrimCard(item) || this.staleCard(item));
+    return Boolean(this.findingRows(key) || this.fixItems(item, key).items.length || this.labelForm(item) || this.detailEditCard(item) || this.entityTrimCard(item) || this.staleCard(item) || (item.object_type === "config_entry" && (item.mark || item.status === "problem") && this.markRows(item).length));
   }
 
   // The tab "Actions" of an object: everything that changes something as rows in one card, grouped by purpose.

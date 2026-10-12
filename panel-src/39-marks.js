@@ -20,7 +20,9 @@ class MarksMixin {
 
   // The form to set or change a mark (kind, reason, target for "replaced", review date).
   markFormHtml(f, key) {
-    const kinds = ["expected_offline", "seasonal", "spare", "keep", "replaced"].map(k => `<option value="${k}" ${f.kind === k ? "selected" : ""}>${this.t(`mark_${k}`)}</option>`).join("");
+    const type = key.split(":")[0];
+    const allowed = ["config_entry", "app"].includes(type) ? ["expected_offline", "seasonal", "spare"] : ["expected_offline", "seasonal", "spare", "keep", "replaced"];
+    const kinds = allowed.map(k => `<option value="${k}" ${f.kind === k ? "selected" : ""}>${this.t(`mark_${k}`)}</option>`).join("");
     const days = [0, 30, 90, 180, 365].map(n => `<option value="${n}" ${Number(f.days) === n ? "selected" : ""}>${n ? this.t("decideDays", { n }) : this.t("markNever")}</option>`).join("");
     const target = f.kind === "replaced" ? `<input data-mark-target maxlength="255" autocomplete="off" value="${this.esc(f.target)}" aria-label="${this.esc(this.t("markTarget"))}" placeholder="${this.esc(this.t("markTarget"))}">` : "";
     return `<form class="pad polform" data-mark-form="${this.esc(key)}"><select data-mark-kind aria-label="${this.esc(this.t("markKind"))}">${kinds}</select>
@@ -31,7 +33,7 @@ class MarksMixin {
   }
 
   markCard(item) {
-    if (item.object_type !== "entity" && item.object_type !== "device") return "";
+    if (!MARK_TYPES.includes(item.object_type)) return "";
     const f = this.markForm, key = this.objectKey(item), mark = item.mark;
     const head = `<div class="panelhead"><div><h2>${this.t("markTitle")}</h2><p>${this.t("markHint")}</p></div></div>`;
     if (f && f.key === key) return `<section class="panel">${head}${this.markFormHtml(f, key)}</section>`;
@@ -43,7 +45,7 @@ class MarksMixin {
 
   // The same as rows of the tab "Actions": the mark with its buttons, or the form below its title while it is edited.
   markRows(item) {
-    if (item.object_type !== "entity" && item.object_type !== "device") return [];
+    if (!MARK_TYPES.includes(item.object_type)) return [];
     const f = this.markForm, key = this.objectKey(item), mark = item.mark;
     if (f && f.key === key) return [this.actRow(this.t("markTitle"), this.t("markHint"), ""), `<div class="actblock">${this.markFormHtml(f, key)}</div>`];
     if (!mark) return [this.actRow(this.t("markTitle"), `${this.t("markNone")} ${this.t("markHint")}`, `<button class="btn" data-mark-open="${this.esc(key)}"><ha-icon icon="mdi:bookmark-plus-outline"></ha-icon>${this.t("markSet")}</button>`)];
