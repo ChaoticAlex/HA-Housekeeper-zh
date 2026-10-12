@@ -402,11 +402,19 @@ def _app_item(app: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-async def _app_inventory(hass: HomeAssistant) -> list[dict[str, Any]]:
-    """Installed apps; empty without a Supervisor or when it does not answer."""
+async def _app_inventory(
+    hass: HomeAssistant, unchecked: set[str] | None = None
+) -> list[dict[str, Any]]:
+    """Installed apps; empty without a Supervisor or when it does not answer.
+
+    A Supervisor that exists but does not answer is noted in ``unchecked``: the apps and what
+    hangs on them were not looked at, which is not the same as "no problems".
+    """
     if not supervisor_token():
         return []
     listing = await supervisor_get(hass, "/addons", timeout=APP_TIMEOUT)
+    if listing is None and unchecked is not None:
+        unchecked.add("app")
     return [
         _app_item(app)
         for app in (listing or {}).get("addons") or []
@@ -652,6 +660,8 @@ class InventoryScanner:
         self._booting = False
         self._warmup_until: float | None = None
         self._recorder_available = False
+        # What the scan in progress could not read: "dashboard", "dashboard:<id>" or "app".
+        self._unchecked: set[str] = set()
         self._lock = asyncio.Lock()
         self._snapshot: dict[str, Any] | None = None
         self._details: dict[str, dict[str, Any]] = {}
@@ -847,6 +857,7 @@ class InventoryScanner:
         # Seconds per phase, in the snapshot and the debug log: the scan runs in the event loop,
         # so a slow phase on a large installation shows here first.
         timing: dict[str, float] = {}
+        self._unchecked = set()
         mark = time.monotonic()
 
         def lap(phase: str) -> None:
@@ -916,7 +927,7 @@ class InventoryScanner:
             for item in integrations:
                 if item["custom"] and item["domain"] in hacs:
                     item["hacs"] = hacs[item["domain"]]
-        apps = await _app_inventory(self.hass)
+        apps = await _app_inventory(self.hass, self._unchecked)
 
         lap("devices")
         self.status.update(phase="automations", progress=60)
@@ -1101,6 +1112,7 @@ class InventoryScanner:
         return {
             "meta": {
                 "scan_timing": timing,
+                "unchecked": sorted(self._unchecked),
                 "storage": storage,
                 "database": database,
                 "scanned_at": observed_at.isoformat(),
@@ -1536,6 +1548,7 @@ class InventoryScanner:
             manager = await async_get_manager(self.hass)
             preferences = manager.data
         except Exception:  # Energy is optional and may not be configured.
+            self._unchecked.add("dashboard:energy")
             return [], []
         references = extract_entity_references(
             preferences, existing["entity"], ENERGY_KEYS, "SHOWS"
@@ -1573,9 +1586,11 @@ class InventoryScanner:
         try:
             from homeassistant.components.lovelace.const import LOVELACE_DATA
         except ImportError:
+            self._unchecked.add("dashboard")
             return [], [], []
         lovelace = self.hass.data.get(LOVELACE_DATA)
         if lovelace is None:
+            self._unchecked.add("dashboard")
             return [], [], []
 
         dashboards: list[dict[str, Any]] = []
@@ -1586,6 +1601,8 @@ class InventoryScanner:
             try:
                 config = await dashboard.async_load(False)
             except Exception:  # Auto-generated, missing or invalid dashboards have nothing to read.
+                # One that had findings before and cannot be read now has not become clean.
+                self._unchecked.add(f"dashboard:{url_path or 'lovelace'}")
                 continue
             object_id = url_path or "lovelace"
             configs[object_id] = config

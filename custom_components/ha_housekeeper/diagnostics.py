@@ -34,7 +34,15 @@ async def async_get_config_entry_diagnostics(
         "scan_status": {**scanner.status, "last_error": error.split(":", 1)[0] if error else None},
         # Without the error text: it can name entities or paths.
         "scan_health": {**scanner.health_report(), "error": None},
-        "meta": snapshot["meta"] if snapshot else None,
+        # The ids of unread dashboards are left out, only how many there were.
+        "meta": (
+            {
+                **{k: v for k, v in snapshot["meta"].items() if k != "unchecked"},
+                "unchecked": len(snapshot["meta"].get("unchecked") or []),
+            }
+            if snapshot
+            else None
+        ),
         "edge_count": len(snapshot["edges"]) if snapshot else 0,
         "findings_by_rule": dict(Counter(item["rule_id"] for item in findings)),
         "findings_by_classification": dict(Counter(item["classification"] for item in findings)),

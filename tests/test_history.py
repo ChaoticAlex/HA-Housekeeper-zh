@@ -88,6 +88,29 @@ def test_a_finding_counts_as_resolved_only_while_its_object_is_still_there() -> 
     assert [(f["object_id"], f["reason"]) for f in diff["ended_findings"]["items"]] == [("x", "unknown")]
 
 
+def test_a_finding_that_vanished_unread_or_under_a_changed_setting_is_not_resolved() -> None:
+    dash = {"rule_id": "dashboard.missing_entity", "object_id": "home", "classification": "broken_reference"}
+    unavailable = {"rule_id": "entity.state_unavailable", "object_id": "sensor.a", "classification": "unavailable"}
+    objects = [("entity", "sensor.a", "active"), ("dashboard", "home", "active")]
+    old_snap = _snapshot("2026-10-06T10:00:00+00:00", objects, [dash, unavailable])
+    old_snap["meta"]["min_unavailable_days"] = 1
+    old = make_checkpoint(old_snap)
+    new = _snapshot("2026-10-07T10:00:00+00:00", objects)
+    new["meta"] |= {"min_unavailable_days": 3, "unchecked": ["dashboard:home"]}
+    diff = diff_checkpoints(old, new)
+    assert diff["resolved_findings"]["total"] == 0
+    assert {f["object_id"]: f["reason"] for f in diff["ended_findings"]["items"]} == {
+        "home": "unchecked",
+        "sensor.a": "rules_changed",
+    }
+    # without those causes the same disappearance is a repair, and an old checkpoint has no settings to compare
+    new["meta"] |= {"min_unavailable_days": 1, "unchecked": []}
+    assert diff_checkpoints(old, new)["resolved_findings"]["total"] == 2
+    del old["rules"]
+    new["meta"]["min_unavailable_days"] = 9
+    assert diff_checkpoints(old, new)["resolved_findings"]["total"] == 2
+
+
 def test_identical_scans_have_no_differences() -> None:
     snap = _snapshot("2026-10-07T10:00:00+00:00", [("entity", "sensor.a", "active")], [FINDING])
     diff = diff_checkpoints(make_checkpoint(snap), snap)

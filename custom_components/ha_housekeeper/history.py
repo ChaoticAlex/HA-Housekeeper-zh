@@ -36,6 +36,18 @@ def _valid_checkpoint(value: Any) -> dict[str, Any] | None:
 
 HEALTH_TYPES = ("entity", "automation", "script", "scene")
 
+# The rules whose outcome depends on a setting: when it changed between two scans, findings that
+# vanished were not repaired, the rule just reads differently now.
+SETTING_RULES = {
+    "min_unavailable_days": {"entity.state_unavailable", "config_entry.not_loaded"},
+    "unused_automation_days": {
+        "automation.disabled_long",
+        "automation.stale",
+        "automation.never_triggered",
+    },
+    "stale_hours": {"entity.stale"},
+}
+
 
 def _share_without_finding(snapshot: dict[str, Any]) -> int:
     """The share of objects without an open finding, as the panel reads it (rounded down)."""
@@ -70,6 +82,10 @@ def make_checkpoint(snapshot: dict[str, Any]) -> dict[str, Any]:
         "open": len(open_findings),
         "classes": classes,
         "share": _share_without_finding(snapshot),
+        # The settings that decide whether some findings exist at all.
+        "rules": {
+            name: snapshot["meta"][name] for name in SETTING_RULES if name in snapshot["meta"]
+        },
     }
 
 
@@ -105,19 +121,30 @@ def diff_checkpoints(base: dict[str, Any], snapshot: dict[str, Any]) -> dict[str
 
     base_findings = set(base["findings"])
     new_findings = [f for f in snapshot["findings"] if _finding_key(f) not in base_findings]
+    # Rules that read differently now than at the baseline: what vanished under them was not repaired.
+    changed = {
+        name
+        for name in SETTING_RULES
+        if name in (base.get("rules") or {}) and base["rules"][name] != current["rules"].get(name)
+    }
+    reworded = set().union(*(SETTING_RULES[name] for name in changed)) if changed else set()
+    unchecked = set(snapshot["meta"].get("unchecked") or [])
     resolved_findings = []
     ended_findings = []
     for key in sorted(base_findings - set(current["findings"])):
         rule_id, object_id, affected = key.split("|", 2)
         item = {"rule_id": rule_id, "object_id": object_id, "affected_object": affected or None}
-        # A finding that is gone is only "resolved" while its object is still there. An object that
-        # was removed took its findings along (nothing was repaired), and where the object cannot
-        # be told from the rule the end stays "unknown" rather than counting as a repair.
         owner = (rule_id.split(".")[0], object_id)
-        if owner in now:
-            resolved_findings.append(item)
-        else:
+        # Said only when it is proven: "resolved" needs the object still there, a rule that reads the
+        # same and a source that was read. Otherwise the end is listed with its reason, not counted.
+        if owner[0] in unchecked or f"{owner[0]}:{owner[1]}" in unchecked:
+            ended_findings.append({**item, "reason": "unchecked"})
+        elif owner not in now:
             ended_findings.append({**item, "reason": "object_removed" if owner in old else "unknown"})
+        elif rule_id in reworded:
+            ended_findings.append({**item, "reason": "rules_changed"})
+        else:
+            resolved_findings.append(item)
 
     def cut(rows: list[dict[str, Any]]) -> dict[str, Any]:
         rows = sorted(rows, key=lambda r: (r.get("object_type", ""), r["object_id"]))

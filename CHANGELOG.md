@@ -4,7 +4,7 @@
 
 ### Neu
 
-- **Ende eines Befunds:** „Behobene Befunde“ zählt nur noch Befunde, deren Objekt weiter existiert. Verschwindet ein Befund, weil sein Objekt entfernt wurde, steht er in einer eigenen Rubrik „Ohne Reparatur beendet“ mit dem Grund („Objekt entfernt“, „Grund unbekannt“). Die Zahl „behoben“ kann dadurch kleiner ausfallen als bisher.
+- **Ende eines Befunds:** „Behobene Befunde“ zählt nur noch Befunde, deren Objekt weiter existiert. Verschwindet ein Befund, weil sein Objekt entfernt wurde, die Prüfung (zum Beispiel eines Dashboards oder der Apps) nicht lesen konnte oder sich eine Einstellung wie die Ausfalldauer geändert hat, steht er in einer eigenen Rubrik „Ohne Reparatur beendet“ mit dem Grund. Die Zahl „behoben“ kann dadurch kleiner ausfallen als bisher.
 - **Scan-Zustand:** Schlägt ein Scan fehl oder bleibt er lange aus, zeigt das Panel ein Band mit der Phase und dem letzten erfolgreichen Scan; die Zahlen stammen dann von einem älteren Stand. Ein neuer Diagnose-Sensor „Scan-Zustand“ (in Ordnung, veraltet, fehlgeschlagen, vorläufig) steht für Dashboards und Automationen bereit, und bei anhaltendem Problem erscheint ein Reparaturhinweis.
 - **Kacheln der Unterseiten:** Aufräumen, Recorder und Apps & Integrationen zeigen unter der Beschreibung eine Zeile mit Hinweisen (zum Beispiel „2 mit Problem“, „9,5 GB“, „751 mit Statistik“). Die Kacheln sind dadurch gleich hoch und springen beim Laden nicht mehr; lange Beschreibungen enden mit „…“. In Aufräumen teilen sich die letzten zwei Kacheln die Zeile, und die Zahlenzeile von „Nicht verwendet“ ist in die Kachel gewandert.
 - **Apps & Integrationen:** Die obere Kennzahlenreihe entfällt. Die drei Kacheln (Apps, Core, Custom) sind breiter, der Text bricht nicht mehr um, und sie tragen die Hinweise selbst: laufende Apps, belegter Platz, Updates und Integrationen mit Problem.
@@ -99,7 +99,7 @@
 
 ### English
 
-- **End of a finding:** "Resolved findings" now counts only findings whose object still exists. A finding that disappears because its object was removed is listed under "Ended without a repair" with the reason ("Object removed", "Reason unknown"). The "resolved" number can therefore be smaller than before.
+- **End of a finding:** "Resolved findings" now counts only findings whose object still exists. A finding that disappears because its object was removed, the check (for example of a dashboard or the apps) could not read it, or a setting such as the outage duration changed is listed under "Ended without a repair" with the reason. The "resolved" number can therefore be smaller than before.
 - **Scan health:** If a scan fails or does not run for a long time, the panel shows a banner with the phase and the last successful scan; the numbers then come from an older state. A new diagnostic sensor "Scan health" (OK, outdated, failed, preliminary) is available for dashboards and automations, and a lasting problem raises a repairs hint.
 - **Recorder, load:** Rows, entities and events are three labelled figures instead of one sentence; what is not counted (hidden, disabled, down all the time) shows as marks of its own with an explanation.
 - **Repair:** The “Repair sensor errors” card now has its title like the others, and the card titles carry the name of their tile (“Repair sensor errors”, “Replace a meter”).
