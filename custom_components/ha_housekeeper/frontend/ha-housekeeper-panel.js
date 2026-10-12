@@ -943,11 +943,6 @@ Object.assign(TEXT.de, {
   viewsLabel: "Gespeicherte Ansichten", viewsNone: "Ansichten …", viewSave: "Ansicht speichern", viewDelete: "Ansicht löschen", viewName: "Name der Ansicht (bleibt nur in diesem Browser)",
   exclLine: "Nicht mitgezählt: {list}.", exclIgnored: "{n} ausgeblendet", exclDisabled: "{n} deaktiviert", exclPermanent: "{n} dauerhaft ausgefallen",
   setKeptTitle: "Was Housekeeper speichert", setKeptHint: "Alles liegt im Speicher von Home Assistant (.storage) und verlässt deine Instanz nicht.",
-  setKeptObservations: "Beobachtungen", setKeptObservationsText: "Seit wann ein Objekt in seinem Zustand ist. Bleibt, solange das Objekt existiert.",
-  setKeptHistory: "Scanverlauf", setKeptHistoryText: "Der letzte Scan jedes Tages als Vergleichspunkt, {days} Tage lang.",
-  setKeptJournal: "Journal", setKeptJournalText: "Pläne des Aufräumens mit Ergebnis und Rückgängig-Angaben. Nie ausgeführte Pläne kannst du löschen; ausgeführte bleiben als Nachweis. Alte Dateisnapshots werden verdichtet, wenn die Größenbegrenzung erreicht ist.",
-  setKeptEvents: "Ereignisse", setKeptEventsText: "Neustarts, Versionswechsel von Home Assistant und Integrationen sowie ausgeführte Pläne, höchstens 5.000 Einträge.",
-  setKeptRuns: "Automationsläufe", setKeptRunsText: "Zähler je Automation und Tag aus den Läufen (ohne Variablen, Auslöserdaten und Fehlertexte), 60 Tage lang.",
   setPrivacy: "Housekeeper sendet nichts nach außen. Die Auswertung der Datenbank liest nur und merkt sich keine Zustandswerte.",
   setLinks: "Links",
 });
@@ -964,13 +959,92 @@ Object.assign(TEXT.en, {
   viewsLabel: "Saved views", viewsNone: "Views …", viewSave: "Save view", viewDelete: "Delete view", viewName: "Name of the view (stays in this browser only)",
   exclLine: "Not counted: {list}.", exclIgnored: "{n} hidden", exclDisabled: "{n} disabled", exclPermanent: "{n} down all the time",
   setKeptTitle: "What Housekeeper stores", setKeptHint: "Everything lives in Home Assistant's storage (.storage) and does not leave your instance.",
-  setKeptObservations: "Observations", setKeptObservationsText: "Since when an object has been in its state. Kept as long as the object exists.",
-  setKeptHistory: "Scan history", setKeptHistoryText: "The last scan of each day as a comparison point, for {days} days.",
-  setKeptJournal: "Journal", setKeptJournalText: "Cleanup plans with their result and undo details. You can delete plans that were never run; executed ones stay as the audit trail. Old file snapshots are condensed when the size limit is reached.",
-  setKeptEvents: "Events", setKeptEventsText: "Restarts, version changes of Home Assistant and integrations, and executed plans, at most 5,000 entries.",
-  setKeptRuns: "Automation runs", setKeptRunsText: "Counters per automation and day from the runs (without variables, trigger data and error texts), for 60 days.",
   setPrivacy: "Housekeeper sends nothing out. The database evaluation only reads and does not remember state values.",
   setLinks: "Links",
+});
+
+// Texts for the list of Housekeeper's own files (Settings, Info); merged into TEXT.
+const STORE_GROUPS = [
+  ["history", ["observations", "history", "events", "runs", "replies", "load", "entry_states", "stale", "config_changes", "coverage", "scan_health", "signals"]],
+  ["proof", ["journal", "attest", "preflight"]],
+  ["yours", ["ignored", "marks", "notes", "reminders", "goals", "criteria", "batteries", "policies", "notify", "window", "protection", "refactor"]],
+];
+
+Object.assign(TEXT.de, {
+  storeGroup_history: "Verlauf und Messwerte",
+  storeGroup_proof: "Nachweise",
+  storeGroup_yours: "Deine Angaben und Einstellungen",
+  storeGroup_other: "Weitere",
+  storeTotal: "Gesamt",
+  storeCount: "Dateien",
+  storeChanged: "geändert",
+  storeNone: "Noch keine Daten gespeichert.",
+  storeHintBytes: "Nur Art und Größe, nie Inhalte. Löschen ist hier nicht vorgesehen.",
+  store_observations: "Beobachtungen", storeText_observations: "Seit wann ein Objekt in seinem Zustand ist. Bleibt, solange das Objekt existiert.",
+  store_history: "Scanverlauf", storeText_history: "Der letzte Scan jedes Tages als Vergleichspunkt, {days} Tage lang.",
+  store_events: "Ereignisse", storeText_events: "Neustarts, Versionswechsel von Home Assistant und Integrationen sowie ausgeführte Pläne, höchstens 5.000 Einträge.",
+  store_runs: "Automationsläufe", storeText_runs: "Zähler je Automation und Tag aus den Läufen (ohne Variablen, Auslöserdaten und Fehlertexte), 60 Tage lang.",
+  store_replies: "Zwischengespeicherte Abfragen", storeText_replies: "Antworten der aufwendigen Datenbankabfragen, damit sie nicht doppelt laufen.",
+  store_load: "Systemlast", storeText_load: "Festplatte, Speicher, CPU und Swap in Prozent, alle fünf Minuten, 7 Tage lang.",
+  store_entry_states: "Setup-Fehler", storeText_entry_states: "Wie oft ein Integrationseintrag in einem fehlgeschlagenen Zustand war, aus den Scans gezählt.",
+  store_stale: "Veraltete Sensoren", storeText_stale: "Wann ein Sensor zuletzt einen neuen Wert gemeldet hat.",
+  store_config_changes: "Konfigurationsänderungen", storeText_config_changes: "Nur ein kurzer Fingerabdruck von Auslösern, Bedingungen und Aktionen, nie der Inhalt.",
+  store_coverage: "Abdeckung", storeText_coverage: "Welche Auslöser und Zweige einer Automation gelaufen sind. Nur, wenn du es einschaltest.",
+  store_scan_health: "Scan-Zustand", storeText_scan_health: "Zeitpunkte, Phase und Fehlerklasse der letzten Scans, ohne Fehlertext.",
+  store_signals: "Signale", storeText_signals: "Welche Situationen schon als Ereignis gemeldet wurden, damit jede nur einmal gemeldet wird.",
+  store_journal: "Journal", storeText_journal: "Pläne des Aufräumens mit Ergebnis und Rückgängig-Angaben. Nie ausgeführte Pläne kannst du löschen; ausgeführte bleiben als Nachweis. Alte Dateisnapshots werden verdichtet, wenn die Größenbegrenzung erreicht ist.",
+  store_attest: "Backup-Bestätigungen", storeText_attest: "Zwei Angaben, die nur du kennst: Notfall-Set sicher verwahrt und eine Wiederherstellung ausprobiert.",
+  store_preflight: "Update-Check", storeText_preflight: "Der Zustand vor einem Home-Assistant-Update, um ihn danach vergleichen zu können.",
+  store_ignored: "Entscheidungen zu Befunden", storeText_ignored: "Ausgeblendet, bewusst behalten oder verschoben, mit Grund. Bleibt, bis du es änderst.",
+  store_marks: "Markierungen", storeText_marks: "Hinweise an Objekten: absichtlich offline, saisonal, Reserve, behalten.",
+  store_notes: "Logbuch", storeText_notes: "Einträge, die du selbst schreibst.",
+  store_reminders: "Erinnerungen", storeText_reminders: "Wartungen mit Intervall, Fälligkeit und den Tagen, an denen sie erledigt wurden.",
+  store_goals: "Ziele", storeText_goals: "Was für dein Haus „in Ordnung“ heißt.",
+  store_criteria: "Erfolgskriterien", storeText_criteria: "Was eine Automation erreichen soll.",
+  store_batteries: "Batterien", storeText_batteries: "Die Art je Sensor und erledigte Wechsel.",
+  store_policies: "Richtlinien", storeText_policies: "Die Regeln, die du eingeschaltet hast.",
+  store_notify: "Benachrichtigung", storeText_notify: "Deine Einstellung zur Meldung bei neuen kaputten Referenzen.",
+  store_window: "Wartungsfenster", storeText_window: "Der Stand des geführten Durchlaufs, wenn du ihn einschaltest.",
+  store_protection: "Schutzmodus", storeText_protection: "Die Begrenzung dessen, was Housekeeper ändern darf.",
+  store_refactor: "Verbesserungen", storeText_refactor: "Der Stand der kleinen Verbesserungen einzelner Automationen.",
+});
+Object.assign(TEXT.en, {
+  storeGroup_history: "History and measurements",
+  storeGroup_proof: "Audit trail",
+  storeGroup_yours: "Your entries and settings",
+  storeGroup_other: "Other",
+  storeTotal: "Total",
+  storeCount: "Files",
+  storeChanged: "changed",
+  storeNone: "No data stored yet.",
+  storeHintBytes: "Only kind and size, never contents. Deleting is not offered here.",
+  store_observations: "Observations", storeText_observations: "Since when an object has been in its state. Kept as long as the object exists.",
+  store_history: "Scan history", storeText_history: "The last scan of each day as a comparison point, for {days} days.",
+  store_events: "Events", storeText_events: "Restarts, version changes of Home Assistant and integrations, and executed plans, at most 5,000 entries.",
+  store_runs: "Automation runs", storeText_runs: "Counters per automation and day from the runs (without variables, trigger data and error texts), for 60 days.",
+  store_replies: "Cached queries", storeText_replies: "Answers of the expensive database queries, so they do not run twice.",
+  store_load: "System load", storeText_load: "Disk, memory, CPU and swap in percent, every five minutes, for 7 days.",
+  store_entry_states: "Setup failures", storeText_entry_states: "How often an integration entry was in a failed state, counted from the scans.",
+  store_stale: "Stale sensors", storeText_stale: "When a sensor last reported a new value.",
+  store_config_changes: "Configuration changes", storeText_config_changes: "Only a short fingerprint of triggers, conditions and actions, never the content.",
+  store_coverage: "Coverage", storeText_coverage: "Which triggers and branches of an automation ran. Only when you switch it on.",
+  store_scan_health: "Scan health", storeText_scan_health: "Times, phase and error class of the latest scans, without an error text.",
+  store_signals: "Signals", storeText_signals: "Which situations were already announced as an event, so each is announced once.",
+  store_journal: "Journal", storeText_journal: "Cleanup plans with their result and undo details. You can delete plans that were never run; executed ones stay as the audit trail. Old file snapshots are condensed when the size limit is reached.",
+  store_attest: "Backup confirmations", storeText_attest: "Two facts only you know: the emergency kit is stored safely and a restore was tried.",
+  store_preflight: "Update check", storeText_preflight: "The state before a Home Assistant update, to compare it afterwards.",
+  store_ignored: "Decisions about findings", storeText_ignored: "Hidden, deliberately kept or put off, with the reason. Stays until you change it.",
+  store_marks: "Marks", storeText_marks: "Notes on objects: offline on purpose, seasonal, spare, keep.",
+  store_notes: "Logbook", storeText_notes: "Entries you write yourself.",
+  store_reminders: "Reminders", storeText_reminders: "Maintenance with its interval, due day and the days it was done.",
+  store_goals: "Goals", storeText_goals: "What \"in order\" means for your house.",
+  store_criteria: "Success criteria", storeText_criteria: "What an automation is supposed to achieve.",
+  store_batteries: "Batteries", storeText_batteries: "The type per sensor and handled replacements.",
+  store_policies: "Policies", storeText_policies: "The rules you switched on.",
+  store_notify: "Notification", storeText_notify: "Your setting for the message about new broken references.",
+  store_window: "Maintenance window", storeText_window: "The state of the guided run, when you switch it on.",
+  store_protection: "Protection mode", storeText_protection: "The limit on what Housekeeper may change.",
+  store_refactor: "Improvements", storeText_refactor: "The state of the small improvements of single automations.",
 });
 
 // Texts for the recorder load view; merged into TEXT.
@@ -2699,16 +2773,39 @@ class SettingsMixin {
     try { await globalThis.navigator?.clipboard?.writeText(this.issueText()); this.toast(this.t("diagCopied")); } catch (err) { this.failed(err); }
   }
 
+  storedFiles(m) {
+    const files = m.storage || {};
+    const known = new Set(STORE_GROUPS.flatMap(([, names]) => names));
+    const groups = STORE_GROUPS.map(([group, names]) => [group, names.filter(name => files[name])]);
+    const other = Object.keys(files).filter(name => !known.has(name)).sort();
+    if (other.length) groups.push(["other", other]);
+    const all = Object.values(files);
+    if (!all.length) return `<p class="factnote">${this.t("storeNone")}</p>`;
+    const total = all.reduce((sum, item) => sum + (item.bytes || 0), 0);
+    const row = name => {
+      const item = files[name];
+      const title = this.t(`store_${name}`) === `store_${name}` ? this.esc(name) : this.t(`store_${name}`);
+      const text = this.t(`storeText_${name}`) === `storeText_${name}` ? "" : this.t(`storeText_${name}`, { days: m.history_days ?? 30 });
+      const changed = item.changed ? ` · ${this.t("storeChanged")} ${this.formatDate(new Date(item.changed * 1000).toISOString())}` : "";
+      return `<div class="row"><span class="tile mute"><ha-icon icon="mdi:database-outline"></ha-icon></span><span class="row-text"><strong>${title}</strong><small>${text}${changed}</small></span><span class="pill mute">${this.formatBytes(item.bytes || 0)}</span></div>`;
+    };
+    const facts = `<div class="facts"><div class="fact"><span>${this.t("storeTotal")}</span><b>${this.formatBytes(total)}</b></div><div class="fact"><span>${this.t("storeCount")}</span><b>${this.formatNumber(all.length)}</b></div></div>`;
+    const body = groups.filter(([, names]) => names.length).map(([group, names], index) => {
+      const size = names.reduce((sum, name) => sum + (files[name].bytes || 0), 0);
+      return `<details ${index < 2 ? "open" : ""}><summary><strong>${this.t(`storeGroup_${group}`)}</strong> <span class="pill mute">${this.formatBytes(size)}</span></summary>${names.map(row).join("")}</details>`;
+    }).join("");
+    return facts + body;
+  }
+
   infoCard() {
     const m = this.data?.meta || {};
     const fact = (k, v) => `<div class="fact"><span>${k}</span><b>${v}</b></div>`;
     const facts = [fact(this.t("version"), this.esc(m.version || "–")), fact(this.t("haVersion"), this.esc(m.ha_version || "–")), fact(this.t("mode"), this.t("readOnlyValue")),
       fact(this.t("lastScan"), m.scanned_at ? this.formatDate(m.scanned_at) : "–"), fact(this.t("objects"), this.formatNumber(m.object_count ?? 0))].join("");
     const link = (icon, href, label, hint) => `<a class="row" href="${href}" target="_blank" rel="noopener noreferrer"><span class="tile mute"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${label}</strong>${hint ? `<small>${hint}</small>` : ""}</span><ha-icon icon="mdi:open-in-new"></ha-icon></a>`;
-    const kept = [["setKeptObservations", "setKeptObservationsText", "observations"], ["setKeptHistory", "setKeptHistoryText", "history"], ["setKeptJournal", "setKeptJournalText", "journal"], ["setKeptEvents", "setKeptEventsText", "events"], ["setKeptRuns", "setKeptRunsText", "runs"]]
-      .map(([title, text, store]) => `<div class="row"><span class="tile mute"><ha-icon icon="mdi:database-outline"></ha-icon></span><span class="row-text"><strong>${this.t(title)}</strong><small>${this.t(text, { days: m.history_days ?? 30 })}</small></span>${m.storage?.[store] !== undefined ? `<span class="pill mute">${this.formatBytes(m.storage[store])}</span>` : ""}</div>`).join("");
+    const kept = this.storedFiles(m);
     return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("about")}</h2></div><div class="facts">${facts}</div></section>
-      <section class="panel"><div class="panelhead"><div><h2>${this.t("setKeptTitle")}</h2><p>${this.t("setKeptHint")}</p></div></div>${kept}<p class="factnote">${this.t("setPrivacy")}</p></section>
+      <section class="panel"><div class="panelhead"><div><h2>${this.t("setKeptTitle")}</h2><p>${this.t("setKeptHint")} ${this.t("storeHintBytes")}</p></div></div>${kept}<p class="factnote">${this.t("setPrivacy")}</p></section>
       <section class="panel"><div class="panelhead"><h2>${this.t("setLinks")}</h2></div>${link("mdi:github", REPO_URL, this.t("repository"), "")}${link("mdi:bug-outline", `${REPO_URL}/issues`, this.t("reportIssue"), "")}${link("mdi:history", `${REPO_URL}/blob/main/CHANGELOG.md`, this.t("changelog"), "")}
         <button class="row" data-diagnostics><span class="tile mute"><ha-icon icon="mdi:stethoscope"></ha-icon></span><span class="row-text"><strong>${this.t("diagDownload")}</strong><small>${this.t("diagHint")}</small></span><ha-icon icon="mdi:download"></ha-icon></button>
         <button class="row" data-diag-copy><span class="tile mute"><ha-icon icon="mdi:content-copy"></ha-icon></span><span class="row-text"><strong>${this.t("diagCopy")}</strong><small>${this.t("diagCopyHint")}</small></span></button></section></div>`;

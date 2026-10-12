@@ -1035,7 +1035,8 @@ async def test_the_scan_reports_the_size_of_housekeepers_own_files(
     (storage / "ha_housekeeper.runs").write_text("y" * 45)
     with patch.object(hass.config, "path", lambda *parts: str(tmp_path.joinpath(*parts))):
         sizes = storage_sizes(hass)
-    assert sizes == {"events": 123, "runs": 45}  # missing files are simply absent
+    assert {name: item["bytes"] for name, item in sizes.items()} == {"events": 123, "runs": 45}
+    assert all(item["changed"] > 0 for item in sizes.values())
 
 
 # What the panel reads from each reply: renaming or removing one of these fields needs a new API schema.

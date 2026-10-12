@@ -607,19 +607,21 @@ def _split_details(objects: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     return details
 
 
-STORED = ("observations", "history", "journal", "events", "runs", "replies")
-
-
-def storage_sizes(hass: HomeAssistant) -> dict[str, int]:
-    """Blocking: the size in bytes of each of Housekeeper's own files in ``.storage``."""
+def storage_sizes(hass: HomeAssistant) -> dict[str, dict[str, float]]:
+    """Blocking: size in bytes and last change of each of Housekeeper's own files in ``.storage``."""
     base = Path(hass.config.path(".storage"))
-    sizes: dict[str, int] = {}
-    for name in STORED:
+    files: dict[str, dict[str, float]] = {}
+    try:
+        found = sorted(base.glob(f"{DOMAIN}.*"))
+    except OSError:
+        return files
+    for path in found:
         try:
-            sizes[name] = (base / f"{DOMAIN}.{name}").stat().st_size
+            info = path.stat()
         except OSError:
             continue
-    return sizes
+        files[path.name[len(DOMAIN) + 1 :]] = {"bytes": info.st_size, "changed": info.st_mtime}
+    return files
 
 
 class InventoryScanner:

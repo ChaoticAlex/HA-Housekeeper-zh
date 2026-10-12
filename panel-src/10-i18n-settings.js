@@ -12,11 +12,6 @@ Object.assign(TEXT.de, {
   viewsLabel: "Gespeicherte Ansichten", viewsNone: "Ansichten …", viewSave: "Ansicht speichern", viewDelete: "Ansicht löschen", viewName: "Name der Ansicht (bleibt nur in diesem Browser)",
   exclLine: "Nicht mitgezählt: {list}.", exclIgnored: "{n} ausgeblendet", exclDisabled: "{n} deaktiviert", exclPermanent: "{n} dauerhaft ausgefallen",
   setKeptTitle: "Was Housekeeper speichert", setKeptHint: "Alles liegt im Speicher von Home Assistant (.storage) und verlässt deine Instanz nicht.",
-  setKeptObservations: "Beobachtungen", setKeptObservationsText: "Seit wann ein Objekt in seinem Zustand ist. Bleibt, solange das Objekt existiert.",
-  setKeptHistory: "Scanverlauf", setKeptHistoryText: "Der letzte Scan jedes Tages als Vergleichspunkt, {days} Tage lang.",
-  setKeptJournal: "Journal", setKeptJournalText: "Pläne des Aufräumens mit Ergebnis und Rückgängig-Angaben. Nie ausgeführte Pläne kannst du löschen; ausgeführte bleiben als Nachweis. Alte Dateisnapshots werden verdichtet, wenn die Größenbegrenzung erreicht ist.",
-  setKeptEvents: "Ereignisse", setKeptEventsText: "Neustarts, Versionswechsel von Home Assistant und Integrationen sowie ausgeführte Pläne, höchstens 5.000 Einträge.",
-  setKeptRuns: "Automationsläufe", setKeptRunsText: "Zähler je Automation und Tag aus den Läufen (ohne Variablen, Auslöserdaten und Fehlertexte), 60 Tage lang.",
   setPrivacy: "Housekeeper sendet nichts nach außen. Die Auswertung der Datenbank liest nur und merkt sich keine Zustandswerte.",
   setLinks: "Links",
 });
@@ -33,11 +28,6 @@ Object.assign(TEXT.en, {
   viewsLabel: "Saved views", viewsNone: "Views …", viewSave: "Save view", viewDelete: "Delete view", viewName: "Name of the view (stays in this browser only)",
   exclLine: "Not counted: {list}.", exclIgnored: "{n} hidden", exclDisabled: "{n} disabled", exclPermanent: "{n} down all the time",
   setKeptTitle: "What Housekeeper stores", setKeptHint: "Everything lives in Home Assistant's storage (.storage) and does not leave your instance.",
-  setKeptObservations: "Observations", setKeptObservationsText: "Since when an object has been in its state. Kept as long as the object exists.",
-  setKeptHistory: "Scan history", setKeptHistoryText: "The last scan of each day as a comparison point, for {days} days.",
-  setKeptJournal: "Journal", setKeptJournalText: "Cleanup plans with their result and undo details. You can delete plans that were never run; executed ones stay as the audit trail. Old file snapshots are condensed when the size limit is reached.",
-  setKeptEvents: "Events", setKeptEventsText: "Restarts, version changes of Home Assistant and integrations, and executed plans, at most 5,000 entries.",
-  setKeptRuns: "Automation runs", setKeptRunsText: "Counters per automation and day from the runs (without variables, trigger data and error texts), for 60 days.",
   setPrivacy: "Housekeeper sends nothing out. The database evaluation only reads and does not remember state values.",
   setLinks: "Links",
 });

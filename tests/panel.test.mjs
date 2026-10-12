@@ -4356,3 +4356,11 @@ test("tiles tell their kind: a figure is flat, a filter has a funnel and is mark
   assert.ok(html.includes('<div class="sumtile mute">') && html.includes('class="sumtile filter mute"') && html.includes('aria-pressed="true"') && html.includes('class="sumtile go mute"'));
   assert.ok(el.filterNote(["Errors"], "data-x").includes("Filter on") && el.filterNote([], "data-x") === "");
 });
+
+test("the settings list every file Housekeeper keeps with size and purpose, grouped, and shows an unknown file by its name", () => {
+  const { el } = panel("en");
+  const html = el.storedFiles({ history_days: 30, storage: { journal: { bytes: 2048, changed: 1700000000 }, notes: { bytes: 100, changed: 1700000000 }, observations: { bytes: 5000, changed: 1700000000 }, brandnew: { bytes: 7, changed: 1700000000 } } });
+  assert.ok(html.includes("Journal") && html.includes("Logbook") && html.includes("Observations") && html.includes("brandnew"));
+  assert.ok(html.includes("Audit trail") && html.includes("Your entries and settings") && html.includes("Other"));
+  assert.ok(el.storedFiles({ storage: {} }).includes("No data stored yet"));
+});

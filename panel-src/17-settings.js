@@ -117,16 +117,39 @@ class SettingsMixin {
     try { await globalThis.navigator?.clipboard?.writeText(this.issueText()); this.toast(this.t("diagCopied")); } catch (err) { this.failed(err); }
   }
 
+  storedFiles(m) {
+    const files = m.storage || {};
+    const known = new Set(STORE_GROUPS.flatMap(([, names]) => names));
+    const groups = STORE_GROUPS.map(([group, names]) => [group, names.filter(name => files[name])]);
+    const other = Object.keys(files).filter(name => !known.has(name)).sort();
+    if (other.length) groups.push(["other", other]);
+    const all = Object.values(files);
+    if (!all.length) return `<p class="factnote">${this.t("storeNone")}</p>`;
+    const total = all.reduce((sum, item) => sum + (item.bytes || 0), 0);
+    const row = name => {
+      const item = files[name];
+      const title = this.t(`store_${name}`) === `store_${name}` ? this.esc(name) : this.t(`store_${name}`);
+      const text = this.t(`storeText_${name}`) === `storeText_${name}` ? "" : this.t(`storeText_${name}`, { days: m.history_days ?? 30 });
+      const changed = item.changed ? ` · ${this.t("storeChanged")} ${this.formatDate(new Date(item.changed * 1000).toISOString())}` : "";
+      return `<div class="row"><span class="tile mute"><ha-icon icon="mdi:database-outline"></ha-icon></span><span class="row-text"><strong>${title}</strong><small>${text}${changed}</small></span><span class="pill mute">${this.formatBytes(item.bytes || 0)}</span></div>`;
+    };
+    const facts = `<div class="facts"><div class="fact"><span>${this.t("storeTotal")}</span><b>${this.formatBytes(total)}</b></div><div class="fact"><span>${this.t("storeCount")}</span><b>${this.formatNumber(all.length)}</b></div></div>`;
+    const body = groups.filter(([, names]) => names.length).map(([group, names], index) => {
+      const size = names.reduce((sum, name) => sum + (files[name].bytes || 0), 0);
+      return `<details ${index < 2 ? "open" : ""}><summary><strong>${this.t(`storeGroup_${group}`)}</strong> <span class="pill mute">${this.formatBytes(size)}</span></summary>${names.map(row).join("")}</details>`;
+    }).join("");
+    return facts + body;
+  }
+
   infoCard() {
     const m = this.data?.meta || {};
     const fact = (k, v) => `<div class="fact"><span>${k}</span><b>${v}</b></div>`;
     const facts = [fact(this.t("version"), this.esc(m.version || "–")), fact(this.t("haVersion"), this.esc(m.ha_version || "–")), fact(this.t("mode"), this.t("readOnlyValue")),
       fact(this.t("lastScan"), m.scanned_at ? this.formatDate(m.scanned_at) : "–"), fact(this.t("objects"), this.formatNumber(m.object_count ?? 0))].join("");
     const link = (icon, href, label, hint) => `<a class="row" href="${href}" target="_blank" rel="noopener noreferrer"><span class="tile mute"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${label}</strong>${hint ? `<small>${hint}</small>` : ""}</span><ha-icon icon="mdi:open-in-new"></ha-icon></a>`;
-    const kept = [["setKeptObservations", "setKeptObservationsText", "observations"], ["setKeptHistory", "setKeptHistoryText", "history"], ["setKeptJournal", "setKeptJournalText", "journal"], ["setKeptEvents", "setKeptEventsText", "events"], ["setKeptRuns", "setKeptRunsText", "runs"]]
-      .map(([title, text, store]) => `<div class="row"><span class="tile mute"><ha-icon icon="mdi:database-outline"></ha-icon></span><span class="row-text"><strong>${this.t(title)}</strong><small>${this.t(text, { days: m.history_days ?? 30 })}</small></span>${m.storage?.[store] !== undefined ? `<span class="pill mute">${this.formatBytes(m.storage[store])}</span>` : ""}</div>`).join("");
+    const kept = this.storedFiles(m);
     return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("about")}</h2></div><div class="facts">${facts}</div></section>
-      <section class="panel"><div class="panelhead"><div><h2>${this.t("setKeptTitle")}</h2><p>${this.t("setKeptHint")}</p></div></div>${kept}<p class="factnote">${this.t("setPrivacy")}</p></section>
+      <section class="panel"><div class="panelhead"><div><h2>${this.t("setKeptTitle")}</h2><p>${this.t("setKeptHint")} ${this.t("storeHintBytes")}</p></div></div>${kept}<p class="factnote">${this.t("setPrivacy")}</p></section>
       <section class="panel"><div class="panelhead"><h2>${this.t("setLinks")}</h2></div>${link("mdi:github", REPO_URL, this.t("repository"), "")}${link("mdi:bug-outline", `${REPO_URL}/issues`, this.t("reportIssue"), "")}${link("mdi:history", `${REPO_URL}/blob/main/CHANGELOG.md`, this.t("changelog"), "")}
         <button class="row" data-diagnostics><span class="tile mute"><ha-icon icon="mdi:stethoscope"></ha-icon></span><span class="row-text"><strong>${this.t("diagDownload")}</strong><small>${this.t("diagHint")}</small></span><ha-icon icon="mdi:download"></ha-icon></button>
         <button class="row" data-diag-copy><span class="tile mute"><ha-icon icon="mdi:content-copy"></ha-icon></span><span class="row-text"><strong>${this.t("diagCopy")}</strong><small>${this.t("diagCopyHint")}</small></span></button></section></div>`;

@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Einstellungen, Info:** „Was Housekeeper speichert“ listet jetzt alle eigenen Dateien mit Zweck, Größe und letzter Änderung, in Gruppen und mit der Gesamtgröße. Es werden nur Art und Größe gezeigt, nie Inhalte.
 - **Ende eines Befunds:** „Behobene Befunde“ zählt nur noch Befunde, deren Objekt weiter existiert. Verschwindet ein Befund, weil sein Objekt entfernt wurde, die Prüfung (zum Beispiel eines Dashboards oder der Apps) nicht lesen konnte oder sich eine Einstellung wie die Ausfalldauer geändert hat, steht er in einer eigenen Rubrik „Ohne Reparatur beendet“ mit dem Grund. Die Zahl „behoben“ kann dadurch kleiner ausfallen als bisher.
 - **Scan-Zustand:** Schlägt ein Scan fehl oder bleibt er lange aus, zeigt das Panel ein Band mit der Phase und dem letzten erfolgreichen Scan; die Zahlen stammen dann von einem älteren Stand. Ein neuer Diagnose-Sensor „Scan-Zustand“ (in Ordnung, veraltet, fehlgeschlagen, vorläufig) steht für Dashboards und Automationen bereit, und bei anhaltendem Problem erscheint ein Reparaturhinweis.
 - **Kacheln der Unterseiten:** Aufräumen, Recorder und Apps & Integrationen zeigen unter der Beschreibung eine Zeile mit Hinweisen (zum Beispiel „2 mit Problem“, „9,5 GB“, „751 mit Statistik“). Die Kacheln sind dadurch gleich hoch und springen beim Laden nicht mehr; lange Beschreibungen enden mit „…“. In Aufräumen teilen sich die letzten zwei Kacheln die Zeile, und die Zahlenzeile von „Nicht verwendet“ ist in die Kachel gewandert.
@@ -99,6 +100,7 @@
 
 ### English
 
+- **Settings, Info:** "What Housekeeper stores" now lists all of its own files with purpose, size and last change, in groups and with the total size. Only kind and size are shown, never contents.
 - **End of a finding:** "Resolved findings" now counts only findings whose object still exists. A finding that disappears because its object was removed, the check (for example of a dashboard or the apps) could not read it, or a setting such as the outage duration changed is listed under "Ended without a repair" with the reason. The "resolved" number can therefore be smaller than before.
 - **Scan health:** If a scan fails or does not run for a long time, the panel shows a banner with the phase and the last successful scan; the numbers then come from an older state. A new diagnostic sensor "Scan health" (OK, outdated, failed, preliminary) is available for dashboards and automations, and a lasting problem raises a repairs hint.
 - **Recorder, load:** Rows, entities and events are three labelled figures instead of one sentence; what is not counted (hidden, disabled, down all the time) shows as marks of its own with an explanation.
