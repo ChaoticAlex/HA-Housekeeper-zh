@@ -1280,7 +1280,7 @@ class StylesMixin {
       .tablewrap.rem td:first-child{white-space:normal}.chevbtn{display:inline-flex;vertical-align:middle;padding:0;margin-right:4px;border:0;background:none;color:var(--hk-muted);cursor:pointer}.remnote{display:block;margin-left:28px;color:var(--hk-muted)}.remact{text-align:right;white-space:nowrap}.remact .btn{margin-left:6px}.remhist td{padding:10px 16px 14px 44px;background:var(--hk-soft)}.remhist h3{margin:0 0 6px;font-size:calc(11px*var(--hk-fs,1));font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--hk-muted)}.remhist ul{display:grid;gap:4px;margin:0;padding:0;list-style:none}.remhist li{display:flex;gap:12px;align-items:center}.remhist li .linkbtn{margin-left:auto;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.remhist p{margin:0}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
       @media(max-width:700px){.remact{display:flex;flex-wrap:wrap;gap:8px;white-space:normal}.remact .btn{margin-left:0}.remgrid{grid-template-columns:1fr}.remfield.wide,.remfield.full{grid-column:auto}}
       .sumtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.sumtile{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border:1px solid var(--hk-border);border-left:4px solid var(--hk-gray);border-radius:12px;background:var(--hk-surface);text-align:left;font:inherit;color:inherit}button.sumtile{cursor:pointer}button.sumtile:hover{background:var(--hk-soft)}.sumtile.ok{border-left-color:var(--hk-green)}.sumtile.warn{border-left-color:var(--hk-amber)}.sumtile.red{border-left-color:var(--hk-red)}.sumlabel{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.sumvalue{font-size:calc(22px*var(--hk-fs,1));font-weight:600;line-height:1.2;overflow-wrap:anywhere}.sumtile small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));overflow-wrap:anywhere}.sumtile{position:relative}button.sumtile .sumlabel{padding-right:20px}.sumcue{position:absolute;top:10px;right:10px;--mdc-icon-size:16px;color:var(--hk-muted)}div.sumtile,div.sumtile:hover{box-shadow:none;background:var(--hk-soft)}.sumtile.filter[aria-pressed=true]{border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 9%,var(--hk-surface));box-shadow:0 0 0 1px var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumcue{color:var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumlabel{color:var(--hk-blue-text)}.sumtile.filter[aria-pressed=true] .sumlabel:before{content:"\\2713";margin-right:.4em}.filteron{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 16px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);background:color-mix(in srgb,var(--hk-blue) 7%,var(--hk-surface));border-bottom:1px solid var(--hk-border)}.filteron ha-icon{--mdc-icon-size:16px;color:var(--hk-blue)}.filteron b{color:var(--hk-text);font-weight:600}.filteron .btn{margin-left:auto}.tabdot{display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:50%;background:var(--hk-gray)}.tabdot.warn{background:var(--hk-amber)}.tabdot.red{background:var(--hk-red)}
-      .detailgrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:14px;align-items:start}.pad{padding:16px}
+      .detailgrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:14px;align-items:start}.pad{padding:16px}.todofoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px}.visitline{display:inline-flex;align-items:center;gap:6px;color:var(--hk-muted)}.visitline ha-icon{--mdc-icon-size:16px}
       .facts{display:grid}.fact{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.fact:first-child{border-top:0}.fact span{color:var(--hk-muted)}.fact b{font-weight:600;text-align:right}.fact small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:400}
       .u-m0{margin:0!important}.u-block{display:block!important}.u-mb14{margin-bottom:14px!important}.u-pt6{padding:6px 0 0!important}.u-dim{opacity:.8!important}.u-ic14{--mdc-icon-size:14px!important}.u-amber{color:var(--hk-amber)!important}
       .factnote{padding:12px 16px;border-top:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));line-height:1.5}:where(:not(.panel))>.factnote{border-top:0;padding:0}.panel>.factnote:first-child{border-top:0}
@@ -1891,11 +1891,11 @@ class OverviewMixin {
     return (this.data?.quarantine || []).filter(q => this.daysSince(q.since) >= limit).length;
   }
 
-  // A line under the to-do list instead of a card of its own: how many goals are met, and where the limits are set.
-  goalsLine() {
-    const r = this.goals;
-    if (!r?.goals?.length) return "";
-    return `<div class="pad"><small>${this.t("goalsLine", { met: r.met, total: r.met + r.missed })} · <button class="link" data-goals-settings>${this.t("goalsAdjust")}</button></small></div>`;
+  // The foot of the to-do card: how many goals are met and where the limits are set, and what changed since the last visit.
+  todoFoot() {
+    const r = this.goals, visit = this.sinceVisitLine();
+    const goals = r?.goals?.length ? `<small>${this.t("goalsLine", { met: r.met, total: r.met + r.missed })} · <button class="link" data-goals-settings>${this.t("goalsAdjust")}</button></small>` : "";
+    return goals || visit ? `<div class="pad todofoot">${goals}${visit}</div>` : "";
   }
 
   // "1 topic urgent, 4 more open": what the headline counts are topics (rows of the list), not objects.
@@ -1955,7 +1955,7 @@ class OverviewMixin {
       : [...urgent.map(row), ...later].join(""))
       : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.esc(this.t("actNone", { date: this.formatDate(this.data.meta.scanned_at) }))}</div>`;
     const all = `<button class="link" data-jump="findingsNav">${this.t("allFindings")} (${this.formatNumber(findings.length)}) <ha-icon icon="mdi:chevron-right"></ha-icon></button>`;
-    return `<section class="panel u-mb14" aria-labelledby="hk-todo" id="hk-todo-card" tabindex="-1"><div class="panelhead"><div><h2 id="hk-todo">${this.t("actTitle")}</h2><p>${this.t("actSub")}</p></div>${all}</div>${body}${this.goalsLine()}</section>`;
+    return `<section class="panel u-mb14" aria-labelledby="hk-todo" id="hk-todo-card" tabindex="-1"><div class="panelhead"><div><h2 id="hk-todo">${this.t("actTitle")}</h2><p>${this.t("actSub")}</p></div>${all}</div>${body}${this.todoFoot()}</section>`;
   }
 
   // The comparison with the previous scan is fetched once per data set; the overview shows it when it is there.
@@ -2010,7 +2010,7 @@ class OverviewMixin {
     const v = this.sinceVisit();
     if (!v || (!v.added && !v.gone)) return "";
     const parts = [v.added ? this.t("visitAdded", { n: this.formatNumber(v.added) }) : "", v.gone ? this.t("visitGone", { n: this.formatNumber(v.gone) }) : ""].filter(Boolean).join(", ");
-    return `<p class="factnote visitline"><ha-icon icon="mdi:history"></ha-icon>${this.t("visitSince", { ago: this.agoText(new Date(v.at).toISOString()) })}: ${parts}</p>`;
+    return `<small class="visitline"><ha-icon icon="mdi:history"></ha-icon>${this.t("visitSince", { ago: this.agoText(new Date(v.at).toISOString()) })}: ${parts}</small>`;
   }
 
   overview() {
@@ -2026,7 +2026,7 @@ class OverviewMixin {
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p></div>
       <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
       ${this.todoCard()}<div class="grid2 ovmid"><div class="stack">${this.inventoryStatusCard()}</div>
-      <div class="stack">${this.sinceVisitLine()}${this.cleanupCard()}</div></div>
+      <div class="stack">${this.cleanupCard()}</div></div>
       <div class="ovzone">${this.systemCard()}${this.databaseCard()}${this.trendCard()}</div>`;
   }
 
@@ -8503,7 +8503,7 @@ Object.assign(TEXT.de, {
   firstScan: "Der erste Scan läuft: {percent} %", groupOpen: "{count} offen", readOnly: "Nur lesen", canChange: "Kann ändern", readOnlyHint: "Diese Seite ändert nichts.", canChangeHint: "Von hier aus lassen sich Pläne erstellen und ausführen. Geändert wird erst nach deiner Bestätigung.",
   outcomeUndoYes: "Rückgängig ist möglich, solange sich die Objekte nicht geändert haben.", outcomeUndoBackup: "Nur per Backup rückgängig.", outcomeUndoMixed: "Teils rückgängig machbar, teils nur per Backup.",
   backupFailHint: "Prüfe unter Einstellungen → System → Backups, ob ein Backup-Ziel erreichbar ist, und lies das Protokoll unter Einstellungen → System → Protokolle.", previewReady: "Vorschau erstellt", toast_verified: "Plan abgeschlossen und geprüft", toast_executed: "Plan ausgeführt", toast_partial: "Plan nur teilweise ausgeführt", toast_aborted: "Plan abgebrochen",
-  visitSince: "Seit deinem letzten Besuch (vor {ago})", visitAdded: "{n} neue Befunde", visitGone: "{n} erledigt",
+  visitSince: "Seit deinem letzten Besuch ({ago})", visitAdded: "{n} neue Befunde", visitGone: "{n} erledigt",
   loadingShort: "lädt …", resetFilters: "Filter zurücksetzen", showSelectedOnly: "Nur Ausgewählte zeigen", showAll: "Alle zeigen",
   verdictIrreversible: "Nicht umkehrbar",
   acknowledgeAll: "Ich habe die {count} zu prüfenden Einträge gesehen und führe sie mit aus", acknowledgeAllHint: "Ohne Haken laufen nur die unbedenklichen Einträge; zu prüfende werden übersprungen.",
@@ -8545,7 +8545,7 @@ Object.assign(TEXT.en, {
   firstScan: "The first scan is running: {percent} %", groupOpen: "{count} open", readOnly: "Read only", canChange: "Can change", readOnlyHint: "This page changes nothing.", canChangeHint: "Plans can be created and run from here. Nothing changes before you confirm.",
   outcomeUndoYes: "Undo is possible as long as the objects have not changed.", outcomeUndoBackup: "Undo only from the backup.", outcomeUndoMixed: "Partly undoable, partly only from the backup.",
   backupFailHint: "Check under Settings → System → Backups that a backup location is reachable, and read the log under Settings → System → Logs.", previewReady: "Preview created", toast_verified: "Plan completed and verified", toast_executed: "Plan executed", toast_partial: "Plan only partly executed", toast_aborted: "Plan aborted",
-  visitSince: "Since your last visit ({ago} ago)", visitAdded: "{n} new findings", visitGone: "{n} resolved",
+  visitSince: "Since your last visit ({ago})", visitAdded: "{n} new findings", visitGone: "{n} resolved",
   loadingShort: "loading …", resetFilters: "Reset filters", showSelectedOnly: "Show selected only", showAll: "Show all",
   verdictIrreversible: "Not reversible",
   acknowledgeAll: "I have seen the {count} entries to review and run them too", acknowledgeAllHint: "Without the tick only the unproblematic entries run; entries to review are skipped.",

@@ -105,11 +105,11 @@ class OverviewMixin {
     return (this.data?.quarantine || []).filter(q => this.daysSince(q.since) >= limit).length;
   }
 
-  // A line under the to-do list instead of a card of its own: how many goals are met, and where the limits are set.
-  goalsLine() {
-    const r = this.goals;
-    if (!r?.goals?.length) return "";
-    return `<div class="pad"><small>${this.t("goalsLine", { met: r.met, total: r.met + r.missed })} · <button class="link" data-goals-settings>${this.t("goalsAdjust")}</button></small></div>`;
+  // The foot of the to-do card: how many goals are met and where the limits are set, and what changed since the last visit.
+  todoFoot() {
+    const r = this.goals, visit = this.sinceVisitLine();
+    const goals = r?.goals?.length ? `<small>${this.t("goalsLine", { met: r.met, total: r.met + r.missed })} · <button class="link" data-goals-settings>${this.t("goalsAdjust")}</button></small>` : "";
+    return goals || visit ? `<div class="pad todofoot">${goals}${visit}</div>` : "";
   }
 
   // "1 topic urgent, 4 more open": what the headline counts are topics (rows of the list), not objects.
@@ -169,7 +169,7 @@ class OverviewMixin {
       : [...urgent.map(row), ...later].join(""))
       : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.esc(this.t("actNone", { date: this.formatDate(this.data.meta.scanned_at) }))}</div>`;
     const all = `<button class="link" data-jump="findingsNav">${this.t("allFindings")} (${this.formatNumber(findings.length)}) <ha-icon icon="mdi:chevron-right"></ha-icon></button>`;
-    return `<section class="panel u-mb14" aria-labelledby="hk-todo" id="hk-todo-card" tabindex="-1"><div class="panelhead"><div><h2 id="hk-todo">${this.t("actTitle")}</h2><p>${this.t("actSub")}</p></div>${all}</div>${body}${this.goalsLine()}</section>`;
+    return `<section class="panel u-mb14" aria-labelledby="hk-todo" id="hk-todo-card" tabindex="-1"><div class="panelhead"><div><h2 id="hk-todo">${this.t("actTitle")}</h2><p>${this.t("actSub")}</p></div>${all}</div>${body}${this.todoFoot()}</section>`;
   }
 
   // The comparison with the previous scan is fetched once per data set; the overview shows it when it is there.
@@ -224,7 +224,7 @@ class OverviewMixin {
     const v = this.sinceVisit();
     if (!v || (!v.added && !v.gone)) return "";
     const parts = [v.added ? this.t("visitAdded", { n: this.formatNumber(v.added) }) : "", v.gone ? this.t("visitGone", { n: this.formatNumber(v.gone) }) : ""].filter(Boolean).join(", ");
-    return `<p class="factnote visitline"><ha-icon icon="mdi:history"></ha-icon>${this.t("visitSince", { ago: this.agoText(new Date(v.at).toISOString()) })}: ${parts}</p>`;
+    return `<small class="visitline"><ha-icon icon="mdi:history"></ha-icon>${this.t("visitSince", { ago: this.agoText(new Date(v.at).toISOString()) })}: ${parts}</small>`;
   }
 
   overview() {
@@ -240,7 +240,7 @@ class OverviewMixin {
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p></div>
       <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
       ${this.todoCard()}<div class="grid2 ovmid"><div class="stack">${this.inventoryStatusCard()}</div>
-      <div class="stack">${this.sinceVisitLine()}${this.cleanupCard()}</div></div>
+      <div class="stack">${this.cleanupCard()}</div></div>
       <div class="ovzone">${this.systemCard()}${this.databaseCard()}${this.trendCard()}</div>`;
   }
 

@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Übersicht:** „Seit deinem letzten Besuch“ steht jetzt in der Fußzeile von „Was muss ich jetzt tun?“, rechts neben den Wartungszielen, und nicht mehr lose zwischen den Karten. Der Text hatte „vor“ doppelt („vor vor 41 Min.“).
 - **Übersicht:** „Wichtigste Befunde“ ist in „Was muss ich jetzt tun?“ aufgegangen: die Zeile „Ausfälle“ klappt auf und zeigt die betroffenen Integrationen, „Einzelne Befunde“ steht als aufklappbarer Bereich unter „Bald“, und „Alle Befunde“ ist ein Link im Kopf der Karte.
 - **Zugangsdaten:** Die Kachel „Felder mit Wert“ entfällt; die Zahl steht als Unterzeile unter „Integrationen mit Zugangsdaten“.
 - **Recorder, Last:** Zeilen, Entitäten und Ereignisse stehen als drei beschriftete Kennzahlen statt in einem Satz; was nicht mitgezählt wird (ausgeblendet, deaktiviert, dauerhaft ausgefallen), steht als eigene Marken mit Erklärung darunter.
