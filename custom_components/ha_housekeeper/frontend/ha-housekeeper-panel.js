@@ -7494,6 +7494,7 @@ Object.assign(TEXT.en, {
 
 // Texts for the statistics and dashboard policy rules; merged into TEXT.
 Object.assign(TEXT.de, {
+  sysTabAppsHint: "CPU, RAM und Daten je App",
   polRule_statistics_unit: "Statistik: Einheit passt nicht mehr", polDesc_statistics_unit: "Die Einheit der Entität weicht von der Einheit der Langzeitstatistik ab, und der Recorder kann sie nicht umrechnen. Neue Werte passen dann nicht zu den alten. Nur Metadaten werden gelesen.", polAlso_statistics_unit: "Statistik → Entität: {ids}",
   polRule_statistics_class: "Statistik: Zustandsklasse passt nicht mehr", polDesc_statistics_class: "Die Zustandsklasse der Entität (Messwert oder Zähler) passt nicht zu den gespeicherten Statistikdaten. Verläufe lassen sich dann nicht zusammen auswerten. Nur Metadaten werden gelesen; Sprünge und Rücksetzer in den Werten prüft Housekeeper nicht.", polAlso_statistics_class: "Statistik → Entität: {ids}",
   polRule_dashboard_navigation: "Dashboard: Navigation führt ins Leere", polDesc_dashboard_navigation: "Eine Karte öffnet eine Ansicht, die es im gelesenen Dashboard nicht gibt. Links zu anderen Bereichen von Home Assistant werden nicht beurteilt.", polAlso_dashboard_navigation: "Ziele: {ids}",
@@ -7512,6 +7513,7 @@ Object.assign(TEXT.de, {
   polRule_hacs_blocked: "HACS-Update braucht neuere Home-Assistant-Version", polDesc_hacs_blocked: "Für eine über HACS installierte Integration wartet ein Update, das HACS nicht installiert, weil es eine neuere Home-Assistant-Version verlangt als die laufende. Nur ein Hinweis; erst Home Assistant aktualisieren.", polAlso_hacs_blocked: "{ids}",
 });
 Object.assign(TEXT.en, {
+  sysTabAppsHint: "CPU, RAM and data per app",
   polRule_statistics_unit: "Statistics: unit no longer fits", polDesc_statistics_unit: "The unit of the entity differs from the unit of its long-term statistics and the recorder cannot convert it. New values then do not fit the old ones. Only metadata is read.", polAlso_statistics_unit: "Statistics → entity: {ids}",
   polRule_statistics_class: "Statistics: state class no longer fits", polDesc_statistics_class: "The state class of the entity (measurement or total) does not match the stored statistics. Histories cannot be read together. Only metadata is read; jumps and resets in the values are not checked.", polAlso_statistics_class: "Statistics → entity: {ids}",
   polRule_dashboard_navigation: "Dashboard: navigation leads nowhere", polDesc_dashboard_navigation: "A card opens a view that the dashboard that was read does not have. Links to other parts of Home Assistant are not judged.", polAlso_dashboard_navigation: "Targets: {ids}",

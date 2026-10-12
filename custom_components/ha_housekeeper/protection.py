@@ -61,7 +61,7 @@ class ProtectionStore:
         # working as before; anything else starts read-only. Saved now so a restart cannot flip it.
         seen = await Store(self._hass, STORAGE_VERSION, STORAGE_KEY).async_load()
         self.mode = LEGACY_MODE if seen is not None else DEFAULT_MODE
-        await self._store.async_save({"mode": self.mode})
+        self._store.async_delay_save(lambda: {"mode": self.mode}, 0)
 
     def set_mode(self, mode: str) -> None:
         if mode not in MODES:
