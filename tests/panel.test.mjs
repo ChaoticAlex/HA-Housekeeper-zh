@@ -4007,10 +4007,11 @@ test("apps and integrations groups config entries by domain and opens the page o
   el.render();
   assert.ok(shadow.innerHTML.includes(el.t("components")));
   assert.ok(!shadow.innerHTML.includes(el.t("renderError")));
-  el.data = { ...el.data, objects: [...el.data.objects, { object_type: "app", object_id: "core_ssh", name: "SSH", slug: "core_ssh", state: "started", status: "active", version: "1.0" }] };
+  el.data = { ...el.data, objects: [...el.data.objects, { object_type: "app", object_id: "core_ssh", name: "SSH", slug: "core_ssh", state: "started", status: "active", version: "1.0", version_latest: "1.7", update_available: true }] };
   el.viewTab = { components: "apps" };
   el.render();
   assert.ok(shadow.innerHTML.includes("0.4 %") && shadow.innerHTML.includes("<th") && shadow.innerHTML.includes(el.t("sysColRam")), "the apps list shows CPU and RAM from the system report");
+  assert.ok(shadow.innerHTML.includes("1.7") && shadow.innerHTML.includes(el.t("compSumAppUpdates")), "the newest version and the number of app updates show");
 });
 
 test("the page of an integration covers all its entries for core and custom and every tab renders", async () => {

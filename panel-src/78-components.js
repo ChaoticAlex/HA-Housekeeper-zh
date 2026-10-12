@@ -4,7 +4,7 @@ Object.assign(TEXT.de, {
   components: "Apps & Integrationen", componentsSubtitle: "Was installiert ist und ob es läuft: Apps und Integrationen nach Domain, mit Version, Status und Umfang. Liest nur, die Zahlen kommen aus dem Scan.",
   compTabApps: "Apps", compTabAppsHint: "Status, CPU, RAM, Daten", compTabIntegrations: "Integrationen", compTabIntegrationsHint: "nach Domain",
   compEntries: "{n} Einträge", compNoApps: "Keine Apps (kein Supervisor oder keine installiert).", compNoIntegrations: "Keine Integrationen gefunden.",
-  compSumApps: "Apps", compSumRunning: "laufen", compSumIntegrations: "Integrationen", compSumCustom: "davon Custom", compSumProblem: "mit Problem", compSumUpdates: "Updates über HACS", compFilterHacs: "HACS", compFilterUpdate: "Update verfügbar", compFilterViaHacs: "Über HACS",
+  compSumApps: "Apps", compSumRunning: "laufen", compSumIntegrations: "Integrationen", compSumCustom: "davon Custom", compSumProblem: "mit Problem", compSumUpdates: "Updates über HACS", compSumAppUpdates: "App-Updates", compColLatest: "Neueste Version", compFilterHacs: "HACS", compFilterUpdate: "Update verfügbar", compFilterViaHacs: "Über HACS",
   compColVersion: "Version", compColEntries: "Einträge", compColDevices: "Geräte", compColAvail: "Verfügbarkeit", compColOrigin: "Herkunft", compUpdate: "Update", compUpdateHint: "Neuere Version: {v}",
   compAvailHint: "Schlechtester Wert der Einträge; erscheint, sobald die Zuverlässigkeit berechnet ist.", compSizeHint: "Ordnergröße; erscheint, sobald „Speicher & System“ geladen ist.",
 });
@@ -12,7 +12,7 @@ Object.assign(TEXT.en, {
   components: "Apps & integrations", componentsSubtitle: "What is installed and whether it runs: apps and integrations by domain, with version, status and scope. Read-only; the numbers come from the scan.",
   compTabApps: "Apps", compTabAppsHint: "state, CPU, RAM, data", compTabIntegrations: "Integrations", compTabIntegrationsHint: "by domain",
   compEntries: "{n} entries", compNoApps: "No apps (no Supervisor, or none installed).", compNoIntegrations: "No integrations found.",
-  compSumApps: "Apps", compSumRunning: "running", compSumIntegrations: "Integrations", compSumCustom: "of them custom", compSumProblem: "with a problem", compSumUpdates: "Updates via HACS", compFilterHacs: "HACS", compFilterUpdate: "Update available", compFilterViaHacs: "Via HACS",
+  compSumApps: "Apps", compSumRunning: "running", compSumIntegrations: "Integrations", compSumCustom: "of them custom", compSumProblem: "with a problem", compSumUpdates: "Updates via HACS", compSumAppUpdates: "App updates", compColLatest: "Latest version", compFilterHacs: "HACS", compFilterUpdate: "Update available", compFilterViaHacs: "Via HACS",
   compColVersion: "Version", compColEntries: "Entries", compColDevices: "Devices", compColAvail: "Availability", compColOrigin: "Origin", compUpdate: "Update", compUpdateHint: "Newer version: {v}",
   compAvailHint: "Worst value of the entries; appears once reliability is calculated.", compSizeHint: "Folder size; appears once Storage & system is loaded.",
 });
@@ -100,6 +100,7 @@ class ComponentsMixin {
       { key: "name", label: "sysColApp", cell: a => this.nameCell(a.name, a.object_id) },
       { key: "state", label: "sysColState", sortable: false, cell: a => `<span class="pill ${running(a) ? "ok" : "mute"}">${this.t(running(a) ? "sysAppRunning" : "sysAppStopped")}</span>` },
       { key: "version", label: "compColVersion", cell: a => `${this.esc(a.version || "–")}${a.update_available ? ` <span class="pill warn" title="${this.esc(this.t("compUpdateHint", { v: a.version_latest || "" }))}">${this.t("compUpdate")}</span>` : ""}` },
+      { key: "latest", label: "compColLatest", cell: a => this.esc(a.version_latest || "–") },
       ...(hasLoad ? [
         { key: "cpu", label: "sysColCpu", dir: "desc", cell: a => this.esc(use(a) ? this.sysAppCpu(use(a)) : "–") },
         { key: "ram", label: "sysColRam", dir: "desc", cell: a => this.esc(use(a) ? this.sysAppRam(use(a)) : "–") },
@@ -109,16 +110,19 @@ class ComponentsMixin {
     return this.sysList("compapps", apps, {
       sort: "name", dir: "asc",
       sorts: [
-        { key: "name", label: "sysColApp", dir: "asc", get: a => a.name }, { key: "version", label: "compColVersion", dir: "asc", get: a => a.version },
+        { key: "name", label: "sysColApp", dir: "asc", get: a => a.name }, { key: "version", label: "compColVersion", dir: "asc", get: a => a.version }, { key: "latest", label: "compColLatest", dir: "asc", get: a => a.version_latest },
         ...(hasLoad ? [{ key: "ram", label: "sysColRam", dir: "desc", get: a => use(a)?.memory_usage ?? null }, { key: "cpu", label: "sysColCpu", dir: "desc", get: a => use(a)?.cpu_percent ?? null }] : []),
         ...(hasSize ? [{ key: "size", label: "sysColData", dir: "desc", get: a => use(a)?.size_bytes ?? null }] : []),
       ],
-      filters: [{ name: "state", all: this.t("sysColState"), options: [["on", this.t("sysAppRunning")], ["off", this.t("sysAppStopped")]] }],
-      filterFns: { state: (a, v) => running(a) === (v === "on") },
+      filters: [
+        { name: "state", all: this.t("sysColState"), options: [["on", this.t("sysAppRunning")], ["off", this.t("sysAppStopped")]] },
+        ...(apps.some(a => a.update_available) ? [{ name: "update", all: this.t("compUpdate"), options: [["yes", this.t("compFilterUpdate")]] }] : []),
+      ],
+      filterFns: { state: (a, v) => running(a) === (v === "on"), update: a => Boolean(a.update_available) },
       text: a => `${a.name} ${a.object_id}`, tie: a => a.object_id, empty: "compNoApps",
       rowAttrs: a => `data-object="${this.esc(this.objectKey(a))}" tabindex="0" role="button" aria-label="${this.esc(a.name)}"`, columns,
-      exportName: "apps", header: [this.t("sysColApp"), "Slug", this.t("sysColState"), this.t("compColVersion"), "CPU %", "RAM bytes", "Data bytes"],
-      rows: a => [a.name, a.object_id, a.state || "", a.version || "", use(a)?.cpu_percent ?? "", use(a)?.memory_usage ?? "", use(a)?.size_bytes ?? ""],
+      exportName: "apps", header: [this.t("sysColApp"), "Slug", this.t("sysColState"), this.t("compColVersion"), this.t("compColLatest"), "CPU %", "RAM bytes", "Data bytes"],
+      rows: a => [a.name, a.object_id, a.state || "", a.version || "", a.version_latest || "", use(a)?.cpu_percent ?? "", use(a)?.memory_usage ?? "", use(a)?.size_bytes ?? ""],
     });
   }
 
@@ -131,12 +135,13 @@ class ComponentsMixin {
     ];
     const open = this.viewTabOf("components", tabs, "integrations");
     const n = f => this.formatNumber(f);
-    const problems = ints.filter(g => g.status === "problem").length, updates = ints.filter(g => g.hacs?.pending_update).length;
+    const problems = ints.filter(g => g.status === "problem").length, updates = ints.filter(g => g.hacs?.pending_update).length, appUpdates = apps.filter(a => a.update_available).length;
     const tiles = this.sumTiles([
       { label: this.t("compSumApps"), value: n(apps.length), sub: `${n(apps.filter(a => a.state === "started").length)} ${this.t("compSumRunning")}`, tone: "mute" },
       { label: this.t("compSumIntegrations"), value: n(ints.length), sub: `${n(ints.filter(g => g.custom).length)} ${this.t("compSumCustom")}`, tone: "mute" },
       problems ? { label: this.t("compSumProblem"), value: n(problems), tone: "red" } : null,
       updates ? { label: this.t("compSumUpdates"), value: n(updates), tone: "warn" } : null,
+      appUpdates ? { label: this.t("compSumAppUpdates"), value: n(appUpdates), tone: "warn" } : null,
     ]);
     if (open === "apps" && apps.length) this.sysEnsure("storage"); // CPU, RAM and data of the apps
     const body = open === "apps" ? this.compAppsList(apps) : this.compIntegrationsList(ints);
