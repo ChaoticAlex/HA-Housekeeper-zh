@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Übersicht:** Drei Zonen statt zwei Spalten: oben Status und Aufgaben, in der Mitte „Wichtigste Befunde“ (höchstens fünf Zeilen) mit dem Inventarstatus darunter neben den Hinweisen, unten System, Datenbank und Vergleich als Zustandskarten. Die Karte „Nach Objekttyp“ entfällt (das Inventar zeigt die Typen). In der System-Karte steht der Wert jetzt rechts und der Balken darunter.
 - **Inventar:** Statt der Kacheln zeigt ein Ring mit Tabelle die Objekttypen: die fünf größten, der Rest auf Knopfdruck. Eine Zeile filtert die Liste, ein zweiter Klick hebt den Filter auf; die Spalten „Nicht verfügbar“ und „Verwaist“ filtern nach Typ und Zustand zugleich.
 - **Inventar:** Suche und die Filter Typ, Zustand und Herkunft stehen in einer Zeile; auf schmalen Bildschirmen brechen sie um.
 - **Speicher:** Die Kacheln Speicher, Arbeitsspeicher, Prozessor und Swap zeigen eine Kurve der letzten Tage (ein Wert alle fünf Minuten, sieben Tage lang gehalten; beim Prozessor auch die Spitze). Eine Stunde nach der Installation erscheint die erste Kurve.
@@ -69,6 +70,7 @@
 
 ### English
 
+- **Overview:** Three zones instead of two columns: status and tasks on top, “Top findings” (five rows at most) with the inventory status below it beside the notes in the middle, and system, database and comparison as state cards at the bottom. The “By object type” card is gone (the inventory shows the types). In the System card the value now sits on the right and the bar below it.
 - **Inventory:** A ring with a table replaces the tiles and shows the object types: the five largest, the rest on request. A row filters the list and a second click lifts the filter; the unavailable and orphaned columns filter by type and state together.
 - **Inventory:** The search and the type, state and origin filters sit in one row; on narrow screens they wrap.
 - **Storage:** The disk, memory, CPU and swap tiles show a line of the last days (one value every five minutes, kept for seven days; the CPU also shows its peak). The first line appears an hour after installing.

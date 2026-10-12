@@ -214,7 +214,7 @@ class OverviewMixin {
   }
 
   overview() {
-    const m = this.data.meta, counts = m.status_counts || {}, types = m.type_counts || {}, health = this.health();
+    const m = this.data.meta, counts = m.status_counts || {}, health = this.health();
     const findings = this.sortedFindings();
     this.ensureTrend();
     this.ensureSeries();
@@ -225,9 +225,9 @@ class OverviewMixin {
     return `<section class="statushead" title="${this.esc(this.t("healthTip", { affected: health.affected, base: health.base }))}"><button type="button" class="ring ${health.tone}" style="--p:${health.percent}" data-health-why aria-expanded="${Boolean(this.healthWhy)}" aria-label="${this.esc(this.t("healthWhy"))}"><b>${health.percent}<small>%</small></b></button>
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p></div>
       <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
-      ${this.sinceVisitLine()}${this.todoCard()}<div class="grid2"><div class="stack">${this.topFindingsCard(findings)}${this.inventoryStatusCard()}</div>
-      <div class="stack">${this.systemCard()}${this.databaseCard()}${this.trendCard()}${this.cleanupCard()}
-      <div class="panel"><div class="panelhead"><h2>${this.t("byType")}</h2></div><div class="types">${["entity", "device", "config_entry", "app", "automation", "script", "scene", "dashboard", "area", "floor", "label"].filter(t => types[t]).map(type => `<button class="type" data-type-jump="${type}">${this.tile(type)}<span>${this.t(type)}</span><b>${this.formatNumber(types[type])}</b></button>`).join("")}</div></div></div></div>`;
+      ${this.todoCard()}<div class="grid2 ovmid"><div class="stack">${this.topFindingsCard(findings)}${this.inventoryStatusCard()}</div>
+      <div class="stack">${this.sinceVisitLine()}${this.cleanupCard()}</div></div>
+      <div class="ovzone">${this.systemCard()}${this.databaseCard()}${this.trendCard()}</div>`;
   }
 
   // Three groups instead of seven raw statuses: what is fine, what to look at, what is broken.
@@ -280,7 +280,7 @@ class OverviewMixin {
     const r = this.sysLight;
     if (!r) return "";
     const disk = r.disk || {}, ram = r.ram || {}, cpu = r.cpu || {};
-    const bar = (label, part, sub) => part.percent === null || part.percent === undefined ? "" : `<div class="fact"><span>${this.esc(label)}</span><b>${this.esc(this.sysPercent(part.percent))}${sub ? `<small>${this.esc(sub)}</small>` : ""}</b>${this.sysMeter(part.percent)}</div>`;
+    const bar = (label, part, sub) => part.percent === null || part.percent === undefined ? "" : `<div class="factbar"><div class="fact"><span>${this.esc(label)}</span><b>${this.esc(this.sysPercent(part.percent))}${sub ? `<small>${this.esc(sub)}</small>` : ""}</b></div>${this.sysMeter(part.percent)}</div>`;
     const rows = [
       bar(this.t("sysDiskUsed"), disk, disk.free !== undefined && disk.free !== null ? this.t("sysFreeOf", { free: this.formatBytes(disk.free), total: this.formatBytes(disk.total) }) : ""),
       bar(this.t("sysRam"), ram, ram.total ? this.t("sysOf", { used: this.formatBytes(ram.used), total: this.formatBytes(ram.total) }) : ""),
@@ -324,11 +324,11 @@ class OverviewMixin {
 
   // The most important findings in two blocks: outages first (one note for what is down), then single findings.
   topFindingsCard(findings) {
-    const outages = this.causeList(), single = findings.filter(f => !f.cause_id).slice(0, 8);
+    const LIMIT = 5, outages = this.causeList(), shown = outages.slice(0, LIMIT), single = findings.filter(f => !f.cause_id).slice(0, LIMIT - shown.length);
     const outageRow = c => `<button class="row rel" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(this.t(`cause_${c.kind}`, { name: c.name }))}</strong><small>${this.esc([this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · "))}</small></span></button>`;
     const block = (title, rows) => rows ? `<h3 class="foldhd">${title}</h3>${rows}` : "";
     const body = outages.length || single.length
-      ? block(`${this.t("causesTitle")} (${outages.length})`, outages.slice(0, 8).map(outageRow).join("")) + block(this.t("singleFindings"), single.map(f => this.findingRow(f)).join(""))
+      ? block(`${this.t("causesTitle")} (${outages.length})`, shown.map(outageRow).join("")) + block(this.t("singleFindings"), single.map(f => this.findingRow(f)).join(""))
       : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("noFindings")}</div>`;
     return `<div class="panel"><div class="panelhead"><div><h2>${this.t("needsAttention")}</h2><p>${this.t("sortedBySure")}</p></div><button class="link" data-jump="findingsNav">${this.t("allFindings")} (${findings.length}) <ha-icon icon="mdi:chevron-right"></ha-icon></button></div>${body}</div>`;
   }
