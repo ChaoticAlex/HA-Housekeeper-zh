@@ -4,18 +4,6 @@
 
 ## 1.5.1 - 2026-10-12
 
-### Behoben
-
-- **Befunde:** Ausfälle (Integration, Gerät, App) lassen sich in der Liste wieder ankreuzen, um sie gesammelt auszublenden, als bekannt zu markieren oder zurückzustellen.
-
-### English
-
-#### Fixed
-
-- **Findings:** Outages (integration, device, app) can be ticked in the list again, to hide, mark as known or snooze them together.
-
-## 1.5.0 - 2026-10-12
-
 ### Geändert
 
 - **Kompaktere Menüleiste:** Damit die Leiste oben schmaler wird und seltener in den „Menü“-Knopf wechseln muss, ist sie umgebaut: „Housekeeper“ mit dem Wort „Übersicht“ darunter ist jetzt der Weg zur Übersicht und ersetzt den Menüpunkt „Übersicht“, und die Einstellungen sind in der Leiste nur noch das Zahnrad (der Name steht als Tooltip und in der Liste des Menü-Knopfs). Das Suchfeld ist dafür etwas breiter.
@@ -115,6 +103,7 @@
 
 ### Behoben
 
+- **Befunde:** Ausfälle (Integration, Gerät, App) lassen sich in der Liste wieder ankreuzen, um sie gesammelt auszublenden, als bekannt zu markieren oder zurückzustellen.
 - **Abhängigkeiten:** Dieselbe Entität, die eine Automation an vielen Stellen nennt, steht nur noch einmal in der Liste („12 Stellen“, die Orte beim Darüberfahren). Objekte ohne eigenen Eintrag im Inventar (zum Beispiel `sun.sun`) zeigen „Nicht im Inventar“ statt „Fehlt“; „Fehlt“ steht nur noch, wo ein Befund es belegt.
 - **Defekte Referenzen:** „Label ergänzen“ erscheint dort nicht mehr (Reiter „Aktionen“, Sammelleiste der Befunde). Die Ursache ist ein Satz: „Automation X verweist auf Y, das es nicht mehr gibt.“
 - **Befunde:** Über dem Titel stand die Überschrift „Aktionen“, ein Rest der Menügruppe, die nur noch aus „Befunde“ besteht. Sie entfällt, ebenso als Pfad in der Suche.
@@ -219,6 +208,7 @@
 
 ### Fixed
 
+- **Findings:** Outages (integration, device, app) can be ticked in the list again, to hide, mark as known or snooze them together.
 - **Relations:** An entity that an automation names in many places now appears once in the list ("12 places", the places on hover). Objects without an inventory entry of their own (for example `sun.sun`) show "Not in inventory" instead of "Missing"; "Missing" only appears where a finding backs it.
 - **Broken references:** "Add label" no longer shows there (Actions tab, finding selection bar). The cause is one sentence: "Automation X points to Y, which no longer exists."
 - **Findings:** The heading “Actions” above the title was a leftover of the menu group that now consists of “Findings” only. It is gone, also as the path in the search.
@@ -236,6 +226,10 @@
 - **Repairs hints:** Only unavailable, orphaned and broken-reference findings raise a hint; other findings (for example an integration that is not loaded) no longer show up as "unavailable entities".
 - **Runs: click on "Errors":** The card on top said "No matches" although the table below listed the automations with errors; the empty message is gone.
 - Under an outage the "Outages" card showed at most 20 follow-up findings even when the number said more. It now has pages.
+
+## 1.5.0 - 2026-10-12
+
+Die Änderungen stehen vollständig unter 1.5.1. / The changes are listed in full under 1.5.1.
 
 ## 1.4.0 - 2026-10-11
 
