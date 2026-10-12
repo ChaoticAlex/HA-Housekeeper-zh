@@ -338,7 +338,9 @@ def websocket_battery_type_set(
         return
     connection.send_result(
         msg["id"],
-        _versioned({"types": scanner.batteries.types, "custom_types": scanner.batteries.custom_types}),
+        _versioned(
+            {"types": scanner.batteries.types, "custom_types": scanner.batteries.custom_types}
+        ),
     )
 
 
@@ -367,7 +369,9 @@ def websocket_battery_custom_type(
         return
     connection.send_result(
         msg["id"],
-        _versioned({"types": scanner.batteries.types, "custom_types": scanner.batteries.custom_types}),
+        _versioned(
+            {"types": scanner.batteries.types, "custom_types": scanner.batteries.custom_types}
+        ),
     )
 
 

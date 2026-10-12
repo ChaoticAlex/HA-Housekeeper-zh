@@ -84,7 +84,9 @@ def _inside(path: str, base: str) -> bool:
 
 
 OTHER_LIMIT = 25  # the largest unlisted entries are named; the remainder is one line
-_DB_PREFIX = "home-assistant_v2.db"  # the database and its journal are counted with the known places
+_DB_PREFIX = (
+    "home-assistant_v2.db"  # the database and its journal are counted with the known places
+)
 
 
 def other_entries(config_dir: str) -> tuple[list[dict[str, Any]], dict[str, int]]:
@@ -307,7 +309,12 @@ def disk_usage(path: str) -> dict[str, Any]:
 
 
 def _empty_storage() -> dict[str, Any]:
-    return {"breakdown": [], "custom_integrations": [], "other": [], "other_rest": {"count": 0, "bytes": 0}}
+    return {
+        "breakdown": [],
+        "custom_integrations": [],
+        "other": [],
+        "other_rest": {"count": 0, "bytes": 0},
+    }
 
 
 def safe_storage_breakdown(config_dir: str) -> dict[str, Any]:

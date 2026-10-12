@@ -85,12 +85,22 @@ def test_a_finding_counts_as_resolved_only_while_its_object_is_still_there() -> 
     old = _snapshot("2026-10-06T10:00:00+00:00", objects, [kept, other])
     diff = diff_checkpoints(make_checkpoint(old), _snapshot("2026-10-07T10:00:00+00:00", objects))
     assert [f["object_id"] for f in diff["resolved_findings"]["items"]] == ["sensor.a"]
-    assert [(f["object_id"], f["reason"]) for f in diff["ended_findings"]["items"]] == [("x", "unknown")]
+    assert [(f["object_id"], f["reason"]) for f in diff["ended_findings"]["items"]] == [
+        ("x", "unknown")
+    ]
 
 
 def test_a_finding_that_vanished_unread_or_under_a_changed_setting_is_not_resolved() -> None:
-    dash = {"rule_id": "dashboard.missing_entity", "object_id": "home", "classification": "broken_reference"}
-    unavailable = {"rule_id": "entity.state_unavailable", "object_id": "sensor.a", "classification": "unavailable"}
+    dash = {
+        "rule_id": "dashboard.missing_entity",
+        "object_id": "home",
+        "classification": "broken_reference",
+    }
+    unavailable = {
+        "rule_id": "entity.state_unavailable",
+        "object_id": "sensor.a",
+        "classification": "unavailable",
+    }
     objects = [("entity", "sensor.a", "active"), ("dashboard", "home", "active")]
     old_snap = _snapshot("2026-10-06T10:00:00+00:00", objects, [dash, unavailable])
     old_snap["meta"]["min_unavailable_days"] = 1
@@ -275,7 +285,11 @@ def test_the_day_of_a_scan_is_counted_in_the_local_time_zone(hass) -> None:
     try:
         history = ScanHistory(hass)
         # 00:15 and 21:54 local on 10 October are 22:15 UTC on the 9th and 19:54 UTC on the 10th
-        for at in ("2026-10-09T22:15:00+00:00", "2026-10-10T19:54:00+00:00", "2026-10-11T08:00:00+00:00"):
+        for at in (
+            "2026-10-09T22:15:00+00:00",
+            "2026-10-10T19:54:00+00:00",
+            "2026-10-11T08:00:00+00:00",
+        ):
             history.record(_snapshot(at, [("entity", "x.a", "active")]))
         history.record(_snapshot("2026-10-11T20:00:00+00:00", [("entity", "x.a", "active")]))
         # both scans belong to the 10th, so only the later one is kept for that day

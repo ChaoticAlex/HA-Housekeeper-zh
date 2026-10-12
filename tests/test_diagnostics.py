@@ -374,7 +374,12 @@ def test_scripts_get_four_dimensions_and_count_their_callers(hass: HomeAssistant
     snapshot = _snapshot()
     for name in ("used", "lonely"):
         snapshot["objects"].append(
-            {"object_type": "script", "object_id": f"script.{name}", "name": name, "status": "active"}
+            {
+                "object_type": "script",
+                "object_id": f"script.{name}",
+                "name": name,
+                "status": "active",
+            }
         )
     snapshot["objects"].append(
         {"object_type": "script", "object_id": "script.boss", "name": "boss", "status": "active"}
@@ -382,7 +387,9 @@ def test_scripts_get_four_dimensions_and_count_their_callers(hass: HomeAssistant
     snapshot["edges"].append(
         {"source": f"automation:{AUTO}", "target": "entity:script.used", "relation": "TARGETS"}
     )
-    calls = {"script.boss": [{"sequence": [{"action": "script.used"}, {"service": "script.turn_on"}]}]}
+    calls = {
+        "script.boss": [{"sequence": [{"action": "script.used"}, {"service": "script.turn_on"}]}]
+    }
     result = build(
         snapshot, {"items": []}, [], CriteriaStore(hass), TODAY, lambda entity_id: [], calls.get
     )

@@ -232,7 +232,9 @@ async def test_repairs_hints_only_cover_entity_and_reference_findings(hass: Home
     assert ir.async_get(hass).async_get_issue(DOMAIN, "unavailable_entities") is not None
 
 
-async def test_scan_health_tells_a_failed_and_an_old_scan_from_a_good_one(hass: HomeAssistant) -> None:
+async def test_scan_health_tells_a_failed_and_an_old_scan_from_a_good_one(
+    hass: HomeAssistant,
+) -> None:
     """The last good counts stay on screen after a failed scan; the health says so, and only a lasting failure is a repair."""
     from homeassistant.helpers import issue_registry as ir
 
@@ -244,7 +246,9 @@ async def test_scan_health_tells_a_failed_and_an_old_scan_from_a_good_one(hass: 
     health.succeeded(now, 2.0, False)
     assert health.report(now, 24)["state"] == "ok"
     assert health.report(now + timedelta(hours=73), 24)["state"] == "stale"
-    assert health.report(now + timedelta(days=30), 0)["state"] == "ok"  # only on request: never overdue
+    assert (
+        health.report(now + timedelta(days=30), 0)["state"] == "ok"
+    )  # only on request: never overdue
 
     for n in range(3):
         health.failed(now + timedelta(minutes=n + 1), "automations", RuntimeError("boom"))
@@ -260,7 +264,9 @@ async def test_scan_health_tells_a_failed_and_an_old_scan_from_a_good_one(hass: 
     assert ir.async_get(hass).async_get_issue(DOMAIN, SCAN_ISSUE_ID) is None
 
 
-async def test_a_scan_says_which_sources_it_read_and_which_it_could_not(hass: HomeAssistant) -> None:
+async def test_a_scan_says_which_sources_it_read_and_which_it_could_not(
+    hass: HomeAssistant,
+) -> None:
     """An empty list must not look the same as a source that was never read."""
     scanner = InventoryScanner(hass)
     snapshot = await scanner.async_scan()

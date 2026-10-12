@@ -62,8 +62,6 @@ from .dashboard_analysis import (
 )
 from .db_health import database_summary
 from .entry_states import EntryStateHistory
-from .scan_coverage import ScanCoverage
-from .scan_health import ScanHealth
 from .events import EventLog
 from .goals import GoalStore
 from .hacs import hacs_by_domain
@@ -94,6 +92,8 @@ from .queries import ReplyStore
 from .refactor import RefactorStore
 from .reminders import ReminderStore
 from .runs import RunStore
+from .scan_coverage import ScanCoverage
+from .scan_health import ScanHealth
 from .service_check import missing_service_findings
 from .signals import SignalStore, situations
 from .signals import fire as signal_fire

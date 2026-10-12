@@ -30,7 +30,12 @@ RANK = {"red": 0, "warn": 1, "info": 2, "unknown": 3, "ok": 4}
 RELIABILITY_KINDS = {"failing", "never_ok", "overlap", "burst", "long_run", "after_update"}
 RESTART_KINDS = {"long_wait", "wait_no_timeout"}
 SCRIPT_DIMENSIONS = ("integrity", "reliability", "maintainability", "efficiency")
-SCRIPT_SERVICES = {"turn_on", "turn_off", "toggle", "reload"}  # the other script.* services call one script by name
+SCRIPT_SERVICES = {
+    "turn_on",
+    "turn_off",
+    "toggle",
+    "reload",
+}  # the other script.* services call one script by name
 STALE = {"disabled", "unavailable", "orphaned", "unknown"}
 THRESHOLDS = {
     "large_actions": LARGE_ACTIONS,
@@ -72,7 +77,11 @@ def _called_scripts(node: Any) -> set[str]:
             found |= _called_scripts(child)
     elif isinstance(node, dict):
         for key, value in node.items():
-            if key in ("service", "action") and isinstance(value, str) and value.startswith("script."):
+            if (
+                key in ("service", "action")
+                and isinstance(value, str)
+                and value.startswith("script.")
+            ):
                 if value[7:] not in SCRIPT_SERVICES:
                     found.add(value)
             else:
@@ -97,7 +106,11 @@ def _script_callers(
     }
     for edge in snapshot["edges"]:
         target = str(edge["target"])
-        if edge["source"] in sources and target.startswith("entity:script.") and edge["relation"] == "TARGETS":
+        if (
+            edge["source"] in sources
+            and target.startswith("entity:script.")
+            and edge["relation"] == "TARGETS"
+        ):
             kind, _, entity_id = str(edge["source"]).partition(":")
             add(target[7:], kind, entity_id)
     for obj in snapshot["objects"]:
@@ -188,7 +201,10 @@ def build(
                 obj.get("trigger_count") or 0
             ) > LARGE_TRIGGERS:
                 reasons.append({"key": "large"})
-            if _depth((actions_of if kind == "automation" else script_actions_of)(entity_id)) >= DEEP_NESTING:
+            if (
+                _depth((actions_of if kind == "automation" else script_actions_of)(entity_id))
+                >= DEEP_NESTING
+            ):
                 reasons.append({"key": "deep"})
             level = "warn" if any(r["key"] != "no_description" for r in reasons) else "info"
             dims["maintainability"] = _dimension(level if reasons else "ok", *reasons)

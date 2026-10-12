@@ -47,7 +47,11 @@ async def test_own_types_are_remembered_renamed_and_kept_while_used(hass: HomeAs
     store.edit_custom("rename", "LR44", "LR 44")
     assert store.types["sensor.a"] == "LR 44" and store.custom_types == ["AAAA", "LR 44"]
     store.edit_custom("delete", "AAAA")
-    for action, name, new in (("delete", "LR 44", ""), ("delete", "CR2032", ""), ("rename", "LR 44", "9 v")):
+    for action, name, new in (
+        ("delete", "LR 44", ""),
+        ("delete", "CR2032", ""),
+        ("rename", "LR 44", "9 v"),
+    ):
         with pytest.raises(BatteryError):
             store.edit_custom(action, name, new)
 

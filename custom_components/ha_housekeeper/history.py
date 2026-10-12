@@ -61,9 +61,7 @@ def _score(snapshot: dict[str, Any]) -> int:
         for f in snapshot["findings"]
         if not f.get("ignored") and not f.get("cause_id")
     ]
-    off = sum(
-        min(most, each * levels.count(level)) for level, (each, most) in SCORE_POINTS.items()
-    )
+    off = sum(min(most, each * levels.count(level)) for level, (each, most) in SCORE_POINTS.items())
     return max(0, 100 - off)
 
 
@@ -161,7 +159,9 @@ def diff_checkpoints(base: dict[str, Any], snapshot: dict[str, Any]) -> dict[str
         if owner[0] in unchecked or f"{owner[0]}:{owner[1]}" in unchecked:
             ended_findings.append({**item, "reason": "unchecked"})
         elif owner not in now:
-            ended_findings.append({**item, "reason": "object_removed" if owner in old else "unknown"})
+            ended_findings.append(
+                {**item, "reason": "object_removed" if owner in old else "unknown"}
+            )
         elif rule_id in reworded:
             ended_findings.append({**item, "reason": "rules_changed"})
         else:
