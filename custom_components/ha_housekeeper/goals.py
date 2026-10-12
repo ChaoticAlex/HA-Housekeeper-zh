@@ -28,6 +28,7 @@ CATALOG: dict[str, tuple[str, int, int, int]] = {
     "stale_sensors": ("count", 0, 0, 100000),
     "recurring_devices": ("count", 0, 0, 100000),
     "automation_errors": ("count", 0, 0, 100000),
+    "blocked_automations": ("count", 0, 0, 100000),
     "orphaned_statistics": ("count", 0, 0, 1000000),
 }
 
@@ -95,6 +96,7 @@ def measure(
         "recurring_devices": snapshot["meta"].get("recurring_devices"),
         "orphaned_statistics": snapshot["meta"].get("orphaned_statistics"),
         "automation_errors": automation_errors,
+        "blocked_automations": sum(f.get("rule_id") == "automation.blocked" for f in findings),
     }
     newest = _check(backup, "newest")
     if newest and newest["level"] != "unknown":

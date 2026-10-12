@@ -88,3 +88,15 @@ def test_the_four_recurring_problem_goals() -> None:
     assert goals["orphaned_statistics"]["value"] == 3
     assert goals["automation_errors"]["state"] == "missed"
     assert _goals(measure(snapshot, None, None, None))["automation_errors"]["state"] == "unknown"
+
+
+def test_blocked_automations_count_open_findings_only() -> None:
+    snapshot = {
+        "findings": [
+            {"rule_id": "automation.blocked", "classification": "problem", "ignored": False},
+            {"rule_id": "automation.blocked", "classification": "problem", "ignored": True},
+        ],
+        "meta": {},
+    }
+    goal = _goals(measure(snapshot, None, None, None))["blocked_automations"]
+    assert goal["value"] == 1 and goal["state"] == "missed"
