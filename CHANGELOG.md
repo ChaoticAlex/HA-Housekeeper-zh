@@ -8,7 +8,7 @@
 - **Zugriffe & Datenfluss** (Erkunden): Systemzugriffe und Cloud-Datenfluss der Integrationen mit Risikostufe, mit Supervisor auch die Rechte der Apps.
 - **Zugangsdaten** (Erkunden): welche Integrationen Passwörter, Tokens oder Schlüssel gespeichert haben und ob ein Wert hinterlegt ist. Werte zeigt Housekeeper nie.
 - **Ausfälle statt drei Listen:** Eine Integration mit Problem steht jetzt auch ohne auffällige Entitäten unter „Befunde“ (Block „Ausfälle“). Auf der Übersicht gibt es dafür eine Zeile, „Benötigt Aufmerksamkeit“ heißt „Wichtigste Befunde“ (Ausfälle zuerst), die Karte „Integrationen mit Problemen“ entfällt.
-- **Menü neu geordnet:** Neue Gruppe „Sicherheit“ (Freigaben, Zugriffe & Datenfluss, Zugangsdaten). Speicher & System steht unter Betrieb, das Journal bei den direkten Einträgen, Erkunden enthält nur noch Inventar, Abhängigkeiten und Änderungen.
+- **Menü neu geordnet:** Neue Gruppe „Sicherheit“ (Freigaben, Zugriffe & Datenfluss, Zugangsdaten). Speicher & System steht unter Betrieb, Erkunden enthält nur noch Nachschlagen: Inventar, Abhängigkeiten, Änderungen und Journal.
 - **Seitenleisten-Knopf:** öffnet die Seitenleiste von Home Assistant, wenn sie ausgeblendet ist.
 
 ### English
@@ -17,7 +17,7 @@
 - **Access & data flow** (Explore): system access and cloud data flow of the integrations with a risk level, with a Supervisor also the rights of the apps.
 - **Credentials** (Explore): which integrations store passwords, tokens or keys and whether a value is set. Housekeeper never shows the values.
 - **Outages instead of three lists:** An integration with a problem now appears under "Findings" even when no entity is flagged (block "Outages"). The overview has one row for it, "Needs attention" is now "Most important findings" (outages first), and the card "Integrations with problems" is gone.
-- **Menu reordered:** New group "Security" (Exposure, Access & data flow, Credentials). Storage & system is under Operation, the Journal is a direct entry, and Explore holds only Inventory, Dependencies and Changes.
+- **Menu reordered:** New group "Security" (Exposure, Access & data flow, Credentials). Storage & system is under Operation, and Explore holds only lookups: Inventory, Dependencies, Changes and Journal.
 - **Sidebar button:** opens Home Assistant's sidebar when it is hidden.
 
 ## 1.4.0 - 2026-10-11
