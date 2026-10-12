@@ -39,7 +39,7 @@ def _cause(
     users: dict[str, set[str]],
     entity_ids: list[str],
 ) -> dict[str, Any]:
-    cause = {
+    cause: dict[str, Any] = {
         "id": f"{kind}:{item['object_id']}",
         "kind": kind,
         "object_type": item["object_type"],
@@ -72,6 +72,7 @@ def apply_causes(
         for f in findings
         if f["rule_id"].startswith("entity.") and _visible(f) and f["object_id"] in entity
     }
+    outage = {f["object_id"]: f for f in findings if f["rule_id"] == "config_entry.not_loaded"}
     causes: list[dict[str, Any]] = []
     # Who uses what, built once: looking it up per cause in all edges grew with causes x edges.
     users: dict[str, set[str]] = {}
@@ -82,6 +83,9 @@ def apply_causes(
     def take(
         kind: str, item: dict[str, Any], entity_ids: list[str], *, alone: bool = False
     ) -> None:
+        own = outage.get(item["object_id"]) if kind == "integration_down" else None
+        if own is not None and own.get("ignored"):
+            return  # known, snoozed, hidden or marked: the outage is no longer news
         followers = [
             by_object[i] for i in entity_ids if i in by_object and "cause_id" not in by_object[i]
         ]
@@ -98,6 +102,9 @@ def apply_causes(
         )
         for finding in followers:
             finding["cause_id"] = cause["id"]
+        if own is not None:  # the finding of the outage itself: the card shows it, not the list
+            cause["finding_key"] = own["key"]
+            own["cause_id"] = cause["id"]
         causes.append(cause)
 
     provided: dict[str, list[str]] = {}

@@ -468,7 +468,14 @@ def _entity_findings(
 
 ENTRY_GRACE = timedelta(hours=1)  # a restart or a retry in progress is no finding
 FAILED_ENTRY_STATES = frozenset(
-    {"setup_error", "setup_retry", "not_loaded", "failed_unload", "migration_error"}
+    {
+        "setup_error",
+        "setup_retry",
+        "setup_in_progress",
+        "not_loaded",
+        "failed_unload",
+        "migration_error",
+    }
 )
 
 

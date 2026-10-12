@@ -27,17 +27,27 @@ class CausesMixin {
   causesCard() {
     const causes = this.causeList();
     if (!causes.length) return "";
-    const followers = id => (this.data.findings || []).filter(f => f.cause_id === id && !f.ignored);
+    const followers = id => (this.data.findings || []).filter(f => f.cause_id === id && !f.ignored && f.rule_id !== "config_entry.not_loaded");
     const rows = causes.map(c => {
       const head = { tone: "red", title: this.esc(this.t(`cause_${c.kind}`, { name: c.name })), sub: [this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · "), pill: this.t("causeFollowers", { n: this.formatNumber(c.follower_count) }) };
-      if (!c.follower_count) return `<button class="row rel" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${head.title}</strong><small>${this.esc(head.sub)}</small></span></button>`;
+      const decide = this.causeDecide(c);
+      if (!c.follower_count) return `<button class="row rel" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${head.title}</strong><small>${this.esc(head.sub)}</small></span></button>${decide}`;
       const body = `<button class="row" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span></button>${followers(c.id).slice(0, 20).map(f => this.findingRow(f)).join("")}`;
-      return this.fold(`cause_${c.id}`, head, body, false);
+      return this.fold(`cause_${c.id}`, head, body + decide, false);
     }).join("");
     return `<div class="panel"><div class="panelhead"><div><h2>${this.t("causesTitle")}</h2><p>${this.t("causesSub", { n: this.formatNumber(causes.length), m: this.formatNumber(this.data.findings.filter(f => !f.cause_id && !f.ignored).length) })}</p></div></div>${rows}</div>`;
   }
 
-  followerCount() { return this.data.findings.filter(f => f.cause_id && !f.ignored).length; }
+  // What can be decided about an outage that is a finding of its own: known, snoozed, hidden.
+  causeDecide(c) {
+    const f = c.finding_key && this.data.findings.find(x => x.key === c.finding_key);
+    if (!f) return "";
+    if (this.decide && this.decide.key === f.key) return `<div class="pad">${this.decideForm(f)}</div>`;
+    const btn = (preset, icon, label) => `<button class="btn" data-decide-open="${this.esc(f.key)}"${preset ? ` data-decide-preset="${preset}"` : ""}><ha-icon icon="${icon}"></ha-icon>${this.t(label)}</button>`;
+    return `<div class="pad"><div class="fbtns">${btn("keep", "mdi:bookmark-check-outline", "markKnown")}${btn("snooze", "mdi:clock-outline", "fselSnooze")}${btn("", "mdi:eye-off-outline", "hideFinding")}</div></div>`;
+  }
+
+  followerCount() { return this.data.findings.filter(f => f.cause_id && !f.ignored && f.rule_id !== "config_entry.not_loaded").length; }
 }
 Object.assign(TEXT.de, {
   causesTitle: "Ausfälle", causesSub: "{n} Ausfälle (Ursachen) · {m} einzelne Befunde. Behebe zuerst die Ausfälle, sie erklären oft viele Befunde.",

@@ -85,3 +85,24 @@ def test_an_integration_that_is_down_is_a_cause_even_without_follow_up_findings(
         ("integration_down:e1", 0, "none")
     ]
     assert causes[0]["consumers"] == {"automation": 1}
+
+
+def test_the_finding_of_an_outage_belongs_to_its_cause_and_a_decision_removes_the_cause() -> None:
+    def outage(**extra):
+        return {
+            "rule_id": "config_entry.not_loaded",
+            "object_id": "e1",
+            "classification": "problem",
+            "key": "config_entry.not_loaded|e1|",
+            "ignored": False,
+            **extra,
+        }
+
+    own = outage()
+    causes = apply_causes([ENTRY], [], [own])
+    assert causes[0]["finding_key"] == own["key"] and own["cause_id"] == causes[0]["id"]
+    assert causes[0]["follower_count"] == 0
+
+    known = outage(ignored=True)
+    assert apply_causes([ENTRY], [], [known]) == [], "known, hidden or marked: no longer news"
+    assert "cause_id" not in known
