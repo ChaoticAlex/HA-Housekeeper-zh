@@ -125,6 +125,10 @@ STATISTIC_KEYS = ("state", "sum", "min", "max", "mean")
 _LOGGER = logging.getLogger(__name__)
 
 LOGBOOK_KINDS = ("remove_device", "forget_device")  # written to the logbook when done
+# Recorder steps do not depend on each other: one that fails must not hold back the others,
+# unless the cause is shared by all of them.
+INDEPENDENT_KINDS = PURGE_KINDS | TRIM_KINDS
+GLOBAL_STOPS = {"recorder_busy", "no_recorder"}
 BACKUP_TIMEOUT = 30 * 60  # seconds; large installations can take a while
 
 
@@ -582,19 +586,28 @@ class CleanupRunner:
             "acknowledged": set(object_ids),
         }
         by_id = {action["object_id"]: action for action in plan["actions"]}
+        skipped = False  # an independent recorder step that did not run (or did not finish)
         for index, object_id in enumerate(object_ids):
             action = by_id[object_id]
             if self._cancel:
                 self._abort(plan, "cancelled", object_ids[index:])
                 return
+            carry_on = action["kind"] in INDEPENDENT_KINDS
             reason = await self._precheck(action, context)
             if reason:
+                if carry_on and reason not in GLOBAL_STOPS:
+                    skipped = self._skip(plan, action, reason) or skipped
+                    continue
                 self._abort(plan, reason, object_ids[index:], object_id)
                 return
             try:
                 result, event = await self._perform(plan, action)
             except StepAbort as stop:
+                carry_on = carry_on and stop.reason not in GLOBAL_STOPS
                 if stop.result is None:
+                    if carry_on:
+                        skipped = self._skip(plan, action, stop.reason) or skipped
+                        continue
                     self._abort(plan, stop.reason, object_ids[index:], object_id)
                     return
                 # Something stayed changed: keep it as a done step so an undo can retry it.
@@ -606,8 +619,11 @@ class CleanupRunner:
                 }
                 _event(plan, "rollback_incomplete", object_id=object_id, reason=stop.reason)
                 plan["executed"] = True
-                self._abort(plan, stop.reason, object_ids[index + 1 :], object_id)
                 await self._keep_undo_data(action["result"])
+                if carry_on:
+                    skipped = True
+                    continue
+                self._abort(plan, stop.reason, object_ids[index + 1 :], object_id)
                 return
             action["result"] = {"state": "done", "at": _now().isoformat(), **result}
             _event(plan, event, object_id=object_id)
@@ -621,7 +637,16 @@ class CleanupRunner:
             if stopped := action["result"].get("stopped"):
                 self._abort(plan, stopped, object_ids[index + 1 :], object_id)
                 return
+        if skipped:
+            plan["status"] = "partial" if plan["executed"] else "aborted"
+            return
         plan["status"] = "executed"
+
+    def _skip(self, plan: dict[str, Any], action: dict[str, Any], reason: str) -> bool:
+        """One independent step stays undone; the run goes on with the next one."""
+        action["result"] = {"state": "not_run", "at": _now().isoformat(), "reason": reason}
+        _event(plan, "step_skipped", object_id=action["object_id"], reason=reason)
+        return True
 
     def _write_logbook(self, plan: dict[str, Any], action: dict[str, Any]) -> None:
         """Enter a removed or forgotten device in the logbook; the entry outlives the device."""
