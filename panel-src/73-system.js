@@ -502,7 +502,7 @@ class SystemMixin {
     root.querySelectorAll("[data-detail-tab-go]").forEach(el => el.onclick = () => { this.detailTab = el.dataset.detailTabGo; this.render(); });
     // A key figure of Access & data flow opens its list, with or without the filter for high risk.
     root.querySelectorAll("[data-acc-show]").forEach(el => el.onclick = () => {
-      const [tab, filter] = el.dataset.accShow.split("|"), id = { sys: "accsys", cloud: "acccloud", apps: "accapps" }[tab];
+      const [tab, filter] = el.dataset.accShow.split("|"), id = { sys: "accsys", cloud: "acccloud", apps: "accapps", hooks: "acchooks" }[tab];
       (this.viewTab ||= {}).dataflow = tab;
       this.lvState(id, "risk", "asc").f.risk = filter ? "high" : ""; this.persistLv(id); this.pages = {}; this.render();
     });

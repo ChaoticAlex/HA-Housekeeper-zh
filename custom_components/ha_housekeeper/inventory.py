@@ -35,6 +35,7 @@ from .battery_kind import apply_battery_kinds
 from .causes import apply_causes
 from .cleanup import JournalStore, is_child_device, quarantine_entries, recurring_devices
 from .cleanup_exec import CleanupRunner
+from .config_changes import ChangeStore, fingerprint
 from .const import (
     DEFAULT_LOW_BATTERY_PERCENT,
     DEFAULT_MIN_UNAVAILABLE_DAYS,
@@ -639,6 +640,7 @@ class InventoryScanner:
         self.window = WindowStore(hass)
         self.notify = NotifyStore(hass)
         self.runs = RunStore(hass)
+        self.config_changes = ChangeStore(hass)
         self.cleanup = CleanupRunner(hass, self)
         self.paused = False
         self._booting = False
@@ -690,6 +692,7 @@ class InventoryScanner:
         await self.window.async_load()
         await self.notify.async_load()
         await self.runs.async_load()
+        await self.config_changes.async_load()
 
     def begin_boot(self) -> None:
         """Home Assistant is still booting: scans are preliminary until the warm-up is over."""
@@ -906,6 +909,16 @@ class InventoryScanner:
             if state.entity_id not in known_automation_ids
         )
 
+        if not preliminary:
+            self.config_changes.update(
+                {
+                    f"{item['object_type']}.{item['object_id']}": fingerprint(item)
+                    for item in automations
+                    if item["object_type"] in ("automation", "script")
+                    and item.get("source") != "state_fallback"
+                },
+                observed_at,
+            )
         # One update for everything: anything missing from it would be forgotten.
         tracked = (
             [("entity", item) for item in entities]

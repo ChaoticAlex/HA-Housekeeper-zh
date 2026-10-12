@@ -13,6 +13,7 @@ from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from . import conflicts
+from .config_changes import before_after
 from .const import IGNORE_LABEL
 from .payloads import RunsResult
 from .runs import (
@@ -256,6 +257,7 @@ def evaluate(
     updates: list[dict[str, Any]],
     now: datetime,
     since: str | None,
+    changes: dict[str, dict[str, Any]] | None = None,
 ) -> RunsResult:
     """Rate every automation and script that has numbers or a structural reason to look.
 
@@ -337,6 +339,11 @@ def evaluate(
                     for back in range(WINDOW_DAYS - 1, -1, -1)
                 ],
                 "lower_bound": any(entry.get("lo") for entry in window),
+                "change": before_after(
+                    days,
+                    ((changes or {}).get(f"{obj['object_type']}.{entity_id}") or {}).get("at"),
+                    today,
+                ),
                 "findings": findings,
             }
         )
@@ -394,6 +401,7 @@ async def report(scanner: Any) -> RunsResult:
         updates,
         datetime.now(UTC),
         scanner.runs.since,
+        scanner.config_changes.items,
     )
     found = conflicts.find(
         [a for a in autos if a["source"] != "state_fallback"],

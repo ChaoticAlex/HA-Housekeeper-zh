@@ -109,6 +109,7 @@ class RunsRow(TypedDict, total=False):
     max_ms: int | None
     per_day: list[int]
     lower_bound: bool
+    change: dict[str, Any] | None
     findings: list[dict[str, Any]]
 
 

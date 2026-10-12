@@ -852,7 +852,7 @@ Object.assign(TEXT.de, {
   runsCoverageFull: "Letzte {days} Tage · alle Zahlen vollständig, soweit Home Assistant die Läufe noch kannte.", runsCoverageLower: "Letzte {days} Tage · bei {n} Einträgen nur „mindestens“: der Trace-Speicher war voll, Läufe können fehlen.",
   rfHint_failing: "Prüfe die Ablaufverfolgung der Automation an der genannten Stelle.", rfHint_overlap: "Modus oder maximale Läufe anpassen oder die Auslöser entflechten.", rfHint_never_ok: "Ein Schritt oder eine Bedingung verhindert jeden Erfolg; die Ablaufverfolgung zeigt wo.", rfHint_no_effect: "Die Bedingung stoppt fast jeden Lauf; prüfe, ob sie noch passt oder der Auslöser zu breit ist.", rfHint_burst: "Prüfe, was die Automation so oft auslöst.", rfHint_long_run: "Prüfe Wartezeiten und Aktionen, die lange dauern.", rfHint_after_update: "Prüfe die Änderungen der neuen Version.", rfHint_long_wait: "Ein Neustart verwirft die Wartezeit; erwäge einen Zeitplan oder Auslöser statt Warten.", rfHint_wait_no_timeout: "Setze ein Zeitlimit, damit ein Lauf nicht ewig hängt.", rfHint_continue_on_error: "Fehler werden still übergangen; prüfe, ob das gewollt ist.",
   runsLowerBound: "mindestens, Läufe können fehlen", runsMore: "{shown} von {total} Zeilen gezeigt.", runsTrendLabel: "Läufe je Tag, ältester zuerst: {values}",
-  runsMs: "{n} ms", runsSec: "{n} s", runsTab: "Läufe", runsTabHint: "Letzte 7 Tage, gezählt seit {date}",
+  runsMs: "{n} ms", runsSec: "{n} s", runsChange: "Seit der Änderung der Konfiguration am {date}: {after}. In der Woche davor: {before}.", runsChangeSide: "{errors} Fehler in {runs} Läufen", runsTab: "Läufe", runsTabHint: "Letzte 7 Tage, gezählt seit {date}",
   runsFootnote: "Gezählt wird, was Home Assistant je Automation kurz vorhält (standardmäßig 5 Läufe), alle 15 Minuten. Gespeichert werden nur Zähler je Tag und die Stelle eines Fehlers, keine Variablen, Daten oder Fehlertexte. Die Hinweise sind Anlässe, genauer hinzusehen, kein Urteil.",
   rfLabelFailing: "Fehler", rfLabelOverlap: "Überschneidung", rfLabelNeverOk: "nie erfolgreich", rfLabelNoEffect: "ohne Wirkung", rfLabelBurst: "sehr oft", rfLabelLongRun: "lange Läufe", rfLabelAfterUpdate: "nach Update", rfLabelLongWait: "lange Wartezeit", rfLabelWaitNoTimeout: "ohne Timeout", rfLabelContinue: "Fehler verdeckt",
   rfFailing: "{errors} von {runs} Läufen endeten mit einem Fehler.", rfFailingStep: " Meist an Stelle {step} ({count}-mal).",
@@ -879,7 +879,7 @@ Object.assign(TEXT.en, {
   runsCoverageFull: "Last {days} days · all numbers complete as far as Home Assistant still knew the runs.", runsCoverageLower: "Last {days} days · “at least” for {n} entries: the trace store was full, runs may be missing.",
   rfHint_failing: "Check the automation's trace at the named step.", rfHint_overlap: "Adjust the mode or max runs, or untangle the triggers.", rfHint_never_ok: "A step or condition prevents every success; the trace shows where.", rfHint_no_effect: "The condition stops almost every run; check whether it still fits or the trigger is too broad.", rfHint_burst: "Check what fires the automation so often.", rfHint_long_run: "Check waits and actions that take long.", rfHint_after_update: "Check the changes of the new version.", rfHint_long_wait: "A restart discards the wait; consider a schedule or trigger instead of waiting.", rfHint_wait_no_timeout: "Set a timeout so a run cannot hang forever.", rfHint_continue_on_error: "Errors are passed over silently; check whether that is intended.",
   runsLowerBound: "at least, runs may be missing", runsMore: "{shown} of {total} rows shown.", runsTrendLabel: "Runs per day, oldest first: {values}",
-  runsMs: "{n} ms", runsSec: "{n} s", runsTab: "Runs", runsTabHint: "Last 7 days, counted since {date}",
+  runsMs: "{n} ms", runsSec: "{n} s", runsChange: "Since the configuration changed on {date}: {after}. The week before: {before}.", runsChangeSide: "{errors} errors in {runs} runs", runsTab: "Runs", runsTabHint: "Last 7 days, counted since {date}",
   runsFootnote: "What is counted is what Home Assistant keeps for each automation for a short time (5 runs by default), read every 15 minutes. Only counters per day and the place of a failure are stored, no variables, data or error texts. The notes are reasons to look closer, not a verdict.",
   rfLabelFailing: "failing", rfLabelOverlap: "overlap", rfLabelNeverOk: "never succeeds", rfLabelNoEffect: "no effect", rfLabelBurst: "very often", rfLabelLongRun: "long runs", rfLabelAfterUpdate: "after update", rfLabelLongWait: "long wait", rfLabelWaitNoTimeout: "no timeout", rfLabelContinue: "errors hidden",
   rfFailing: "{errors} of {runs} runs ended with an error.", rfFailingStep: " Mostly at step {step} ({count} times).",
@@ -5004,7 +5004,10 @@ class RunsMixin {
     const facts = [["runsColRuns", `${this.formatNumber(row.runs)}${row.lower_bound ? "+" : ""}`], ["runsColErrors", this.formatNumber(row.errors)], ["runsColConditions", this.formatNumber(row.conditions)], ["runsColDuration", `${this.runsDuration(row.mean_ms)} / ${this.runsDuration(row.max_ms)}`]]
       .map(([label, value]) => `<dt>${this.t(label)}</dt><dd>${value}</dd>`).join("");
     const notes = row.findings.length ? `<div class="pad">${this.runsFindingLines(row)}</div>` : "";
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("runsTab")}</h2><p>${since}</p></div></div><div class="pad"><dl class="kv">${facts}<dt>${this.t("runsColTrend")}</dt><dd>${this.runsTrend(row)}</dd></dl></div>${notes}${this.howCounted("runsFootnote")}</section>`;
+    const c = row.change;
+    const side = s => this.t("runsChangeSide", { errors: this.formatNumber(s.errors), runs: this.formatNumber(s.runs) });
+    const change = c ? `<div class="pad"><p class="factnote"><ha-icon icon="mdi:source-commit"></ha-icon> ${this.esc(this.t("runsChange", { date: this.formatDate(c.at), after: side(c.after), before: side(c.before) }))}</p></div>` : "";
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("runsTab")}</h2><p>${since}</p></div></div><div class="pad"><dl class="kv">${facts}<dt>${this.t("runsColTrend")}</dt><dd>${this.runsTrend(row)}</dd></dl></div>${change}${notes}${this.howCounted("runsFootnote")}</section>`;
   }
 
   // Two tabs: the counted runs, and the quality of each automation (46-diagnostics.js).
@@ -10907,7 +10910,7 @@ class SystemMixin {
     root.querySelectorAll("[data-detail-tab-go]").forEach(el => el.onclick = () => { this.detailTab = el.dataset.detailTabGo; this.render(); });
     // A key figure of Access & data flow opens its list, with or without the filter for high risk.
     root.querySelectorAll("[data-acc-show]").forEach(el => el.onclick = () => {
-      const [tab, filter] = el.dataset.accShow.split("|"), id = { sys: "accsys", cloud: "acccloud", apps: "accapps" }[tab];
+      const [tab, filter] = el.dataset.accShow.split("|"), id = { sys: "accsys", cloud: "acccloud", apps: "accapps", hooks: "acchooks" }[tab];
       (this.viewTab ||= {}).dataflow = tab;
       this.lvState(id, "risk", "asc").f.risk = filter ? "high" : ""; this.persistLv(id); this.pages = {}; this.render();
     });

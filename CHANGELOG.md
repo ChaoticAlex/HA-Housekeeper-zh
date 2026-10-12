@@ -20,6 +20,9 @@
 - **Zahlen im Menü:** Wartung (verfehlte Ziele) und Richtlinien (Verstöße) zeigen eine Zahl; Bestand nicht mehr.
 - **Blockierte Automationen:** Eine Automation, deren Auslöser alle auf ausgefallene Entitäten zeigen, wird als Befund gemeldet.
 - **Fehlende Dienste:** Automationen und Skripte, die einen Dienst aufrufen, den es nicht mehr gibt, werden als Befund gemeldet; rufen mehrere denselben auf, steht er als eine Ursache in den Ausfällen.
+- **Automationen ohne Wirkung:** Befunde für Automationen und Skripte, deren Aktionen alle auf ausgefallene Entitäten zielen, und für Bedingungen, die nie wahr werden. Eine blockierte Automation lässt sich per Plan ausschalten.
+- **Webhooks:** Zugriffe & Datenfluss zeigt, welche Automationen ein Webhook starten kann und ob er auch von außen erreichbar ist.
+- **Vorher/nachher:** Der Reiter „Läufe“ vergleicht Fehler vor und nach einer Änderung der Konfiguration.
 - **Seitenleisten-Knopf:** öffnet die Seitenleiste von Home Assistant, wenn sie ausgeblendet ist.
 
 ### English

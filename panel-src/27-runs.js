@@ -133,7 +133,10 @@ class RunsMixin {
     const facts = [["runsColRuns", `${this.formatNumber(row.runs)}${row.lower_bound ? "+" : ""}`], ["runsColErrors", this.formatNumber(row.errors)], ["runsColConditions", this.formatNumber(row.conditions)], ["runsColDuration", `${this.runsDuration(row.mean_ms)} / ${this.runsDuration(row.max_ms)}`]]
       .map(([label, value]) => `<dt>${this.t(label)}</dt><dd>${value}</dd>`).join("");
     const notes = row.findings.length ? `<div class="pad">${this.runsFindingLines(row)}</div>` : "";
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("runsTab")}</h2><p>${since}</p></div></div><div class="pad"><dl class="kv">${facts}<dt>${this.t("runsColTrend")}</dt><dd>${this.runsTrend(row)}</dd></dl></div>${notes}${this.howCounted("runsFootnote")}</section>`;
+    const c = row.change;
+    const side = s => this.t("runsChangeSide", { errors: this.formatNumber(s.errors), runs: this.formatNumber(s.runs) });
+    const change = c ? `<div class="pad"><p class="factnote"><ha-icon icon="mdi:source-commit"></ha-icon> ${this.esc(this.t("runsChange", { date: this.formatDate(c.at), after: side(c.after), before: side(c.before) }))}</p></div>` : "";
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("runsTab")}</h2><p>${since}</p></div></div><div class="pad"><dl class="kv">${facts}<dt>${this.t("runsColTrend")}</dt><dd>${this.runsTrend(row)}</dd></dl></div>${change}${notes}${this.howCounted("runsFootnote")}</section>`;
   }
 
   // Two tabs: the counted runs, and the quality of each automation (46-diagnostics.js).

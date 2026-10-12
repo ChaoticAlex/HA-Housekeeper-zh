@@ -77,7 +77,7 @@ async def websocket_access(
             result = await access_report(
                 hass,
                 [
-                    item
+                    {**item, **(scanner.get_details("automation", item["object_id"]) or {})}
                     for item in (scanner.snapshot or {}).get("objects", [])
                     if item["object_type"] == "automation"
                 ],
