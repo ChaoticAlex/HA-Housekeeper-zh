@@ -877,7 +877,6 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-fsel]").forEach(el => el.onchange = () => { this.pickRows("fsel", el.dataset.fsel, el.checked, this.findSel, this._findPage); this.render(); });
     root.querySelectorAll("[data-sel-only]").forEach(el => el.onclick = () => { const id = el.dataset.selOnly; this.selOnly = { ...this.selOnly, [id]: !this.selOnly?.[id] }; this.pages = {}; this.render(); });
     root.querySelectorAll("[data-lreset]").forEach(el => el.onclick = () => { const st = this.lv[el.dataset.lreset]; if (st) { st.q = ""; st.f = {}; this.persistLv(el.dataset.lreset); } this.pages = {}; this.render(); });
-    root.querySelectorAll("[data-copy]").forEach(el => el.onclick = async ev => { ev.stopPropagation(); ev.preventDefault(); try { await navigator.clipboard.writeText(el.dataset.copy); el.classList.add("done"); el.title = this.t("copiedShort"); this.toast(this.t("copiedShort")); setTimeout(() => { el.classList.remove("done"); el.title = this.t("copyId"); }, 1500); } catch (_) { /* no clipboard in this context */ } });
     root.querySelector("[data-fsel-page]")?.addEventListener("click", () => { (this._findPage || []).forEach(key => this.findSel.add(key)); this.render(); });
     root.querySelector("[data-fsel-clear]")?.addEventListener("click", () => { this.findSel.clear(); this.render(); });
     root.querySelector("[data-fsel-unhide]")?.addEventListener("click", () => this.unhideSelectedFindings());

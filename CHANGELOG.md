@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Kein Kopieren-Knopf mehr in den Listen:** Das Viereck beim Daraufzeigen verdeckte Namen und IDs; die ID lässt sich direkt markieren.
 - **Automationen: Diagnose auf der Detailseite:** Die Spalte „Diagnose“ in der Übersicht entfällt; die Zeile öffnet die Detailseite, die einen Reiter „Diagnose“ hat (Blickwinkel, Erfolgskriterien, Verbessern, Ablaufverfolgung). Skripte zeigen dort ihre vier Blickwinkel.
 - **Recorder-Kosten als Tabelle:** Die Einträge stehen in einer sortierbaren Liste mit Balken für den Anteil und Spalten für Gesamt, 24 Stunden, 7 Tage und Durchschnitt pro Tag; klickbare Kacheln (Alle, Vorschläge, Ausgeschlossen, Nicht verwendet), Filter und CSV-Export.
 - **Schutzmodus startet schreibgeschützt:** Eine neue Installation beginnt im Modus „nur lesen“; Änderungen schaltest du unter Einstellungen → Sicherheit bewusst frei. Bestehende Installationen behalten „voll“.
@@ -50,6 +51,7 @@
 
 ### English
 
+- **No copy button in the lists any more:** The square shown on hover covered names and IDs; the ID can be selected directly.
 - **Automations: diagnosis on the detail page:** The "Diagnosis" column of the overview is gone; the row opens the detail page, which has a "Diagnosis" tab (views, success criteria, improve, trace tools). Scripts show their four views there.
 - **Recorder costs as a table:** The entries are a sortable list with a bar for the share and columns for total, 24 hours, 7 days and average per day; clickable tiles (All, Suggestions, Excluded, Not used), filters and CSV export.
 - **Protection mode starts read-only:** A new install begins in "read only"; you release changes on purpose under Settings → Security. Existing installs keep "full".
