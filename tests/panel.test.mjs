@@ -3932,6 +3932,19 @@ test("broken references of one dashboard card form one row with a readable place
   assert.ok(diag.hint.includes("custom:charger-card") && diag.hint.includes("3 of 4"), "the diagnosis names the abandoned card");
 });
 
+test("origin filter keeps only core or custom config entries", () => {
+  const { el } = panel();
+  el.data = { ...DATA, objects: [
+    ...DATA.objects,
+    { object_type: "config_entry", object_id: "E1", name: "Core", domain: "hue", custom: false, status: "active", entity_count: 2 },
+    { object_type: "config_entry", object_id: "E2", name: "Cust", domain: "hacs", custom: true, integration_version: "2.0", status: "active", entity_count: 5 },
+  ] };
+  el.originFilter = "custom";
+  assert.deepEqual(el.filtered().map(o => o.object_id), ["E2"]);
+  el.originFilter = "core";
+  assert.deepEqual(el.filtered().map(o => o.object_id), ["E1"]);
+});
+
 // ---------------------------------------------------------------- Storage & system, access & data flow
 
 const SYSTEM = {
@@ -3972,6 +3985,13 @@ function systemPanel(lang = "en") {
   };
   return { ...env, calls };
 }
+
+test("a custom integration row opens its config entry, a folder without one stays static", () => {
+  const { el } = systemPanel();
+  el.data = { ...DATA, objects: [{ object_type: "config_entry", object_id: "E9", name: "HACS", domain: "hacs", integration_name: "HACS", status: "active" }] };
+  assert.match(el.sysCustomRowAttrs({ domain: "hacs" }), /data-object="config_entry:E9"/);
+  assert.match(el.sysCustomRowAttrs({ domain: "theme_only" }), /class="static"/);
+});
 
 test("the three new pages sit under Operation and Security and render in both languages", () => {
   const { NAV_GROUPS, TEXT } = loadPanel();

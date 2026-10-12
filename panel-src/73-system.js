@@ -139,22 +139,34 @@ class SystemMixin {
     });
   }
 
-  // The integration's name as Housekeeper's inventory knows it, for a custom_components folder.
-  sysIntegrationName(domain) {
-    const names = this.memo("sysNames", [], () => {
-      const map = new Map();
-      for (const o of this.data?.objects || []) if (o.object_type === "config_entry" && o.integration_name && !map.has(o.domain)) map.set(o.domain, o.integration_name);
-      return map;
+  // What Housekeeper's inventory knows about the config entries of a custom_components folder: name, first entry, how many.
+  sysIntegrationInfo(domain) {
+    const map = this.memo("sysNames", [], () => {
+      const found = new Map();
+      for (const o of this.data?.objects || []) {
+        if (o.object_type !== "config_entry") continue;
+        const info = found.get(o.domain) || { name: o.integration_name, id: o.object_id, entries: 0 };
+        info.entries += 1;
+        found.set(o.domain, info);
+      }
+      return found;
     });
-    return names.get(domain) || domain;
+    return map.get(domain) || { name: null, id: null, entries: 0 };
+  }
+
+  sysIntegrationName(domain) { return this.sysIntegrationInfo(domain).name || domain; }
+
+  sysCustomRowAttrs(x) {
+    const info = this.sysIntegrationInfo(x.domain);
+    return info.id ? `data-object="${this.esc(`config_entry:${info.id}`)}" tabindex="0" role="button" aria-label="${this.esc(this.sysIntegrationName(x.domain))}"` : `class="static" title="${this.esc(this.t("sysCustomNoEntry"))}"`;
   }
 
   sysCustom(items) {
     const max = Math.max(0, ...items.map(x => x.bytes));
     return this.sysList("syscustom", items, {
       sort: "size", dir: "desc", sorts: [...this.sysBySize(), { key: "name", label: "sysColIntegration", dir: "asc", get: x => this.sysIntegrationName(x.domain) }],
-      text: x => `${this.sysIntegrationName(x.domain)} ${x.domain}`, tie: x => x.domain, empty: "sysNoCustom",
-      columns: [{ key: "name", label: "sysColIntegration", cell: x => this.nameCell(this.sysIntegrationName(x.domain), `custom_components/${x.domain}`) }, ...this.sysSizeColumns(max)],
+      text: x => `${this.sysIntegrationName(x.domain)} ${x.domain}`, tie: x => x.domain, empty: "sysNoCustom", rowAttrs: x => this.sysCustomRowAttrs(x),
+      columns: [{ key: "name", label: "sysColIntegration", cell: x => this.nameCell(this.sysIntegrationName(x.domain), `custom_components/${x.domain}${this.sysIntegrationInfo(x.domain).entries > 1 ? ` · ${this.t("sysCustomEntries", { n: this.sysIntegrationInfo(x.domain).entries })}` : ""}`) }, ...this.sysSizeColumns(max)],
       exportName: "storage-custom-integrations", header: [this.t("sysColIntegration"), "Domain", "Bytes"], rows: x => [this.sysIntegrationName(x.domain), x.domain, x.bytes],
     });
   }

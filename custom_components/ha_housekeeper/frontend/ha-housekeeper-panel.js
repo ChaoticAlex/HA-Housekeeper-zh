@@ -582,6 +582,7 @@ Object.assign(TEXT.en, {
 
 // Texts for the integration detail page; merged into TEXT.
 Object.assign(TEXT.de, {
+  originKindCore: "Core", originKindCustom: "Custom", allOrigins: "Alle Herkünfte",
   ignored: "Ignoriert", integrationCard: "Integration", integrationName: "Integration", origin: "Herkunft", originBuiltIn: "In Home Assistant enthalten", originCustom: "Benutzerdefiniert · {path}{version}",
   entrySource: "Eingerichtet über", entryError: "Fehlermeldung", entryId: "Eintrags-ID", entryUniqueId: "Eindeutige ID", entryCreated: "Angelegt", entryModified: "Geändert", entryEntities: "Entitäten", entryDevices: "Geräte",
   entryDocs: "Dokumentation", entryHaPath: "Pfad in Home Assistant", noneValue: "keine",
@@ -591,6 +592,7 @@ Object.assign(TEXT.de, {
   cause_entry_problem_error: "Die Integration ist nicht geladen ({state}). Meldung: {error}",
 });
 Object.assign(TEXT.en, {
+  originKindCore: "Core", originKindCustom: "Custom", allOrigins: "All origins",
   ignored: "Ignored", integrationCard: "Integration", integrationName: "Integration", origin: "Origin", originBuiltIn: "Included with Home Assistant", originCustom: "Custom · {path}{version}",
   entrySource: "Set up via", entryError: "Error message", entryId: "Entry ID", entryUniqueId: "Unique ID", entryCreated: "Created", entryModified: "Modified", entryEntities: "Entities", entryDevices: "Devices",
   entryDocs: "Documentation", entryHaPath: "Path in Home Assistant", noneValue: "none",
@@ -3375,11 +3377,12 @@ class InventoryMixin {
   filtered() {
     if (!this.data) return [];
     const q = this.query.trim().toLowerCase();
-    return this.memo("inventory", [q, this.typeFilter, this.statusFilter, this.sort, this.sortDir, this.lang], () => {
+    return this.memo("inventory", [q, this.typeFilter, this.statusFilter, this.originFilter, this.sort, this.sortDir, this.lang], () => {
       const { natural, ids } = this.collators(), desc = this.sortDir === "desc";
-      const pick = item => this.sort === "status" ? item.status : this.sort === "type" ? item.object_type : this.sort === "since" ? item.status_since : (item.name || item.object_id);
+      const pick = item => this.sort === "status" ? item.status : this.sort === "type" ? item.object_type : this.sort === "since" ? item.status_since : this.sort === "version" ? item.integration_version : this.sort === "entities" ? String(item.entity_count ?? "") : (item.name || item.object_id);
       const rows = this.data.objects.filter(item => (!q || this.haystack(item).includes(q)) && (!this.typeFilter || item.object_type === this.typeFilter)
-        && (!this.statusFilter || item.status === this.statusFilter)).map(item => ({ item, key: pick(item) }));
+        && (!this.statusFilter || item.status === this.statusFilter)
+        && (!this.originFilter || (item.object_type === "config_entry" && !!item.custom === (this.originFilter === "custom")))).map(item => ({ item, key: pick(item) }));
       rows.sort((a, b) => {
         if (!a.key !== !b.key) return a.key ? -1 : 1; // missing values stay last in both directions
         const order = natural.compare(String(a.key ?? ""), String(b.key ?? ""));
@@ -3415,11 +3418,14 @@ class InventoryMixin {
       statusTile("unavailable", "red"), statusTile("orphaned", "warn"),
     ]);
     const hid = key => this.colHidden("inventory", key);
-    this.setExporter("inventory", "inventory", [this.t("name"), "ID", this.t("type"), this.t("status"), this.t("reason"), this.t("since")], () => rows.map(i => [i.name, i.object_id, this.t(i.object_type), this.statusLabel(i.status), i.reason ? this.t(i.reason) : i.missing_reference_count ? `${i.missing_reference_count} ${this.t("missingReferences")}` : "", i.status_since || ""]));
-    const tools = `<div class="listtools">${this.listTools("inventory", ["type", "status", "reason", "since"].map(k => ({ key: k, label: k })))}<button type="button" class="btn" data-xp-open><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button></div>`;
-    return `<div class="stack">${tiles}<div class="panel"><div class="filters"><input id="query" type="search" value="${this.esc(this.query)}" placeholder="${this.t("search")}"><select id="typeFilter" aria-label="${this.t("type")}"><option value="">${this.t("all")}</option>${types.map(x => `<option value="${x}" ${this.typeFilter === x ? "selected" : ""}>${this.t(x)}</option>`).join("")}</select><select id="statusFilter" aria-label="${this.t("status")}"><option value="">${this.t("allStatus")}</option>${statuses.map(x => `<option value="${x}" ${this.statusFilter === x ? "selected" : ""}>${this.statusLabel(x)}</option>`).join("")}</select>
-        <div class="mobsort"><select id="sortKey" aria-label="${this.t("sortBy")}">${[["name", "sortName"], ["type", "sortType"], ["status", "sortStatus"], ["since", "sortSince"]].map(([key, label]) => `<option value="${key}" ${this.sort === key ? "selected" : ""}>${this.t(label)}</option>`).join("")}</select><button class="btn" id="sortDir" aria-label="${this.t("sortBy")}">${this.sortDir === "desc" ? "▼" : "▲"}</button></div></div>${tools}
-      <div class="tablewrap inv"><table><thead><tr>${this.th("name", "name")}${hid("type") ? "" : this.th("type", "type")}${hid("status") ? "" : this.th("status", "status")}${hid("reason") ? "" : `<th>${this.t("reason")}</th>`}${hid("since") ? "" : this.th("since", "since")}</tr></thead><tbody>${visibleRows.map(item => `<tr data-object="${this.esc(this.objectKey(item))}" tabindex="0" role="button" aria-label="${this.esc(item.name)}"><td><span class="object">${this.tile(item.object_type, this.tone(item.status) === "ok" ? "" : this.tone(item.status))}${this.nameCell(item.name, item.object_id, "span")}</span></td>${hid("type") ? "" : `<td data-label="${this.esc(this.t("type"))}">${this.t(item.object_type)}</td>`}${hid("status") ? "" : `<td data-label="${this.esc(this.t("status"))}">${this.pill(item.status)}</td>`}${hid("reason") ? "" : `<td data-label="${this.esc(this.t("reason"))}">${this.esc(item.reason ? this.t(item.reason) : item.missing_reference_count ? `${item.missing_reference_count} ${this.t("missingReferences")}` : "—")}</td>`}${hid("since") ? "" : `<td data-label="${this.esc(this.t("since"))}">${this.formatDate(item.status_since)}</td>`}</tr>`).join("")}</tbody></table>${rows.length ? "" : `<div class="emptymsg">${this.t("noResults")}</div>`}</div>
+    // Version and entity count only mean something for integrations, so they appear once the list is narrowed to them.
+    const integ = this.typeFilter === "config_entry" || !!this.originFilter;
+    const integCols = integ ? ["version", "entities"] : [];
+    this.setExporter("inventory", "inventory", [this.t("name"), "ID", this.t("type"), this.t("status"), this.t("reason"), this.t("since"), ...(integ ? [this.t("origin"), this.t("version"), this.t("entities")] : [])], () => rows.map(i => [i.name, i.object_id, this.t(i.object_type), this.statusLabel(i.status), i.reason ? this.t(i.reason) : i.missing_reference_count ? `${i.missing_reference_count} ${this.t("missingReferences")}` : "", i.status_since || "", ...(integ ? [i.object_type === "config_entry" ? this.t(i.custom ? "originKindCustom" : "originKindCore") : "", i.integration_version || "", i.entity_count ?? ""] : [])]));
+    const tools = `<div class="listtools">${this.listTools("inventory", ["type", "status", "reason", "since", ...integCols].map(k => ({ key: k, label: k })))}<button type="button" class="btn" data-xp-open><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button></div>`;
+    return `<div class="stack">${tiles}<div class="panel"><div class="filters"><input id="query" type="search" value="${this.esc(this.query)}" placeholder="${this.t("search")}"><select id="typeFilter" aria-label="${this.t("type")}"><option value="">${this.t("all")}</option>${types.map(x => `<option value="${x}" ${this.typeFilter === x ? "selected" : ""}>${this.t(x)}</option>`).join("")}</select><select id="statusFilter" aria-label="${this.t("status")}"><option value="">${this.t("allStatus")}</option>${statuses.map(x => `<option value="${x}" ${this.statusFilter === x ? "selected" : ""}>${this.statusLabel(x)}</option>`).join("")}</select><select id="originFilter" aria-label="${this.t("origin")}"><option value="">${this.t("allOrigins")}</option>${["core", "custom"].map(x => `<option value="${x}" ${this.originFilter === x ? "selected" : ""}>${this.t(x === "core" ? "originKindCore" : "originKindCustom")}</option>`).join("")}</select>
+        <div class="mobsort"><select id="sortKey" aria-label="${this.t("sortBy")}">${[["name", "sortName"], ["type", "sortType"], ["status", "sortStatus"], ["since", "sortSince"], ...(integ ? [["version", "version"], ["entities", "entities"]] : [])].map(([key, label]) => `<option value="${key}" ${this.sort === key ? "selected" : ""}>${this.t(label)}</option>`).join("")}</select><button class="btn" id="sortDir" aria-label="${this.t("sortBy")}">${this.sortDir === "desc" ? "▼" : "▲"}</button></div></div>${tools}
+      <div class="tablewrap inv"><table><thead><tr>${this.th("name", "name")}${hid("type") ? "" : this.th("type", "type")}${hid("status") ? "" : this.th("status", "status")}${hid("reason") ? "" : `<th>${this.t("reason")}</th>`}${hid("since") ? "" : this.th("since", "since")}${integCols.map(k => hid(k) ? "" : this.th(k, k)).join("")}</tr></thead><tbody>${visibleRows.map(item => `<tr data-object="${this.esc(this.objectKey(item))}" tabindex="0" role="button" aria-label="${this.esc(item.name)}"><td><span class="object">${this.tile(item.object_type, this.tone(item.status) === "ok" ? "" : this.tone(item.status))}${this.nameCell(item.name, item.object_id, "span")}</span></td>${hid("type") ? "" : `<td data-label="${this.esc(this.t("type"))}">${this.t(item.object_type)}</td>`}${hid("status") ? "" : `<td data-label="${this.esc(this.t("status"))}">${this.pill(item.status)}</td>`}${hid("reason") ? "" : `<td data-label="${this.esc(this.t("reason"))}">${this.esc(item.reason ? this.t(item.reason) : item.missing_reference_count ? `${item.missing_reference_count} ${this.t("missingReferences")}` : "—")}</td>`}${hid("since") ? "" : `<td data-label="${this.esc(this.t("since"))}">${this.formatDate(item.status_since)}</td>`}${integCols.map(k => hid(k) ? "" : `<td data-label="${this.esc(this.t(k))}">${this.esc(item.object_type !== "config_entry" ? "—" : k === "version" ? (item.integration_version || "—") : this.formatNumber(item.entity_count ?? 0))}</td>`).join("")}</tr>`).join("")}</tbody></table>${rows.length ? "" : `<div class="emptymsg">${this.t("noResults")}</div>`}</div>
       ${pg.footer || `<div class="tablefoot"><span>${this.formatNumber(rows.length)} ${this.t("of_total")} ${this.formatNumber(this.data.objects.length)} ${this.t("shown")}</span></div>`}</div>`;
   }
 
@@ -10132,6 +10138,7 @@ class BatteryKindMixin {
 
 // Texts for storage and system, access and data flow, the credential overview and the sidebar button; merged into TEXT.
 Object.assign(TEXT.de, {
+  sysCustomEntries: "{n} Einträge", sysCustomNoEntry: "Kein Konfigurationseintrag: Ordner ohne eingerichtete Integration (etwa Bibliothek oder noch nicht eingerichtet)",
   haMenu: "Seitenleiste von Home Assistant öffnen",
   storage: "Speicher & System", storageSubtitle: "Belegung von Datenträger, Arbeitsspeicher und CPU und die größten Speicherverbraucher. Liest nur; es wird nichts geändert und nichts gespeichert.",
   dataflow: "Zugriffe & Datenfluss", dataflowSubtitle: "Welche Integrationen auf System, Funk, Kameras oder den Standort zugreifen, welche Daten ins Internet schicken und welche Rechte die Apps haben. Liest nur.",
@@ -10184,6 +10191,7 @@ Object.assign(TEXT.de, {
   secFootnote: "Housekeeper erkennt Zugangsdaten am Namen eines Feldes in der Konfiguration einer Integration (password, token, api_key, secret, webhook, pin) und prüft nur, ob es leer ist. Werte, Auszüge davon und ihre Länge werden weder gelesen noch angezeigt noch exportiert. Die Erkennung ist ein Hinweis: Zugangsdaten unter einem anderen Namen fehlen, und ein Feld mit so einem Namen kann etwas Harmloses enthalten. Ein Klick auf eine Zeile öffnet die Integration in Home Assistant, dort lassen sich die Zugangsdaten ändern. Es wird nichts geändert und nichts gespeichert.",
 });
 Object.assign(TEXT.en, {
+  sysCustomEntries: "{n} entries", sysCustomNoEntry: "No config entry: a folder without a set-up integration (for example a library, or not set up yet)",
   haMenu: "Open the Home Assistant sidebar",
   storage: "Storage & system", storageSubtitle: "Use of disk, memory and CPU and the largest consumers of space. Only reads; nothing is changed and nothing is stored.",
   dataflow: "Access & data flow", dataflowSubtitle: "Which integrations reach the system, radios, cameras or the location, which send data to the internet and which rights the apps have. Only reads.",
@@ -10564,22 +10572,34 @@ class SystemMixin {
     });
   }
 
-  // The integration's name as Housekeeper's inventory knows it, for a custom_components folder.
-  sysIntegrationName(domain) {
-    const names = this.memo("sysNames", [], () => {
-      const map = new Map();
-      for (const o of this.data?.objects || []) if (o.object_type === "config_entry" && o.integration_name && !map.has(o.domain)) map.set(o.domain, o.integration_name);
-      return map;
+  // What Housekeeper's inventory knows about the config entries of a custom_components folder: name, first entry, how many.
+  sysIntegrationInfo(domain) {
+    const map = this.memo("sysNames", [], () => {
+      const found = new Map();
+      for (const o of this.data?.objects || []) {
+        if (o.object_type !== "config_entry") continue;
+        const info = found.get(o.domain) || { name: o.integration_name, id: o.object_id, entries: 0 };
+        info.entries += 1;
+        found.set(o.domain, info);
+      }
+      return found;
     });
-    return names.get(domain) || domain;
+    return map.get(domain) || { name: null, id: null, entries: 0 };
+  }
+
+  sysIntegrationName(domain) { return this.sysIntegrationInfo(domain).name || domain; }
+
+  sysCustomRowAttrs(x) {
+    const info = this.sysIntegrationInfo(x.domain);
+    return info.id ? `data-object="${this.esc(`config_entry:${info.id}`)}" tabindex="0" role="button" aria-label="${this.esc(this.sysIntegrationName(x.domain))}"` : `class="static" title="${this.esc(this.t("sysCustomNoEntry"))}"`;
   }
 
   sysCustom(items) {
     const max = Math.max(0, ...items.map(x => x.bytes));
     return this.sysList("syscustom", items, {
       sort: "size", dir: "desc", sorts: [...this.sysBySize(), { key: "name", label: "sysColIntegration", dir: "asc", get: x => this.sysIntegrationName(x.domain) }],
-      text: x => `${this.sysIntegrationName(x.domain)} ${x.domain}`, tie: x => x.domain, empty: "sysNoCustom",
-      columns: [{ key: "name", label: "sysColIntegration", cell: x => this.nameCell(this.sysIntegrationName(x.domain), `custom_components/${x.domain}`) }, ...this.sysSizeColumns(max)],
+      text: x => `${this.sysIntegrationName(x.domain)} ${x.domain}`, tie: x => x.domain, empty: "sysNoCustom", rowAttrs: x => this.sysCustomRowAttrs(x),
+      columns: [{ key: "name", label: "sysColIntegration", cell: x => this.nameCell(this.sysIntegrationName(x.domain), `custom_components/${x.domain}${this.sysIntegrationInfo(x.domain).entries > 1 ? ` · ${this.t("sysCustomEntries", { n: this.sysIntegrationInfo(x.domain).entries })}` : ""}`) }, ...this.sysSizeColumns(max)],
       exportName: "storage-custom-integrations", header: [this.t("sysColIntegration"), "Domain", "Bytes"], rows: x => [this.sysIntegrationName(x.domain), x.domain, x.bytes],
     });
   }
@@ -11282,6 +11302,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.query = "";
     this.typeFilter = "";
     this.statusFilter = "";
+    this.originFilter = "";
     this.findingFilter = ""; this.findingAfter = false; this.findingDue = false; this.showFollowers = false; this.goals = null; this.goalsLoading = false; this.goalForm = null; this.decide = null; this.markForm = null;
     this.findingStatus = ""; this.bulk = null;
     this.batteryFilter = "all";
@@ -12014,7 +12035,7 @@ class HAHousekeeperPanel extends HTMLElement {
       this.view = el.dataset.jump; this.pages = {};
       if (el.dataset.jumpTab) (this.viewTab ||= {})[this.view] = el.dataset.jumpTab;
       if (el.dataset.filter !== undefined) this.findingFilter = el.dataset.filter;
-      if (el.dataset.jump === "inventory") { this.statusFilter = el.dataset.status || ""; this.typeFilter = el.dataset.type || ""; this.pages = {}; }
+      if (el.dataset.jump === "inventory") { this.statusFilter = el.dataset.status || ""; this.typeFilter = el.dataset.type || ""; this.originFilter = ""; this.pages = {}; }
       this.render();
     });
     root.querySelectorAll("[data-tip]").forEach(el => { el.onmouseenter = () => this.showTip(el); el.onmouseleave = () => this.hideTip();
@@ -12030,8 +12051,8 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-col]").forEach(el => el.onchange = () => { const [id, key] = el.dataset.col.split("|"); this.toggleCol(id, key); });
     root.querySelectorAll("[data-export-list]").forEach(el => el.onclick = () => this.exportList(el.dataset.exportList));
     root.querySelectorAll("[data-win-act]").forEach(el => el.onclick = () => { const [name, ...rest] = el.dataset.winAct.split(":"); this.winAct(name, rest.join(":")); });
-    root.querySelectorAll("[data-inv-filter]").forEach(el => el.onclick = () => { const [type, status] = el.dataset.invFilter.split("|"); this.typeFilter = type; this.statusFilter = status; this.pages = {}; this.render(); });
-    root.querySelectorAll("[data-type-jump]").forEach(el => el.onclick = () => { this.noteJump("inventory"); this.typeFilter = el.dataset.typeJump; this.statusFilter = ""; this.pages = {}; this.view = "inventory"; this.render(); });
+    root.querySelectorAll("[data-inv-filter]").forEach(el => el.onclick = () => { const [type, status] = el.dataset.invFilter.split("|"); this.typeFilter = type; this.statusFilter = status; this.originFilter = ""; this.pages = {}; this.render(); });
+    root.querySelectorAll("[data-type-jump]").forEach(el => el.onclick = () => { this.noteJump("inventory"); this.typeFilter = el.dataset.typeJump; this.statusFilter = ""; this.originFilter = ""; this.pages = {}; this.view = "inventory"; this.render(); });
     root.querySelectorAll("[data-export]").forEach(el => el.onclick = () => this.exportFindings(el.dataset.export));
     this.bindFindingStatus(root);
     this.bindDetailActions(root);
@@ -12093,6 +12114,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-baseline]").forEach(b => b.addEventListener("click", () => { this.compareBaseline = b.dataset.baseline; this.pages = {}; this.loadCompare(); }));
     const bl = root.querySelector("#baseline"); if (bl) bl.onchange = () => { this.compareBaseline = bl.value; this.pages = {}; this.loadCompare(); };
     const tf = root.querySelector("#typeFilter"); if (tf) tf.onchange = () => { this.typeFilter = tf.value; this.pages = {}; this.render(); };
+    const of = root.querySelector("#originFilter"); if (of) of.onchange = () => { this.originFilter = of.value; this.pages = {}; this.render(); };
     const sf = root.querySelector("#statusFilter"); if (sf) sf.onchange = () => { this.statusFilter = sf.value; this.pages = {}; this.render(); };
     const sk = root.querySelector("#sortKey"); if (sk) sk.onchange = () => { this.sort = sk.value; this.pages = {}; this.render(); };
     const sd = root.querySelector("#sortDir"); if (sd) sd.onclick = () => { this.sortDir = this.sortDir === "asc" ? "desc" : "asc"; this.pages = {}; this.render(); };
