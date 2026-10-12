@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Kacheln der Unterseiten:** Aufräumen, Recorder und Apps & Integrationen zeigen unter der Beschreibung eine Zeile mit Hinweisen (zum Beispiel „2 mit Problem“, „9,5 GB“, „751 mit Statistik“). Die Kacheln sind dadurch gleich hoch und springen beim Laden nicht mehr; lange Beschreibungen enden mit „…“. In Aufräumen teilen sich die letzten zwei Kacheln die Zeile, und die Zahlenzeile von „Nicht verwendet“ ist in die Kachel gewandert.
 - **Apps & Integrationen:** Die obere Kennzahlenreihe entfällt. Die drei Kacheln (Apps, Core, Custom) sind breiter, der Text bricht nicht mehr um, und sie tragen die Hinweise selbst: laufende Apps, belegter Platz, Updates und Integrationen mit Problem.
 - **Bestand:** In der Ansicht „Nach Objekttyp“ hebt der Ring den Abschnitt hervor, über dem die Maus liegt oder dessen Tabellenzeile sie berührt; umgekehrt leuchtet die Zeile auf, wenn die Maus auf dem Ringabschnitt liegt.
 - **Recorder, Datenbank:** „Fehlende Stunden in Statistiken“ ist verständlicher: ein kurzer Satz sagt, ob die Lücken alle Sensoren oder nur einzelne betreffen, darunter steht offen die Liste „Sensoren mit den meisten Lücken“ als sortierbare, durchsuchbare Tabelle wie die anderen Listen (Spalte „Gemeinsame“ nur, wenn es gemeinsame Lücken gibt).

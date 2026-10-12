@@ -140,11 +140,11 @@ class ComponentsMixin {
     const sizeFact = b => (size(b) ? { text: size(b), tone: "mute" } : null);
     const tabs = [
       { id: "apps", icon: "mdi:apps", label: this.t("compTabApps"), hint: this.t("compTabAppsHint"), count: apps.length,
-        facts: [fact(apps.filter(a => a.state === "started").length, "compSumRunning", "ok"), sizeFact(appBytes), fact(apps.filter(a => a.update_available).length, "compSumAppUpdates", "warn")] },
+        facts: [fact(apps.filter(a => a.update_available).length, "compSumAppUpdates", "warn"), fact(apps.filter(a => a.state === "started").length, "compSumRunning", "ok"), sizeFact(appBytes)] },
       { id: "core", icon: "mdi:puzzle-outline", label: this.t("compTabCore"), hint: this.t("compTabCoreHint"), count: core.length,
         facts: [fact(bad(core), "compSumProblem", "red")] },
       { id: "custom", icon: "mdi:puzzle-plus-outline", label: this.t("compTabCustom"), hint: this.t("compTabCustomHint"), count: custom.length,
-        facts: [sizeFact(customBytes), fact(custom.filter(g => g.hacs?.pending_update).length, "compSumUpdates", "warn"), fact(bad(custom), "compSumProblem", "red")] },
+        facts: [fact(bad(custom), "compSumProblem", "red"), fact(custom.filter(g => g.hacs?.pending_update).length, "compSumUpdates", "warn"), sizeFact(customBytes)] },
     ].map(t => ({ ...t, facts: t.facts.filter(Boolean), tone: t.facts.some(f => f?.tone === "red") ? "red" : "mute" }));
     const open = this.viewTabOf("components", tabs, "core");
     if (apps.length || custom.length) this.sysEnsure("storage"); // CPU, RAM and data of the apps, folder sizes of custom integrations

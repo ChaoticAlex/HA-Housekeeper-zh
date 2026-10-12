@@ -153,10 +153,19 @@ class StormsMixin {
     const perDay = db?.growth?.known ? db.growth.per_day : meta?.per_day;
     const keep = db?.keep_days ?? meta?.keep_days, purge = db?.auto_purge ?? meta?.auto_purge;
     const loud = st?.entities?.[0], topCost = this.costs?.entities?.[0];
+    const stormGroups = st ? this.stormGroups(st) : [];
+    const loadFacts = ["storm", "integration_share", "no_new_state", "attribute_flood", "event_burst"]
+      .map(k => ({ k, n: stormGroups.filter(g => g.items.some(f => f.kind === k)).length })).filter(x => x.n)
+      .map(x => ({ text: `${this.t(`stormKind_${x.k}`)}: ${this.formatNumber(x.n)}`, tone: x.k === "storm" || x.k === "integration_share" ? "red" : "warn" }));
+    const dbFacts = [
+      purge === false ? { text: this.t("recSumPurgeOff"), tone: "warn" } : null,
+      bytes !== null && bytes !== undefined ? { text: this.formatBytes(bytes), tone: "mute" } : null,
+      perDay !== null && perDay !== undefined ? { text: this.t("dbOvPerDay", { size: this.formatBytes(Math.max(0, perDay)) }), tone: "mute" } : null,
+    ].filter(Boolean);
     const tabs = [
-      { id: "load", icon: "mdi:chart-timeline-variant", label: this.t("stormTitle"), hint: st ? this.t("recTileLoadRows", { n: this.formatNumber(st.per_day), window: this.t(this.stormsWindow === 1 ? "relWindow1" : "relWindow7") }) : this.t("recTileLoadHint"), count: st ? stormFindings : null, tone: stormTone },
-      { id: "costs", icon: "mdi:database-search-outline", label: this.t("recorderTitle"), hint: topCost ? this.t("recTileCostsTop", { name: topCost.name || topCost.entity_id, share: topCost.share }) : this.t("recTileCostsHint"), tone: "mute" },
-      { id: "db", icon: "mdi:database-outline", label: this.t("dbTitle"), hint: bytes !== null && bytes !== undefined ? [this.formatBytes(bytes), perDay !== null && perDay !== undefined ? this.t("dbOvPerDay", { size: this.formatBytes(Math.max(0, perDay)) }) : ""].filter(Boolean).join(" · ") : this.t("recTileDbHint"), count: db ? dbFindings : null, tone: dbTone, pill: purge === false ? this.t("recSumPurgeOff") : "", pillTone: "warn" },
+      { id: "load", icon: "mdi:chart-timeline-variant", label: this.t("stormTitle"), hint: this.t("recTileLoadHint"), count: st ? stormFindings : null, facts: loadFacts, tone: stormTone },
+      { id: "costs", icon: "mdi:database-search-outline", label: this.t("recorderTitle"), hint: this.t("recTileCostsHint"), facts: topCost ? [{ text: this.t("recTileCostsTop", { name: topCost.name || topCost.entity_id, share: topCost.share }), tone: "mute" }] : [], tone: "mute" },
+      { id: "db", icon: "mdi:database-outline", label: this.t("dbTitle"), hint: this.t("recTileDbHint"), count: db ? dbFindings : null, facts: dbFacts, tone: dbTone },
     ];
     const open = this.viewTabOf("recorder", tabs, "load");
     const body = open === "costs" ? this.recorderCard() : open === "db" ? this.dbCard() : this.stormsView();

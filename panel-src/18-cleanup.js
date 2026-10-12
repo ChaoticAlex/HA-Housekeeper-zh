@@ -573,14 +573,21 @@ class CleanupMixin {
     const held = this.data.quarantine || [], heldReady = held.filter(q => this.daysSince(q.since) >= limit).length;
     const unusedCount = this.unreferencedRows().length, statsCount = (this.data.orphaned_statistics || []).length;
     const count = kind => this.cleanupCandidates(kind).length;
+    const unusedRows = this.unreferencedRows();
+    const topDomain = (() => { const counts = new Map(); unusedRows.forEach(o => { const d = o.object_id.split(".")[0]; counts.set(d, (counts.get(d) || 0) + 1); }); return [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]; })();
+    const unusedFacts = [
+      this.data.meta.recorder_available && unusedRows.length ? { text: this.t("unrefFactStats", { n: this.formatNumber(unusedRows.filter(o => o.has_statistics).length) }), tone: "mute" } : null,
+      topDomain ? { text: this.t("unrefFactDomain", { name: topDomain[0] }), tone: "mute" } : null,
+    ].filter(Boolean);
+    const nothing = n => (n ? [] : [{ text: this.t("cleanupNothing"), tone: "ok" }]);
     // The tiles are the navigation: each one is one job, with how much there is to do.
     const tabs = [
-      { id: "entities", icon: "mdi:shape-outline", label: this.t("cleanupTabEntities"), hint: this.t("cleanupTileEntitiesHint"), count: count("disable_entity"), tone: "warn" },
-      { id: "devices", icon: "mdi:devices", label: this.t("cleanupTabDevices"), hint: this.t("cleanupTileDevicesHint"), count: count("disable_device"), tone: "warn" },
-      { id: "quarantine", icon: "mdi:archive-clock-outline", label: this.t("cleanupTabQuarantine"), hint: this.t("cleanupTileQuarantineHint", { days: limit }), count: held.length, pill: heldReady ? this.t("cleanupReadyCount", { count: heldReady }) : "", tone: heldReady ? "ok" : "mute" },
-      { id: "unused", icon: "mdi:link-variant-off", label: this.t("unreferenced"), hint: this.t("cleanupTileUnusedHint"), count: unusedCount, tone: "mute" },
-      { id: "stats", icon: "mdi:database-remove-outline", label: this.t("orphanStats"), hint: this.t("cleanupTileStatsHint"), count: statsCount, tone: "mute" },
-      ...(purges.length ? [{ id: "purges", icon: "mdi:history", label: this.t("cleanupTabPurges"), hint: this.t("cleanupTilePurgesHint"), count: purges.length, tone: "mute" }] : []),
+      { id: "entities", icon: "mdi:shape-outline", label: this.t("cleanupTabEntities"), hint: this.t("cleanupTileEntitiesHint"), count: count("disable_entity"), facts: nothing(count("disable_entity")), tone: "warn" },
+      { id: "devices", icon: "mdi:devices", label: this.t("cleanupTabDevices"), hint: this.t("cleanupTileDevicesHint"), count: count("disable_device"), facts: nothing(count("disable_device")), tone: "warn" },
+      { id: "quarantine", icon: "mdi:archive-clock-outline", label: this.t("cleanupTabQuarantine"), hint: this.t("cleanupTileQuarantineHint", { days: limit }), count: held.length, facts: [], pill: heldReady ? this.t("cleanupReadyCount", { count: heldReady }) : "", tone: heldReady ? "ok" : "mute" },
+      { id: "unused", icon: "mdi:link-variant-off", label: this.t("unreferenced"), hint: this.t("cleanupTileUnusedHint"), count: unusedCount, facts: unusedFacts, tone: "mute" },
+      { id: "stats", icon: "mdi:database-remove-outline", label: this.t("orphanStats"), hint: this.t("cleanupTileStatsHint"), count: statsCount, facts: [], tone: "mute" },
+      ...(purges.length ? [{ id: "purges", icon: "mdi:history", label: this.t("cleanupTabPurges"), hint: this.t("cleanupTilePurgesHint"), count: purges.length, facts: [], tone: "mute" }] : []),
     ];
     const open = this.viewTabOf("cleanup", tabs, "entities");
     const tiles = this.cleanupTiles(tabs, open);
