@@ -1,7 +1,8 @@
 // Texts for storage and system, access and data flow, the credential overview and the sidebar button; merged into TEXT.
 Object.assign(TEXT.de, {
+  sysTabUsage: "Belegung", sysTabUsageHint: "Kategorien und Ordner", sysByCategory: "Nach Kategorie", sysByFolder: "Nach Ordner unter /config", sysAppsHint: "Apps und Custom-Integrationen mit Größe, CPU und RAM stehen unter",
   sysTabMisc: "Sonstiges", sysTabMiscHint: "Karten, Blueprints, übrige Ordner", sysSecOther: "Weitere Ordner und Dateien in /config", sysNoOther: "Außer den bekannten Orten wurde unter /config nichts Messbares gefunden.", sysOtherMore: "Dazu {n} kleinere Einträge mit zusammen {size}.", sysKindFolder: "Ordner", sysKindFile: "Datei",
-  sysCustomEntries: "{n} Einträge", sysCustomNoEntry: "Kein Konfigurationseintrag: Ordner ohne eingerichtete Integration (etwa Bibliothek oder noch nicht eingerichtet)",
+ 
   haMenu: "Seitenleiste von Home Assistant öffnen",
   storage: "Speicher & System", storageSubtitle: "Belegung von Datenträger, Arbeitsspeicher und CPU und die größten Speicherverbraucher. Liest nur; es wird nichts geändert und nichts gespeichert.",
   dataflow: "Zugriffe & Datenfluss", dataflowSubtitle: "Welche Integrationen auf System, Funk, Kameras oder den Standort zugreifen, welche Daten ins Internet schicken und welche Rechte die Apps haben. Liest nur.",
@@ -13,15 +14,15 @@ Object.assign(TEXT.de, {
   sysDiskUsed: "Speicher belegt", sysRam: "RAM", sysCpu: "CPU", sysOf: "{used} von {total}", sysAppsRam: "Apps: {n}", sysCores: "{n} Kerne", sysLoad: "Last {a} / {b} / {c}",
   sysSrc_supervisor: "Quelle: Supervisor (Datenträger des Hosts)", sysSrc_filesystem: "Quelle: Dateisystem von /config", sysUnknown: "nicht messbar",
   sysSwapHint: "Auslagerungsspeicher: ein Teil des Datenträgers, den das System als Reserve nutzt, wenn der RAM knapp wird. Er ist deutlich langsamer als RAM; viel Swap bei hoher RAM-Auslastung kann das System bremsen.",
-  sysTabCategories: "Systemspeicher nach Kategorie", sysTabCategoriesHint: "vom Supervisor gemessen", sysTabConsumers: "Größte Verbraucher", sysTabConsumersHint: "unter /config", sysTabCustom: "Custom-Integrationen", sysTabCustomHint: "Platz je Integration",
-  sysTabApps: "Apps", sysTabAppsHint: "CPU, RAM und Daten je App", sysTabCards: "Custom Cards", sysTabCardsHint: "Dashboard-Ressourcen", sysTabBlueprints: "Blueprints", sysTabBlueprintsHint: "Größe der Dateien", sysNoSupervisor: "nur mit Supervisor",
+       
+    sysTabCards: "Custom Cards", sysTabCardsHint: "Dashboard-Ressourcen", sysTabBlueprints: "Blueprints", sysTabBlueprintsHint: "Größe der Dateien", sysNoSupervisor: "nur mit Supervisor",
   cardStatus_missing: "Datei fehlt", cardStatus_external: "extern", cardStatus_unused: "ungenutzt", cardStatus_used: "genutzt", cardStatus_unknown: "unbekannt",
   cardStatusHint_missing: "Die lokale Datei gibt es nicht mehr; die Karte lädt nicht.", cardStatusHint_external: "Eine externe Adresse; Housekeeper prüft sie nicht.", cardStatusHint_unused: "Kein Dashboard nutzt eine Karte aus dieser Datei. Ein Hinweis, kein Urteil: Hilfsmodule werden anders gebraucht.", cardStatusHint_used: "Ein Dashboard nutzt eine Karte aus dieser Datei.", cardStatusHint_unknown: "Aus der Datei lassen sich keine Kartennamen lesen; ob sie gebraucht wird, ist offen.",
   sysColCategory: "Kategorie", sysColPlace: "Bereich", sysColSize: "Größe", sysColShare: "Anteil", sysColIntegration: "Integration", sysColApp: "App", sysColState: "Status", sysColCpu: "CPU", sysColRam: "RAM", sysColData: "Daten",
   sysColUrl: "Ressource", sysColType: "Typ", sysColName: "Name", sysColDomain: "Art", sysColAuthor: "Autor",
   sysTarget_recorder_db: "Recorder-Datenbank", sysTarget_backups: "Backups", sysTarget_custom_components: "Custom Components", sysTarget_media: "Medien", sysTarget_www: "www (lokale Web-Dateien)", sysTarget_image: "Bilder-Upload", sysTarget_tts: "TTS-Cache", sysTarget_blueprints: "Blueprints", sysTarget_themes: "Themes", sysTarget_deps: "Python-Abhängigkeiten (deps)", sysTarget_custom_cards: "Custom Cards",
   sysFolder: "Ordner", sysFolderHint: "Gezählt wird der ganze Ordner der Karte.", sysExternal: "extern oder nicht gefunden", sysAppRunning: "läuft", sysAppStopped: "gestoppt",
-  sysNoCategories: "Der Supervisor hat keine Aufteilung geliefert.", sysNoConsumers: "Unter /config wurde nichts Messbares gefunden.", sysNoCustom: "Keine Custom-Integrationen installiert.", sysNoApps: "Keine Apps installiert.", sysNoCards: "Keine Dashboard-Ressourcen eingetragen.", sysNoBlueprints: "Keine Blueprints vorhanden.",
+  sysNoCategories: "Der Supervisor hat keine Aufteilung geliefert.", sysNoConsumers: "Unter /config wurde nichts Messbares gefunden.", sysNoCards: "Keine Dashboard-Ressourcen eingetragen.", sysNoBlueprints: "Keine Blueprints vorhanden.",
   sysFootnote: "Datenträger, Kategorien und Apps kommen unter Home Assistant OS und Supervised vom Supervisor, sonst steht dort das Dateisystem, auf dem /config liegt. Die Größen unter /config zählt Housekeeper selbst, ohne Verknüpfungen zu folgen; die Recorder-Datenbank zählt mit ihren -wal- und -shm-Dateien. Eine Custom Card aus HACS zählt mit ihrem ganzen Ordner und wird aus „www“ herausgerechnet, damit nichts doppelt zählt. Die CPU-Last ist ein Mittel über 0,4 Sekunden. Es wird nichts geändert und nichts gespeichert.",
 
   accHint: "Systemzugriffe und Cloud-Datenfluss der Integrationen, Rechte der Apps", accLoading: "Die Integrationen werden eingeordnet …",
@@ -54,8 +55,9 @@ Object.assign(TEXT.de, {
   secFootnote: "Housekeeper erkennt Zugangsdaten am Namen eines Feldes in der Konfiguration einer Integration (password, token, api_key, secret, webhook, pin) und prüft nur, ob es leer ist. Werte, Auszüge davon und ihre Länge werden weder gelesen noch angezeigt noch exportiert. Die Erkennung ist ein Hinweis: Zugangsdaten unter einem anderen Namen fehlen, und ein Feld mit so einem Namen kann etwas Harmloses enthalten. Ein Klick auf eine Zeile öffnet die Integration in Home Assistant, dort lassen sich die Zugangsdaten ändern. Es wird nichts geändert und nichts gespeichert.",
 });
 Object.assign(TEXT.en, {
+  sysTabUsage: "Usage", sysTabUsageHint: "categories and folders", sysByCategory: "By category", sysByFolder: "By folder under /config", sysAppsHint: "Apps and custom integrations with size, CPU and RAM are under",
   sysTabMisc: "Other", sysTabMiscHint: "cards, blueprints, remaining folders", sysSecOther: "Other folders and files in /config", sysNoOther: "Apart from the known places, nothing measurable was found under /config.", sysOtherMore: "Plus {n} smaller entries totalling {size}.", sysKindFolder: "Folder", sysKindFile: "File",
-  sysCustomEntries: "{n} entries", sysCustomNoEntry: "No config entry: a folder without a set-up integration (for example a library, or not set up yet)",
+ 
   haMenu: "Open the Home Assistant sidebar",
   storage: "Storage & system", storageSubtitle: "Use of disk, memory and CPU and the largest consumers of space. Only reads; nothing is changed and nothing is stored.",
   dataflow: "Access & data flow", dataflowSubtitle: "Which integrations reach the system, radios, cameras or the location, which send data to the internet and which rights the apps have. Only reads.",
@@ -67,15 +69,15 @@ Object.assign(TEXT.en, {
   sysDiskUsed: "Storage used", sysRam: "RAM", sysCpu: "CPU", sysOf: "{used} of {total}", sysAppsRam: "Apps: {n}", sysCores: "{n} cores", sysLoad: "Load {a} / {b} / {c}",
   sysSrc_supervisor: "Source: Supervisor (host disk)", sysSrc_filesystem: "Source: file system of /config", sysUnknown: "cannot be measured",
   sysSwapHint: "Swap space: part of the disk the system uses as a reserve when RAM runs low. It is much slower than RAM; a lot of swap together with high RAM use can slow the system down.",
-  sysTabCategories: "System storage by category", sysTabCategoriesHint: "measured by the Supervisor", sysTabConsumers: "Largest consumers", sysTabConsumersHint: "under /config", sysTabCustom: "Custom integrations", sysTabCustomHint: "space per integration",
-  sysTabApps: "Apps", sysTabAppsHint: "CPU, RAM and data per app", sysTabCards: "Custom cards", sysTabCardsHint: "dashboard resources", sysTabBlueprints: "Blueprints", sysTabBlueprintsHint: "size of the files", sysNoSupervisor: "only with a Supervisor",
+       
+    sysTabCards: "Custom cards", sysTabCardsHint: "dashboard resources", sysTabBlueprints: "Blueprints", sysTabBlueprintsHint: "size of the files", sysNoSupervisor: "only with a Supervisor",
   cardStatus_missing: "File missing", cardStatus_external: "external", cardStatus_unused: "unused", cardStatus_used: "used", cardStatus_unknown: "unknown",
   cardStatusHint_missing: "The local file is gone; the card does not load.", cardStatusHint_external: "An external address; Housekeeper does not check it.", cardStatusHint_unused: "No dashboard uses a card from this file. A hint, not a verdict: helper modules are used in other ways.", cardStatusHint_used: "A dashboard uses a card from this file.", cardStatusHint_unknown: "No card names can be read from the file; whether it is needed is open.",
   sysColCategory: "Category", sysColPlace: "Area", sysColSize: "Size", sysColShare: "Share", sysColIntegration: "Integration", sysColApp: "App", sysColState: "State", sysColCpu: "CPU", sysColRam: "RAM", sysColData: "Data",
   sysColUrl: "Resource", sysColType: "Type", sysColName: "Name", sysColDomain: "Kind", sysColAuthor: "Author",
   sysTarget_recorder_db: "Recorder database", sysTarget_backups: "Backups", sysTarget_custom_components: "Custom components", sysTarget_media: "Media", sysTarget_www: "www (local web files)", sysTarget_image: "Image upload", sysTarget_tts: "TTS cache", sysTarget_blueprints: "Blueprints", sysTarget_themes: "Themes", sysTarget_deps: "Python dependencies (deps)", sysTarget_custom_cards: "Custom cards",
   sysFolder: "Folder", sysFolderHint: "The whole folder of the card is counted.", sysExternal: "external or not found", sysAppRunning: "running", sysAppStopped: "stopped",
-  sysNoCategories: "The Supervisor did not send a breakdown.", sysNoConsumers: "Nothing measurable was found under /config.", sysNoCustom: "No custom integrations installed.", sysNoApps: "No apps installed.", sysNoCards: "No dashboard resources registered.", sysNoBlueprints: "No blueprints.",
+  sysNoCategories: "The Supervisor did not send a breakdown.", sysNoConsumers: "Nothing measurable was found under /config.", sysNoCards: "No dashboard resources registered.", sysNoBlueprints: "No blueprints.",
   sysFootnote: "On Home Assistant OS and Supervised, the disk, the categories and the apps come from the Supervisor; otherwise the file system /config lies on is shown. Housekeeper counts the sizes under /config itself without following links; the recorder database counts with its -wal and -shm files. A custom card from HACS counts with its whole folder and is taken out of \"www\" so nothing counts twice. The CPU load is an average over 0.4 seconds. Nothing is changed and nothing is stored.",
 
   accHint: "System access and cloud data flow of the integrations, rights of the apps", accLoading: "Classifying the integrations …",

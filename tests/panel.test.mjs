@@ -4028,13 +4028,6 @@ function systemPanel(lang = "en") {
   return { ...env, calls };
 }
 
-test("a custom integration row opens its config entry, a folder without one stays static", () => {
-  const { el } = systemPanel();
-  el.data = { ...DATA, objects: [{ object_type: "config_entry", object_id: "E9", name: "HACS", domain: "hacs", integration_name: "HACS", status: "active" }] };
-  assert.match(el.sysCustomRowAttrs({ domain: "hacs" }), /data-object="integration:hacs"/);
-  assert.match(el.sysCustomRowAttrs({ domain: "theme_only" }), /class="static"/);
-});
-
 test("apps and integrations groups config entries by domain and opens the page of the domain", () => {
   const { el, shadow } = systemPanel("en");
   const entry = (id, domain, extra = {}) => ({ object_type: "config_entry", object_id: id, name: `Hub ${id}`, domain, integration_name: "Demo", status: "active", entity_count: 2, device_count: 1, ...extra });
@@ -4109,15 +4102,17 @@ test("storage shows the key figures, a red disk at 96 % and the Supervisor categ
   assert.ok(shadow.innerHTML.includes("card.js") && shadow.innerHTML.includes("Ordner") && shadow.innerHTML.includes("Motion light") && shadow.innerHTML.includes(".storage"), "cards, blueprints and the other entries share one tab");
 });
 
-test("without a Supervisor the categories and apps tiles are switched off and the consumers open", () => {
+test("without a Supervisor only the folders show and there is nothing to switch", () => {
   const { el, shadow } = systemPanel();
   el._sys.storage.data = { ...SYSTEM, supervisor: false, categories: {}, apps: [] };
   el.view = "storage";
   el.render();
   const html = shadow.innerHTML;
-  assert.equal((html.match(/taskcard t-mute off/g) || []).length, 2);
-  assert.ok(html.includes("Recorder database"), "the consumers under /config are the first list");
+  assert.ok(!html.includes("data-storage-by"), "no switch without categories");
+  assert.ok(html.includes("Recorder database"), "the folders under /config are shown");
+  assert.ok(html.includes('data-view="components"'), "a note points to Apps & integrations");
 });
+
 
 test("access and data flow show one list at a time, chosen by the tiles, and the high-risk filter can be removed", () => {
   const { el, shadow } = systemPanel();
@@ -4252,4 +4247,13 @@ test("the findings of the load view are a sortable table with the numbers in col
   assert.ok(html.includes('data-lf-set="stormfind||"') && html.includes('data-lf-set="stormfind|kind|storm"'));
   assert.ok(html.includes("Rows/day") && html.includes("72,000") && html.includes('data-object="entity:sensor.laut"') && html.includes('data-exsel="sensor.laut"') && html.includes("Nothing selected"));
   assert.ok(!html.includes("stormgroup"));
+});
+
+test("with a Supervisor the usage tab switches between categories and folders", () => {
+  const { el, shadow } = systemPanel();
+  el.view = "storage";
+  el.render();
+  assert.ok(shadow.innerHTML.includes('data-storage-by="folder"') && !shadow.innerHTML.includes("Recorder database"));
+  el.storageBy = "folder"; el.render();
+  assert.ok(shadow.innerHTML.includes("Recorder database"));
 });

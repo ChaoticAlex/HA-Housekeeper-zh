@@ -816,6 +816,7 @@ class HAHousekeeperPanel extends HTMLElement {
     });
     root.querySelectorAll("[data-decide-cancel]").forEach(el => el.onclick = () => { this.decide = null; this.render(); });
     root.querySelectorAll("[data-finding-after]").forEach(el => el.onclick = () => { this.findingAfter = !this.findingAfter; this.pages = {}; this.render(); });
+    root.querySelectorAll("[data-storage-by]").forEach(el => el.onclick = () => { this.storageBy = el.dataset.storageBy; this.render(); });
     root.querySelectorAll("[data-lf-set]").forEach(el => el.onclick = () => {
       const [id, name, value] = el.dataset.lfSet.split("|"), st = this.lv[id];
       if (!st) return;

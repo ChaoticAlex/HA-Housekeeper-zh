@@ -93,17 +93,16 @@ class SystemMixin {
         swap.total ? { label: this.t("sysSwapLabel"), value: this.esc(this.sysPercent(swap.percent)), sub: of(swap.used, swap.total), hint: this.t("sysSwapHint"), tone: "mute", spark: this.sysMeter(swap.percent) } : null,
       ]);
       const cats = r.categories?.children || [];
-      const sup = Boolean(r.supervisor);
-      const noSup = { disabled: true, hint: this.t("sysNoSupervisor") };
+      const sup = Boolean(r.supervisor) && cats.length > 0;
       const tabs = [
-        { id: "categories", icon: "mdi:chart-donut", label: this.t("sysTabCategories"), hint: this.t("sysTabCategoriesHint"), count: cats.length, ...(sup ? {} : noSup) },
-        { id: "consumers", icon: "mdi:folder-outline", label: this.t("sysTabConsumers"), hint: this.t("sysTabConsumersHint"), count: r.breakdown.length },
-        { id: "custom", icon: "mdi:puzzle-outline", label: this.t("sysTabCustom"), hint: this.t("sysTabCustomHint"), count: r.custom_integrations.length },
-        { id: "apps", icon: "mdi:package-variant-closed", label: this.t("sysTabApps"), hint: this.t("sysTabAppsHint"), count: r.apps.length, ...(sup ? {} : noSup) },
+        { id: "usage", icon: "mdi:chart-donut", label: this.t("sysTabUsage"), hint: this.t("sysTabUsageHint"), count: sup ? cats.length : r.breakdown.length },
         { id: "misc", icon: "mdi:dots-horizontal-circle-outline", label: this.t("sysTabMisc"), hint: this.t("sysTabMiscHint"), count: r.cards.length + r.blueprints.length + (r.other || []).length + (r.other_rest?.count || 0), ...(r.cards.some(c => c.status === "missing") ? { tone: "red" } : {}) },
       ];
-      const open = this.viewTabOf("storage", tabs.filter(x => !x.disabled), sup && cats.length ? "categories" : "consumers");
-      const body = { categories: () => this.sysCategories(cats), consumers: () => this.sysConsumers(r.breakdown), custom: () => this.sysCustom(r.custom_integrations), apps: () => this.sysApps(r.apps), misc: () => this.sysMisc(r) }[open]();
+      const open = this.viewTabOf("storage", tabs, "usage");
+      const by = sup && this.storageBy !== "folder" ? "category" : "folder";
+      const choice = sup ? `<div class="chips">${[["category", "sysByCategory"], ["folder", "sysByFolder"]].map(([id, key]) => `<button class="chip ${by === id ? "active" : ""}" data-storage-by="${id}" aria-pressed="${by === id}">${this.t(key)}</button>`).join("")}</div>` : "";
+      const usage = `${choice}${by === "category" ? this.sysCategories(cats) : this.sysConsumers(r.breakdown)}<p class="factnote">${this.t("sysAppsHint")} <button type="button" class="link" data-view="components">${this.t("components")}</button></p>`;
+      const body = open === "misc" ? this.sysMisc(r) : usage;
       return `<div class="stack">${head}${tiles}<div class="sysnav">${this.navTiles("storage", tabs, open, this.t("storage"), true)}</div><div class="panel">${body}${this.howCounted("sysFootnote")}</div></div>`;
     });
   }
@@ -138,64 +137,10 @@ class SystemMixin {
     });
   }
 
-  // What Housekeeper's inventory knows about the config entries of a custom_components folder: name, first entry, how many.
-  sysIntegrationInfo(domain) {
-    const map = this.memo("sysNames", [], () => {
-      const found = new Map();
-      for (const o of this.data?.objects || []) {
-        if (o.object_type !== "config_entry") continue;
-        const info = found.get(o.domain) || { name: o.integration_name, id: o.object_id, entries: 0 };
-        info.entries += 1;
-        found.set(o.domain, info);
-      }
-      return found;
-    });
-    return map.get(domain) || { name: null, id: null, entries: 0 };
-  }
-
-  sysIntegrationName(domain) { return this.sysIntegrationInfo(domain).name || domain; }
-
-  sysCustomRowAttrs(x) {
-    const info = this.sysIntegrationInfo(x.domain);
-    return info.id ? `data-object="${this.esc(`integration:${x.domain}`)}" tabindex="0" role="button" aria-label="${this.esc(this.sysIntegrationName(x.domain))}"` : `class="static" title="${this.esc(this.t("sysCustomNoEntry"))}"`;
-  }
-
-  sysCustom(items) {
-    const max = Math.max(0, ...items.map(x => x.bytes));
-    return this.sysList("syscustom", items, {
-      sort: "size", dir: "desc", sorts: [...this.sysBySize(), { key: "name", label: "sysColIntegration", dir: "asc", get: x => this.sysIntegrationName(x.domain) }],
-      text: x => `${this.sysIntegrationName(x.domain)} ${x.domain}`, tie: x => x.domain, empty: "sysNoCustom", rowAttrs: x => this.sysCustomRowAttrs(x),
-      columns: [{ key: "name", label: "sysColIntegration", cell: x => this.nameCell(this.sysIntegrationName(x.domain), `custom_components/${x.domain}${this.sysIntegrationInfo(x.domain).entries > 1 ? ` · ${this.t("sysCustomEntries", { n: this.sysIntegrationInfo(x.domain).entries })}` : ""}`) }, ...this.sysSizeColumns(max)],
-      exportName: "storage-custom-integrations", header: [this.t("sysColIntegration"), "Domain", "Bytes"], rows: x => [this.sysIntegrationName(x.domain), x.domain, x.bytes],
-    });
-  }
-
   // The load of an app as the Supervisor measured it, for the two app lists.
   sysAppRam(a) { return a.memory_usage === null || a.memory_usage === undefined ? "–" : `${this.formatBytes(a.memory_usage)}${a.memory_limit ? ` / ${this.formatBytes(a.memory_limit)}` : ""}`; }
 
   sysAppCpu(a) { return a.cpu_percent === null || a.cpu_percent === undefined ? "–" : `${this.formatNumber(Math.round(a.cpu_percent * 10) / 10)} %`; }
-
-  sysApps(apps) {
-    const max = Math.max(0, ...apps.map(a => a.size_bytes || 0));
-    const ram = a => this.sysAppRam(a), cpu = a => this.sysAppCpu(a);
-    const running = a => a.state === "started";
-    return this.sysList("sysapps", apps, {
-      sort: "ram", dir: "desc",
-      sorts: [{ key: "ram", label: "sysColRam", dir: "desc", get: a => a.memory_usage ?? null }, { key: "cpu", label: "sysColCpu", dir: "desc", get: a => a.cpu_percent ?? null }, { key: "size", label: "sysColData", dir: "desc", get: a => a.size_bytes ?? null }, { key: "name", label: "sysColApp", dir: "asc", get: a => a.name }],
-      filters: [{ name: "state", all: this.t("sysColState"), options: [["on", this.t("sysAppRunning")], ["off", this.t("sysAppStopped")]] }],
-      filterFns: { state: (a, v) => running(a) === (v === "on") },
-      text: a => `${a.name} ${a.slug}`, tie: a => a.slug, empty: "sysNoApps",
-      rowAttrs: a => (this.findObject(`app:${a.slug}`) ? this.appRowAttrs(a) : 'class="static"'),
-      columns: [
-        { key: "name", label: "sysColApp", cell: a => this.nameCell(a.name, a.slug) },
-        { key: "state", label: "sysColState", sortable: false, cell: a => `<span class="pill ${running(a) ? "ok" : "mute"}">${this.t(running(a) ? "sysAppRunning" : "sysAppStopped")}</span>` },
-        { key: "cpu", label: "sysColCpu", dir: "desc", cell: a => this.esc(cpu(a)) },
-        { key: "ram", label: "sysColRam", dir: "desc", cell: a => this.esc(ram(a)) },
-        { key: "size", label: "sysColData", dir: "desc", cell: a => (a.size_bytes === null || a.size_bytes === undefined ? "–" : `${this.esc(this.formatBytes(a.size_bytes))}${this.sysShare(a.size_bytes, max)}`) },
-      ],
-      exportName: "storage-apps", header: [this.t("sysColApp"), "Slug", this.t("sysColState"), "CPU %", "RAM bytes", "RAM limit", "Data bytes"], rows: a => [a.name, a.slug, a.state || "", a.cpu_percent ?? "", a.memory_usage ?? "", a.memory_limit ?? "", a.size_bytes ?? ""],
-    });
-  }
 
   cardStatus(c) {
     const tone = { missing: "red", unused: "warn", used: "ok" }[c.status] || "mute";

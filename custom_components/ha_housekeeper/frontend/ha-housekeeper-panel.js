@@ -10378,8 +10378,9 @@ class BatteryKindMixin {
 
 // Texts for storage and system, access and data flow, the credential overview and the sidebar button; merged into TEXT.
 Object.assign(TEXT.de, {
+  sysTabUsage: "Belegung", sysTabUsageHint: "Kategorien und Ordner", sysByCategory: "Nach Kategorie", sysByFolder: "Nach Ordner unter /config", sysAppsHint: "Apps und Custom-Integrationen mit Größe, CPU und RAM stehen unter",
   sysTabMisc: "Sonstiges", sysTabMiscHint: "Karten, Blueprints, übrige Ordner", sysSecOther: "Weitere Ordner und Dateien in /config", sysNoOther: "Außer den bekannten Orten wurde unter /config nichts Messbares gefunden.", sysOtherMore: "Dazu {n} kleinere Einträge mit zusammen {size}.", sysKindFolder: "Ordner", sysKindFile: "Datei",
-  sysCustomEntries: "{n} Einträge", sysCustomNoEntry: "Kein Konfigurationseintrag: Ordner ohne eingerichtete Integration (etwa Bibliothek oder noch nicht eingerichtet)",
+ 
   haMenu: "Seitenleiste von Home Assistant öffnen",
   storage: "Speicher & System", storageSubtitle: "Belegung von Datenträger, Arbeitsspeicher und CPU und die größten Speicherverbraucher. Liest nur; es wird nichts geändert und nichts gespeichert.",
   dataflow: "Zugriffe & Datenfluss", dataflowSubtitle: "Welche Integrationen auf System, Funk, Kameras oder den Standort zugreifen, welche Daten ins Internet schicken und welche Rechte die Apps haben. Liest nur.",
@@ -10391,15 +10392,15 @@ Object.assign(TEXT.de, {
   sysDiskUsed: "Speicher belegt", sysRam: "RAM", sysCpu: "CPU", sysOf: "{used} von {total}", sysAppsRam: "Apps: {n}", sysCores: "{n} Kerne", sysLoad: "Last {a} / {b} / {c}",
   sysSrc_supervisor: "Quelle: Supervisor (Datenträger des Hosts)", sysSrc_filesystem: "Quelle: Dateisystem von /config", sysUnknown: "nicht messbar",
   sysSwapHint: "Auslagerungsspeicher: ein Teil des Datenträgers, den das System als Reserve nutzt, wenn der RAM knapp wird. Er ist deutlich langsamer als RAM; viel Swap bei hoher RAM-Auslastung kann das System bremsen.",
-  sysTabCategories: "Systemspeicher nach Kategorie", sysTabCategoriesHint: "vom Supervisor gemessen", sysTabConsumers: "Größte Verbraucher", sysTabConsumersHint: "unter /config", sysTabCustom: "Custom-Integrationen", sysTabCustomHint: "Platz je Integration",
-  sysTabApps: "Apps", sysTabAppsHint: "CPU, RAM und Daten je App", sysTabCards: "Custom Cards", sysTabCardsHint: "Dashboard-Ressourcen", sysTabBlueprints: "Blueprints", sysTabBlueprintsHint: "Größe der Dateien", sysNoSupervisor: "nur mit Supervisor",
+       
+    sysTabCards: "Custom Cards", sysTabCardsHint: "Dashboard-Ressourcen", sysTabBlueprints: "Blueprints", sysTabBlueprintsHint: "Größe der Dateien", sysNoSupervisor: "nur mit Supervisor",
   cardStatus_missing: "Datei fehlt", cardStatus_external: "extern", cardStatus_unused: "ungenutzt", cardStatus_used: "genutzt", cardStatus_unknown: "unbekannt",
   cardStatusHint_missing: "Die lokale Datei gibt es nicht mehr; die Karte lädt nicht.", cardStatusHint_external: "Eine externe Adresse; Housekeeper prüft sie nicht.", cardStatusHint_unused: "Kein Dashboard nutzt eine Karte aus dieser Datei. Ein Hinweis, kein Urteil: Hilfsmodule werden anders gebraucht.", cardStatusHint_used: "Ein Dashboard nutzt eine Karte aus dieser Datei.", cardStatusHint_unknown: "Aus der Datei lassen sich keine Kartennamen lesen; ob sie gebraucht wird, ist offen.",
   sysColCategory: "Kategorie", sysColPlace: "Bereich", sysColSize: "Größe", sysColShare: "Anteil", sysColIntegration: "Integration", sysColApp: "App", sysColState: "Status", sysColCpu: "CPU", sysColRam: "RAM", sysColData: "Daten",
   sysColUrl: "Ressource", sysColType: "Typ", sysColName: "Name", sysColDomain: "Art", sysColAuthor: "Autor",
   sysTarget_recorder_db: "Recorder-Datenbank", sysTarget_backups: "Backups", sysTarget_custom_components: "Custom Components", sysTarget_media: "Medien", sysTarget_www: "www (lokale Web-Dateien)", sysTarget_image: "Bilder-Upload", sysTarget_tts: "TTS-Cache", sysTarget_blueprints: "Blueprints", sysTarget_themes: "Themes", sysTarget_deps: "Python-Abhängigkeiten (deps)", sysTarget_custom_cards: "Custom Cards",
   sysFolder: "Ordner", sysFolderHint: "Gezählt wird der ganze Ordner der Karte.", sysExternal: "extern oder nicht gefunden", sysAppRunning: "läuft", sysAppStopped: "gestoppt",
-  sysNoCategories: "Der Supervisor hat keine Aufteilung geliefert.", sysNoConsumers: "Unter /config wurde nichts Messbares gefunden.", sysNoCustom: "Keine Custom-Integrationen installiert.", sysNoApps: "Keine Apps installiert.", sysNoCards: "Keine Dashboard-Ressourcen eingetragen.", sysNoBlueprints: "Keine Blueprints vorhanden.",
+  sysNoCategories: "Der Supervisor hat keine Aufteilung geliefert.", sysNoConsumers: "Unter /config wurde nichts Messbares gefunden.", sysNoCards: "Keine Dashboard-Ressourcen eingetragen.", sysNoBlueprints: "Keine Blueprints vorhanden.",
   sysFootnote: "Datenträger, Kategorien und Apps kommen unter Home Assistant OS und Supervised vom Supervisor, sonst steht dort das Dateisystem, auf dem /config liegt. Die Größen unter /config zählt Housekeeper selbst, ohne Verknüpfungen zu folgen; die Recorder-Datenbank zählt mit ihren -wal- und -shm-Dateien. Eine Custom Card aus HACS zählt mit ihrem ganzen Ordner und wird aus „www“ herausgerechnet, damit nichts doppelt zählt. Die CPU-Last ist ein Mittel über 0,4 Sekunden. Es wird nichts geändert und nichts gespeichert.",
 
   accHint: "Systemzugriffe und Cloud-Datenfluss der Integrationen, Rechte der Apps", accLoading: "Die Integrationen werden eingeordnet …",
@@ -10432,8 +10433,9 @@ Object.assign(TEXT.de, {
   secFootnote: "Housekeeper erkennt Zugangsdaten am Namen eines Feldes in der Konfiguration einer Integration (password, token, api_key, secret, webhook, pin) und prüft nur, ob es leer ist. Werte, Auszüge davon und ihre Länge werden weder gelesen noch angezeigt noch exportiert. Die Erkennung ist ein Hinweis: Zugangsdaten unter einem anderen Namen fehlen, und ein Feld mit so einem Namen kann etwas Harmloses enthalten. Ein Klick auf eine Zeile öffnet die Integration in Home Assistant, dort lassen sich die Zugangsdaten ändern. Es wird nichts geändert und nichts gespeichert.",
 });
 Object.assign(TEXT.en, {
+  sysTabUsage: "Usage", sysTabUsageHint: "categories and folders", sysByCategory: "By category", sysByFolder: "By folder under /config", sysAppsHint: "Apps and custom integrations with size, CPU and RAM are under",
   sysTabMisc: "Other", sysTabMiscHint: "cards, blueprints, remaining folders", sysSecOther: "Other folders and files in /config", sysNoOther: "Apart from the known places, nothing measurable was found under /config.", sysOtherMore: "Plus {n} smaller entries totalling {size}.", sysKindFolder: "Folder", sysKindFile: "File",
-  sysCustomEntries: "{n} entries", sysCustomNoEntry: "No config entry: a folder without a set-up integration (for example a library, or not set up yet)",
+ 
   haMenu: "Open the Home Assistant sidebar",
   storage: "Storage & system", storageSubtitle: "Use of disk, memory and CPU and the largest consumers of space. Only reads; nothing is changed and nothing is stored.",
   dataflow: "Access & data flow", dataflowSubtitle: "Which integrations reach the system, radios, cameras or the location, which send data to the internet and which rights the apps have. Only reads.",
@@ -10445,15 +10447,15 @@ Object.assign(TEXT.en, {
   sysDiskUsed: "Storage used", sysRam: "RAM", sysCpu: "CPU", sysOf: "{used} of {total}", sysAppsRam: "Apps: {n}", sysCores: "{n} cores", sysLoad: "Load {a} / {b} / {c}",
   sysSrc_supervisor: "Source: Supervisor (host disk)", sysSrc_filesystem: "Source: file system of /config", sysUnknown: "cannot be measured",
   sysSwapHint: "Swap space: part of the disk the system uses as a reserve when RAM runs low. It is much slower than RAM; a lot of swap together with high RAM use can slow the system down.",
-  sysTabCategories: "System storage by category", sysTabCategoriesHint: "measured by the Supervisor", sysTabConsumers: "Largest consumers", sysTabConsumersHint: "under /config", sysTabCustom: "Custom integrations", sysTabCustomHint: "space per integration",
-  sysTabApps: "Apps", sysTabAppsHint: "CPU, RAM and data per app", sysTabCards: "Custom cards", sysTabCardsHint: "dashboard resources", sysTabBlueprints: "Blueprints", sysTabBlueprintsHint: "size of the files", sysNoSupervisor: "only with a Supervisor",
+       
+    sysTabCards: "Custom cards", sysTabCardsHint: "dashboard resources", sysTabBlueprints: "Blueprints", sysTabBlueprintsHint: "size of the files", sysNoSupervisor: "only with a Supervisor",
   cardStatus_missing: "File missing", cardStatus_external: "external", cardStatus_unused: "unused", cardStatus_used: "used", cardStatus_unknown: "unknown",
   cardStatusHint_missing: "The local file is gone; the card does not load.", cardStatusHint_external: "An external address; Housekeeper does not check it.", cardStatusHint_unused: "No dashboard uses a card from this file. A hint, not a verdict: helper modules are used in other ways.", cardStatusHint_used: "A dashboard uses a card from this file.", cardStatusHint_unknown: "No card names can be read from the file; whether it is needed is open.",
   sysColCategory: "Category", sysColPlace: "Area", sysColSize: "Size", sysColShare: "Share", sysColIntegration: "Integration", sysColApp: "App", sysColState: "State", sysColCpu: "CPU", sysColRam: "RAM", sysColData: "Data",
   sysColUrl: "Resource", sysColType: "Type", sysColName: "Name", sysColDomain: "Kind", sysColAuthor: "Author",
   sysTarget_recorder_db: "Recorder database", sysTarget_backups: "Backups", sysTarget_custom_components: "Custom components", sysTarget_media: "Media", sysTarget_www: "www (local web files)", sysTarget_image: "Image upload", sysTarget_tts: "TTS cache", sysTarget_blueprints: "Blueprints", sysTarget_themes: "Themes", sysTarget_deps: "Python dependencies (deps)", sysTarget_custom_cards: "Custom cards",
   sysFolder: "Folder", sysFolderHint: "The whole folder of the card is counted.", sysExternal: "external or not found", sysAppRunning: "running", sysAppStopped: "stopped",
-  sysNoCategories: "The Supervisor did not send a breakdown.", sysNoConsumers: "Nothing measurable was found under /config.", sysNoCustom: "No custom integrations installed.", sysNoApps: "No apps installed.", sysNoCards: "No dashboard resources registered.", sysNoBlueprints: "No blueprints.",
+  sysNoCategories: "The Supervisor did not send a breakdown.", sysNoConsumers: "Nothing measurable was found under /config.", sysNoCards: "No dashboard resources registered.", sysNoBlueprints: "No blueprints.",
   sysFootnote: "On Home Assistant OS and Supervised, the disk, the categories and the apps come from the Supervisor; otherwise the file system /config lies on is shown. Housekeeper counts the sizes under /config itself without following links; the recorder database counts with its -wal and -shm files. A custom card from HACS counts with its whole folder and is taken out of \"www\" so nothing counts twice. The CPU load is an average over 0.4 seconds. Nothing is changed and nothing is stored.",
 
   accHint: "System access and cloud data flow of the integrations, rights of the apps", accLoading: "Classifying the integrations …",
@@ -10768,17 +10770,16 @@ class SystemMixin {
         swap.total ? { label: this.t("sysSwapLabel"), value: this.esc(this.sysPercent(swap.percent)), sub: of(swap.used, swap.total), hint: this.t("sysSwapHint"), tone: "mute", spark: this.sysMeter(swap.percent) } : null,
       ]);
       const cats = r.categories?.children || [];
-      const sup = Boolean(r.supervisor);
-      const noSup = { disabled: true, hint: this.t("sysNoSupervisor") };
+      const sup = Boolean(r.supervisor) && cats.length > 0;
       const tabs = [
-        { id: "categories", icon: "mdi:chart-donut", label: this.t("sysTabCategories"), hint: this.t("sysTabCategoriesHint"), count: cats.length, ...(sup ? {} : noSup) },
-        { id: "consumers", icon: "mdi:folder-outline", label: this.t("sysTabConsumers"), hint: this.t("sysTabConsumersHint"), count: r.breakdown.length },
-        { id: "custom", icon: "mdi:puzzle-outline", label: this.t("sysTabCustom"), hint: this.t("sysTabCustomHint"), count: r.custom_integrations.length },
-        { id: "apps", icon: "mdi:package-variant-closed", label: this.t("sysTabApps"), hint: this.t("sysTabAppsHint"), count: r.apps.length, ...(sup ? {} : noSup) },
+        { id: "usage", icon: "mdi:chart-donut", label: this.t("sysTabUsage"), hint: this.t("sysTabUsageHint"), count: sup ? cats.length : r.breakdown.length },
         { id: "misc", icon: "mdi:dots-horizontal-circle-outline", label: this.t("sysTabMisc"), hint: this.t("sysTabMiscHint"), count: r.cards.length + r.blueprints.length + (r.other || []).length + (r.other_rest?.count || 0), ...(r.cards.some(c => c.status === "missing") ? { tone: "red" } : {}) },
       ];
-      const open = this.viewTabOf("storage", tabs.filter(x => !x.disabled), sup && cats.length ? "categories" : "consumers");
-      const body = { categories: () => this.sysCategories(cats), consumers: () => this.sysConsumers(r.breakdown), custom: () => this.sysCustom(r.custom_integrations), apps: () => this.sysApps(r.apps), misc: () => this.sysMisc(r) }[open]();
+      const open = this.viewTabOf("storage", tabs, "usage");
+      const by = sup && this.storageBy !== "folder" ? "category" : "folder";
+      const choice = sup ? `<div class="chips">${[["category", "sysByCategory"], ["folder", "sysByFolder"]].map(([id, key]) => `<button class="chip ${by === id ? "active" : ""}" data-storage-by="${id}" aria-pressed="${by === id}">${this.t(key)}</button>`).join("")}</div>` : "";
+      const usage = `${choice}${by === "category" ? this.sysCategories(cats) : this.sysConsumers(r.breakdown)}<p class="factnote">${this.t("sysAppsHint")} <button type="button" class="link" data-view="components">${this.t("components")}</button></p>`;
+      const body = open === "misc" ? this.sysMisc(r) : usage;
       return `<div class="stack">${head}${tiles}<div class="sysnav">${this.navTiles("storage", tabs, open, this.t("storage"), true)}</div><div class="panel">${body}${this.howCounted("sysFootnote")}</div></div>`;
     });
   }
@@ -10813,64 +10814,10 @@ class SystemMixin {
     });
   }
 
-  // What Housekeeper's inventory knows about the config entries of a custom_components folder: name, first entry, how many.
-  sysIntegrationInfo(domain) {
-    const map = this.memo("sysNames", [], () => {
-      const found = new Map();
-      for (const o of this.data?.objects || []) {
-        if (o.object_type !== "config_entry") continue;
-        const info = found.get(o.domain) || { name: o.integration_name, id: o.object_id, entries: 0 };
-        info.entries += 1;
-        found.set(o.domain, info);
-      }
-      return found;
-    });
-    return map.get(domain) || { name: null, id: null, entries: 0 };
-  }
-
-  sysIntegrationName(domain) { return this.sysIntegrationInfo(domain).name || domain; }
-
-  sysCustomRowAttrs(x) {
-    const info = this.sysIntegrationInfo(x.domain);
-    return info.id ? `data-object="${this.esc(`integration:${x.domain}`)}" tabindex="0" role="button" aria-label="${this.esc(this.sysIntegrationName(x.domain))}"` : `class="static" title="${this.esc(this.t("sysCustomNoEntry"))}"`;
-  }
-
-  sysCustom(items) {
-    const max = Math.max(0, ...items.map(x => x.bytes));
-    return this.sysList("syscustom", items, {
-      sort: "size", dir: "desc", sorts: [...this.sysBySize(), { key: "name", label: "sysColIntegration", dir: "asc", get: x => this.sysIntegrationName(x.domain) }],
-      text: x => `${this.sysIntegrationName(x.domain)} ${x.domain}`, tie: x => x.domain, empty: "sysNoCustom", rowAttrs: x => this.sysCustomRowAttrs(x),
-      columns: [{ key: "name", label: "sysColIntegration", cell: x => this.nameCell(this.sysIntegrationName(x.domain), `custom_components/${x.domain}${this.sysIntegrationInfo(x.domain).entries > 1 ? ` · ${this.t("sysCustomEntries", { n: this.sysIntegrationInfo(x.domain).entries })}` : ""}`) }, ...this.sysSizeColumns(max)],
-      exportName: "storage-custom-integrations", header: [this.t("sysColIntegration"), "Domain", "Bytes"], rows: x => [this.sysIntegrationName(x.domain), x.domain, x.bytes],
-    });
-  }
-
   // The load of an app as the Supervisor measured it, for the two app lists.
   sysAppRam(a) { return a.memory_usage === null || a.memory_usage === undefined ? "–" : `${this.formatBytes(a.memory_usage)}${a.memory_limit ? ` / ${this.formatBytes(a.memory_limit)}` : ""}`; }
 
   sysAppCpu(a) { return a.cpu_percent === null || a.cpu_percent === undefined ? "–" : `${this.formatNumber(Math.round(a.cpu_percent * 10) / 10)} %`; }
-
-  sysApps(apps) {
-    const max = Math.max(0, ...apps.map(a => a.size_bytes || 0));
-    const ram = a => this.sysAppRam(a), cpu = a => this.sysAppCpu(a);
-    const running = a => a.state === "started";
-    return this.sysList("sysapps", apps, {
-      sort: "ram", dir: "desc",
-      sorts: [{ key: "ram", label: "sysColRam", dir: "desc", get: a => a.memory_usage ?? null }, { key: "cpu", label: "sysColCpu", dir: "desc", get: a => a.cpu_percent ?? null }, { key: "size", label: "sysColData", dir: "desc", get: a => a.size_bytes ?? null }, { key: "name", label: "sysColApp", dir: "asc", get: a => a.name }],
-      filters: [{ name: "state", all: this.t("sysColState"), options: [["on", this.t("sysAppRunning")], ["off", this.t("sysAppStopped")]] }],
-      filterFns: { state: (a, v) => running(a) === (v === "on") },
-      text: a => `${a.name} ${a.slug}`, tie: a => a.slug, empty: "sysNoApps",
-      rowAttrs: a => (this.findObject(`app:${a.slug}`) ? this.appRowAttrs(a) : 'class="static"'),
-      columns: [
-        { key: "name", label: "sysColApp", cell: a => this.nameCell(a.name, a.slug) },
-        { key: "state", label: "sysColState", sortable: false, cell: a => `<span class="pill ${running(a) ? "ok" : "mute"}">${this.t(running(a) ? "sysAppRunning" : "sysAppStopped")}</span>` },
-        { key: "cpu", label: "sysColCpu", dir: "desc", cell: a => this.esc(cpu(a)) },
-        { key: "ram", label: "sysColRam", dir: "desc", cell: a => this.esc(ram(a)) },
-        { key: "size", label: "sysColData", dir: "desc", cell: a => (a.size_bytes === null || a.size_bytes === undefined ? "–" : `${this.esc(this.formatBytes(a.size_bytes))}${this.sysShare(a.size_bytes, max)}`) },
-      ],
-      exportName: "storage-apps", header: [this.t("sysColApp"), "Slug", this.t("sysColState"), "CPU %", "RAM bytes", "RAM limit", "Data bytes"], rows: a => [a.name, a.slug, a.state || "", a.cpu_percent ?? "", a.memory_usage ?? "", a.memory_limit ?? "", a.size_bytes ?? ""],
-    });
-  }
 
   cardStatus(c) {
     const tone = { missing: "red", unused: "warn", used: "ok" }[c.status] || "mute";
@@ -12697,6 +12644,7 @@ class HAHousekeeperPanel extends HTMLElement {
     });
     root.querySelectorAll("[data-decide-cancel]").forEach(el => el.onclick = () => { this.decide = null; this.render(); });
     root.querySelectorAll("[data-finding-after]").forEach(el => el.onclick = () => { this.findingAfter = !this.findingAfter; this.pages = {}; this.render(); });
+    root.querySelectorAll("[data-storage-by]").forEach(el => el.onclick = () => { this.storageBy = el.dataset.storageBy; this.render(); });
     root.querySelectorAll("[data-lf-set]").forEach(el => el.onclick = () => {
       const [id, name, value] = el.dataset.lfSet.split("|"), st = this.lv[id];
       if (!st) return;
