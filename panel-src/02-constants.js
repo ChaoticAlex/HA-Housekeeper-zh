@@ -1,5 +1,5 @@
 const ICONS = {
-  service: "mdi:cog-off-outline", entity: "mdi:shape-outline", device: "mdi:devices", config_entry: "mdi:puzzle-outline",
+  service: "mdi:cog-off-outline", entity: "mdi:shape-outline", device: "mdi:devices", config_entry: "mdi:puzzle-outline", integration: "mdi:puzzle",
   area: "mdi:floor-plan", automation: "mdi:robot-outline", floor: "mdi:layers-outline",
   label: "mdi:label-outline", script: "mdi:script-text-outline", scene: "mdi:palette-outline", dashboard: "mdi:view-dashboard-outline", app: "mdi:package-variant-closed",
 };

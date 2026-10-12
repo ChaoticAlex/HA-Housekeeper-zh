@@ -263,6 +263,7 @@ class DiagnosisMixin {
 
   // The always-visible summary under the title: status, cause, since when, integration, device, area, risk.
   detailSummary(item, key) {
+    if (item.object_type === "integration") return this.intSummary(item);
     const device = item.device_id ? this.findObject(`device:${item.device_id}`) : null;
     const areaId = item.area_id || device?.area_id, area = areaId ? this.findObject(`area:${areaId}`) : null;
     const integration = item.object_type === "entity" ? item.platform : item.object_type === "config_entry" ? (item.integration_name || item.domain) : null;
@@ -271,7 +272,7 @@ class DiagnosisMixin {
     return [
       item.reason ? [this.t("sumCause"), this.esc(this.t(item.reason))] : null,
       item.status_since ? [this.t("since"), this.esc(this.formatDate(item.status_since))] : null,
-      integration ? [this.t("sumIntegration"), this.esc(integration)] : null,
+      integration ? [this.t("sumIntegration"), item.object_type === "config_entry" && this.findObject(`integration:${item.domain}`) ? `<button class="link" data-object="${this.esc(`integration:${item.domain}`)}" title="${this.esc(this.t("intToIntegration"))}">${this.esc(integration)}</button>` : this.esc(integration)] : null,
       device ? [this.t("sumDevice"), this.esc(device.name)] : null,
       area ? [this.t("sumArea"), this.esc(area.name)] : null,
       risk ? [this.t("sumRisk"), `<span class="pill ${risk.tone}">${this.esc(risk.text)}</span>`] : null,
@@ -280,6 +281,7 @@ class DiagnosisMixin {
 
   // Tabs offered for one object; "attributes" only when it has some, so an empty tab never shows.
   detailTabs(item, key) {
+    if (item.object_type === "integration") return this.intTabs(item);
     // An app has no actions of its own; its rights and its load come from the two system reports, its relations are the integrations that seem to use it.
     if (item.object_type === "app") return [["overview", "tabOverview"], ...(this.edgesTo(key).length ? [["relations", "tabRelations", this.edgesTo(key).length]] : []), ["access", "accAppTab", null, this.appAccessTone(item)], ["storage", "accAppLoad"], ["technical", "tabTechnical"]];
     const tabs = [["overview", "tabOverview"], ["relations", "tabRelations", this.edgesTo(key).length + this.edgesFrom(key).length], ["technical", "tabTechnical"]];
@@ -298,7 +300,9 @@ class DiagnosisMixin {
     const item = { ...base, ...(this.details.get(this.objectKey(base)) || {}) };
     const key = this.objectKey(item);
     if (["automation", "script"].includes(item.object_type)) this.ensureRuns();
-    if (item.object_type === "config_entry") this.ensureReliability();
+    if (item.object_type === "config_entry" || item.object_type === "integration") this.ensureReliability();
+    if (item.object_type === "integration" && item.custom && this.detailTab === "overview") this.sysEnsure("storage"); // the folder size
+    if (item.object_type === "integration" && this.detailTab === "access") { this.sysEnsure("dataflow"); this.sysEnsure("secrets"); }
     // The reports of Access & data flow and Credentials are read when their tab is opened, not with the page.
     if (item.object_type === "config_entry" && this.detailTab === "access") { this.sysEnsure("dataflow"); this.sysEnsure("secrets"); }
     if (item.object_type === "app" && this.detailTab === "access") this.sysEnsure("dataflow");
@@ -315,7 +319,7 @@ class DiagnosisMixin {
     const tablist = tabs.map(([id, label, count, tone]) => `<button class="tab" role="tab" id="hk-tab-${id}" aria-selected="${id === tab}" aria-controls="hk-tabpanel" tabindex="${id === tab ? 0 : -1}" data-detail-tab="${id}">${this.t(label)}${count ? ` <em>${this.formatNumber(count)}</em>` : ""}${tone ? `<i class="tabdot ${tone}" aria-hidden="true"></i>` : ""}</button>`).join("");
     return `<div class="crumbs"><button class="btn" data-action="back"><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("backTo")} ${this.esc(back)}</button><span class="trail">${this.t(this.view)} › ${this.t(item.object_type)}</span></div>
       <div class="panel detailhead">${this.tile(item.object_type, tone)}<div><div class="headpills">${this.pill(item.status)}<span class="pill mute">${this.t(item.object_type)}</span></div><h1>${this.esc(item.name)}</h1><span class="id">${this.esc(item.object_id)}</span></div>
-      <div class="actions">${path ? `<button class="btn" data-ha-path="${this.esc(path)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("openInHA")}</button>` : ""}<button class="btn" data-graph-open="${this.esc(key)}"><ha-icon icon="mdi:source-fork"></ha-icon>${this.t("showInGraph")}</button>${["entity", "device", "area", "automation", "script", "scene", "dashboard"].includes(item.object_type) ? `<button class="btn" data-xp-from="${this.esc(key)}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button>` : ""}</div></div>
+      <div class="actions">${path ? `<button class="btn" data-ha-path="${this.esc(path)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("openInHA")}</button>` : ""}<button class="btn" data-graph-open="${this.esc(item.object_type === "integration" ? this.objectKey(item.entries[0]) : key)}"><ha-icon icon="mdi:source-fork"></ha-icon>${this.t("showInGraph")}</button>${["entity", "device", "area", "automation", "script", "scene", "dashboard"].includes(item.object_type) ? `<button class="btn" data-xp-from="${this.esc(key)}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button>` : ""}</div></div>
       <div class="panel sumline">${summary}</div>
       <div class="tabs" role="tablist" aria-label="${this.esc(this.t("tabsLabel"))}">${tablist}</div>
       <div role="tabpanel" id="hk-tabpanel" aria-labelledby="hk-tab-${tab}" tabindex="0">${tab === "overview" ? this.accessAlert(item) : ""}${this.detailPanel(tab, item, key)}</div>`;
@@ -323,6 +327,7 @@ class DiagnosisMixin {
 
   // Only the open tab is built, so large attributes and relations cost nothing until they are asked for.
   detailPanel(tab, item, key) {
+    if (item.object_type === "integration") return this.intPanel(tab, item);
     if (tab === "actions") return this.actionsTab(item, key);
     if (tab === "relations") return `<div class="stack">${this.relationsCard(key)}</div>`;
     if (tab === "flow") return this.flowCard(item, key);

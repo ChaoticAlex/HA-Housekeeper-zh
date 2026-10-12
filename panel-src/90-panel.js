@@ -230,6 +230,7 @@ class HAHousekeeperPanel extends HTMLElement {
     if (this.selected !== obj) { this.detailTab = this._pendingTab || "overview"; this._pendingTab = null; }
     this.selected = obj;
     const key = this.objectKey(obj);
+    if (obj.object_type === "integration" && !this.details.has(key)) this.details.set(key, {}); // made in the panel, nothing to ask the backend
     if (this.details.has(key)) { this.render(); this.scrollIntoView?.({ block: "start" }); return; }
     this.detailLoading = true;
     this.render();
@@ -309,6 +310,7 @@ class HAHousekeeperPanel extends HTMLElement {
     if (!this.data) return undefined;
     if (!this._index || this._indexSource !== this.data) {
       this._index = new Map(this.data.objects.map(item => [this.objectKey(item), item]));
+      for (const g of this.buildIntegrationObjects(this.data.objects).values()) this._index.set(this.objectKey(g), g); // pages of whole integrations, not inventory rows
       this._indexSource = this.data;
     }
     return this._index.get(key);
@@ -330,7 +332,7 @@ class HAHousekeeperPanel extends HTMLElement {
         : `/config/entities?search=${encodeURIComponent(item.object_id)}`;
       case "dashboard": return `/${encodeURIComponent(item.url_path || "lovelace")}`;
       case "app": return `/hassio/addon/${encodeURIComponent(item.slug || item.object_id)}/info`;
-      case "config_entry": return `/config/integrations/integration/${encodeURIComponent(item.domain)}`;
+      case "config_entry": case "integration": return `/config/integrations/integration/${encodeURIComponent(item.domain)}`;
       case "floor": return "/config/areas/dashboard";
       case "label": return "/config/labels";
       default: return null;
@@ -838,15 +840,6 @@ class HAHousekeeperPanel extends HTMLElement {
       ev.preventDefault();
       if (el.click) el.click(); else el.onclick?.();
     };
-    root.querySelectorAll("tr[data-comp-toggle]").forEach(el => {
-      el.onclick = ev => {
-        if (ev?.target?.closest?.("button, select, input, a, label")) return; // the entries and the copy button have their own action
-        const set = this.compOpen ||= new Set(), d = el.dataset.compToggle;
-        if (!set.delete(d)) set.add(d);
-        this.render();
-      };
-      openByKey(el);
-    });
     root.querySelectorAll("tr[data-object], g[data-graph]").forEach(openByKey);
     root.querySelectorAll("g[data-graph-group]").forEach(openByKey);
     root.querySelectorAll("[data-graph-depth]").forEach(el => el.onclick = () => { this.graphDepth = Number(el.dataset.graphDepth); this.graphLimit = GRAPH_NODE_STEP; this.render(); });

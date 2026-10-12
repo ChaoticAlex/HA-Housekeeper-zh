@@ -3989,11 +3989,11 @@ function systemPanel(lang = "en") {
 test("a custom integration row opens its config entry, a folder without one stays static", () => {
   const { el } = systemPanel();
   el.data = { ...DATA, objects: [{ object_type: "config_entry", object_id: "E9", name: "HACS", domain: "hacs", integration_name: "HACS", status: "active" }] };
-  assert.match(el.sysCustomRowAttrs({ domain: "hacs" }), /data-object="config_entry:E9"/);
+  assert.match(el.sysCustomRowAttrs({ domain: "hacs" }), /data-object="integration:hacs"/);
   assert.match(el.sysCustomRowAttrs({ domain: "theme_only" }), /class="static"/);
 });
 
-test("apps and integrations groups config entries by domain and opens one entry or lists several", () => {
+test("apps and integrations groups config entries by domain and opens the page of the domain", () => {
   const { el, shadow } = systemPanel("en");
   const entry = (id, domain, extra = {}) => ({ object_type: "config_entry", object_id: id, name: `Hub ${id}`, domain, integration_name: "Demo", status: "active", entity_count: 2, device_count: 1, ...extra });
   el.data = { ...DATA, objects: [entry("A1", "demo", { custom: true, integration_version: "1.0" }), entry("A2", "demo", { status: "problem" }), entry("B1", "solo")] };
@@ -4001,12 +4001,30 @@ test("apps and integrations groups config entries by domain and opens one entry 
   assert.equal(demo.entries.length, 2);
   assert.equal(demo.entities, 4);
   assert.equal(demo.status, "problem");
-  assert.match(el.compRowAttrs(demo), /data-comp-toggle="demo"/);
-  assert.match(el.compRowAttrs(el.compIntegrations().find(g => g.domain === "solo")), /data-object="config_entry:B1"/);
+  assert.match(el.compRowAttrs(demo), /data-object="integration:demo"/);
   el.view = "components";
   el.render();
   assert.ok(shadow.innerHTML.includes(el.t("components")));
   assert.ok(!shadow.innerHTML.includes(el.t("renderError")));
+});
+
+test("the page of an integration covers all its entries for core and custom and every tab renders", async () => {
+  for (const custom of [true, false]) {
+    const { el, shadow } = systemPanel("en");
+    const entry = (id, extra = {}) => ({ object_type: "config_entry", object_id: id, name: `Hub ${id}`, domain: "demo", integration_name: "Demo", custom, integration_version: custom ? "1.0" : null, status: "active", entity_count: 1, device_count: 1, ...extra });
+    el.data = { ...DATA, objects: [entry("A1"), entry("A2"), { object_type: "entity", object_id: "sensor.x", name: "X", status: "active", config_entry_id: "A2" }], edges: [{ source: "automation:a", target: "entity:sensor.x", relation: "uses" }] };
+    const page = el.findObject("integration:demo");
+    assert.equal(page.entries.length, 2);
+    assert.equal(page.custom, custom);
+    await el.openObject(page);
+    assert.equal(el.details.has("integration:demo"), true);
+    for (const tab of el.detailTabs(page, "integration:demo").map(([id]) => id)) {
+      el.detailTab = tab;
+      el.render();
+      assert.ok(!shadow.innerHTML.includes(el.t("renderError")), `${custom} ${tab}`);
+    }
+    assert.ok(el.detailTabs(page, "integration:demo").some(([id]) => id === "members"));
+  }
 });
 
 test("the three new pages sit under Operation and Security and render in both languages", () => {

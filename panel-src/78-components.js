@@ -3,7 +3,7 @@
 Object.assign(TEXT.de, {
   components: "Apps & Integrationen", componentsSubtitle: "Was installiert ist und ob es läuft: Apps und Integrationen nach Domain, mit Version, Status und Umfang. Liest nur, die Zahlen kommen aus dem Scan.",
   compTabApps: "Apps", compTabAppsHint: "vom Supervisor", compTabIntegrations: "Integrationen", compTabIntegrationsHint: "nach Domain",
-  compEntries: "{n} Einträge", compEntriesOpen: "Einträge der Integration zeigen oder verbergen", compNoApps: "Keine Apps (kein Supervisor oder keine installiert).", compNoIntegrations: "Keine Integrationen gefunden.",
+  compEntries: "{n} Einträge", compNoApps: "Keine Apps (kein Supervisor oder keine installiert).", compNoIntegrations: "Keine Integrationen gefunden.",
   compSumApps: "Apps", compSumRunning: "laufen", compSumIntegrations: "Integrationen", compSumCustom: "davon Custom", compSumProblem: "mit Problem",
   compColVersion: "Version", compColEntries: "Einträge", compColDevices: "Geräte", compColAvail: "Verfügbarkeit", compColOrigin: "Herkunft", compUpdate: "Update", compUpdateHint: "Neuere Version: {v}",
   compAvailHint: "Schlechtester Wert der Einträge; erscheint, sobald die Zuverlässigkeit berechnet ist.", compSizeHint: "Ordnergröße; erscheint, sobald „Speicher & System“ geladen ist.",
@@ -11,7 +11,7 @@ Object.assign(TEXT.de, {
 Object.assign(TEXT.en, {
   components: "Apps & integrations", componentsSubtitle: "What is installed and whether it runs: apps and integrations by domain, with version, status and scope. Read-only; the numbers come from the scan.",
   compTabApps: "Apps", compTabAppsHint: "from the Supervisor", compTabIntegrations: "Integrations", compTabIntegrationsHint: "by domain",
-  compEntries: "{n} entries", compEntriesOpen: "Show or hide the entries of the integration", compNoApps: "No apps (no Supervisor, or none installed).", compNoIntegrations: "No integrations found.",
+  compEntries: "{n} entries", compNoApps: "No apps (no Supervisor, or none installed).", compNoIntegrations: "No integrations found.",
   compSumApps: "Apps", compSumRunning: "running", compSumIntegrations: "Integrations", compSumCustom: "of them custom", compSumProblem: "with a problem",
   compColVersion: "Version", compColEntries: "Entries", compColDevices: "Devices", compColAvail: "Availability", compColOrigin: "Origin", compUpdate: "Update", compUpdateHint: "Newer version: {v}",
   compAvailHint: "Worst value of the entries; appears once reliability is calculated.", compSizeHint: "Folder size; appears once Storage & system is loaded.",
@@ -43,15 +43,12 @@ class ComponentsMixin {
   }
 
   compRowAttrs(g) {
-    if (g.entries.length > 1) return `data-comp-toggle="${this.esc(g.domain)}" tabindex="0" role="button" aria-expanded="${this.compOpen?.has(g.domain) ? "true" : "false"}" aria-label="${this.esc(this.t("compEntriesOpen"))}: ${this.esc(g.name)}"`;
-    return `data-object="${this.esc(`config_entry:${g.entries[0].object_id}`)}" tabindex="0" role="button" aria-label="${this.esc(g.name)}"`;
+    return `data-object="${this.esc(`integration:${g.domain}`)}" tabindex="0" role="button" aria-label="${this.esc(g.name)}"`;
   }
 
   compNameCell(g) {
-    const open = this.compOpen?.has(g.domain);
-    const list = open ? `<div class="compentries">${g.entries.map(e => `<button type="button" class="btn" data-object="${this.esc(`config_entry:${e.object_id}`)}">${this.esc(e.name || e.object_id)}</button>`).join("")}</div>` : "";
     const sub = [g.domain, g.entries.length > 1 ? this.t("compEntries", { n: g.entries.length }) : ""].filter(Boolean).join(" · ");
-    return `${this.nameCell(g.name, sub)}${list}`;
+    return this.nameCell(g.name, sub);
   }
 
   compIntegrationsList(items) {

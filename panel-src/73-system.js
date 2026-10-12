@@ -158,7 +158,7 @@ class SystemMixin {
 
   sysCustomRowAttrs(x) {
     const info = this.sysIntegrationInfo(x.domain);
-    return info.id ? `data-object="${this.esc(`config_entry:${info.id}`)}" tabindex="0" role="button" aria-label="${this.esc(this.sysIntegrationName(x.domain))}"` : `class="static" title="${this.esc(this.t("sysCustomNoEntry"))}"`;
+    return info.id ? `data-object="${this.esc(`integration:${x.domain}`)}" tabindex="0" role="button" aria-label="${this.esc(this.sysIntegrationName(x.domain))}"` : `class="static" title="${this.esc(this.t("sysCustomNoEntry"))}"`;
   }
 
   sysCustom(items) {

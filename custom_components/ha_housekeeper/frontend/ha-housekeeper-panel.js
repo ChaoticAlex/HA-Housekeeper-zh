@@ -360,7 +360,7 @@ const TEXT = {
 };
 
 const ICONS = {
-  service: "mdi:cog-off-outline", entity: "mdi:shape-outline", device: "mdi:devices", config_entry: "mdi:puzzle-outline",
+  service: "mdi:cog-off-outline", entity: "mdi:shape-outline", device: "mdi:devices", config_entry: "mdi:puzzle-outline", integration: "mdi:puzzle",
   area: "mdi:floor-plan", automation: "mdi:robot-outline", floor: "mdi:layers-outline",
   label: "mdi:label-outline", script: "mdi:script-text-outline", scene: "mdi:palette-outline", dashboard: "mdi:view-dashboard-outline", app: "mdi:package-variant-closed",
 };
@@ -1370,7 +1370,7 @@ class StylesMixin {
       button.ring{border:0;padding:0;cursor:pointer;color:inherit;font:inherit}button.ring:focus-visible{outline:2px solid var(--hk-blue);outline-offset:3px}.healthwhy{display:grid;gap:6px;max-width:560px;margin:-4px 0 14px;padding:14px 16px;border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-soft)}.healthwhy .row{display:flex;justify-content:space-between;gap:16px;padding:0;border:0;background:transparent}.healthwhy .row.minus{color:var(--hk-muted)}.healthwhy .row.total{border-top:1px solid var(--hk-border);padding-top:6px;font-weight:700}.healthwhy small{color:var(--hk-muted)}.healthwhy .btn{justify-self:start}
       .btn.small{padding:5px 11px;font-size:calc(13px*var(--hk-fs,1))}.notehint{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 16px}.notehint small{display:block;color:var(--hk-muted)}.row.seeall{justify-content:flex-start;color:var(--hk-blue-text);font-weight:600}.logfilters{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.logfilters .chip{cursor:pointer}.logfilters .chip.on{border-color:var(--hk-blue);color:var(--hk-blue-text)}.logsuggest{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:12px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 9%,transparent)}
       .hamenu{display:grid;place-items:center;flex:none;width:40px;height:40px;margin:0 -10px 0 -6px;padding:0;border:0;border-radius:50%;background:none;color:inherit}.hamenu:hover{background:var(--hk-soft)}.hamenu:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px}.hamenu ha-icon{--mdc-icon-size:24px}.sysmeter{display:block;height:6px;margin-top:6px;border-radius:99px;background:var(--hk-soft);overflow:hidden}.sysmeter i{display:block;height:100%;border-radius:99px;background:var(--hk-green)}.sysmeter.warn i{background:var(--hk-amber)}.sysmeter.red i{background:var(--hk-red)}.sysmeter.mute i{background:var(--hk-gray)}.sysshare{display:block;width:100%;min-width:120px;height:8px;margin-top:2px;border-radius:99px;background:var(--hk-soft);overflow:hidden}.sysshare i{display:block;height:100%;border-radius:99px;background:var(--hk-green)}.tablewrap.lt.acc td{white-space:normal}.pills{display:flex;flex-wrap:wrap;gap:4px}@media(min-width:641px){.sysnav .navtiles{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(min-width:1300px){.sysnav .navtiles{grid-template-columns:repeat(6,minmax(0,1fr))}}
-      .compentries{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.compentries .btn{min-height:28px;padding:2px 10px}
+      .intentry{margin:4px 2px 0;font-size:15px}
       ${this.themeCss()}
     </style>`;
   }
@@ -4226,6 +4226,7 @@ class DiagnosisMixin {
 
   // The always-visible summary under the title: status, cause, since when, integration, device, area, risk.
   detailSummary(item, key) {
+    if (item.object_type === "integration") return this.intSummary(item);
     const device = item.device_id ? this.findObject(`device:${item.device_id}`) : null;
     const areaId = item.area_id || device?.area_id, area = areaId ? this.findObject(`area:${areaId}`) : null;
     const integration = item.object_type === "entity" ? item.platform : item.object_type === "config_entry" ? (item.integration_name || item.domain) : null;
@@ -4234,7 +4235,7 @@ class DiagnosisMixin {
     return [
       item.reason ? [this.t("sumCause"), this.esc(this.t(item.reason))] : null,
       item.status_since ? [this.t("since"), this.esc(this.formatDate(item.status_since))] : null,
-      integration ? [this.t("sumIntegration"), this.esc(integration)] : null,
+      integration ? [this.t("sumIntegration"), item.object_type === "config_entry" && this.findObject(`integration:${item.domain}`) ? `<button class="link" data-object="${this.esc(`integration:${item.domain}`)}" title="${this.esc(this.t("intToIntegration"))}">${this.esc(integration)}</button>` : this.esc(integration)] : null,
       device ? [this.t("sumDevice"), this.esc(device.name)] : null,
       area ? [this.t("sumArea"), this.esc(area.name)] : null,
       risk ? [this.t("sumRisk"), `<span class="pill ${risk.tone}">${this.esc(risk.text)}</span>`] : null,
@@ -4243,6 +4244,7 @@ class DiagnosisMixin {
 
   // Tabs offered for one object; "attributes" only when it has some, so an empty tab never shows.
   detailTabs(item, key) {
+    if (item.object_type === "integration") return this.intTabs(item);
     // An app has no actions of its own; its rights and its load come from the two system reports, its relations are the integrations that seem to use it.
     if (item.object_type === "app") return [["overview", "tabOverview"], ...(this.edgesTo(key).length ? [["relations", "tabRelations", this.edgesTo(key).length]] : []), ["access", "accAppTab", null, this.appAccessTone(item)], ["storage", "accAppLoad"], ["technical", "tabTechnical"]];
     const tabs = [["overview", "tabOverview"], ["relations", "tabRelations", this.edgesTo(key).length + this.edgesFrom(key).length], ["technical", "tabTechnical"]];
@@ -4261,7 +4263,9 @@ class DiagnosisMixin {
     const item = { ...base, ...(this.details.get(this.objectKey(base)) || {}) };
     const key = this.objectKey(item);
     if (["automation", "script"].includes(item.object_type)) this.ensureRuns();
-    if (item.object_type === "config_entry") this.ensureReliability();
+    if (item.object_type === "config_entry" || item.object_type === "integration") this.ensureReliability();
+    if (item.object_type === "integration" && item.custom && this.detailTab === "overview") this.sysEnsure("storage"); // the folder size
+    if (item.object_type === "integration" && this.detailTab === "access") { this.sysEnsure("dataflow"); this.sysEnsure("secrets"); }
     // The reports of Access & data flow and Credentials are read when their tab is opened, not with the page.
     if (item.object_type === "config_entry" && this.detailTab === "access") { this.sysEnsure("dataflow"); this.sysEnsure("secrets"); }
     if (item.object_type === "app" && this.detailTab === "access") this.sysEnsure("dataflow");
@@ -4278,7 +4282,7 @@ class DiagnosisMixin {
     const tablist = tabs.map(([id, label, count, tone]) => `<button class="tab" role="tab" id="hk-tab-${id}" aria-selected="${id === tab}" aria-controls="hk-tabpanel" tabindex="${id === tab ? 0 : -1}" data-detail-tab="${id}">${this.t(label)}${count ? ` <em>${this.formatNumber(count)}</em>` : ""}${tone ? `<i class="tabdot ${tone}" aria-hidden="true"></i>` : ""}</button>`).join("");
     return `<div class="crumbs"><button class="btn" data-action="back"><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("backTo")} ${this.esc(back)}</button><span class="trail">${this.t(this.view)} › ${this.t(item.object_type)}</span></div>
       <div class="panel detailhead">${this.tile(item.object_type, tone)}<div><div class="headpills">${this.pill(item.status)}<span class="pill mute">${this.t(item.object_type)}</span></div><h1>${this.esc(item.name)}</h1><span class="id">${this.esc(item.object_id)}</span></div>
-      <div class="actions">${path ? `<button class="btn" data-ha-path="${this.esc(path)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("openInHA")}</button>` : ""}<button class="btn" data-graph-open="${this.esc(key)}"><ha-icon icon="mdi:source-fork"></ha-icon>${this.t("showInGraph")}</button>${["entity", "device", "area", "automation", "script", "scene", "dashboard"].includes(item.object_type) ? `<button class="btn" data-xp-from="${this.esc(key)}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button>` : ""}</div></div>
+      <div class="actions">${path ? `<button class="btn" data-ha-path="${this.esc(path)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("openInHA")}</button>` : ""}<button class="btn" data-graph-open="${this.esc(item.object_type === "integration" ? this.objectKey(item.entries[0]) : key)}"><ha-icon icon="mdi:source-fork"></ha-icon>${this.t("showInGraph")}</button>${["entity", "device", "area", "automation", "script", "scene", "dashboard"].includes(item.object_type) ? `<button class="btn" data-xp-from="${this.esc(key)}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button>` : ""}</div></div>
       <div class="panel sumline">${summary}</div>
       <div class="tabs" role="tablist" aria-label="${this.esc(this.t("tabsLabel"))}">${tablist}</div>
       <div role="tabpanel" id="hk-tabpanel" aria-labelledby="hk-tab-${tab}" tabindex="0">${tab === "overview" ? this.accessAlert(item) : ""}${this.detailPanel(tab, item, key)}</div>`;
@@ -4286,6 +4290,7 @@ class DiagnosisMixin {
 
   // Only the open tab is built, so large attributes and relations cost nothing until they are asked for.
   detailPanel(tab, item, key) {
+    if (item.object_type === "integration") return this.intPanel(tab, item);
     if (tab === "actions") return this.actionsTab(item, key);
     if (tab === "relations") return `<div class="stack">${this.relationsCard(key)}</div>`;
     if (tab === "flow") return this.flowCard(item, key);
@@ -10593,7 +10598,7 @@ class SystemMixin {
 
   sysCustomRowAttrs(x) {
     const info = this.sysIntegrationInfo(x.domain);
-    return info.id ? `data-object="${this.esc(`config_entry:${info.id}`)}" tabindex="0" role="button" aria-label="${this.esc(this.sysIntegrationName(x.domain))}"` : `class="static" title="${this.esc(this.t("sysCustomNoEntry"))}"`;
+    return info.id ? `data-object="${this.esc(`integration:${x.domain}`)}" tabindex="0" role="button" aria-label="${this.esc(this.sysIntegrationName(x.domain))}"` : `class="static" title="${this.esc(this.t("sysCustomNoEntry"))}"`;
   }
 
   sysCustom(items) {
@@ -11299,7 +11304,7 @@ class BrokenCardsMixin {
 Object.assign(TEXT.de, {
   components: "Apps & Integrationen", componentsSubtitle: "Was installiert ist und ob es läuft: Apps und Integrationen nach Domain, mit Version, Status und Umfang. Liest nur, die Zahlen kommen aus dem Scan.",
   compTabApps: "Apps", compTabAppsHint: "vom Supervisor", compTabIntegrations: "Integrationen", compTabIntegrationsHint: "nach Domain",
-  compEntries: "{n} Einträge", compEntriesOpen: "Einträge der Integration zeigen oder verbergen", compNoApps: "Keine Apps (kein Supervisor oder keine installiert).", compNoIntegrations: "Keine Integrationen gefunden.",
+  compEntries: "{n} Einträge", compNoApps: "Keine Apps (kein Supervisor oder keine installiert).", compNoIntegrations: "Keine Integrationen gefunden.",
   compSumApps: "Apps", compSumRunning: "laufen", compSumIntegrations: "Integrationen", compSumCustom: "davon Custom", compSumProblem: "mit Problem",
   compColVersion: "Version", compColEntries: "Einträge", compColDevices: "Geräte", compColAvail: "Verfügbarkeit", compColOrigin: "Herkunft", compUpdate: "Update", compUpdateHint: "Neuere Version: {v}",
   compAvailHint: "Schlechtester Wert der Einträge; erscheint, sobald die Zuverlässigkeit berechnet ist.", compSizeHint: "Ordnergröße; erscheint, sobald „Speicher & System“ geladen ist.",
@@ -11307,7 +11312,7 @@ Object.assign(TEXT.de, {
 Object.assign(TEXT.en, {
   components: "Apps & integrations", componentsSubtitle: "What is installed and whether it runs: apps and integrations by domain, with version, status and scope. Read-only; the numbers come from the scan.",
   compTabApps: "Apps", compTabAppsHint: "from the Supervisor", compTabIntegrations: "Integrations", compTabIntegrationsHint: "by domain",
-  compEntries: "{n} entries", compEntriesOpen: "Show or hide the entries of the integration", compNoApps: "No apps (no Supervisor, or none installed).", compNoIntegrations: "No integrations found.",
+  compEntries: "{n} entries", compNoApps: "No apps (no Supervisor, or none installed).", compNoIntegrations: "No integrations found.",
   compSumApps: "Apps", compSumRunning: "running", compSumIntegrations: "Integrations", compSumCustom: "of them custom", compSumProblem: "with a problem",
   compColVersion: "Version", compColEntries: "Entries", compColDevices: "Devices", compColAvail: "Availability", compColOrigin: "Origin", compUpdate: "Update", compUpdateHint: "Newer version: {v}",
   compAvailHint: "Worst value of the entries; appears once reliability is calculated.", compSizeHint: "Folder size; appears once Storage & system is loaded.",
@@ -11339,15 +11344,12 @@ class ComponentsMixin {
   }
 
   compRowAttrs(g) {
-    if (g.entries.length > 1) return `data-comp-toggle="${this.esc(g.domain)}" tabindex="0" role="button" aria-expanded="${this.compOpen?.has(g.domain) ? "true" : "false"}" aria-label="${this.esc(this.t("compEntriesOpen"))}: ${this.esc(g.name)}"`;
-    return `data-object="${this.esc(`config_entry:${g.entries[0].object_id}`)}" tabindex="0" role="button" aria-label="${this.esc(g.name)}"`;
+    return `data-object="${this.esc(`integration:${g.domain}`)}" tabindex="0" role="button" aria-label="${this.esc(g.name)}"`;
   }
 
   compNameCell(g) {
-    const open = this.compOpen?.has(g.domain);
-    const list = open ? `<div class="compentries">${g.entries.map(e => `<button type="button" class="btn" data-object="${this.esc(`config_entry:${e.object_id}`)}">${this.esc(e.name || e.object_id)}</button>`).join("")}</div>` : "";
     const sub = [g.domain, g.entries.length > 1 ? this.t("compEntries", { n: g.entries.length }) : ""].filter(Boolean).join(" · ");
-    return `${this.nameCell(g.name, sub)}${list}`;
+    return this.nameCell(g.name, sub);
   }
 
   compIntegrationsList(items) {
@@ -11423,6 +11425,159 @@ class ComponentsMixin {
     ]);
     const body = open === "apps" ? this.compAppsList(apps) : this.compIntegrationsList(ints);
     return `<div class="stack">${tiles}<div class="sysnav">${this.navTiles("components", tabs, open, this.t("components"), true)}</div><div class="panel">${body}</div></div>`;
+  }
+}
+
+// The page of an integration as a whole (core or custom): all config entries of one domain. It is a synthetic object
+// `integration:<domain>` made in the panel from the config entries of the scan, so the page runs through the same
+// detail path (header, tabs, back trail, keys) as every other object. The page of one entry stays and holds the actions.
+Object.assign(TEXT.de, {
+  integration: "Integration", intTabEntries: "Einträge", intTabMembers: "Entitäten & Geräte", intTabUsed: "Verwendung", intTabRel: "Zuverlässigkeit",
+  intSumEntries: "Einträge", intSumDevices: "Geräte", intSumEntities: "Entitäten", intSumVersion: "Version", intSumOrigin: "Herkunft", intSumHA: "Home Assistant {v}",
+  intFolder: "Ordner", intFolderSize: "Größe des Ordners", intDocs: "Dokumentation", intOpenHA: "In Home Assistant öffnen", intToIntegration: "Zur Integration",
+  intEntriesTitle: "Einträge dieser Integration", intMembersTitle: "Entitäten und Geräte", intNoMembers: "Keine Entitäten oder Geräte.", intUsedTitle: "Verwendet von", intNoUsed: "Keine Automation, kein Skript und keine Szene nutzt Entitäten dieser Integration.",
+  intNoRel: "Für diese Integration liegen noch keine Zuverlässigkeitswerte vor.", intColName: "Name", intColType: "Typ", intColStatus: "Status",
+  intSources: "Quellen der Einträge", intFirstCreated: "Ältester Eintrag angelegt", intLastModified: "Zuletzt geändert", intIds: "Eintrags-IDs",
+  intEntityCount: "{e} Entitäten · {d} Geräte",
+});
+Object.assign(TEXT.en, {
+  integration: "Integration", intTabEntries: "Entries", intTabMembers: "Entities & devices", intTabUsed: "Used by", intTabRel: "Reliability",
+  intSumEntries: "Entries", intSumDevices: "Devices", intSumEntities: "Entities", intSumVersion: "Version", intSumOrigin: "Origin", intSumHA: "Home Assistant {v}",
+  intFolder: "Folder", intFolderSize: "Size of the folder", intDocs: "Documentation", intOpenHA: "Open in Home Assistant", intToIntegration: "To the integration",
+  intEntriesTitle: "Entries of this integration", intMembersTitle: "Entities and devices", intNoMembers: "No entities or devices.", intUsedTitle: "Used by", intNoUsed: "No automation, script or scene uses entities of this integration.",
+  intNoRel: "There are no reliability values for this integration yet.", intColName: "Name", intColType: "Type", intColStatus: "Status",
+  intSources: "Sources of the entries", intFirstCreated: "Oldest entry created", intLastModified: "Last changed", intIds: "Entry IDs",
+  intEntityCount: "{e} entities · {d} devices",
+});
+
+const INT_RANK = { problem: 3, disabled: 2, active: 1, ignored: 0 };
+
+class IntegrationPageMixin {
+  // One synthetic object per domain that has config entries; they are not part of the inventory list.
+  buildIntegrationObjects(objects) {
+    const groups = new Map();
+    for (const o of objects) {
+      if (o.object_type !== "config_entry") continue;
+      const g = groups.get(o.domain) || { object_type: "integration", object_id: o.domain, domain: o.domain, name: o.integration_name || o.domain, custom: false, integration_version: null, integration_dir: null, documentation: null, entries: [], entity_count: 0, device_count: 0, status: "ignored" };
+      g.entries.push(o);
+      g.custom ||= Boolean(o.custom);
+      g.integration_version ||= o.integration_version || null;
+      g.integration_dir ||= o.integration_dir || null;
+      g.documentation ||= o.documentation || null;
+      g.entity_count += o.entity_count || 0;
+      g.device_count += o.device_count || 0;
+      if ((INT_RANK[o.status] ?? 1) > (INT_RANK[g.status] ?? 1)) g.status = o.status;
+      groups.set(o.domain, g);
+    }
+    return groups;
+  }
+
+  intEntries(item) { return item.entries || []; }
+
+  // Entities and devices of all entries of the domain, from the registry objects of the scan.
+  intMembers(item) {
+    const ids = new Set(this.intEntries(item).map(e => e.object_id));
+    return this.memo("intMembers", [this.data?.objects, item.object_id], () => (this.data?.objects || []).filter(o =>
+      (o.object_type === "entity" && ids.has(o.config_entry_id)) || (o.object_type === "device" && (o.config_entry_ids || []).some(id => ids.has(id)))));
+  }
+
+  // Automations, scripts and scenes that use an entity of the integration.
+  intUsedBy(item) {
+    const found = new Map();
+    for (const m of this.intMembers(item)) {
+      if (m.object_type !== "entity") continue;
+      for (const edge of this.edgesTo(`entity:${m.object_id}`)) {
+        const src = this.findObject(edge.source);
+        if (src && ["automation", "script", "scene"].includes(src.object_type)) found.set(edge.source, src);
+      }
+    }
+    return [...found.values()];
+  }
+
+  intAccessTone(item) {
+    const tones = this.intEntries(item).map(e => this.accessTone(e));
+    return tones.includes("red") ? "red" : tones.includes("warn") ? "warn" : "";
+  }
+
+  intTabs(item) {
+    const used = this.intUsedBy(item).length;
+    const tabs = [["overview", "tabOverview"], ["members", "intTabMembers", this.intMembers(item).length]];
+    if (used) tabs.push(["used", "intTabUsed", used]);
+    if (this.intEntries(item).some(e => this.reliabilityRow(e))) tabs.push(["reliability", "intTabRel"]);
+    tabs.push(["access", "accTab", null, this.intAccessTone(item)], ["technical", "tabTechnical"]);
+    return tabs;
+  }
+
+  intSummary(item) {
+    const n = f => this.formatNumber(f);
+    return [
+      [this.t("intSumOrigin"), this.esc(this.t(item.custom ? "originKindCustom" : "originKindCore"))],
+      item.custom && item.integration_version ? [this.t("intSumVersion"), this.esc(item.integration_version)] : !item.custom && this.data?.meta?.ha_version ? [this.t("intSumVersion"), this.esc(this.t("intSumHA", { v: this.data.meta.ha_version }))] : null,
+      [this.t("intSumEntries"), n(this.intEntries(item).length)],
+      [this.t("intSumDevices"), n(item.device_count)],
+      [this.t("intSumEntities"), n(item.entity_count)],
+    ].filter(Boolean);
+  }
+
+  // The panel of one tab; the heading names the entry when there are several.
+  intEachEntry(item, build) {
+    const entries = this.intEntries(item);
+    return `<div class="stack">${entries.map(e => (entries.length > 1 ? `<h3 class="intentry">${this.esc(e.name || e.object_id)}</h3>` : "") + build(e)).join("")}</div>`;
+  }
+
+  intPanel(tab, item) {
+    if (tab === "members") return this.intMembersCard(item);
+    if (tab === "used") return this.intUsedCard(item);
+    if (tab === "reliability") return this.intEachEntry(item, e => { const row = this.reliabilityRow(e); return row ? this.reliabilityDetailCard(row) : `<div class="panel"><div class="emptymsg">${this.t("intNoRel")}</div></div>`; });
+    if (tab === "access") return this.intEachEntry(item, e => this.accessDetailCard(e));
+    if (tab === "technical") return this.intTechnicalCard(item);
+    return this.intOverview(item);
+  }
+
+  intOverview(item) {
+    const fact = (label, value) => `<div class="fact"><span>${this.t(label)}</span><b>${value}</b></div>`;
+    const size = item.custom ? (this.sysState("storage").data?.custom_integrations || []).find(x => x.domain === item.domain) : null;
+    const docs = /^https:\/\//.test(item.documentation || "") ? `<a class="btn" href="${this.esc(item.documentation)}" target="_blank" rel="noopener noreferrer"><ha-icon icon="mdi:book-open-variant"></ha-icon>${this.t("intDocs")}</a>` : "";
+    const folder = item.custom ? `<section class="panel"><div class="panelhead"><h2>${this.t("intFolder")}</h2></div><div class="facts">${fact("intFolder", this.esc(item.integration_dir || `custom_components/${item.domain}`))}${size ? fact("intFolderSize", this.esc(this.formatBytes(size.bytes))) : ""}</div></section>` : "";
+    const rows = this.intEntries(item).map(e => {
+      const tone = this.tone(e.status) === "ok" ? "" : this.tone(e.status);
+      return `<button class="row rel" data-object="${this.esc(`config_entry:${e.object_id}`)}">${this.tile("config_entry", tone)}<span class="row-text"><strong>${this.esc(e.name || e.object_id)}</strong><small>${this.esc(this.t("intEntityCount", { e: this.formatNumber(e.entity_count || 0), d: this.formatNumber(e.device_count || 0) }))}</small></span>${this.pill(e.status)}</button>`;
+    }).join("");
+    return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("intEntriesTitle")}</h2>${docs ? `<div class="actions">${docs}</div>` : ""}</div>${rows}</section>${folder}</div>`;
+  }
+
+  intMembersCard(item) {
+    const members = this.intMembers(item);
+    return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("intMembersTitle")}</h2></div>${this.sysList("intmembers", members, {
+      sort: "name", dir: "asc",
+      sorts: [{ key: "name", label: "intColName", dir: "asc", get: o => o.name || o.object_id }, { key: "type", label: "intColType", dir: "asc", get: o => o.object_type }, { key: "status", label: "intColStatus", dir: "asc", get: o => o.status }],
+      text: o => `${o.name} ${o.object_id}`, tie: o => this.objectKey(o), empty: "intNoMembers",
+      rowAttrs: o => `data-object="${this.esc(this.objectKey(o))}" tabindex="0" role="button" aria-label="${this.esc(o.name || o.object_id)}"`,
+      columns: [
+        { key: "name", label: "intColName", cell: o => this.nameCell(o.name || o.object_id, o.object_id) },
+        { key: "type", label: "intColType", cell: o => this.esc(this.t(o.object_type)) },
+        { key: "status", label: "intColStatus", cell: o => this.pill(o.status) },
+      ],
+    })}</section></div>`;
+  }
+
+  intUsedCard(item) {
+    const used = this.intUsedBy(item);
+    const rows = used.map(o => `<button class="row rel" data-object="${this.esc(this.objectKey(o))}">${this.tile(o.object_type, this.tone(o.status) === "ok" ? "" : this.tone(o.status))}<span class="row-text"><strong>${this.esc(o.name || o.object_id)}</strong><small>${this.esc(this.t(o.object_type))}</small></span>${this.pill(o.status)}</button>`).join("");
+    return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("intUsedTitle")}</h2></div>${rows || `<div class="emptymsg">${this.t("intNoUsed")}</div>`}</section></div>`;
+  }
+
+  intTechnicalCard(item) {
+    const entries = this.intEntries(item);
+    const dates = key => entries.map(e => e[key]).filter(Boolean).sort();
+    const row = (k, v) => (v ? `<dt>${this.esc(k)}</dt><dd>${this.esc(v)}</dd>` : "");
+    return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("registry")}</h2></div><div class="pad"><dl class="kv">${[
+      row("domain", item.domain), row(this.t("integrationName"), item.name), row(this.t("intSumOrigin"), this.t(item.custom ? "originKindCustom" : "originKindCore")),
+      row(this.t("intSumVersion"), item.integration_version), row(this.t("intFolder"), item.integration_dir), row(this.t("intDocs"), item.documentation),
+      row(this.t("intSources"), [...new Set(entries.map(e => e.source).filter(Boolean))].join(", ")),
+      row(this.t("intFirstCreated"), dates("created_at")[0] ? this.formatDate(dates("created_at")[0]) : ""), row(this.t("intLastModified"), dates("modified_at").slice(-1)[0] ? this.formatDate(dates("modified_at").slice(-1)[0]) : ""),
+      row(this.t("intIds"), entries.map(e => e.object_id).join(", ")),
+    ].join("")}</dl></div></section></div>`;
   }
 }
 
@@ -11658,6 +11813,7 @@ class HAHousekeeperPanel extends HTMLElement {
     if (this.selected !== obj) { this.detailTab = this._pendingTab || "overview"; this._pendingTab = null; }
     this.selected = obj;
     const key = this.objectKey(obj);
+    if (obj.object_type === "integration" && !this.details.has(key)) this.details.set(key, {}); // made in the panel, nothing to ask the backend
     if (this.details.has(key)) { this.render(); this.scrollIntoView?.({ block: "start" }); return; }
     this.detailLoading = true;
     this.render();
@@ -11737,6 +11893,7 @@ class HAHousekeeperPanel extends HTMLElement {
     if (!this.data) return undefined;
     if (!this._index || this._indexSource !== this.data) {
       this._index = new Map(this.data.objects.map(item => [this.objectKey(item), item]));
+      for (const g of this.buildIntegrationObjects(this.data.objects).values()) this._index.set(this.objectKey(g), g); // pages of whole integrations, not inventory rows
       this._indexSource = this.data;
     }
     return this._index.get(key);
@@ -11758,7 +11915,7 @@ class HAHousekeeperPanel extends HTMLElement {
         : `/config/entities?search=${encodeURIComponent(item.object_id)}`;
       case "dashboard": return `/${encodeURIComponent(item.url_path || "lovelace")}`;
       case "app": return `/hassio/addon/${encodeURIComponent(item.slug || item.object_id)}/info`;
-      case "config_entry": return `/config/integrations/integration/${encodeURIComponent(item.domain)}`;
+      case "config_entry": case "integration": return `/config/integrations/integration/${encodeURIComponent(item.domain)}`;
       case "floor": return "/config/areas/dashboard";
       case "label": return "/config/labels";
       default: return null;
@@ -12266,15 +12423,6 @@ class HAHousekeeperPanel extends HTMLElement {
       ev.preventDefault();
       if (el.click) el.click(); else el.onclick?.();
     };
-    root.querySelectorAll("tr[data-comp-toggle]").forEach(el => {
-      el.onclick = ev => {
-        if (ev?.target?.closest?.("button, select, input, a, label")) return; // the entries and the copy button have their own action
-        const set = this.compOpen ||= new Set(), d = el.dataset.compToggle;
-        if (!set.delete(d)) set.add(d);
-        this.render();
-      };
-      openByKey(el);
-    });
     root.querySelectorAll("tr[data-object], g[data-graph]").forEach(openByKey);
     root.querySelectorAll("g[data-graph-group]").forEach(openByKey);
     root.querySelectorAll("[data-graph-depth]").forEach(el => el.onclick = () => { this.graphDepth = Number(el.dataset.graphDepth); this.graphLimit = GRAPH_NODE_STEP; this.render(); });
@@ -12448,7 +12596,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin, BrokenCardsMixin, SystemMixin, ComponentsMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, SparklineMixin, BrokenCardsMixin, SystemMixin, ComponentsMixin, IntegrationPageMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }
