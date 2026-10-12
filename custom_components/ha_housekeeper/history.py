@@ -106,11 +106,18 @@ def diff_checkpoints(base: dict[str, Any], snapshot: dict[str, Any]) -> dict[str
     base_findings = set(base["findings"])
     new_findings = [f for f in snapshot["findings"] if _finding_key(f) not in base_findings]
     resolved_findings = []
+    ended_findings = []
     for key in sorted(base_findings - set(current["findings"])):
         rule_id, object_id, affected = key.split("|", 2)
-        resolved_findings.append(
-            {"rule_id": rule_id, "object_id": object_id, "affected_object": affected or None}
-        )
+        item = {"rule_id": rule_id, "object_id": object_id, "affected_object": affected or None}
+        # A finding that is gone is only "resolved" while its object is still there. An object that
+        # was removed took its findings along (nothing was repaired), and where the object cannot
+        # be told from the rule the end stays "unknown" rather than counting as a repair.
+        owner = (rule_id.split(".")[0], object_id)
+        if owner in now:
+            resolved_findings.append(item)
+        else:
+            ended_findings.append({**item, "reason": "object_removed" if owner in old else "unknown"})
 
     def cut(rows: list[dict[str, Any]]) -> dict[str, Any]:
         rows = sorted(rows, key=lambda r: (r.get("object_type", ""), r["object_id"]))
@@ -124,6 +131,7 @@ def diff_checkpoints(base: dict[str, Any], snapshot: dict[str, Any]) -> dict[str
         "status_changes": cut(status_changes),
         "new_findings": cut(new_findings),
         "resolved_findings": cut(resolved_findings),
+        "ended_findings": cut(ended_findings),
     }
 
 

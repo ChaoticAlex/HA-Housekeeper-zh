@@ -45,7 +45,7 @@ class ChangesMixin {
       `# ${this.t("weeklyTitle")}`, "",
       `${this.t("comparedWith")} ${this.formatDate(c.baseline_at)} → ${this.formatDate(this.data.meta.scanned_at)}`, "",
       `- ${this.t("health")}: ${h.percent} %`,
-      ...[["statusChanges", c.status_changes], ["newFindings", c.new_findings], ["resolvedFindings", c.resolved_findings], ["newObjects", c.new_objects], ["removedObjects", c.removed_objects]].map(([label, part]) => `- ${this.t(label)}: ${part.total}`), "",
+      ...[["statusChanges", c.status_changes], ["newFindings", c.new_findings], ["resolvedFindings", c.resolved_findings], ["endedFindings", c.ended_findings || { total: 0 }], ["newObjects", c.new_objects], ["removedObjects", c.removed_objects]].map(([label, part]) => `- ${this.t(label)}: ${part.total}`), "",
       ...list20(this.t("newFindings"), c.new_findings, f => `- ${this.findingTitle(f)}: ${name({ name: this.findObject(this.findingKey(f))?.name, object_id: f.object_id })}`),
       ...list20(this.t("resolvedFindings"), c.resolved_findings, f => `- ${this.findingTitle(f)}: ${f.object_id}`),
       ...list20(this.t("newObjects"), c.new_objects, o => `- ${this.t(o.object_type)}: ${name(o)}`),
@@ -81,7 +81,8 @@ class ChangesMixin {
     }
     const sections = [
       ["statusChanges", "mdi:swap-horizontal", c.status_changes], ["newFindings", "mdi:alert-outline", c.new_findings],
-      ["resolvedFindings", "mdi:check-circle-outline", c.resolved_findings], ["newObjects", "mdi:plus-circle-outline", c.new_objects],
+      ["resolvedFindings", "mdi:check-circle-outline", c.resolved_findings], ["endedFindings", "mdi:help-circle-outline", c.ended_findings || { total: 0, items: [] }],
+      ["newObjects", "mdi:plus-circle-outline", c.new_objects],
       ["removedObjects", "mdi:minus-circle-outline", c.removed_objects],
     ];
     const total = sections.reduce((n, [, , part]) => n + part.total, 0);
@@ -111,6 +112,8 @@ class ChangesMixin {
         const type = f.rule_id.split(".")[0];
         return objectRow({ object_type: type, object_id: f.object_id }, `${f.affected_object ? `${f.affected_object} · ` : ""}${this.findingTitle(f)}`, `<span class="pill ok">${this.t("improved")}</span>`);
       }),
+      // Gone, but not repaired: the object left with its findings, or the reason cannot be told.
+      endedFindings: paged("endedFindings", (c.ended_findings || { items: [] }).items, f => objectRow({ object_type: f.rule_id.split(".")[0], object_id: f.object_id }, `${f.affected_object ? `${f.affected_object} · ` : ""}${this.findingTitle(f)}`, `<span class="pill mute">${this.t(f.reason === "object_removed" ? "endedObjectRemoved" : "endedUnknown")}</span>`)),
       newObjects: paged("newObjects", c.new_objects.items, o => objectRow(o, `${this.t(o.object_type)} · ${o.object_id}`, this.pill(o.status))),
       removedObjects: paged("removedObjects", c.removed_objects.items, o => objectRow(o, `${this.t(o.object_type)} · ${this.t("gone")}`, "")),
     };

@@ -2459,7 +2459,7 @@ class ChangesMixin {
       `# ${this.t("weeklyTitle")}`, "",
       `${this.t("comparedWith")} ${this.formatDate(c.baseline_at)} → ${this.formatDate(this.data.meta.scanned_at)}`, "",
       `- ${this.t("health")}: ${h.percent} %`,
-      ...[["statusChanges", c.status_changes], ["newFindings", c.new_findings], ["resolvedFindings", c.resolved_findings], ["newObjects", c.new_objects], ["removedObjects", c.removed_objects]].map(([label, part]) => `- ${this.t(label)}: ${part.total}`), "",
+      ...[["statusChanges", c.status_changes], ["newFindings", c.new_findings], ["resolvedFindings", c.resolved_findings], ["endedFindings", c.ended_findings || { total: 0 }], ["newObjects", c.new_objects], ["removedObjects", c.removed_objects]].map(([label, part]) => `- ${this.t(label)}: ${part.total}`), "",
       ...list20(this.t("newFindings"), c.new_findings, f => `- ${this.findingTitle(f)}: ${name({ name: this.findObject(this.findingKey(f))?.name, object_id: f.object_id })}`),
       ...list20(this.t("resolvedFindings"), c.resolved_findings, f => `- ${this.findingTitle(f)}: ${f.object_id}`),
       ...list20(this.t("newObjects"), c.new_objects, o => `- ${this.t(o.object_type)}: ${name(o)}`),
@@ -2495,7 +2495,8 @@ class ChangesMixin {
     }
     const sections = [
       ["statusChanges", "mdi:swap-horizontal", c.status_changes], ["newFindings", "mdi:alert-outline", c.new_findings],
-      ["resolvedFindings", "mdi:check-circle-outline", c.resolved_findings], ["newObjects", "mdi:plus-circle-outline", c.new_objects],
+      ["resolvedFindings", "mdi:check-circle-outline", c.resolved_findings], ["endedFindings", "mdi:help-circle-outline", c.ended_findings || { total: 0, items: [] }],
+      ["newObjects", "mdi:plus-circle-outline", c.new_objects],
       ["removedObjects", "mdi:minus-circle-outline", c.removed_objects],
     ];
     const total = sections.reduce((n, [, , part]) => n + part.total, 0);
@@ -2525,6 +2526,8 @@ class ChangesMixin {
         const type = f.rule_id.split(".")[0];
         return objectRow({ object_type: type, object_id: f.object_id }, `${f.affected_object ? `${f.affected_object} · ` : ""}${this.findingTitle(f)}`, `<span class="pill ok">${this.t("improved")}</span>`);
       }),
+      // Gone, but not repaired: the object left with its findings, or the reason cannot be told.
+      endedFindings: paged("endedFindings", (c.ended_findings || { items: [] }).items, f => objectRow({ object_type: f.rule_id.split(".")[0], object_id: f.object_id }, `${f.affected_object ? `${f.affected_object} · ` : ""}${this.findingTitle(f)}`, `<span class="pill mute">${this.t(f.reason === "object_removed" ? "endedObjectRemoved" : "endedUnknown")}</span>`)),
       newObjects: paged("newObjects", c.new_objects.items, o => objectRow(o, `${this.t(o.object_type)} · ${o.object_id}`, this.pill(o.status))),
       removedObjects: paged("removedObjects", c.removed_objects.items, o => objectRow(o, `${this.t(o.object_type)} · ${this.t("gone")}`, "")),
     };
@@ -8599,7 +8602,7 @@ Object.assign(TEXT.en, {
 
 // Navigation split: Cleanup (remove what is not needed), Repair (fix what stays) and the shared Journal.
 Object.assign(TEXT.de, {
-  findUnhide: "Wieder einblenden", findUnhidden: "{n} Befunde wieder eingeblendet", healthFailed: "Der letzte Scan ist in der Phase „{phase}“ fehlgeschlagen. Die Zahlen stammen vom letzten erfolgreichen Scan ({last}).", healthStale: "Seit {last} war kein Scan erfolgreich. Die Zahlen können veraltet sein.", healthTries: "{n} Fehlversuche in Folge", healthStaleHint: "Der regelmäßige Scan ist ausgeblieben. Starte einen Scan von Hand; schlägt er fehl, steht der Grund hier.", bulkPartial: "{done} von {total} erledigt, {failed} fehlgeschlagen ({detail}). Die fehlgeschlagenen bleiben ausgewählt; ein neuer Versuch sendet nur diese.", viewsFull: "Es sind höchstens {n} gespeicherte Ansichten möglich. Lösche eine Ansicht oder speichere unter dem Namen einer vorhandenen.",
+  findUnhide: "Wieder einblenden", findUnhidden: "{n} Befunde wieder eingeblendet", endedFindings: "Ohne Reparatur beendet", endedObjectRemoved: "Objekt entfernt", endedUnknown: "Grund unbekannt", healthFailed: "Der letzte Scan ist in der Phase „{phase}“ fehlgeschlagen. Die Zahlen stammen vom letzten erfolgreichen Scan ({last}).", healthStale: "Seit {last} war kein Scan erfolgreich. Die Zahlen können veraltet sein.", healthTries: "{n} Fehlversuche in Folge", healthStaleHint: "Der regelmäßige Scan ist ausgeblieben. Starte einen Scan von Hand; schlägt er fehl, steht der Grund hier.", bulkPartial: "{done} von {total} erledigt, {failed} fehlgeschlagen ({detail}). Die fehlgeschlagenen bleiben ausgewählt; ein neuer Versuch sendet nur diese.", viewsFull: "Es sind höchstens {n} gespeicherte Ansichten möglich. Lösche eine Ansicht oder speichere unter dem Namen einer vorhandenen.",
   firstScan: "Der erste Scan läuft: {percent} %", groupOpen: "{count} offen", readOnly: "Nur lesen", canChange: "Kann ändern", readOnlyHint: "Diese Seite ändert nichts.", canChangeHint: "Von hier aus lassen sich Pläne erstellen und ausführen. Geändert wird erst nach deiner Bestätigung.",
   outcomeUndoYes: "Rückgängig ist möglich, solange sich die Objekte nicht geändert haben.", outcomeUndoBackup: "Nur per Backup rückgängig.", outcomeUndoMixed: "Teils rückgängig machbar, teils nur per Backup.",
   backupFailHint: "Prüfe unter Einstellungen → System → Backups, ob ein Backup-Ziel erreichbar ist, und lies das Protokoll unter Einstellungen → System → Protokolle.", previewReady: "Vorschau erstellt", toast_verified: "Plan abgeschlossen und geprüft", toast_executed: "Plan ausgeführt", toast_partial: "Plan nur teilweise ausgeführt", toast_aborted: "Plan abgebrochen", planStatusLost: "Der Planstatus lässt sich gerade nicht abrufen. Der Plan läuft weiter, Housekeeper versucht es erneut.", planCancelFailed: "Der Abbruch ist nicht bestätigt. Der Plan läuft möglicherweise weiter. Bereits ausgeführte Schritte werden durch einen Abbruch nicht zurückgenommen.",
@@ -8642,7 +8645,7 @@ Object.assign(TEXT.de, {
   repairTaskExchange: "Gerät austauschen", repairTaskExchangeHint: "Ein defektes Gerät durch ein neues ersetzen und alles übernehmen.",
 });
 Object.assign(TEXT.en, {
-  findUnhide: "Show again", findUnhidden: "{n} findings shown again", healthFailed: "The last scan failed in phase \"{phase}\". The numbers come from the last successful scan ({last}).", healthStale: "No scan has succeeded since {last}. The numbers may be outdated.", healthTries: "{n} failures in a row", healthStaleHint: "The regular scan did not run. Start a scan by hand; if it fails, the reason shows here.", bulkPartial: "{done} of {total} done, {failed} failed ({detail}). The failed ones stay selected; a retry sends only those.", viewsFull: "At most {n} saved views are possible. Delete one, or save under the name of an existing view.",
+  findUnhide: "Show again", findUnhidden: "{n} findings shown again", endedFindings: "Ended without a repair", endedObjectRemoved: "Object removed", endedUnknown: "Reason unknown", healthFailed: "The last scan failed in phase \"{phase}\". The numbers come from the last successful scan ({last}).", healthStale: "No scan has succeeded since {last}. The numbers may be outdated.", healthTries: "{n} failures in a row", healthStaleHint: "The regular scan did not run. Start a scan by hand; if it fails, the reason shows here.", bulkPartial: "{done} of {total} done, {failed} failed ({detail}). The failed ones stay selected; a retry sends only those.", viewsFull: "At most {n} saved views are possible. Delete one, or save under the name of an existing view.",
   firstScan: "The first scan is running: {percent} %", groupOpen: "{count} open", readOnly: "Read only", canChange: "Can change", readOnlyHint: "This page changes nothing.", canChangeHint: "Plans can be created and run from here. Nothing changes before you confirm.",
   outcomeUndoYes: "Undo is possible as long as the objects have not changed.", outcomeUndoBackup: "Undo only from the backup.", outcomeUndoMixed: "Partly undoable, partly only from the backup.",
   backupFailHint: "Check under Settings → System → Backups that a backup location is reachable, and read the log under Settings → System → Logs.", previewReady: "Preview created", toast_verified: "Plan completed and verified", toast_executed: "Plan executed", toast_partial: "Plan only partly executed", toast_aborted: "Plan aborted", planStatusLost: "The plan status cannot be read right now. The plan keeps running, Housekeeper will try again.", planCancelFailed: "The cancellation is not confirmed. The plan may still be running. Steps that already ran are not undone by cancelling.",

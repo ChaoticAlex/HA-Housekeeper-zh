@@ -66,9 +66,26 @@ def test_diff_reports_new_removed_changed_and_findings() -> None:
         "SENSOR.A",
     )
     assert [f["rule_id"] for f in diff["new_findings"]["items"]] == ["entity.state_unavailable"]
-    assert diff["resolved_findings"]["items"] == [
-        {"rule_id": "entity.state_missing", "object_id": "sensor.b", "affected_object": None}
+    # sensor.b is gone with its finding: that is no repair
+    assert diff["resolved_findings"]["total"] == 0
+    assert diff["ended_findings"]["items"] == [
+        {
+            "rule_id": "entity.state_missing",
+            "object_id": "sensor.b",
+            "affected_object": None,
+            "reason": "object_removed",
+        }
     ]
+
+
+def test_a_finding_counts_as_resolved_only_while_its_object_is_still_there() -> None:
+    kept = {"rule_id": "entity.stale", "object_id": "sensor.a", "classification": "stale"}
+    other = {"rule_id": "mystery.rule", "object_id": "x", "classification": "problem"}
+    objects = [("entity", "sensor.a", "active")]
+    old = _snapshot("2026-10-06T10:00:00+00:00", objects, [kept, other])
+    diff = diff_checkpoints(make_checkpoint(old), _snapshot("2026-10-07T10:00:00+00:00", objects))
+    assert [f["object_id"] for f in diff["resolved_findings"]["items"]] == ["sensor.a"]
+    assert [(f["object_id"], f["reason"]) for f in diff["ended_findings"]["items"]] == [("x", "unknown")]
 
 
 def test_identical_scans_have_no_differences() -> None:
