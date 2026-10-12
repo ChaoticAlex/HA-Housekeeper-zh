@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.5.1 - 2026-10-12
+
 ### Behoben
 
 - **Befunde:** Ausfälle (Integration, Gerät, App) lassen sich in der Liste wieder ankreuzen, um sie gesammelt auszublenden, als bekannt zu markieren oder zurückzustellen.
