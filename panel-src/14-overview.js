@@ -168,7 +168,7 @@ class OverviewMixin {
       ? `<h3 class="foldhd">${this.t("actNow")}</h3>${urgent.map(row).join("")}${this.fold("todo_later", { tone: "warn", title: this.t("actSoon"), sub: this.t("actSoonSub"), pill: this.t(later.length === 1 ? "topicsOne" : "topicsN", { n: this.formatNumber(later.length) }) }, later.join(""), false)}`
       : [...urgent.map(row), ...later].join(""))
       : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.esc(this.t("actNone", { date: this.formatDate(this.data.meta.scanned_at) }))}</div>`;
-    const all = `<button class="link" data-jump="findingsNav">${this.t("allFindings")} (${this.formatNumber(findings.length)}) <ha-icon icon="mdi:chevron-right"></ha-icon></button>`;
+    const all = `<button class="link" data-jump="findingsNav">${this.t("allFindings")} (${this.formatNumber(this.findingTotal())}) <ha-icon icon="mdi:chevron-right"></ha-icon></button>`;
     return `<section class="panel u-mb14" aria-labelledby="hk-todo" id="hk-todo-card" tabindex="-1"><div class="panelhead"><div><h2 id="hk-todo">${this.t("actTitle")}</h2><p>${this.t("actSub")}</p></div>${all}</div>${body}${this.todoFoot()}</section>`;
   }
 
@@ -229,7 +229,7 @@ class OverviewMixin {
 
   overview() {
     const m = this.data.meta, counts = m.status_counts || {}, health = this.health();
-    const findings = this.sortedFindings();
+    const findings = this.sortedFindings(), total = this.findingTotal();
     this.ensureTrend();
     this.ensureSeries();
     this.ensureBackup();
@@ -238,7 +238,7 @@ class OverviewMixin {
     const why = this.healthWhy ? this.healthWhyCard(health) : "";
     return `<section class="statushead" title="${this.esc(this.t("healthTip", { affected: health.affected, base: health.base }))}"><button type="button" class="ring ${health.tone}" style="--p:${health.percent}" data-health-why aria-expanded="${Boolean(this.healthWhy)}" aria-label="${this.esc(this.t("healthWhy"))}"><b>${health.percent}<small>%</small></b></button>
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p></div>
-      <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
+      <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", total, total ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
       ${this.todoCard()}<div class="ovzone">${this.cleanupCard()}${this.trendCard()}${this.inventoryStatusCard()}</div>
       <div class="ovzone">${this.systemCard()}${this.databaseCard()}${this.backupCard()}</div>`;
   }

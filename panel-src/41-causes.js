@@ -59,6 +59,9 @@ class CausesMixin {
     return `<div class="pad"><div class="fbtns">${btn("keep", "mdi:bookmark-check-outline", "markKnown")}${btn("snooze", "mdi:clock-outline", "fselSnooze")}${btn("", "mdi:eye-off-outline", "hideFinding")}</div></div>`;
   }
 
+  // The number the findings are counted by: every outage once and every finding without an outage behind it; the follow-up findings of an outage are not counted again.
+  findingTotal() { return this.causeList().length + this.data.findings.filter(f => !f.cause_id && !f.ignored).length; }
+
   followerCount() { return this.data.findings.filter(f => f.cause_id && !f.ignored && f.rule_id !== "config_entry.not_loaded").length; }
 }
 Object.assign(TEXT.de, {
@@ -67,7 +70,7 @@ Object.assign(TEXT.de, {
   logTitle: "Im HA-Log", logLine: "Im HA-Log: {what}, zuletzt {when}", logLevel_warning: "{n}× Warnung", logLevel_error: "{n}× Fehler", logLevel_critical: "{n}× kritischer Fehler",
   cause_integration_down: "Integration {name} ist nicht geladen", cause_device_down: "Gerät {name} ist ganz ausgefallen",
   causeFollowers: "{n} Folgebefunde", cause_service_missing: "Dienst {name} existiert nicht", causeCallers: "{n} Automationen und Skripte rufen ihn auf", outageServices: "{n} fehlende Dienste", causeState: "Zustand: {state}", causeUses_automation: "{n} Automationen betroffen", causeUses_script: "{n} Skripte betroffen", causeUses_dashboard: "{n} Dashboards betroffen",
-  causeShow: "Folgebefunde anzeigen", causeHide: "Folgebefunde ausblenden", actOutages: "Ausfälle",
+  causeShow: "Folgebefunde anzeigen", findingsFollowSub: "dazu {n} Folgebefunde der Ausfälle", causeHide: "Folgebefunde ausblenden", actOutages: "Ausfälle",
 });
 Object.assign(TEXT.en, {
   causesTitle: "Outages", causesSub: "{n} outages (causes) · {m} single findings. Fix the outages first, they often explain many findings.",
@@ -75,5 +78,5 @@ Object.assign(TEXT.en, {
   logTitle: "In the HA log", logLine: "In the HA log: {what}, last {when}", logLevel_warning: "{n}× warning", logLevel_error: "{n}× error", logLevel_critical: "{n}× critical error",
   cause_integration_down: "Integration {name} is not loaded", cause_device_down: "Device {name} is down completely",
   causeFollowers: "{n} follow-up findings", cause_service_missing: "Service {name} does not exist", causeCallers: "{n} automations and scripts call it", outageServices: "{n} missing services", causeState: "State: {state}", causeUses_automation: "{n} automations affected", causeUses_script: "{n} scripts affected", causeUses_dashboard: "{n} dashboards affected",
-  causeShow: "Show follow-up findings", causeHide: "Hide follow-up findings", actOutages: "Outages",
+  causeShow: "Show follow-up findings", findingsFollowSub: "plus {n} follow-up findings of the outages", causeHide: "Hide follow-up findings", actOutages: "Outages",
 });

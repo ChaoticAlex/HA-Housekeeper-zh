@@ -1380,7 +1380,7 @@ class StylesMixin {
       .rangechart .grid{stroke:var(--hk-border);stroke-width:1}
       .bkcsum{padding:14px 16px 0}.bkcsum .sumtiles{margin-bottom:0}.bkcrule{display:grid;gap:8px;margin:14px 16px;padding:12px 14px;border-radius:12px;background:var(--hk-soft)}.bkcrule .line{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.bkcrule input{width:76px}.bkcrule .line .btn{margin-left:auto}.bkcrule p,.bkcfoot small{display:block;margin:0;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));line-height:1.5}.bkcwarn{display:flex;gap:6px;align-items:flex-start;margin-top:4px;color:var(--hk-amber)}.bkcwarn ha-icon{--mdc-icon-size:14px;flex:none;margin-top:1px}.bkcfoot{display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;padding:14px 16px;border-top:1px solid var(--hk-border)}.bkcfoot>div{flex:1 1 260px;min-width:0}.bkcerr{margin:6px 0 0;color:var(--hk-red);font-size:calc(12px*var(--hk-fs,1))}@media(max-width:640px){.bkcrow{grid-auto-flow:row}.bkcrow>.pill{grid-column:2;justify-self:start}}
       .pagebar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.pb-left,.pb-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1))}.pb-right{margin-left:auto}.pagebar .btn{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.pagebar ha-icon{--mdc-icon-size:18px}.pagebar ha-icon.spin{animation:hkspin 1s linear infinite}@keyframes hkspin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.pagebar ha-icon.spin{animation:none}}
-      .navtiles.compact{grid-template-columns:repeat(auto-fit,minmax(max(200px,calc(100%/var(--cols,4) - 12px)),1fr));grid-auto-rows:1fr;gap:10px}.navtiles.compact .taskcard{display:grid;grid-template-columns:38px 1fr;grid-template-rows:auto auto auto;column-gap:12px;row-gap:3px;align-content:center;align-items:center;padding:10px 14px 10px 20px}.navtiles.compact .taskcard>ha-icon{grid-row:1 / span 3;margin:0}.navtiles.compact .taskcard>strong{grid-column:2;grid-row:1}.navtiles.compact .taskcard>.setpill{grid-column:2;grid-row:2;flex-wrap:wrap;gap:6px;min-height:0;justify-self:start}.navtiles.compact .taskcard>.setpill:empty{display:none}.navtiles.compact .taskcard>small{grid-column:2;grid-row:3}
+      .navtiles.compact{grid-template-columns:repeat(auto-fit,minmax(max(200px,calc(100%/var(--cols,4) - 12px)),1fr));grid-auto-rows:1fr;gap:10px}.navtiles.compact .taskcard{display:grid;grid-template-columns:30px 1fr;grid-template-rows:auto auto auto;column-gap:10px;row-gap:3px;align-content:center;align-items:center;padding:10px 8px 10px 16px}.navtiles.compact .taskcard>ha-icon{grid-row:1 / span 3;margin:0}.navtiles.compact .taskcard>strong{grid-column:2;grid-row:1}.navtiles.compact .taskcard>.setpill{grid-column:2;grid-row:2;flex-wrap:wrap;gap:6px;min-height:0;justify-self:start}.navtiles.compact .taskcard>.setpill:empty{display:none}.navtiles.compact .taskcard>small{grid-column:2;grid-row:3}
       @media(max-width:640px){.navtiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.navtiles .taskcard{grid-template-rows:auto auto;padding:10px}.navtiles .taskcard>ha-icon,.navtiles .taskcard>small{display:none}.navtiles.compact{grid-template-columns:repeat(2,minmax(0,1fr))}.navtiles.compact .taskcard{grid-template-columns:1fr}.navtiles.compact .taskcard>strong,.navtiles.compact .taskcard>.setpill{grid-column:1}.toolbar.nosel [data-fsel-clear],.toolbar.nosel [data-sel-clear],.toolbar.nosel [data-sel-only],.toolbar.nosel .fbtns{display:none}}
       .hkmodal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(10,14,20,.55)}.hkdialog{width:min(520px,100%);max-height:calc(100vh - 32px);overflow:auto;border:1px solid var(--hk-border);border-radius:16px;background:var(--hk-surface);box-shadow:0 14px 40px rgba(0,0,0,.35)}.hkdialog .dhead{padding:16px 18px 4px}.hkdialog .dhead h2{margin:0}.hkdialog .dbody{display:grid;gap:12px;padding:10px 18px 14px}.hkdialog .dbody label{display:block;margin-bottom:4px;font-weight:600;font-size:calc(12.5px*var(--hk-fs,1))}.hkdialog .dbody input[type=text],.hkdialog .dbody input[type=datetime-local],.hkdialog .dbody textarea{width:100%;box-sizing:border-box}.hkdialog .dfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--hk-border);background:var(--hk-soft)}.hkdialog .dbtns,.logsuggest .dbtns{display:flex;gap:8px;margin-left:auto}.hkdialog .dquestion{font-weight:600}.hkdialog .danger-t{color:var(--hk-red)}.notechips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.notechips .chip{cursor:pointer}.notetwo{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.notetwo{grid-template-columns:1fr}}
       .kngrp{padding:9px 16px 4px;border-top:1px solid var(--hk-border);background:var(--hk-soft);color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:700;letter-spacing:.05em;text-transform:uppercase}.kngrp:first-child{border-top:0}.knline{display:grid;grid-template-columns:20px minmax(110px,170px) minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 16px;border-top:1px solid var(--hk-border)}.kngrp+.knline{border-top:0}.knline .kk{color:var(--hk-muted)}.knline .kval{min-width:0;overflow-wrap:anywhere}.knline .kval small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.knline .ksrc{padding:1px 6px;border:1px solid var(--hk-border);border-radius:6px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));white-space:nowrap}.kdot{font-weight:700;text-align:center}.k-ok{color:var(--hk-green)}.k-warn{color:var(--hk-amber)}.k-red{color:var(--hk-red)}.k-mute{color:var(--hk-muted)}@media(max-width:640px){.knline{grid-template-columns:20px minmax(0,1fr)}.knline .kval{grid-column:2}.knline .ksrc{display:none}}
@@ -1954,7 +1954,7 @@ class OverviewMixin {
       ? `<h3 class="foldhd">${this.t("actNow")}</h3>${urgent.map(row).join("")}${this.fold("todo_later", { tone: "warn", title: this.t("actSoon"), sub: this.t("actSoonSub"), pill: this.t(later.length === 1 ? "topicsOne" : "topicsN", { n: this.formatNumber(later.length) }) }, later.join(""), false)}`
       : [...urgent.map(row), ...later].join(""))
       : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.esc(this.t("actNone", { date: this.formatDate(this.data.meta.scanned_at) }))}</div>`;
-    const all = `<button class="link" data-jump="findingsNav">${this.t("allFindings")} (${this.formatNumber(findings.length)}) <ha-icon icon="mdi:chevron-right"></ha-icon></button>`;
+    const all = `<button class="link" data-jump="findingsNav">${this.t("allFindings")} (${this.formatNumber(this.findingTotal())}) <ha-icon icon="mdi:chevron-right"></ha-icon></button>`;
     return `<section class="panel u-mb14" aria-labelledby="hk-todo" id="hk-todo-card" tabindex="-1"><div class="panelhead"><div><h2 id="hk-todo">${this.t("actTitle")}</h2><p>${this.t("actSub")}</p></div>${all}</div>${body}${this.todoFoot()}</section>`;
   }
 
@@ -2015,7 +2015,7 @@ class OverviewMixin {
 
   overview() {
     const m = this.data.meta, counts = m.status_counts || {}, health = this.health();
-    const findings = this.sortedFindings();
+    const findings = this.sortedFindings(), total = this.findingTotal();
     this.ensureTrend();
     this.ensureSeries();
     this.ensureBackup();
@@ -2024,7 +2024,7 @@ class OverviewMixin {
     const why = this.healthWhy ? this.healthWhyCard(health) : "";
     return `<section class="statushead" title="${this.esc(this.t("healthTip", { affected: health.affected, base: health.base }))}"><button type="button" class="ring ${health.tone}" style="--p:${health.percent}" data-health-why aria-expanded="${Boolean(this.healthWhy)}" aria-label="${this.esc(this.t("healthWhy"))}"><b>${health.percent}<small>%</small></b></button>
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p></div>
-      <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
+      <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", total, total ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
       ${this.todoCard()}<div class="ovzone">${this.cleanupCard()}${this.trendCard()}${this.inventoryStatusCard()}</div>
       <div class="ovzone">${this.systemCard()}${this.databaseCard()}${this.backupCard()}</div>`;
   }
@@ -2277,7 +2277,7 @@ class FindingsMixin {
     const afterCount = all.filter(f => this.corr?.by_key?.[f.key]).length;
     const tiles = this.sumTiles([
       { label: this.t("health"), value: `${h.share} %`, sub: this.t("findSumAffected", { n: this.formatNumber(h.affected), m: this.formatNumber(h.base) }), tone: h.tone, spark: spark("share", "good") },
-      { label: this.t("all"), value: this.formatNumber(all.length), tone: all.length ? "warn" : "ok", filter: "", active: !this.findingFilter, spark: spark("open", "bad") },
+      { label: this.t("all"), value: this.formatNumber(this.findingTotal()), sub: this.followerCount() ? this.esc(this.t("findingsFollowSub", { n: this.formatNumber(this.followerCount()) })) : undefined, tone: this.findingTotal() ? "warn" : "ok", filter: "", active: !this.findingFilter, spark: spark("open", "bad") },
       afterCount ? { label: this.t("corrTile"), value: this.formatNumber(afterCount), sub: this.t("corrTileSub"), tone: "warn", attr: ["data-finding-after", "1"], active: this.findingAfter } : null,
       ...classes.map(c => ({ label: this.t(c), value: this.formatNumber(all.filter(f => f.classification === c).length), tone: classTone(c), filter: c, active: this.findingFilter === c, spark: spark(`class:${c}`, "bad") })),
     ]);
@@ -6599,6 +6599,9 @@ class CausesMixin {
     return `<div class="pad"><div class="fbtns">${btn("keep", "mdi:bookmark-check-outline", "markKnown")}${btn("snooze", "mdi:clock-outline", "fselSnooze")}${btn("", "mdi:eye-off-outline", "hideFinding")}</div></div>`;
   }
 
+  // The number the findings are counted by: every outage once and every finding without an outage behind it; the follow-up findings of an outage are not counted again.
+  findingTotal() { return this.causeList().length + this.data.findings.filter(f => !f.cause_id && !f.ignored).length; }
+
   followerCount() { return this.data.findings.filter(f => f.cause_id && !f.ignored && f.rule_id !== "config_entry.not_loaded").length; }
 }
 Object.assign(TEXT.de, {
@@ -6607,7 +6610,7 @@ Object.assign(TEXT.de, {
   logTitle: "Im HA-Log", logLine: "Im HA-Log: {what}, zuletzt {when}", logLevel_warning: "{n}× Warnung", logLevel_error: "{n}× Fehler", logLevel_critical: "{n}× kritischer Fehler",
   cause_integration_down: "Integration {name} ist nicht geladen", cause_device_down: "Gerät {name} ist ganz ausgefallen",
   causeFollowers: "{n} Folgebefunde", cause_service_missing: "Dienst {name} existiert nicht", causeCallers: "{n} Automationen und Skripte rufen ihn auf", outageServices: "{n} fehlende Dienste", causeState: "Zustand: {state}", causeUses_automation: "{n} Automationen betroffen", causeUses_script: "{n} Skripte betroffen", causeUses_dashboard: "{n} Dashboards betroffen",
-  causeShow: "Folgebefunde anzeigen", causeHide: "Folgebefunde ausblenden", actOutages: "Ausfälle",
+  causeShow: "Folgebefunde anzeigen", findingsFollowSub: "dazu {n} Folgebefunde der Ausfälle", causeHide: "Folgebefunde ausblenden", actOutages: "Ausfälle",
 });
 Object.assign(TEXT.en, {
   causesTitle: "Outages", causesSub: "{n} outages (causes) · {m} single findings. Fix the outages first, they often explain many findings.",
@@ -6615,7 +6618,7 @@ Object.assign(TEXT.en, {
   logTitle: "In the HA log", logLine: "In the HA log: {what}, last {when}", logLevel_warning: "{n}× warning", logLevel_error: "{n}× error", logLevel_critical: "{n}× critical error",
   cause_integration_down: "Integration {name} is not loaded", cause_device_down: "Device {name} is down completely",
   causeFollowers: "{n} follow-up findings", cause_service_missing: "Service {name} does not exist", causeCallers: "{n} automations and scripts call it", outageServices: "{n} missing services", causeState: "State: {state}", causeUses_automation: "{n} automations affected", causeUses_script: "{n} scripts affected", causeUses_dashboard: "{n} dashboards affected",
-  causeShow: "Show follow-up findings", causeHide: "Hide follow-up findings", actOutages: "Outages",
+  causeShow: "Show follow-up findings", findingsFollowSub: "plus {n} follow-up findings of the outages", causeHide: "Hide follow-up findings", actOutages: "Outages",
 });
 
 // Maintenance goals: what "in order" means for this house and whether it is so (see goals.py); mixed into the panel in 99-register.js.
@@ -12665,7 +12668,7 @@ class HAHousekeeperPanel extends HTMLElement {
   topbar() {
     const missedGoals = (this.goals?.goals || []).filter(g => g.state === "missed").length;
     const violations = (this.policies?.rules || []).filter(r => r.enabled).reduce((n, r) => n + (r.count || 0), 0);
-    const counts = this.data ? { findingsNav: this.data.findings.filter(f => !f.ignored).length, batteries: this.lowBatteries().length || undefined, reminders: (this.data.reminders || []).filter(r => r.state === "due").length || undefined, cleanup: this.readyQuarantine() || undefined, repair: this.counterScan?.items?.length || undefined, maintenance: missedGoals || undefined, policies: violations || undefined } : {};
+    const counts = this.data ? { findingsNav: this.findingTotal(), batteries: this.lowBatteries().length || undefined, reminders: (this.data.reminders || []).filter(r => r.state === "due").length || undefined, cleanup: this.readyQuarantine() || undefined, repair: this.counterScan?.items?.length || undefined, maintenance: missedGoals || undefined, policies: violations || undefined } : {};
     const item = view => `<button class="nav ${this.view === view ? "active" : ""}" data-view="${view}" ${this.view === view ? 'aria-current="page"' : ""}><ha-icon icon="${NAV_ICONS[view]}"></ha-icon><span>${this.t(view)}</span>${counts[view] !== undefined ? `<em>${counts[view]}</em>` : ""}</button>`;
     const [direct, ...menus] = NAV_GROUPS;
     const menu = ([label, views]) => {
