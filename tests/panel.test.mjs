@@ -2859,6 +2859,8 @@ test("the findings list is one list: a chain is one entry with a counter and ope
   const html = el.findingsView();
   assert.ok(html.includes("App Zigbee2MQTT is stopped") && html.includes("2 follow-ups") && html.includes("Integration MQTT is not loaded") && html.includes("sensor.a") && html.includes("sensor.c"));
   assert.ok(!html.includes("Single findings"), "no separate groups");
+  el.data = { ...el.data, findings: [...el.data.findings, { ...f("x", "integration_down:e1"), rule_id: "config_entry.not_loaded", key: "own1" }], causes: [app, { ...integ, finding_key: "own1" }] };
+  assert.ok(el.findingsView().includes('data-fsel="own1"'), "an outage with a finding of its own can be picked");
   el.findingWithFollowers = true;
   assert.ok(!el.findingsView().includes("sensor.c"), "the filter keeps only entries with follow-ups");
   el.findingWithFollowers = false; el.showFollowers = true;

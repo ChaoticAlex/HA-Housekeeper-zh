@@ -174,7 +174,7 @@ class FindingsMixin {
 
   findSelBar(pageRows) {
     const n = this.findSel.size;
-    this._findPage = pageRows.flatMap(f => (f.members ? f.members : [f])).map(f => f.key).filter(Boolean);
+    this._findPage = pageRows.flatMap(f => (f.cause ? [{ key: f.cause.finding_key }] : f.members ? f.members : [f])).map(f => f.key).filter(Boolean);
     if (!pageRows.length && !n) return "";
     // Nothing picked: only the box that picks the page. The actions appear with the first pick.
     if (!n) return `<div class="toolbar selhead"><label class="selall"><input type="checkbox" class="selbox" data-fsel-page> ${this.t("selectPage")}</label></div>`;

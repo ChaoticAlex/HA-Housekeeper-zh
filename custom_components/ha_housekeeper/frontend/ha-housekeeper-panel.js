@@ -2435,7 +2435,7 @@ class FindingsMixin {
 
   findSelBar(pageRows) {
     const n = this.findSel.size;
-    this._findPage = pageRows.flatMap(f => (f.members ? f.members : [f])).map(f => f.key).filter(Boolean);
+    this._findPage = pageRows.flatMap(f => (f.cause ? [{ key: f.cause.finding_key }] : f.members ? f.members : [f])).map(f => f.key).filter(Boolean);
     if (!pageRows.length && !n) return "";
     // Nothing picked: only the box that picks the page. The actions appear with the first pick.
     if (!n) return `<div class="toolbar selhead"><label class="selall"><input type="checkbox" class="selbox" data-fsel-page> ${this.t("selectPage")}</label></div>`;
@@ -6944,13 +6944,18 @@ class CausesMixin {
 
   // One entry of the list for a cause: a row with a red counter ("12 follow-ups"); it opens into the chain below it
   // (causes and then the findings they explain), each with its own counter. A cause without any follow-up is a plain row.
+  // The box that picks the outage's own finding, so it can be hidden, marked as known or snoozed with others at once.
+  causeBox(c) {
+    return c.finding_key ? `<input type="checkbox" class="selbox" data-fsel="${this.esc(c.finding_key)}" ${this.findSel.has(c.finding_key) ? "checked" : ""} aria-label="${this.esc(c.name)}">` : "";
+  }
+
   causeEntry(c) {
     const total = this.causeTotal(c), link = `${c.object_type}:${c.object_id}`;
     const title = this.esc(this.t(`cause_${c.kind}`, { name: c.name })), decide = this.causeDecide(c);
     const sub = [total ? this.t("causeExplains", { n: this.formatNumber(total) }) : "", this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · ");
-    if (!total) return `<button class="row rel" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${title}</strong><small>${this.esc(sub)}</small></span></button>${decide}`;
+    if (!total) return `<div class="rowwrap">${this.causeBox(c)}<button class="row rel" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${title}</strong><small>${this.esc(sub)}</small></span></button></div>${decide}`;
     const byId = id => this.causeList().find(x => x.id === id);
-    const own = c.virtual ? "" : `<button class="row" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span></button>`;
+    const own = c.virtual ? "" : `<div class="rowwrap">${this.causeBox(c)}<button class="row" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span></button></div>`;
     const below = (c.child_ids || []).map(byId).filter(Boolean).map(x => this.causeEntry(x)).join("");
     const followers = (this.data.findings || []).filter(f => f.cause_id === c.id && !f.ignored && !CAUSE_OWN_RULES.includes(f.rule_id));
     const pg = this.paginate(`cause_${c.id}`, followers.map(f => this.findingRow(f)));

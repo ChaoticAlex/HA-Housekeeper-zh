@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Behoben
+
+- **Befunde:** Ausfälle (Integration, Gerät, App) lassen sich in der Liste wieder ankreuzen, um sie gesammelt auszublenden, als bekannt zu markieren oder zurückzustellen.
+
+### English
+
+#### Fixed
+
+- **Findings:** Outages (integration, device, app) can be ticked in the list again, to hide, mark as known or snooze them together.
+
 ## 1.5.0 - 2026-10-12
 
 ### Geändert
