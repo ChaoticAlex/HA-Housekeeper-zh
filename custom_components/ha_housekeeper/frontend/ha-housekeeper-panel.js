@@ -1380,7 +1380,7 @@ class StylesMixin {
       .rangechart .grid{stroke:var(--hk-border);stroke-width:1}
       .bkcsum{padding:14px 16px 0}.bkcsum .sumtiles{margin-bottom:0}.bkcrule{display:grid;gap:8px;margin:14px 16px;padding:12px 14px;border-radius:12px;background:var(--hk-soft)}.bkcrule .line{display:flex;flex-wrap:wrap;align-items:center;gap:8px}.bkcrule input{width:76px}.bkcrule .line .btn{margin-left:auto}.bkcrule p,.bkcfoot small{display:block;margin:0;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));line-height:1.5}.bkcwarn{display:flex;gap:6px;align-items:flex-start;margin-top:4px;color:var(--hk-amber)}.bkcwarn ha-icon{--mdc-icon-size:14px;flex:none;margin-top:1px}.bkcfoot{display:flex;align-items:center;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;padding:14px 16px;border-top:1px solid var(--hk-border)}.bkcfoot>div{flex:1 1 260px;min-width:0}.bkcerr{margin:6px 0 0;color:var(--hk-red);font-size:calc(12px*var(--hk-fs,1))}@media(max-width:640px){.bkcrow{grid-auto-flow:row}.bkcrow>.pill{grid-column:2;justify-self:start}}
       .pagebar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.pb-left,.pb-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1))}.pb-right{margin-left:auto}.pagebar .btn{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.pagebar ha-icon{--mdc-icon-size:18px}.pagebar ha-icon.spin{animation:hkspin 1s linear infinite}@keyframes hkspin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.pagebar ha-icon.spin{animation:none}}
-      .navtiles.compact{grid-template-columns:repeat(auto-fit,minmax(max(200px,calc(100%/var(--cols,4) - 12px)),1fr));grid-auto-rows:1fr;gap:10px}.navtiles.compact .taskcard{display:grid;grid-template-columns:30px 1fr;grid-template-rows:auto auto auto;column-gap:10px;row-gap:3px;align-content:center;align-items:center;padding:10px 8px 10px 16px}.navtiles.compact .taskcard>ha-icon{grid-row:1 / span 3;margin:0}.navtiles.compact .taskcard>strong{grid-column:2;grid-row:1}.navtiles.compact .taskcard>.setpill{grid-column:2;grid-row:2;flex-wrap:wrap;gap:6px;min-height:0;justify-self:start}.navtiles.compact .taskcard>.setpill:empty{display:none}.navtiles.compact .taskcard>small{grid-column:2;grid-row:3}
+      .navtiles.compact{grid-template-columns:repeat(auto-fit,minmax(max(200px,calc(100%/var(--cols,4) - 12px)),1fr));grid-auto-rows:1fr;gap:10px}.navtiles.compact .taskcard{display:grid;grid-template-columns:30px 1fr;grid-template-rows:auto auto auto;column-gap:10px;row-gap:3px;align-content:center;align-items:center;padding:10px 8px 10px 16px}.navtiles.compact .taskcard>ha-icon{grid-row:1 / -1;margin:0}.navtiles.compact .taskcard>.navfacts{grid-column:2;display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.navtiles.compact .taskcard>strong{grid-column:2;grid-row:1}.navtiles.compact .taskcard>.setpill{grid-column:2;grid-row:2;flex-wrap:wrap;gap:6px;min-height:0;justify-self:start}.navtiles.compact .taskcard>.setpill:empty{display:none}.navtiles.compact .taskcard>small{grid-column:2;grid-row:3}
       @media(max-width:640px){.navtiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.navtiles .taskcard{grid-template-rows:auto auto;padding:10px}.navtiles .taskcard>ha-icon,.navtiles .taskcard>small{display:none}.navtiles.compact{grid-template-columns:repeat(2,minmax(0,1fr))}.navtiles.compact .taskcard{grid-template-columns:1fr}.navtiles.compact .taskcard>strong,.navtiles.compact .taskcard>.setpill{grid-column:1}.toolbar.nosel [data-fsel-clear],.toolbar.nosel [data-sel-clear],.toolbar.nosel [data-sel-only],.toolbar.nosel .fbtns{display:none}}
       .hkmodal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(10,14,20,.55)}.hkdialog{width:min(520px,100%);max-height:calc(100vh - 32px);overflow:auto;border:1px solid var(--hk-border);border-radius:16px;background:var(--hk-surface);box-shadow:0 14px 40px rgba(0,0,0,.35)}.hkdialog .dhead{padding:16px 18px 4px}.hkdialog .dhead h2{margin:0}.hkdialog .dbody{display:grid;gap:12px;padding:10px 18px 14px}.hkdialog .dbody label{display:block;margin-bottom:4px;font-weight:600;font-size:calc(12.5px*var(--hk-fs,1))}.hkdialog .dbody input[type=text],.hkdialog .dbody input[type=datetime-local],.hkdialog .dbody textarea{width:100%;box-sizing:border-box}.hkdialog .dfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--hk-border);background:var(--hk-soft)}.hkdialog .dbtns,.logsuggest .dbtns{display:flex;gap:8px;margin-left:auto}.hkdialog .dquestion{font-weight:600}.hkdialog .danger-t{color:var(--hk-red)}.notechips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.notechips .chip{cursor:pointer}.notetwo{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.notetwo{grid-template-columns:1fr}}
       .kngrp{padding:9px 16px 4px;border-top:1px solid var(--hk-border);background:var(--hk-soft);color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:700;letter-spacing:.05em;text-transform:uppercase}.kngrp:first-child{border-top:0}.knline{display:grid;grid-template-columns:20px minmax(110px,170px) minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 16px;border-top:1px solid var(--hk-border)}.kngrp+.knline{border-top:0}.knline .kk{color:var(--hk-muted)}.knline .kval{min-width:0;overflow-wrap:anywhere}.knline .kval small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.knline .ksrc{padding:1px 6px;border:1px solid var(--hk-border);border-radius:6px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));white-space:nowrap}.kdot{font-weight:700;text-align:center}.k-ok{color:var(--hk-green)}.k-warn{color:var(--hk-amber)}.k-red{color:var(--hk-red)}.k-mute{color:var(--hk-muted)}@media(max-width:640px){.knline{grid-template-columns:20px minmax(0,1fr)}.knline .kval{grid-column:2}.knline .ksrc{display:none}}
@@ -6021,7 +6021,7 @@ class LayoutMixin {
     const cells = tabs.map(t => {
       const tone = t.tone || "mute", has = t.count !== undefined && t.count !== null;
       const pills = `${has ? `<span class="pill ${tone}">${this.esc(this.formatNumber(t.count))}</span>` : ""}${t.pill ? `<span class="pill ${t.pillTone || tone}">${this.esc(t.pill)}</span>` : ""}`;
-      const inner = `<ha-icon icon="${t.icon}"></ha-icon><strong>${this.esc(t.label)}</strong><span class="setpill">${pills}</span><small>${this.esc(t.hint || "")}</small>`;
+      const inner = `<ha-icon icon="${t.icon}"></ha-icon><strong>${this.esc(t.label)}</strong><span class="setpill">${pills}</span><small>${this.esc(t.hint || "")}</small>${t.facts?.length ? `<span class="navfacts">${t.facts.map(f => `<span class="pill ${f.tone}">${this.esc(f.text)}</span>`).join("")}</span>` : ""}`;
       if (t.disabled) return `<div class="taskcard t-mute off" aria-disabled="true">${inner}</div>`;
       return `<button class="taskcard t-${tone}${t.id === open ? " on" : ""}" aria-pressed="${t.id === open}" data-view-tab="${this.esc(`${view}|${t.id}`)}">${inner}</button>`;
     }).join("");
@@ -11958,26 +11958,22 @@ class ComponentsMixin {
     const appBytes = storage ? sum(apps.map(a => (storage.apps || []).find(u => u.slug === a.object_id)?.size_bytes)) : null;
     const customBytes = storage ? sum(custom.map(g => g.bytes)) : null;
     const size = b => (b === null ? "" : this.t("compSumSize", { size: this.formatBytes(b) }));
-    const withSize = (text, b) => [text, size(b)].filter(Boolean).join(" · ");
-    const tabs = [
-      { id: "apps", icon: "mdi:apps", label: this.t("compTabApps"), hint: withSize(this.t("compTabAppsHint"), appBytes), count: apps.length },
-      { id: "core", icon: "mdi:puzzle-outline", label: this.t("compTabCore"), hint: this.t("compTabCoreHint"), count: core.length },
-      { id: "custom", icon: "mdi:puzzle-plus-outline", label: this.t("compTabCustom"), hint: withSize(this.t("compTabCustomHint"), customBytes), count: custom.length },
-    ];
-    const open = this.viewTabOf("components", tabs, "core");
     const n = f => this.formatNumber(f);
-    const problems = ints.filter(g => g.status === "problem").length, updates = ints.filter(g => g.hacs?.pending_update).length, appUpdates = apps.filter(a => a.update_available).length;
-    const tiles = this.sumTiles([
-      { label: this.t("compSumApps"), value: n(apps.length), sub: withSize(`${n(apps.filter(a => a.state === "started").length)} ${this.t("compSumRunning")}`, appBytes), tone: "mute" },
-      { label: this.t("compSumCore"), value: n(core.length), tone: "mute" },
-      { label: this.t("compSumCustomInt"), value: n(custom.length), sub: size(customBytes), tone: "mute" },
-      problems ? { label: this.t("compSumProblem"), value: n(problems), tone: "red" } : null,
-      updates ? { label: this.t("compSumUpdates"), value: n(updates), tone: "warn" } : null,
-      appUpdates ? { label: this.t("compSumAppUpdates"), value: n(appUpdates), tone: "warn" } : null,
-    ]);
+    const bad = list => list.filter(g => g.status === "problem").length;
+    const fact = (count, label, tone) => (count ? { text: `${n(count)} ${this.t(label)}`, tone } : null);
+    const sizeFact = b => (size(b) ? { text: size(b), tone: "mute" } : null);
+    const tabs = [
+      { id: "apps", icon: "mdi:apps", label: this.t("compTabApps"), hint: this.t("compTabAppsHint"), count: apps.length,
+        facts: [fact(apps.filter(a => a.state === "started").length, "compSumRunning", "ok"), sizeFact(appBytes), fact(apps.filter(a => a.update_available).length, "compSumAppUpdates", "warn")] },
+      { id: "core", icon: "mdi:puzzle-outline", label: this.t("compTabCore"), hint: this.t("compTabCoreHint"), count: core.length,
+        facts: [fact(bad(core), "compSumProblem", "red")] },
+      { id: "custom", icon: "mdi:puzzle-plus-outline", label: this.t("compTabCustom"), hint: this.t("compTabCustomHint"), count: custom.length,
+        facts: [sizeFact(customBytes), fact(custom.filter(g => g.hacs?.pending_update).length, "compSumUpdates", "warn"), fact(bad(custom), "compSumProblem", "red")] },
+    ].map(t => ({ ...t, facts: t.facts.filter(Boolean), tone: t.facts.some(f => f?.tone === "red") ? "red" : "mute" }));
+    const open = this.viewTabOf("components", tabs, "core");
     if (apps.length || custom.length) this.sysEnsure("storage"); // CPU, RAM and data of the apps, folder sizes of custom integrations
     const body = open === "apps" ? this.compAppsList(apps) : this.compIntegrationsList(open === "custom" ? custom : core, open);
-    return `<div class="stack">${tiles}<div class="sysnav">${this.navTiles("components", tabs, open, this.t("components"), true)}</div><div class="panel">${body}</div></div>`;
+    return `<div class="stack">${this.navTiles("components", tabs, open, this.t("components"), true)}<div class="panel">${body}</div></div>`;
   }
 }
 

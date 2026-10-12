@@ -40,7 +40,7 @@ class LayoutMixin {
     const cells = tabs.map(t => {
       const tone = t.tone || "mute", has = t.count !== undefined && t.count !== null;
       const pills = `${has ? `<span class="pill ${tone}">${this.esc(this.formatNumber(t.count))}</span>` : ""}${t.pill ? `<span class="pill ${t.pillTone || tone}">${this.esc(t.pill)}</span>` : ""}`;
-      const inner = `<ha-icon icon="${t.icon}"></ha-icon><strong>${this.esc(t.label)}</strong><span class="setpill">${pills}</span><small>${this.esc(t.hint || "")}</small>`;
+      const inner = `<ha-icon icon="${t.icon}"></ha-icon><strong>${this.esc(t.label)}</strong><span class="setpill">${pills}</span><small>${this.esc(t.hint || "")}</small>${t.facts?.length ? `<span class="navfacts">${t.facts.map(f => `<span class="pill ${f.tone}">${this.esc(f.text)}</span>`).join("")}</span>` : ""}`;
       if (t.disabled) return `<div class="taskcard t-mute off" aria-disabled="true">${inner}</div>`;
       return `<button class="taskcard t-${tone}${t.id === open ? " on" : ""}" aria-pressed="${t.id === open}" data-view-tab="${this.esc(`${view}|${t.id}`)}">${inner}</button>`;
     }).join("");

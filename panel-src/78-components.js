@@ -134,25 +134,21 @@ class ComponentsMixin {
     const appBytes = storage ? sum(apps.map(a => (storage.apps || []).find(u => u.slug === a.object_id)?.size_bytes)) : null;
     const customBytes = storage ? sum(custom.map(g => g.bytes)) : null;
     const size = b => (b === null ? "" : this.t("compSumSize", { size: this.formatBytes(b) }));
-    const withSize = (text, b) => [text, size(b)].filter(Boolean).join(" · ");
-    const tabs = [
-      { id: "apps", icon: "mdi:apps", label: this.t("compTabApps"), hint: withSize(this.t("compTabAppsHint"), appBytes), count: apps.length },
-      { id: "core", icon: "mdi:puzzle-outline", label: this.t("compTabCore"), hint: this.t("compTabCoreHint"), count: core.length },
-      { id: "custom", icon: "mdi:puzzle-plus-outline", label: this.t("compTabCustom"), hint: withSize(this.t("compTabCustomHint"), customBytes), count: custom.length },
-    ];
-    const open = this.viewTabOf("components", tabs, "core");
     const n = f => this.formatNumber(f);
-    const problems = ints.filter(g => g.status === "problem").length, updates = ints.filter(g => g.hacs?.pending_update).length, appUpdates = apps.filter(a => a.update_available).length;
-    const tiles = this.sumTiles([
-      { label: this.t("compSumApps"), value: n(apps.length), sub: withSize(`${n(apps.filter(a => a.state === "started").length)} ${this.t("compSumRunning")}`, appBytes), tone: "mute" },
-      { label: this.t("compSumCore"), value: n(core.length), tone: "mute" },
-      { label: this.t("compSumCustomInt"), value: n(custom.length), sub: size(customBytes), tone: "mute" },
-      problems ? { label: this.t("compSumProblem"), value: n(problems), tone: "red" } : null,
-      updates ? { label: this.t("compSumUpdates"), value: n(updates), tone: "warn" } : null,
-      appUpdates ? { label: this.t("compSumAppUpdates"), value: n(appUpdates), tone: "warn" } : null,
-    ]);
+    const bad = list => list.filter(g => g.status === "problem").length;
+    const fact = (count, label, tone) => (count ? { text: `${n(count)} ${this.t(label)}`, tone } : null);
+    const sizeFact = b => (size(b) ? { text: size(b), tone: "mute" } : null);
+    const tabs = [
+      { id: "apps", icon: "mdi:apps", label: this.t("compTabApps"), hint: this.t("compTabAppsHint"), count: apps.length,
+        facts: [fact(apps.filter(a => a.state === "started").length, "compSumRunning", "ok"), sizeFact(appBytes), fact(apps.filter(a => a.update_available).length, "compSumAppUpdates", "warn")] },
+      { id: "core", icon: "mdi:puzzle-outline", label: this.t("compTabCore"), hint: this.t("compTabCoreHint"), count: core.length,
+        facts: [fact(bad(core), "compSumProblem", "red")] },
+      { id: "custom", icon: "mdi:puzzle-plus-outline", label: this.t("compTabCustom"), hint: this.t("compTabCustomHint"), count: custom.length,
+        facts: [sizeFact(customBytes), fact(custom.filter(g => g.hacs?.pending_update).length, "compSumUpdates", "warn"), fact(bad(custom), "compSumProblem", "red")] },
+    ].map(t => ({ ...t, facts: t.facts.filter(Boolean), tone: t.facts.some(f => f?.tone === "red") ? "red" : "mute" }));
+    const open = this.viewTabOf("components", tabs, "core");
     if (apps.length || custom.length) this.sysEnsure("storage"); // CPU, RAM and data of the apps, folder sizes of custom integrations
     const body = open === "apps" ? this.compAppsList(apps) : this.compIntegrationsList(open === "custom" ? custom : core, open);
-    return `<div class="stack">${tiles}<div class="sysnav">${this.navTiles("components", tabs, open, this.t("components"), true)}</div><div class="panel">${body}</div></div>`;
+    return `<div class="stack">${this.navTiles("components", tabs, open, this.t("components"), true)}<div class="panel">${body}</div></div>`;
   }
 }
