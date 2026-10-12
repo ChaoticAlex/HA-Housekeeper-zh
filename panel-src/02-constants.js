@@ -144,3 +144,5 @@ const csvCell = v => {
   if (/^[=+\-@\t\r]/.test(t) && !/^[+-]?\d+([.,]\d+)?([eE][+-]?\d+)?$/.test(t)) t = "'" + t;
   return `"${t.replace(/"/g, '""')}"`;
 };
+// Pages whose subtitle only explains what the page does or does not do; it sits behind an (i) after the title.
+const INFO_SUB_VIEWS = ["exposure", "maintenance", "repair", "policies", "recorder", "reliability", "storage", "dataflow", "secrets"];
