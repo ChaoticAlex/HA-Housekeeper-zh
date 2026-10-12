@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Übersicht:** „Braucht Aufmerksamkeit“ steht vor dem Zustand des Bestands.
 - **Batterien in Reitern:** Die Liste steht allein, die Prognose und die Arten der Batterien sind eigene Reiter, sobald es etwas zu zeigen gibt.
 - **Änderungen als Bereiche:** Jede Kategorie (Statuswechsel, neue und behobene Befunde, neue und entfernte Objekte) ist ein einklappbarer Bereich mit Zahl; die Kacheln oben öffnen genau diese Kategorie.
 - **Ausfälle und Recorder-Kosten kürzer:** Bei vielen Ursachen lässt sich die Karte einklappen, und die Statistik unter den Recorder-Kosten ist ein eingeklappter Bereich mit Zahl.
