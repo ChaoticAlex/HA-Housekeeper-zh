@@ -115,6 +115,11 @@ class FindingsMixin {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
+  // The filters the tiles above set (class, "after"); the list bar shows its own.
+  findingNote() {
+    return this.filterNote([this.findingFilter ? this.t(this.findingFilter) : "", this.findingAfter ? this.t("corrTile") : ""].filter(Boolean), "data-finding-reset");
+  }
+
   findingsView() {
     const all = this.sortedFindings(true).filter(f => this.statusMatch(f));
     const classes = [...new Set(all.map(f => f.classification))];
@@ -137,7 +142,7 @@ class FindingsMixin {
     const dueCount = this.data.findings.filter(f => f.resurfaced).length;
     const followers = this.followerCount();
     return `<div class="stack">${tiles}${this.causesCard()}${this.fixedCard()}<div class="panel"><div class="chips">${followers ? `<button class="chip ${this.showFollowers ? "active" : ""}" data-toggle-followers>${this.t(this.showFollowers ? "causeHide" : "causeShow")} (${followers})</button>` : ""}${dueCount ? `<button class="chip ${this.findingDue ? "active" : ""}" data-finding-due>${this.t("dueFilter")} (${dueCount})</button>` : ""}${this.statusChips()}<span class="spacer"></span><button class="chip" data-export="csv" title="${this.t("exportTitle")}">${this.t("exportCsv")}</button><button class="chip" data-export="json" title="${this.t("exportTitle")}">${this.t("exportJson")}</button></div>
-      ${this.findSelBar(pg.rows)}${bar}${list.length ? pg.rows.map(f => (f.members ? this.findingGroup(f) : this.findingRow(f))).join("") : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${all.length ? this.noMatches("findings") : this.t("noFindings")}</div>`}${pg.footer}</div></div>`;
+      ${this.findingNote()}${this.findSelBar(pg.rows)}${bar}${list.length ? pg.rows.map(f => (f.members ? this.findingGroup(f) : this.findingRow(f))).join("") : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${all.length ? this.noMatches("findings") : this.t("noFindings")}</div>`}${pg.footer}</div></div>`;
   }
 
   // The selection of findings: hide several at once, or export just those. Kept across pages until cleared.

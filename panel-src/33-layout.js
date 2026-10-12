@@ -4,16 +4,20 @@ class LayoutMixin {
   sumTiles(tiles) {
     const cells = tiles.filter(Boolean).map(t => {
       const inner = `<span class="sumlabel">${this.esc(t.label)}</span><b class="sumvalue">${t.value}</b>${t.sub ? `<small>${t.sub}</small>` : ""}${t.spark ? `<span class="spark-row">${t.spark}</span>` : ""}`;
-      if (t.filter !== undefined) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-finding-filter="${this.esc(t.filter)}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
+      const hint = t.hint ? ` title="${this.esc(t.hint)}"` : "";
+      // Three kinds, told apart by a cue in the corner: a figure only (flat), a filter of the list below (funnel, marked when on), a link to another page (arrow).
+      const filter = (attr, active) => `<button class="sumtile filter ${t.tone || "mute"}"${hint} ${attr} aria-pressed="${Boolean(active)}"><ha-icon class="sumcue" icon="mdi:filter-variant"></ha-icon>${inner}</button>`;
+      if (t.filter !== undefined) return filter(`data-finding-filter="${this.esc(t.filter)}"`, t.active);
       if (t.lf) {
         const [id, name, value] = t.lf, f = this.lv[id]?.f || {};
-        const active = name ? f[name] === value : !Object.values(f).some(Boolean);
-        return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-lf-set="${this.esc(t.lf.join("|"))}" aria-pressed="${active}">${inner}</button>`;
+        return filter(`data-lf-set="${this.esc(t.lf.join("|"))}"`, name ? f[name] === value : !Object.values(f).some(Boolean));
       }
-      if (t.attr) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} ${t.attr[0]}="${this.esc(t.attr[1])}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
-      if (t.unref) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-unref-tab="${t.unref}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
-      if (t.inv !== undefined) return `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-inv-filter="${this.esc(t.inv)}" aria-pressed="${Boolean(t.active)}">${inner}</button>`;
-      return t.tab ? `<button class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""} data-view-tab="${this.esc(t.tab)}">${inner}</button>` : `<div class="sumtile ${t.tone || "mute"}"${t.hint ? ` title="${this.esc(t.hint)}"` : ""}>${inner}</div>`;
+      if (t.attr && t.attr[0] !== "data-object") return filter(`${t.attr[0]}="${this.esc(t.attr[1])}"`, t.active);
+      if (t.inv !== undefined) return filter(`data-inv-filter="${this.esc(t.inv)}"`, t.active);
+      const go = attr => `<button class="sumtile go ${t.tone || "mute"}"${hint} ${attr}><ha-icon class="sumcue" icon="mdi:chevron-right"></ha-icon>${inner}</button>`;
+      if (t.attr) return go(`${t.attr[0]}="${this.esc(t.attr[1])}"`);
+      if (t.unref) return go(`data-unref-tab="${t.unref}"`);
+      return t.tab ? go(`data-view-tab="${this.esc(t.tab)}"`) : `<div class="sumtile ${t.tone || "mute"}"${hint}>${inner}</div>`;
     }).join("");
     return cells ? `<div class="sumtiles" role="group" aria-label="${this.esc(this.t("sumLabel"))}">${cells}</div>` : "";
   }

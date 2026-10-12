@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Kacheln erkennbar:** Eine Zahl ohne Klick ist flach, ein Filter trägt einen Trichter und ist markiert (mit Haken), solange er wirkt, ein Link auf eine andere Seite einen Pfeil. Ein zweiter Klick hebt jeden Filter wieder auf, die Liste kommt ins Bild, und über der Liste steht „Filter aktiv“ mit „Zurücksetzen“.
 - **Reparieren wie Aufräumen:** Die Aufgaben stehen als kompakte Kacheln oben und bleiben beim Arbeiten stehen; ein Wechsel braucht kein „Zurück“ mehr. Der Hinweis zum bestätigten Plan sitzt auch hier hinter dem farbigen (i).
 - **Kein Kopieren-Knopf mehr in den Listen:** Das Viereck beim Daraufzeigen verdeckte Namen und IDs; die ID lässt sich direkt markieren.
 - **Automationen: Diagnose auf der Detailseite:** Die Spalte „Diagnose“ in der Übersicht entfällt; die Zeile öffnet die Detailseite, die einen Reiter „Diagnose“ hat (Blickwinkel, Erfolgskriterien, Verbessern, Ablaufverfolgung). Skripte zeigen dort ihre vier Blickwinkel.
@@ -52,6 +53,7 @@
 
 ### Behoben
 
+- **Läufe: Klick auf „Fehler“:** Die Karte oben zeigte „Keine Treffer“, obwohl die Tabelle darunter die Automationen mit Fehlern auflistete; die leere Meldung entfällt jetzt.
 - Unter einem Ausfall zeigte die Karte „Ausfälle“ höchstens 20 Folgebefunde, auch wenn die Zahl mehr nannte. Jetzt gibt es Seiten.
 
 ### English

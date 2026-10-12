@@ -4272,3 +4272,10 @@ test("a cause with more than 20 follow-up findings pages them instead of cutting
   el.pages[`cause_${cause.id}`] = 2;
   assert.ok(el.causesCard().includes("sensor.n24"));
 });
+
+test("tiles tell their kind: a figure is flat, a filter has a funnel and is marked when on, a link has an arrow; a filter shows its note", () => {
+  const { el } = panel("en");
+  const html = el.sumTiles([{ label: "Figure", value: "1" }, { label: "Filter", value: "2", filter: "x", active: true }, { label: "Link", value: "3", tab: "findingsNav|all" }]);
+  assert.ok(html.includes('<div class="sumtile mute">') && html.includes('class="sumtile filter mute"') && html.includes('aria-pressed="true"') && html.includes('class="sumtile go mute"'));
+  assert.ok(el.filterNote(["Errors"], "data-x").includes("Filter on") && el.filterNote([], "data-x") === "");
+});
