@@ -82,6 +82,7 @@
 
 ### Behoben
 
+- **Übersicht:** „Schwache Batterien: Ziel verfehlt“ führt jetzt zu „Pflegen → Batterien“ statt zum Inventar.
 - **Recorder aufräumen:** Statistiken löschen und Verlauf kürzen laufen für jede Entität einzeln: Scheitert eine, laufen die übrigen weiter und der Grund steht bei der betroffenen. Vorher stoppte der Lauf nach dem ersten Fehler. Bei einem gemeinsamen Problem (Recorder beschäftigt oder nicht verfügbar) stoppt er weiter.
 - **Verweise ersetzen, Umbenennen:** Betreffen mehrere Schritte eines Plans dieselbe Automation oder dieselbe Quelle, brach der Lauf nach dem ersten Schritt mit „Eine Konfiguration wurde nach der Vorschau geändert“ ab. Die eigenen Änderungen früherer Schritte zählen jetzt nicht mehr als fremde Änderung.
 - **Kacheln der Unterseiten:** Das Symbol sitzt jetzt mittig in der Kachel und hat mehr Abstand zum Text.
@@ -156,6 +157,7 @@
 
 ### Fixed
 
+- **Overview:** "Weak batteries: goal missed" now leads to "Maintain → Batteries" instead of the inventory.
 - **Recorder cleanup:** Deleting statistics and trimming history now run per entity: if one fails, the others carry on and the reason is shown on the affected one. Before, the run stopped at the first failure. It still stops on a shared problem (recorder busy or unavailable).
 - **Replace references, rename:** When several steps of a plan touched the same automation or source, the run stopped after the first step with "A configuration was changed after the preview". The changes made by earlier steps of the same run no longer count as foreign changes.
 - **Sub-page tiles:** The icon is now vertically centred in the tile and has more room to the text.

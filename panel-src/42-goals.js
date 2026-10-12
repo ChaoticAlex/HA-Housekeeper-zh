@@ -14,7 +14,7 @@ Object.assign(TEXT.en, {
   goalUnit_mb_per_day: "{n} MB per day", goalEdit: "Adjust", goalLimitLabel: "Limit", goalEnabled: "Watch this goal", goalDefault: "Default: {n}", goalFailed: "Not saved: {reason}", goalSave: "Save", goalsAdjust: "Adjust limits", goalsAllMet: "All {n} watched goals are met.",
 });
 
-const GOAL_VIEWS = { broken_references: "findingsNav", unavailable: "findingsNav", backup_age: "maintenance", restore_test_age: "maintenance", recorder_growth: "recorder", weak_batteries: "inventory", devices_without_area: "policies", stale_sensors: "findingsNav", recurring_devices: "cleanup", automation_errors: "runs", blocked_automations: "findingsNav", orphaned_statistics: "cleanup" };
+const GOAL_VIEWS = { broken_references: "findingsNav", unavailable: "findingsNav", backup_age: "maintenance", restore_test_age: "maintenance", recorder_growth: "recorder", weak_batteries: "batteries", devices_without_area: "policies", stale_sensors: "findingsNav", recurring_devices: "cleanup", automation_errors: "runs", blocked_automations: "findingsNav", orphaned_statistics: "cleanup" };
 const GOAL_TONES = { met: "ok", missed: "red", unknown: "mute", off: "mute" };
 
 class GoalsMixin {
