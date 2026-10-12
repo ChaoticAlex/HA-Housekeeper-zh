@@ -4043,6 +4043,9 @@ test("the credential overview shows kind and set or empty, links to Home Assista
   assert.ok(html.includes('data-ha-path="/config/integrations/integration/demo_cloud"'), "a row opens the integration in Home Assistant");
   assert.ok(html.includes("&lt;i&gt;Demo&lt;/i&gt;") && !html.includes("<i>Demo</i>"), "titles are escaped");
   assert.ok(!/reveal|credential_reveal/i.test(html), "nothing to reveal");
+  assert.ok(!html.includes("Hinterlegt: mit leeren Feldern"), "no filter chip by default");
+  el.lvState("seclist", "name", "asc").f.state = "gap"; el.render();
+  assert.ok(shadow.innerHTML.includes("Hinterlegt: mit leeren Feldern ✕"), "the filter shows as a chip");
 });
 
 test("the rights of the apps show under access and data flow, or why they are missing", () => {

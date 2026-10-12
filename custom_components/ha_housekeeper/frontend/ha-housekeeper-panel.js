@@ -10111,7 +10111,7 @@ Object.assign(TEXT.de, {
   secSumEntries: "Integrationen mit Zugangsdaten", secSumSet: "Felder mit Wert", secSumEmpty: "Felder ohne Wert", secSumEmptySub: "Feld vorhanden, aber leer",
   secListTitle: "Integrationen", secListHint: "Art der Zugangsdaten und ob ein Wert hinterlegt ist",
   secColKind: "Art", secColFields: "Felder", secColState: "Hinterlegt", secColOpen: "In Home Assistant", secColSetCount: "Felder mit Wert", secColEmptyCount: "Felder ohne Wert",
-  secState: "{n} von {total}", secStateSet: "alle hinterlegt", secStatePart: "teilweise", secStateEmpty: "nichts hinterlegt", secAllKinds: "Alle Arten", secAllStates: "Alle Zustände",
+  secStateGap: "mit leeren Feldern", secState: "{n} von {total}", secStateSet: "alle hinterlegt", secStatePart: "teilweise", secStateEmpty: "nichts hinterlegt", secAllKinds: "Alle Arten", secAllStates: "Alle Zustände",
   secKind_password: "Passwort", secKind_token: "Token", secKind_api_key: "API-Schlüssel", secKind_secret: "Secret", secKind_webhook: "Webhook", secKind_pin: "PIN",
   secNone: "Keine Integration mit gespeicherten Zugangsdaten erkannt.", secOpen: "{name} in Home Assistant öffnen",
   secFootnote: "Housekeeper erkennt Zugangsdaten am Namen eines Feldes in der Konfiguration einer Integration (password, token, api_key, secret, webhook, pin) und prüft nur, ob es leer ist. Werte, Auszüge davon und ihre Länge werden weder gelesen noch angezeigt noch exportiert. Die Erkennung ist ein Hinweis: Zugangsdaten unter einem anderen Namen fehlen, und ein Feld mit so einem Namen kann etwas Harmloses enthalten. Ein Klick auf eine Zeile öffnet die Integration in Home Assistant, dort lassen sich die Zugangsdaten ändern. Es wird nichts geändert und nichts gespeichert.",
@@ -10159,7 +10159,7 @@ Object.assign(TEXT.en, {
   secSumEntries: "Integrations with credentials", secSumSet: "Fields with a value", secSumEmpty: "Fields without a value", secSumEmptySub: "field exists but is empty",
   secListTitle: "Integrations", secListHint: "Kind of credentials and whether a value is set",
   secColKind: "Kind", secColFields: "Fields", secColState: "Set", secColOpen: "In Home Assistant", secColSetCount: "Fields with a value", secColEmptyCount: "Fields without a value",
-  secState: "{n} of {total}", secStateSet: "all set", secStatePart: "partly", secStateEmpty: "nothing set", secAllKinds: "All kinds", secAllStates: "All states",
+  secStateGap: "with empty fields", secState: "{n} of {total}", secStateSet: "all set", secStatePart: "partly", secStateEmpty: "nothing set", secAllKinds: "All kinds", secAllStates: "All states",
   secKind_password: "Password", secKind_token: "Token", secKind_api_key: "API key", secKind_secret: "Secret", secKind_webhook: "Webhook", secKind_pin: "PIN",
   secNone: "No integration with stored credentials found.", secOpen: "Open {name} in Home Assistant",
   secFootnote: "Housekeeper recognises credentials by the name of a field in an integration's configuration (password, token, api_key, secret, webhook, pin) and only checks whether it is empty. Values, parts of them and their length are neither read nor shown nor exported. The detection is a hint: credentials under another name are missing, and a field with such a name may hold something harmless. A click on a row opens the integration in Home Assistant, where the credentials can be changed. Nothing is changed and nothing is stored.",
@@ -10694,11 +10694,13 @@ class SystemMixin {
       const count = (e, set) => e.fields.filter(f => f.set === set).length;
       const kinds = e => [...new Set(e.fields.map(f => f.kind))];
       const empty = entries.reduce((n, e) => n + count(e, false), 0);
+      const gap = this.lv?.seclist?.f?.state === "gap", anyFilter = Object.values(this.lv?.seclist?.f || {}).some(Boolean);
       const tiles = this.sumTiles([
-        { label: this.t("secSumEntries"), value: this.esc(this.formatNumber(entries.length)), tone: "mute" },
+        { label: this.t("secSumEntries"), value: this.esc(this.formatNumber(entries.length)), tone: "mute", attr: ["data-sec-show", ""], active: !anyFilter },
         { label: this.t("secSumSet"), value: this.esc(this.formatNumber(entries.reduce((n, e) => n + count(e, true), 0))), tone: "mute" },
-        { label: this.t("secSumEmpty"), value: this.esc(this.formatNumber(empty)), sub: this.esc(this.t("secSumEmptySub")), tone: empty ? "warn" : "ok" },
+        { label: this.t("secSumEmpty"), value: this.esc(this.formatNumber(empty)), sub: this.esc(this.t("secSumEmptySub")), tone: empty ? "warn" : "ok", attr: ["data-sec-show", "gap"], active: gap },
       ]);
+      const chip = gap ? `<div class="pad"><button class="pill warn" data-sec-show="" title="${this.esc(this.t("accClearFilter"))}">${this.esc(`${this.t("secColState")}: ${this.t("secStateGap")}`)} ✕</button></div>` : "";
       const state = e => (count(e, false) === 0 ? "set" : count(e, true) === 0 ? "empty" : "part");
       const stateCell = e => `<span class="pill ${{ set: "ok", part: "warn", empty: "warn" }[state(e)]}">${this.esc(this.t("secState", { n: count(e, true), total: e.fields.length }))}</span>`;
       const kindNames = e => kinds(e).map(k => this.t(`secKind_${k}`));
@@ -10708,9 +10710,9 @@ class SystemMixin {
         sorts: [{ key: "name", label: "accColIntegration", dir: "asc", get: e => `${e.domain} ${e.title}` }, { key: "state", label: "secColState", dir: "desc", get: e => ({ empty: 2, part: 1, set: 0 })[state(e)] }],
         filters: [
           { name: "kind", all: this.t("secAllKinds"), options: ["password", "token", "api_key", "secret", "webhook", "pin"].map(k => [k, this.t(`secKind_${k}`)]) },
-          { name: "state", all: this.t("secAllStates"), options: [["set", this.t("secStateSet")], ["part", this.t("secStatePart")], ["empty", this.t("secStateEmpty")]] },
+          { name: "state", all: this.t("secAllStates"), options: [["gap", this.t("secStateGap")], ["set", this.t("secStateSet")], ["part", this.t("secStatePart")], ["empty", this.t("secStateEmpty")]] },
         ],
-        filterFns: { kind: (e, v) => kinds(e).includes(v), state: (e, v) => state(e) === v },
+        filterFns: { kind: (e, v) => kinds(e).includes(v), state: (e, v) => (v === "gap" ? state(e) !== "set" : state(e) === v) },
         text: e => `${e.domain} ${e.title} ${names(e)} ${kindNames(e).join(" ")}`, empty: "secNone",
         rowAttrs: e => `data-ha-path="${this.esc(`/config/integrations/integration/${encodeURIComponent(e.domain)}`)}" tabindex="0" role="link" aria-label="${this.esc(this.t("secOpen", { name: e.title || e.domain }))}"`,
         columns: [
@@ -10723,7 +10725,7 @@ class SystemMixin {
         exportName: "credential-fields", header: [this.t("accColIntegration"), "Domain", this.t("secColKind"), this.t("secColFields"), this.t("secColSetCount"), this.t("secColEmptyCount")],
         rows: e => [e.title, e.domain, kindNames(e).join("; "), names(e), count(e, true), count(e, false)],
       });
-      return `<div class="stack"><div class="panel">${head}</div>${tiles}<div class="panel"><div class="panelhead"><div><h2>${this.t("secListTitle")}</h2><p>${this.t("secListHint")}</p></div></div>${table}${this.howCounted("secFootnote")}</div></div>`;
+      return `<div class="stack"><div class="panel">${head}</div>${tiles}<div class="panel"><div class="panelhead"><div><h2>${this.t("secListTitle")}</h2><p>${this.t("secListHint")}</p></div></div>${chip}${table}${this.howCounted("secFootnote")}</div></div>`;
     }, "secIntro");
   }
 
@@ -10741,6 +10743,12 @@ class SystemMixin {
       const [tab, filter] = el.dataset.accShow.split("|"), id = { sys: "accsys", cloud: "acccloud", apps: "accapps" }[tab];
       (this.viewTab ||= {}).dataflow = tab;
       this.lvState(id, "risk", "asc").f.risk = filter ? "high" : ""; this.persistLv(id); this.pages = {}; this.render();
+    });
+    // A key figure of the credential overview sets the state filter ("gap": some field empty) or clears all filters.
+    root.querySelectorAll("[data-sec-show]").forEach(el => el.onclick = () => {
+      const st = this.lvState("seclist", "name", "asc");
+      st.f = el.dataset.secShow ? { ...st.f, state: el.dataset.secShow } : {};
+      this.persistLv("seclist"); this.pages = {}; this.render();
     });
     root.querySelectorAll("[data-acc-clear]").forEach(el => el.onclick = () => { this.lvState(el.dataset.accClear, "risk", "asc").f.risk = ""; this.persistLv(el.dataset.accClear); this.pages = {}; this.render(); });
     root.querySelector("[data-ha-menu]")?.addEventListener("click", () => this.toggleHaSidebar());
