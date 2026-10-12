@@ -44,9 +44,9 @@ Das Ziel ist keine aggressive automatische Bereinigung. Housekeeper hilft zunäc
 | --- | --- |
 | ![Aufräumen](screenshots/showcase/cleanup-desktop-light.png) | ![Abhängigkeitspfad](screenshots/showcase/graph-desktop-light.png) |
 
-| Automationen im Betrieb | Zuverlässigkeit |
+| Automationen | Zuverlässigkeit |
 | --- | --- |
-| ![Automationen im Betrieb](screenshots/showcase/runs-desktop-light.png) | ![Zuverlässigkeit](screenshots/showcase/reliability-desktop-light.png) |
+| ![Automationen](screenshots/showcase/runs-desktop-light.png) | ![Zuverlässigkeit](screenshots/showcase/reliability-desktop-light.png) |
 
 <p align="center">
   <img src="screenshots/showcase/recorder-desktop-light.png" alt="Recorder-Analyse" width="100%">

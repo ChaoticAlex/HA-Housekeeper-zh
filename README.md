@@ -44,9 +44,9 @@ The goal is not aggressive automatic cleanup. Housekeeper helps you understand w
 | --- | --- |
 | ![Tidy up](screenshots/showcase-en/cleanup-desktop-light.png) | ![Dependency path](screenshots/showcase-en/graph-desktop-light.png) |
 
-| Automations in operation | Reliability |
+| Automations | Reliability |
 | --- | --- |
-| ![Automations in operation](screenshots/showcase-en/runs-desktop-light.png) | ![Reliability](screenshots/showcase-en/reliability-desktop-light.png) |
+| ![Automations](screenshots/showcase-en/runs-desktop-light.png) | ![Reliability](screenshots/showcase-en/reliability-desktop-light.png) |
 
 <p align="center">
   <img src="screenshots/showcase-en/recorder-desktop-light.png" alt="Recorder analysis" width="100%">
