@@ -657,11 +657,11 @@ class CleanupMixin {
     } finally { this.planBusy = false; }
   }
 
-  // The dry-run note, an error from the last request and the plan that is open, on top of every view that can finish one.
-  // `note` is the dry-run sentence; Repair says it in its subtitle and in each form, so it passes false.
-  planHeader(note = true) {
+  // An error from the last request and the plan that is open, on top of every view that can finish one.
+  // The dry-run sentence sits behind the coloured (i) in the page title (Cleanup, Journal); Repair says it in its subtitle.
+  planHeader() {
     const error = this.cleanupError ? `<div class="error">${this.t("planError")}: ${this.esc(this.cleanupError)}</div>` : "";
-    return `${note || error ? `<div class="panel">${note ? `<p class="factnote">${this.t("cleanupDryRun")}</p>` : ""}${error}</div>` : ""}${this.plan ? this.planCard(this.plan) : ""}`;
+    return `${error ? `<div class="panel">${error}</div>` : ""}${this.plan ? this.planCard(this.plan) : ""}`;
   }
 
   // Every plan from Cleanup and Repair: what changed, what was checked, and what can be undone.
@@ -700,6 +700,6 @@ class CleanupMixin {
       const tiles = REPAIR_TASKS.map(([kind, icon, label, hint]) => `<button class="taskcard t-${tone(kind)}" data-repair-task="${kind}"><ha-icon icon="${icon}"></ha-icon><strong>${this.t(label)}${state(kind)}</strong><small>${this.t(hint)}</small></button>`).join("");
       body = `<div class="panel"><div class="panelhead"><div><h2>${this.t("repairTitle")}</h2><p>${this.t("repairHint")}</p></div></div><div class="taskgrid">${tiles}</div></div>`;
     }
-    return `<div class="stack">${this.planHeader(false)}${body}</div>`;
+    return `<div class="stack">${this.planHeader()}${body}</div>`;
   }
 }

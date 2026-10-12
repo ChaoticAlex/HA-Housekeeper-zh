@@ -28,8 +28,9 @@ class SystemMixin {
   }
 
   // The introduction sits behind an (i) after the title instead of in a paragraph of its own.
-  infoTip(text) {
-    return `<button type="button" class="infotip" data-tip="${this.esc(text)}" data-tip-plain="1" aria-label="${this.esc(text)}"><ha-icon icon="mdi:information-outline"></ha-icon></button>`;
+  // `warn` colours it in the tone of the "can change" label: for a promise about what is changed.
+  infoTip(text, warn = false) {
+    return `<button type="button" class="infotip${warn ? " warn" : ""}" data-tip="${this.esc(text)}" data-tip-plain="1" aria-label="${this.esc(text)}"><ha-icon icon="mdi:information-outline"></ha-icon></button>`;
   }
 
   // Loading, error or the page: the frame every one of the three pages shares. build(data, bar) puts the bar on top.
