@@ -64,6 +64,7 @@ from .db_health import database_summary
 from .entry_states import EntryStateHistory
 from .events import EventLog
 from .goals import GoalStore
+from .hacs import hacs_by_domain
 from .history import ScanHistory
 from .hygiene import (
     automation_hygiene_findings,
@@ -884,6 +885,11 @@ class InventoryScanner:
             for entry in config_entries
         ]
 
+        hacs = hacs_by_domain(self.hass)
+        if hacs is not None:
+            for item in integrations:
+                if item["custom"] and item["domain"] in hacs:
+                    item["hacs"] = hacs[item["domain"]]
         apps = await _app_inventory(self.hass)
 
         lap("devices")
@@ -1083,6 +1089,7 @@ class InventoryScanner:
                 "recurring_devices": len(recurring),
                 "quarantine_days": QUARANTINE_DAYS,
                 "ha_version": HA_VERSION,
+                "hacs_available": hacs is not None,
                 "scan_interval_hours": self.scan_interval_hours,
                 "low_battery_percent": self.low_battery_percent,
                 "stale_hours": self.stale_hours,

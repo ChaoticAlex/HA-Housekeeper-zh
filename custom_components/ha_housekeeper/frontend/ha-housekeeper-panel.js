@@ -11327,7 +11327,7 @@ Object.assign(TEXT.de, {
   components: "Apps & Integrationen", componentsSubtitle: "Was installiert ist und ob es läuft: Apps und Integrationen nach Domain, mit Version, Status und Umfang. Liest nur, die Zahlen kommen aus dem Scan.",
   compTabApps: "Apps", compTabAppsHint: "Status, CPU, RAM, Daten", compTabIntegrations: "Integrationen", compTabIntegrationsHint: "nach Domain",
   compEntries: "{n} Einträge", compNoApps: "Keine Apps (kein Supervisor oder keine installiert).", compNoIntegrations: "Keine Integrationen gefunden.",
-  compSumApps: "Apps", compSumRunning: "laufen", compSumIntegrations: "Integrationen", compSumCustom: "davon Custom", compSumProblem: "mit Problem",
+  compSumApps: "Apps", compSumRunning: "laufen", compSumIntegrations: "Integrationen", compSumCustom: "davon Custom", compSumProblem: "mit Problem", compSumUpdates: "Updates über HACS", compFilterHacs: "HACS", compFilterUpdate: "Update verfügbar", compFilterViaHacs: "Über HACS",
   compColVersion: "Version", compColEntries: "Einträge", compColDevices: "Geräte", compColAvail: "Verfügbarkeit", compColOrigin: "Herkunft", compUpdate: "Update", compUpdateHint: "Neuere Version: {v}",
   compAvailHint: "Schlechtester Wert der Einträge; erscheint, sobald die Zuverlässigkeit berechnet ist.", compSizeHint: "Ordnergröße; erscheint, sobald „Speicher & System“ geladen ist.",
 });
@@ -11335,7 +11335,7 @@ Object.assign(TEXT.en, {
   components: "Apps & integrations", componentsSubtitle: "What is installed and whether it runs: apps and integrations by domain, with version, status and scope. Read-only; the numbers come from the scan.",
   compTabApps: "Apps", compTabAppsHint: "state, CPU, RAM, data", compTabIntegrations: "Integrations", compTabIntegrationsHint: "by domain",
   compEntries: "{n} entries", compNoApps: "No apps (no Supervisor, or none installed).", compNoIntegrations: "No integrations found.",
-  compSumApps: "Apps", compSumRunning: "running", compSumIntegrations: "Integrations", compSumCustom: "of them custom", compSumProblem: "with a problem",
+  compSumApps: "Apps", compSumRunning: "running", compSumIntegrations: "Integrations", compSumCustom: "of them custom", compSumProblem: "with a problem", compSumUpdates: "Updates via HACS", compFilterHacs: "HACS", compFilterUpdate: "Update available", compFilterViaHacs: "Via HACS",
   compColVersion: "Version", compColEntries: "Entries", compColDevices: "Devices", compColAvail: "Availability", compColOrigin: "Origin", compUpdate: "Update", compUpdateHint: "Newer version: {v}",
   compAvailHint: "Worst value of the entries; appears once reliability is calculated.", compSizeHint: "Folder size; appears once Storage & system is loaded.",
 });
@@ -11350,10 +11350,11 @@ class ComponentsMixin {
       const groups = new Map();
       for (const o of this.data?.objects || []) {
         if (o.object_type !== "config_entry") continue;
-        const g = groups.get(o.domain) || { domain: o.domain, name: o.integration_name || o.domain, custom: false, version: null, entries: [], entities: 0, devices: 0, status: "ignored", avail: null, bytes: sizes.get(o.domain) ?? null };
+        const g = groups.get(o.domain) || { domain: o.domain, name: o.integration_name || o.domain, custom: false, version: null, entries: [], entities: 0, devices: 0, status: "ignored", avail: null, hacs: null, bytes: sizes.get(o.domain) ?? null };
         g.entries.push(o);
         g.custom ||= Boolean(o.custom);
         g.version ||= o.integration_version || null;
+        g.hacs ||= o.hacs || null;
         g.entities += o.entity_count || 0;
         g.devices += o.device_count || 0;
         if ((COMP_RANK[o.status] ?? 1) > (COMP_RANK[g.status] ?? 1)) g.status = o.status;
@@ -11382,7 +11383,7 @@ class ComponentsMixin {
     const columns = [
       { key: "name", label: "sysColIntegration", cell: g => this.compNameCell(g) },
       { key: "origin", label: "compColOrigin", cell: g => `<span class="pill ${g.custom ? "violet" : "mute"}">${this.esc(origin(g))}</span>` },
-      { key: "version", label: "compColVersion", cell: g => this.esc(g.version || "–") },
+      { key: "version", label: "compColVersion", cell: g => `${this.esc(g.version || "–")}${g.hacs?.pending_update ? ` <span class="pill warn" title="${this.esc(this.t("compUpdateHint", { v: g.hacs.available_version || "" }))}">${this.t("compUpdate")}</span>` : ""}` },
       { key: "state", label: "sysColState", cell: g => this.pill(g.status) },
       { key: "entities", label: "entities", dir: "desc", cell: g => this.esc(this.formatNumber(g.entities)) },
       { key: "devices", label: "compColDevices", dir: "desc", cell: g => this.esc(this.formatNumber(g.devices)) },
@@ -11398,12 +11399,15 @@ class ComponentsMixin {
         ...(hasSize ? [{ key: "size", label: "sysColSize", dir: "desc", get: g => g.bytes }] : []),
         ...(hasAvail ? [{ key: "avail", label: "compColAvail", dir: "asc", get: g => g.avail }] : []),
       ],
-      filters: [{ name: "origin", all: this.t("allOrigins"), options: [["core", this.t("originKindCore")], ["custom", this.t("originKindCustom")]] }],
-      filterFns: { origin: (g, v) => g.custom === (v === "custom") },
+      filters: [
+        { name: "origin", all: this.t("allOrigins"), options: [["core", this.t("originKindCore")], ["custom", this.t("originKindCustom")]] },
+        ...(items.some(g => g.hacs) ? [{ name: "hacs", all: this.t("compFilterHacs"), options: [["update", this.t("compFilterUpdate")], ["hacs", this.t("compFilterViaHacs")]] }] : []),
+      ],
+      filterFns: { origin: (g, v) => g.custom === (v === "custom"), hacs: (g, v) => (v === "update" ? Boolean(g.hacs?.pending_update) : Boolean(g.hacs)) },
       text: g => `${g.name} ${g.domain}`, tie: g => g.domain, empty: "compNoIntegrations",
       rowAttrs: g => this.compRowAttrs(g), columns,
-      exportName: "integrations", header: [this.t("sysColIntegration"), "Domain", this.t("compColOrigin"), this.t("compColVersion"), this.t("sysColState"), this.t("compColEntries"), this.t("entities"), this.t("compColDevices")],
-      rows: g => [g.name, g.domain, origin(g), g.version || "", this.statusLabel(g.status), g.entries.length, g.entities, g.devices],
+      exportName: "integrations", header: [this.t("sysColIntegration"), "Domain", this.t("compColOrigin"), this.t("compColVersion"), this.t("sysColState"), this.t("compColEntries"), this.t("entities"), this.t("compColDevices"), this.t("intHacsAvailable"), this.t("compUpdate")],
+      rows: g => [g.name, g.domain, origin(g), g.version || "", this.statusLabel(g.status), g.entries.length, g.entities, g.devices, g.hacs ? g.hacs.available_version || "" : "", g.hacs ? (g.hacs.pending_update ? "yes" : "no") : ""],
     });
   }
 
@@ -11450,11 +11454,12 @@ class ComponentsMixin {
     ];
     const open = this.viewTabOf("components", tabs, "integrations");
     const n = f => this.formatNumber(f);
-    const problems = ints.filter(g => g.status === "problem").length;
+    const problems = ints.filter(g => g.status === "problem").length, updates = ints.filter(g => g.hacs?.pending_update).length;
     const tiles = this.sumTiles([
       { label: this.t("compSumApps"), value: n(apps.length), sub: `${n(apps.filter(a => a.state === "started").length)} ${this.t("compSumRunning")}`, tone: "mute" },
       { label: this.t("compSumIntegrations"), value: n(ints.length), sub: `${n(ints.filter(g => g.custom).length)} ${this.t("compSumCustom")}`, tone: "mute" },
       problems ? { label: this.t("compSumProblem"), value: n(problems), tone: "red" } : null,
+      updates ? { label: this.t("compSumUpdates"), value: n(updates), tone: "warn" } : null,
     ]);
     if (open === "apps" && apps.length) this.sysEnsure("storage"); // CPU, RAM and data of the apps
     const body = open === "apps" ? this.compAppsList(apps) : this.compIntegrationsList(ints);
@@ -11473,6 +11478,7 @@ Object.assign(TEXT.de, {
   intNoRel: "Für diese Integration liegen noch keine Zuverlässigkeitswerte vor.", intColName: "Name", intColType: "Typ", intColStatus: "Status",
   intSources: "Quellen der Einträge", intFirstCreated: "Ältester Eintrag angelegt", intLastModified: "Zuletzt geändert", intIds: "Eintrags-IDs",
   intEntityCount: "{e} Entitäten · {d} Geräte",
+  intHacsTitle: "HACS", intHacsInstalled: "Installierte Version", intHacsAvailable: "Neueste Version", intHacsUpdate: "Update verfügbar", intHacsCurrent: "Aktuell", intHacsOpen: "In HACS öffnen", intHacsGitHub: "Repository auf GitHub", intHacsNote: "Stand aus dem Speicher von HACS; es wird nichts bei GitHub abgefragt und nichts installiert.",
 });
 Object.assign(TEXT.en, {
   integration: "Integration", intTabEntries: "Entries", intTabMembers: "Entities & devices", intTabUsed: "Used by", intTabRel: "Reliability",
@@ -11482,6 +11488,7 @@ Object.assign(TEXT.en, {
   intNoRel: "There are no reliability values for this integration yet.", intColName: "Name", intColType: "Type", intColStatus: "Status",
   intSources: "Sources of the entries", intFirstCreated: "Oldest entry created", intLastModified: "Last changed", intIds: "Entry IDs",
   intEntityCount: "{e} entities · {d} devices",
+  intHacsTitle: "HACS", intHacsInstalled: "Installed version", intHacsAvailable: "Latest version", intHacsUpdate: "Update available", intHacsCurrent: "Up to date", intHacsOpen: "Open in HACS", intHacsGitHub: "Repository on GitHub", intHacsNote: "Taken from the memory of HACS; nothing is asked from GitHub and nothing is installed.",
 });
 
 const INT_RANK = { problem: 3, disabled: 2, active: 1, ignored: 0 };
@@ -11492,12 +11499,13 @@ class IntegrationPageMixin {
     const groups = new Map();
     for (const o of objects) {
       if (o.object_type !== "config_entry") continue;
-      const g = groups.get(o.domain) || { object_type: "integration", object_id: o.domain, domain: o.domain, name: o.integration_name || o.domain, custom: false, integration_version: null, integration_dir: null, documentation: null, entries: [], entity_count: 0, device_count: 0, status: "ignored" };
+      const g = groups.get(o.domain) || { object_type: "integration", object_id: o.domain, domain: o.domain, name: o.integration_name || o.domain, custom: false, integration_version: null, integration_dir: null, documentation: null, hacs: null, entries: [], entity_count: 0, device_count: 0, status: "ignored" };
       g.entries.push(o);
       g.custom ||= Boolean(o.custom);
       g.integration_version ||= o.integration_version || null;
       g.integration_dir ||= o.integration_dir || null;
       g.documentation ||= o.documentation || null;
+      g.hacs ||= o.hacs || null;
       g.entity_count += o.entity_count || 0;
       g.device_count += o.device_count || 0;
       if ((INT_RANK[o.status] ?? 1) > (INT_RANK[g.status] ?? 1)) g.status = o.status;
@@ -11546,7 +11554,7 @@ class IntegrationPageMixin {
     const n = f => this.formatNumber(f);
     return [
       [this.t("intSumOrigin"), this.esc(this.t(item.custom ? "originKindCustom" : "originKindCore"))],
-      item.custom && item.integration_version ? [this.t("intSumVersion"), this.esc(item.integration_version)] : !item.custom && this.data?.meta?.ha_version ? [this.t("intSumVersion"), this.esc(this.t("intSumHA", { v: this.data.meta.ha_version }))] : null,
+      item.custom && item.integration_version ? [this.t("intSumVersion"), `${this.esc(item.integration_version)}${item.hacs?.pending_update ? ` <span class="pill warn" title="${this.esc(this.t("compUpdateHint", { v: item.hacs.available_version || "" }))}">${this.t("compUpdate")}</span>` : ""}`] : !item.custom && this.data?.meta?.ha_version ? [this.t("intSumVersion"), this.esc(this.t("intSumHA", { v: this.data.meta.ha_version }))] : null,
       [this.t("intSumEntries"), n(this.intEntries(item).length)],
       [this.t("intSumDevices"), n(item.device_count)],
       [this.t("intSumEntities"), n(item.entity_count)],
@@ -11573,11 +11581,21 @@ class IntegrationPageMixin {
     const size = item.custom ? (this.sysState("storage").data?.custom_integrations || []).find(x => x.domain === item.domain) : null;
     const docs = /^https:\/\//.test(item.documentation || "") ? `<a class="btn" href="${this.esc(item.documentation)}" target="_blank" rel="noopener noreferrer"><ha-icon icon="mdi:book-open-variant"></ha-icon>${this.t("intDocs")}</a>` : "";
     const folder = item.custom ? `<section class="panel"><div class="panelhead"><h2>${this.t("intFolder")}</h2></div><div class="facts">${fact("intFolder", this.esc(item.integration_dir || `custom_components/${item.domain}`))}${size ? fact("intFolderSize", this.esc(this.formatBytes(size.bytes))) : ""}</div></section>` : "";
+    const hacs = item.hacs ? this.intHacsCard(item.hacs) : "";
     const rows = this.intEntries(item).map(e => {
       const tone = this.tone(e.status) === "ok" ? "" : this.tone(e.status);
       return `<button class="row rel" data-object="${this.esc(`config_entry:${e.object_id}`)}">${this.tile("config_entry", tone)}<span class="row-text"><strong>${this.esc(e.name || e.object_id)}</strong><small>${this.esc(this.t("intEntityCount", { e: this.formatNumber(e.entity_count || 0), d: this.formatNumber(e.device_count || 0) }))}</small></span>${this.pill(e.status)}</button>`;
     }).join("");
-    return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("intEntriesTitle")}</h2>${docs ? `<div class="actions">${docs}</div>` : ""}</div>${rows}</section>${folder}</div>`;
+    return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("intEntriesTitle")}</h2>${docs ? `<div class="actions">${docs}</div>` : ""}</div>${rows}</section>${hacs}${folder}</div>`;
+  }
+
+  // What HACS says about the integration, for custom integrations that HACS installed.
+  intHacsCard(h) {
+    const fact = (label, value) => `<div class="fact"><span>${this.t(label)}</span><b>${value}</b></div>`;
+    const status = `<span class="pill ${h.pending_update ? "warn" : "ok"}">${this.t(h.pending_update ? "intHacsUpdate" : "intHacsCurrent")}</span>`;
+    const open = h.id ? `<button class="btn" data-ha-path="${this.esc(`/hacs/repository/${encodeURIComponent(h.id)}`)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("intHacsOpen")}</button>` : "";
+    const github = h.full_name ? `<a class="btn" href="${this.esc(`https://github.com/${h.full_name}`)}" target="_blank" rel="noopener noreferrer"><ha-icon icon="mdi:github"></ha-icon>${this.t("intHacsGitHub")}</a>` : "";
+    return `<section class="panel"><div class="panelhead"><h2>${this.t("intHacsTitle")}</h2>${open || github ? `<div class="actions">${open}${github}</div>` : ""}</div><div class="facts">${fact("intHacsInstalled", this.esc(h.installed_version || "–"))}${fact("intHacsAvailable", this.esc(h.available_version || "–"))}${fact("sysColState", status)}</div><p class="factnote">${this.t("intHacsNote")}</p></section>`;
   }
 
   intMembersCard(item) {

@@ -4016,7 +4016,7 @@ test("apps and integrations groups config entries by domain and opens the page o
 test("the page of an integration covers all its entries for core and custom and every tab renders", async () => {
   for (const custom of [true, false]) {
     const { el, shadow } = systemPanel("en");
-    const entry = (id, extra = {}) => ({ object_type: "config_entry", object_id: id, name: `Hub ${id}`, domain: "demo", integration_name: "Demo", custom, integration_version: custom ? "1.0" : null, status: "active", entity_count: 1, device_count: 1, ...extra });
+    const entry = (id, extra = {}) => ({ object_type: "config_entry", object_id: id, name: `Hub ${id}`, domain: "demo", integration_name: "Demo", custom, integration_version: custom ? "1.0" : null, status: "active", entity_count: 1, device_count: 1, ...(custom ? { hacs: { id: "42", full_name: "me/demo", installed_version: "1.0", available_version: "1.1", pending_update: true } } : {}), ...extra });
     el.data = { ...DATA, objects: [entry("A1"), entry("A2"), { object_type: "entity", object_id: "sensor.x", name: "X", status: "active", config_entry_id: "A2" }], edges: [{ source: "automation:a", target: "entity:sensor.x", relation: "uses" }] };
     const page = el.findObject("integration:demo");
     assert.equal(page.entries.length, 2);
@@ -4029,6 +4029,9 @@ test("the page of an integration covers all its entries for core and custom and 
       assert.ok(!shadow.innerHTML.includes(el.t("renderError")), `${custom} ${tab}`);
     }
     assert.ok(el.detailTabs(page, "integration:demo").some(([id]) => id === "members"));
+    el.detailTab = "overview";
+    el.render();
+    assert.equal(shadow.innerHTML.includes("/hacs/repository/42") && shadow.innerHTML.includes(el.t("intHacsUpdate")), custom, "HACS card only for a custom integration that HACS knows");
   }
 });
 

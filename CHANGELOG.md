@@ -29,6 +29,7 @@
 - **Seitenleisten-Knopf:** öffnet die Seitenleiste von Home Assistant, wenn sie ausgeblendet ist.
 - **Apps & Integrationen** (Bestand): Apps (mit CPU und RAM) und Integrationen nach Domain in einer Liste, mit Version, Status, Entitäten und Geräten; im Inventar gibt es dazu einen Filter „Core / Custom“.
 - **Seite einer Integration:** Core und Custom haben eine eigene Detailseite mit allen Einträgen, Entitäten und Geräten, Zuverlässigkeit sowie Zugriffen und Daten; bei Custom auch Ordner und Größe.
+- **HACS-Updates:** Bei Custom-Integrationen, die HACS installiert hat, zeigen die Seite der Integration und die Liste „Apps & Integrationen“ die installierte und die neueste Version samt Hinweis auf ein Update; die Liste lässt sich danach filtern.
 - **Sonstiges** (Speicher & System): Custom Cards, Blueprints und die übrigen Ordner und Dateien unter `/config` stehen in einem Reiter.
 
 ### English
@@ -58,6 +59,7 @@
 - **Sidebar button:** opens Home Assistant's sidebar when it is hidden.
 - **Apps & integrations** (Inventory): apps (with CPU and RAM) and integrations by domain in one list, with version, status, entities and devices; the inventory also has a "Core / Custom" filter.
 - **Page of an integration:** core and custom integrations have their own detail page with all entries, entities and devices, reliability, and access and data; for custom ones also the folder and its size.
+- **HACS updates:** For custom integrations installed by HACS, the integration page and the "Apps & integrations" list show the installed and the newest version with a note about an update; the list can be filtered by it.
 - **Other** (Storage & system): custom cards, blueprints and the remaining folders and files under `/config` share one tab.
 
 ## 1.4.0 - 2026-10-11
