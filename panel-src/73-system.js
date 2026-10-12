@@ -331,6 +331,47 @@ class SystemMixin {
     });
   }
 
+  // ---------------------------------------------------------------- Detail page of an integration
+
+  // The entry of the reports that are already read; null while they are not.
+  accessEntryOf(item) { return (this.sysState("dataflow").data?.entries || []).find(e => e.entry_id === item.object_id) || null; }
+
+  credentialsOf(item) { return (this.sysState("secrets").data?.entries || []).find(e => e.entry_id === item.object_id) || null; }
+
+  // The dot at the tab: red for a high risk, amber for a field without a value; nothing before the reports are read.
+  accessTone(item) {
+    if (this.accessEntryOf(item)?.risk === "high") return "red";
+    return (this.credentialsOf(item)?.fields || []).some(f => !f.set) ? "warn" : "";
+  }
+
+  // Overview of the integration: one red line for a high system access, once the report has been read.
+  accessAlert(item) {
+    const e = item.object_type === "config_entry" ? this.accessEntryOf(item) : null;
+    if (!e || e.risk !== "high" || !(e.access.length || e.gps || e.camera)) return "";
+    return `<div class="outcome warn" role="status"><ha-icon icon="mdi:shield-alert-outline"></ha-icon><span><strong>${this.esc(this.t("accAlertHigh", { list: this.accAccessLabels(e).join(", ") }))}</strong> <button class="link" data-detail-tab-go="access">${this.t("accAlertMore")}</button></span></div>`;
+  }
+
+  accessDetailCard(item) {
+    const df = this.sysState("dataflow"), se = this.sysState("secrets");
+    const err = df.error || se.error;
+    if (err) return `<div class="panel"><div class="error">${this.esc(err)}</div></div>`;
+    if (!df.data || !se.data) return `<div class="panel">${this.skeleton("accLoading")}</div>`;
+    const e = this.accessEntryOf(item), cred = this.credentialsOf(item);
+    const section = (title, body) => `<section class="panel"><div class="panelhead"><h2>${this.t(title)}</h2></div>${body}</section>`;
+    const none = key => `<div class="emptymsg">${this.t(key)}</div>`;
+    const access = e && (e.access.length || e.gps || e.camera)
+      ? `<div class="facts"><div class="fact"><span>${this.t("accColAccess")}</span><b>${this.accPills(this.accAccessLabels(e), "warn")}</b></div><div class="fact"><span>${this.t("accColRisk")}</span><b>${this.accRiskPill(e.risk)}</b></div></div>`
+      : none("accDetNoAccess");
+    const flows = e && e.flows?.length ? e.flows.map(f => this.t(`accFlow_${f}`)) : [];
+    const iot = e?.iot_class ? (TEXT[this.lang][`accIot_${e.iot_class}`] ? this.t(`accIot_${e.iot_class}`) : e.iot_class) : "";
+    const flow = e && (flows.length || e.external)
+      ? `<div class="facts"><div class="fact"><span>${this.t("accDetConnection")}</span><b>${this.esc(this.t(e.external ? "accDetCloud" : "accDetLocal"))}</b></div>${flows.length ? `<div class="fact"><span>${this.t("accColFlow")}</span><b>${this.accPills(flows, "mute")}</b></div>` : ""}${iot ? `<div class="fact"><span>${this.t("accColIot")}</span><b>${this.esc(iot)}</b></div>` : ""}</div>`
+      : none("accDetNoFlow");
+    const fields = cred ? cred.fields.map(f => `<div class="row static"><span class="row-text"><strong>${this.esc(this.t(`secKind_${f.kind}`))}</strong><small>${this.esc(f.key)}</small></span><span class="pill ${f.set ? "ok" : "warn"}">${this.t(f.set ? "accDetSet" : "accDetEmpty")}</span></div>`).join("") : none("accDetNoCredentials");
+    const links = `<div class="pad"><small>${this.t("accDetNever")} · <button class="link" data-jump="dataflow">${this.t("accDetAllFlow")}</button> · <button class="link" data-jump="secrets">${this.t("accDetAllSecrets")}</button></small></div>`;
+    return `<div class="stack">${section("accSysTitle", access)}${section("accDetFlow", flow)}${section("accDetCredentials", fields)}<section class="panel">${links}</section></div>`;
+  }
+
   // ---------------------------------------------------------------- Credentials
 
   // Which integrations hold credentials, of what kind, and whether a value is set. Never a value.
@@ -384,6 +425,7 @@ class SystemMixin {
       this.showTip(el); globalThis.clearTimeout?.(this._tipHide);
       this._tipHide = globalThis.setTimeout?.(() => this.hideTip(), 6000);
     }));
+    root.querySelectorAll("[data-detail-tab-go]").forEach(el => el.onclick = () => { this.detailTab = el.dataset.detailTabGo; this.render(); });
     // A key figure of Access & data flow opens its list, with or without the filter for high risk.
     root.querySelectorAll("[data-acc-show]").forEach(el => el.onclick = () => {
       const [tab, filter] = el.dataset.accShow.split("|"), id = { sys: "accsys", cloud: "acccloud", apps: "accapps" }[tab];

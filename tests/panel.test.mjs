@@ -4102,3 +4102,17 @@ test("the overview shows the system card and a disk row from 85 %, red from 95 %
   el.sysLight = null;
   assert.equal(el.systemCard(), "");
 });
+
+test("the detail page of an integration has an access tab and a red line in its overview for a high risk", () => {
+  const { el } = systemPanel("de");
+  const zha = { object_type: "config_entry", object_id: "E2", name: "Zigbee" }, demo = { object_type: "config_entry", object_id: "c1", name: "Demo" };
+  assert.equal(el.accessTone(zha), "red");
+  assert.equal(el.accessTone(demo), "warn", "a field without a value");
+  assert.ok(el.accessAlert(zha).includes("Hoher Systemzugriff") && el.accessAlert(zha).includes("data-detail-tab-go=\"access\""));
+  assert.equal(el.accessAlert({ object_type: "config_entry", object_id: "E4" }), "");
+  const card = el.accessDetailCard(demo);
+  assert.ok(card.includes("hinterlegt") && card.includes("leer") && card.includes("token.access_token") && !card.includes("s3cr3t"));
+  el._sys.dataflow.data = null;
+  assert.equal(el.accessTone(zha), "", "no dot before the report is read");
+  assert.ok(!el.accessDetailCard(demo).includes("token.access_token"), "the card waits for both reports");
+});

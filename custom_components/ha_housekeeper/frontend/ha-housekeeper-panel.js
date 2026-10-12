@@ -4234,6 +4234,7 @@ class DiagnosisMixin {
     if (NOTE_TYPES.includes(item.object_type)) tabs.push(["history", "tabHistory", this.historyCount(item)]);
     if (this.runsRow(item)) tabs.push(["runs", "runsTab"]);
     if (this.reliabilityRow(item)) tabs.push(["reliability", "relTab"]);
+    if (item.object_type === "config_entry") tabs.push(["access", "accTab", null, this.accessTone(item)]);
     return tabs;
   }
 
@@ -4243,6 +4244,8 @@ class DiagnosisMixin {
     const key = this.objectKey(item);
     if (["automation", "script"].includes(item.object_type)) this.ensureRuns();
     if (item.object_type === "config_entry") this.ensureReliability();
+    // The reports of Access & data flow and Credentials are read when their tab is opened, not with the page.
+    if (item.object_type === "config_entry" && this.detailTab === "access") { this.sysEnsure("dataflow"); this.sysEnsure("secrets"); }
     if (item.object_type === "entity") this.ensureStability();
     if (item.object_type === "device") this.ensureLifecycle(item.object_id);
     if (NOTE_TYPES.includes(item.object_type)) this.ensureJournal();
@@ -4252,13 +4255,13 @@ class DiagnosisMixin {
     const path = this.haPath(item), tone = this.tone(item.status) === "ok" ? "" : this.tone(item.status);
     const back = this.trail.length ? this.trail[this.trail.length - 1].name : this.t(this.view);
     const summary = this.detailSummary(item, key).map(([label, value]) => `<span><small>${label}</small><b>${value}</b></span>`).join("");
-    const tablist = tabs.map(([id, label, count]) => `<button class="tab" role="tab" id="hk-tab-${id}" aria-selected="${id === tab}" aria-controls="hk-tabpanel" tabindex="${id === tab ? 0 : -1}" data-detail-tab="${id}">${this.t(label)}${count ? ` <em>${this.formatNumber(count)}</em>` : ""}</button>`).join("");
+    const tablist = tabs.map(([id, label, count, tone]) => `<button class="tab" role="tab" id="hk-tab-${id}" aria-selected="${id === tab}" aria-controls="hk-tabpanel" tabindex="${id === tab ? 0 : -1}" data-detail-tab="${id}">${this.t(label)}${count ? ` <em>${this.formatNumber(count)}</em>` : ""}${tone ? `<i class="tabdot ${tone}" aria-hidden="true"></i>` : ""}</button>`).join("");
     return `<div class="crumbs"><button class="btn" data-action="back"><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("backTo")} ${this.esc(back)}</button><span class="trail">${this.t(this.view)} › ${this.t(item.object_type)}</span></div>
       <div class="panel detailhead">${this.tile(item.object_type, tone)}<div><div class="headpills">${this.pill(item.status)}<span class="pill mute">${this.t(item.object_type)}</span></div><h1>${this.esc(item.name)}</h1><span class="id">${this.esc(item.object_id)}</span></div>
       <div class="actions">${path ? `<button class="btn" data-ha-path="${this.esc(path)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("openInHA")}</button>` : ""}<button class="btn" data-graph-open="${this.esc(key)}"><ha-icon icon="mdi:source-fork"></ha-icon>${this.t("showInGraph")}</button>${["entity", "device", "area", "automation", "script", "scene", "dashboard"].includes(item.object_type) ? `<button class="btn" data-xp-from="${this.esc(key)}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button>` : ""}</div></div>
       <div class="panel sumline">${summary}</div>
       <div class="tabs" role="tablist" aria-label="${this.esc(this.t("tabsLabel"))}">${tablist}</div>
-      <div role="tabpanel" id="hk-tabpanel" aria-labelledby="hk-tab-${tab}" tabindex="0">${this.detailPanel(tab, item, key)}</div>`;
+      <div role="tabpanel" id="hk-tabpanel" aria-labelledby="hk-tab-${tab}" tabindex="0">${tab === "overview" ? this.accessAlert(item) : ""}${this.detailPanel(tab, item, key)}</div>`;
   }
 
   // Only the open tab is built, so large attributes and relations cost nothing until they are asked for.
@@ -4269,6 +4272,7 @@ class DiagnosisMixin {
     if (tab === "history") return this.historyTab(item);
     if (tab === "runs") return this.runsDetailCard(this.runsRow(item));
     if (tab === "reliability") return this.reliabilityDetailCard(this.reliabilityRow(item));
+    if (tab === "access") return this.accessDetailCard(item);
     if (tab === "attributes") {
       return `<section class="panel"><div class="panelhead"><h2>${this.t("state")}</h2></div><div class="pad"><div class="code">${this.esc(JSON.stringify(item.attributes, null, 2))}</div></div></section>`;
     }
@@ -10099,6 +10103,10 @@ Object.assign(TEXT.de, {
   accKind_system_root: "System/Root-Zugriff", accKind_shell: "Shell-Ausführung", accKind_radio: "Funk/Gerät", accKind_hardware: "Hardware", accKind_network: "Netzwerk", accKind_database: "Datenbank", accKind_camera: "Kamera", accKind_location: "GPS/Standort", accKind_geocoding: "Geocoding", accKind_weather: "Wetter (standortabhängig)", accKind_cloud_api: "Cloud-API", accKind_cloud: "Cloud",
   accFlow_local: "lokal", accFlow_external: "extern", accFlow_cloud: "Cloud", accFlow_system: "System", accFlow_database: "Datenbank", accFlow_network: "Netzwerk", accFlow_gps: "GPS", accFlow_storage: "Speicher", accFlow_phone: "Telefon", accFlow_push: "Push",
   accIot_cloud_polling: "Cloud, fragt ab", accIot_cloud_push: "Cloud, meldet selbst", accIot_local_polling: "lokal, fragt ab", accIot_local_push: "lokal, meldet selbst", accIot_calculated: "berechnet", accIot_assumed_state: "angenommener Zustand",
+  accTab: "Zugriffe & Daten", accDetFlow: "Datenfluss", accDetCredentials: "Zugangsdaten", accDetConnection: "Verbindung", accDetCloud: "tauscht Daten mit externen oder Cloud-Diensten aus", accDetLocal: "lokal, kein Cloud-Dienst erkannt",
+  accDetNoAccess: "Kein Zugriff auf System, Funk, Hardware, Kamera oder Standort erkannt.", accDetNoFlow: "Kein Datenfluss nach außen erkannt.", accDetNoCredentials: "Keine gespeicherten Zugangsdaten erkannt.",
+  accDetSet: "hinterlegt", accDetEmpty: "leer", accDetNever: "Werte zeigt Housekeeper nie", accDetAllFlow: "Alle Zugriffe & Datenfluss", accDetAllSecrets: "Alle Zugangsdaten",
+  accAlertHigh: "Hoher Systemzugriff: {list}", accAlertMore: "Details im Reiter",
   accClearFilter: "Filter aufheben", accSumApps: "Apps mit hohem Risiko", accSumAppsSub: "von {n} Apps", accAppsTitle: "Apps", accAppsHint: "Rechte der installierten Apps, wie der Supervisor sie beschreibt", accColApp: "App", accColRights: "Rechte",
   accAppsNoSupervisor: "Apps gibt es nur mit Home Assistant OS oder Supervised.", accNoneApps: "Keine Apps installiert.", accAppNoRights: "keine besonderen Rechte", accAppUnchecked: "Der Supervisor hat zu dieser App nicht geantwortet.", accAppUncheckedShort: "nicht prüfbar",
   accApp_full_access: "Voller Hardwarezugriff", accApp_privileged: "Privilegiert", accApp_host_pid: "Host-Prozesse (PID)", accApp_docker_api: "Docker-API (wie Root)", accApp_host_ipc: "Host-IPC", accApp_host_dbus: "Host-D-Bus", accApp_host_network: "Host-Netzwerk", accApp_supervisor_api: "Supervisor-API", accApp_ha_api: "Home-Assistant-API", accApp_auth_api: "Login-Prüfung (Auth-API)", accApp_gpio: "GPIO", accApp_usb: "USB", accApp_devices: "Geräte", accApp_apparmor_off: "AppArmor aus",
@@ -10147,6 +10155,10 @@ Object.assign(TEXT.en, {
   accKind_system_root: "System/root access", accKind_shell: "Shell commands", accKind_radio: "Radio/device", accKind_hardware: "Hardware", accKind_network: "Network", accKind_database: "Database", accKind_camera: "Camera", accKind_location: "GPS/location", accKind_geocoding: "Geocoding", accKind_weather: "Weather (location based)", accKind_cloud_api: "Cloud API", accKind_cloud: "Cloud",
   accFlow_local: "local", accFlow_external: "external", accFlow_cloud: "cloud", accFlow_system: "system", accFlow_database: "database", accFlow_network: "network", accFlow_gps: "GPS", accFlow_storage: "storage", accFlow_phone: "phone", accFlow_push: "push",
   accIot_cloud_polling: "cloud, polls", accIot_cloud_push: "cloud, pushes", accIot_local_polling: "local, polls", accIot_local_push: "local, pushes", accIot_calculated: "calculated", accIot_assumed_state: "assumed state",
+  accTab: "Access & data", accDetFlow: "Data flow", accDetCredentials: "Credentials", accDetConnection: "Connection", accDetCloud: "exchanges data with external or cloud services", accDetLocal: "local, no cloud service detected",
+  accDetNoAccess: "No access to the system, radios, hardware, cameras or the location detected.", accDetNoFlow: "No data flow to the outside detected.", accDetNoCredentials: "No stored credentials detected.",
+  accDetSet: "set", accDetEmpty: "empty", accDetNever: "Housekeeper never shows values", accDetAllFlow: "All access & data flow", accDetAllSecrets: "All credentials",
+  accAlertHigh: "High system access: {list}", accAlertMore: "Details in the tab",
   accClearFilter: "Remove the filter", accSumApps: "Apps with high risk", accSumAppsSub: "of {n} apps", accAppsTitle: "Apps", accAppsHint: "Rights of the installed apps as the Supervisor describes them", accColApp: "App", accColRights: "Rights",
   accAppsNoSupervisor: "Apps exist only with Home Assistant OS or Supervised.", accNoneApps: "No apps installed.", accAppNoRights: "no special rights", accAppUnchecked: "The Supervisor did not answer for this app.", accAppUncheckedShort: "cannot be checked",
   accApp_full_access: "Full hardware access", accApp_privileged: "Privileged", accApp_host_pid: "Host processes (PID)", accApp_docker_api: "Docker API (like root)", accApp_host_ipc: "Host IPC", accApp_host_dbus: "Host D-Bus", accApp_host_network: "Host network", accApp_supervisor_api: "Supervisor API", accApp_ha_api: "Home Assistant API", accApp_auth_api: "Login check (Auth API)", accApp_gpio: "GPIO", accApp_usb: "USB", accApp_devices: "Devices", accApp_apparmor_off: "AppArmor off",
@@ -10685,6 +10697,47 @@ class SystemMixin {
     });
   }
 
+  // ---------------------------------------------------------------- Detail page of an integration
+
+  // The entry of the reports that are already read; null while they are not.
+  accessEntryOf(item) { return (this.sysState("dataflow").data?.entries || []).find(e => e.entry_id === item.object_id) || null; }
+
+  credentialsOf(item) { return (this.sysState("secrets").data?.entries || []).find(e => e.entry_id === item.object_id) || null; }
+
+  // The dot at the tab: red for a high risk, amber for a field without a value; nothing before the reports are read.
+  accessTone(item) {
+    if (this.accessEntryOf(item)?.risk === "high") return "red";
+    return (this.credentialsOf(item)?.fields || []).some(f => !f.set) ? "warn" : "";
+  }
+
+  // Overview of the integration: one red line for a high system access, once the report has been read.
+  accessAlert(item) {
+    const e = item.object_type === "config_entry" ? this.accessEntryOf(item) : null;
+    if (!e || e.risk !== "high" || !(e.access.length || e.gps || e.camera)) return "";
+    return `<div class="outcome warn" role="status"><ha-icon icon="mdi:shield-alert-outline"></ha-icon><span><strong>${this.esc(this.t("accAlertHigh", { list: this.accAccessLabels(e).join(", ") }))}</strong> <button class="link" data-detail-tab-go="access">${this.t("accAlertMore")}</button></span></div>`;
+  }
+
+  accessDetailCard(item) {
+    const df = this.sysState("dataflow"), se = this.sysState("secrets");
+    const err = df.error || se.error;
+    if (err) return `<div class="panel"><div class="error">${this.esc(err)}</div></div>`;
+    if (!df.data || !se.data) return `<div class="panel">${this.skeleton("accLoading")}</div>`;
+    const e = this.accessEntryOf(item), cred = this.credentialsOf(item);
+    const section = (title, body) => `<section class="panel"><div class="panelhead"><h2>${this.t(title)}</h2></div>${body}</section>`;
+    const none = key => `<div class="emptymsg">${this.t(key)}</div>`;
+    const access = e && (e.access.length || e.gps || e.camera)
+      ? `<div class="facts"><div class="fact"><span>${this.t("accColAccess")}</span><b>${this.accPills(this.accAccessLabels(e), "warn")}</b></div><div class="fact"><span>${this.t("accColRisk")}</span><b>${this.accRiskPill(e.risk)}</b></div></div>`
+      : none("accDetNoAccess");
+    const flows = e && e.flows?.length ? e.flows.map(f => this.t(`accFlow_${f}`)) : [];
+    const iot = e?.iot_class ? (TEXT[this.lang][`accIot_${e.iot_class}`] ? this.t(`accIot_${e.iot_class}`) : e.iot_class) : "";
+    const flow = e && (flows.length || e.external)
+      ? `<div class="facts"><div class="fact"><span>${this.t("accDetConnection")}</span><b>${this.esc(this.t(e.external ? "accDetCloud" : "accDetLocal"))}</b></div>${flows.length ? `<div class="fact"><span>${this.t("accColFlow")}</span><b>${this.accPills(flows, "mute")}</b></div>` : ""}${iot ? `<div class="fact"><span>${this.t("accColIot")}</span><b>${this.esc(iot)}</b></div>` : ""}</div>`
+      : none("accDetNoFlow");
+    const fields = cred ? cred.fields.map(f => `<div class="row static"><span class="row-text"><strong>${this.esc(this.t(`secKind_${f.kind}`))}</strong><small>${this.esc(f.key)}</small></span><span class="pill ${f.set ? "ok" : "warn"}">${this.t(f.set ? "accDetSet" : "accDetEmpty")}</span></div>`).join("") : none("accDetNoCredentials");
+    const links = `<div class="pad"><small>${this.t("accDetNever")} · <button class="link" data-jump="dataflow">${this.t("accDetAllFlow")}</button> · <button class="link" data-jump="secrets">${this.t("accDetAllSecrets")}</button></small></div>`;
+    return `<div class="stack">${section("accSysTitle", access)}${section("accDetFlow", flow)}${section("accDetCredentials", fields)}<section class="panel">${links}</section></div>`;
+  }
+
   // ---------------------------------------------------------------- Credentials
 
   // Which integrations hold credentials, of what kind, and whether a value is set. Never a value.
@@ -10738,6 +10791,7 @@ class SystemMixin {
       this.showTip(el); globalThis.clearTimeout?.(this._tipHide);
       this._tipHide = globalThis.setTimeout?.(() => this.hideTip(), 6000);
     }));
+    root.querySelectorAll("[data-detail-tab-go]").forEach(el => el.onclick = () => { this.detailTab = el.dataset.detailTabGo; this.render(); });
     // A key figure of Access & data flow opens its list, with or without the filter for high risk.
     root.querySelectorAll("[data-acc-show]").forEach(el => el.onclick = () => {
       const [tab, filter] = el.dataset.accShow.split("|"), id = { sys: "accsys", cloud: "acccloud", apps: "accapps" }[tab];
