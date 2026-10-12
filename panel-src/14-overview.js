@@ -104,7 +104,7 @@ class OverviewMixin {
     this.ensureGoals();
     this.ensurePolicies(); // the menu counts need both
     for (const g of (this.goals?.goals || []).filter(x => x.state === "missed")) {
-      items.push({ key: `goal_${g.id}`, area: "care", tone: "warn", icon: "mdi:target", text: this.t("goalMissedTitle", { goal: this.t(`goal_${g.id}`) }), hintText: `${this.goalNow(g)} · ${this.t("goalLimit", { limit: this.goalAmount(g, g.limit) })}`, view: GOAL_VIEWS[g.id] });
+      items.push({ key: `goal_${g.id}`, area: "care", tone: "warn", icon: "mdi:target", text: this.t(`goal_${g.id}`), hintText: `${this.goalNow(g)} · ${g.limit === 0 && g.unit === "count" ? this.t("goalAllowedNone") : this.t("goalAllowed", { limit: this.goalAmount(g, g.limit) })}`, pill: this.t("goalMissedPill"), view: GOAL_VIEWS[g.id] });
     }
     return items;
   }
@@ -151,35 +151,30 @@ class OverviewMixin {
     return unit ? `${this.formatNumber(it.count)} ${this.t(`unit_${unit}_${it.count === 1 ? "1" : "n"}`)}` : this.formatNumber(it.count);
   }
 
-  // The outages as a fold of the to-do list: one row per failed integration or device, the first few; the rest is behind "all findings".
-  outagesFold(it, limit) {
-    const outages = this.causeList();
-    const row = c => `<button class="row rel" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(this.t(`cause_${c.kind}`, { name: c.name }))}</strong><small>${this.esc([this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · "))}</small></span></button>`;
-    const more = outages.length > limit ? `<div class="pad"><small><button class="link" data-jump="findingsNav">${this.t("allFindings")}</button></small></div>` : "";
-    return this.fold("todo_outages", { tone: "red", title: this.esc(this.t(it.label)), sub: it.hintText, pill: this.todoCount(it) }, outages.slice(0, limit).map(row).join("") + more, outages.length <= 3);
-  }
-
+  // "What do I have to do now?" in up to three areas: Findings (the first entries of the findings list), State (backup, disk,
+  // scan: urgent ones take points off the status) and Maintenance (goals, reminders, quarantine: never urgent, folded
+  // while something else needs attention). An area without rows is left out.
   todoCard() {
-    const items = this.todoItems();
-    const findings = this.sortedFindings(), LIMIT = 5;
+    const items = this.todoItems(), LIMIT = 5;
     const row = it => {
-      if (it.key === "outages") return this.outagesFold(it, LIMIT);
       const inner = `<span class="tile ${it.tone}"><ha-icon icon="${it.icon}"></ha-icon></span><span class="row-text"><strong>${this.esc(it.text || this.t(it.label))}</strong>${it.hint || it.hintText ? `<small>${this.esc(it.hintText || this.t(it.hint))}</small>` : ""}</span>`;
       if (it.scan) return `<div class="row todo" data-todo="${it.key}">${inner}<button class="btn" data-action="scan">${this.t("scan")}</button></div>`;
       const target = `data-jump="${it.view}"${it.filter !== undefined ? ` data-filter="${it.filter}"` : ""}${it.type ? ` data-type="${it.type}"` : ""}${it.status ? ` data-status="${it.status}"` : ""}`;
-      return `<button class="row todo" data-todo="${it.key}" ${target}>${inner}${it.count !== undefined ? `<span class="pill ${it.tone}">${this.todoCount(it)}</span>` : ""}</button>`;
+      const pill = it.count !== undefined ? this.todoCount(it) : it.pill;
+      return `<button class="row todo" data-todo="${it.key}" ${target}>${inner}${pill ? `<span class="pill ${it.tone}">${this.esc(pill)}</span>` : ""}</button>`;
     };
-    // Red items first and open; the rest is a fold of its own once both kinds exist. The single findings
-    // (those without an outage behind them) are one more fold at the end; they are not a topic of the status.
-    const singles = findings.filter(f => !f.cause_id);
-    const urgent = items.filter(i => i.tone === "red"), later = items.filter(i => i.tone !== "red").map(row);
-    if (singles.length) later.push(this.fold("todo_findings", { tone: "warn", title: this.t("singleFindings"), sub: this.t("sortedBySure"), pill: this.formatNumber(singles.length) }, singles.slice(0, LIMIT).map(f => this.findingRow(f)).join(""), false));
-    const grouped = urgent.length && later.length;
-    const body = items.length || singles.length ? (grouped
-      ? `<h3 class="foldhd">${this.t("actNow")}</h3>${urgent.map(row).join("")}${this.fold("todo_later", { tone: "warn", title: this.t("actSoon"), sub: this.t("actSoonSub"), pill: this.t(later.length === 1 ? "topicsOne" : "topicsN", { n: this.formatNumber(later.length) }) }, later.join(""), false)}`
-      : [...urgent.map(row), ...later].join(""))
-      : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.esc(this.t("actNone", { date: this.formatDate(this.data.meta.scanned_at) }))}</div>`;
+    const inArea = area => items.filter(i => i.area === area && i.key !== "outages"); // the outages are entries of the list itself
+    const entries = this.findingEntries();
+    const entryRow = e => (e.cause ? this.overviewCause(e.cause) : this.findingRow(e.finding));
+    const findingRows = [...inArea("findings").map(row), ...entries.slice(0, LIMIT).map(entryRow)];
     const all = `<button class="link" data-jump="findingsNav">${this.t("allFindings")} (${this.formatNumber(this.findingTotal())}) <ha-icon icon="mdi:chevron-right"></ha-icon></button>`;
+    const state = [...inArea("state")].sort((x, y) => (y.tone === "red") - (x.tone === "red"));
+    const care = inArea("care");
+    const sections = [];
+    if (findingRows.length) sections.push(`<h3 class="foldhd">${this.t("areaFindings")}</h3>${findingRows.join("")}${entries.length > LIMIT ? `<div class="pad"><small>${all}</small></div>` : ""}`);
+    if (state.length) sections.push(`<h3 class="foldhd">${this.t("areaState")}</h3>${state.map(row).join("")}`);
+    if (care.length) sections.push(this.fold("todo_care", { tone: "warn", title: this.t("areaCare"), sub: this.t("areaCareSub"), pill: this.formatNumber(care.length) }, care.map(row).join(""), !sections.length));
+    const body = sections.length ? sections.join("") : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.esc(this.t("actNone", { date: this.formatDate(this.data.meta.scanned_at) }))}</div>`;
     return `<section class="panel u-mb14" aria-labelledby="hk-todo" id="hk-todo-card" tabindex="-1"><div class="panelhead"><div><h2 id="hk-todo">${this.t("actTitle")}</h2><p>${this.t("actSub")}</p></div>${all}</div>${body}${this.todoFoot()}</section>`;
   }
 

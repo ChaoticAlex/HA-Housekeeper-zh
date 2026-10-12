@@ -46,7 +46,7 @@ const TEXT = {
    
     actQuarantine: "Quarantäne abgelaufen", actQuarantineHint: "Bereit zur Entfernung nach deiner Bestätigung",
     trendTitle: "Seit dem letzten Scan", trendSince: "Vergleich mit dem Scan vom {date}", trendNewFindings: "Neue Befunde", trendResolved: "Behoben", trendChanged: "Statuswechsel", trendNewObjects: "Neue Objekte", trendNone: "Keine Änderungen seit dem Scan vom {date}.",
-    sortedBySure: "Nach Sicherheit der Diagnose sortiert", allFindings: "Alle Befunde",
+    allFindings: "Alle Befunde",
     inventoryStatus: "Inventarstatus", byType: "Nach Objekttyp", noFindings: "Keine Befunde – alles unauffällig.",
     openInHA: "In Home Assistant öffnen", diagnosis: "Ursachendiagnose", present: "Vorhanden", missing: "Fehlt",
     certain: "Bestätigt", probable: "Wahrscheinlich", confidence: "Sicherheit", origin: "Herkunft",
@@ -228,7 +228,7 @@ const TEXT = {
    
     actQuarantine: "Quarantine over", actQuarantineHint: "Ready for removal once you confirm",
     trendTitle: "Since the last scan", trendSince: "Compared with the scan of {date}", trendNewFindings: "New findings", trendResolved: "Resolved", trendChanged: "Status changes", trendNewObjects: "New objects", trendNone: "No changes since the scan of {date}.",
-    sortedBySure: "Sorted by diagnosis confidence", allFindings: "All findings",
+    allFindings: "All findings",
     inventoryStatus: "Inventory status", byType: "By object type", noFindings: "No findings – everything looks fine.",
     openInHA: "Open in Home Assistant", diagnosis: "Root-cause diagnosis", present: "Present", missing: "Missing",
     certain: "Confirmed", probable: "Probable", confidence: "Confidence", origin: "Origin",

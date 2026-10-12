@@ -2286,7 +2286,7 @@ test("polish: the to-do list groups by urgency, the cleanup view has tabs, the q
   const { el } = panel("en");
   el.data = { ...DATA, regressions: [{ plan_id: "p", at: "2026-10-08T10:00:00+00:00", new_count: 1 }], criteria_alerts: [{ entity_id: "automation.a", ok: 0, missed: 3 }] };
   const card = el.todoCard();
-  assert.ok(card.includes("Now") && card.includes("Soon") && card.includes('data-fold="todo_later"'));
+  assert.ok(card.includes(">Findings<") && card.includes('data-fold="todo_care"') && !card.includes(">State<"), "areas without rows are left out, maintenance folds while something else is open");
   el.view = "cleanup"; el.journal = []; el._journalRequested = true; el.purges = [{ at: "2026-10-01T10:00:00+00:00", removed: ["sensor.a"], skipped: [], states: false }];
   const html = el.cleanupView();
   assert.ok(html.includes('data-view-tab="cleanup|entities"') && html.includes('data-view-tab="cleanup|devices"') && html.includes('data-view-tab="cleanup|unused"') && html.includes('data-view-tab="cleanup|stats"') && html.includes('data-view-tab="cleanup|purges"'));
@@ -3377,9 +3377,10 @@ test("the overview has no tile card; a missed goal is a to-do row, not a card of
   el.data = { ...DATA, regressions: [], criteria_alerts: [] };
   el.goals = { met: 2, missed: 1, goals: [{ id: "broken_references", state: "missed", value: 43, limit: 0, unit: "count", enabled: true, default: 0 }, { id: "backup_age", state: "met", value: 3, limit: 48, unit: "hours", enabled: true, default: 48 }] };
   el._goalsRequested = true; el._goalsKey = el.data.meta.scanned_at || "";
+  el.folds = { todo_care: true };
   const html = el.overview();
   assert.ok(!html.includes("hk-tiles"));
-  assert.ok(html.includes("Broken references: goal missed") && html.includes("Maintenance goals: 3 of 3 met".replace("3 of 3", "2 of 3")) && html.includes("data-goals-settings"));
+  assert.ok(html.includes("Broken references") && html.includes("Goal missed") && html.includes("allowed: none") && html.includes("Maintenance goals: 3 of 3 met".replace("3 of 3", "2 of 3")) && html.includes("data-goals-settings"));
   assert.ok(!html.includes('aria-labelledby="hk-goals"') && html.includes("with a finding"));
   assert.ok(el.health().tasks >= 1 && el.health().tone === "ok"); // a missed goal is an open task, but maintenance never colours the status
   el.data = { ...DATA, objects: [], findings: [], regressions: [], criteria_alerts: [] };

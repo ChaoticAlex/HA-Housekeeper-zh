@@ -1,6 +1,6 @@
 // Texts of the panel polish: folds, groups and tabs in the cleanup view, filters of the quality view.
 Object.assign(TEXT.de, {
-  actNow: "Jetzt", actSoon: "Bald", actSoonSub: "Nicht dringend, zum Aufklappen anklicken",
+ 
   cleanupTabNew: "Neuer Plan", cleanupTabJournal: "Pläne und Journal", cleanupTabPurges: "Gelöschte Statistiken",
   journalEmptyNext: "Noch kein Plan. Wähle unter „Neuer Plan“ Kandidaten aus und lege einen Plan an.",
   
@@ -9,7 +9,7 @@ Object.assign(TEXT.de, {
   diagSecDims: "Bewertung", diagSecCriteria: "Erfolgskriterien", diagSecMore: "Abdeckung, Vergleich und Testlauf",
 });
 Object.assign(TEXT.en, {
-  actNow: "Now", actSoon: "Soon", actSoonSub: "Not urgent, click to open",
+ 
   cleanupTabNew: "New plan", cleanupTabJournal: "Plans and journal", cleanupTabPurges: "Deleted statistics",
   journalEmptyNext: "No plan yet. Pick candidates under “New plan” and create one.",
   

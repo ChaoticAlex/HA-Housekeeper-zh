@@ -48,7 +48,7 @@ const TEXT = {
    
     actQuarantine: "Quarantäne abgelaufen", actQuarantineHint: "Bereit zur Entfernung nach deiner Bestätigung",
     trendTitle: "Seit dem letzten Scan", trendSince: "Vergleich mit dem Scan vom {date}", trendNewFindings: "Neue Befunde", trendResolved: "Behoben", trendChanged: "Statuswechsel", trendNewObjects: "Neue Objekte", trendNone: "Keine Änderungen seit dem Scan vom {date}.",
-    sortedBySure: "Nach Sicherheit der Diagnose sortiert", allFindings: "Alle Befunde",
+    allFindings: "Alle Befunde",
     inventoryStatus: "Inventarstatus", byType: "Nach Objekttyp", noFindings: "Keine Befunde – alles unauffällig.",
     openInHA: "In Home Assistant öffnen", diagnosis: "Ursachendiagnose", present: "Vorhanden", missing: "Fehlt",
     certain: "Bestätigt", probable: "Wahrscheinlich", confidence: "Sicherheit", origin: "Herkunft",
@@ -230,7 +230,7 @@ const TEXT = {
    
     actQuarantine: "Quarantine over", actQuarantineHint: "Ready for removal once you confirm",
     trendTitle: "Since the last scan", trendSince: "Compared with the scan of {date}", trendNewFindings: "New findings", trendResolved: "Resolved", trendChanged: "Status changes", trendNewObjects: "New objects", trendNone: "No changes since the scan of {date}.",
-    sortedBySure: "Sorted by diagnosis confidence", allFindings: "All findings",
+    allFindings: "All findings",
     inventoryStatus: "Inventory status", byType: "By object type", noFindings: "No findings – everything looks fine.",
     openInHA: "Open in Home Assistant", diagnosis: "Root-cause diagnosis", present: "Present", missing: "Missing",
     certain: "Confirmed", probable: "Probable", confidence: "Confidence", origin: "Origin",
@@ -2001,7 +2001,7 @@ class OverviewMixin {
     this.ensureGoals();
     this.ensurePolicies(); // the menu counts need both
     for (const g of (this.goals?.goals || []).filter(x => x.state === "missed")) {
-      items.push({ key: `goal_${g.id}`, area: "care", tone: "warn", icon: "mdi:target", text: this.t("goalMissedTitle", { goal: this.t(`goal_${g.id}`) }), hintText: `${this.goalNow(g)} · ${this.t("goalLimit", { limit: this.goalAmount(g, g.limit) })}`, view: GOAL_VIEWS[g.id] });
+      items.push({ key: `goal_${g.id}`, area: "care", tone: "warn", icon: "mdi:target", text: this.t(`goal_${g.id}`), hintText: `${this.goalNow(g)} · ${g.limit === 0 && g.unit === "count" ? this.t("goalAllowedNone") : this.t("goalAllowed", { limit: this.goalAmount(g, g.limit) })}`, pill: this.t("goalMissedPill"), view: GOAL_VIEWS[g.id] });
     }
     return items;
   }
@@ -2048,35 +2048,30 @@ class OverviewMixin {
     return unit ? `${this.formatNumber(it.count)} ${this.t(`unit_${unit}_${it.count === 1 ? "1" : "n"}`)}` : this.formatNumber(it.count);
   }
 
-  // The outages as a fold of the to-do list: one row per failed integration or device, the first few; the rest is behind "all findings".
-  outagesFold(it, limit) {
-    const outages = this.causeList();
-    const row = c => `<button class="row rel" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(this.t(`cause_${c.kind}`, { name: c.name }))}</strong><small>${this.esc([this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · "))}</small></span></button>`;
-    const more = outages.length > limit ? `<div class="pad"><small><button class="link" data-jump="findingsNav">${this.t("allFindings")}</button></small></div>` : "";
-    return this.fold("todo_outages", { tone: "red", title: this.esc(this.t(it.label)), sub: it.hintText, pill: this.todoCount(it) }, outages.slice(0, limit).map(row).join("") + more, outages.length <= 3);
-  }
-
+  // "What do I have to do now?" in up to three areas: Findings (the first entries of the findings list), State (backup, disk,
+  // scan: urgent ones take points off the status) and Maintenance (goals, reminders, quarantine: never urgent, folded
+  // while something else needs attention). An area without rows is left out.
   todoCard() {
-    const items = this.todoItems();
-    const findings = this.sortedFindings(), LIMIT = 5;
+    const items = this.todoItems(), LIMIT = 5;
     const row = it => {
-      if (it.key === "outages") return this.outagesFold(it, LIMIT);
       const inner = `<span class="tile ${it.tone}"><ha-icon icon="${it.icon}"></ha-icon></span><span class="row-text"><strong>${this.esc(it.text || this.t(it.label))}</strong>${it.hint || it.hintText ? `<small>${this.esc(it.hintText || this.t(it.hint))}</small>` : ""}</span>`;
       if (it.scan) return `<div class="row todo" data-todo="${it.key}">${inner}<button class="btn" data-action="scan">${this.t("scan")}</button></div>`;
       const target = `data-jump="${it.view}"${it.filter !== undefined ? ` data-filter="${it.filter}"` : ""}${it.type ? ` data-type="${it.type}"` : ""}${it.status ? ` data-status="${it.status}"` : ""}`;
-      return `<button class="row todo" data-todo="${it.key}" ${target}>${inner}${it.count !== undefined ? `<span class="pill ${it.tone}">${this.todoCount(it)}</span>` : ""}</button>`;
+      const pill = it.count !== undefined ? this.todoCount(it) : it.pill;
+      return `<button class="row todo" data-todo="${it.key}" ${target}>${inner}${pill ? `<span class="pill ${it.tone}">${this.esc(pill)}</span>` : ""}</button>`;
     };
-    // Red items first and open; the rest is a fold of its own once both kinds exist. The single findings
-    // (those without an outage behind them) are one more fold at the end; they are not a topic of the status.
-    const singles = findings.filter(f => !f.cause_id);
-    const urgent = items.filter(i => i.tone === "red"), later = items.filter(i => i.tone !== "red").map(row);
-    if (singles.length) later.push(this.fold("todo_findings", { tone: "warn", title: this.t("singleFindings"), sub: this.t("sortedBySure"), pill: this.formatNumber(singles.length) }, singles.slice(0, LIMIT).map(f => this.findingRow(f)).join(""), false));
-    const grouped = urgent.length && later.length;
-    const body = items.length || singles.length ? (grouped
-      ? `<h3 class="foldhd">${this.t("actNow")}</h3>${urgent.map(row).join("")}${this.fold("todo_later", { tone: "warn", title: this.t("actSoon"), sub: this.t("actSoonSub"), pill: this.t(later.length === 1 ? "topicsOne" : "topicsN", { n: this.formatNumber(later.length) }) }, later.join(""), false)}`
-      : [...urgent.map(row), ...later].join(""))
-      : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.esc(this.t("actNone", { date: this.formatDate(this.data.meta.scanned_at) }))}</div>`;
+    const inArea = area => items.filter(i => i.area === area && i.key !== "outages"); // the outages are entries of the list itself
+    const entries = this.findingEntries();
+    const entryRow = e => (e.cause ? this.overviewCause(e.cause) : this.findingRow(e.finding));
+    const findingRows = [...inArea("findings").map(row), ...entries.slice(0, LIMIT).map(entryRow)];
     const all = `<button class="link" data-jump="findingsNav">${this.t("allFindings")} (${this.formatNumber(this.findingTotal())}) <ha-icon icon="mdi:chevron-right"></ha-icon></button>`;
+    const state = [...inArea("state")].sort((x, y) => (y.tone === "red") - (x.tone === "red"));
+    const care = inArea("care");
+    const sections = [];
+    if (findingRows.length) sections.push(`<h3 class="foldhd">${this.t("areaFindings")}</h3>${findingRows.join("")}${entries.length > LIMIT ? `<div class="pad"><small>${all}</small></div>` : ""}`);
+    if (state.length) sections.push(`<h3 class="foldhd">${this.t("areaState")}</h3>${state.map(row).join("")}`);
+    if (care.length) sections.push(this.fold("todo_care", { tone: "warn", title: this.t("areaCare"), sub: this.t("areaCareSub"), pill: this.formatNumber(care.length) }, care.map(row).join(""), !sections.length));
+    const body = sections.length ? sections.join("") : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.esc(this.t("actNone", { date: this.formatDate(this.data.meta.scanned_at) }))}</div>`;
     return `<section class="panel u-mb14" aria-labelledby="hk-todo" id="hk-todo-card" tabindex="-1"><div class="panelhead"><div><h2 id="hk-todo">${this.t("actTitle")}</h2><p>${this.t("actSub")}</p></div>${all}</div>${body}${this.todoFoot()}</section>`;
   }
 
@@ -6937,6 +6932,19 @@ class CausesMixin {
     return this.fold(`cause_${c.id}`, { tone: "red", title, sub, pill: this.t("causeFollowers", { n: this.formatNumber(total) }) }, `${own}${below}${pg.rows.join("")}${pg.footer}${decide}`, false);
   }
 
+  // The entries at the top of the findings list, as the overview shows them: by impact, a chain once at its top.
+  findingEntries() {
+    const score = e => e.cause ? (IMPACT_RANK[e.cause.impact] ?? 0) + 0.5 + Math.min(this.causeTotal(e.cause), 999) / 2000 : this.impactScore(e.finding);
+    return [...this.causeEntries().map(cause => ({ cause })), ...this.sortedFindings().filter(f => !f.cause_id).map(finding => ({ finding }))].sort((a, b) => score(b) - score(a));
+  }
+
+  // A cause as a compact row of the overview: the counter says how many findings it explains.
+  overviewCause(c) {
+    const total = this.causeTotal(c), sub = [this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · ");
+    const target = c.virtual ? 'data-jump="findingsNav"' : `data-object="${this.esc(`${c.object_type}:${c.object_id}`)}"`;
+    return `<button class="row rel" ${target}>${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(this.t(`cause_${c.kind}`, { name: c.name }))}</strong><small>${this.esc(sub)}</small></span>${total ? `<span class="pill red">${this.esc(this.t("causeFollowers", { n: this.formatNumber(total) }))}</span>` : ""}</button>`;
+  }
+
   // Only in the flat view: "Follow-up of Integration Cloud" next to a finding that a cause explains.
   followOf(f) {
     const c = f.cause_id && !CAUSE_OWN_RULES.includes(f.rule_id) ? this.causeList().find(x => x.id === f.cause_id) : null;
@@ -6959,7 +6967,7 @@ class CausesMixin {
 }
 Object.assign(TEXT.de, {
   causesTitle: "Ausfälle",
-  causeNone: "keine Entität betroffen", outageIntegrations: "{n} Integrationen", outageDevices: "{n} Geräte", singleFindings: "Einzelne Befunde",
+  causeNone: "keine Entität betroffen", outageIntegrations: "{n} Integrationen", outageDevices: "{n} Geräte",
   logTitle: "Im HA-Log", logLine: "Im HA-Log: {what}, zuletzt {when}", logLevel_warning: "{n}× Warnung", logLevel_error: "{n}× Fehler", logLevel_critical: "{n}× kritischer Fehler",
   cause_integration_down: "Integration {name} ist nicht geladen", cause_device_down: "Gerät {name} ist ganz ausgefallen",
   causeFollowers: "{n} Folgen", causeExplains: "erklärt {n} weitere Befunde", causeFollowOf: "Folge von {name}", withFollowers: "Mit Folgen", flatList: "Flache Liste", cause_app_down: "App {name} ist gestoppt", cause_entity_missing: "Entität {name} existiert nicht", cause_device_missing: "Gerät {name} existiert nicht", cause_area_missing: "Bereich {name} existiert nicht", causeUsers: "{n} Automationen, Skripte oder Dashboards verweisen darauf", causeBelow: "{n} Integrationen hängen vermutlich daran", outageApps: "{n} Apps", outageTargets: "{n} fehlende Ziele", cause_service_missing: "Dienst {name} existiert nicht", causeCallers: "{n} Automationen und Skripte rufen ihn auf", outageServices: "{n} fehlende Dienste", causeState: "Zustand: {state}", causeUses_automation: "{n} Automationen betroffen", causeUses_script: "{n} Skripte betroffen", causeUses_dashboard: "{n} Dashboards betroffen",
@@ -6967,7 +6975,7 @@ Object.assign(TEXT.de, {
 });
 Object.assign(TEXT.en, {
   causesTitle: "Outages",
-  causeNone: "no entity affected", outageIntegrations: "{n} integrations", outageDevices: "{n} devices", singleFindings: "Single findings",
+  causeNone: "no entity affected", outageIntegrations: "{n} integrations", outageDevices: "{n} devices",
   logTitle: "In the HA log", logLine: "In the HA log: {what}, last {when}", logLevel_warning: "{n}× warning", logLevel_error: "{n}× error", logLevel_critical: "{n}× critical error",
   cause_integration_down: "Integration {name} is not loaded", cause_device_down: "Device {name} is down completely",
   causeFollowers: "{n} follow-ups", causeExplains: "explains {n} more findings", causeFollowOf: "Follow-up of {name}", withFollowers: "With follow-ups", flatList: "Flat list", cause_app_down: "App {name} is stopped", cause_entity_missing: "Entity {name} does not exist", cause_device_missing: "Device {name} does not exist", cause_area_missing: "Area {name} does not exist", causeUsers: "{n} automations, scripts or dashboards point to it", causeBelow: "{n} integrations probably depend on it", outageApps: "{n} apps", outageTargets: "{n} missing targets", cause_service_missing: "Service {name} does not exist", causeCallers: "{n} automations and scripts call it", outageServices: "{n} missing services", causeState: "State: {state}", causeUses_automation: "{n} automations affected", causeUses_script: "{n} scripts affected", causeUses_dashboard: "{n} dashboards affected",
@@ -6978,14 +6986,14 @@ Object.assign(TEXT.en, {
 Object.assign(TEXT.de, {
   tilesMissed: "{count} Ziele verfehlt", moreItems: "und {count} weitere", goalsTitle: "Wartungsziele", goalsSub: "Eigene Grenzen für das, was in Ordnung heißt. Housekeeper ändert nichts.", goalsSummary: "{met} erfüllt, {missed} verfehlt",
   goal_broken_references: "Defekte Referenzen", goal_unavailable: "Nicht verfügbare Entitäten", goal_backup_age: "Alter des letzten Backups", goal_restore_test_age: "Alter des Wiederherstellungstests", goal_recorder_growth: "Datenbankwachstum", goal_weak_batteries: "Schwache Batterien", goal_devices_without_area: "Geräte ohne Bereich", goal_stale_sensors: "Sensoren ohne neue Meldung", goal_recurring_devices: "Wiederkehrende Ausfälle (Geräte)", goal_automation_errors: "Automationen mit Fehlern (30 Tage)", goal_blocked_automations: "Blockierte Automationen", goal_orphaned_statistics: "Verwaiste Statistiken",
-  goalLimit: "höchstens {limit}", goalNow: "jetzt {value}", goalNever: "nie", goalNoBackup: "kein Backup", goalUnknownHint: "noch nicht messbar",
+  goalLimit: "höchstens {limit}", goalAllowed: "erlaubt: {limit}", goalAllowedNone: "erlaubt: keine", goalMissedPill: "Ziel verfehlt", areaFindings: "Befunde", areaState: "Zustand", areaCare: "Wartung", areaCareSub: "nichts dringend", goalNow: "jetzt {value}", goalNever: "nie", goalNoBackup: "kein Backup", goalUnknownHint: "noch nicht messbar",
   goalState_met: "Erfüllt", goalState_missed: "Verfehlt", goalState_unknown: "Unbekannt", goalState_off: "Aus",
   goalUnit_mb_per_day: "{n} MB pro Tag", goalEdit: "Anpassen", goalLimitLabel: "Grenze", goalEnabled: "Ziel beachten", goalDefault: "Standard: {n}", goalFailed: "Nicht gespeichert: {reason}", goalSave: "Speichern", goalsAdjust: "Grenzen anpassen", goalsAllMet: "Alle {n} beachteten Ziele sind erreicht.",
 });
 Object.assign(TEXT.en, {
   tilesMissed: "{count} goals missed", moreItems: "and {count} more", goalsTitle: "Maintenance goals", goalsSub: "Your own limits for what in order means. Housekeeper changes nothing.", goalsSummary: "{met} met, {missed} missed",
   goal_broken_references: "Broken references", goal_unavailable: "Unavailable entities", goal_backup_age: "Age of the latest backup", goal_restore_test_age: "Age of the restore test", goal_recorder_growth: "Database growth", goal_weak_batteries: "Weak batteries", goal_devices_without_area: "Devices without an area", goal_stale_sensors: "Sensors without a new report", goal_recurring_devices: "Recurring outages (devices)", goal_automation_errors: "Automations with errors (30 days)", goal_blocked_automations: "Blocked automations", goal_orphaned_statistics: "Orphaned statistics",
-  goalLimit: "at most {limit}", goalNow: "now {value}", goalNever: "never", goalNoBackup: "no backup", goalUnknownHint: "cannot be measured yet",
+  goalLimit: "at most {limit}", goalAllowed: "allowed: {limit}", goalAllowedNone: "allowed: none", goalMissedPill: "Goal missed", areaFindings: "Findings", areaState: "State", areaCare: "Maintenance", areaCareSub: "nothing urgent", goalNow: "now {value}", goalNever: "never", goalNoBackup: "no backup", goalUnknownHint: "cannot be measured yet",
   goalState_met: "Met", goalState_missed: "Missed", goalState_unknown: "Unknown", goalState_off: "Off",
   goalUnit_mb_per_day: "{n} MB per day", goalEdit: "Adjust", goalLimitLabel: "Limit", goalEnabled: "Watch this goal", goalDefault: "Default: {n}", goalFailed: "Not saved: {reason}", goalSave: "Save", goalsAdjust: "Adjust limits", goalsAllMet: "All {n} watched goals are met.",
 });
@@ -7787,7 +7795,7 @@ class DryRunMixin {
 
 // Texts of the panel polish: folds, groups and tabs in the cleanup view, filters of the quality view.
 Object.assign(TEXT.de, {
-  actNow: "Jetzt", actSoon: "Bald", actSoonSub: "Nicht dringend, zum Aufklappen anklicken",
+ 
   cleanupTabNew: "Neuer Plan", cleanupTabJournal: "Pläne und Journal", cleanupTabPurges: "Gelöschte Statistiken",
   journalEmptyNext: "Noch kein Plan. Wähle unter „Neuer Plan“ Kandidaten aus und lege einen Plan an.",
   
@@ -7796,7 +7804,7 @@ Object.assign(TEXT.de, {
   diagSecDims: "Bewertung", diagSecCriteria: "Erfolgskriterien", diagSecMore: "Abdeckung, Vergleich und Testlauf",
 });
 Object.assign(TEXT.en, {
-  actNow: "Now", actSoon: "Soon", actSoonSub: "Not urgent, click to open",
+ 
   cleanupTabNew: "New plan", cleanupTabJournal: "Plans and journal", cleanupTabPurges: "Deleted statistics",
   journalEmptyNext: "No plan yet. Pick candidates under “New plan” and create one.",
   
@@ -8994,7 +9002,7 @@ Object.assign(TEXT.de, {
   statusUrgentOne: "1 Thema dringend", statusUrgent: "{n} Themen dringend", statusMoreOpen: "{n} weitere offen", statusOpenOne: "1 Thema offen", statusOpen: "{n} Themen offen",
   statusObjects: "{affected} von {base} Objekten mit Befund", statusTopicsCost: "Zustand: Abzug {n} Punkte", statusTopicsFree: "Zustand: kein Abzug", healthWhy: "Wie entsteht die Zahl?",
   whyStart: "Ausgangswert", whyLevel: "{n} Einträge · {level} · je {each} Punkte", whyState: "{n} dringende Zustandsthemen · je {each} Punkte", whyTotal: "Punktestand", whyNote: "Jeder Eintrag der Befundliste zählt einmal, nach seiner Auswirkung; Folgebefunde einer Ursache zählen nicht extra. Hohe Auswirkung höchstens 30 Punkte, mittlere 20, niedrige 10; dringende Zustandsthemen (Backup, Datenträger) höchstens 30. Ab {green} grün, ab {yellow} gelb, darunter rot; ein Eintrag mit hoher Auswirkung oder ein dringendes Zustandsthema ist mindestens gelb. Ausgeblendete, bekannte und zurückgestellte Befunde zählen nicht.",
-  topicsOne: "1 Thema", topicsN: "{n} Themen",
+ 
   unit_outages_1: "Ausfall", unit_outages_n: "Ausfälle", unit_followup_1: "Plan", unit_followup_n: "Pläne", unit_reminders_1: "Erinnerung", unit_reminders_n: "Erinnerungen", unit_criteria_1: "Ziel", unit_criteria_n: "Ziele", unit_critical_1: "Befund", unit_critical_n: "Befunde", unit_backup_1: "Problem", unit_backup_n: "Probleme", unit_quarantine_1: "Objekt", unit_quarantine_n: "Objekte",
   statusTasks: "{count} Aufgaben warten auf dich", statusTasksJump: "Zur Liste der Aufgaben springen", statusAllGood: "Alles in Ordnung",
   counterNoneSub: "{count} Sensoren sehen unauffällig aus.", counterNotChecked: "Noch nicht geprüft", counterNotCheckedSub: "Housekeeper sucht falsche Werte in Zählern und Messwerten. Starte die Prüfung mit „Sensoren prüfen“.",
@@ -9008,7 +9016,7 @@ Object.assign(TEXT.de, {
   navGroupActions: "Aktionen", navGroupSecurity: "Sicherheit",
   err_cleanup_busy: "Ein Plan läuft gerade. Housekeeper lädt die Ansicht neu, sobald er fertig ist.", 
   
-  goalMissedTitle: "{goal}: Ziel verfehlt", goalsLine: "Wartungsziele: {met} von {total} erfüllt", hintsTitle: "Hinweise",
+  goalsLine: "Wartungsziele: {met} von {total} erfüllt", hintsTitle: "Hinweise",
   healthScore: "Punktestand {percent} von 100", healthTasks: "{count} Aufgaben offen", healthNoTasks: "keine offenen Aufgaben", healthTip: "Punktestand von 100: Jeder Eintrag der Befundliste nimmt je nach Auswirkung Punkte weg, dringende Zustandsthemen (Backup, Datenträger) ebenfalls. {affected} von {base} Objekten haben einen Befund; das ist nur die Begleitzahl. Mehr per Klick auf den Ring.",
   repair: "Reparieren", repairSubtitle: "Bestehende Daten und Verweise korrigieren oder auf etwas Neues umstellen. Housekeeper zeigt erst eine Vorschau; geschrieben wird erst nach deiner Bestätigung.", repairDryRun: "Nichts wird geändert, bis du die Vorschau bestätigst.",
   journalSubtitle: "Alle Pläne aus Aufräumen und Reparieren: was geändert wurde, was geprüft wurde und was sich rückgängig machen lässt.",
@@ -9037,7 +9045,7 @@ Object.assign(TEXT.en, {
   statusUrgentOne: "1 topic urgent", statusUrgent: "{n} topics urgent", statusMoreOpen: "{n} more open", statusOpenOne: "1 topic open", statusOpen: "{n} topics open",
   statusObjects: "{affected} of {base} objects with a finding", statusTopicsCost: "State: {n} points off", statusTopicsFree: "State: nothing off", healthWhy: "How is this number made?",
   whyStart: "Starting value", whyLevel: "{n} entries · {level} · {each} points each", whyState: "{n} urgent state topics · {each} points each", whyTotal: "Score", whyNote: "Every entry of the findings list counts once, by its impact; follow-up findings of a cause do not count extra. High impact takes off at most 30 points, medium 20, low 10; urgent state topics (backup, disk) at most 30. Green from {green}, yellow from {yellow}, red below; an entry with high impact or an urgent state topic is at least yellow. Hidden, known and snoozed findings do not count.",
-  topicsOne: "1 topic", topicsN: "{n} topics",
+ 
   unit_outages_1: "outage", unit_outages_n: "outages", unit_followup_1: "plan", unit_followup_n: "plans", unit_reminders_1: "reminder", unit_reminders_n: "reminders", unit_criteria_1: "goal", unit_criteria_n: "goals", unit_critical_1: "finding", unit_critical_n: "findings", unit_backup_1: "problem", unit_backup_n: "problems", unit_quarantine_1: "object", unit_quarantine_n: "objects",
   statusTasks: "{count} tasks are waiting for you", statusTasksJump: "Jump to the list of tasks", statusAllGood: "All good",
   counterNoneSub: "{count} sensors look fine.", counterNotChecked: "Not checked yet", counterNotCheckedSub: "Housekeeper looks for wrong values in counters and measurements. Start the check with “Check sensors”.",
@@ -9051,7 +9059,7 @@ Object.assign(TEXT.en, {
   navGroupActions: "Actions", navGroupSecurity: "Security",
   err_cleanup_busy: "A plan is running. Housekeeper reloads the view as soon as it has finished.", 
   
-  goalMissedTitle: "{goal}: goal missed", goalsLine: "Maintenance goals: {met} of {total} met", hintsTitle: "Hints",
+  goalsLine: "Maintenance goals: {met} of {total} met", hintsTitle: "Hints",
   healthScore: "Score {percent} of 100", healthTasks: "{count} tasks open", healthNoTasks: "no open tasks", healthTip: "Score out of 100: every entry of the findings list takes points off by its impact, and so do urgent state topics (backup, disk). {affected} of {base} objects have a finding; that is only the number beside it. More with a click on the ring.",
   repair: "Repair", repairSubtitle: "Correct existing data and references, or switch them over to something new. Housekeeper shows a preview first; nothing is written until you confirm.", repairDryRun: "Nothing is changed until you confirm the preview.",
   journalSubtitle: "Every plan from Tidy up and Repair: what changed, what was checked and what can be undone.",

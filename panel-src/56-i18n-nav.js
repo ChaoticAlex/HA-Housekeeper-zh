@@ -16,7 +16,7 @@ Object.assign(TEXT.de, {
   statusUrgentOne: "1 Thema dringend", statusUrgent: "{n} Themen dringend", statusMoreOpen: "{n} weitere offen", statusOpenOne: "1 Thema offen", statusOpen: "{n} Themen offen",
   statusObjects: "{affected} von {base} Objekten mit Befund", statusTopicsCost: "Zustand: Abzug {n} Punkte", statusTopicsFree: "Zustand: kein Abzug", healthWhy: "Wie entsteht die Zahl?",
   whyStart: "Ausgangswert", whyLevel: "{n} Einträge · {level} · je {each} Punkte", whyState: "{n} dringende Zustandsthemen · je {each} Punkte", whyTotal: "Punktestand", whyNote: "Jeder Eintrag der Befundliste zählt einmal, nach seiner Auswirkung; Folgebefunde einer Ursache zählen nicht extra. Hohe Auswirkung höchstens 30 Punkte, mittlere 20, niedrige 10; dringende Zustandsthemen (Backup, Datenträger) höchstens 30. Ab {green} grün, ab {yellow} gelb, darunter rot; ein Eintrag mit hoher Auswirkung oder ein dringendes Zustandsthema ist mindestens gelb. Ausgeblendete, bekannte und zurückgestellte Befunde zählen nicht.",
-  topicsOne: "1 Thema", topicsN: "{n} Themen",
+ 
   unit_outages_1: "Ausfall", unit_outages_n: "Ausfälle", unit_followup_1: "Plan", unit_followup_n: "Pläne", unit_reminders_1: "Erinnerung", unit_reminders_n: "Erinnerungen", unit_criteria_1: "Ziel", unit_criteria_n: "Ziele", unit_critical_1: "Befund", unit_critical_n: "Befunde", unit_backup_1: "Problem", unit_backup_n: "Probleme", unit_quarantine_1: "Objekt", unit_quarantine_n: "Objekte",
   statusTasks: "{count} Aufgaben warten auf dich", statusTasksJump: "Zur Liste der Aufgaben springen", statusAllGood: "Alles in Ordnung",
   counterNoneSub: "{count} Sensoren sehen unauffällig aus.", counterNotChecked: "Noch nicht geprüft", counterNotCheckedSub: "Housekeeper sucht falsche Werte in Zählern und Messwerten. Starte die Prüfung mit „Sensoren prüfen“.",
@@ -30,7 +30,7 @@ Object.assign(TEXT.de, {
   navGroupActions: "Aktionen", navGroupSecurity: "Sicherheit",
   err_cleanup_busy: "Ein Plan läuft gerade. Housekeeper lädt die Ansicht neu, sobald er fertig ist.", 
   
-  goalMissedTitle: "{goal}: Ziel verfehlt", goalsLine: "Wartungsziele: {met} von {total} erfüllt", hintsTitle: "Hinweise",
+  goalsLine: "Wartungsziele: {met} von {total} erfüllt", hintsTitle: "Hinweise",
   healthScore: "Punktestand {percent} von 100", healthTasks: "{count} Aufgaben offen", healthNoTasks: "keine offenen Aufgaben", healthTip: "Punktestand von 100: Jeder Eintrag der Befundliste nimmt je nach Auswirkung Punkte weg, dringende Zustandsthemen (Backup, Datenträger) ebenfalls. {affected} von {base} Objekten haben einen Befund; das ist nur die Begleitzahl. Mehr per Klick auf den Ring.",
   repair: "Reparieren", repairSubtitle: "Bestehende Daten und Verweise korrigieren oder auf etwas Neues umstellen. Housekeeper zeigt erst eine Vorschau; geschrieben wird erst nach deiner Bestätigung.", repairDryRun: "Nichts wird geändert, bis du die Vorschau bestätigst.",
   journalSubtitle: "Alle Pläne aus Aufräumen und Reparieren: was geändert wurde, was geprüft wurde und was sich rückgängig machen lässt.",
@@ -59,7 +59,7 @@ Object.assign(TEXT.en, {
   statusUrgentOne: "1 topic urgent", statusUrgent: "{n} topics urgent", statusMoreOpen: "{n} more open", statusOpenOne: "1 topic open", statusOpen: "{n} topics open",
   statusObjects: "{affected} of {base} objects with a finding", statusTopicsCost: "State: {n} points off", statusTopicsFree: "State: nothing off", healthWhy: "How is this number made?",
   whyStart: "Starting value", whyLevel: "{n} entries · {level} · {each} points each", whyState: "{n} urgent state topics · {each} points each", whyTotal: "Score", whyNote: "Every entry of the findings list counts once, by its impact; follow-up findings of a cause do not count extra. High impact takes off at most 30 points, medium 20, low 10; urgent state topics (backup, disk) at most 30. Green from {green}, yellow from {yellow}, red below; an entry with high impact or an urgent state topic is at least yellow. Hidden, known and snoozed findings do not count.",
-  topicsOne: "1 topic", topicsN: "{n} topics",
+ 
   unit_outages_1: "outage", unit_outages_n: "outages", unit_followup_1: "plan", unit_followup_n: "plans", unit_reminders_1: "reminder", unit_reminders_n: "reminders", unit_criteria_1: "goal", unit_criteria_n: "goals", unit_critical_1: "finding", unit_critical_n: "findings", unit_backup_1: "problem", unit_backup_n: "problems", unit_quarantine_1: "object", unit_quarantine_n: "objects",
   statusTasks: "{count} tasks are waiting for you", statusTasksJump: "Jump to the list of tasks", statusAllGood: "All good",
   counterNoneSub: "{count} sensors look fine.", counterNotChecked: "Not checked yet", counterNotCheckedSub: "Housekeeper looks for wrong values in counters and measurements. Start the check with “Check sensors”.",
@@ -73,7 +73,7 @@ Object.assign(TEXT.en, {
   navGroupActions: "Actions", navGroupSecurity: "Security",
   err_cleanup_busy: "A plan is running. Housekeeper reloads the view as soon as it has finished.", 
   
-  goalMissedTitle: "{goal}: goal missed", goalsLine: "Maintenance goals: {met} of {total} met", hintsTitle: "Hints",
+  goalsLine: "Maintenance goals: {met} of {total} met", hintsTitle: "Hints",
   healthScore: "Score {percent} of 100", healthTasks: "{count} tasks open", healthNoTasks: "no open tasks", healthTip: "Score out of 100: every entry of the findings list takes points off by its impact, and so do urgent state topics (backup, disk). {affected} of {base} objects have a finding; that is only the number beside it. More with a click on the ring.",
   repair: "Repair", repairSubtitle: "Correct existing data and references, or switch them over to something new. Housekeeper shows a preview first; nothing is written until you confirm.", repairDryRun: "Nothing is changed until you confirm the preview.",
   journalSubtitle: "Every plan from Tidy up and Repair: what changed, what was checked and what can be undone.",
