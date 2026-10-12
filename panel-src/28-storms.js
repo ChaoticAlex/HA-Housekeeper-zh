@@ -2,7 +2,7 @@
 class StormsMixin {
   async loadStorms(refresh = false) {
     this.stormsLoading = true; this.stormsError = ""; this.render();
-    try { this.storms = await this._hass.callWS({ type: "ha_housekeeper/storms", window_days: this.stormsWindow, refresh }); }
+    try { this.storms = await this._hass.callWS({ type: "ha_housekeeper/storms", window_days: this.stormsWindow, refresh }); this.markLoaded("storms"); }
     catch (err) { this.stormsError = err?.message || String(err); }
     this.stormsLoading = false; this.render();
     this.followUp("storms", "recorder", this.storms, r => this.loadStorms(r), refresh);
@@ -112,19 +112,19 @@ class StormsMixin {
     ];
     const open = this.viewTabOf("recorder", tabs, "load");
     const body = open === "costs" ? this.recorderCard() : open === "db" ? this.dbCard() : this.stormsView();
-    return `<div class="stack">${this.navTiles("recorder", tabs, open, this.t("recorder"))}${body}</div>`;
+    return `<div class="stack">${this.navTiles("recorder", tabs, open, this.t("recorder"), true)}${body}</div>`;
   }
 
   stormsView() {
     this.ensureStorms();
     const r = this.storms;
     const windows = [[1, "relWindow1"], [7, "relWindow7"]].map(([days, key]) => `<button class="chip ${this.stormsWindow === days ? "active" : ""}" data-storm-window="${days}" aria-pressed="${this.stormsWindow === days}">${this.t(key)}</button>`).join("");
-    const took = this.tookNote(r);
-    const head = `<div class="panelhead"><div><h2>${this.t("stormTitle")}</h2><p>${this.t("stormHint")}${took}</p></div><div class="actions" style="display:flex;gap:8px;flex-wrap:wrap">${windows}<button class="btn" data-storm-refresh ${this.stormsLoading ? "disabled" : ""}>${this.t("relRefresh")}</button></div></div>`;
-    if (this.stormsError) return `<div class="panel">${head}<div class="error">${this.esc(this.stormsError)}</div></div>`;
-    if (!r) return `<div class="panel">${head}${this.skeleton("stormLoading")}</div>`;
-    if (!r.available) return `<div class="panel">${head}<p class="factnote">${this.t("relNoRecorder")}</p></div>`;
-    if (r.busy) return `<div class="panel">${head}${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p></div>`;
+    const aged = Boolean(r?.computed_at && (r.stale || r.age_seconds >= 60)), took = aged ? "" : this.tookNote(r).replace(/^ · /, "");
+    const head = this.pageBar({ left: `${windows}${took ? `<span>${this.esc(took)}</span>` : ""}`, at: this.isoOf(r?.computed_at) || this.loadedAt("storms"), loading: this.stormsLoading, attr: "data-storm-refresh" });
+    if (this.stormsError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.stormsError)}</div></div></div>`;
+    if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("stormLoading")}</div></div>`;
+    if (!r.available) return `<div class="stack">${head}<div class="panel"><p class="factnote">${this.t("relNoRecorder")}</p></div></div>`;
+    if (r.busy) return `<div class="stack">${head}<div class="panel">${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p></div></div>`;
     const loading = this.stormsLoading ? `<p class="factnote">${this.t("stormLoading")}</p>` : "";
     const groups = this.stormGroups(r), kinds = [["all", "stormFilterAll"], ["entities", "stormGroupEntities"], ["integrations", "stormGroupIntegrations"], ["events", "stormGroupEvents"]].filter(([id]) => id === "all" || groups.some(g => g.type === id));
     const kind = kinds.some(([id]) => id === this.stormFind) ? this.stormFind : "all";
@@ -162,6 +162,6 @@ class StormsMixin {
     ].filter(Boolean);
     const open = this.viewTabOf("recload", tabs, r.findings.length ? "findings" : "entities");
     const body = open === "entities" ? table : open === "shares" ? shares : open === "events" ? events : `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormTabFindings")}</h2></div></div>${attention}</div>`;
-    return `<div class="stack"><div class="panel">${head}${loading}${summary}${left ? `<p class="factnote">${left}</p>` : ""}</div>${this.viewTabBar("recload", tabs, open)}${body}</div>`;
+    return `<div class="stack">${head}<div class="panel">${loading}${summary}${left ? `<p class="factnote">${left}</p>` : ""}</div>${this.viewTabBar("recload", tabs, open)}${body}</div>`;
   }
 }

@@ -9,7 +9,7 @@ const RUN_FINDINGS = {
 class RunsMixin {
   async loadRuns() {
     this.runsLoading = true; this.runsError = ""; this.render();
-    try { this.runs = await this._hass.callWS({ type: "ha_housekeeper/automation_runs" }); }
+    try { this.runs = await this._hass.callWS({ type: "ha_housekeeper/automation_runs" }); this.markLoaded("runs"); }
     catch (err) { this.runsError = err?.message || String(err); }
     this.runsLoading = false; this.render();
   }
@@ -146,17 +146,17 @@ class RunsMixin {
       { id: "quality", icon: "mdi:clipboard-pulse-outline", label: this.t("qualityTab"), hint: this.t("runsTileQualityHint"), tone: "mute" },
     ];
     const open = this.viewTabOf("runs", tabs, "runs");
-    if (open === "quality") return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"))}${this.qualityView()}</div>`;
-    return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"))}${this.runsListView()}</div>`;
+    if (open === "quality") return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${this.qualityView()}</div>`;
+    return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${this.runsListView()}</div>`;
   }
 
   runsListView() {
     this.ensureRuns();
     const r = this.runs;
     const since = r?.since ? ` · ${this.t("runsSince", { date: this.formatDate(r.since) })}` : "";
-    const head = `<div class="panelhead"><div><h2>${this.t("runsTitle")}</h2><p>${this.t("runsHint")}${since}</p></div><div class="actions"><button class="btn" data-runs-refresh ${this.runsLoading ? "disabled" : ""}>${this.t("runsRefresh")}</button></div></div>`;
-    if (this.runsError) return `<div class="panel">${head}<div class="error">${this.esc(this.runsError)}</div></div>`;
-    if (!r) return `<div class="panel">${head}${this.skeleton("runsLoading")}</div>`;
+    const head = this.pageBar({ left: since ? `<span>${this.esc(since.replace(/^ · /, ""))}</span>` : "", at: this.loadedAt("runs"), loading: this.runsLoading, attr: "data-runs-refresh" });
+    if (this.runsError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.runsError)}</div></div></div>`;
+    if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("runsLoading")}</div></div>`;
     this.lvState("runs", "runs", "desc");
     const lower = r.items.filter(row => row.lower_bound).length;
     const coverage = this.coverageNote(this.t(lower ? "runsCoverageLower" : "runsCoverageFull", { n: this.formatNumber(lower), days: r.window_days }) + ` ${this.excludedText(r.excluded)}`.trimEnd());
@@ -177,6 +177,6 @@ class RunsMixin {
       { label: this.t("runsSumFlagged"), value: this.formatNumber(allFlagged), tone: allFlagged ? "warn" : "ok" },
       { label: this.t("runsSumNeverOk"), value: this.formatNumber(neverOk), tone: neverOk ? "red" : "ok" },
     ]);
-    return `<div class="stack">${tiles}<div class="panel">${head}${coverage}${bar}${attention}</div>${this.conflictsPanel(r)}${all}</div>`;
+    return `<div class="stack">${head}${tiles}<div class="panel">${coverage}${bar}${attention}</div>${this.conflictsPanel(r)}${all}</div>`;
   }
 }

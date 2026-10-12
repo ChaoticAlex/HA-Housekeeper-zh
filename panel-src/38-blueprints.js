@@ -4,7 +4,7 @@ class BlueprintsMixin {
     if (this._blueprintsRequested) return;
     this._blueprintsRequested = true;
     setTimeout(async () => {
-      try { this.blueprints = await this._hass.callWS({ type: "ha_housekeeper/blueprints" }); this.blueprintsError = ""; }
+      try { this.blueprints = await this._hass.callWS({ type: "ha_housekeeper/blueprints" }); this.blueprintsError = ""; this.markLoaded("blueprints"); }
       catch (err) { this.blueprints = null; this.blueprintsError = err?.message || String(err); }
       this.render();
     }, 0);
@@ -14,9 +14,9 @@ class BlueprintsMixin {
 
   blueprintsCard() {
     this.ensureBlueprints();
-    const head = `<div class="panelhead"><div><h2>${this.t("bpTitle")}</h2><p>${this.t("bpHint")}</p></div><div class="actions"><button class="btn" data-bp-refresh>${this.t("relRefresh")}</button></div></div>`;
-    if (this.blueprintsError) return `<div class="panel">${head}<div class="error">${this.esc(this.blueprintsError)}</div></div>`;
-    if (!this.blueprints) return `<div class="panel">${head}${this.skeleton("loading")}</div>`;
+    const head = this.pageBar({ at: this.loadedAt("blueprints"), loading: !this.blueprints && !this.blueprintsError, attr: "data-bp-refresh" });
+    if (this.blueprintsError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.blueprintsError)}</div></div></div>`;
+    if (!this.blueprints) return `<div class="stack">${head}<div class="panel">${this.skeleton("loading")}</div></div>`;
     const users = (b) => (b.users || []).map(u => {
       const obj = this.findObject(`${u.id.split(".")[0]}:${u.id}`);
       return obj ? `<button class="linklike" data-object="${this.esc(this.objectKey(obj))}">${this.esc(u.name)}</button>` : this.esc(u.name);
@@ -31,6 +31,6 @@ class BlueprintsMixin {
       const pg = this.paginate(`bp-${d.domain}`, all), rows = pg.rows.join("") + pg.footer;
       return `<div class="sectionlabel">${this.t(d.domain)} (${this.formatNumber(d.total)} ${this.t("bpFiles")})</div>${rows || `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("bpNone")}</div>`}`;
     }).join("");
-    return `<div class="panel">${head}${blocks}</div>`;
+    return `<div class="stack">${head}<div class="panel">${blocks}</div></div>`;
   }
 }

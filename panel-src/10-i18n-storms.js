@@ -2,7 +2,7 @@
 Object.assign(TEXT.de, {
   recSumRows: "Zeilen pro Tag", recSumLoudest: "Lauteste Entität", recSumDb: "Datenbank", recSumPurgeOff: "Bereinigung aus", recSumFindings: "Auffälligkeiten",
   recorder: "Recorder", recorderSubtitle: "Was den Recorder am meisten beschreibt, was die Datenbank füllt und wie gesund sie ist. Liest nur den Recorder.",
-  stormTitle: "Last im Recorder", stormHint: "Gezählt werden geschriebene Zeilen, nicht Aufrufe", stormLoading: "Der Recorder wird ausgewertet. Das kann bei einer großen Datenbank einige Sekunden dauern …",
+  stormTitle: "Last im Recorder", stormLoading: "Der Recorder wird ausgewertet. Das kann bei einer großen Datenbank einige Sekunden dauern …",
   stormNone: "Nichts schreibt auffällig viel.", stormSummary: "Im Zeitraum: {rows} Zeilen ({perDay} pro Tag) von {entities} Entitäten und {events} Ereignisse.",
   stormKind_storm: "Sturm", stormKind_attribute_flood: "Große Zeilen", stormKind_no_new_state: "Nur Attribute", stormKind_integration_share: "Großer Anteil", stormKind_event_burst: "Ereignisflut",
   stormGroupHint: "Hier steht, was die Datenbank ungewöhnlich stark füllt. Eine Entität steht nur einmal da, auch wenn mehrere Gründe zutreffen.", stormLegendTitle: "Was bedeuten die Markierungen?",
@@ -27,7 +27,7 @@ Object.assign(TEXT.de, {
 Object.assign(TEXT.en, {
   recSumRows: "Rows a day", recSumLoudest: "Loudest entity", recSumDb: "Database", recSumPurgeOff: "purging off", recSumFindings: "Findings",
   recorder: "Recorder", recorderSubtitle: "What writes the most to the recorder, what fills the database and how healthy it is. Only reads the recorder.",
-  stormTitle: "Recorder load", stormHint: "Rows written are counted, not calls", stormLoading: "Evaluating the recorder. On a large database this can take a few seconds …",
+  stormTitle: "Recorder load", stormLoading: "Evaluating the recorder. On a large database this can take a few seconds …",
   stormNone: "Nothing writes unusually much.", stormSummary: "In the period: {rows} rows ({perDay} a day) from {entities} entities and {events} events.",
   stormKind_storm: "Storm", stormKind_attribute_flood: "Large rows", stormKind_no_new_state: "Attributes only", stormKind_integration_share: "Large share", stormKind_event_burst: "Event flood",
   stormGroupHint: "This is what fills the database unusually fast. An entity appears only once, even when several reasons apply.", stormLegendTitle: "What do the marks mean?",

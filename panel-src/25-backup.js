@@ -4,7 +4,7 @@ class BackupMixin {
   async loadBackup(call) {
     if (call) this.bhForm = null;
     this.backupLoading = true; this.backupError = ""; this.render();
-    try { this.backup = await this._hass.callWS(call || { type: "ha_housekeeper/backup_health" }); }
+    try { this.backup = await this._hass.callWS(call || { type: "ha_housekeeper/backup_health" }); this.markLoaded("backup"); }
     catch (err) { this.backupError = err?.message || String(err); }
     this.backupLoading = false; this.render();
   }
@@ -90,12 +90,12 @@ class BackupMixin {
   }
 
   backupCard() {
-    const head = `<div class="panelhead"><div><h2>${this.t("backupTitle")}</h2><p>${this.t("backupHint")}</p></div><div class="actions"><button class="btn" data-bh-refresh ${this.backupLoading ? "disabled" : ""}>${this.t("backupRefresh")}</button></div></div>`;
-    if (this.backupError) return `<div class="panel">${head}<div class="error">${this.esc(this.backupError)}</div></div>`;
+    const head = this.pageBar({ at: this.loadedAt("backup"), loading: this.backupLoading, attr: "data-bh-refresh" });
+    if (this.backupError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.backupError)}</div></div></div>`;
     const b = this.backup;
-    if (!b) return `<div class="panel">${head}${this.skeleton("backupLoading")}</div>`;
-    if (!b.available) return `<div class="panel">${head}<div class="emptymsg">${this.t("backupUnavailable")}</div></div>`;
+    if (!b) return `<div class="stack">${head}<div class="panel">${this.skeleton("backupLoading")}</div></div>`;
+    if (!b.available) return `<div class="stack">${head}<div class="panel"><div class="emptymsg">${this.t("backupUnavailable")}</div></div></div>`;
     const guide = `<details class="bhguide"><summary>${this.t("bhGuideTitle")}</summary><p class="factnote">${this.t("bhGuideSteps")}</p></details>`;
-    return `<div class="panel">${head}${b.checks.map(c => this.bhRow(c)).join("")}${this.bhBackups(b.backups)}${guide}</div>`;
+    return `<div class="stack">${head}<div class="panel">${b.checks.map(c => this.bhRow(c)).join("")}${this.bhBackups(b.backups)}${guide}</div></div>`;
   }
 }

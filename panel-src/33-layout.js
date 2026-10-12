@@ -13,11 +13,16 @@ class LayoutMixin {
     return cells ? `<div class="sumtiles" role="group" aria-label="${this.esc(this.t("sumLabel"))}">${cells}</div>` : "";
   }
 
+  // When the data of a page was read last (for its "as of"), and a time given in seconds as ISO text.
+  markLoaded(key) { (this._loadedAt ||= {})[key] = new Date().toISOString(); }
+  loadedAt(key) { return this._loadedAt?.[key] || null; }
+  isoOf(seconds) { return seconds ? new Date(seconds * 1000).toISOString() : null; }
+
   // The slim row under a page title: the page's own controls and facts on the left, "as of" and the refresh button on the
   // right. { left, at (ISO time or null), loading, error, attr (the data-… attribute of the refresh button) }.
-  pageBar({ left = "", at = null, loading = false, attr = "" }) {
+  pageBar({ left = "", at = null, loading = false, attr = "", refresh = true }) {
     const stand = loading ? this.t("sysReading") : at ? this.t("sysAsOf", { time: this.formatDate(at) }) : "";
-    return `<div class="pagebar"><div class="pb-left">${left}</div><div class="pb-right">${stand ? `<span class="scanago">${this.esc(stand)}</span>` : ""}<button class="btn" ${attr} title="${this.esc(this.t("sysRefreshHint"))}" ${loading ? "disabled" : ""}><ha-icon icon="mdi:refresh" class="${loading ? "spin" : ""}"></ha-icon>${this.t("sysRefresh")}</button></div></div>`;
+    return `<div class="pagebar"><div class="pb-left">${left}</div><div class="pb-right">${stand ? `<span class="scanago">${this.esc(stand)}</span>` : ""}${refresh ? `<button class="btn" ${attr} title="${this.esc(this.t("sysRefreshHint"))}" ${loading ? "disabled" : ""}><ha-icon icon="mdi:refresh" class="${loading ? "spin" : ""}"></ha-icon>${this.t("sysRefresh")}</button>` : ""}</div></div>`;
   }
 
   // Tiles that switch between the areas of one view: icon, title, number and a short hint; the open one is marked.

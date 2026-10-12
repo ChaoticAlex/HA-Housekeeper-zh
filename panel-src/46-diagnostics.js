@@ -48,7 +48,7 @@ class DiagnosticsMixin {
   async loadQuality() {
     const d = this.diagState();
     d.loading = true; d.error = ""; this.render();
-    try { d.quality = await this._hass.callWS({ type: "ha_housekeeper/automation_quality" }); }
+    try { d.quality = await this._hass.callWS({ type: "ha_housekeeper/automation_quality" }); this.markLoaded("quality"); }
     catch (err) { d.error = err?.message || String(err); }
     d.loading = false; this.render();
   }
@@ -76,9 +76,9 @@ class DiagnosticsMixin {
   qualityView() {
     this.ensureQuality();
     const d = this.diagState(), q = d.quality;
-    const head = `<div class="panelhead"><div><h2>${this.t("qualityTab")}</h2><p>${this.t("qualityHint")}</p></div><div class="actions"><button class="btn" data-quality-refresh ${d.loading ? "disabled" : ""}>${this.t("qualityRefresh")}</button></div></div>`;
-    if (d.error) return `<div class="panel">${head}<div class="error">${this.esc(d.error)}</div></div>`;
-    if (!q) return `<div class="panel">${head}${this.skeleton("qualityLoading")}</div>`;
+    const head = this.pageBar({ at: this.loadedAt("quality"), loading: d.loading, attr: "data-quality-refresh" });
+    if (d.error) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(d.error)}</div></div></div>`;
+    if (!q) return `<div class="stack">${head}<div class="panel">${this.skeleton("qualityLoading")}</div></div>`;
     const issue = i => i.worst === "red" || i.worst === "warn" || i.worst === "info";
     const items = d.issuesOnly ? q.items.filter(issue) : q.items;  // the backend sends them worst first
     const sorted = d.byName ? [...items].sort((a, b) => a.name.localeCompare(b.name)) : items;
@@ -86,7 +86,7 @@ class DiagnosticsMixin {
     const header = `<tr><th>${this.t("utName")}</th>${DIM_ORDER.map(id => `<th>${this.t(`dim_${id}`)}</th>`).join("")}<th></th></tr>`;
     const empty = d.issuesOnly && q.items.length ? this.t("qualityNoIssues") : this.t("qualityNoneNext");
     const table = sorted.length ? `<div class="tablewrap lt qualitytable"><table><thead>${header}</thead><tbody>${sorted.map(i => this.qualityRow(i)).join("")}</tbody></table></div>` : `<div class="emptymsg">${empty}</div>`;
-    return `<div class="stack"><div class="panel">${head}${q.items.length ? bar : ""}${table}</div>${d.sel ? this.diagDetail(d.sel) : ""}</div>`;
+    return `<div class="stack">${head}<div class="panel">${q.items.length ? bar : ""}${table}</div>${d.sel ? this.diagDetail(d.sel) : ""}</div>`;
   }
 
   // Everything about one automation in one place: why each dimension is as it is, the criteria, and later the coverage, the comparison and the dry run.

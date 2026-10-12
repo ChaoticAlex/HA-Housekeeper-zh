@@ -2,8 +2,8 @@
 Object.assign(TEXT.de, {
   runsSumRuns: "Gezählte Läufe", runsSumOf: "von {n} Automationen und Skripten", runsSumShare: "{n} % der Läufe", runsSumFlagged: "Auffällig", runsSumNeverOk: "Nie erfolgreich",
   runs: "Automationen", runsHeading: "Automationen", runsSubtitle: "Wie oft Automationen und Skripte laufen, scheitern oder ohne Wirkung enden. Gezählt aus den Läufen, die Home Assistant kurz vorhält.",
-  runsTitle: "Auffällig", runsHint: "Letzte 7 Tage. Ein fehlerfreier Lauf heißt nicht, dass die Automation ihren Zweck erfüllt",
-  runsSince: "Gezählt seit {date}; ältere Läufe sind in Home Assistant nicht mehr vorhanden.", runsRefresh: "Neu zählen",
+  
+  runsSince: "Gezählt seit {date}; ältere Läufe sind in Home Assistant nicht mehr vorhanden.", 
   runsLoading: "Die Läufe werden gezählt …", runsNone: "Nichts Auffälliges in den gezählten Läufen.", runsFactNone: "Noch keine Läufe gezählt", runsAllOutcomes: "Alle Läufe", runsOnlyErrors: "Mit Fehlern", runsOnlyFlagged: "Mit Auffälligkeit", runsNoData: "Noch keine Läufe gezählt. Der Zähler liest alle 15 Minuten.",
   runsAll: "Alle gezählten Läufe", runsColName: "Name", runsColRuns: "Läufe", runsColErrors: "Fehler", runsColConditions: "Bedingung", runsColDuration: "Dauer Ø / max", runsColTrend: "7 Tage",
   runsCoverageFull: "Letzte {days} Tage · alle Zahlen vollständig, soweit Home Assistant die Läufe noch kannte.", runsCoverageLower: "Letzte {days} Tage · bei {n} Einträgen nur „mindestens“: der Trace-Speicher war voll, Läufe können fehlen.",
@@ -29,8 +29,8 @@ Object.assign(TEXT.de, {
 Object.assign(TEXT.en, {
   runsSumRuns: "Counted runs", runsSumOf: "of {n} automations and scripts", runsSumShare: "{n} % of the runs", runsSumFlagged: "Flagged", runsSumNeverOk: "Never successful",
   runs: "Automations", runsHeading: "Automations", runsSubtitle: "How often automations and scripts run, fail or end without effect. Counted from the runs Home Assistant keeps for a short time.",
-  runsTitle: "Needs a look", runsHint: "Last 7 days. A run without an error does not mean the automation does its job",
-  runsSince: "Counted since {date}; older runs are no longer in Home Assistant.", runsRefresh: "Count again",
+  
+  runsSince: "Counted since {date}; older runs are no longer in Home Assistant.", 
   runsLoading: "Counting the runs …", runsNone: "Nothing stands out in the counted runs.", runsFactNone: "No runs counted yet", runsAllOutcomes: "All runs", runsOnlyErrors: "With errors", runsOnlyFlagged: "Flagged", runsNoData: "No runs counted yet. The counter reads every 15 minutes.",
   runsAll: "All counted runs", runsColName: "Name", runsColRuns: "Runs", runsColErrors: "Errors", runsColConditions: "Condition", runsColDuration: "Duration avg / max", runsColTrend: "7 days",
   runsCoverageFull: "Last {days} days · all numbers complete as far as Home Assistant still knew the runs.", runsCoverageLower: "Last {days} days · “at least” for {n} entries: the trace store was full, runs may be missing.",
