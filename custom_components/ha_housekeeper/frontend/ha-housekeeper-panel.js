@@ -56,7 +56,7 @@ const TEXT = {
     searchObject: "Objekt suchen …", noRelations: "Keine Beziehungen gefunden.", firstSeenNote: "seit erster Beobachtung",
     findingsSubtitle: "Alle Diagnosen mit Verweis auf das betroffene Objekt.", inventorySubtitle: "Alle erfassten Objekte der Installation.",
     scanDone: "Scan aktuell", of_total: "von", shown: "angezeigt", integration: "Integration",
-    PROVIDES: "stellt bereit", OWNS: "besitzt", CONTAINS: "enthält", VIA_DEVICE: "über Gerät",
+    PROVIDES: "stellt bereit", CONNECTED: "Verbindung (vermutet)", OWNS: "besitzt", CONTAINS: "enthält", VIA_DEVICE: "über Gerät",
     TRIGGERS_ON: "löst aus durch", USES_AS_CONDITION: "prüft als Bedingung", TARGETS: "steuert", REFERENCES: "verweist auf",
     runtimeState: "Laufzeit-Zustand", usedBy: "verwendet von",
     impactTitle: "Auswirkung einer Entfernung", impactSubtitle: "Reine Analyse – Housekeeper entfernt nichts.",
@@ -234,7 +234,7 @@ const TEXT = {
     searchObject: "Search object …", noRelations: "No relationships found.", firstSeenNote: "since first observation",
     findingsSubtitle: "All diagnoses with a link to the affected object.", inventorySubtitle: "All recorded objects of the installation.",
     scanDone: "Scan up to date", of_total: "of", shown: "shown", integration: "Integration",
-    PROVIDES: "provides", OWNS: "owns", CONTAINS: "contains", VIA_DEVICE: "via device",
+    PROVIDES: "provides", CONNECTED: "connection (assumed)", OWNS: "owns", CONTAINS: "contains", VIA_DEVICE: "via device",
     TRIGGERS_ON: "triggers on", USES_AS_CONDITION: "checks as condition", TARGETS: "targets", REFERENCES: "references",
     runtimeState: "Runtime state", usedBy: "used by",
     impactTitle: "Impact of removal", impactSubtitle: "Analysis only – Housekeeper removes nothing.",
@@ -4227,8 +4227,8 @@ class DiagnosisMixin {
 
   // Tabs offered for one object; "attributes" only when it has some, so an empty tab never shows.
   detailTabs(item, key) {
-    // An app has no relations or actions of its own; its rights and its load come from the two system reports.
-    if (item.object_type === "app") return [["overview", "tabOverview"], ["access", "accAppTab", null, this.appAccessTone(item)], ["storage", "accAppLoad"], ["technical", "tabTechnical"]];
+    // An app has no actions of its own; its rights and its load come from the two system reports, its relations are the integrations that seem to use it.
+    if (item.object_type === "app") return [["overview", "tabOverview"], ...(this.edgesTo(key).length ? [["relations", "tabRelations", this.edgesTo(key).length]] : []), ["access", "accAppTab", null, this.appAccessTone(item)], ["storage", "accAppLoad"], ["technical", "tabTechnical"]];
     const tabs = [["overview", "tabOverview"], ["relations", "tabRelations", this.edgesTo(key).length + this.edgesFrom(key).length], ["technical", "tabTechnical"]];
     if (this.hasActionsTab(item, key)) tabs.splice(1, 0, ["actions", "tabActions", this.fixItems(item, key).items.length]);
     if (item.attributes && Object.keys(item.attributes).length) tabs.push(["attributes", "tabAttributes"]);

@@ -21,6 +21,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.loader import IntegrationNotFound, async_get_integration, async_get_integrations
 
 from . import followup
+from .app_links import app_edges
 from .automation_analysis import (
     is_concrete_id,
     missing_references,
@@ -900,6 +901,7 @@ class InventoryScanner:
             + dashboard_edges
             + helper_edges
             + group_edges
+            + app_edges(config_entries, apps)
         )
         objects = (
             entities
