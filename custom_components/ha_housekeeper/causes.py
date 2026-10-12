@@ -3,7 +3,8 @@
 Only reads the objects, edges and findings of the last scan. A cause is a hint, not a proof: when
 an integration is not loaded, every entity it provides is unavailable, and one note at the top is
 more useful than a hundred findings. The follow-up findings get a ``cause_id`` and stay in the
-list; hidden or marked findings do not count.
+list; hidden or marked findings do not count. An integration that is not loaded is a cause even
+without follow-up findings (``follower_count`` 0), so the outage never goes unnoticed.
 """
 
 from __future__ import annotations
@@ -32,7 +33,11 @@ def _consumers(entity_ids: list[str], users: dict[str, set[str]]) -> dict[str, i
 
 
 def _cause(
-    kind: str, item: dict[str, Any], followers: list[dict[str, Any]], users: dict[str, set[str]]
+    kind: str,
+    item: dict[str, Any],
+    followers: list[dict[str, Any]],
+    users: dict[str, set[str]],
+    entity_ids: list[str],
 ) -> dict[str, Any]:
     cause = {
         "id": f"{kind}:{item['object_id']}",
@@ -42,8 +47,10 @@ def _cause(
         "name": item.get("name") or item["object_id"],
         "follower_count": len(followers),
         "follower_keys": [f["key"] for f in followers[:KEY_LIMIT]],
-        "consumers": _consumers([f["object_id"] for f in followers], users),
-        "impact": max((f.get("impact", "none") for f in followers), key=RANK.__getitem__),
+        "consumers": _consumers(entity_ids, users),
+        "impact": max(
+            (f.get("impact", "none") for f in followers), default="none", key=RANK.__getitem__
+        ),
     }
     if kind == "integration_down":
         cause.update(domain=item.get("domain"), state=item.get("state"), error=item.get("error"))
@@ -72,13 +79,23 @@ def apply_causes(
         if edge["relation"] in USAGE:
             users.setdefault(edge["target"], set()).add(edge["source"])
 
-    def take(kind: str, item: dict[str, Any], entity_ids: list[str]) -> None:
+    def take(
+        kind: str, item: dict[str, Any], entity_ids: list[str], *, alone: bool = False
+    ) -> None:
         followers = [
             by_object[i] for i in entity_ids if i in by_object and "cause_id" not in by_object[i]
         ]
-        if not followers:
+        if not followers and not alone:
             return
-        cause = _cause(kind, item, followers, users)
+        # An integration that is down is an outage even when no entity of it is flagged. Its
+        # consumers are counted from all its entities, so the note says what it touches.
+        cause = _cause(
+            kind,
+            item,
+            followers,
+            users,
+            entity_ids if alone else [f["object_id"] for f in followers],
+        )
         for finding in followers:
             finding["cause_id"] = cause["id"]
         causes.append(cause)
@@ -89,7 +106,7 @@ def apply_causes(
             provided.setdefault(item["config_entry_id"], []).append(item["object_id"])
     for item in objects:
         if item["object_type"] == "config_entry" and item["status"] == "problem":
-            take("integration_down", item, provided.get(item["object_id"], []))
+            take("integration_down", item, provided.get(item["object_id"], []), alone=True)
 
     members: dict[str, list[str]] = {}
     for item in entity.values():

@@ -42,9 +42,8 @@ const TEXT = {
     recentFindings: "Aktuelle Befunde", affected: "Betroffenes Objekt",
     systemState: "Systemzustand", health: "Housekeeping-Status", healthGood: "Gut", healthCheck: "Prüfen",
     healthBad: "Problematisch", healthHint: "Anteil der Entitäten, Automationen, Skripte und Szenen ohne Befund", healthTip: "Gezählt werden betroffene Objekte, nicht einzelne Befunde. Ausgeblendete Befunde und andere Objekttypen (Dashboards, Geräte, Helfer) zählen nicht. Der Wert ist gerundet. Betroffen: {affected} von {base}.",
-    openFindings: "Offene Befunde", needsAttention: "Benötigt Aufmerksamkeit",
+    openFindings: "Offene Befunde", needsAttention: "Wichtigste Befunde",
     actTitle: "Was muss ich jetzt tun?", actSub: "Nach Dringlichkeit sortiert", actNone: "Nichts zu tun. Letzter Scan: {date}.",
-    actIntegrations: "Integrationen mit Problem", actIntegrationsHint: "Einträge, die nicht geladen sind oder Fehler melden",
     actNewCritical: "Neue kritische Befunde", actNewCriticalHint: "Seit dem letzten Scan: nicht verfügbar, defekte Referenz oder Problem",
    
     actQuarantine: "Quarantäne abgelaufen", actQuarantineHint: "Bereit zur Entfernung nach deiner Bestätigung",
@@ -147,8 +146,7 @@ const TEXT = {
     unreferenced: "Nicht verwendet", unreferencedSubtitle: "Aktive Entitäten, die in keiner Automation, keinem Skript, keiner Szene, Gruppe, keinem Helfer und keinem lesbaren Dashboard vorkommen.",
     unreferencedHint: "Nur ein Hinweis, keine Empfehlung zum Löschen: Entitäten können auch über Sprachassistenten, Apps, das Energie-Dashboard, automatisch erzeugte Dashboards oder externe Systeme genutzt werden. Diagnose- und Konfigurations-Entitäten sind ausgeblendet.",
     noUnreferenced: "Alle aktiven Entitäten werden irgendwo verwendet.", unrefShown: "{shown} von {total} angezeigt – nach Domäne filtern, um weitere zu sehen.", allDomains: "Alle Domänen",
-    noBatteries: "Keine Batterie-Entitäten gefunden.", batteryLevel: "Ladestand", integrationProblems: "Integrationen mit Problemen",
-    integrationProblemsHint: "Diese Integrationen sind nicht geladen. Ihre Entitäten sind nicht verfügbar.",
+    noBatteries: "Keine Batterie-Entitäten gefunden.", batteryLevel: "Ladestand",
     backTo: "Zurück zu", facts: "Eckdaten", relations: "Beziehungen", showInGraph: "Im Abhängigkeitsdiagramm", noState: "Kein Zustand vorhanden", notExpected: "Nicht erwartet",
     available: "Verfügbar", causeLabel: "Ursache", hintLabel: "Empfehlung", certainty: "Sicherheit", finding: "Befund", noFinding: "Kein Befund",
     belowThreshold: "Noch kein Befund: nicht verfügbare Entitäten werden erst nach {days} Tagen gemeldet.", refCount: "Verwendet von",
@@ -222,9 +220,8 @@ const TEXT = {
     recentFindings: "Current findings", affected: "Affected object",
     systemState: "System health", health: "Housekeeping status", healthGood: "Good", healthCheck: "Review",
     healthBad: "Problematic", healthHint: "Share of entities, automations, scripts and scenes without findings", healthTip: "Affected objects are counted, not single findings. Hidden findings and other object types (dashboards, devices, helpers) do not count. The value is rounded. Affected: {affected} of {base}.",
-    openFindings: "Open findings", needsAttention: "Needs attention",
+    openFindings: "Open findings", needsAttention: "Most important findings",
     actTitle: "What needs doing now?", actSub: "Sorted by urgency", actNone: "Nothing to do. Last scan: {date}.",
-    actIntegrations: "Integrations with a problem", actIntegrationsHint: "Entries that are not loaded or report errors",
     actNewCritical: "New critical findings", actNewCriticalHint: "Since the last scan: unavailable, broken reference or problem",
    
     actQuarantine: "Quarantine over", actQuarantineHint: "Ready for removal once you confirm",
@@ -327,8 +324,7 @@ const TEXT = {
     unreferenced: "Not used", unreferencedSubtitle: "Active entities that appear in no automation, script, scene, group, helper, or readable dashboard.",
     unreferencedHint: "A hint only, not a recommendation to delete: entities can also be used by voice assistants, apps, the energy dashboard, auto-generated dashboards, or external systems. Diagnostic and configuration entities are hidden.",
     noUnreferenced: "Every active entity is used somewhere.", unrefShown: "Showing {shown} of {total} – filter by domain to see more.", allDomains: "All domains",
-    noBatteries: "No battery entities found.", batteryLevel: "Level", integrationProblems: "Integrations with problems",
-    integrationProblemsHint: "These integrations are not loaded. Their entities are unavailable.",
+    noBatteries: "No battery entities found.", batteryLevel: "Level",
     backTo: "Back to", facts: "Key facts", relations: "Relationships", showInGraph: "In dependency graph", noState: "No state available", notExpected: "Not expected",
     available: "Available", causeLabel: "Cause", hintLabel: "Recommendation", certainty: "Confidence", finding: "Finding", noFinding: "No finding",
     belowThreshold: "Not a finding yet: unavailable entities are reported only after {days} days.", refCount: "Used by",
@@ -1750,14 +1746,12 @@ class OverviewMixin {
     return `<div class="panel u-mb14"><div class="row"><span class="tile warn"><ha-icon icon="mdi:timer-sand"></ha-icon></span><span class="row-text"><strong>${this.esc(this.t("warmupBanner"))}</strong></span></div></div>`;
   }
 
-  // What to do now, most urgent first: broken integrations and new critical findings, then an
+  // What to do now, most urgent first: outages (integrations and devices that are down) and new critical findings, then an
   // overdue scan and the backup, then removals that are ready. Rows without data are left out.
   todoItems() {
     const items = [], m = this.data.meta;
-    const broken = this.data.objects.filter(o => o.object_type === "config_entry" && o.status === "problem").length;
-    if (broken) items.push({ key: "integrations", tone: "red", icon: "mdi:puzzle-remove-outline", label: "actIntegrations", hint: "actIntegrationsHint", count: broken, view: "inventory", type: "config_entry", status: "problem" });
-    const causes = this.causeList().length;
-    if (causes) items.push({ key: "causes", tone: "red", icon: "mdi:source-branch", label: "actCauses", hint: "actCausesHint", count: causes, view: "findingsNav", filter: "" });
+    const outages = this.causeList();
+    if (outages.length) items.push({ key: "outages", tone: "red", icon: "mdi:source-branch", label: "actOutages", hintText: this.outagesHint(outages), count: outages.length, view: "findingsNav", filter: "" });
     const regressions = (this.data.regressions || []).length;
     if (regressions) items.push({ key: "followup", tone: "red", icon: "mdi:history", label: "actFollowup", hint: "actFollowupHint", count: regressions, view: "journal" });
     const due = (this.data.reminders || []).filter(r => r.state === "due").length;
@@ -1823,7 +1817,7 @@ class OverviewMixin {
 
   // A number with its noun, so that the rows count what they say: "8 integrations".
   todoCount(it) {
-    const unit = ({ integrations: "integrations", causes: "causes", followup: "followup", reminders: "reminders", criteria: "criteria", critical: "critical", backup: "backup", quarantine: "quarantine" })[it.key];
+    const unit = ({ outages: "outages", followup: "followup", reminders: "reminders", criteria: "criteria", critical: "critical", backup: "backup", quarantine: "quarantine" })[it.key];
     return unit ? `${this.formatNumber(it.count)} ${this.t(`unit_${unit}_${it.count === 1 ? "1" : "n"}`)}` : this.formatNumber(it.count);
   }
 
@@ -1912,8 +1906,7 @@ class OverviewMixin {
     return `<section class="statushead" title="${this.esc(this.t("healthTip", { affected: health.affected, base: health.base }))}"><button type="button" class="ring ${health.tone}" style="--p:${health.percent}" data-health-why aria-expanded="${Boolean(this.healthWhy)}" aria-label="${this.esc(this.t("healthWhy"))}"><b>${health.percent}<small>%</small></b></button>
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p></div>
       <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", findings.length, findings.length ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
-      ${this.sinceVisitLine()}${this.todoCard()}<div class="grid2"><div class="stack">${this.inventoryStatusCard()}<div class="panel"><div class="panelhead"><div><h2>${this.t("needsAttention")}</h2><p>${this.t("sortedBySure")}</p></div><button class="link" data-jump="findingsNav">${this.t("allFindings")} (${findings.length}) <ha-icon icon="mdi:chevron-right"></ha-icon></button></div>
-      ${findings.length ? findings.filter(f => !f.cause_id).slice(0, 8).map(f => this.findingRow(f)).join("") : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("noFindings")}</div>`}</div>${this.integrationProblems()}</div>
+      ${this.sinceVisitLine()}${this.todoCard()}<div class="grid2"><div class="stack">${this.inventoryStatusCard()}${this.topFindingsCard(findings)}</div>
       <div class="stack">${this.databaseCard()}${this.trendCard()}${this.cleanupCard()}
       <div class="panel"><div class="panelhead"><h2>${this.t("byType")}</h2></div><div class="types">${["entity", "device", "config_entry", "automation", "script", "scene", "dashboard", "area", "floor", "label"].filter(t => types[t]).map(type => `<button class="type" data-type-jump="${type}">${this.tile(type)}<span>${this.t(type)}</span><b>${this.formatNumber(types[type])}</b></button>`).join("")}</div></div></div></div>`;
   }
@@ -1980,16 +1973,15 @@ class OverviewMixin {
     return `<div class="panel"><div class="panelhead"><div><h2>${this.t("hintsTitle")}</h2><p>${this.t("cleanupHint")}</p></div></div>${rows}</div>`;
   }
 
-  integrationProblems() {
-    const broken = this.data.objects.filter(o => o.object_type === "config_entry" && o.status === "problem");
-    if (!broken.length) return "";
-    this.lvState("integrations", "name", "asc");
-    const sorts = [{ key: "name", label: "sortName", dir: "asc", get: o => o.name }, { key: "state", label: "sortStatus", dir: "asc", get: o => o.state || "" }];
-    const bar = broken.length > 5 ? this.listBar("integrations", { sorts }) : "";
-    const shown = broken.length > 5 ? this.refine("integrations", broken, { text: o => [o.name, o.domain, o.state].join(" "), sorts, tie: o => o.object_id }) : broken;
-    const pg = this.paginate("integrations", shown);
-    const rows = pg.rows.map(o => `<button class="row rel" data-object="${this.esc(this.objectKey(o))}">${this.tile("config_entry", "red")}<span class="row-text"><strong>${this.esc(o.name)}</strong><small>${this.esc(o.domain)} · ${this.t(`cs_${o.state || "not_loaded"}`)}</small></span>${this.pill(o.status)}</button>`).join("");
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("integrationProblems")} (${broken.length})</h2><p>${this.t("integrationProblemsHint")}</p></div></div>${bar}${rows}${pg.footer}</div>`;
+  // The most important findings in two blocks: outages first (one note for what is down), then single findings.
+  topFindingsCard(findings) {
+    const outages = this.causeList(), single = findings.filter(f => !f.cause_id).slice(0, 8);
+    const outageRow = c => `<button class="row rel" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(this.t(`cause_${c.kind}`, { name: c.name }))}</strong><small>${this.esc([this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · "))}</small></span></button>`;
+    const block = (title, rows) => rows ? `<h3 class="foldhd">${title}</h3>${rows}` : "";
+    const body = outages.length || single.length
+      ? block(`${this.t("causesTitle")} (${outages.length})`, outages.slice(0, 8).map(outageRow).join("")) + block(this.t("singleFindings"), single.map(f => this.findingRow(f)).join(""))
+      : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("noFindings")}</div>`;
+    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("needsAttention")}</h2><p>${this.t("sortedBySure")}</p></div><button class="link" data-jump="findingsNav">${this.t("allFindings")} (${findings.length}) <ha-icon icon="mdi:chevron-right"></ha-icon></button></div>${body}</div>`;
   }
 }
 
@@ -6135,8 +6127,15 @@ class CausesMixin {
 
   // One headline per cause with the counts of what it touches; the follow-up findings sit in a fold.
   causeCounts(c) {
+    if (!c.follower_count && !Object.keys(c.consumers || {}).length) return this.t("causeNone");
     const parts = [this.t("causeN_entity", { n: this.formatNumber(c.follower_count) }), ...["automation", "script", "dashboard"].filter(k => c.consumers?.[k]).map(k => this.t(`causeN_${k}`, { n: c.consumers[k] }))];
     return this.t("causeCounts", { parts: parts.join(", ") });
+  }
+
+  // "3 integrations, 1 device" for the to-do row.
+  outagesHint(causes) {
+    const n = kind => causes.filter(c => c.kind === kind).length;
+    return [n("integration_down") ? this.t("outageIntegrations", { n: n("integration_down") }) : "", n("device_down") ? this.t("outageDevices", { n: n("device_down") }) : ""].filter(Boolean).join(", ");
   }
 
   causesCard() {
@@ -6145,25 +6144,28 @@ class CausesMixin {
     const followers = id => (this.data.findings || []).filter(f => f.cause_id === id && !f.ignored);
     const rows = causes.map(c => {
       const head = { tone: "red", title: this.esc(this.t(`cause_${c.kind}`, { name: c.name })), sub: [this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · "), pill: this.t("causeFollowers", { n: this.formatNumber(c.follower_count) }) };
+      if (!c.follower_count) return `<button class="row rel" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${head.title}</strong><small>${this.esc(head.sub)}</small></span></button>`;
       const body = `<button class="row" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span></button>${followers(c.id).slice(0, 20).map(f => this.findingRow(f)).join("")}`;
       return this.fold(`cause_${c.id}`, head, body, false);
     }).join("");
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("causesTitle")}</h2><p>${this.t("causesSub")}</p></div></div>${rows}</div>`;
+    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("causesTitle")}</h2><p>${this.t("causesSub", { n: this.formatNumber(causes.length), m: this.formatNumber(this.data.findings.filter(f => !f.cause_id && !f.ignored).length) })}</p></div></div>${rows}</div>`;
   }
 
   followerCount() { return this.data.findings.filter(f => f.cause_id && !f.ignored).length; }
 }
 Object.assign(TEXT.de, {
-  causesTitle: "Gemeinsame Ursachen", causesSub: "Viele Befunde haben wahrscheinlich dieselbe Ursache. Beheb sie zuerst.",
+  causesTitle: "Ausfälle", causesSub: "{n} Ausfälle (Ursachen) · {m} einzelne Befunde. Behebe zuerst die Ausfälle, sie erklären oft viele Befunde.",
+  causeNone: "keine Entität betroffen", outageIntegrations: "{n} Integrationen", outageDevices: "{n} Geräte", singleFindings: "Einzelne Befunde",
   cause_integration_down: "Integration {name} ist nicht geladen", cause_device_down: "Gerät {name} ist ganz ausgefallen",
   causeFollowers: "{n} Folgebefunde", causeState: "Zustand: {state}", causeUses_automation: "{n} Automationen betroffen", causeUses_script: "{n} Skripte betroffen", causeUses_dashboard: "{n} Dashboards betroffen",
-  causeShow: "Folgebefunde anzeigen", causeHide: "Folgebefunde ausblenden", actCauses: "Gemeinsame Ursachen", actCausesHint: "Ein Ausfall erklärt viele Befunde",
+  causeShow: "Folgebefunde anzeigen", causeHide: "Folgebefunde ausblenden", actOutages: "Ausfälle",
 });
 Object.assign(TEXT.en, {
-  causesTitle: "Common causes", causesSub: "Many findings probably share one cause. Fix it first.",
+  causesTitle: "Outages", causesSub: "{n} outages (causes) · {m} single findings. Fix the outages first, they often explain many findings.",
+  causeNone: "no entity affected", outageIntegrations: "{n} integrations", outageDevices: "{n} devices", singleFindings: "Single findings",
   cause_integration_down: "Integration {name} is not loaded", cause_device_down: "Device {name} is down completely",
   causeFollowers: "{n} follow-up findings", causeState: "State: {state}", causeUses_automation: "{n} automations affected", causeUses_script: "{n} scripts affected", causeUses_dashboard: "{n} dashboards affected",
-  causeShow: "Show follow-up findings", causeHide: "Hide follow-up findings", actCauses: "Common causes", actCausesHint: "One outage explains many findings",
+  causeShow: "Show follow-up findings", causeHide: "Hide follow-up findings", actOutages: "Outages",
 });
 
 // Maintenance goals: what "in order" means for this house and whether it is so (see goals.py); mixed into the panel in 99-register.js.
@@ -7076,7 +7078,7 @@ Object.assign(TEXT.de, {
   modeText_read_only: "Nichts wird geändert, auch kein Rückgängig.", modeText_quarantine: "Nur Deaktivieren (und dessen Rückgängig) ist erlaubt.", modeText_confirmed: "Alles mit Einzelbestätigung und Backup außer unumkehrbarem Löschen von Recorder-Daten.", modeText_full: "Alles, wie bisher.",
   err_protection_mode: "Der Schutzmodus erlaubt das nicht. Ändere ihn unter Einstellungen → Scan.",
   eventsTitle: "Ereignisse für eigene Automationen", eventsHint: "Housekeeper löst nach einem Scan für jede neue Lage ein Ereignis auf dem Home-Assistant-Bus aus (einmal je Lage, beim ersten Mal still). Es verlässt nichts Home Assistant.",
-  event_critical_finding: "neuer Befund mit hoher Auswirkung", event_backup_overdue: "Backup überfällig", event_quarantine_expired: "Quarantäne abgelaufen", event_followup_regression: "Nachkontrolle: Rückfall", event_integration_down: "Integration nicht geladen (Ursache mit Folgebefunden)",
+  event_critical_finding: "neuer Befund mit hoher Auswirkung", event_backup_overdue: "Backup überfällig", event_quarantine_expired: "Quarantäne abgelaufen", event_followup_regression: "Nachkontrolle: Rückfall", event_integration_down: "Integration nicht geladen",
 });
 Object.assign(TEXT.en, {
   safeMode_full: "Protection mode: full", safeMode_read_only: "Protection mode: read only", safeMode_quarantine: "Protection mode: quarantine only", safeMode_confirmed: "Protection mode: no irreversible deletions",
@@ -7085,7 +7087,7 @@ Object.assign(TEXT.en, {
   modeText_read_only: "Nothing is changed, not even an undo.", modeText_quarantine: "Only disabling (and undoing it) is allowed.", modeText_confirmed: "Everything with one-by-one confirmation and backup except irreversible deletion of recorder data.", modeText_full: "Everything, as before.",
   err_protection_mode: "The protection mode does not allow this. Change it under Settings → Scan.",
   eventsTitle: "Events for your own automations", eventsHint: "After a scan Housekeeper fires an event on the Home Assistant bus for each new situation (once per situation, silent the first time). Nothing leaves Home Assistant.",
-  event_critical_finding: "new finding with high impact", event_backup_overdue: "backup overdue", event_quarantine_expired: "quarantine expired", event_followup_regression: "follow-up: regression", event_integration_down: "integration not loaded (cause with follow-up findings)",
+  event_critical_finding: "new finding with high impact", event_backup_overdue: "backup overdue", event_quarantine_expired: "quarantine expired", event_followup_regression: "follow-up: regression", event_integration_down: "integration not loaded",
 });
 
 // Texts for the statistics and dashboard policy rules; merged into TEXT.
@@ -7931,7 +7933,7 @@ Object.assign(TEXT.de, {
   statusObjects: "Objekte: {share} % ohne Befund ({affected} von {base} betroffen)", statusTopicsCost: "Themen: Abzug {n} Punkte", statusTopicsFree: "Themen: kein Abzug", healthWhy: "Wie entsteht die Zahl?",
   whyShare: "Objekte ohne Befund", whyUrgentOne: "1 dringendes Thema ({points} Punkte)", whyUrgent: "{n} dringende Themen ({points} Punkte je Thema)", whyTotal: "Zustand", whyNote: "Zählt Entitäten, Automationen, Skripte und Szenen. Nur dringende Themen ziehen Punkte ab, höchstens {max}. Die anderen Themen färben den Ring gelb. Ausgeblendete Befunde und die Datenbankprüfung zählen nicht. „Offene Befunde“ rechts zählt alle Befunde.",
   topicsOne: "1 Thema", topicsN: "{n} Themen",
-  unit_integrations_1: "Integration", unit_integrations_n: "Integrationen", unit_causes_1: "Ursache", unit_causes_n: "Ursachen", unit_followup_1: "Plan", unit_followup_n: "Pläne", unit_reminders_1: "Erinnerung", unit_reminders_n: "Erinnerungen", unit_criteria_1: "Ziel", unit_criteria_n: "Ziele", unit_critical_1: "Befund", unit_critical_n: "Befunde", unit_backup_1: "Problem", unit_backup_n: "Probleme", unit_quarantine_1: "Objekt", unit_quarantine_n: "Objekte",
+  unit_outages_1: "Ausfall", unit_outages_n: "Ausfälle", unit_followup_1: "Plan", unit_followup_n: "Pläne", unit_reminders_1: "Erinnerung", unit_reminders_n: "Erinnerungen", unit_criteria_1: "Ziel", unit_criteria_n: "Ziele", unit_critical_1: "Befund", unit_critical_n: "Befunde", unit_backup_1: "Problem", unit_backup_n: "Probleme", unit_quarantine_1: "Objekt", unit_quarantine_n: "Objekte",
   statusTasks: "{count} Aufgaben warten auf dich", statusTasksJump: "Zur Liste der Aufgaben springen", statusAllGood: "Alles in Ordnung",
   counterNoneSub: "{count} Sensoren sehen unauffällig aus.", counterNotChecked: "Noch nicht geprüft", counterNotCheckedSub: "Housekeeper sucht falsche Werte in Zählern und Messwerten. Starte die Prüfung mit „Sensoren prüfen“.",
   stepChoose: "Auswahl", stepSetup: "Einstellen", stepPreview: "Vorschau",
@@ -7973,7 +7975,7 @@ Object.assign(TEXT.en, {
   statusObjects: "Objects: {share}% without a finding ({affected} of {base} affected)", statusTopicsCost: "Topics: {n} points off", statusTopicsFree: "Topics: nothing off", healthWhy: "How is this number made?",
   whyShare: "Objects without a finding", whyUrgentOne: "1 urgent topic ({points} points)", whyUrgent: "{n} urgent topics ({points} points each)", whyTotal: "Status", whyNote: "Counts entities, automations, scripts and scenes. Only urgent topics take points off, at most {max}. The other topics turn the ring amber. Hidden findings and the database check do not count. “Open findings” on the right counts all findings.",
   topicsOne: "1 topic", topicsN: "{n} topics",
-  unit_integrations_1: "integration", unit_integrations_n: "integrations", unit_causes_1: "cause", unit_causes_n: "causes", unit_followup_1: "plan", unit_followup_n: "plans", unit_reminders_1: "reminder", unit_reminders_n: "reminders", unit_criteria_1: "goal", unit_criteria_n: "goals", unit_critical_1: "finding", unit_critical_n: "findings", unit_backup_1: "problem", unit_backup_n: "problems", unit_quarantine_1: "object", unit_quarantine_n: "objects",
+  unit_outages_1: "outage", unit_outages_n: "outages", unit_followup_1: "plan", unit_followup_n: "plans", unit_reminders_1: "reminder", unit_reminders_n: "reminders", unit_criteria_1: "goal", unit_criteria_n: "goals", unit_critical_1: "finding", unit_critical_n: "findings", unit_backup_1: "problem", unit_backup_n: "problems", unit_quarantine_1: "object", unit_quarantine_n: "objects",
   statusTasks: "{count} tasks are waiting for you", statusTasksJump: "Jump to the list of tasks", statusAllGood: "All good",
   counterNoneSub: "{count} sensors look fine.", counterNotChecked: "Not checked yet", counterNotCheckedSub: "Housekeeper looks for wrong values in counters and measurements. Start the check with “Check sensors”.",
   stepChoose: "Choose", stepSetup: "Set up", stepPreview: "Preview",

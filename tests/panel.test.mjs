@@ -1443,13 +1443,15 @@ test("the overview starts with what needs doing, most urgent first", () => {
     meta: { ...DATA.meta, scanned_at: new Date(Date.now() - 80 * 3.6e6).toISOString(), scan_interval_hours: 24, quarantine_days: 14 },
     objects: [...DATA.objects, { object_type: "config_entry", object_id: "e1", name: "Hub", status: "problem", domain: "hue", state: "setup_error" }],
     quarantine: [{ object_id: "sensor.old", object_type: "entity", since: new Date(Date.now() - 20 * 864e5).toISOString() }, { object_id: "sensor.fresh", object_type: "entity", since: now }],
+    causes: [{ id: "integration_down:e1", kind: "integration_down", object_type: "config_entry", object_id: "e1", name: "Hub", follower_count: 0, consumers: {}, impact: "none", state: "setup_error" }],
   };
   el.trend = TREND;
   el.backup = { available: true, overall: "problem", checks: [{ id: "newest", level: "problem" }, { id: "emergency_kit", level: "note" }, { id: "last_run", level: "problem" }] };
   const keys = el.todoItems().map(i => i.key);
-  assert.equal(JSON.stringify(keys), JSON.stringify(["integrations", "critical", "stale", "backup", "quarantine"]));
+  assert.equal(JSON.stringify(keys), JSON.stringify(["outages", "critical", "stale", "backup", "quarantine"]));
   const byKey = Object.fromEntries(el.todoItems().map(i => [i.key, i]));
-  assert.equal(byKey.integrations.count, 1);
+  assert.equal(byKey.outages.count, 1);
+  assert.equal(byKey.outages.hintText, "1 integrations", "an outage without any affected entity still counts");
   assert.equal(byKey.critical.count, 2, "hidden findings and other classes do not count");
   assert.equal(byKey.quarantine.count, 1, "only entries past the quarantine period");
   assert.equal(byKey.backup.tone, "red");
@@ -1458,8 +1460,9 @@ test("the overview starts with what needs doing, most urgent first", () => {
   el.view = "overview"; el.folds = { todo_later: true }; el.render();
   const html = shadow.innerHTML;
   assert.ok(html.indexOf("What needs doing now?") > html.indexOf('class="summary"'), "the list comes after the key figures");
-  assert.ok(html.indexOf('data-todo="integrations"') < html.indexOf('data-todo="critical"') && html.indexOf('data-todo="critical"') < html.indexOf('data-todo="stale"'));
-  assert.ok(html.includes('data-jump="inventory" data-type="config_entry" data-status="problem"'));
+  assert.ok(html.indexOf('data-todo="outages"') < html.indexOf('data-todo="critical"') && html.indexOf('data-todo="critical"') < html.indexOf('data-todo="stale"'));
+  assert.equal(html.split("Integration Hub is not loaded").length - 1, 1, "an outage appears once on the overview, not as a second card");
+  assert.ok(html.includes("no entity affected") && !html.includes("Integrations with problems"));
   assert.ok(html.indexOf('class="summary"') < html.indexOf('class="ring') && html.indexOf('class="ring') < html.indexOf('data-jump="inventory" data-status'), "the health card is the first card of the statistics row");
 });
 
@@ -2784,7 +2787,9 @@ test("follow-up findings of a cause stay folded until asked for, and the export 
   assert.ok(el.causesCard().includes("1 automations affected") && el.causesCard().includes("timeout"));
   el.showFollowers = true;
   assert.equal(el.collapseFollowers(el.visibleFindings()).length, 3);
-  assert.equal(el.todoItems().some(i => i.key === "causes"), true);
+  assert.equal(el.todoItems().some(i => i.key === "outages"), true);
+  el.data = { ...el.data, causes: [{ ...cause, follower_count: 0, consumers: {} }] };
+  assert.ok(el.causesCard().includes("no entity affected") && !el.causesCard().includes("data-fold"), "an outage without follow-ups is a plain row");
 });
 
 test("an object shows the rules it breaks on its overview, and nothing when there are none", () => {
@@ -3628,7 +3633,7 @@ test("the mark is a row of the Actions tab and a line of what is known, no longe
 test("the status takes points off only for urgent topics, names its topics and explains the number on a click", () => {
   const { el, shadow } = panel("en");
   el.data = { ...DATA };
-  const items = [{ tone: "red", key: "integrations", count: 8 }, { tone: "warn", key: "quarantine", count: 2 }, { tone: "warn", key: "reminders", count: 1 }];
+  const items = [{ tone: "red", key: "outages", count: 8 }, { tone: "warn", key: "quarantine", count: 2 }, { tone: "warn", key: "reminders", count: 1 }];
   el.todoItems = () => items;
   let h = el.health();
   assert.equal(h.red, 1); assert.equal(h.later, 2); assert.equal(h.penalty, 10); assert.equal(h.percent, h.share - 10, "the other topics cost nothing");
@@ -3641,13 +3646,13 @@ test("the status takes points off only for urgent topics, names its topics and e
   h = el.health();
   assert.equal(h.percent, h.share); assert.equal(el.statusHeadline(h), "1 topic open");
   // the calculation opens from the ring
-  el.todoItems = () => [{ tone: "red", key: "integrations", count: 8 }];
+  el.todoItems = () => [{ tone: "red", key: "outages", count: 8 }];
   el.view = "overview"; el.render();
   assert.ok(shadow.innerHTML.includes("data-health-why") && !shadow.innerHTML.includes('class="healthwhy"'));
   el.healthWhy = true; el.render();
   assert.ok(shadow.innerHTML.includes('class="healthwhy"') && shadow.innerHTML.includes("− 10"));
   // the rows say what they count
-  assert.equal(el.todoCount({ key: "integrations", count: 8 }), "8 integrations"); assert.equal(el.todoCount({ key: "quarantine", count: 1 }), "1 object");
+  assert.equal(el.todoCount({ key: "outages", count: 8 }), "8 outages"); assert.equal(el.todoCount({ key: "quarantine", count: 1 }), "1 object");
 });
 
 test("batteries are named by their device: the tile, the rows and the search", () => {

@@ -69,3 +69,19 @@ def test_the_integration_wins_over_the_device() -> None:
     ]
     findings = [_finding(f"sensor.{n}") for n in "abc"]
     assert [c["kind"] for c in apply_causes(objects, [], findings)] == ["integration_down"]
+
+
+def test_an_integration_that_is_down_is_a_cause_even_without_follow_up_findings() -> None:
+    objects = [ENTRY, _entity("sensor.a", config_entry_id="e1")]
+    edges = [
+        {
+            "source": "automation:automation.x",
+            "target": "entity:sensor.a",
+            "relation": "TRIGGERS_ON",
+        }
+    ]
+    causes = apply_causes(objects, edges, [])
+    assert [(c["id"], c["follower_count"], c["impact"]) for c in causes] == [
+        ("integration_down:e1", 0, "none")
+    ]
+    assert causes[0]["consumers"] == {"automation": 1}
