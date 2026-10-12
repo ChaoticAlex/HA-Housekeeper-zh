@@ -15,6 +15,7 @@ from .impact import RANK, USAGE
 
 DEVICE_MIN_ENTITIES = 3  # a device with fewer entities is not a pattern
 KEY_LIMIT = 500
+SERVICE_MIN = 2  # automations and scripts that call the same missing service
 
 
 def _visible(finding: dict[str, Any]) -> bool:
@@ -127,5 +128,18 @@ def apply_causes(
             entity[i]["status"] == "unavailable" for i in ids
         ):
             take("device_down", item, ids)
+
+    callers: dict[str, list[dict[str, Any]]] = {}
+    for finding in findings:
+        if finding["rule_id"].endswith(".missing_service") and not finding.get("ignored"):
+            callers.setdefault(finding["affected_object"], []).append(finding)
+    for service, followers in callers.items():
+        if len(followers) < SERVICE_MIN:
+            continue
+        item = {"object_type": "service", "object_id": service, "name": service}
+        cause = _cause("service_missing", item, followers, users, [])
+        for finding in followers:
+            finding["cause_id"] = cause["id"]
+        causes.append(cause)
 
     return sorted(causes, key=lambda c: (-c["follower_count"], c["id"]))

@@ -88,6 +88,7 @@ from .queries import ReplyStore
 from .refactor import RefactorStore
 from .reminders import ReminderStore
 from .runs import RunStore
+from .service_check import missing_service_findings
 from .signals import SignalStore, situations
 from .signals import fire as signal_fire
 from .stale import StaleStore
@@ -977,6 +978,21 @@ class InventoryScanner:
             + helper_findings
             + group_findings
             + stopped_app_findings(apps, integrations, app_links)
+            + (
+                []
+                if preliminary
+                else missing_service_findings(
+                    automations,
+                    self.hass.services.has_service,
+                    {
+                        entry.domain
+                        for entry in config_entries
+                        if entry.disabled_by is None
+                        and entry.source != "ignore"
+                        and _enum(entry.state) != "loaded"
+                    },
+                )
+            )
             + _config_entry_findings(integrations, observed_at, self.min_unavailable_days)
         )
 

@@ -153,7 +153,7 @@ const TEXT = {
     automationOff: "Automation ist ausgeschaltet", refsResolved: "Alle Referenzen aufgelöst", entities: "Entitäten",
     cs_loaded: "Geladen", cs_setup_error: "Fehler beim Einrichten", cs_setup_retry: "Einrichtung wird wiederholt", cs_not_loaded: "Nicht geladen",
     cs_migration_error: "Fehler bei der Migration", cs_failed_unload: "Entladen fehlgeschlagen", cs_setup_in_progress: "Wird eingerichtet",
-    missing_entity: "Entität", missing_device: "Gerät", missing_area: "Bereich", missing_floor: "Etage", missing_label: "Label",
+    missing_entity: "Entität", missing_service: "Dienst", missing_device: "Gerät", missing_area: "Bereich", missing_floor: "Etage", missing_label: "Label",
     cause_ok: "Integration, Gerät und Zustand sind in Ordnung. Hier ist nichts zu tun.",
     cause_entity_disabled: "Die Entität wurde deaktiviert und besitzt deshalb keinen Zustand. Das ist kein Fehler.",
     cause_device_disabled: "Das zugehörige Gerät ist deaktiviert, daher liefert die Entität keinen Zustand. Das ist kein Fehler.",
@@ -331,7 +331,7 @@ const TEXT = {
     automationOff: "Automation is turned off", refsResolved: "All references resolved", entities: "Entities",
     cs_loaded: "Loaded", cs_setup_error: "Setup error", cs_setup_retry: "Retrying setup", cs_not_loaded: "Not loaded",
     cs_migration_error: "Migration error", cs_failed_unload: "Unload failed", cs_setup_in_progress: "Setting up",
-    missing_entity: "Entity", missing_device: "Device", missing_area: "Area", missing_floor: "Floor", missing_label: "Label",
+    missing_entity: "Entity", missing_service: "Service", missing_device: "Device", missing_area: "Area", missing_floor: "Floor", missing_label: "Label",
     cause_ok: "Integration, device and state are fine. Nothing to do here.",
     cause_entity_disabled: "The entity was disabled and therefore has no state. This is not an error.",
     cause_device_disabled: "The related device is disabled, so the entity provides no state. This is not an error.",
@@ -360,7 +360,7 @@ const TEXT = {
 };
 
 const ICONS = {
-  entity: "mdi:shape-outline", device: "mdi:devices", config_entry: "mdi:puzzle-outline",
+  service: "mdi:cog-off-outline", entity: "mdi:shape-outline", device: "mdi:devices", config_entry: "mdi:puzzle-outline",
   area: "mdi:floor-plan", automation: "mdi:robot-outline", floor: "mdi:layers-outline",
   label: "mdi:label-outline", script: "mdi:script-text-outline", scene: "mdi:palette-outline", dashboard: "mdi:view-dashboard-outline", app: "mdi:package-variant-closed",
 };
@@ -6184,6 +6184,7 @@ class CausesMixin {
 
   // One headline per cause with the counts of what it touches; the follow-up findings sit in a fold.
   causeCounts(c) {
+    if (c.kind === "service_missing") return this.t("causeCallers", { n: this.formatNumber(c.follower_count) });
     if (!c.follower_count && !Object.keys(c.consumers || {}).length) return this.t("causeNone");
     const parts = [this.t("causeN_entity", { n: this.formatNumber(c.follower_count) }), ...["automation", "script", "dashboard"].filter(k => c.consumers?.[k]).map(k => this.t(`causeN_${k}`, { n: c.consumers[k] }))];
     return this.t("causeCounts", { parts: parts.join(", ") });
@@ -6192,7 +6193,7 @@ class CausesMixin {
   // "3 integrations, 1 device" for the to-do row.
   outagesHint(causes) {
     const n = kind => causes.filter(c => c.kind === kind).length;
-    return [n("integration_down") ? this.t("outageIntegrations", { n: n("integration_down") }) : "", n("device_down") ? this.t("outageDevices", { n: n("device_down") }) : ""].filter(Boolean).join(", ");
+    return [n("integration_down") ? this.t("outageIntegrations", { n: n("integration_down") }) : "", n("device_down") ? this.t("outageDevices", { n: n("device_down") }) : "", n("service_missing") ? this.t("outageServices", { n: n("service_missing") }) : ""].filter(Boolean).join(", ");
   }
 
   causesCard() {
@@ -6203,7 +6204,8 @@ class CausesMixin {
       const head = { tone: "red", title: this.esc(this.t(`cause_${c.kind}`, { name: c.name })), sub: [this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · "), pill: this.t("causeFollowers", { n: this.formatNumber(c.follower_count) }) };
       const decide = this.causeDecide(c);
       if (!c.follower_count) return `<button class="row rel" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${head.title}</strong><small>${this.esc(head.sub)}</small></span></button>${decide}`;
-      const body = `<button class="row" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span></button>${followers(c.id).slice(0, 20).map(f => this.findingRow(f)).join("")}`;
+      const own = c.kind === "service_missing" ? "" : `<button class="row" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span></button>`;
+      const body = `${own}${followers(c.id).slice(0, 20).map(f => this.findingRow(f)).join("")}`;
       return this.fold(`cause_${c.id}`, head, body + decide, false);
     }).join("");
     return `<div class="panel"><div class="panelhead"><div><h2>${this.t("causesTitle")}</h2><p>${this.t("causesSub", { n: this.formatNumber(causes.length), m: this.formatNumber(this.data.findings.filter(f => !f.cause_id && !f.ignored).length) })}</p></div></div>${rows}</div>`;
@@ -6224,14 +6226,14 @@ Object.assign(TEXT.de, {
   causesTitle: "Ausfälle", causesSub: "{n} Ausfälle (Ursachen) · {m} einzelne Befunde. Behebe zuerst die Ausfälle, sie erklären oft viele Befunde.",
   causeNone: "keine Entität betroffen", outageIntegrations: "{n} Integrationen", outageDevices: "{n} Geräte", singleFindings: "Einzelne Befunde",
   cause_integration_down: "Integration {name} ist nicht geladen", cause_device_down: "Gerät {name} ist ganz ausgefallen",
-  causeFollowers: "{n} Folgebefunde", causeState: "Zustand: {state}", causeUses_automation: "{n} Automationen betroffen", causeUses_script: "{n} Skripte betroffen", causeUses_dashboard: "{n} Dashboards betroffen",
+  causeFollowers: "{n} Folgebefunde", cause_service_missing: "Dienst {name} existiert nicht", causeCallers: "{n} Automationen und Skripte rufen ihn auf", outageServices: "{n} fehlende Dienste", causeState: "Zustand: {state}", causeUses_automation: "{n} Automationen betroffen", causeUses_script: "{n} Skripte betroffen", causeUses_dashboard: "{n} Dashboards betroffen",
   causeShow: "Folgebefunde anzeigen", causeHide: "Folgebefunde ausblenden", actOutages: "Ausfälle",
 });
 Object.assign(TEXT.en, {
   causesTitle: "Outages", causesSub: "{n} outages (causes) · {m} single findings. Fix the outages first, they often explain many findings.",
   causeNone: "no entity affected", outageIntegrations: "{n} integrations", outageDevices: "{n} devices", singleFindings: "Single findings",
   cause_integration_down: "Integration {name} is not loaded", cause_device_down: "Device {name} is down completely",
-  causeFollowers: "{n} follow-up findings", causeState: "State: {state}", causeUses_automation: "{n} automations affected", causeUses_script: "{n} scripts affected", causeUses_dashboard: "{n} dashboards affected",
+  causeFollowers: "{n} follow-up findings", cause_service_missing: "Service {name} does not exist", causeCallers: "{n} automations and scripts call it", outageServices: "{n} missing services", causeState: "State: {state}", causeUses_automation: "{n} automations affected", causeUses_script: "{n} scripts affected", causeUses_dashboard: "{n} dashboards affected",
   causeShow: "Show follow-up findings", causeHide: "Hide follow-up findings", actOutages: "Outages",
 });
 
