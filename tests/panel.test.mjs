@@ -3993,6 +3993,22 @@ test("a custom integration row opens its config entry, a folder without one stay
   assert.match(el.sysCustomRowAttrs({ domain: "theme_only" }), /class="static"/);
 });
 
+test("apps and integrations groups config entries by domain and opens one entry or lists several", () => {
+  const { el, shadow } = systemPanel("en");
+  const entry = (id, domain, extra = {}) => ({ object_type: "config_entry", object_id: id, name: `Hub ${id}`, domain, integration_name: "Demo", status: "active", entity_count: 2, device_count: 1, ...extra });
+  el.data = { ...DATA, objects: [entry("A1", "demo", { custom: true, integration_version: "1.0" }), entry("A2", "demo", { status: "problem" }), entry("B1", "solo")] };
+  const [demo] = el.compIntegrations().filter(g => g.domain === "demo");
+  assert.equal(demo.entries.length, 2);
+  assert.equal(demo.entities, 4);
+  assert.equal(demo.status, "problem");
+  assert.match(el.compRowAttrs(demo), /data-comp-toggle="demo"/);
+  assert.match(el.compRowAttrs(el.compIntegrations().find(g => g.domain === "solo")), /data-object="config_entry:B1"/);
+  el.view = "components";
+  el.render();
+  assert.ok(shadow.innerHTML.includes(el.t("components")));
+  assert.ok(!shadow.innerHTML.includes(el.t("renderError")));
+});
+
 test("the three new pages sit under Operation and Security and render in both languages", () => {
   const { NAV_GROUPS, TEXT } = loadPanel();
   const group = label => NAV_GROUPS.find(([name]) => name === label)[1];

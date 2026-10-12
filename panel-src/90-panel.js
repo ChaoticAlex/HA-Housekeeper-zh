@@ -589,6 +589,7 @@ class HAHousekeeperPanel extends HTMLElement {
       inventory: [this.t("inventory"), this.t("inventorySubtitle")],
       findingsNav: [this.t("findings"), this.t("findingsSubtitle")],
       changes: [this.t("changes"), this.t("changesSubtitle")],
+      components: [this.t("components"), this.t("componentsSubtitle")],
       batteries: [this.t("batteries"), this.t("batteriesSubtitle")],
       reminders: [this.t("reminders"), this.t("remindersSubtitle")],
       unreferenced: [this.t("unreferenced"), this.t("unreferencedSubtitle")],
@@ -628,6 +629,7 @@ class HAHousekeeperPanel extends HTMLElement {
     if (this.view === "inventory") return this.inventory();
     if (this.view === "findingsNav") return this.findingsView();
     if (this.view === "changes") return this.changesView();
+    if (this.view === "components") return this.componentsView();
     if (this.view === "batteries") return this.batteriesView();
     if (this.view === "reminders") return this.remindersView();
     if (this.view === "unreferenced") return this.unreferencedView();
@@ -836,6 +838,15 @@ class HAHousekeeperPanel extends HTMLElement {
       ev.preventDefault();
       if (el.click) el.click(); else el.onclick?.();
     };
+    root.querySelectorAll("tr[data-comp-toggle]").forEach(el => {
+      el.onclick = ev => {
+        if (ev?.target?.closest?.("button, select, input, a, label")) return; // the entries and the copy button have their own action
+        const set = this.compOpen ||= new Set(), d = el.dataset.compToggle;
+        if (!set.delete(d)) set.add(d);
+        this.render();
+      };
+      openByKey(el);
+    });
     root.querySelectorAll("tr[data-object], g[data-graph]").forEach(openByKey);
     root.querySelectorAll("g[data-graph-group]").forEach(openByKey);
     root.querySelectorAll("[data-graph-depth]").forEach(el => el.onclick = () => { this.graphDepth = Number(el.dataset.graphDepth); this.graphLimit = GRAPH_NODE_STEP; this.render(); });
