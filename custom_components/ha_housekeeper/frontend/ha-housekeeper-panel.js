@@ -5615,7 +5615,7 @@ class PoliciesMixin {
     // A row with a fix offers it as its button (it folds the row open); the other rows keep their hide button; an opened row has it next to "open object".
     const act = open ? "" : main ? `<button class="btn" data-pol-open="${this.esc(item.key)}">${this.t(main)}</button>` : button;
     const detail = open ? this.polDetail(item, button) : "";
-    return `${box ? `<div class="rowwrap">${box}` : ""}<div class="row politem${open ? " open" : ""}" data-pol-row="${this.esc(item.key)}">${chev}<span class="row-text">${item.object_type === "recorder" || compact ? `<strong>${this.esc(item.name)}</strong>` : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong></button>`}${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}${detail}</span>${due}${pill}${act}</div>${box ? "</div>" : ""}${form}`;
+    return `${box ? `<div class="rowwrap">${box}` : ""}<div class="row politem${open ? " open" : ""}" data-pol-row="${this.esc(item.key)}">${chev}<span class="row-text">${["recorder", "system"].includes(item.object_type) || compact ? `<strong>${this.esc(item.name)}</strong>` : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong></button>`}${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}${detail}</span>${due}${pill}${act}</div>${box ? "</div>" : ""}${form}`;
   }
 
   // The violations of one object, on its overview: the same rows as in the policies view, so a fix can be made here.
@@ -7306,6 +7306,9 @@ Object.assign(TEXT.de, {
   polRule_dashboard_duplicate_cards: "Dashboard: doppelte Karten", polDesc_dashboard_duplicate_cards: "Dieselbe Karte mit gleicher Einstellung steht mehrmals in derselben Liste.", polAlso_dashboard_duplicate_cards: "Doppelte Karten: {ids}",
   polRule_dashboard_size: "Sehr großes Dashboard", polDesc_dashboard_size: "Mehr als 200 Karten laden langsam und sind schwer zu pflegen.", polAlso_dashboard_size: "{ids} Karten",
   polRule_dashboard_custom_cards: "Dashboard: Custom-Karten ohne Ressource", polDesc_dashboard_custom_cards: "Das Dashboard nutzt Custom-Karten, aber es ist keine Dashboard-Ressource eingetragen. Ob eine einzelne Karte geladen ist, lässt sich von hier nicht sagen; nur dieser sichere Fall zählt.", polAlso_dashboard_custom_cards: "Karten: {ids}",
+  polRule_http_trusted_networks: "Anmeldung ohne Passwort für ein öffentliches Netz", polDesc_http_trusted_networks: "Der Anmeldeweg „trusted_networks“ vertraut einem Netz, das öffentliche Adressen umfasst (ganz oder größer als ein privater Bereich), oder lässt die Anmeldung ganz aus (allow_bypass_login). Gewöhnliche private Netze wie 192.168.x.x werden nicht gemeldet. Nur ein Hinweis.", polAlso_http_trusted_networks: "{ids}",
+  polRule_http_external_url: "Externe URL ohne Verschlüsselung", polDesc_http_external_url: "Die externe URL beginnt mit http:// und nennt einen Host außerhalb des Heimnetzes. Zugangsdaten und Sitzungen laufen dann unverschlüsselt. Nur ein Hinweis.", polAlso_http_external_url: "Host: {ids}",
+  polRule_http_proxies: "Vertrauenswürdige Proxys: öffentliches Netz", polDesc_http_proxies: "trusted_proxies enthält ein Netz mit öffentlichen Adressen. Jeder Absender dort könnte die Adresse des Clients (X-Forwarded-For) beliebig angeben. Nur ein Hinweis.", polAlso_http_proxies: "{ids}",
 });
 Object.assign(TEXT.en, {
   polRule_statistics_unit: "Statistics: unit no longer fits", polDesc_statistics_unit: "The unit of the entity differs from the unit of its long-term statistics and the recorder cannot convert it. New values then do not fit the old ones. Only metadata is read.", polAlso_statistics_unit: "Statistics → entity: {ids}",
@@ -7315,6 +7318,9 @@ Object.assign(TEXT.en, {
   polRule_dashboard_duplicate_cards: "Dashboard: doubled cards", polDesc_dashboard_duplicate_cards: "The same card with the same settings appears more than once in the same list.", polAlso_dashboard_duplicate_cards: "Doubled cards: {ids}",
   polRule_dashboard_size: "Very large dashboard", polDesc_dashboard_size: "More than 200 cards load slowly and are hard to keep.", polAlso_dashboard_size: "{ids} cards",
   polRule_dashboard_custom_cards: "Dashboard: custom cards without a resource", polDesc_dashboard_custom_cards: "The dashboard uses custom cards but no dashboard resource is registered. Whether a single card is loaded cannot be told from here; only this sure case counts.", polAlso_dashboard_custom_cards: "Cards: {ids}",
+  polRule_http_trusted_networks: "Login without password for a public network", polDesc_http_trusted_networks: "The \"trusted_networks\" login trusts a network that includes public addresses (all of them, or bigger than a private range), or skips the login altogether (allow_bypass_login). Ordinary private networks such as 192.168.x.x are not reported. A hint only.", polAlso_http_trusted_networks: "{ids}",
+  polRule_http_external_url: "External URL without encryption", polDesc_http_external_url: "The external URL starts with http:// and names a host outside the home network. Credentials and sessions then travel unencrypted. A hint only.", polAlso_http_external_url: "Host: {ids}",
+  polRule_http_proxies: "Trusted proxies: public network", polDesc_http_proxies: "trusted_proxies contains a network with public addresses. Any sender there could name any client address (X-Forwarded-For). A hint only.", polAlso_http_proxies: "{ids}",
 });
 
 // BatteryCareMixin: the battery forecast and the maintenance reminders in the Batteries view.
@@ -11197,7 +11203,7 @@ class PolicyRowMixin {
     const why = `<div><h4>${this.t("polWhy")}</h4><p>${this.t(`polDesc_${item.rule}`)}${item.expected ? ` ${this.t("polExpectedNote", { prefix: item.expected })}` : ""}</p></div>`;
     const fix = item.ignored ? "" : item.object_type === "entity" && POL_RENAME_RULES.includes(item.rule) ? this.polRenameBlock(item)
       : ["entity", "device"].includes(item.object_type) && POL_AREA_RULES.includes(item.rule) ? this.polAreaBlock(item) : "";
-    const open = item.object_type === "recorder" ? "" : `<button type="button" class="btn small" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}">${this.t("polOpenObject")}</button>`;
+    const open = ["recorder", "system"].includes(item.object_type) ? "" : `<button type="button" class="btn small" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}">${this.t("polOpenObject")}</button>`;
     return `<div class="poldetail">${why}${fix}${open || hide ? `<div class="acts">${open}${hide}</div>` : ""}</div>`;
   }
 

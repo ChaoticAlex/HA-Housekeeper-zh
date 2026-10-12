@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterable
+from ipaddress import ip_address, ip_network
 from typing import Any
+from urllib.parse import urlsplit
 
 from .exposure import SENSITIVE_COVERS, SENSITIVE_DOMAINS
 from .hygiene import low_battery_ids
@@ -354,3 +356,58 @@ def dashboard_custom_cards(dashboards: list[dict[str, Any]]):
         health = item.get("health") or {}
         if health.get("custom") and health.get("resources") == 0:
             yield {**item, "also": health["custom"]}
+
+
+# Objects that exist only for a rule about the system itself; they are not in the snapshot.
+SYSTEM_OBJECTS = ("recorder", "http_trusted_networks", "http_external_url", "http_proxies")
+LOCAL_SUFFIXES = (".local", ".lan", ".home", ".internal", ".localdomain", ".home.arpa")
+
+
+def _too_wide(network: str) -> bool:
+    """Whether a network reaches public addresses: all of them, a block bigger than any private
+    range, or addresses that are routed on the internet. Private and carrier-grade ranges are the
+    normal case and are not reported."""
+    try:
+        net = ip_network(network, strict=False)
+    except ValueError:
+        return False
+    return net.prefixlen == 0 or (net.version == 4 and net.prefixlen < 8) or net.is_global
+
+
+def _system_item(object_id: str, name: str, also: list[str]) -> dict[str, Any]:
+    return {"object_type": "system", "object_id": object_id, "name": name, "also": also}
+
+
+def http_trusted_networks(http: dict[str, Any]):
+    """The trusted_networks login provider with a public network or with the login bypass."""
+    if "trusted_networks" not in http:
+        return
+    also = [net for net in http["trusted_networks"] if _too_wide(net)]
+    if http.get("bypass_login"):
+        also.append("allow_bypass_login")
+    if also:
+        yield _system_item("http_trusted_networks", "trusted_networks", also)
+
+
+def http_external_url(http: dict[str, Any]):
+    """An external URL that starts with http:// and names a host outside the home network."""
+    parts = urlsplit(str(http.get("external_url") or ""))
+    host = (parts.hostname or "").lower()
+    if parts.scheme != "http" or not host:
+        return
+    try:
+        address = ip_address(host)
+    except ValueError:
+        if "." not in host or host.endswith(LOCAL_SUFFIXES):
+            return
+    else:
+        if address.is_private or address.is_loopback or address.is_link_local:
+            return
+    yield _system_item("http_external_url", "external_url", [host])
+
+
+def http_proxies(http: dict[str, Any]):
+    """trusted_proxies that trust a public network: any sender there may name any client address."""
+    also = [net for net in http.get("trusted_proxies") or [] if _too_wide(net)]
+    if also:
+        yield _system_item("http_proxies", "trusted_proxies", also)

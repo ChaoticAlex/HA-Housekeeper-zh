@@ -222,3 +222,28 @@ def test_statistics_and_dashboard_rules() -> None:
         if r["id"] == "statistics_unit"
     )
     assert ids(unit) == ["sensor.e"] and unit["items"][0]["also"] == ["m³ → kWh"]
+
+
+def test_http_rules_report_only_public_networks_plain_http_and_the_login_bypass() -> None:
+    private = {
+        "trusted_networks": ["192.168.1.0/24", "10.0.0.0/8", "100.64.0.0/10", "fd00::/8"],
+        "trusted_proxies": ["172.30.33.0/24"],
+        "external_url": "http://homeassistant.local:8123",
+    }
+    for rule in ("http_trusted_networks", "http_external_url", "http_proxies"):
+        assert ids(run([], rule, http=private)) == [], rule
+        assert ids(run([], rule)) == [], rule  # nothing readable, nothing reported
+
+    open_ = {
+        "trusted_networks": ["192.168.1.0/24", "0.0.0.0/0", "8.8.8.0/24"],
+        "bypass_login": True,
+        "trusted_proxies": ["::/0", "172.30.33.0/24"],
+        "external_url": "http://home.example.org",
+    }
+    nets = run([], "http_trusted_networks", http=open_)["items"][0]
+    assert nets["also"] == ["0.0.0.0/0", "8.8.8.0/24", "allow_bypass_login"]
+    assert run([], "http_proxies", http=open_)["items"][0]["also"] == ["::/0"]
+    assert run([], "http_external_url", http=open_)["items"][0]["also"] == ["home.example.org"]
+    assert (
+        ids(run([], "http_external_url", http={"external_url": "https://home.example.org"})) == []
+    )

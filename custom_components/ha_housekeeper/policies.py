@@ -55,6 +55,9 @@ RULES = (
     "dashboard_duplicate_cards",
     "dashboard_size",
     "dashboard_custom_cards",
+    "http_trusted_networks",
+    "http_external_url",
+    "http_proxies",
 )
 # Rules that wait for numbers the Recorder views keep; they never start a recorder query themselves.
 NEEDS_LOAD = ("state_rate", "recorder_unused")
@@ -292,6 +295,9 @@ def evaluate(
         "battery_no_automation": lambda: rules_more.battery_no_automation(
             entities, used, extra.get("battery_percent", 20)
         ),
+        "http_trusted_networks": lambda: rules_more.http_trusted_networks(extra.get("http") or {}),
+        "http_external_url": lambda: rules_more.http_external_url(extra.get("http") or {}),
+        "http_proxies": lambda: rules_more.http_proxies(extra.get("http") or {}),
         "recorder_unused": lambda: rules_more.recorder_unused(entities, rates or {}, used),
         "recorder_retention": lambda: rules_more.recorder_retention(extra.get("db") or {}),
         "statistics_unit": lambda: rules_more.statistics_issue(
@@ -407,17 +413,20 @@ def policies(
             entry = registry.async_get(item["object_id"])
             if entry is not None:
                 with_labels[item["object_id"]] = bool(entry.labels)
+    object_ids = [item["object_id"] for item in snapshot["objects"]] + list(
+        rules_more.SYSTEM_OBJECTS
+    )
     keys = {
-        policy_key(rule, item["object_id"])
+        policy_key(rule, object_id)
         for rule in RULES
-        for item in snapshot["objects"]
-        if ignored.is_ignored(policy_key(rule, item["object_id"]))
+        for object_id in object_ids
+        if ignored.is_ignored(policy_key(rule, object_id))
     }
     due = {
-        policy_key(rule, item["object_id"])
+        policy_key(rule, object_id)
         for rule in RULES
-        for item in snapshot["objects"]
-        if ignored.is_due(policy_key(rule, item["object_id"]))
+        for object_id in object_ids
+        if ignored.is_due(policy_key(rule, object_id))
     }
     decisions = {key: ignored.info(key) for key in keys}
     return evaluate(
@@ -462,10 +471,31 @@ def _extra(
         extra["exposed"] = {
             row["entity_id"]: row["assistants"] for row in result["exposed_entities"]
         }
+    if store.enabled & {"http_trusted_networks", "http_external_url", "http_proxies"}:
+        extra["http"] = http_facts(hass)
     kept = getattr(replies, "replies", {}).get("db_health")
     if isinstance(kept, dict) and "db_bytes" in kept:
         extra["db"] = kept
     return extra
+
+
+def http_facts(hass: HomeAssistant) -> dict[str, Any]:
+    """What the running Home Assistant says about how it can be reached; a key is left out when
+    it cannot be read, so its rule reports nothing. Only networks and the host are kept."""
+    facts: dict[str, Any] = {"external_url": getattr(hass.config, "external_url", None)}
+    proxies = getattr(getattr(hass, "http", None), "trusted_proxies", None)
+    if proxies is not None:
+        facts["trusted_proxies"] = [str(net) for net in proxies]
+    providers = getattr(getattr(hass, "auth", None), "auth_providers", None)
+    if providers is not None:
+        trusted = [p for p in providers if getattr(p, "type", None) == "trusted_networks"]
+        facts["trusted_networks"] = [
+            str(net) for p in trusted for net in getattr(p, "trusted_networks", [])
+        ]
+        facts["bypass_login"] = any(
+            (getattr(p, "config", None) or {}).get("allow_bypass_login") for p in trusted
+        )
+    return facts
 
 
 def stored_rates(replies: Any) -> dict[str, int] | None:
