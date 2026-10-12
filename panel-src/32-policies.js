@@ -33,6 +33,7 @@ class PoliciesMixin {
   polItemNote(item) {
     if (item.keep_days !== undefined) return `<small>${this.esc(this.t("polRetention", { days: item.keep_days, size: this.formatBytes(item.db_bytes) }))}</small>`;
     if (item.also?.length) return `<small>${this.esc(this.t(TEXT[this.lang]?.[`polAlso_${item.rule}`] ? `polAlso_${item.rule}` : "polAlso", { ids: item.also.join(", ") }))}</small>`;
+    if (item.idle_days !== undefined) return `<small>${this.esc(this.t("polIdle", { n: this.formatNumber(item.idle_days) }))}</small>`;
     if (item.days !== undefined) return `<small>${this.esc(this.t("polDays", { n: this.formatNumber(item.days) }))}</small>`;
     if (item.rate !== undefined) return `<small>${this.esc(this.t("polRate", { n: this.formatNumber(item.rate) }))}</small>`;
     if (item.expected) return `<small>${this.esc(this.t("polExpected", { prefix: item.expected }))}</small>`;

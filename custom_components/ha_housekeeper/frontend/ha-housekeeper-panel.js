@@ -5608,6 +5608,7 @@ class PoliciesMixin {
   polItemNote(item) {
     if (item.keep_days !== undefined) return `<small>${this.esc(this.t("polRetention", { days: item.keep_days, size: this.formatBytes(item.db_bytes) }))}</small>`;
     if (item.also?.length) return `<small>${this.esc(this.t(TEXT[this.lang]?.[`polAlso_${item.rule}`] ? `polAlso_${item.rule}` : "polAlso", { ids: item.also.join(", ") }))}</small>`;
+    if (item.idle_days !== undefined) return `<small>${this.esc(this.t("polIdle", { n: this.formatNumber(item.idle_days) }))}</small>`;
     if (item.days !== undefined) return `<small>${this.esc(this.t("polDays", { n: this.formatNumber(item.days) }))}</small>`;
     if (item.rate !== undefined) return `<small>${this.esc(this.t("polRate", { n: this.formatNumber(item.rate) }))}</small>`;
     if (item.expected) return `<small>${this.esc(this.t("polExpected", { prefix: item.expected }))}</small>`;
@@ -7427,6 +7428,7 @@ Object.assign(TEXT.de, {
   polRule_user_inactive: "Benutzer lange nicht angemeldet", polDesc_user_inactive: "Ein aktiver Benutzer hat sich seit mindestens 90 Tagen nicht angemeldet oder noch nie. Konten, die nur Langzeit-Tokens halten (Dienstkonten), zählen nicht. Nur ein Hinweis; ob das Konto noch gebraucht wird, weißt nur du.", polDays: "Zuletzt angemeldet vor {n} Tagen",
   polRule_user_old_tokens: "Alte Langzeit-Tokens", polDesc_user_old_tokens: "Ein aktives Konto hat Langzeit-Tokens, die mindestens 90 Tage alt sind. Home Assistant merkt sich nicht, wann ein Langzeit-Token benutzt wird; die Regel kann deshalb nur das Alter nennen, nicht, ob es noch gebraucht wird. Nie ein Token-Wert.", polAlso_user_old_tokens: "Alter in Tagen: {ids}",
   polRule_user_dead_tokens: "Langzeit-Tokens abgeschalteter Konten", polDesc_user_dead_tokens: "Ein abgeschaltetes Konto hält noch Langzeit-Tokens. Sie funktionieren nicht mehr und können mit dem Konto gelöscht werden.", polAlso_user_dead_tokens: "Tokens: {ids}",
+  polRule_companion_silent: "Companion-App-Gerät meldet sich nicht mehr", polDesc_companion_silent: "Kein beobachteter Sensor eines Companion-App-Geräts hat seit mindestens 30 Tagen etwas gemeldet. Oft ist es ein altes Handy, dessen Eintrag stehen geblieben ist. Die Zeit zählt ab dem Beginn der Beobachtung, \"mindestens\" also. Ein Handy im Energiesparmodus kann ebenfalls still sein. Nur ein Hinweis; entfernt wird in den Einstellungen von Home Assistant.", polIdle: "Seit mindestens {n} Tagen keine Meldung", polAlso_companion_silent: "{ids}",
 });
 Object.assign(TEXT.en, {
   polRule_statistics_unit: "Statistics: unit no longer fits", polDesc_statistics_unit: "The unit of the entity differs from the unit of its long-term statistics and the recorder cannot convert it. New values then do not fit the old ones. Only metadata is read.", polAlso_statistics_unit: "Statistics → entity: {ids}",
@@ -7442,6 +7444,7 @@ Object.assign(TEXT.en, {
   polRule_user_inactive: "User not logged in for a long time", polDesc_user_inactive: "An active user has not logged in for at least 90 days, or never has. Accounts that only hold long-lived tokens (service accounts) do not count. A hint only; whether the account is still needed is for you to say.", polDays: "Last login {n} days ago",
   polRule_user_old_tokens: "Old long-lived tokens", polDesc_user_old_tokens: "An active account has long-lived tokens that are at least 90 days old. Home Assistant does not record when a long-lived token is used, so the rule can only name the age, not whether it is still needed. Never a token value.", polAlso_user_old_tokens: "Age in days: {ids}",
   polRule_user_dead_tokens: "Long-lived tokens of switched-off accounts", polDesc_user_dead_tokens: "A switched-off account still holds long-lived tokens. They no longer work and can go with the account.", polAlso_user_dead_tokens: "Tokens: {ids}",
+  polRule_companion_silent: "Companion app device no longer reports", polDesc_companion_silent: "No watched sensor of a companion app device has reported anything for at least 30 days. Often it is an old phone whose entry was left behind. The time counts from when watching began, so it is \"at least\". A phone in power saving mode can be quiet too. A hint only; removal is done in the Home Assistant settings.", polIdle: "No report for at least {n} days", polAlso_companion_silent: "{ids}",
 });
 
 // BatteryCareMixin: the battery forecast and the maintenance reminders in the Batteries view.

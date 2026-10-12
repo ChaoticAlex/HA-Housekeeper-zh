@@ -174,6 +174,7 @@ class PolicyItem(TypedDict):
     keep_days: NotRequired[int]  # recorder_retention: days the recorder keeps
     db_bytes: NotRequired[int]  # recorder_retention: size of the database
     days: NotRequired[int]  # user_inactive: days since the last login (absent: never)
+    idle_days: NotRequired[int]  # companion_silent: days without a report, at least
 
 
 class PolicyRule(TypedDict):

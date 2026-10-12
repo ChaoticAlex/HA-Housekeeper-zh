@@ -464,3 +464,39 @@ def user_dead_tokens(auth: dict[str, Any], now: datetime):
                 "name": user["name"],
                 "also": [token["name"] for token in user["tokens"]],
             }
+
+
+COMPANION_DAYS = 30
+
+
+def companion_silent(
+    devices: dict[str, dict[str, Any]], entities: dict[str, dict[str, Any]], now: datetime
+):
+    """Companion app devices none of whose watched sensors has reported for a long time.
+
+    The last report of a sensor is the one Housekeeper noted (``stale_last_activity``), so the
+    time is "at least since": it starts when the sensor was first watched. A device without any
+    watched sensor says nothing.
+    """
+    seen: dict[str, datetime] = {}
+    for item in entities.values():
+        moment = item.get("stale_last_activity")
+        if not moment or item.get("status") != "active" or not item.get("device_id"):
+            continue
+        try:
+            at = datetime.fromisoformat(moment)
+        except ValueError:
+            continue
+        at = at if at.tzinfo else at.replace(tzinfo=now.tzinfo)
+        if item["device_id"] not in seen or at > seen[item["device_id"]]:
+            seen[item["device_id"]] = at
+    for device in devices.values():
+        if device.get("device_kind") == "child" or device.get("status") == "disabled":
+            continue
+        if not any(str(i).startswith("mobile_app:") for i in device.get("identifiers") or []):
+            continue
+        last = seen.get(device["object_id"])
+        days = None if last is None else _days_since(last, now)
+        if days is not None and days >= COMPANION_DAYS:
+            also = [str(v) for v in (device.get("model"), device.get("sw_version")) if v]
+            yield {**device, "idle_days": days, "also": also}

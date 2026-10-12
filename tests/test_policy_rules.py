@@ -306,3 +306,31 @@ async def test_account_rules_name_age_and_logins_but_never_a_token_value() -> No
     assert hits("user_old_tokens")["emil"]["also"] == ["Skript: 200"]
     assert set(hits("user_old_tokens")) == {"dienst", "emil"}  # service accounts count here
     assert hits("user_dead_tokens")["gina"]["also"] == ["Alt"]
+
+
+def test_companion_silent_names_only_phones_whose_watched_sensors_all_went_quiet() -> None:
+    from datetime import UTC, datetime, timedelta
+
+    now = datetime.now(UTC)
+
+    def ago(days: int) -> str:
+        return (now - timedelta(days=days)).isoformat()
+
+    def phone(object_id: str) -> dict:
+        return obj("device", object_id, identifiers=[f"mobile_app:{object_id}"], model="Pixel")
+
+    objects = [
+        phone("old"),
+        phone("fresh"),
+        phone("unwatched"),
+        obj("device", "lamp", identifiers=["hue:1"]),
+        obj("entity", "sensor.old_a", device_id="old", stale_last_activity=ago(90)),
+        obj("entity", "sensor.old_b", device_id="old", stale_last_activity=ago(40)),
+        obj("entity", "sensor.fresh_a", device_id="fresh", stale_last_activity=ago(90)),
+        obj("entity", "sensor.fresh_b", device_id="fresh", stale_last_activity=ago(1)),
+        obj("entity", "sensor.unwatched", device_id="unwatched", stale_last_activity=None),
+        obj("entity", "sensor.lamp", device_id="lamp", stale_last_activity=ago(400)),
+    ]
+    rule = run(objects, "companion_silent", now=now)
+    assert ids(rule) == ["old"]
+    assert rule["items"][0]["idle_days"] == 40

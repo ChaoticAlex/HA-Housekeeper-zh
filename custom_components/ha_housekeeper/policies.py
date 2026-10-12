@@ -62,6 +62,7 @@ RULES = (
     "user_inactive",
     "user_old_tokens",
     "user_dead_tokens",
+    "companion_silent",
 )
 # Rules that wait for numbers the Recorder views keep; they never start a recorder query themselves.
 NEEDS_LOAD = ("state_rate", "recorder_unused")
@@ -307,6 +308,7 @@ def evaluate(
         "user_inactive": lambda: rules_more.user_inactive(auth, now),
         "user_old_tokens": lambda: rules_more.user_old_tokens(auth, now),
         "user_dead_tokens": lambda: rules_more.user_dead_tokens(auth, now),
+        "companion_silent": lambda: rules_more.companion_silent(devices, entities, now),
         "recorder_unused": lambda: rules_more.recorder_unused(entities, rates or {}, used),
         "recorder_retention": lambda: rules_more.recorder_retention(extra.get("db") or {}),
         "statistics_unit": lambda: rules_more.statistics_issue(
@@ -368,7 +370,7 @@ def evaluate(
                     "resurfaced": key in (extra.get("due") or ()),
                     **{
                         k: item[k]
-                        for k in ("also", "expected", "rate", "keep_days", "db_bytes", "days")
+                        for k in ("also", "expected", "rate", "keep_days", "db_bytes", "days", "idle_days")
                         if k in item
                     },
                 }
