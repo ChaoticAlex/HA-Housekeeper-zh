@@ -2816,7 +2816,7 @@ test("follow-up findings of a cause stay folded until asked for, and the export 
   assert.equal(el.collapseFollowers(el.visibleFindings()).length, 3);
   assert.equal(el.todoItems().some(i => i.key === "outages"), true);
   el.data = { ...el.data, causes: [{ ...cause, follower_count: 0, consumers: {} }] };
-  assert.ok(el.causesCard().includes("no entity affected") && !el.causesCard().includes("data-fold"), "an outage without follow-ups is a plain row");
+  assert.ok(el.causesCard().includes("no entity affected") && el.causesCard().split("data-fold=").length === 2, "an outage without follow-ups is a plain row inside the one fold of the group");
 });
 
 test("an object shows the rules it breaks on its overview, and nothing when there are none", () => {

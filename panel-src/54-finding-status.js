@@ -54,8 +54,9 @@ class FindingStatusMixin {
 
   statusChips() {
     const chip = (state, label, count) => `<button class="chip ${(this.findingStatus || "") === state ? "active" : ""}" data-fstatus="${state || "open"}">${label} (${this.formatNumber(count)})</button>`;
-    const decided = FINDING_STATES.filter(s => this.statusCount(s));
-    return decided.length ? [chip("", this.t("stateOpen"), this.statusCount("")), ...decided.map(s => chip(s, this.t(`state_${s}`), this.statusCount(s)))].join("") : "";
+    const decided = FINDING_STATES.filter(s => this.statusCount(s)), fixed = this.fixedLately().length;
+    if (!decided.length && !fixed) return "";
+    return [chip("", this.t("stateOpen"), this.findingTotal()), ...decided.map(s => chip(s, this.t(`state_${s}`), this.statusCount(s))), ...(fixed ? [chip("fixed", this.t("state_fixed"), fixed)] : [])].join("");
   }
 
   // Objects a plan changed lately that no longer have a finding: the closed cases.
@@ -64,12 +65,13 @@ class FindingStatusMixin {
     return [...this.planSets().done].filter(([id]) => !withFinding.has(id)).sort((a, b) => b[1] - a[1]);
   }
 
-  fixedCard() {
+  // The closed cases of the last days as rows, for the status "fixed" of the list.
+  fixedList() {
     const fixed = this.fixedLately();
-    if (!fixed.length) return "";
-    const fixedRows = fixed.map(([id, at]) => `<div class="row"><span class="tile ok"><ha-icon icon="mdi:check"></ha-icon></span><span class="row-text"><strong>${this.esc(this.findObject(`entity:${id}`)?.name || id)}</strong><small>${this.esc(id)} · ${this.formatDate(new Date(at).toISOString())}</small></span></div>`);
-    const pg = this.paginate("fixedlately", fixedRows), rows = pg.rows.join("") + pg.footer;
-    return this.fold("fixed_lately", { tone: "ok", title: this.t("fixedTitle", { days: FIXED_DAYS }), pill: this.formatNumber(fixed.length) }, rows, false);
+    if (!fixed.length) return `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("fixedNone", { days: FIXED_DAYS })}</div>`;
+    const rows = fixed.map(([id, at]) => `<div class="row"><span class="tile ok"><ha-icon icon="mdi:check"></ha-icon></span><span class="row-text"><strong>${this.esc(this.findObject(`entity:${id}`)?.name || id)}</strong><small>${this.esc(id)} · ${this.formatDate(new Date(at).toISOString())}</small></span></div>`);
+    const pg = this.paginate("fixedlately", rows);
+    return `<p class="factnote">${this.t("fixedTitle", { days: FIXED_DAYS })}</p>${pg.rows.join("")}${pg.footer}`;
   }
 
   // The form under the selection bar: known or snoozed for all selected findings at once.
@@ -161,12 +163,12 @@ class FindingStatusMixin {
   }
 }
 Object.assign(TEXT.de, {
-  stateOpen: "Offen", stateNew: "Neu", stateInwork: "In Arbeit", state_new: "Neu", state_inwork: "In Arbeit", state_known: "Bekannt", state_snoozed: "Zurückgestellt", state_hidden: "Ausgeblendet",
+  stateOpen: "Offen", state_fixed: "Zuletzt behoben", fixedNone: "In den letzten {days} Tagen wurde nichts behoben.", stateNew: "Neu", stateInwork: "In Arbeit", state_new: "Neu", state_inwork: "In Arbeit", state_known: "Bekannt", state_snoozed: "Zurückgestellt", state_hidden: "Ausgeblendet",
   fixedTitle: "Zuletzt behoben (letzte {days} Tage)", fselKnown: "Als bekannt markieren", fselSnooze: "Zurückstellen", fselLabel: "Label ergänzen", state_label: "Label ergänzen", labelChoose: "Label", labelNone: "Es gibt noch kein Label. Lege in Home Assistant eines an (Einstellungen → Bereiche, Labels & Zonen → Labels).", labelNoEntities: "Unter der Auswahl sind keine Entitäten, Automationen, Skripte oder Szenen.", confirmedSummaryLabel: "{count} Entitäten bekommen ein Label (nur in Home Assistant, Rückgängig entfernt es wieder).", reason_label_missing: "Das Label gibt es nicht mehr.", reason_already_labelled: "Hat dieses Label schon.", result_labeled: "Label ergänzt", undo_unlabelled: "Label wieder entfernt",
   notDuplicate: "Ist kein Duplikat", notDuplicateReason: "Kein Duplikat (bestätigt)", openTwin: "Funktionierende Entität öffnen", markKnown: "Als bekannt markieren",
 });
 Object.assign(TEXT.en, {
-  stateOpen: "Open", stateNew: "New", stateInwork: "In work", state_new: "New", state_inwork: "In work", state_known: "Known", state_snoozed: "Snoozed", state_hidden: "Hidden",
+  stateOpen: "Open", state_fixed: "Fixed lately", fixedNone: "Nothing was fixed in the last {days} days.", stateNew: "New", stateInwork: "In work", state_new: "New", state_inwork: "In work", state_known: "Known", state_snoozed: "Snoozed", state_hidden: "Hidden",
   fixedTitle: "Fixed lately (last {days} days)", fselKnown: "Mark as known", fselSnooze: "Snooze", fselLabel: "Add label", state_label: "Add label", labelChoose: "Label", labelNone: "There is no label yet. Create one in Home Assistant (Settings → Areas, labels & zones → Labels).", labelNoEntities: "The selection holds no entities, automations, scripts or scenes.", confirmedSummaryLabel: "{count} entities get a label (in Home Assistant only, undo takes it off again).", reason_label_missing: "The label no longer exists.", reason_already_labelled: "Already has this label.", result_labeled: "Label added", undo_unlabelled: "label taken off again",
   notDuplicate: "Not a duplicate", notDuplicateReason: "Not a duplicate (confirmed)", openTwin: "Open the working entity", markKnown: "Mark as known",
 });

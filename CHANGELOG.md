@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Befunde:** Die Seite hat einen klareren Aufbau: ein Panel mit den Reitern Offen, Neu, Bekannt … und „Zuletzt behoben“ (statt eines Faltbereichs darüber). Suche und Filter stehen zuerst; im Reiter „Offen“ folgen zuerst die Ausfälle als aufklappbare Gruppe, dann die einzelnen Befunde. Die Auswahl-Knöpfe erscheinen erst nach dem ersten Markieren; vorher gibt es nur das Kästchen „Seite auswählen“.
 - **Befunde:** Die Zahl der Befunde zählt jetzt jeden Ausfall einmal und jeden Befund ohne Ausfall dahinter („8 Ausfälle + 6 einzelne = 14“); die Folgebefunde der Ausfälle stehen als Unterzeile unter der Kachel „Alle“. Das gilt für die Zahl am Reiter, die Kachel „Offene Befunde“, den Link „Alle Befunde“ und die Befunde-Seite. Die Kacheln der Unterseiten (z. B. Komponenten) haben mehr Platz für den Text.
 - **Recorder, Lauteste Entitäten:** Die Liste ist jetzt eine sortierbare Tabelle wie „Auffälligkeiten“ (Name, Einordnung, Zeilen, Zeilen pro Tag, ohne neuen Zustand, Attribute, lauteste Stunde) statt vierzeiliger Karten; auf dem Telefon wird sie zu Karten. Im Kopf der Auswahlspalte markiert ein Kästchen alle Zeilen der Seite (auch bei „Auffälligkeiten“ und in der Kostenliste).
 - **Recorder:** Die Auswahlspalte der Tabellen („Auffälligkeiten“, Lauteste Entitäten) ist nur noch so breit wie das Kästchen; der Kopf zeigt ein Symbol statt des Worts „Auswahl“.

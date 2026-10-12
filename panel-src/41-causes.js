@@ -44,10 +44,9 @@ class CausesMixin {
       const body = `${own}${pg.rows.join("")}${pg.footer}`;
       return this.fold(`cause_${c.id}`, head, body + decide, false);
     }).join("");
-    const sub = this.t("causesSub", { n: this.formatNumber(causes.length), m: this.formatNumber(this.data.findings.filter(f => !f.cause_id && !f.ignored).length) });
-    // From four causes on the heading folds, so the list of findings below does not sink; up to five stay open.
-    if (causes.length > 3) return `<div class="panel">${this.fold("causes_all", { tone: "red", title: this.t("causesTitle"), sub, pill: this.formatNumber(causes.length) }, rows, causes.length <= 5)}</div>`;
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("causesTitle")}</h2><p>${sub}</p></div></div>${rows}</div>`;
+    const sub = this.t("causesHint");
+    // The outages are the first group of the open list; from four causes on the group folds, up to five stay open.
+    return this.fold("causes_all", { tone: "red", title: this.t("causesGroup", { n: this.formatNumber(causes.length) }), sub, pill: this.formatNumber(causes.length) }, rows, causes.length <= 5);
   }
 
   // What can be decided about an outage that is a finding of its own: known, snoozed, hidden.
@@ -65,7 +64,7 @@ class CausesMixin {
   followerCount() { return this.data.findings.filter(f => f.cause_id && !f.ignored && f.rule_id !== "config_entry.not_loaded").length; }
 }
 Object.assign(TEXT.de, {
-  causesTitle: "Ausfälle", causesSub: "{n} Ausfälle (Ursachen) · {m} einzelne Befunde. Behebe zuerst die Ausfälle, sie erklären oft viele Befunde.",
+  causesTitle: "Ausfälle", causesGroup: "Ausfälle ({n})", causesHint: "Behebe zuerst diese, sie erklären oft viele Befunde.", singleGroup: "Einzelne Befunde ({n})", causesSub: "{n} Ausfälle (Ursachen) · {m} einzelne Befunde. Behebe zuerst die Ausfälle, sie erklären oft viele Befunde.",
   causeNone: "keine Entität betroffen", outageIntegrations: "{n} Integrationen", outageDevices: "{n} Geräte", singleFindings: "Einzelne Befunde",
   logTitle: "Im HA-Log", logLine: "Im HA-Log: {what}, zuletzt {when}", logLevel_warning: "{n}× Warnung", logLevel_error: "{n}× Fehler", logLevel_critical: "{n}× kritischer Fehler",
   cause_integration_down: "Integration {name} ist nicht geladen", cause_device_down: "Gerät {name} ist ganz ausgefallen",
@@ -73,7 +72,7 @@ Object.assign(TEXT.de, {
   causeShow: "Folgebefunde anzeigen", findingsFollowSub: "dazu {n} Folgebefunde der Ausfälle", causeHide: "Folgebefunde ausblenden", actOutages: "Ausfälle",
 });
 Object.assign(TEXT.en, {
-  causesTitle: "Outages", causesSub: "{n} outages (causes) · {m} single findings. Fix the outages first, they often explain many findings.",
+  causesTitle: "Outages", causesGroup: "Outages ({n})", causesHint: "Fix these first, they often explain many findings.", singleGroup: "Single findings ({n})", causesSub: "{n} outages (causes) · {m} single findings. Fix the outages first, they often explain many findings.",
   causeNone: "no entity affected", outageIntegrations: "{n} integrations", outageDevices: "{n} devices", singleFindings: "Single findings",
   logTitle: "In the HA log", logLine: "In the HA log: {what}, last {when}", logLevel_warning: "{n}× warning", logLevel_error: "{n}× error", logLevel_critical: "{n}× critical error",
   cause_integration_down: "Integration {name} is not loaded", cause_device_down: "Device {name} is down completely",
