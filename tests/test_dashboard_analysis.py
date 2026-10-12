@@ -82,6 +82,24 @@ def test_helper_options_reference_their_source_entities() -> None:
     }
 
 
+def test_mold_indicator_and_bayesian_options_reference_their_sources() -> None:
+    from custom_components.ha_housekeeper.dashboard_analysis import (
+        HELPER_DOMAINS,
+        extract_helper_references,
+    )
+
+    assert {"bayesian", "mold_indicator"} <= HELPER_DOMAINS
+    options = {
+        "indoor_temp_sensor": "sensor.temp",
+        "indoor_humidity_sensor": "light.kitchen",
+        "outdoor_temp_sensor": "sensor.gone",
+        "observations": [{"platform": "state", "entity_id": "sun.sun", "to_state": "on"}],
+    }
+    refs = {r["object_id"] for r in extract_helper_references(options, KNOWN)}
+
+    assert refs == {"sensor.temp", "light.kitchen", "sensor.gone", "sun.sun"}
+
+
 def test_location_names_view_section_and_card() -> None:
     from custom_components.ha_housekeeper.dashboard_analysis import describe_location
 

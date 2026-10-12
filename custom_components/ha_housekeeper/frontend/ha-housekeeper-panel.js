@@ -423,6 +423,9 @@ const SCHEMES = {
 // Earlier builds saved other scheme names.
 const SCHEME_ALIASES = { teal: "housekeeper", amber: "housekeeper", sage: "housekeeper", zeitarchiv: "housekeeper", indigo: "modern" };
 
+// Helpers: config-entry domains (inventory type config_entry) and entity platforms (inventory type entity).
+const HELPER_DOMAINS = new Set(["template", "derivative", "integration", "min_max", "threshold", "utility_meter", "statistics", "trend", "filter", "history_stats", "switch_as_x", "compensation", "generic_hygrostat", "generic_thermostat", "bayesian", "mold_indicator", "group", "random", "tod"]);
+const HELPER_PLATFORMS = new Set(["input_boolean", "input_button", "input_datetime", "input_number", "input_select", "input_text", "counter", "timer", "schedule", "group"]);
 const USAGE_RELATIONS = ["TRIGGERS_ON", "USES_AS_CONDITION", "TARGETS", "REFERENCES", "SHOWS", "INCLUDES"];
 
 // Pause after the last key stroke in a search field before the list is rebuilt.
@@ -583,7 +586,7 @@ Object.assign(TEXT.en, {
 
 // Texts for the integration detail page; merged into TEXT.
 Object.assign(TEXT.de, {
-  originKindCore: "Core", originKindCustom: "Custom", allOrigins: "Alle Herkünfte",
+  originKindCore: "Core", originKindCustom: "Custom", allOrigins: "Alle Herkünfte", helperKind: "Helfer", usedByCol: "Verwendet von", changedCol: "Zuletzt geändert",
   ignored: "Ignoriert", integrationCard: "Integration", integrationName: "Integration", origin: "Herkunft", originBuiltIn: "In Home Assistant enthalten", originCustom: "Benutzerdefiniert · {path}{version}",
   entrySource: "Eingerichtet über", entryError: "Fehlermeldung", entryId: "Eintrags-ID", entryUniqueId: "Eindeutige ID", entryCreated: "Angelegt", entryModified: "Geändert", entryEntities: "Entitäten", entryDevices: "Geräte",
   entryDocs: "Dokumentation", entryHaPath: "Pfad in Home Assistant", noneValue: "keine",
@@ -593,7 +596,7 @@ Object.assign(TEXT.de, {
   cause_entry_problem_error: "Die Integration ist nicht geladen ({state}). Meldung: {error}",
 });
 Object.assign(TEXT.en, {
-  originKindCore: "Core", originKindCustom: "Custom", allOrigins: "All origins",
+  originKindCore: "Core", originKindCustom: "Custom", allOrigins: "All origins", helperKind: "Helpers", usedByCol: "Used by", changedCol: "Last changed",
   ignored: "Ignored", integrationCard: "Integration", integrationName: "Integration", origin: "Origin", originBuiltIn: "Included with Home Assistant", originCustom: "Custom · {path}{version}",
   entrySource: "Set up via", entryError: "Error message", entryId: "Entry ID", entryUniqueId: "Unique ID", entryCreated: "Created", entryModified: "Modified", entryEntities: "Entities", entryDevices: "Devices",
   entryDocs: "Documentation", entryHaPath: "Path in Home Assistant", noneValue: "none",
@@ -3381,8 +3384,8 @@ class InventoryMixin {
     const q = this.query.trim().toLowerCase();
     return this.memo("inventory", [q, this.typeFilter, this.statusFilter, this.originFilter, this.sort, this.sortDir, this.lang], () => {
       const { natural, ids } = this.collators(), desc = this.sortDir === "desc";
-      const pick = item => this.sort === "status" ? item.status : this.sort === "type" ? item.object_type : this.sort === "since" ? item.status_since : this.sort === "version" ? item.integration_version : this.sort === "entities" ? String(item.entity_count ?? "") : (item.name || item.object_id);
-      const rows = this.data.objects.filter(item => (!q || this.haystack(item).includes(q)) && (!this.typeFilter || item.object_type === this.typeFilter)
+      const pick = item => this.sort === "status" ? item.status : this.sort === "type" ? item.object_type : this.sort === "since" ? item.status_since : this.sort === "version" ? item.integration_version : this.sort === "entities" ? String(item.entity_count ?? "") : this.sort === "usedByCol" ? String(this.usedByCount(item) ?? "") : this.sort === "changedCol" ? (item.last_changed || "") : (item.name || item.object_id);
+      const rows = this.data.objects.filter(item => (!q || this.haystack(item).includes(q)) && (!this.typeFilter || (this.typeFilter === "helper" ? this.isHelper(item) : item.object_type === this.typeFilter))
         && (!this.statusFilter || item.status === this.statusFilter)
         && (!this.originFilter || (item.object_type === "config_entry" && !!item.custom === (this.originFilter === "custom")))).map(item => ({ item, key: pick(item) }));
       rows.sort((a, b) => {
@@ -3392,6 +3395,27 @@ class InventoryMixin {
       });
       return rows.map(row => row.item);
     });
+  }
+
+  // A helper is a config entry of a helper domain or an entity of a helper platform.
+  isHelper(item) {
+    return item.object_type === "config_entry" ? HELPER_DOMAINS.has(item.domain) : item.object_type === "entity" && (HELPER_PLATFORMS.has(item.platform) || HELPER_DOMAINS.has(item.platform));
+  }
+
+  // How many objects use this one (incoming edges of the usage kinds); a config entry adds up its entities.
+  usedByCount(item) {
+    const counts = this.memo("usedBy", [], () => {
+      const own = new Map(), perEntry = new Map();
+      for (const o of this.data.objects) {
+        if (o.object_type !== "entity") continue;
+        const n = this.edgesTo(this.objectKey(o)).filter(e => USAGE_RELATIONS.includes(e.relation)).length;
+        own.set(o.object_id, n);
+        if (o.config_entry_id) perEntry.set(o.config_entry_id, (perEntry.get(o.config_entry_id) || 0) + n);
+      }
+      return { own, perEntry };
+    });
+    if (item.object_type === "config_entry") return counts.perEntry.get(item.object_id) ?? 0;
+    return item.object_type === "entity" ? counts.own.get(item.object_id) ?? 0 : null;
   }
 
   // The text a search looks in, built once per object.
@@ -3422,12 +3446,14 @@ class InventoryMixin {
     const hid = key => this.colHidden("inventory", key);
     // Version and entity count only mean something for integrations, so they appear once the list is narrowed to them.
     const integ = this.typeFilter === "config_entry" || !!this.originFilter;
-    const integCols = integ ? ["version", "entities"] : [];
-    this.setExporter("inventory", "inventory", [this.t("name"), "ID", this.t("type"), this.t("status"), this.t("reason"), this.t("since"), ...(integ ? [this.t("origin"), this.t("version"), this.t("entities")] : [])], () => rows.map(i => [i.name, i.object_id, this.t(i.object_type), this.statusLabel(i.status), i.reason ? this.t(i.reason) : i.missing_reference_count ? `${i.missing_reference_count} ${this.t("missingReferences")}` : "", i.status_since || "", ...(integ ? [i.object_type === "config_entry" ? this.t(i.custom ? "originKindCustom" : "originKindCore") : "", i.integration_version || "", i.entity_count ?? ""] : [])]));
+    const helperMode = this.typeFilter === "helper";
+    const integCols = [...(integ ? ["version", "entities"] : []), ...(helperMode ? ["usedByCol", "changedCol"] : [])];
+    const colValue = (item, k) => k === "version" ? (item.object_type === "config_entry" ? item.integration_version || "" : "") : k === "entities" ? (item.object_type === "config_entry" ? item.entity_count ?? 0 : "") : k === "usedByCol" ? this.usedByCount(item) ?? "" : item.last_changed || "";
+    this.setExporter("inventory", "inventory", [this.t("name"), "ID", this.t("type"), this.t("status"), this.t("reason"), this.t("since"), ...(integ ? [this.t("origin")] : []), ...integCols.map(k => this.t(k))], () => rows.map(i => [i.name, i.object_id, this.t(i.object_type), this.statusLabel(i.status), i.reason ? this.t(i.reason) : i.missing_reference_count ? `${i.missing_reference_count} ${this.t("missingReferences")}` : "", i.status_since || "", ...(integ ? [i.object_type === "config_entry" ? this.t(i.custom ? "originKindCustom" : "originKindCore") : ""] : []), ...integCols.map(k => colValue(i, k))]));
     const tools = `<div class="listtools">${this.listTools("inventory", ["type", "status", "reason", "since", ...integCols].map(k => ({ key: k, label: k })))}<button type="button" class="btn" data-xp-open><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button></div>`;
-    return `<div class="stack">${tiles}<div class="panel"><div class="filters"><input id="query" type="search" value="${this.esc(this.query)}" placeholder="${this.t("search")}"><select id="typeFilter" aria-label="${this.t("type")}"><option value="">${this.t("all")}</option>${types.map(x => `<option value="${x}" ${this.typeFilter === x ? "selected" : ""}>${this.t(x)}</option>`).join("")}</select><select id="statusFilter" aria-label="${this.t("status")}"><option value="">${this.t("allStatus")}</option>${statuses.map(x => `<option value="${x}" ${this.statusFilter === x ? "selected" : ""}>${this.statusLabel(x)}</option>`).join("")}</select><select id="originFilter" aria-label="${this.t("origin")}"><option value="">${this.t("allOrigins")}</option>${["core", "custom"].map(x => `<option value="${x}" ${this.originFilter === x ? "selected" : ""}>${this.t(x === "core" ? "originKindCore" : "originKindCustom")}</option>`).join("")}</select>
-        <div class="mobsort"><select id="sortKey" aria-label="${this.t("sortBy")}">${[["name", "sortName"], ["type", "sortType"], ["status", "sortStatus"], ["since", "sortSince"], ...(integ ? [["version", "version"], ["entities", "entities"]] : [])].map(([key, label]) => `<option value="${key}" ${this.sort === key ? "selected" : ""}>${this.t(label)}</option>`).join("")}</select><button class="btn" id="sortDir" aria-label="${this.t("sortBy")}">${this.sortDir === "desc" ? "▼" : "▲"}</button></div></div>${tools}
-      <div class="tablewrap inv"><table><thead><tr>${this.th("name", "name")}${hid("type") ? "" : this.th("type", "type")}${hid("status") ? "" : this.th("status", "status")}${hid("reason") ? "" : `<th>${this.t("reason")}</th>`}${hid("since") ? "" : this.th("since", "since")}${integCols.map(k => hid(k) ? "" : this.th(k, k)).join("")}</tr></thead><tbody>${visibleRows.map(item => `<tr data-object="${this.esc(this.objectKey(item))}" tabindex="0" role="button" aria-label="${this.esc(item.name)}"><td><span class="object">${this.tile(item.object_type, this.tone(item.status) === "ok" ? "" : this.tone(item.status))}${this.nameCell(item.name, item.object_id, "span")}</span></td>${hid("type") ? "" : `<td data-label="${this.esc(this.t("type"))}">${this.t(item.object_type)}</td>`}${hid("status") ? "" : `<td data-label="${this.esc(this.t("status"))}">${this.pill(item.status)}</td>`}${hid("reason") ? "" : `<td data-label="${this.esc(this.t("reason"))}">${this.esc(item.reason ? this.t(item.reason) : item.missing_reference_count ? `${item.missing_reference_count} ${this.t("missingReferences")}` : "—")}</td>`}${hid("since") ? "" : `<td data-label="${this.esc(this.t("since"))}">${this.formatDate(item.status_since)}</td>`}${integCols.map(k => hid(k) ? "" : `<td data-label="${this.esc(this.t(k))}">${this.esc(item.object_type !== "config_entry" ? "—" : k === "version" ? (item.integration_version || "—") : this.formatNumber(item.entity_count ?? 0))}</td>`).join("")}</tr>`).join("")}</tbody></table>${rows.length ? "" : `<div class="emptymsg">${this.t("noResults")}</div>`}</div>
+    return `<div class="stack">${tiles}<div class="panel"><div class="filters"><input id="query" type="search" value="${this.esc(this.query)}" placeholder="${this.t("search")}"><select id="typeFilter" aria-label="${this.t("type")}"><option value="">${this.t("all")}</option><option value="helper" ${this.typeFilter === "helper" ? "selected" : ""}>${this.t("helperKind")}</option>${types.map(x => `<option value="${x}" ${this.typeFilter === x ? "selected" : ""}>${this.t(x)}</option>`).join("")}</select><select id="statusFilter" aria-label="${this.t("status")}"><option value="">${this.t("allStatus")}</option>${statuses.map(x => `<option value="${x}" ${this.statusFilter === x ? "selected" : ""}>${this.statusLabel(x)}</option>`).join("")}</select><select id="originFilter" aria-label="${this.t("origin")}"><option value="">${this.t("allOrigins")}</option>${["core", "custom"].map(x => `<option value="${x}" ${this.originFilter === x ? "selected" : ""}>${this.t(x === "core" ? "originKindCore" : "originKindCustom")}</option>`).join("")}</select>
+        <div class="mobsort"><select id="sortKey" aria-label="${this.t("sortBy")}">${[["name", "sortName"], ["type", "sortType"], ["status", "sortStatus"], ["since", "sortSince"], ...(integ ? [["version", "version"], ["entities", "entities"]] : []), ...(helperMode ? [["usedByCol", "usedByCol"], ["changedCol", "changedCol"]] : [])].map(([key, label]) => `<option value="${key}" ${this.sort === key ? "selected" : ""}>${this.t(label)}</option>`).join("")}</select><button class="btn" id="sortDir" aria-label="${this.t("sortBy")}">${this.sortDir === "desc" ? "▼" : "▲"}</button></div></div>${tools}
+      <div class="tablewrap inv"><table><thead><tr>${this.th("name", "name")}${hid("type") ? "" : this.th("type", "type")}${hid("status") ? "" : this.th("status", "status")}${hid("reason") ? "" : `<th>${this.t("reason")}</th>`}${hid("since") ? "" : this.th("since", "since")}${integCols.map(k => hid(k) ? "" : this.th(k, k)).join("")}</tr></thead><tbody>${visibleRows.map(item => `<tr data-object="${this.esc(this.objectKey(item))}" tabindex="0" role="button" aria-label="${this.esc(item.name)}"><td><span class="object">${this.tile(item.object_type, this.tone(item.status) === "ok" ? "" : this.tone(item.status))}${this.nameCell(item.name, item.object_id, "span")}</span></td>${hid("type") ? "" : `<td data-label="${this.esc(this.t("type"))}">${this.t(item.object_type)}</td>`}${hid("status") ? "" : `<td data-label="${this.esc(this.t("status"))}">${this.pill(item.status)}</td>`}${hid("reason") ? "" : `<td data-label="${this.esc(this.t("reason"))}">${this.esc(item.reason ? this.t(item.reason) : item.missing_reference_count ? `${item.missing_reference_count} ${this.t("missingReferences")}` : "—")}</td>`}${hid("since") ? "" : `<td data-label="${this.esc(this.t("since"))}">${this.formatDate(item.status_since)}</td>`}${integCols.map(k => hid(k) ? "" : `<td data-label="${this.esc(this.t(k))}">${this.esc(k === "usedByCol" ? (this.usedByCount(item) == null ? "—" : this.formatNumber(this.usedByCount(item))) : k === "changedCol" ? (item.last_changed ? this.formatDate(item.last_changed) : "—") : item.object_type !== "config_entry" ? "—" : k === "version" ? (item.integration_version || "—") : this.formatNumber(item.entity_count ?? 0))}</td>`).join("")}</tr>`).join("")}</tbody></table>${rows.length ? "" : `<div class="emptymsg">${this.t("noResults")}</div>`}</div>
       ${pg.footer || `<div class="tablefoot"><span>${this.formatNumber(rows.length)} ${this.t("of_total")} ${this.formatNumber(this.data.objects.length)} ${this.t("shown")}</span></div>`}</div>`;
   }
 

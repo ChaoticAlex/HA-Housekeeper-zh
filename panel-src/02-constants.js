@@ -62,6 +62,9 @@ const SCHEMES = {
 // Earlier builds saved other scheme names.
 const SCHEME_ALIASES = { teal: "housekeeper", amber: "housekeeper", sage: "housekeeper", zeitarchiv: "housekeeper", indigo: "modern" };
 
+// Helpers: config-entry domains (inventory type config_entry) and entity platforms (inventory type entity).
+const HELPER_DOMAINS = new Set(["template", "derivative", "integration", "min_max", "threshold", "utility_meter", "statistics", "trend", "filter", "history_stats", "switch_as_x", "compensation", "generic_hygrostat", "generic_thermostat", "bayesian", "mold_indicator", "group", "random", "tod"]);
+const HELPER_PLATFORMS = new Set(["input_boolean", "input_button", "input_datetime", "input_number", "input_select", "input_text", "counter", "timer", "schedule", "group"]);
 const USAGE_RELATIONS = ["TRIGGERS_ON", "USES_AS_CONDITION", "TARGETS", "REFERENCES", "SHOWS", "INCLUDES"];
 
 // Pause after the last key stroke in a search field before the list is rebuilt.

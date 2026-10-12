@@ -3945,6 +3945,20 @@ test("origin filter keeps only core or custom config entries", () => {
   assert.deepEqual(el.filtered().map(o => o.object_id), ["E1"]);
 });
 
+test("helper filter keeps helper entries and entities and counts what uses them", () => {
+  const { el } = panel();
+  el.data = { ...DATA, edges: [{ source: "automation:a1", target: "entity:input_boolean.guest", relation: "TRIGGERS_ON" }], objects: [
+    { object_type: "entity", object_id: "input_boolean.guest", name: "Guest", platform: "input_boolean", config_entry_id: null, status: "active" },
+    { object_type: "entity", object_id: "light.kitchen", name: "Kitchen", platform: "hue", config_entry_id: "E1", status: "active" },
+    { object_type: "config_entry", object_id: "E3", name: "Sum", domain: "min_max", status: "active", entity_count: 1 },
+    { object_type: "config_entry", object_id: "E1", name: "Hue", domain: "hue", status: "active", entity_count: 1 },
+  ] };
+  el.typeFilter = "helper";
+  assert.deepEqual(el.filtered().map(o => o.object_id).sort(), ["E3", "input_boolean.guest"]);
+  assert.equal(el.usedByCount(el.data.objects[0]), 1);
+  assert.equal(el.usedByCount(el.data.objects[3]), 0);
+});
+
 // ---------------------------------------------------------------- Storage & system, access & data flow
 
 const SYSTEM = {
