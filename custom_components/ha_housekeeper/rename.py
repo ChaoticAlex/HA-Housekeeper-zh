@@ -22,12 +22,16 @@ def taken(hass: HomeAssistant, entity_id: str) -> bool:
 
 
 async def prepare(
-    hass: HomeAssistant, snapshot: dict[str, Any], old: str, new: str
+    hass: HomeAssistant,
+    snapshot: dict[str, Any],
+    old: str,
+    new: str,
+    lineage: dict[str, dict[str, str]] | None = None,
 ) -> dict[str, Any]:
     """What a rename touches: the registry facts, the sources and a fingerprint of both."""
     valid = valid_entity_id(new) and new.split(".", 1)[0] == old.split(".", 1)[0]
     free = valid and not taken(hass, new)
-    sources_print, sources = await collect_sources(hass, snapshot, old, new)
+    sources_print, sources = await collect_sources(hass, snapshot, old, new, lineage)
     return {
         "registered": er.async_get(hass).async_get(old) is not None,
         "valid": valid,

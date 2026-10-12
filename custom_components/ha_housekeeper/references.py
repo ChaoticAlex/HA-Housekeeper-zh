@@ -234,8 +234,23 @@ def _mark_item_level_undo(sources: list[dict[str, Any]]) -> None:
         source["undo_per_item"] = not whole
 
 
+def original_hash(lineage: dict[str, dict[str, str]] | None, key: str, value: str | None) -> Any:
+    """The hash a source had before the steps of this run rewrote it (``lineage``: key -> after
+    hash -> hash before that write), so an earlier step's own edit does not look like a foreign one."""
+    steps = (lineage or {}).get(key, {})
+    seen = set()
+    while value in steps and value not in seen:
+        seen.add(value)
+        value = steps[value]
+    return value
+
+
 async def collect_sources(
-    hass: HomeAssistant, snapshot: dict[str, Any], old: str, new: str
+    hass: HomeAssistant,
+    snapshot: dict[str, Any],
+    old: str,
+    new: str,
+    lineage: dict[str, dict[str, str]] | None = None,
 ) -> tuple[str, list[dict[str, Any]]]:
     """Preview a replacement: every source with the changes it would get.
 
@@ -282,7 +297,12 @@ async def collect_sources(
         )
     _mark_item_level_undo(sources)
     fingerprint = text_hash(
-        json.dumps([[s["source"], s["hash"], s["change_count"]] for s in sources])
+        json.dumps(
+            [
+                [s["source"], original_hash(lineage, s["source"], s["hash"]), s["change_count"]]
+                for s in sources
+            ]
+        )
     )
     return fingerprint, sources
 
@@ -294,10 +314,14 @@ def entity_print(hass: HomeAssistant, entity_id: str) -> str:
 
 
 async def preview_replacement(
-    hass: HomeAssistant, snapshot: dict[str, Any], old: str, new: str
+    hass: HomeAssistant,
+    snapshot: dict[str, Any],
+    old: str,
+    new: str,
+    lineage: dict[str, dict[str, str]] | None = None,
 ) -> tuple[str, list[dict[str, Any]]]:
     """Fingerprint and sources of a replacement; the fingerprint also covers both entities."""
-    sources_print, sources = await collect_sources(hass, snapshot, old, new)
+    sources_print, sources = await collect_sources(hass, snapshot, old, new, lineage)
     return text_hash(
         f"{sources_print}|{entity_print(hass, old)}|{entity_print(hass, new)}"
     ), sources

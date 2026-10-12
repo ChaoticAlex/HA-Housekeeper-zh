@@ -329,6 +329,7 @@ class CleanupRunner:
         self.scanner = scanner
         self._tokens: dict[str, tuple[str, datetime, list[str]]] = {}
         self._cancel = False
+        self._lineage: dict[str, dict[str, str]] = {}
         self._task: asyncio.Task[None] | None = None
         self.status: dict[str, Any] = {
             "running": False,
@@ -567,6 +568,7 @@ class CleanupRunner:
 
     async def _execute(self, plan: dict[str, Any], object_ids: list[str]) -> None:
         self.status["phase"] = "running"
+        self._lineage = {}
         snapshot = await self.scanner.async_scan()
         context = {
             "snapshot": snapshot,
@@ -1270,6 +1272,7 @@ class CleanupRunner:
                 after = await load_source(self.hass, snapshot, planned["source"])
                 source["after_hash"] = after["hash"]
                 source["state"] = "done"
+                self._lineage.setdefault(planned["source"], {})[after["hash"]] = planned["hash"]
                 await self._reload(loaded)
                 # A reload skips an automation it cannot load instead of failing.
                 if (
@@ -1554,7 +1557,9 @@ class CleanupRunner:
                 "meter": {**meter, "mode": action["mode"]},
             }
         elif kind in RENAME_KINDS:
-            found = await rename_module.prepare(self.hass, snapshot, object_id, action["target"])
+            found = await rename_module.prepare(
+                self.hass, snapshot, object_id, action["target"], self._lineage
+            )
             if action.get("fingerprint") is None or found["fingerprint"] != action["fingerprint"]:
                 return "source_changed"
             action["sources"] = found["sources"]
@@ -1568,7 +1573,7 @@ class CleanupRunner:
             return None
         elif kind in REFERENCE_KINDS:
             fingerprint, sources = await preview_replacement(
-                self.hass, snapshot, object_id, action["target"]
+                self.hass, snapshot, object_id, action["target"], self._lineage
             )
             if action.get("fingerprint") is None or fingerprint != action["fingerprint"]:
                 return "source_changed"

@@ -82,6 +82,7 @@
 
 ### Behoben
 
+- **Verweise ersetzen, Umbenennen:** Betreffen mehrere Schritte eines Plans dieselbe Automation oder dieselbe Quelle, brach der Lauf nach dem ersten Schritt mit „Eine Konfiguration wurde nach der Vorschau geändert“ ab. Die eigenen Änderungen früherer Schritte zählen jetzt nicht mehr als fremde Änderung.
 - **Kacheln der Unterseiten:** Das Symbol sitzt jetzt mittig in der Kachel und hat mehr Abstand zum Text.
 - **Webhooks:** Hat eine Automation mehrere Webhook-Auslöser, gilt sie als offen, sobald einer von außen erreichbar ist (vorher zählte nur der erste). Deaktivierte Automationen sind gekennzeichnet und zählen nicht als offen.
 - **Pläne:** Ein einzelner fehlgeschlagener Statusabruf beendet die Fortschrittsanzeige nicht mehr; sie versucht es erneut und weist darauf hin. Ein fehlgeschlagener Abbruch meldet das jetzt.
@@ -154,6 +155,7 @@
 
 ### Fixed
 
+- **Replace references, rename:** When several steps of a plan touched the same automation or source, the run stopped after the first step with "A configuration was changed after the preview". The changes made by earlier steps of the same run no longer count as foreign changes.
 - **Sub-page tiles:** The icon is now vertically centred in the tile and has more room to the text.
 - **Webhooks:** An automation with several webhook triggers now counts as open as soon as one of them is reachable from outside (before, only the first one counted). Disabled automations are marked and do not count as open.
 - **Plans:** A single failed status request no longer ends the progress display; it retries and says so. A failed cancel now reports that.
