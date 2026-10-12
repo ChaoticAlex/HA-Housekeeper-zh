@@ -1201,7 +1201,7 @@ class StylesMixin {
       .dot.ok,.bar .ok{background:var(--hk-green)}.dot.warn,.bar .warn{background:var(--hk-amber)}.dot.red,.bar .red{background:var(--hk-red)}.dot.mute,.bar .mute{background:var(--hk-gray)}.dot.violet,.bar .violet{background:var(--hk-violet)}
       .types{display:grid}.type{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:10px 16px;border:0;border-top:1px solid var(--hk-border);background:transparent;text-align:left;font-size:calc(13px*var(--hk-fs,1))}.type:hover{background:var(--hk-soft)}.type .tile{width:30px;height:30px}.type b{font-weight:600}
       .mobsort,.msince{display:none}
-      .rowwrap .row.politem{padding-left:12px}.row.politem{padding-left:44px;background:color-mix(in srgb,var(--hk-soft) 45%,transparent)}.row.politem .tile{width:28px;height:28px}.tablewrap.lt td:not(:first-child){white-space:nowrap}.tablewrap.lt tr.static{cursor:default}.tablewrap.lt tr.static:hover{background:transparent}.tablewrap.lt td .id{display:block;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-family:var(--hk-mono,monospace);margin-top:2px}.tablewrap.lt td small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.tablewrap.lt td:first-child{min-width:220px}.tip{position:fixed;z-index:50;display:grid;gap:2px;max-width:min(520px,calc(100vw - 16px));padding:8px 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);box-shadow:0 6px 20px rgba(0,0,0,.18);font-size:calc(12px*var(--hk-fs,1));pointer-events:none;overflow-wrap:anywhere}.tip[hidden]{display:none}.tip strong{font-weight:700}.tip span{font-family:ui-monospace,SFMono-Regular,monospace;color:var(--hk-muted)}.fflow{padding:6px 14px 12px}.fstep{margin:6px 0;padding:8px 10px;border:1px solid var(--hk-border);border-left:3px solid var(--hk-blue);border-radius:8px;background:var(--hk-surface)}.fstep.broken{border-left-color:var(--hk-red,#b3261e);background:color-mix(in srgb,var(--hk-red,#b3261e) 6%,var(--hk-surface))}.fstep>summary{cursor:pointer;list-style-position:inside}.fhead{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 8px;max-width:calc(100% - 20px);vertical-align:middle}.fhead ha-icon{--mdc-icon-size:18px;color:var(--hk-muted)}.ffacts{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.fpath{margin-left:auto;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.fkids{margin:8px 0 2px 14px;padding-left:10px;border-left:1px dashed var(--hk-border)}.fgroup>small{display:block;margin:6px 0 2px;color:var(--hk-muted);text-transform:uppercase;letter-spacing:.05em;font-size:calc(10px*var(--hk-fs,1))}.fbranch{margin:6px 0}.chip.flowref{cursor:pointer;padding:2px 8px;font-size:calc(12px*var(--hk-fs,1))}.chip.flowref.missing{border-color:var(--hk-red,#b3261e);color:var(--hk-red,#b3261e);cursor:default}.listtools{display:flex;gap:8px;justify-content:flex-end;align-items:stretch;padding:10px 14px}.listtools .btn,.listtools .dirbtn{height:40px;min-height:40px;box-sizing:border-box;border:1px solid var(--hk-border);border-radius:8px;box-shadow:none}.listtools .btn:hover{border-color:var(--hk-blue)}.listtools .colwrap{display:flex}.colwrap{position:relative;display:inline-flex}.colpop{position:absolute;right:0;top:calc(100% + 4px);z-index:20;display:grid;gap:6px;min-width:180px;padding:10px 12px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);box-shadow:0 6px 20px rgba(0,0,0,.18)}.colpop label{display:flex;gap:8px;align-items:center;font-size:calc(13px*var(--hk-fs,1));cursor:pointer}.dirbtn.on{border-color:var(--hk-blue);color:var(--hk-blue)}.namecell{display:block;min-width:0;max-width:280px}.namecell .cut{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media(max-width:860px){.namecell{max-width:none}.namecell .cut{white-space:normal;overflow:visible}}@media(min-width:861px){}.dense .tablewrap td{padding-top:4px;padding-bottom:4px}.dense .tablewrap .namecell .id{display:none}.tablewrap.lt .muted{color:var(--hk-muted)}.polform{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.polform input{flex:1 1 140px;min-width:0;padding:8px 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit;font:inherit}.policyswitch{appearance:none;-webkit-appearance:none;position:relative;width:38px;height:22px;margin:0;border:1px solid var(--hk-border);border-radius:11px;background:var(--hk-soft);flex:none;cursor:pointer;transition:background-color .15s ease,border-color .15s ease}.policyswitch::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--hk-muted);transition:transform .15s ease,background-color .15s ease}.policyswitch:checked{border-color:var(--hk-blue);background:var(--hk-blue)}.policyswitch:checked::after{background:#fff;transform:translateX(16px)}.policyswitch:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px}.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+      .rowwrap .row.politem{padding-left:12px}.row.politem{padding-left:44px;background:color-mix(in srgb,var(--hk-soft) 45%,transparent)}.row.politem .tile{width:28px;height:28px}.tablewrap.lt td:not(:first-child){white-space:nowrap}.tablewrap.lt tr.static{cursor:default}.tablewrap.lt tr.static:hover{background:transparent}.tablewrap.lt td .id{display:block;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-family:var(--hk-mono,monospace);margin-top:2px}.tablewrap.lt td small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.tablewrap.lt td:first-child{min-width:220px}.tip{position:fixed;z-index:50;display:grid;gap:2px;max-width:min(520px,calc(100vw - 16px));padding:8px 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);box-shadow:0 6px 20px rgba(0,0,0,.18);font-size:calc(12px*var(--hk-fs,1));pointer-events:none;overflow-wrap:anywhere}.tip[hidden]{display:none}.tip strong{font-weight:700}.tip span{font-family:ui-monospace,SFMono-Regular,monospace;color:var(--hk-muted)}.tip em{font-style:normal;line-height:1.4;width:max-content;max-width:100%}.infotip{display:inline-grid;place-items:center;width:24px;height:24px;margin:-4px 0 -4px 4px;padding:0;border:0;border-radius:50%;background:none;color:var(--hk-muted);vertical-align:middle;cursor:help}.infotip:hover,.infotip:focus-visible{background:var(--hk-soft);color:inherit}.infotip ha-icon{--mdc-icon-size:18px}.fflow{padding:6px 14px 12px}.fstep{margin:6px 0;padding:8px 10px;border:1px solid var(--hk-border);border-left:3px solid var(--hk-blue);border-radius:8px;background:var(--hk-surface)}.fstep.broken{border-left-color:var(--hk-red,#b3261e);background:color-mix(in srgb,var(--hk-red,#b3261e) 6%,var(--hk-surface))}.fstep>summary{cursor:pointer;list-style-position:inside}.fhead{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 8px;max-width:calc(100% - 20px);vertical-align:middle}.fhead ha-icon{--mdc-icon-size:18px;color:var(--hk-muted)}.ffacts{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.fpath{margin-left:auto;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.fkids{margin:8px 0 2px 14px;padding-left:10px;border-left:1px dashed var(--hk-border)}.fgroup>small{display:block;margin:6px 0 2px;color:var(--hk-muted);text-transform:uppercase;letter-spacing:.05em;font-size:calc(10px*var(--hk-fs,1))}.fbranch{margin:6px 0}.chip.flowref{cursor:pointer;padding:2px 8px;font-size:calc(12px*var(--hk-fs,1))}.chip.flowref.missing{border-color:var(--hk-red,#b3261e);color:var(--hk-red,#b3261e);cursor:default}.listtools{display:flex;gap:8px;justify-content:flex-end;align-items:stretch;padding:10px 14px}.listtools .btn,.listtools .dirbtn{height:40px;min-height:40px;box-sizing:border-box;border:1px solid var(--hk-border);border-radius:8px;box-shadow:none}.listtools .btn:hover{border-color:var(--hk-blue)}.listtools .colwrap{display:flex}.colwrap{position:relative;display:inline-flex}.colpop{position:absolute;right:0;top:calc(100% + 4px);z-index:20;display:grid;gap:6px;min-width:180px;padding:10px 12px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);box-shadow:0 6px 20px rgba(0,0,0,.18)}.colpop label{display:flex;gap:8px;align-items:center;font-size:calc(13px*var(--hk-fs,1));cursor:pointer}.dirbtn.on{border-color:var(--hk-blue);color:var(--hk-blue)}.namecell{display:block;min-width:0;max-width:280px}.namecell .cut{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media(max-width:860px){.namecell{max-width:none}.namecell .cut{white-space:normal;overflow:visible}}@media(min-width:861px){}.dense .tablewrap td{padding-top:4px;padding-bottom:4px}.dense .tablewrap .namecell .id{display:none}.tablewrap.lt .muted{color:var(--hk-muted)}.polform{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.polform input{flex:1 1 140px;min-width:0;padding:8px 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit;font:inherit}.policyswitch{appearance:none;-webkit-appearance:none;position:relative;width:38px;height:22px;margin:0;border:1px solid var(--hk-border);border-radius:11px;background:var(--hk-soft);flex:none;cursor:pointer;transition:background-color .15s ease,border-color .15s ease}.policyswitch::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--hk-muted);transition:transform .15s ease,background-color .15s ease}.policyswitch:checked{border-color:var(--hk-blue);background:var(--hk-blue)}.policyswitch:checked::after{background:#fff;transform:translateX(16px)}.policyswitch:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px}.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
       button:focus-visible,[data-object]:focus-visible,tr[data-object]:focus-visible,th[data-sort]:focus-visible,.nav:focus-visible,.chip:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px}
       .filters{display:grid;grid-template-columns:minmax(240px,1fr) 190px 190px;gap:10px;padding:14px;border-bottom:1px solid var(--hk-border)}
       input,select{border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);padding:9px 12px;min-width:0}
@@ -10378,15 +10378,20 @@ class SystemMixin {
     return st;
   }
 
-  sysHead(name, title, hint) {
+  // The introduction sits behind an (i) after the title instead of in a paragraph of its own.
+  infoTip(text) {
+    return `<button type="button" class="infotip" data-tip="${this.esc(text)}" data-tip-plain="1" aria-label="${this.esc(text)}"><ha-icon icon="mdi:information-outline"></ha-icon></button>`;
+  }
+
+  sysHead(name, title, hint, intro) {
     const st = this.sysState(name);
     const at = st.at ? `<span class="scanago">${this.esc(this.t("sysAsOf", { time: this.formatDate(st.at) }))}</span>` : "";
-    return `<div class="panelhead"><div><h2>${this.t(title)}</h2><p>${this.t(hint)}</p></div><div class="actions">${at}<button class="btn" data-sys-refresh="${name}" ${st.loading ? "disabled" : ""}><ha-icon icon="mdi:refresh"></ha-icon>${this.t("sysRefresh")}</button></div></div>`;
+    return `<div class="panelhead"><div><h2>${this.t(title)}${intro ? this.infoTip(this.t(intro)) : ""}</h2><p>${this.t(hint)}</p></div><div class="actions">${at}<button class="btn" data-sys-refresh="${name}" ${st.loading ? "disabled" : ""}><ha-icon icon="mdi:refresh"></ha-icon>${this.t("sysRefresh")}</button></div></div>`;
   }
 
   // Loading, error or the page: the frame every one of the three pages shares.
-  sysFrame(name, title, hint, loading, build) {
-    const st = this.sysEnsure(name), head = this.sysHead(name, title, hint);
+  sysFrame(name, title, hint, loading, build, intro) {
+    const st = this.sysEnsure(name), head = this.sysHead(name, title, hint, intro);
     if (st.error) return `<div class="panel">${head}<div class="error">${this.esc(st.error)}</div></div>`;
     if (!st.data) return `<div class="panel">${head}${this.skeleton(loading)}</div>`;
     return build(st.data, head);
@@ -10457,8 +10462,8 @@ class SystemMixin {
       const open = this.viewTabOf("storage", tabs.filter(x => !x.disabled), sup && cats.length ? "categories" : "consumers");
       const tab = tabs.find(x => x.id === open);
       const body = { categories: () => this.sysCategories(cats), consumers: () => this.sysConsumers(r.breakdown), custom: () => this.sysCustom(r.custom_integrations), apps: () => this.sysApps(r.apps), cards: () => this.sysCards(r.cards), blueprints: () => this.sysBlueprints(r.blueprints) }[open]();
-      return `<div class="stack"><div class="panel">${head}<div class="pad"><p class="factnote">${this.t("sysIntro")}</p></div></div>${tiles}${swapLine ? `<div class="panel"><div class="pad">${swapLine}</div></div>` : ""}<div class="sysnav">${this.navTiles("storage", tabs, open, this.t("storage"))}</div><div class="panel"><div class="panelhead"><div><h2>${this.esc(tab.label)}</h2><p>${this.esc(tab.hint)}</p></div></div>${body}${this.howCounted("sysFootnote")}</div></div>`;
-    });
+      return `<div class="stack"><div class="panel">${head}</div>${tiles}${swapLine ? `<div class="panel"><div class="pad">${swapLine}</div></div>` : ""}<div class="sysnav">${this.navTiles("storage", tabs, open, this.t("storage"))}</div><div class="panel"><div class="panelhead"><div><h2>${this.esc(tab.label)}</h2><p>${this.esc(tab.hint)}</p></div></div>${body}${this.howCounted("sysFootnote")}</div></div>`;
+    }, "sysIntro");
   }
 
   sysSizeColumns(max) {
@@ -10638,8 +10643,8 @@ class SystemMixin {
       });
       const panel = (title, hint, body) => `<div class="panel"><div class="panelhead"><div><h2>${this.t(title)}</h2><p>${this.t(hint)}</p></div></div>${body}</div>`;
       const apps = r.apps_available ? this.accAppsTable(r.apps || [], risks, sorts.find(x => x.key === "risk")) : `<div class="emptymsg">${this.t("accAppsNoSupervisor")}</div>`;
-      return `<div class="stack"><div class="panel">${head}<div class="pad"><p class="factnote">${this.t("accIntro")}</p></div></div>${tiles}${panel("accSysTitle", "accSysHint", sysTable)}${panel("accCloudTitle", "accCloudHint", cloudTable)}${panel("accAppsTitle", "accAppsHint", apps)}<div class="panel">${this.howCounted("accFootnote")}</div></div>`;
-    });
+      return `<div class="stack"><div class="panel">${head}</div>${tiles}${panel("accSysTitle", "accSysHint", sysTable)}${panel("accCloudTitle", "accCloudHint", cloudTable)}${panel("accAppsTitle", "accAppsHint", apps)}<div class="panel">${this.howCounted("accFootnote")}</div></div>`;
+    }, "accIntro");
   }
 
   // The rights of the installed apps (add-ons), as the Supervisor describes them. A row opens the app in Home Assistant.
@@ -10704,14 +10709,19 @@ class SystemMixin {
         exportName: "credential-fields", header: [this.t("accColIntegration"), "Domain", this.t("secColKind"), this.t("secColFields"), this.t("secColSetCount"), this.t("secColEmptyCount")],
         rows: e => [e.title, e.domain, kindNames(e).join("; "), names(e), count(e, true), count(e, false)],
       });
-      return `<div class="stack"><div class="panel">${head}<div class="pad"><p class="factnote">${this.t("secIntro")}</p></div></div>${tiles}<div class="panel"><div class="panelhead"><div><h2>${this.t("secListTitle")}</h2><p>${this.t("secListHint")}</p></div></div>${table}${this.howCounted("secFootnote")}</div></div>`;
-    });
+      return `<div class="stack"><div class="panel">${head}</div>${tiles}<div class="panel"><div class="panelhead"><div><h2>${this.t("secListTitle")}</h2><p>${this.t("secListHint")}</p></div></div>${table}${this.howCounted("secFootnote")}</div></div>`;
+    }, "secIntro");
   }
 
   // ---------------------------------------------------------------- bindings
 
   bindSystem(root) {
     root.querySelectorAll("[data-sys-refresh]").forEach(el => el.onclick = () => this.sysLoad(el.dataset.sysRefresh));
+    // A tap on the (i) shows its text for a few seconds, as touch has no hover.
+    root.querySelectorAll(".infotip").forEach(el => el.addEventListener("click", () => {
+      this.showTip(el); globalThis.clearTimeout?.(this._tipHide);
+      this._tipHide = globalThis.setTimeout?.(() => this.hideTip(), 6000);
+    }));
     root.querySelector("[data-ha-menu]")?.addEventListener("click", () => this.toggleHaSidebar());
     // Rows that lead into Home Assistant (apps) open with Enter and Space like the other rows.
     root.querySelectorAll("tr[data-ha-path]").forEach(el => el.onkeydown = ev => {
@@ -11488,7 +11498,7 @@ class HAHousekeeperPanel extends HTMLElement {
     const root = this.shadowRoot;
     let tip = this._tip;
     if (!tip || tip.parentNode !== root) { tip = this._tip = document.createElement("div"); tip.className = "tip"; tip.setAttribute("role", "tooltip"); root.appendChild(tip); }
-    tip.innerHTML = `<strong>${this.esc(el.dataset.tip)}</strong><span>${this.esc(el.dataset.tipSub || "")}</span>`;
+    tip.innerHTML = el.dataset.tipPlain ? `<em>${this.esc(el.dataset.tip)}</em>` : `<strong>${this.esc(el.dataset.tip)}</strong><span>${this.esc(el.dataset.tipSub || "")}</span>`;
     const box = el.getBoundingClientRect();
     tip.style.left = `${Math.max(8, Math.min(box.left, globalThis.innerWidth - 320))}px`;
     tip.style.top = `${box.bottom + 6}px`;
@@ -11782,7 +11792,7 @@ class HAHousekeeperPanel extends HTMLElement {
       this.render();
     });
     root.querySelectorAll("[data-tip]").forEach(el => { el.onmouseenter = () => this.showTip(el); el.onmouseleave = () => this.hideTip();
-      const holder = el.closest?.("tr") || (el.hasAttribute?.("tabindex") ? el : null);
+      const holder = el.closest?.("tr") || (el.hasAttribute?.("tabindex") || el.matches?.("button") ? el : null);
       if (holder) { holder.onfocus = () => this.showTip(el); holder.onblur = () => this.hideTip(); }
       // Touch: a long press shows the tooltip for a few seconds and does not open the object.
       el.ontouchstart = () => { globalThis.clearTimeout?.(this._tipTimer); this._tipTimer = globalThis.setTimeout?.(() => { this._tipShownAt = Date.now(); this.showTip(el); globalThis.clearTimeout?.(this._tipHide); this._tipHide = globalThis.setTimeout?.(() => this.hideTip(), 4000); }, 500); };

@@ -27,15 +27,20 @@ class SystemMixin {
     return st;
   }
 
-  sysHead(name, title, hint) {
+  // The introduction sits behind an (i) after the title instead of in a paragraph of its own.
+  infoTip(text) {
+    return `<button type="button" class="infotip" data-tip="${this.esc(text)}" data-tip-plain="1" aria-label="${this.esc(text)}"><ha-icon icon="mdi:information-outline"></ha-icon></button>`;
+  }
+
+  sysHead(name, title, hint, intro) {
     const st = this.sysState(name);
     const at = st.at ? `<span class="scanago">${this.esc(this.t("sysAsOf", { time: this.formatDate(st.at) }))}</span>` : "";
-    return `<div class="panelhead"><div><h2>${this.t(title)}</h2><p>${this.t(hint)}</p></div><div class="actions">${at}<button class="btn" data-sys-refresh="${name}" ${st.loading ? "disabled" : ""}><ha-icon icon="mdi:refresh"></ha-icon>${this.t("sysRefresh")}</button></div></div>`;
+    return `<div class="panelhead"><div><h2>${this.t(title)}${intro ? this.infoTip(this.t(intro)) : ""}</h2><p>${this.t(hint)}</p></div><div class="actions">${at}<button class="btn" data-sys-refresh="${name}" ${st.loading ? "disabled" : ""}><ha-icon icon="mdi:refresh"></ha-icon>${this.t("sysRefresh")}</button></div></div>`;
   }
 
   // Loading, error or the page: the frame every one of the three pages shares.
-  sysFrame(name, title, hint, loading, build) {
-    const st = this.sysEnsure(name), head = this.sysHead(name, title, hint);
+  sysFrame(name, title, hint, loading, build, intro) {
+    const st = this.sysEnsure(name), head = this.sysHead(name, title, hint, intro);
     if (st.error) return `<div class="panel">${head}<div class="error">${this.esc(st.error)}</div></div>`;
     if (!st.data) return `<div class="panel">${head}${this.skeleton(loading)}</div>`;
     return build(st.data, head);
@@ -106,8 +111,8 @@ class SystemMixin {
       const open = this.viewTabOf("storage", tabs.filter(x => !x.disabled), sup && cats.length ? "categories" : "consumers");
       const tab = tabs.find(x => x.id === open);
       const body = { categories: () => this.sysCategories(cats), consumers: () => this.sysConsumers(r.breakdown), custom: () => this.sysCustom(r.custom_integrations), apps: () => this.sysApps(r.apps), cards: () => this.sysCards(r.cards), blueprints: () => this.sysBlueprints(r.blueprints) }[open]();
-      return `<div class="stack"><div class="panel">${head}<div class="pad"><p class="factnote">${this.t("sysIntro")}</p></div></div>${tiles}${swapLine ? `<div class="panel"><div class="pad">${swapLine}</div></div>` : ""}<div class="sysnav">${this.navTiles("storage", tabs, open, this.t("storage"))}</div><div class="panel"><div class="panelhead"><div><h2>${this.esc(tab.label)}</h2><p>${this.esc(tab.hint)}</p></div></div>${body}${this.howCounted("sysFootnote")}</div></div>`;
-    });
+      return `<div class="stack"><div class="panel">${head}</div>${tiles}${swapLine ? `<div class="panel"><div class="pad">${swapLine}</div></div>` : ""}<div class="sysnav">${this.navTiles("storage", tabs, open, this.t("storage"))}</div><div class="panel"><div class="panelhead"><div><h2>${this.esc(tab.label)}</h2><p>${this.esc(tab.hint)}</p></div></div>${body}${this.howCounted("sysFootnote")}</div></div>`;
+    }, "sysIntro");
   }
 
   sysSizeColumns(max) {
@@ -287,8 +292,8 @@ class SystemMixin {
       });
       const panel = (title, hint, body) => `<div class="panel"><div class="panelhead"><div><h2>${this.t(title)}</h2><p>${this.t(hint)}</p></div></div>${body}</div>`;
       const apps = r.apps_available ? this.accAppsTable(r.apps || [], risks, sorts.find(x => x.key === "risk")) : `<div class="emptymsg">${this.t("accAppsNoSupervisor")}</div>`;
-      return `<div class="stack"><div class="panel">${head}<div class="pad"><p class="factnote">${this.t("accIntro")}</p></div></div>${tiles}${panel("accSysTitle", "accSysHint", sysTable)}${panel("accCloudTitle", "accCloudHint", cloudTable)}${panel("accAppsTitle", "accAppsHint", apps)}<div class="panel">${this.howCounted("accFootnote")}</div></div>`;
-    });
+      return `<div class="stack"><div class="panel">${head}</div>${tiles}${panel("accSysTitle", "accSysHint", sysTable)}${panel("accCloudTitle", "accCloudHint", cloudTable)}${panel("accAppsTitle", "accAppsHint", apps)}<div class="panel">${this.howCounted("accFootnote")}</div></div>`;
+    }, "accIntro");
   }
 
   // The rights of the installed apps (add-ons), as the Supervisor describes them. A row opens the app in Home Assistant.
@@ -353,14 +358,19 @@ class SystemMixin {
         exportName: "credential-fields", header: [this.t("accColIntegration"), "Domain", this.t("secColKind"), this.t("secColFields"), this.t("secColSetCount"), this.t("secColEmptyCount")],
         rows: e => [e.title, e.domain, kindNames(e).join("; "), names(e), count(e, true), count(e, false)],
       });
-      return `<div class="stack"><div class="panel">${head}<div class="pad"><p class="factnote">${this.t("secIntro")}</p></div></div>${tiles}<div class="panel"><div class="panelhead"><div><h2>${this.t("secListTitle")}</h2><p>${this.t("secListHint")}</p></div></div>${table}${this.howCounted("secFootnote")}</div></div>`;
-    });
+      return `<div class="stack"><div class="panel">${head}</div>${tiles}<div class="panel"><div class="panelhead"><div><h2>${this.t("secListTitle")}</h2><p>${this.t("secListHint")}</p></div></div>${table}${this.howCounted("secFootnote")}</div></div>`;
+    }, "secIntro");
   }
 
   // ---------------------------------------------------------------- bindings
 
   bindSystem(root) {
     root.querySelectorAll("[data-sys-refresh]").forEach(el => el.onclick = () => this.sysLoad(el.dataset.sysRefresh));
+    // A tap on the (i) shows its text for a few seconds, as touch has no hover.
+    root.querySelectorAll(".infotip").forEach(el => el.addEventListener("click", () => {
+      this.showTip(el); globalThis.clearTimeout?.(this._tipHide);
+      this._tipHide = globalThis.setTimeout?.(() => this.hideTip(), 6000);
+    }));
     root.querySelector("[data-ha-menu]")?.addEventListener("click", () => this.toggleHaSidebar());
     // Rows that lead into Home Assistant (apps) open with Enter and Space like the other rows.
     root.querySelectorAll("tr[data-ha-path]").forEach(el => el.onkeydown = ev => {

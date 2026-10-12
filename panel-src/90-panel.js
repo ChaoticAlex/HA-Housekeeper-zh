@@ -447,7 +447,7 @@ class HAHousekeeperPanel extends HTMLElement {
     const root = this.shadowRoot;
     let tip = this._tip;
     if (!tip || tip.parentNode !== root) { tip = this._tip = document.createElement("div"); tip.className = "tip"; tip.setAttribute("role", "tooltip"); root.appendChild(tip); }
-    tip.innerHTML = `<strong>${this.esc(el.dataset.tip)}</strong><span>${this.esc(el.dataset.tipSub || "")}</span>`;
+    tip.innerHTML = el.dataset.tipPlain ? `<em>${this.esc(el.dataset.tip)}</em>` : `<strong>${this.esc(el.dataset.tip)}</strong><span>${this.esc(el.dataset.tipSub || "")}</span>`;
     const box = el.getBoundingClientRect();
     tip.style.left = `${Math.max(8, Math.min(box.left, globalThis.innerWidth - 320))}px`;
     tip.style.top = `${box.bottom + 6}px`;
@@ -741,7 +741,7 @@ class HAHousekeeperPanel extends HTMLElement {
       this.render();
     });
     root.querySelectorAll("[data-tip]").forEach(el => { el.onmouseenter = () => this.showTip(el); el.onmouseleave = () => this.hideTip();
-      const holder = el.closest?.("tr") || (el.hasAttribute?.("tabindex") ? el : null);
+      const holder = el.closest?.("tr") || (el.hasAttribute?.("tabindex") || el.matches?.("button") ? el : null);
       if (holder) { holder.onfocus = () => this.showTip(el); holder.onblur = () => this.hideTip(); }
       // Touch: a long press shows the tooltip for a few seconds and does not open the object.
       el.ontouchstart = () => { globalThis.clearTimeout?.(this._tipTimer); this._tipTimer = globalThis.setTimeout?.(() => { this._tipShownAt = Date.now(); this.showTip(el); globalThis.clearTimeout?.(this._tipHide); this._tipHide = globalThis.setTimeout?.(() => this.hideTip(), 4000); }, 500); };
