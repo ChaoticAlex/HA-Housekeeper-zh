@@ -64,6 +64,14 @@
 
 ### English
 
+- **Blueprints and detail page:** Each blueprint kind is a section with its number (open only when there are findings); on the detail page of an entity or device "Rename and area" is folded.
+- **Overview:** "Needs attention" comes before the state of the inventory.
+- **Batteries in tabs:** The list stands alone; the forecast and the kinds of batteries are tabs of their own as soon as there is something to show.
+- **Changes as sections:** Each category (status changes, new and resolved findings, new and removed objects) is a foldable section with its number; the tiles above open exactly that category.
+- **Outages and recorder costs shorter:** With many causes the card can be folded, and the statistics under the recorder costs are a folded section with its number.
+- **Runs without a second list:** The findings ("never succeeded", "fails" …) are shown in the table under the name; the "Flagged" tile filters them. The possible conflicts sit folded with their number under the table.
+- **Recognisable tiles:** A number without a click is flat, a filter has a funnel and is marked (with a check) while it is on, a link to another page has an arrow. A second click lifts every filter, the list comes into view, and above the list "Filter on" with "Reset" says what is filtered.
+- **Repair like cleanup:** The tasks are compact tiles on top and stay there while working; changing the task no longer needs "Back". The note about the confirmed plan sits behind the coloured (i) here too.
 - **No copy button in the lists any more:** The square shown on hover covered names and IDs; the ID can be selected directly.
 - **Automations: diagnosis on the detail page:** The "Diagnosis" column of the overview is gone; the row opens the detail page, which has a "Diagnosis" tab (views, success criteria, improve, trace tools). Scripts show their four views there.
 - **Recorder costs as a table:** The entries are a sortable list with a bar for the share and columns for total, 24 hours, 7 days and average per day; clickable tiles (All, Suggestions, Excluded, Not used), filters and CSV export.
@@ -111,6 +119,7 @@
 
 ### Fixed
 
+- **Runs: click on "Errors":** The card on top said "No matches" although the table below listed the automations with errors; the empty message is gone.
 - Under an outage the "Outages" card showed at most 20 follow-up findings even when the number said more. It now has pages.
 
 ## 1.4.0 - 2026-10-11
