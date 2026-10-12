@@ -1253,7 +1253,7 @@ class StylesMixin {
       .tablewrap{overflow-x:auto;overflow-y:visible}table{border-collapse:collapse;width:100%}th{text-align:left;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:11px 16px;background:var(--hk-soft);cursor:pointer;white-space:nowrap}.thbtn{padding:0;border:0;background:none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer}td{padding:11px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}tbody tr{cursor:pointer}tbody tr:hover{background:var(--hk-soft)}
       .object{display:flex;align-items:center;gap:11px;min-width:260px}.object .tile{width:34px;height:34px}.object strong{display:block;font-weight:600}.id{display:block;color:var(--hk-muted);font-family:ui-monospace,SFMono-Regular,monospace;font-size:calc(11px*var(--hk-fs,1));margin-top:2px;max-width:390px;overflow:hidden;text-overflow:ellipsis}
       .tablefoot{padding:12px 16px;border-top:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));display:flex;align-items:center;justify-content:space-between;gap:10px}.pager{display:flex;align-items:center;gap:8px}.pager button{border:1px solid var(--hk-border);background:var(--hk-surface);border-radius:7px;padding:5px 10px}.pager button:disabled{opacity:.4}
-      .chips .spacer{flex:1}.chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.chip{border:1px solid var(--hk-border);background:var(--hk-surface);border-radius:99px;padding:5px 12px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}.chip.active{color:var(--hk-blue-text);border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 11%,transparent);font-weight:600}
+      .chip em{font-style:normal;opacity:.7;margin-left:4px}.chip .tabdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:6px;background:var(--hk-red)}.chips .spacer{flex:1}.chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.chip{border:1px solid var(--hk-border);background:var(--hk-surface);border-radius:99px;padding:5px 12px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}.chip.active{color:var(--hk-blue-text);border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 11%,transparent);font-weight:600}
       .emptymsg,.loading{padding:46px;text-align:center;color:var(--hk-muted)}.viewgroup{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}.skeleton{display:grid;gap:10px;padding:18px 16px}.skeleton i{display:block;height:14px;border-radius:7px;background:linear-gradient(90deg,var(--hk-soft),color-mix(in srgb,var(--hk-soft) 55%,var(--hk-surface)),var(--hk-soft)) 0 0/200% 100%;animation:hk-shimmer 1.4s ease-in-out infinite}.skeleton i:nth-of-type(2){width:80%}.skeleton i:nth-of-type(3){width:60%}@keyframes hk-shimmer{to{background-position:-200% 0}}@media(prefers-reduced-motion:reduce){.skeleton i{animation:none}}.coverage{display:flex;gap:6px;align-items:flex-start}.coverage ha-icon{--mdc-icon-size:16px;flex:none;margin-top:1px}.fline{display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin-top:6px}.fline .fnote{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.emptymsg ha-icon{--mdc-icon-size:34px;color:var(--hk-green);display:block;margin:0 auto 8px}.error{padding:18px;border-radius:12px;background:color-mix(in srgb,var(--hk-red) 12%,transparent);color:var(--hk-red)}
       .bh .btn.small{margin-left:8px;flex:none}.bh.open{background:var(--hk-soft)}.bhattest{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:4px 16px 14px 62px;background:var(--hk-soft)}.bhattest label{display:flex;align-items:center;gap:8px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}.bhattest input{padding:6px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.bhcancel,.bhtake{border:0;background:none;padding:4px 2px;font:inherit;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);cursor:pointer;text-decoration:underline}.bhtake{margin-left:auto;color:var(--hk-red)}.bhcancel:hover{color:var(--hk-text)}
       .dense .row-text small:not(:first-of-type){display:none}.dense .bh .row-text small:not(:first-of-type){display:block}.dirbtn[aria-pressed="true"]{border-color:var(--hk-blue);color:var(--hk-blue)}
@@ -10564,7 +10564,7 @@ class BatteryKindMixin {
 
 // Texts for storage and system, access and data flow, the credential overview and the sidebar button; merged into TEXT.
 Object.assign(TEXT.de, {
-  sysTabUsage: "Belegung", sysTabUsageHint: "Kategorien und Ordner", sysByCategory: "Nach Kategorie", sysByFolder: "Nach Ordner unter /config", sysAppsHint: "Apps und Custom-Integrationen mit Größe, CPU und RAM stehen unter",
+  sysTabUsage: "Belegung", sysTabUsageHint: "Kategorien und Ordner", sysByCategory: "Nach Kategorie", sysByFolder: "Nach Ordner unter /config", sysByMisc: "Weitere", sysHeadCategory: "Belegung nach Kategorie", sysHeadFolder: "Belegung nach Ordner", sysAppsHint: "Apps und Custom-Integrationen mit Größe, CPU und RAM stehen unter",
   sysTabMisc: "Sonstiges", sysTabMiscHint: "Karten, Blueprints, übrige Ordner", sysSecOther: "Weitere Ordner und Dateien in /config", sysNoOther: "Außer den bekannten Orten wurde unter /config nichts Messbares gefunden.", sysOtherMore: "Dazu {n} kleinere Einträge mit zusammen {size}.", sysKindFolder: "Ordner", sysKindFile: "Datei",
  
   haMenu: "Seitenleiste von Home Assistant öffnen",
@@ -10619,7 +10619,7 @@ Object.assign(TEXT.de, {
   secFootnote: "Housekeeper erkennt Zugangsdaten am Namen eines Feldes in der Konfiguration einer Integration (password, token, api_key, secret, webhook, pin) und prüft nur, ob es leer ist. Werte, Auszüge davon und ihre Länge werden weder gelesen noch angezeigt noch exportiert. Die Erkennung ist ein Hinweis: Zugangsdaten unter einem anderen Namen fehlen, und ein Feld mit so einem Namen kann etwas Harmloses enthalten. Ein Klick auf eine Zeile öffnet die Integration in Home Assistant, dort lassen sich die Zugangsdaten ändern. Es wird nichts geändert und nichts gespeichert.",
 });
 Object.assign(TEXT.en, {
-  sysTabUsage: "Usage", sysTabUsageHint: "categories and folders", sysByCategory: "By category", sysByFolder: "By folder under /config", sysAppsHint: "Apps and custom integrations with size, CPU and RAM are under",
+  sysTabUsage: "Usage", sysTabUsageHint: "categories and folders", sysByCategory: "By category", sysByFolder: "By folder under /config", sysByMisc: "More", sysHeadCategory: "Usage by category", sysHeadFolder: "Usage by folder", sysAppsHint: "Apps and custom integrations with size, CPU and RAM are under",
   sysTabMisc: "Other", sysTabMiscHint: "cards, blueprints, remaining folders", sysSecOther: "Other folders and files in /config", sysNoOther: "Apart from the known places, nothing measurable was found under /config.", sysOtherMore: "Plus {n} smaller entries totalling {size}.", sysKindFolder: "Folder", sysKindFile: "File",
  
   haMenu: "Open the Home Assistant sidebar",
@@ -10958,16 +10958,18 @@ class SystemMixin {
       ]);
       const cats = r.categories?.children || [];
       const sup = Boolean(r.supervisor) && cats.length > 0;
-      const tabs = [
-        { id: "usage", icon: "mdi:chart-donut", label: this.t("sysTabUsage"), hint: this.t("sysTabUsageHint"), count: sup ? cats.length : r.breakdown.length },
-        { id: "misc", icon: "mdi:dots-horizontal-circle-outline", label: this.t("sysTabMisc"), hint: this.t("sysTabMiscHint"), count: r.cards.length + r.blueprints.length + (r.other || []).length + (r.other_rest?.count || 0), ...(r.cards.some(c => c.status === "missing") ? { tone: "red" } : {}) },
+      const miss = r.cards.some(c => c.status === "missing");
+      const chips = [
+        ...(sup ? [["category", "sysByCategory", cats.length]] : []),
+        ["folder", "sysByFolder", r.breakdown.length],
+        ["misc", "sysByMisc", r.cards.length + r.blueprints.length + (r.other || []).length + (r.other_rest?.count || 0)],
       ];
-      const open = this.viewTabOf("storage", tabs, "usage");
-      const by = sup && this.storageBy !== "folder" ? "category" : "folder";
-      const choice = sup ? `<div class="chips">${[["category", "sysByCategory"], ["folder", "sysByFolder"]].map(([id, key]) => `<button class="chip ${by === id ? "active" : ""}" data-storage-by="${id}" aria-pressed="${by === id}">${this.t(key)}</button>`).join("")}</div>` : "";
-      const usage = `${choice}${by === "category" ? this.sysCategories(cats) : this.sysConsumers(r.breakdown)}<p class="factnote">${this.t("sysAppsHint")} <button type="button" class="link" data-view="components">${this.t("components")}</button></p>`;
-      const body = open === "misc" ? this.sysMisc(r) : usage;
-      return `<div class="stack">${head}${tiles}<div class="sysnav">${this.navTiles("storage", tabs, open, this.t("storage"), true)}</div><div class="panel">${body}${this.howCounted("sysFootnote")}</div></div>`;
+      const by = chips.some(([id]) => id === this.storageBy) ? this.storageBy : chips[0][0];
+      const choice = `<div class="chips">${chips.map(([id, key, n]) => `<button class="chip ${by === id ? "active" : ""}" data-storage-by="${id}" aria-pressed="${by === id}">${this.t(key)} <em>${this.formatNumber(n)}</em>${id === "misc" && miss ? '<i class="tabdot red" aria-hidden="true"></i>' : ""}</button>`).join("")}</div>`;
+      const title = key => `<h3 class="syssec">${this.esc(this.t(key))}</h3>`;
+      const apps = `<p class="factnote">${this.t("sysAppsHint")} <button type="button" class="link" data-view="components">${this.t("components")}</button></p>`;
+      const list = by === "misc" ? this.sysMisc(r) : `${title(by === "category" ? "sysHeadCategory" : "sysHeadFolder")}${by === "category" ? this.sysCategories(cats) : this.sysConsumers(r.breakdown)}${apps}`;
+      return `<div class="stack">${head}${tiles}<div class="panel">${choice}${list}${this.howCounted("sysFootnote")}</div></div>`;
     });
   }
 

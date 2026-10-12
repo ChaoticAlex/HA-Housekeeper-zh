@@ -95,16 +95,18 @@ class SystemMixin {
       ]);
       const cats = r.categories?.children || [];
       const sup = Boolean(r.supervisor) && cats.length > 0;
-      const tabs = [
-        { id: "usage", icon: "mdi:chart-donut", label: this.t("sysTabUsage"), hint: this.t("sysTabUsageHint"), count: sup ? cats.length : r.breakdown.length },
-        { id: "misc", icon: "mdi:dots-horizontal-circle-outline", label: this.t("sysTabMisc"), hint: this.t("sysTabMiscHint"), count: r.cards.length + r.blueprints.length + (r.other || []).length + (r.other_rest?.count || 0), ...(r.cards.some(c => c.status === "missing") ? { tone: "red" } : {}) },
+      const miss = r.cards.some(c => c.status === "missing");
+      const chips = [
+        ...(sup ? [["category", "sysByCategory", cats.length]] : []),
+        ["folder", "sysByFolder", r.breakdown.length],
+        ["misc", "sysByMisc", r.cards.length + r.blueprints.length + (r.other || []).length + (r.other_rest?.count || 0)],
       ];
-      const open = this.viewTabOf("storage", tabs, "usage");
-      const by = sup && this.storageBy !== "folder" ? "category" : "folder";
-      const choice = sup ? `<div class="chips">${[["category", "sysByCategory"], ["folder", "sysByFolder"]].map(([id, key]) => `<button class="chip ${by === id ? "active" : ""}" data-storage-by="${id}" aria-pressed="${by === id}">${this.t(key)}</button>`).join("")}</div>` : "";
-      const usage = `${choice}${by === "category" ? this.sysCategories(cats) : this.sysConsumers(r.breakdown)}<p class="factnote">${this.t("sysAppsHint")} <button type="button" class="link" data-view="components">${this.t("components")}</button></p>`;
-      const body = open === "misc" ? this.sysMisc(r) : usage;
-      return `<div class="stack">${head}${tiles}<div class="sysnav">${this.navTiles("storage", tabs, open, this.t("storage"), true)}</div><div class="panel">${body}${this.howCounted("sysFootnote")}</div></div>`;
+      const by = chips.some(([id]) => id === this.storageBy) ? this.storageBy : chips[0][0];
+      const choice = `<div class="chips">${chips.map(([id, key, n]) => `<button class="chip ${by === id ? "active" : ""}" data-storage-by="${id}" aria-pressed="${by === id}">${this.t(key)} <em>${this.formatNumber(n)}</em>${id === "misc" && miss ? '<i class="tabdot red" aria-hidden="true"></i>' : ""}</button>`).join("")}</div>`;
+      const title = key => `<h3 class="syssec">${this.esc(this.t(key))}</h3>`;
+      const apps = `<p class="factnote">${this.t("sysAppsHint")} <button type="button" class="link" data-view="components">${this.t("components")}</button></p>`;
+      const list = by === "misc" ? this.sysMisc(r) : `${title(by === "category" ? "sysHeadCategory" : "sysHeadFolder")}${by === "category" ? this.sysCategories(cats) : this.sysConsumers(r.breakdown)}${apps}`;
+      return `<div class="stack">${head}${tiles}<div class="panel">${choice}${list}${this.howCounted("sysFootnote")}</div></div>`;
     });
   }
 

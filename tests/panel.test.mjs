@@ -4114,7 +4114,7 @@ test("storage shows the key figures, a red disk at 96 % and the Supervisor categ
   assert.ok(html.includes("Speicher belegt") && html.includes("4 Kerne") && html.includes("frei"));
   assert.ok(html.includes('<span class="sumlabel">Swap</span>') && !html.includes('sumlabel">Speicher frei'), "swap is a tile, free space sits in the disk tile");
   assert.ok(html.includes("&lt;b&gt;apps&lt;/b&gt;") && !html.includes("<b>apps</b>"), "Supervisor labels are escaped");
-  el.viewTab = { storage: "misc" };
+  el.storageBy = "misc";
   el.render();
   assert.ok(shadow.innerHTML.includes("card.js") && shadow.innerHTML.includes("Ordner") && shadow.innerHTML.includes("Motion light") && shadow.innerHTML.includes(".storage"), "cards, blueprints and the other entries share one tab");
 });
@@ -4125,7 +4125,7 @@ test("without a Supervisor only the folders show and there is nothing to switch"
   el.view = "storage";
   el.render();
   const html = shadow.innerHTML;
-  assert.ok(!html.includes("data-storage-by"), "no switch without categories");
+  assert.ok(!html.includes('data-storage-by="category"'), "no category chip without categories");
   assert.ok(html.includes("Recorder database"), "the folders under /config are shown");
   assert.ok(html.includes('data-view="components"'), "a note points to Apps & integrations");
 });
