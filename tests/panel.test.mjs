@@ -4260,3 +4260,15 @@ test("with a Supervisor the usage tab switches between categories and folders", 
   el.storageBy = "folder"; el.render();
   assert.ok(shadow.innerHTML.includes("Recorder database"));
 });
+
+test("a cause with more than 20 follow-up findings pages them instead of cutting them off", () => {
+  const { el } = panel("en");
+  const cause = { id: "integration_down:e1", kind: "integration_down", object_type: "config_entry", object_id: "e1", name: "Cloud", follower_count: 25, consumers: {}, impact: "high", state: "setup_error", error: "timeout" };
+  const findings = Array.from({ length: 25 }, (_, i) => ({ rule_id: "entity.state_unavailable", object_id: `sensor.n${i}`, classification: "unavailable", confidence: 0.75, key: `k${i}`, ignored: false, cause_id: cause.id }));
+  el.data = { ...DATA, findings, causes: [cause] };
+  el.folds = { [`cause_${cause.id}`]: true };
+  const first = el.causesCard();
+  assert.ok(first.includes("sensor.n0") && !first.includes("sensor.n24") && first.includes("data-lpage"));
+  el.pages[`cause_${cause.id}`] = 2;
+  assert.ok(el.causesCard().includes("sensor.n24"));
+});

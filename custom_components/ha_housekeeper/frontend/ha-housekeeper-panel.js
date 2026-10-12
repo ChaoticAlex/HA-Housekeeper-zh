@@ -6419,7 +6419,8 @@ class CausesMixin {
       const decide = this.causeDecide(c);
       if (!c.follower_count) return `<button class="row rel" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${head.title}</strong><small>${this.esc(head.sub)}</small></span></button>${decide}`;
       const own = c.kind === "service_missing" ? "" : `<button class="row" data-object="${this.esc(`${c.object_type}:${c.object_id}`)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span></button>`;
-      const body = `${own}${followers(c.id).slice(0, 20).map(f => this.findingRow(f)).join("")}`;
+      const pg = this.paginate(`cause_${c.id}`, followers(c.id).map(f => this.findingRow(f)));
+      const body = `${own}${pg.rows.join("")}${pg.footer}`;
       return this.fold(`cause_${c.id}`, head, body + decide, false);
     }).join("");
     return `<div class="panel"><div class="panelhead"><div><h2>${this.t("causesTitle")}</h2><p>${this.t("causesSub", { n: this.formatNumber(causes.length), m: this.formatNumber(this.data.findings.filter(f => !f.cause_id && !f.ignored).length) })}</p></div></div>${rows}</div>`;

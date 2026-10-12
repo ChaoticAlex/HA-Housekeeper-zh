@@ -49,6 +49,10 @@
 - **HACS-Updates:** Bei Custom-Integrationen, die HACS installiert hat, zeigen die Seite der Integration und die Liste „Apps & Integrationen“ die installierte und die neueste Version samt Hinweis auf ein Update; die Liste lässt sich danach filtern. Bei Apps zeigt die Liste die neueste Version, eine Kachel „App-Updates“ und einen Filter „Update verfügbar“.
 - **Sonstiges** (Speicher & System): Custom Cards, Blueprints und die übrigen Ordner und Dateien unter `/config` stehen in einem Reiter.
 
+### Behoben
+
+- Unter einem Ausfall zeigte die Karte „Ausfälle“ höchstens 20 Folgebefunde, auch wenn die Zahl mehr nannte. Jetzt gibt es Seiten.
+
 ### English
 
 - **No copy button in the lists any more:** The square shown on hover covered names and IDs; the ID can be selected directly.
@@ -95,6 +99,10 @@
 - **Page of an integration:** core and custom integrations have their own detail page with all entries, entities and devices, reliability, and access and data; for custom ones also the folder and its size.
 - **HACS updates:** For custom integrations installed by HACS, the integration page and the "Apps & integrations" list show the installed and the newest version with a note about an update; the list can be filtered by it. For apps the list shows the newest version, an "App updates" tile and an "Update available" filter.
 - **Other** (Storage & system): custom cards, blueprints and the remaining folders and files under `/config` share one tab.
+
+### Fixed
+
+- Under an outage the "Outages" card showed at most 20 follow-up findings even when the number said more. It now has pages.
 
 ## 1.4.0 - 2026-10-11
 
