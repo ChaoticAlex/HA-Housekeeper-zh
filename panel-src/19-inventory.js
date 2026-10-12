@@ -73,14 +73,8 @@ class InventoryMixin {
       types: [...new Set(this.data.objects.map(x => x.object_type))].sort(),
       statuses: [...new Set(this.data.objects.map(x => x.status))].sort(),
     }));
-    const all = this.data.objects, count = pred => all.filter(pred).length;
-    const typeTile = type => { const n = count(x => x.object_type === type); return n && { label: this.t(type), value: this.formatNumber(n), tone: "mute", inv: `${type}|`, active: this.typeFilter === type && !this.statusFilter }; };
-    const statusTile = (status, tone) => { const n = count(x => x.status === status); return n && { label: this.statusLabel(status), value: this.formatNumber(n), tone, inv: `|${status}`, active: this.statusFilter === status && !this.typeFilter }; };
-    const tiles = this.sumTiles([
-      { label: this.t("all"), value: this.formatNumber(all.length), tone: "mute", inv: "|", active: !this.typeFilter && !this.statusFilter },
-      typeTile("entity"), typeTile("device"), typeTile("automation"), typeTile("config_entry"), typeTile("app"),
-      statusTile("unavailable", "red"), statusTile("orphaned", "warn"),
-    ]);
+    const all = this.data.objects;
+    const tiles = this.invTypesCard(all);
     const hid = key => this.colHidden("inventory", key);
     // Version and entity count only mean something for integrations, so they appear once the list is narrowed to them.
     const integ = this.typeFilter === "config_entry" || !!this.originFilter;
@@ -91,10 +85,54 @@ class InventoryMixin {
     const colValue = (item, k) => k === "version" ? (item.object_type === "config_entry" ? item.integration_version || "" : "") : k === "entities" ? (item.object_type === "config_entry" ? item.entity_count ?? 0 : "") : k === "usedByCol" ? this.usedByCount(item) ?? "" : item.last_changed || "";
     this.setExporter("inventory", "inventory", [this.t("name"), "ID", this.t("type"), this.t("status"), this.t("reason"), this.t("since"), ...(integ ? [this.t("origin")] : []), ...integCols.map(k => this.t(k))], () => rows.map(i => [i.name, i.object_id, this.t(i.object_type), this.statusLabel(i.status), i.reason ? this.t(i.reason) : i.missing_reference_count ? `${i.missing_reference_count} ${this.t("missingReferences")}` : "", i.status_since || "", ...(integ ? [i.object_type === "config_entry" ? this.t(i.custom ? "originKindCustom" : "originKindCore") : ""] : []), ...integCols.map(k => colValue(i, k))]));
     const tools = `<div class="listtools">${this.listTools("inventory", ["type", "status", "reason", "since", ...integCols].map(k => ({ key: k, label: k })))}<button type="button" class="btn" data-xp-open><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button></div>`;
-    return `<div class="stack">${tiles}<div class="panel"><div class="filters invfilters"><input id="query" type="search" value="${this.esc(this.query)}" placeholder="${this.t("search")}"><select id="typeFilter" aria-label="${this.t("type")}"><option value="">${this.t("all")}</option><option value="helper" ${this.typeFilter === "helper" ? "selected" : ""}>${this.t("helperKind")}</option>${types.map(x => `<option value="${x}" ${this.typeFilter === x ? "selected" : ""}>${this.t(x)}</option>`).join("")}</select><select id="statusFilter" aria-label="${this.t("status")}"><option value="">${this.t("allStatus")}</option>${statuses.map(x => `<option value="${x}" ${this.statusFilter === x ? "selected" : ""}>${this.statusLabel(x)}</option>`).join("")}</select><select id="originFilter" aria-label="${this.t("origin")}"><option value="">${this.t("allOrigins")}</option>${["core", "custom"].map(x => `<option value="${x}" ${this.originFilter === x ? "selected" : ""}>${this.t(x === "core" ? "originKindCore" : "originKindCustom")}</option>`).join("")}</select>${idleSelect}
+    return `<div class="stack">${tiles}${this.filterNote(this.invFilterLabels(), 'data-inv-filter="|"')}<div class="panel"><div class="filters invfilters"><input id="query" type="search" value="${this.esc(this.query)}" placeholder="${this.t("search")}"><select id="typeFilter" aria-label="${this.t("type")}"><option value="">${this.t("all")}</option><option value="helper" ${this.typeFilter === "helper" ? "selected" : ""}>${this.t("helperKind")}</option>${types.map(x => `<option value="${x}" ${this.typeFilter === x ? "selected" : ""}>${this.t(x)}</option>`).join("")}</select><select id="statusFilter" aria-label="${this.t("status")}"><option value="">${this.t("allStatus")}</option>${statuses.map(x => `<option value="${x}" ${this.statusFilter === x ? "selected" : ""}>${this.statusLabel(x)}</option>`).join("")}</select><select id="originFilter" aria-label="${this.t("origin")}"><option value="">${this.t("allOrigins")}</option>${["core", "custom"].map(x => `<option value="${x}" ${this.originFilter === x ? "selected" : ""}>${this.t(x === "core" ? "originKindCore" : "originKindCustom")}</option>`).join("")}</select>${idleSelect}
         <div class="mobsort"><select id="sortKey" aria-label="${this.t("sortBy")}">${[["name", "sortName"], ["type", "sortType"], ["status", "sortStatus"], ["since", "sortSince"], ...(integ ? [["version", "version"], ["entities", "entities"]] : []), ...(helperMode ? [["usedByCol", "usedByCol"], ["changedCol", "changedCol"]] : [])].map(([key, label]) => `<option value="${key}" ${this.sort === key ? "selected" : ""}>${this.t(label)}</option>`).join("")}</select><button class="btn" id="sortDir" aria-label="${this.t("sortBy")}">${this.sortDir === "desc" ? "▼" : "▲"}</button></div></div>${idleHint}${tools}
       <div class="tablewrap inv"><table><thead><tr>${this.th("name", "name")}${hid("type") ? "" : this.th("type", "type")}${hid("status") ? "" : this.th("status", "status")}${hid("reason") ? "" : `<th>${this.t("reason")}</th>`}${hid("since") ? "" : this.th("since", "since")}${integCols.map(k => hid(k) ? "" : this.th(k, k)).join("")}</tr></thead><tbody>${visibleRows.map(item => `<tr data-object="${this.esc(this.objectKey(item))}" tabindex="0" role="button" aria-label="${this.esc(item.name)}"><td><span class="object">${this.tile(item.object_type, this.tone(item.status) === "ok" ? "" : this.tone(item.status))}${this.nameCell(item.name, item.object_id, "span")}</span></td>${hid("type") ? "" : `<td data-label="${this.esc(this.t("type"))}">${this.t(item.object_type)}</td>`}${hid("status") ? "" : `<td data-label="${this.esc(this.t("status"))}">${this.pill(item.status)}</td>`}${hid("reason") ? "" : `<td data-label="${this.esc(this.t("reason"))}">${this.esc(item.reason ? this.t(item.reason) : item.missing_reference_count ? `${item.missing_reference_count} ${this.t("missingReferences")}` : "—")}</td>`}${hid("since") ? "" : `<td data-label="${this.esc(this.t("since"))}">${this.formatDate(item.status_since)}</td>`}${integCols.map(k => hid(k) ? "" : `<td data-label="${this.esc(this.t(k))}">${this.esc(k === "usedByCol" ? (this.usedByCount(item) == null ? "—" : this.formatNumber(this.usedByCount(item))) : k === "changedCol" ? (item.last_changed ? this.formatDate(item.last_changed) : "—") : item.object_type !== "config_entry" ? "—" : k === "version" ? (item.integration_version || "—") : this.formatNumber(item.entity_count ?? 0))}</td>`).join("")}</tr>`).join("")}</tbody></table>${rows.length ? "" : `<div class="emptymsg">${this.t("noResults")}</div>`}</div>
       ${pg.footer || `<div class="tablefoot"><span>${this.formatNumber(rows.length)} ${this.t("of_total")} ${this.formatNumber(this.data.objects.length)} ${this.t("shown")}</span></div>`}</div>`;
+  }
+
+  // The labels of the filters the tile block sets (type and state), for the "Filter on" line.
+  invFilterLabels() {
+    return [this.typeFilter ? (this.typeFilter === "helper" ? this.t("helperKind") : this.t(this.typeFilter)) : "", this.statusFilter ? this.statusLabel(this.statusFilter) : ""].filter(Boolean);
+  }
+
+  // The types as a ring with a table beside it: the largest few, the rest behind a button. A row filters the list below (a
+  // second click lifts it); the columns for unavailable and orphaned objects filter by type and state together.
+  invTypesCard(all) {
+    const SHOWN = 5;
+    const by = new Map();
+    for (const x of all) {
+      const r = by.get(x.object_type) || { type: x.object_type, n: 0, un: 0, or: 0 };
+      r.n += 1; if (x.status === "unavailable") r.un += 1; else if (x.status === "orphaned") r.or += 1;
+      by.set(x.object_type, r);
+    }
+    const sorted = [...by.values()].sort((a, b) => b.n - a.n || a.type.localeCompare(b.type));
+    let rows = this.invAllTypes ? sorted : sorted.slice(0, SHOWN);
+    const picked = sorted.find(r => r.type === this.typeFilter);
+    if (picked && !rows.includes(picked)) rows = [...rows, picked]; // a chosen type is never hidden
+    const rest = sorted.filter(r => !rows.includes(r));
+    const total = all.length || 1, sum = key => sorted.reduce((a, r) => a + r[key], 0);
+    const colors = ["var(--hk-blue)", "var(--hk-green)", "var(--hk-amber)", "var(--hk-violet)", "color-mix(in srgb,var(--hk-blue) 50%,var(--hk-green))", "color-mix(in srgb,var(--hk-violet) 55%,var(--hk-red))", "color-mix(in srgb,var(--hk-amber) 55%,var(--hk-red))", "color-mix(in srgb,var(--hk-green) 55%,var(--hk-amber))", "color-mix(in srgb,var(--hk-blue) 55%,var(--hk-violet))", "color-mix(in srgb,var(--hk-blue) 40%,var(--hk-gray))", "color-mix(in srgb,var(--hk-green) 40%,var(--hk-gray))"];
+    const color = i => colors[i % colors.length];
+    const pct = n => `${this.formatNumber(Math.round((n / total) * 1000) / 10)} %`;
+    // Ring: one segment per shown type and one grey one for the rest.
+    const R = 70, C = 2 * Math.PI * R;
+    let acc = 0;
+    const seg = (n, stroke, attrs, on) => { const len = Math.max((n / total) * C, 1.5), at = acc; acc += (n / total) * C; return `<circle cx="100" cy="100" r="${R}" fill="none" style="stroke:${stroke}" stroke-width="${on ? 30 : 22}" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-at}" transform="rotate(-90 100 100)" ${attrs}/>`; };
+    const picks = r => this.typeFilter === r.type && !this.statusFilter;
+    const ring = rows.map((r, i) => seg(r.n, color(i), `class="invseg${this.typeFilter && !picks(r) ? " dim" : ""}" data-inv-filter="${this.esc(r.type)}|" tabindex="0" role="button" aria-label="${this.esc(this.t(r.type))}: ${this.formatNumber(r.n)}"`, picks(r))).join("")
+      + (rest.length ? seg(rest.reduce((a, r) => a + r.n, 0), "var(--hk-gray)", `class="invseg${this.typeFilter ? " dim" : ""}"`, false) : "");
+    const mid = picked && !this.statusFilter ? [this.formatNumber(picked.n), this.t(picked.type)] : [this.formatNumber(all.length), this.t("objects")];
+    const donut = `<svg class="invring" viewBox="0 0 200 200" role="img" aria-label="${this.esc(this.t("byType"))}">${ring}<text x="100" y="100" text-anchor="middle" class="invmid">${this.esc(mid[0])}</text><text x="100" y="120" text-anchor="middle" class="invsub">${this.esc(mid[1])}</text></svg>`;
+    const num = (n, attr, label) => n ? `<button class="linkbtn" ${attr} aria-label="${this.esc(label)}">${this.formatNumber(n)}</button>` : `<span class="muted">–</span>`;
+    const line = (r, i) => `<tr${picks(r) ? ' class="sel"' : ""}><td><button class="linkbtn invtype" data-inv-filter="${this.esc(r.type)}|" aria-pressed="${picks(r)}"><span class="sw" style="background:${color(i)}"></span>${this.esc(this.t(r.type))}</button></td><td>${this.formatNumber(r.n)}</td><td>${pct(r.n)}</td><td>${num(r.un, `data-inv-filter="${this.esc(r.type)}|unavailable"`, `${this.t(r.type)}: ${this.statusLabel("unavailable")}`)}</td><td>${num(r.or, `data-inv-filter="${this.esc(r.type)}|orphaned"`, `${this.t(r.type)}: ${this.statusLabel("orphaned")}`)}</td></tr>`;
+    const others = rest.length ? `<tr class="dim"><td><span class="sw" style="background:var(--hk-gray)"></span>${this.esc(this.t("invOthers", { n: rest.length }))}</td><td>${this.formatNumber(rest.reduce((a, r) => a + r.n, 0))}</td><td>${pct(rest.reduce((a, r) => a + r.n, 0))}</td><td>${rest.reduce((a, r) => a + r.un, 0) || "–"}</td><td>${rest.reduce((a, r) => a + r.or, 0) || "–"}</td></tr>` : "";
+    const allRow = `<tr class="invall"><td><button class="linkbtn invtype" data-inv-filter="|" aria-pressed="${!this.typeFilter && !this.statusFilter}">${this.esc(this.t("all"))}</button></td><td>${this.formatNumber(all.length)}</td><td>100 %</td><td>${num(sum("un"), `data-inv-filter="|unavailable"`, this.statusLabel("unavailable"))}</td><td>${num(sum("or"), `data-inv-filter="|orphaned"`, this.statusLabel("orphaned"))}</td></tr>`;
+    const more = sorted.length > SHOWN ? `<button type="button" class="btn quiet" data-inv-more>${this.esc(this.invAllTypes ? this.t("invFewer", { n: SHOWN }) : this.t("invMore", { n: sorted.length }))}</button>` : "";
+    const table = `<table class="invtypes"><thead><tr><th>${this.t("type")}</th><th>${this.t("invColCount")}</th><th>${this.t("invColShare")}</th><th>${this.statusLabel("unavailable")}</th><th>${this.statusLabel("orphaned")}</th></tr></thead><tbody>${rows.map(line).join("")}${others}${allRow}</tbody></table>${more}`;
+    const filtered = this.typeFilter || this.statusFilter;
+    const shown = this.filtered().length;
+    return `<div class="panel">${this.fold("inv_types", { title: this.esc(this.t("byType")), pill: filtered ? this.t("invOfAll", { n: this.formatNumber(shown), total: this.formatNumber(all.length) }) : "" }, `<div class="invbody">${donut}<div class="tablewrap">${table}</div></div>`, true)}</div>`;
   }
 
   nodeButton(key, label, tone = "") {

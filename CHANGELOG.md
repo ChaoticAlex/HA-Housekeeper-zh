@@ -4,6 +4,7 @@
 
 ### Neu
 
+- **Inventar:** Statt der Kacheln zeigt ein Ring mit Tabelle die Objekttypen: die fünf größten, der Rest auf Knopfdruck. Eine Zeile filtert die Liste, ein zweiter Klick hebt den Filter auf; die Spalten „Nicht verfügbar“ und „Verwaist“ filtern nach Typ und Zustand zugleich.
 - **Inventar:** Suche und die Filter Typ, Zustand und Herkunft stehen in einer Zeile; auf schmalen Bildschirmen brechen sie um.
 - **Speicher:** Die Kacheln Speicher, Arbeitsspeicher, Prozessor und Swap zeigen eine Kurve der letzten Tage (ein Wert alle fünf Minuten, sieben Tage lang gehalten; beim Prozessor auch die Spitze). Eine Stunde nach der Installation erscheint die erste Kurve.
 - **Speicher:** Die zwei Kacheln „Belegung“ und „Sonstiges“ sind weg; drei Chips (Nach Kategorie, Nach Ordner, Weitere) wählen die Liste, jede mit eigener Überschrift.
@@ -68,6 +69,7 @@
 
 ### English
 
+- **Inventory:** A ring with a table replaces the tiles and shows the object types: the five largest, the rest on request. A row filters the list and a second click lifts the filter; the unavailable and orphaned columns filter by type and state together.
 - **Inventory:** The search and the type, state and origin filters sit in one row; on narrow screens they wrap.
 - **Storage:** The disk, memory, CPU and swap tiles show a line of the last days (one value every five minutes, kept for seven days; the CPU also shows its peak). The first line appears an hour after installing.
 - **Storage:** The two tiles “Usage” and “Other” are gone; three chips (By category, By folder, More) pick the list, each with its own heading.

@@ -4265,6 +4265,21 @@ test("an app is an object of its own: status, detail tabs with rights and load, 
   assert.ok(shadow.innerHTML.includes('data-inv-filter="app|"'), "the inventory has a tile for the type");
 });
 
+test("the inventory shows the types as a ring and a table: five rows, the rest on request, a row filters and a second click lifts it", () => {
+  const { el, shadow } = panel("en");
+  const types = ["entity", "device", "automation", "config_entry", "app", "script", "scene"];
+  const objects = types.flatMap((type, i) => Array.from({ length: 20 - i * 2 }, (_, k) => ({ object_type: type, object_id: `${type}.${k}`, name: `${type}${k}`, status: type === "entity" && k < 2 ? "unavailable" : "active" })));
+  el.data = { ...DATA, objects, edges: [], findings: [] };
+  el.view = "inventory"; el.render();
+  let html = shadow.innerHTML;
+  assert.ok(html.includes("Others (2 types)") && html.includes("Show all 7 types") && !html.includes('data-inv-filter="scene|"'));
+  assert.ok(html.includes('data-inv-filter="entity|unavailable"') && !html.includes('class="sumtile'), "no tiles, the state columns filter");
+  el.invAllTypes = true; el.render();
+  assert.ok(shadow.innerHTML.includes('data-inv-filter="scene|"') && shadow.innerHTML.includes("Only the largest 5"));
+  el.invAllTypes = false; el.typeFilter = "scene"; el.render();
+  assert.ok(shadow.innerHTML.includes('data-inv-filter="scene|"'), "a chosen type is never hidden");
+});
+
 test("the findings of the load view are a sortable table with the numbers in columns and clickable tiles", () => {
   const { el } = panel("en");
   el.data = { ...DATA }; el._stormsRequested = 1; el._exposureRequested = true;
