@@ -14,6 +14,7 @@
 - **Apps als Objekte:** Mit Supervisor stehen installierte Apps im Inventar (Status, Version, Update) und haben eine Detailseite mit Rechten, Last und Speicher. Keine Befunde, keine Änderungen an Apps.
 - **Apps und Integrationen:** Hängt eine Integration vermutlich an einer App (Hostname in der Konfiguration), zeigt die App den Reiter „Beziehungen“. Die Zuordnung ist immer „vermutet“.
 - **Befund „App gestoppt“:** Ist eine App gestoppt und fällt eine Integration aus, die vermutlich daran hängt, meldet Housekeeper das.
+- **Befund „Integration nicht geladen“:** Ein aktiver Eintrag, der länger als eine Stunde nicht geladen ist, steht jetzt in den Befunden, mit der Ursache von Home Assistant.
 - **Seitenleisten-Knopf:** öffnet die Seitenleiste von Home Assistant, wenn sie ausgeblendet ist.
 
 ### English

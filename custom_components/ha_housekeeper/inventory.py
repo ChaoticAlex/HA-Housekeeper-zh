@@ -466,6 +466,39 @@ def _entity_findings(
     ]
 
 
+ENTRY_GRACE = timedelta(hours=1)  # a restart or a retry in progress is no finding
+FAILED_ENTRY_STATES = frozenset(
+    {"setup_error", "setup_retry", "not_loaded", "failed_unload", "migration_error"}
+)
+
+
+def _config_entry_findings(
+    integrations: list[dict[str, Any]], now: datetime, min_unavailable_days: int = 0
+) -> list[dict[str, Any]]:
+    """Findings for active config entries that have not been loaded for longer than the grace."""
+    wait = max(ENTRY_GRACE, timedelta(days=min_unavailable_days))
+    findings = []
+    for item in integrations:
+        since = item.get("status_since")
+        if item["status"] != "problem" or item["state"] not in FAILED_ENTRY_STATES or not since:
+            continue
+        if now - datetime.fromisoformat(since) < wait:
+            continue
+        findings.append(
+            {
+                "rule_id": "config_entry.not_loaded",
+                "object_id": item["object_id"],
+                "classification": "problem",
+                "confidence": 0.9 if item["state"] == "setup_error" else 0.75,
+                "first_detected_at": since,
+                "evidence": [
+                    {"kind": item["state"], "source": "config_entries", "reason": item.get("error")}
+                ],
+            }
+        )
+    return findings
+
+
 def _missing_findings(
     domain: str,
     object_id: str,
@@ -869,6 +902,7 @@ class InventoryScanner:
             [("entity", item) for item in entities]
             + [("automation", item) for item in automations]
             + [("app", item) for item in apps]
+            + [("config_entry", item) for item in integrations]
         )
         if not preliminary:
             await self.observations.async_update(
@@ -935,6 +969,7 @@ class InventoryScanner:
             + helper_findings
             + group_findings
             + stopped_app_findings(apps, integrations, app_links)
+            + _config_entry_findings(integrations, observed_at, self.min_unavailable_days)
         )
 
         quarantine = quarantine_entries(self.journal.plans, [*entities, *devices])
