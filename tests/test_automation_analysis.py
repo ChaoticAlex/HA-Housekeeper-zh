@@ -95,6 +95,16 @@ def test_missing_references_ignore_dynamic_and_existing_targets() -> None:
     assert [item["object_id"] for item in missing] == ["light.missing", "missing-device"]
 
 
+def test_none_entity_is_a_blueprint_placeholder_not_missing() -> None:
+    references = [
+        {"kind": "entity", "object_id": "scene.none"},
+        {"kind": "entity", "object_id": "scene.gone"},
+    ]
+    missing = analysis.missing_references(references, {"entity": set()})
+
+    assert [item["object_id"] for item in missing] == ["scene.gone"]
+
+
 def test_template_reference_is_left_to_home_assistant_runtime_extraction() -> None:
     references = analysis.extract_references(
         {"actions": [{"target": {"entity_id": "{{ states('input_text.target') }}"}}]}

@@ -143,6 +143,9 @@ def missing_references(
         # Templates and selectors can contain dynamic or non-ID strings.
         if kind == "entity" and "." not in object_id:
             continue
+        # `scene.none` and the like are the usual "nothing chosen" default of blueprint inputs.
+        if kind == "entity" and object_id.partition(".")[2] == "none":
+            continue
         known = existing.get(kind)
         if known is not None and object_id not in known:
             missing.append(reference)
