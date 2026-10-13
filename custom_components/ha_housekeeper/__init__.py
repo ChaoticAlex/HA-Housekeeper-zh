@@ -50,6 +50,7 @@ from .inventory import InventoryScanner
 from .issues import async_clear_issues
 from .maintenance import recorder_costs
 from .runs import run_key
+from .scan_coverage import RETRY_LIMIT, RETRY_MINUTES, retryable_gaps
 from .system_usage import system_light
 from .websocket_api import async_register as async_register_websocket
 
@@ -129,14 +130,37 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         config_panel_domain=DOMAIN,
     )
 
+    # A gap that a new scan may close (Lovelace not ready, a dashboard being saved) is tried again
+    # a few minutes later, a few times, instead of waiting for the next regular scan.
+    retry: dict[str, Any] = {"cancel": None}
+
+    async def _scan(*, again: bool = False) -> None:
+        scanner.retry_runs = scanner.retry_runs + 1 if again else 0
+        await _async_initial_scan(scanner)
+        if retry["cancel"]:
+            retry["cancel"]()
+            retry["cancel"] = None
+        if scanner.retry_runs < RETRY_LIMIT and retryable_gaps(scanner.scan_coverage.report()):
+            retry["cancel"] = async_call_later(hass, RETRY_MINUTES * 60, _retry_scan)
+
+    @callback
+    def _retry_scan(_: Any) -> None:
+        retry["cancel"] = None
+        if scanner.paused:  # A cleanup run scans itself; look again in a while.
+            retry["cancel"] = async_call_later(hass, RETRY_MINUTES * 60, _retry_scan)
+            return
+        entry.async_create_background_task(
+            hass, _scan(again=True), "HA Housekeeper rescan after a gap"
+        )
+
+    entry.async_on_unload(lambda: retry["cancel"]() if retry["cancel"] else None)
+
     # Scanning while Home Assistant is still starting would classify entities of
     # integrations that have not finished loading as orphaned and persist that.
     # A final scan follows once the warm-up after "started" is over.
     @callback
     def _final_scan(_: Any) -> None:
-        entry.async_create_background_task(
-            hass, _async_initial_scan(scanner), "HA Housekeeper final startup scan"
-        )
+        entry.async_create_background_task(hass, _scan(), "HA Housekeeper final startup scan")
 
     @callback
     def _start_initial_scan(_: HomeAssistant) -> None:
@@ -147,11 +171,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if booting:
             scanner.begin_warmup(WARMUP_SECONDS)
             entry.async_on_unload(async_call_later(hass, WARMUP_SECONDS + 5, _final_scan))
-        entry.async_create_background_task(
-            hass,
-            _async_initial_scan(scanner),
-            "HA Housekeeper initial inventory scan",
-        )
+        entry.async_create_background_task(hass, _scan(), "HA Housekeeper initial inventory scan")
 
     # Changed thresholds only affect the findings, so a reload with a fresh scan suffices.
     entry.async_on_unload(entry.add_update_listener(_async_options_updated))
@@ -271,7 +291,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             if scanner.paused:  # A cleanup run is in progress and scans itself.
                 return
             entry.async_create_background_task(
-                hass, _async_initial_scan(scanner), "HA Housekeeper scheduled inventory scan"
+                hass, _scan(), "HA Housekeeper scheduled inventory scan"
             )
 
         entry.async_on_unload(

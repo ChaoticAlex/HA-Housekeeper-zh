@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from custom_components.ha_housekeeper.scan_coverage import SOURCES, ScanCoverage, gaps
+from custom_components.ha_housekeeper.scan_coverage import (
+    SOURCES,
+    ScanCoverage,
+    gaps,
+    retryable_gaps,
+)
 
 
 def test_a_source_the_scan_never_reached_is_unknown_and_the_order_is_fixed() -> None:
@@ -37,3 +42,12 @@ def test_gaps_name_skipped_partial_and_unknown_sources_but_not_absent_ones() -> 
     assert gaps(coverage.report()) == ["dashboards", "statistics"]
     coverage.reset()
     assert gaps(coverage.report()) == list(SOURCES)
+
+
+def test_retryable_gaps_leave_out_a_component_that_is_not_there() -> None:
+    coverage = ScanCoverage()
+    coverage.skipped("dashboards", "unavailable")
+    coverage.partial("statistics", "resources_unknown")
+    coverage.skipped("energy", "not_ready")
+    coverage.absent("apps", "no_supervisor")
+    assert retryable_gaps(coverage.report()) == ["energy", "statistics"]

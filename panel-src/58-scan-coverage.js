@@ -3,7 +3,7 @@
 Object.assign(TEXT.de, {
   covLine: "Prüfung: {n} von {m} Quellen",
   covAll: "Prüfung: alle {m} Quellen gelesen",
-  covGaps: "Nicht vollständig gelesen: {list}. Befunde dort fehlen in den Zahlen.",
+  covGaps: "Nicht vollständig gelesen: {list}. Befunde dort fehlen in den Zahlen.", covRetry: "Housekeeper versucht es in {n} Minuten noch einmal.",
   covDetails: "Details",
   covListTitle: "Was zuletzt geprüft wurde",
   covListHint: "Scan von {date}. Quellen mit Lücke stehen oben. „Nicht vorhanden“ heißt: Diese Quelle gibt es in deiner Installation nicht.",
@@ -36,7 +36,7 @@ Object.assign(TEXT.de, {
 Object.assign(TEXT.en, {
   covLine: "Check: {n} of {m} sources",
   covAll: "Check: all {m} sources read",
-  covGaps: "Not read in full: {list}. Findings there are missing from the numbers.",
+  covGaps: "Not read in full: {list}. Findings there are missing from the numbers.", covRetry: "Housekeeper tries again in {n} minutes.",
   covDetails: "Details",
   covListTitle: "What was checked last",
   covListHint: "Scan of {date}. Sources with a gap come first. \"Not present\" means this source does not exist in your installation.",
@@ -89,7 +89,7 @@ class ScanCoverageMixin {
     const gaps = this.scanCoverageGaps(), read = items.length - gaps.length;
     const text = gaps.length ? this.t("covLine", { n: read, m: items.length }) : this.t("covAll", { m: items.length });
     const list = gaps.map(c => this.t(`covSrc_${c.source}`)).join(", ");
-    return `<div class="panel u-mb14" data-coverage><div class="row"><span class="tile ${gaps.length ? "warn" : "mute"}"><ha-icon icon="${gaps.length ? "mdi:shield-alert-outline" : "mdi:shield-check-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(text)}</strong>${gaps.length ? `<small>${this.esc(this.t("covGaps", { list }))}</small>` : ""}</span><button class="btn" data-cov-details>${this.t("covDetails")}</button></div></div>`;
+    return `<div class="panel u-mb14" data-coverage><div class="row"><span class="tile ${gaps.length ? "warn" : "mute"}"><ha-icon icon="${gaps.length ? "mdi:shield-alert-outline" : "mdi:shield-check-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(text)}</strong>${gaps.length ? `<small>${this.esc(this.t("covGaps", { list }))}${this.data?.meta?.coverage_retry_minutes ? ` ${this.esc(this.t("covRetry", { n: this.data.meta.coverage_retry_minutes }))}` : ""}</small>` : ""}</span><button class="btn" data-cov-details>${this.t("covDetails")}</button></div></div>`;
   }
 
   // The list in Settings > Info: every source with its state, the reason and the time of the scan; gaps first.

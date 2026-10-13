@@ -92,7 +92,7 @@ from .queries import ReplyStore
 from .refactor import RefactorStore
 from .reminders import ReminderStore
 from .runs import RunStore
-from .scan_coverage import ScanCoverage
+from .scan_coverage import RETRY_LIMIT, RETRY_MINUTES, ScanCoverage, retryable_gaps
 from .scan_health import ScanHealth
 from .service_check import missing_service_findings
 from .signals import SignalStore, situations
@@ -671,6 +671,7 @@ class InventoryScanner:
         self.config_changes = ChangeStore(hass)
         self.cleanup = CleanupRunner(hass, self)
         self.paused = False
+        self.retry_runs = 0  # Rescans after a gap in a row; set by the scheduler in __init__.py
         self._booting = False
         self._warmup_until: float | None = None
         self._recorder_available = False
@@ -1148,6 +1149,9 @@ class InventoryScanner:
                 "scan_timing": timing,
                 "unchecked": sorted(self._unchecked),
                 "coverage": self.scan_coverage.report(),
+                "coverage_retry_minutes": RETRY_MINUTES
+                if self.retry_runs < RETRY_LIMIT and retryable_gaps(self.scan_coverage.report())
+                else 0,
                 "storage": storage,
                 "database": database,
                 "scanned_at": observed_at.isoformat(),

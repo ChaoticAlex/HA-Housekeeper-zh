@@ -23,6 +23,12 @@ SOURCES = (
 GAPS = ("skipped", "partial")
 
 
+# A gap that a later scan can close: everything except a component that is not there at all.
+PERMANENT_REASONS = ("unavailable",)
+RETRY_MINUTES = 5
+RETRY_LIMIT = 3
+
+
 class ScanCoverage:
     """The state of each source in one scan; rebuilt at the start of every scan."""
 
@@ -60,3 +66,12 @@ class ScanCoverage:
 def gaps(report: list[dict[str, Any]]) -> list[str]:
     """The sources that are not fully read: skipped, partial or unknown."""
     return [item["source"] for item in report if item["state"] in (*GAPS, "unknown")]
+
+
+def retryable_gaps(report: list[dict[str, Any]]) -> list[str]:
+    """The skipped or partly read sources that a new scan may well read in full."""
+    return [
+        item["source"]
+        for item in report
+        if item["state"] in GAPS and item.get("reason") not in PERMANENT_REASONS
+    ]

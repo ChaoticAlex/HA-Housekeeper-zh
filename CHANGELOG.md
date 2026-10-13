@@ -10,6 +10,8 @@
 
 ### Neu
 
+- **Lücken in der Prüfung werden nachgeholt:** Konnte ein Scan eine Quelle nicht vollständig lesen (etwa Dashboards, weil Lovelace noch nicht bereit war), startet Housekeeper nach 5 Minuten einen neuen Scan, höchstens dreimal hintereinander. Die Leiste „Prüfung“ sagt dazu, dass es noch einmal versucht wird. Fehlt eine Komponente ganz, wird nicht wiederholt.
+
 - **Vermerk für mehrere Objekte:** Die Auswahlleiste der Befunde hat den Knopf „Vermerk setzen“. Er setzt Art, Begründung und Prüffrist in einem Zug an allen angekreuzten Entitäten, Geräten, Integrationen und Apps; andere Objekte in der Auswahl (zum Beispiel Automationen) bleiben unberührt.
 
 ### Behoben
@@ -27,6 +29,8 @@
 - **Integration outages graded by duration:** An integration that is not loaded is a finding at once and no longer waits for “Minimum days unavailable” (default 7 days). How long it has lasted sets the impact: under 1 hour “Info”, from 1 hour “Low”, from 1 day “Medium”, from the minimum days “High”. “Info” is new (1 point, at most 5); “Low” and “Medium” now take off 2 and 3 points instead of 1 and 2, so the score jumps once. In the list every row carries its impact as a chip and a “⋯” menu with “Mark as known”, “Snooze”, “Hide finding” (and “Prepare deletion” where it fits); the wide buttons under outages and the single “Prepare deletion” button are gone. The detail page shows the same actions for outages now. The row of an outage only says what is affected and how long it has lasted (“for 6 h · Medium in 18 h”); state and error text are on the detail page. Each row has two chips: the reason (grey outline, for example “Outage”, “Unused”) and the impact (coloured, High red down to Info grey); the date is gone from the row. The filters “Type” and “Impact” now apply to outages too; there is a new filter “Reason” (with “Outage” as a tile of its own). The “Housekeeping status” tile of the Findings page is gone; its history (“−27 in 2 days”) sits under the headline of the overview, and the link “How is the number made?” is removed.
 
 #### New
+
+- **Gaps in the check are made up for:** If a scan could not read a source in full (dashboards, say, because Lovelace was not ready), Housekeeper starts a new scan after 5 minutes, at most three times in a row. The "Check" bar says that it will try again. A component that is missing altogether is not retried.
 
 - **Mark for several objects:** The selection bar of the Findings page has a “Set a mark” button. It sets kind, reason and review date in one go on all ticked entities, devices, integrations and apps; other objects in the selection (for example automations) stay untouched.
 
