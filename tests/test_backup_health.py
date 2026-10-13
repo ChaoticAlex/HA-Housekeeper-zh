@@ -152,7 +152,7 @@ def test_a_failed_attempt_or_failed_target_is_a_problem() -> None:
 def test_a_backup_only_on_the_local_target_is_a_note() -> None:
     _, checks = judge(state([backup(agents=("hassio.local",))]))
     assert checks["targets"]["level"] == "note"
-    assert checks["targets"]["values"] == {"local": ["hassio.local"], "remote": []}
+    assert checks["targets"]["values"] == {"local": ["hassio.local"], "remote": [], "at": None}
     _, checks = judge(state([backup(agents=("backup.local", "hassio.nas"))]))
     assert checks["targets"]["values"]["remote"] == ["hassio.nas"]
 
@@ -167,6 +167,33 @@ def test_an_unusual_size_is_a_note_against_the_median_of_the_backups_before() ->
     assert checks["size"]["values"]["baseline"] == 5  # only the five before the newest count
     assert judge(state([backup()]))[1]["size"]["level"] == "unknown"
     assert judge(state([backup(5, size=0), backup(29)]))[1]["size"]["level"] == "unknown"
+
+
+def test_only_automatic_and_manual_backups_affect_the_report() -> None:
+    app_update = backup(1, size=5, agents=("hassio.local",), automatic=None)
+    automatic = backup(10, size=1000)
+    manual = backup(30, size=1100, automatic=False)
+    report, checks = judge(state([app_update, automatic, manual]))
+    assert report["backup_count"] == 2
+    assert [item["automatic"] for item in report["backups"]] == [True, False]
+    assert checks["newest"]["values"]["age_hours"] == 10
+    assert checks["targets"]["level"] == "ok"
+    assert checks["size"]["level"] == "ok"
+    assert checks["retention"]["values"]["count"] == 2
+    _, empty_checks = judge(state([app_update], config=config(agent_ids=[])))
+    assert empty_checks["setup"]["level"] == "problem"
+    assert empty_checks["newest"]["level"] == "problem"
+
+
+def test_confirmed_external_storage_overrides_name_based_guess() -> None:
+    local_only = state([backup(agents=("hassio.local",))])
+    _, checks = judge(local_only, attest={**ATTEST, "targets": ago(days=2)})
+    assert checks["targets"]["level"] == "ok"
+    assert checks["targets"]["values"]["at"] == ago(days=2)
+    _, checks = judge(local_only, attest=ATTEST)
+    assert checks["targets"]["level"] == "note"
+    _, checks = judge(state([]), attest={**ATTEST, "targets": ago(days=2)})
+    assert checks["targets"]["level"] == "unknown"
 
 
 def test_retention_and_age_of_the_oldest_backup() -> None:
@@ -327,9 +354,10 @@ async def test_the_attestations_survive_a_restart_and_reject_unknown_kinds(
 ) -> None:
     store = AttestStore(hass)
     await store.async_load()
-    assert store.record == {"emergency_kit": None, "restore_test": None}
+    assert store.record == {"targets": None, "emergency_kit": None, "restore_test": None}
     store.set("emergency_kit")
     store.set("restore_test", date(2026, 9, 1))
+    store.set("targets", date(2026, 9, 2))
     assert store.record["restore_test"] == "2026-09-01T00:00:00+00:00"
     with pytest.raises(ValueError):
         store.set("backup_ok")
@@ -348,4 +376,4 @@ async def test_the_attestations_survive_a_restart_and_reject_unknown_kinds(
     }
     broken = AttestStore(hass)
     await broken.async_load()
-    assert broken.record == {"emergency_kit": None, "restore_test": None}
+    assert broken.record == {"targets": None, "emergency_kit": None, "restore_test": None}

@@ -984,6 +984,10 @@ async def test_backup_health_and_attestations_over_the_websocket(
             and attested["result"]["attest"]["restore_test"] == "2026-09-01T00:00:00+00:00"
         )
         assert scanner.attest.record["restore_test"] == "2026-09-01T00:00:00+00:00"
+        locations = await ask(
+            {"type": "ha_housekeeper/backup_attest", "kind": "targets", "date": "2026-09-02"}
+        )
+        assert locations["result"]["attest"]["targets"] == "2026-09-02T00:00:00+00:00"
         today = await ask({"type": "ha_housekeeper/backup_attest", "kind": "emergency_kit"})
         assert today["result"]["attest"]["emergency_kit"] is not None
         cleared = await ask(

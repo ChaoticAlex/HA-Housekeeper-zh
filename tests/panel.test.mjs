@@ -53,6 +53,26 @@ function panel(lang = "en", extra = {}) {
   return { el, ...env };
 }
 
+test("the overview has one findings link and shows active policy violations among hints", () => {
+  const { el } = panel("de");
+  el.findingEntries = () => Array.from({ length: 6 }, (_, i) => ({ finding: { id: i } }));
+  el.findingRow = () => '<div class="row">Befund</div>';
+  el.findingTotal = () => 6;
+  el.todoItems = () => [];
+  const todo = el.todoCard();
+  assert.equal((todo.match(/Alle Befunde \(6\)/g) || []).length, 1);
+  el.ensureBatteryTrend = () => {};
+  el.ensurePolicies = () => {};
+  el.policies = { available: true, rules: [
+    { enabled: true, count: 3, ignored: 2 },
+    { enabled: false, count: 8, ignored: 0 },
+  ] };
+  const hints = el.cleanupCard();
+  assert.match(hints, /data-jump="policies"[^>]*>[\s\S]*?Richtlinienverstöße[\s\S]*?1 Regel aktiv[\s\S]*?>3<\/span>/);
+  assert.ok(!hints.includes('>8</span>'), "disabled rules do not contribute violations");
+  assert.equal(el.t("dbOvHint"), "Größe und Wachstum des Recorders.");
+});
+
 test("German and English texts define the same keys", () => {
   const { TEXT } = loadPanel();
   assert.deepEqual(Object.keys(TEXT.de).sort(), Object.keys(TEXT.en).sort());

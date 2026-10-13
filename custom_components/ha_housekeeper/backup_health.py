@@ -30,7 +30,7 @@ RESTORE_TEST_DAYS = 180
 LOCAL_SUFFIX = ".local"  # agent ids such as backup.local or hassio.local; anything else is remote
 MAX_PLANS_CHECKED = 5
 PLAN_BACKUP_WINDOW_SECONDS = 2 * 3600  # the backup started up to this long before it was recorded
-ATTEST_KINDS = ("emergency_kit", "restore_test")
+ATTEST_KINDS = ("targets", "emergency_kit", "restore_test")
 _SEVERITY = {"ok": 0, "unknown": 1, "note": 2, "problem": 3}
 
 
@@ -176,12 +176,13 @@ def _last_run_check(
     return _check("last_run", "ok", failed_attempt=False, **values)
 
 
-def _targets_check(newest: dict[str, Any] | None) -> dict[str, Any]:
+def _targets_check(newest: dict[str, Any] | None, recorded: str | None) -> dict[str, Any]:
     if newest is None:
         return _check("targets", "unknown")
     local = [agent for agent in newest["agents"] if _is_local(agent)]
     remote = [agent for agent in newest["agents"] if not _is_local(agent)]
-    return _check("targets", "ok" if remote else "note", local=local, remote=remote)
+    at = _iso(recorded)
+    return _check("targets", "ok" if remote or at else "note", local=local, remote=remote, at=at)
 
 
 def _size_check(backups: list[dict[str, Any]]) -> dict[str, Any]:
@@ -275,25 +276,32 @@ def evaluate(
     if not state.get("available"):
         return {"available": False, "checks": [], "backups": [], "overall": "unknown"}
     config, backups = state.get("config"), state.get("backups")
-    checks = [_setup_check(config, backups)]
-    if backups is None:
+    selected = (
+        [item for item in backups if item.get("automatic") is not None]
+        if backups is not None
+        else None
+    )
+    checks = [_setup_check(config, selected)]
+    if selected is None:
         checks.append(_check("newest", "unknown"))
         listing: list[dict[str, Any]] = []
         everything: list[dict[str, Any]] = []
     else:
-        everything = sorted(backups, key=lambda item: item["date"] or "", reverse=True)
+        # HA marks its scheduled backups True and its manual backups False.
+        # App-update and other imported backups have no such classification (None).
+        everything = sorted(selected, key=lambda item: item["date"] or "", reverse=True)
         # The safety copies before a plan say nothing about the backup strategy.
         listing = [item for item in everything if not item.get("partial")]
         newest = listing[0] if listing and listing[0]["date"] else None
         checks.append(_newest_check(config, listing, now))
         checks.append(_last_run_check(config, newest, state.get("agent_errors") or []))
-        checks.append(_targets_check(newest))
+        checks.append(_targets_check(newest, attest.get("targets")))
         checks.append(_size_check(listing))
         checks.append(_retention_check(config, listing, now))
         checks.append(_encryption_check(config, newest))
     checks.append(_attest_check("emergency_kit", attest.get("emergency_kit"), now, None))
     checks.append(_attest_check("restore_test", attest.get("restore_test"), now, RESTORE_TEST_DAYS))
-    if backups is not None and (plan_check := _plans_check(plans, everything)):
+    if selected is not None and (plan_check := _plans_check(plans, everything)):
         checks.append(plan_check)
     overall = max((item["level"] for item in checks), key=_SEVERITY.__getitem__, default="unknown")
     counts = {level: sum(1 for item in checks if item["level"] == level) for level in _SEVERITY}
