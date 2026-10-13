@@ -13005,7 +13005,7 @@ class EntityStateMixin {
 Object.assign(TEXT.de, {
   monitor: "Hausmonitor", monitorSubtitle: "Wichtige Funktionen und ihr zuletzt geprüfter Zustand.",
   monitorAdd: "Monitor hinzufügen", monitorEdit: "Bearbeiten", monitorEditTitle: "Monitor bearbeiten", monitorDelete: "Löschen",
-  monitorEmpty: "Noch keine Funktion festgelegt.", monitorEmptyHint: "Wähle die wenigen Objekte, von denen eine wichtige Funktion direkt abhängt.",
+  monitorEmpty: "Noch kein Monitor. Lege zum Beispiel einen Wasseralarm oder eine Türklingel an.",
   monitorProblem: "Beeinträchtigt", monitorUnverified: "Unbekannt", monitorOk: "Unauffällig",
   monitorLastScan: "Letzter Scan: {date}", monitorLastVerified: "Letzte vollständige Prüfung: {date}", monitorNeverVerified: "Noch nie vollständig geprüft",
   monitorUnresolved: "Letzter belegter Defekt ungeklärt", monitorNoProof: "Prüfung unvollständig – kein Ausfall belegt",
@@ -13032,7 +13032,7 @@ Object.assign(TEXT.de, {
 Object.assign(TEXT.en, {
   monitor: "Home monitor", monitorSubtitle: "Important functions and their last checked state.",
   monitorAdd: "Add monitor", monitorEdit: "Edit", monitorEditTitle: "Edit monitor", monitorDelete: "Delete",
-  monitorEmpty: "No function defined yet.", monitorEmptyHint: "Choose the few objects an important function directly depends on.",
+  monitorEmpty: "No monitor yet. Add a water alarm or a doorbell, for example.",
   monitorProblem: "Impaired", monitorUnverified: "Unknown", monitorOk: "No known fault",
   monitorLastScan: "Last scan: {date}", monitorLastVerified: "Last complete check: {date}", monitorNeverVerified: "Never checked completely",
   monitorUnresolved: "Last confirmed fault unresolved", monitorNoProof: "Check incomplete – no failure confirmed",
@@ -13081,7 +13081,7 @@ class MonitorMixin {
       const detail = item.incident_open && item.state === "unverified" ? `${this.t("monitorUnresolved")}: ${this.monitorReason(item.last_problem_reason)}` : this.monitorReason(item.reason);
       return `<button class="row" data-monitor-open="${this.esc(item.id)}"><span class="tile ${tone}"><ha-icon icon="mdi:home-heart"></ha-icon></span><span class="row-text"><strong>${this.esc(item.name)}</strong><small>${this.esc([reason, detail, this.t("monitorLastScan", { date: this.formatDate(item.scanned_at) })].filter(Boolean).join(" · "))}</small></span><span class="pill ${tone}">${this.monitorState(item)}</span></button>`;
     }).join("");
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("monitor")}</h2><p>${this.t("monitorSubtitle")}</p></div><button class="btn primary" data-monitor-add><ha-icon icon="mdi:plus"></ha-icon>${this.t("monitorAdd")}</button></div>${this.monitorFunctions().length ? `<div class="toolbar">${filters}</div>${rows || `<div class="emptymsg">${this.t("monitorEmptyFiltered")}</div>`}` : `<div class="emptymsg"><ha-icon icon="mdi:home-heart-outline"></ha-icon>${this.t("monitorEmpty")}<small>${this.t("monitorEmptyHint")}</small></div>`}</section>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("monitor")}</h2><p>${this.t("monitorSubtitle")}</p></div><button class="btn primary" data-monitor-add><ha-icon icon="mdi:plus"></ha-icon>${this.t("monitorAdd")}</button></div>${this.monitorFunctions().length ? `<div class="toolbar">${filters}</div>${rows || `<div class="emptymsg">${this.t("monitorEmptyFiltered")}</div>`}` : `<div class="emptymsg"><ha-icon icon="mdi:home-heart"></ha-icon>${this.t("monitorEmpty")}</div>`}</section>`;
   }
 
   monitorDetail() {

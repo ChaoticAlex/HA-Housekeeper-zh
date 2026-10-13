@@ -22,7 +22,7 @@ class MonitorMixin {
       const detail = item.incident_open && item.state === "unverified" ? `${this.t("monitorUnresolved")}: ${this.monitorReason(item.last_problem_reason)}` : this.monitorReason(item.reason);
       return `<button class="row" data-monitor-open="${this.esc(item.id)}"><span class="tile ${tone}"><ha-icon icon="mdi:home-heart"></ha-icon></span><span class="row-text"><strong>${this.esc(item.name)}</strong><small>${this.esc([reason, detail, this.t("monitorLastScan", { date: this.formatDate(item.scanned_at) })].filter(Boolean).join(" · "))}</small></span><span class="pill ${tone}">${this.monitorState(item)}</span></button>`;
     }).join("");
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("monitor")}</h2><p>${this.t("monitorSubtitle")}</p></div><button class="btn primary" data-monitor-add><ha-icon icon="mdi:plus"></ha-icon>${this.t("monitorAdd")}</button></div>${this.monitorFunctions().length ? `<div class="toolbar">${filters}</div>${rows || `<div class="emptymsg">${this.t("monitorEmptyFiltered")}</div>`}` : `<div class="emptymsg"><ha-icon icon="mdi:home-heart-outline"></ha-icon>${this.t("monitorEmpty")}<small>${this.t("monitorEmptyHint")}</small></div>`}</section>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("monitor")}</h2><p>${this.t("monitorSubtitle")}</p></div><button class="btn primary" data-monitor-add><ha-icon icon="mdi:plus"></ha-icon>${this.t("monitorAdd")}</button></div>${this.monitorFunctions().length ? `<div class="toolbar">${filters}</div>${rows || `<div class="emptymsg">${this.t("monitorEmptyFiltered")}</div>`}` : `<div class="emptymsg"><ha-icon icon="mdi:home-heart"></ha-icon>${this.t("monitorEmpty")}</div>`}</section>`;
   }
 
   monitorDetail() {

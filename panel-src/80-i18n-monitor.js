@@ -2,7 +2,7 @@
 Object.assign(TEXT.de, {
   monitor: "Hausmonitor", monitorSubtitle: "Wichtige Funktionen und ihr zuletzt geprüfter Zustand.",
   monitorAdd: "Monitor hinzufügen", monitorEdit: "Bearbeiten", monitorEditTitle: "Monitor bearbeiten", monitorDelete: "Löschen",
-  monitorEmpty: "Noch keine Funktion festgelegt.", monitorEmptyHint: "Wähle die wenigen Objekte, von denen eine wichtige Funktion direkt abhängt.",
+  monitorEmpty: "Noch kein Monitor. Lege zum Beispiel einen Wasseralarm oder eine Türklingel an.",
   monitorProblem: "Beeinträchtigt", monitorUnverified: "Unbekannt", monitorOk: "Unauffällig",
   monitorLastScan: "Letzter Scan: {date}", monitorLastVerified: "Letzte vollständige Prüfung: {date}", monitorNeverVerified: "Noch nie vollständig geprüft",
   monitorUnresolved: "Letzter belegter Defekt ungeklärt", monitorNoProof: "Prüfung unvollständig – kein Ausfall belegt",
@@ -29,7 +29,7 @@ Object.assign(TEXT.de, {
 Object.assign(TEXT.en, {
   monitor: "Home monitor", monitorSubtitle: "Important functions and their last checked state.",
   monitorAdd: "Add monitor", monitorEdit: "Edit", monitorEditTitle: "Edit monitor", monitorDelete: "Delete",
-  monitorEmpty: "No function defined yet.", monitorEmptyHint: "Choose the few objects an important function directly depends on.",
+  monitorEmpty: "No monitor yet. Add a water alarm or a doorbell, for example.",
   monitorProblem: "Impaired", monitorUnverified: "Unknown", monitorOk: "No known fault",
   monitorLastScan: "Last scan: {date}", monitorLastVerified: "Last complete check: {date}", monitorNeverVerified: "Never checked completely",
   monitorUnresolved: "Last confirmed fault unresolved", monitorNoProof: "Check incomplete – no failure confirmed",
