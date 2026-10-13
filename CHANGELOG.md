@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.6.0 - 2026-10-13
 
 ### Geändert
 
@@ -51,6 +51,10 @@
 - **Mark for several objects:** The selection bar of the Findings page has a “Set a mark” button. It sets kind, reason and review date in one go on all ticked entities, devices, integrations and apps; other objects in the selection (for example automations) stay untouched.
 
 #### Fixed
+
+- **Backup before a deletion without set-up backups:** Anyone who had not set up automatic backups in Home Assistant first had to create a backup location and an encryption key. Housekeeper now saves to the local storage of Home Assistant, without a password. The preview and the backup step say that it is local and not encrypted. An aborted plan names the reason in the red band ("Nothing was deleted and nothing was changed").
+
+- **"Scene missing" for scenes an automation creates itself:** If an automation or script creates the scene with `scene.create`, the finding now says so: the scene only exists after that action has run.
 
 - **Policies and other views after “Scan now”:** The list of affected entities stayed at the old state after a new scan until the page was reloaded. Policies, exposure, automation quality and blueprints now load again by themselves after a new scan (issue #11).
 
