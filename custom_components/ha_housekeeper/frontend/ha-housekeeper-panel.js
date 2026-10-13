@@ -1510,7 +1510,7 @@ class StylesMixin {
       .btn.small{padding:5px 11px;font-size:calc(13px*var(--hk-fs,1))}.notehint{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 16px}.notehint small{display:block;color:var(--hk-muted)}.row.seeall{justify-content:flex-start;color:var(--hk-blue-text);font-weight:600}.logfilters{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.logfilters .chip{cursor:pointer}.logfilters .chip.on{border-color:var(--hk-blue);color:var(--hk-blue-text)}.logsuggest{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:12px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 9%,transparent)}
       .hamenu{display:grid;place-items:center;flex:none;width:40px;height:40px;margin:0 -10px 0 -6px;padding:0;border:0;border-radius:50%;background:none;color:inherit}.hamenu:hover{background:var(--hk-soft)}.hamenu:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px}.hamenu ha-icon{--mdc-icon-size:24px}.sysmeter{display:block;height:6px;margin-top:6px;border-radius:99px;background:var(--hk-soft);overflow:hidden}.sysmeter i{display:block;height:100%;border-radius:99px;background:var(--hk-green)}.sysmeter.warn i{background:var(--hk-amber)}.sysmeter.red i{background:var(--hk-red)}.sysmeter.mute i{background:var(--hk-gray)}.sysshare{display:block;width:100%;min-width:120px;height:8px;margin-top:2px;border-radius:99px;background:var(--hk-soft);overflow:hidden}.sysshare i{display:block;height:100%;border-radius:99px;background:var(--hk-green)}.tablewrap.lt.acc td{white-space:normal}.pills{display:flex;flex-wrap:wrap;gap:4px}@media(min-width:641px){.sysnav .navtiles{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(min-width:1300px){.sysnav .navtiles{grid-template-columns:repeat(6,minmax(0,1fr))}}
       .intentry{margin:4px 2px 0;font-size:15px}.syssec{margin:18px 16px 6px;font-size:15px}.syssec:first-child{margin-top:12px}
-      .rowmenu{position:relative;flex:none;margin:0 10px 0 0}.rowmenu>summary{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;list-style:none;cursor:pointer;color:var(--hk-muted)}.rowmenu>summary::-webkit-details-marker{display:none}.rowmenu>summary:hover,.rowmenu[open]>summary{background:var(--hk-soft);color:inherit}.menupop{position:absolute;right:0;top:100%;z-index:20;display:grid;min-width:210px;padding:4px 0;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);box-shadow:0 6px 20px rgba(0,0,0,.18)}.menuitem{display:flex;gap:10px;align-items:center;padding:8px 14px;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}.menuitem:hover{background:var(--hk-soft)}.menuitem ha-icon{--mdc-icon-size:18px;color:var(--hk-muted)}
+      .rowmenu{position:relative;flex:none;margin:0 10px 0 0}.rowmenu>summary{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;list-style:none;cursor:pointer;color:var(--hk-muted)}.rowmenu>summary::-webkit-details-marker{display:none}.rowmenu>summary:hover,.rowmenu[open]>summary{background:var(--hk-soft);color:inherit}.menupop{position:absolute;right:0;top:100%;z-index:20;display:grid;min-width:260px;padding:4px 0;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);box-shadow:0 6px 20px rgba(0,0,0,.18)}.menuitem{white-space:nowrap;display:flex;gap:10px;align-items:center;padding:8px 14px;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}.menuitem:hover{background:var(--hk-soft)}.menuitem ha-icon{--mdc-icon-size:18px;color:var(--hk-muted)}
       ${this.themeCss()}
     </style>`;
   }
@@ -6903,13 +6903,13 @@ class MarksMixin {
 
 // Texts for the impact of a finding (see impact.py); merged into TEXT.
 Object.assign(TEXT.de, {
-  sortImpact: "Auswirkung", allImpacts: "Alle Auswirkungen", impact_high: "Hohe Auswirkung", impact_medium: "Mittlere Auswirkung", impact_low: "Geringe Auswirkung", impact_info: "Info", chip_high: "Hoch", chip_medium: "Mittel", chip_low: "Niedrig", chip_info: "Info", rowMenu: "Aktionen für diese Zeile", impact_none: "Keine Auswirkung",
+  sortImpact: "Auswirkung", allImpacts: "Alle Auswirkungen", impact_high: "Hohe Auswirkung", impact_medium: "Mittlere Auswirkung", impact_low: "Geringe Auswirkung", impact_info: "Info", outageFor: "seit {span}", outageNext: "{level} in {span}", unitMin: "Min.", unitHour: "Std.", unitDay: "Tagen", chip_high: "Hoch", chip_medium: "Mittel", chip_low: "Niedrig", chip_info: "Info", rowMenu: "Aktionen für diese Zeile", impact_none: "Keine Auswirkung",
   impactFact_outage_age: "Dauer des Ausfalls", impactFact_critical: "kritisch: {why}", impactFact_target_critical: "fehlendes Ziel {id} ist kritisch", impactFact_controls_critical: "steuert {n} kritische Objekte", impactFact_used_by_active: "von {n} aktiven Automationen oder Skripten genutzt", impactFact_on_dashboards: "auf {n} Dashboards", impactFact_many_dependents: "{n} Abhängige", impactFact_runs_active: "läuft aktiv", impactFact_runs_inactive: "ist deaktiviert",
   reason_critical_object: "Kritisches Objekt (Schloss, Alarm, Wasser- oder Rauchmelder, Label housekeeper_critical): bitte einzeln bestätigen.",
   impactWhy_label: "Label", impactWhy_device_label: "Label am Gerät", impactWhy_area_label: "Label am Bereich", impactWhy_kind: "Art des Objekts",
 });
 Object.assign(TEXT.en, {
-  sortImpact: "Impact", allImpacts: "All impacts", impact_high: "High impact", impact_medium: "Medium impact", impact_low: "Low impact", impact_info: "Info", chip_high: "High", chip_medium: "Medium", chip_low: "Low", chip_info: "Info", rowMenu: "Actions for this row", impact_none: "No impact",
+  sortImpact: "Impact", allImpacts: "All impacts", impact_high: "High impact", impact_medium: "Medium impact", impact_low: "Low impact", impact_info: "Info", outageFor: "for {span}", outageNext: "{level} in {span}", unitMin: "min", unitHour: "h", unitDay: "days", chip_high: "High", chip_medium: "Medium", chip_low: "Low", chip_info: "Info", rowMenu: "Actions for this row", impact_none: "No impact",
   impactFact_outage_age: "length of the outage", impactFact_critical: "critical: {why}", impactFact_target_critical: "the missing target {id} is critical", impactFact_controls_critical: "controls {n} critical objects", impactFact_used_by_active: "used by {n} active automations or scripts", impactFact_on_dashboards: "on {n} dashboards", impactFact_many_dependents: "{n} dependents", impactFact_runs_active: "runs actively", impactFact_runs_inactive: "is disabled",
   reason_critical_object: "Critical object (lock, alarm, water or smoke sensor, label housekeeper_critical): confirm it on its own.",
   impactWhy_label: "label", impactWhy_device_label: "label on the device", impactWhy_area_label: "label on the area", impactWhy_kind: "kind of object",
@@ -6933,6 +6933,20 @@ class CausesMixin {
     const why = c.kind === "integration_down" ? [c.state ? this.t("causeState", { state: c.state }) : "", c.error || "", this.logLine(c.log)].filter(Boolean) : [];
     return [...why, ...used, c.impact && c.impact !== "none" ? this.t(`impact_${c.impact}`) : ""].filter(Boolean).join(" · ");
   }
+
+  // How long an integration has not been loaded and when that becomes more serious: "for 6 h · Medium in 18 h".
+  outageLine(c) {
+    const f = c.finding_key && this.data.findings.find(x => x.key === c.finding_key);
+    const since = f && Date.parse(f.first_detected_at);
+    if (!since) return "";
+    const hours = Math.max(0, (Date.now() - since) / 3600000), high = Math.max(24, (this.data.meta?.min_unavailable_days || 0) * 24);
+    const span = h => h < 1 ? `${Math.max(1, Math.round(h * 60))} ${this.t("unitMin")}` : h < 48 ? `${Math.round(h)} ${this.t("unitHour")}` : `${Math.round(h / 24)} ${this.t("unitDay")}`;
+    const next = hours < 1 ? [1, "low"] : hours < 24 ? [24, "medium"] : hours < high ? [high, "high"] : null;
+    return [this.t("outageFor", { span: span(hours) }), next ? this.t("outageNext", { level: this.t(`chip_${next[1]}`), span: span(next[0] - hours) }) : ""].filter(Boolean).join(" · ");
+  }
+
+  // The short line of a row: the counts and, for an integration, how long it has been down; reason and log are for the detail page.
+  causeShort(c) { return c.kind === "integration_down" ? [this.causeCounts(c), this.outageLine(c)].filter(Boolean).join(" · ") : [this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · "); }
 
   // One headline per cause with the counts of what it touches; the follow-up findings sit in a fold.
   causeCounts(c) {
@@ -6988,7 +7002,7 @@ class CausesMixin {
   causeEntry(c) {
     const total = this.causeTotal(c), link = `${c.object_type}:${c.object_id}`;
     const title = this.esc(this.t(`cause_${c.kind}`, { name: c.name })), own1 = c.finding_key && this.data.findings.find(x => x.key === c.finding_key);
-    const sub = [total ? this.t("causeExplains", { n: this.formatNumber(total) }) : "", this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · ");
+    const sub = [total ? this.t("causeExplains", { n: this.formatNumber(total) }) : "", this.causeShort(c)].filter(Boolean).join(" · ");
     if (!total) return `<div class="rowwrap">${this.causeBox(c)}<button class="row rel" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${title}</strong><small>${this.esc(sub)}</small></span>${this.impactChip(c.impact)}</button>${this.rowMenu(own1)}</div>${this.rowDecide(own1)}`;
     const byId = id => this.causeList().find(x => x.id === id);
     const own = c.virtual ? "" : `<div class="rowwrap">${this.causeBox(c)}<button class="row" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span>${this.impactChip(own1 ? own1.impact : "")}</button>${this.rowMenu(own1)}</div>${this.rowDecide(own1)}`;

@@ -2840,7 +2840,7 @@ test("follow-up findings of a cause stay folded until asked for, and the export 
   assert.equal(el.exportRows().length, 3);
   const html = el.findingsView();
   assert.ok(html.includes("Integration Cloud is not loaded") && html.includes("2 follow-ups") && html.includes("explains 2 more findings") && html.includes("data-toggle-followers"));
-  assert.ok(entriesOf(el).includes("1 automations affected") && entriesOf(el).includes("timeout"));
+  assert.ok(entriesOf(el).includes("1 automations affected") && !entriesOf(el).includes("timeout"));
   el.showFollowers = true;
   assert.equal(el.collapseFollowers(el.visibleFindings()).length, 3);
   assert.equal(el.todoItems().some(i => i.key === "outages"), true);

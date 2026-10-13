@@ -17,6 +17,20 @@ class CausesMixin {
     return [...why, ...used, c.impact && c.impact !== "none" ? this.t(`impact_${c.impact}`) : ""].filter(Boolean).join(" · ");
   }
 
+  // How long an integration has not been loaded and when that becomes more serious: "for 6 h · Medium in 18 h".
+  outageLine(c) {
+    const f = c.finding_key && this.data.findings.find(x => x.key === c.finding_key);
+    const since = f && Date.parse(f.first_detected_at);
+    if (!since) return "";
+    const hours = Math.max(0, (Date.now() - since) / 3600000), high = Math.max(24, (this.data.meta?.min_unavailable_days || 0) * 24);
+    const span = h => h < 1 ? `${Math.max(1, Math.round(h * 60))} ${this.t("unitMin")}` : h < 48 ? `${Math.round(h)} ${this.t("unitHour")}` : `${Math.round(h / 24)} ${this.t("unitDay")}`;
+    const next = hours < 1 ? [1, "low"] : hours < 24 ? [24, "medium"] : hours < high ? [high, "high"] : null;
+    return [this.t("outageFor", { span: span(hours) }), next ? this.t("outageNext", { level: this.t(`chip_${next[1]}`), span: span(next[0] - hours) }) : ""].filter(Boolean).join(" · ");
+  }
+
+  // The short line of a row: the counts and, for an integration, how long it has been down; reason and log are for the detail page.
+  causeShort(c) { return c.kind === "integration_down" ? [this.causeCounts(c), this.outageLine(c)].filter(Boolean).join(" · ") : [this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · "); }
+
   // One headline per cause with the counts of what it touches; the follow-up findings sit in a fold.
   causeCounts(c) {
     if (c.kind === "service_missing") return this.t("causeCallers", { n: this.formatNumber(c.follower_count) });
@@ -71,7 +85,7 @@ class CausesMixin {
   causeEntry(c) {
     const total = this.causeTotal(c), link = `${c.object_type}:${c.object_id}`;
     const title = this.esc(this.t(`cause_${c.kind}`, { name: c.name })), own1 = c.finding_key && this.data.findings.find(x => x.key === c.finding_key);
-    const sub = [total ? this.t("causeExplains", { n: this.formatNumber(total) }) : "", this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · ");
+    const sub = [total ? this.t("causeExplains", { n: this.formatNumber(total) }) : "", this.causeShort(c)].filter(Boolean).join(" · ");
     if (!total) return `<div class="rowwrap">${this.causeBox(c)}<button class="row rel" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${title}</strong><small>${this.esc(sub)}</small></span>${this.impactChip(c.impact)}</button>${this.rowMenu(own1)}</div>${this.rowDecide(own1)}`;
     const byId = id => this.causeList().find(x => x.id === id);
     const own = c.virtual ? "" : `<div class="rowwrap">${this.causeBox(c)}<button class="row" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span>${this.impactChip(own1 ? own1.impact : "")}</button>${this.rowMenu(own1)}</div>${this.rowDecide(own1)}`;
