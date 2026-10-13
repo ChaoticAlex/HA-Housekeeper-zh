@@ -16,6 +16,8 @@
 
 ### Behoben
 
+- **Hausmonitor-Detailansicht:** Der Zurück-Knopf hat wieder Abstand zur darunterliegenden Karte.
+
 - **Hausmonitor-Editor:** Abbrechen steht im Formularkopf, die Beschreibung ist kompakter und ausgewählte Objekte zeigen Typ und ID. Suchtreffer haben kurze Hinzufügen-Knöpfe; bereits gewählte Objekte sind erkennbar und nicht erneut auswählbar.
 
 - **Hausmonitor ohne Einträge:** Die leere Ansicht zeigt nun ein sichtbares Haussymbol und einen kurzen Beispieltext wie die Wartungserinnerungen.
@@ -49,6 +51,8 @@
 - **Switch entities in bulk from the inventory:** Entity rows of the Inventory have a checkbox. The bar above disables, enables, hides or shows them, up to 200 entities per plan, with a preview and undo. An entity that something certainly uses is not disabled; only what you disabled yourself is enabled again.
 
 #### Fixed
+
+- **Home monitor detail view:** The back button now has space before the card below it.
 
 - **Home monitor editor:** Cancel is in the form header, the description field is smaller, and selected objects show their type and ID. Search results have compact Add buttons; selected objects remain visible and cannot be added twice.
 
