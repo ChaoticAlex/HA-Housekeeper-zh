@@ -10,6 +10,8 @@
 
 ### Behoben
 
+- **Listensuche zugänglich beschriftet:** Das Suchfeld in Listen hat jetzt auch nach dem Tippen eine Bezeichnung für Screenreader.
+
 - **Plan in einem Schritt bestätigen:** Die Vorschau zeigt Hinweis und eine größere Zusammenfassung; „Bestätigen“ fragt in einem Dialog nach und führt dann aus. Das Eintippen des Bestätigungsworts und der zweite Bildschirm entfallen. Die „Prüfung nach dem Lauf“ ist zugeklappt.
 
 - **Plan abbrechen:** Neben „Bestätigen“ steht jetzt „Abbrechen“. Es verwirft die Vorschau wie „Schließen“ oben rechts; geändert wird nichts.
@@ -25,6 +27,8 @@
 - **Switch entities in bulk from the inventory:** Entity rows of the Inventory have a checkbox. The bar above disables, enables, hides or shows them, up to 200 entities per plan, with a preview and undo. An entity that something certainly uses is not disabled; only what you disabled yourself is enabled again.
 
 #### Fixed
+
+- **Accessible list search label:** List search fields now keep a name for screen readers after typing.
 
 - **Confirm a plan in one step:** The preview shows the hint and a larger summary; “Confirm” asks in a dialog and then runs the plan. Typing the confirmation word and the second screen are gone. The “Check after the run” is collapsed.
 

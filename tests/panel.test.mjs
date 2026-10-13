@@ -58,6 +58,15 @@ test("German and English texts define the same keys", () => {
   assert.deepEqual(Object.keys(TEXT.de).sort(), Object.keys(TEXT.en).sort());
 });
 
+test("shared list search keeps an accessible name after its placeholder disappears", () => {
+  for (const lang of ["de", "en"]) {
+    const { el } = panel(lang);
+    el.lvState("findings", "name", "asc");
+    const html = el.listBar("findings", { sorts: [] });
+    assert.match(html, /<input type="search" data-lq="findings"[^>]+aria-label="[^"]+"/);
+  }
+});
+
 test("every view renders without throwing and escapes object names", () => {
   const { el, shadow } = panel("de");
   for (const view of ["overview", "inventory", "findingsNav", "graph"]) {
