@@ -21,7 +21,7 @@ def definition(*members):
     }
 
 
-def snapshot(objects=(), findings=(), *, registry="checked", automations="checked", at=NOW):
+def snapshot(objects=(), findings=(), *, registry="checked", automations="checked", apps="checked", at=NOW):
     return {
         "objects": list(objects), "findings": list(findings),
         "meta": {
@@ -29,6 +29,7 @@ def snapshot(objects=(), findings=(), *, registry="checked", automations="checke
             "coverage": [
                 {"source": "registry", "state": registry},
                 {"source": "automations", "state": automations},
+                {"source": "apps", "state": apps},
             ],
         },
     }
@@ -67,6 +68,23 @@ def test_automation_broken_reference_is_a_problem_but_off_entity_is_not():
     item = definition(("entity:sensor.water", True))
     data = snapshot([{"object_type": "entity", "object_id": "sensor.water", "status": "active", "state": "off"}])
     assert evaluate(item, data, health(), NOW)["state"] == "ok"
+
+
+def test_scenes_scripts_and_selected_apps_have_distinct_fault_rules():
+    scene = definition(("scene:scene.arrival", True))
+    script = definition(("script:script.arrival", True))
+    app = definition(("app:core_mosquitto", True))
+    scene_item = {"object_type": "scene", "object_id": "scene.arrival", "status": "active", "state": "off"}
+    script_item = {"object_type": "script", "object_id": "script.arrival", "status": "active", "state": "off"}
+    app_item = {"object_type": "app", "object_id": "core_mosquitto", "status": "stopped"}
+    assert evaluate(scene, snapshot([scene_item]), health(), NOW)["state"] == "ok"
+    assert evaluate(script, snapshot([script_item]), health(), NOW)["state"] == "ok"
+    broken = {"rule_id": "scene.missing_entity", "object_id": "scene.arrival", "classification": "broken_reference"}
+    assert evaluate(scene, snapshot([scene_item], [broken]), health(), NOW)["reason"] == "broken_reference"
+    assert evaluate(scene, snapshot([scene_item], [{**broken, "runtime_created": True}]), health(), NOW)["state"] == "ok"
+    assert evaluate(script, snapshot([script_item], [{**broken, "rule_id": "script.dead_actions", "object_id": "script.arrival"}]), health(), NOW)["reason"] == "broken_reference"
+    assert evaluate(app, snapshot([app_item]), health(), NOW)["reason"] == "stopped"
+    assert evaluate(app, snapshot(apps="skipped"), health(), NOW)["state"] == "unverified"
 
 
 def test_two_scans_are_needed_to_report_a_gap(monkeypatch):

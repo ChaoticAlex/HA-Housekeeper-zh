@@ -48,7 +48,7 @@ const language = arg("lang", "de") === "en" ? "en" : "de";
 
 const VIEWPORTS = { desktop: [1280, 1000], tablet: [768, 1100], mobile: [375, 1700] };
 const VIEWS = {
-  overview: "view=overview", findings: "view=findingsNav", inventory: "view=inventory", changes: "view=changes",
+  overview: "view=overview", findings: "view=findingsNav", inventory: "view=inventory", changes: "view=changes", monitor_editor: "view=monitor&editor=1",
   graph: "view=graph&graph=1&gobj=automation%3Aautomation.a1", detail: "object=entity%3Asensor.beispiel_7&tab=overview",
   attributes: "object=entity%3Asensor.beispiel_7&tab=technical", cleanup: "view=cleanup&plan=running", plan: "view=cleanup&plan=preview", repair: "view=repair", maintenance: "view=maintenance", reliability: "view=reliability", runs: "view=runs", recorder: "view=recorder", exposure: "view=exposure", policies: "view=policies", storage: "view=storage", dataflow: "view=dataflow", secrets: "view=secrets", settings: "view=settings", batteries: "view=batteries", unreferenced: "view=unreferenced",
 };
@@ -201,6 +201,7 @@ const PAGE = `<!doctype html><html lang="${language}"><head><meta charset="utf-8
     if (plan === "running") el.planProgress = { done: 1, total: 2 };
   }
   if (q.get("view")) { el.view = q.get("view"); if (el.view === "changes") await el.loadCompare(); }
+  if (q.get("editor")) { el.monitorForm = { name: document.documentElement.lang === "en" ? "Front door" : "Haustür", description: "", notify: true, members: [{ object_key: "entity:sensor.beispiel_7", required: true }] }; el.monitorQuery = "sensor"; }
   if (q.get("graph")) { el.graphSelected = el.findObject(q.get("gobj")); el.graphDepth = 3; el.view = "graph"; }
   else if (q.get("object")) { await el.openObject(el.findObject(q.get("object"))); el.detailTab = q.get("tab") || "overview"; }
   el.render();

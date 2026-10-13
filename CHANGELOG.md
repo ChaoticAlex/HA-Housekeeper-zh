@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Hausmonitor-Objektsuche:** Eine gemeinsame Suche gruppiert Treffer nach Typ. Filter für Entitäten, Geräte, Automationen, Szenen, Integrationen und Sonstiges helfen beim Eingrenzen. Szenen, Skripte und Apps/Add-ons lassen sich nun überwachen; eine ruhende Szene oder ein ruhendes Skript gilt nicht als Ausfall.
+
 - **Hausmonitor:** Wichtige Funktionen aus direkt gewählten Entitäten, Geräten, Automationen und Integrationen zusammenstellen. Die neue Seite zeigt belegte Defekte, Prüflücken und die letzte vollständige Prüfung; die Übersicht meldet beeinträchtigte Funktionen und unvollständige Prüfungen. Zustandswechsel stehen als HA-Ereignis und Event-Entität bereit, jede Funktion hat einen Sensor. Dauerhafte HA-Mitteilungen lassen sich pro Funktion einschalten.
 
 - **Seite im Inventar auswählen:** Ein Kästchen im Tabellenkopf markiert die auswählbaren Entitäten der aktuellen Seite. Bei teilweiser Auswahl zeigt es den Zwischenzustand; ein weiterer Klick hebt die Seitenauswahl auf. Die Auswahl aller gefilterten Entitäten bleibt über die Leiste möglich.
@@ -11,6 +13,8 @@
 - **Entitäten im Inventar gesammelt umschalten:** Die Entitätenzeilen des Inventars haben ein Kästchen. Die Leiste darüber deaktiviert, aktiviert, blendet aus oder ein, bis zu 200 Entitäten pro Plan, mit Vorschau und Rückgängig. Eine Entität, die etwas sicher benutzt, wird nicht deaktiviert; nur selbst Deaktiviertes wird wieder aktiviert.
 
 ### Behoben
+
+- **Hausmonitor-Editor:** Abbrechen steht im Formularkopf, die Beschreibung ist kompakter und ausgewählte Objekte zeigen Typ und ID. Suchtreffer haben kurze Hinzufügen-Knöpfe; bereits gewählte Objekte sind erkennbar und nicht erneut auswählbar.
 
 - **Hausmonitor ohne Einträge:** Die leere Ansicht zeigt nun ein sichtbares Haussymbol und einen kurzen Beispieltext wie die Wartungserinnerungen.
 
@@ -32,6 +36,8 @@
 
 #### New
 
+- **Home monitor object search:** One search groups matches by type. Filters for entities, devices, automations, scenes, integrations and other objects narrow the results. Scenes, scripts and apps/add-ons can now be monitored; an idle scene or script is not considered a fault.
+
 - **Home monitor:** Group important functions from directly selected entities, devices, automations and integrations. The new page shows confirmed faults, check gaps and the last complete check; the overview highlights impaired functions and incomplete checks. State changes are available as HA bus events and an event entity, with one sensor per function. Persistent HA notifications can be enabled per function.
 
 - **Select an inventory page:** A checkbox in the table header selects the selectable entities on the current page. It shows a mixed state when some are selected; another click clears the page selection. The bar still offers selection of all filtered entities.
@@ -39,6 +45,8 @@
 - **Switch entities in bulk from the inventory:** Entity rows of the Inventory have a checkbox. The bar above disables, enables, hides or shows them, up to 200 entities per plan, with a preview and undo. An entity that something certainly uses is not disabled; only what you disabled yourself is enabled again.
 
 #### Fixed
+
+- **Home monitor editor:** Cancel is in the form header, the description field is smaller, and selected objects show their type and ID. Search results have compact Add buttons; selected objects remain visible and cannot be added twice.
 
 - **Empty home monitor:** The empty view now shows a visible home icon and a short example, matching maintenance reminders.
 

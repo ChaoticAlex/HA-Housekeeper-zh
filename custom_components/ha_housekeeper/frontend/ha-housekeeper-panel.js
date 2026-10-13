@@ -1512,7 +1512,7 @@ class StylesMixin {
       .hamenu{display:grid;place-items:center;flex:none;width:40px;height:40px;margin:0 -10px 0 -6px;padding:0;border:0;border-radius:50%;background:none;color:inherit}.hamenu:hover{background:var(--hk-soft)}.hamenu:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px}.hamenu ha-icon{--mdc-icon-size:24px}.sysmeter{display:block;height:6px;margin-top:6px;border-radius:99px;background:var(--hk-soft);overflow:hidden}.sysmeter i{display:block;height:100%;border-radius:99px;background:var(--hk-green)}.sysmeter.warn i{background:var(--hk-amber)}.sysmeter.red i{background:var(--hk-red)}.sysmeter.mute i{background:var(--hk-gray)}.sysshare{display:block;width:100%;min-width:120px;height:8px;margin-top:2px;border-radius:99px;background:var(--hk-soft);overflow:hidden}.sysshare i{display:block;height:100%;border-radius:99px;background:var(--hk-green)}.tablewrap.lt.acc td{white-space:normal}.pills{display:flex;flex-wrap:wrap;gap:4px}@media(min-width:641px){.sysnav .navtiles{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(min-width:1300px){.sysnav .navtiles{grid-template-columns:repeat(6,minmax(0,1fr))}}
       .intentry{margin:4px 2px 0;font-size:15px}.syssec{margin:18px 16px 6px;font-size:15px}.syssec:first-child{margin-top:12px}
       .pill.kind{background:none;border:1px solid var(--hk-border);color:var(--hk-muted)}.rowmenu{position:relative;flex:none;margin:0 10px 0 0}.rowmenu>summary{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;list-style:none;cursor:pointer;color:var(--hk-muted)}.rowmenu>summary::-webkit-details-marker{display:none}.rowmenu>summary:hover,.rowmenu[open]>summary{background:var(--hk-soft);color:inherit}.menupop{position:absolute;right:0;top:100%;z-index:20;display:grid;min-width:260px;padding:4px 0;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);box-shadow:0 6px 20px rgba(0,0,0,.18)}.menuitem{white-space:nowrap;display:flex;gap:10px;align-items:center;padding:8px 14px;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}.menuitem:hover{background:var(--hk-soft)}.menuitem ha-icon{--mdc-icon-size:18px;color:var(--hk-muted)}
-      .monitor-editor{max-width:960px;margin:0 auto}.monitor-back{margin-bottom:10px}.monitor-fields{display:grid;gap:14px;padding:16px}.monitor-fields label{display:grid;gap:6px;font-weight:600}.monitor-fields input,.monitor-fields textarea{width:100%;padding:10px 12px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit;font:inherit}.monitor-fields textarea{min-height:72px;resize:vertical}.monitor-check{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.monitor-check input{width:18px;height:18px}.row.monitor-member{grid-template-columns:minmax(0,1fr) auto auto}.row.monitor-choice{grid-template-columns:auto minmax(0,1fr) auto}.monitor-choice .btn,.monitor-member .btn{justify-self:end;width:auto;white-space:nowrap}.row.monitor-notify{grid-template-columns:minmax(0,1fr) auto;cursor:pointer}.monitor-notify .policyswitch{justify-self:end}.monitor-results{max-height:420px;overflow:auto}.monitor-search-note{padding:0 16px 18px;color:var(--hk-muted)}.monitor-editor .savebar{border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-surface)}@media(max-width:600px){.row.monitor-member{grid-template-columns:minmax(0,1fr) auto;gap:8px}.monitor-member .row-text{grid-row:span 2}.monitor-member .btn{grid-column:2}}
+      .monitor-editor{max-width:960px;margin:0 auto}.monitor-editorhead{align-items:center}.monitor-editorhead .btn{margin-left:auto;white-space:nowrap}.monitor-fields{display:grid;gap:14px;padding:16px}.monitor-fields label{display:grid;gap:6px;font-weight:600}.monitor-fields input,.monitor-fields textarea{width:100%;padding:10px 12px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit;font:inherit}.monitor-fields textarea{min-height:64px;resize:vertical}.monitor-check{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.monitor-check input{width:18px;height:18px}.row.monitor-member{grid-template-columns:auto minmax(0,1fr) auto auto}.row.monitor-choice{grid-template-columns:auto minmax(0,1fr) auto}.monitor-choice .btn,.monitor-member .btn{justify-self:end;width:auto;white-space:nowrap}.row.monitor-notify{grid-template-columns:minmax(0,1fr) auto;cursor:pointer}.monitor-notify .policyswitch{justify-self:end}.monitor-tabs{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 14px;border-bottom:1px solid var(--hk-border)}.monitor-tabs .btn{border-radius:99px;min-height:34px}.monitor-group h3{display:flex;gap:8px;align-items:center;margin:0;padding:10px 16px;background:var(--hk-soft);font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}.monitor-group h3 span{font-weight:400}.monitor-group .row{border-bottom:1px solid var(--hk-border)}.monitor-choice .btn:disabled{opacity:.65}.monitor-results{max-height:420px;overflow:auto}.monitor-search-note{padding:0 16px 18px;color:var(--hk-muted)}.monitor-editor .savebar{border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-surface)}@media(max-width:600px){.row.monitor-member{grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto;grid-auto-flow:row;gap:8px}.monitor-member .tile{grid-column:1;grid-row:1}.monitor-member .row-text{grid-column:2;grid-row:1}.monitor-member .monitor-check{grid-column:2;grid-row:2}.monitor-member .btn{grid-column:3;grid-row:1/3}}
       ${this.themeCss()}
     </style>`;
   }
@@ -13011,11 +13011,15 @@ Object.assign(TEXT.de, {
   monitorUnresolved: "Letzter belegter Defekt ungeklärt", monitorNoProof: "Prüfung unvollständig – kein Ausfall belegt",
   monitorRequired: "Erforderlich", monitorAdditional: "Zusätzlich", monitorMembers: "Zugeordnete Objekte",
   monitorName: "Name", monitorDescription: "Beschreibung (optional)", monitorFindObject: "Objekt hinzufügen",
-  monitorSearch: "Name oder ID suchen …", monitorSearchHint: "Entität, Gerät, Automation oder Integration suchen.",
+  monitorSearch: "Name oder ID suchen …", monitorSearchHint: "Entitäten, Geräte, Automationen, Szenen, Integrationen und weitere Objekte suchen.",
+  monitorTypeFilter: "Objekttyp", monitorTypeAll: "Alle", monitorTypeEntity: "Entitäten", monitorTypeDevice: "Geräte",
+  monitorTypeAutomation: "Automationen", monitorTypeScene: "Szenen", monitorTypeIntegration: "Integrationen", monitorTypeOther: "Sonstiges",
+  monitorType_entity: "Entität", monitorType_device: "Gerät", monitorType_automation: "Automation", monitorType_scene: "Szene",
+  monitorType_config_entry: "Integration", monitorType_script: "Skript", monitorType_app: "App/Add-on", monitorAdded: "Hinzugefügt",
   monitorPick: "Hinzufügen", monitorRemove: "Entfernen", monitorNotify: "Dauerhafte HA-Mitteilung bei Problemen",
   monitorNotifyHint: "Zustandswechsel stehen unabhängig davon als HA-Ereignis bereit.", monitorSave: "Speichern",
   monitorCancel: "Abbrechen", monitorBack: "Zum Hausmonitor", monitorBackShort: "Zurück", monitorAll: "Alle Funktionen",
-  monitorSearchStart: "Mindestens zwei Zeichen eingeben, um Objekte zu finden.", monitorSearchNone: "Keine passenden Objekte gefunden.",
+  monitorSearchStart: "Mindestens zwei Zeichen eingeben, um Objekte zu finden.", monitorSearchNone: "Keine passenden Objekte gefunden.", monitorMoreResults: "Weitere Treffer: Suche verfeinern oder Typ auswählen.",
   monitorEmptyFiltered: "Für diesen Zustand gibt es keine Funktion.",
   monitorSaveFailed: "Funktion konnte nicht gespeichert werden: {reason}", monitorDeleteFailed: "Funktion konnte nicht gelöscht werden: {reason}",
   monitorConfirmDelete: "Die Funktion „{name}“, ihr HA-Sensor und ihre Mitteilung werden entfernt.",
@@ -13026,6 +13030,7 @@ Object.assign(TEXT.de, {
   monitorReason_scan_unverified: "Scan nicht verlässlich", monitorReason_no_required_members: "Kein erforderliches Objekt",
   monitorReason_active: "Kein bekannter Defekt", monitorReason_disabled: "Deaktiviert", monitorReason_unavailable: "Nicht verfügbar",
   monitorReason_orphaned: "Verwaist", monitorReason_problem: "Integration nicht geladen", monitorReason_empty: "Ohne Entitäten",
+  monitorReason_broken_reference: "Defekter Verweis", monitorReason_stopped: "App gestoppt",
   "monitorReason_automation.blocked": "Automation blockiert", "monitorReason_automation.dead_actions": "Defekte Automationsaktion", "monitorReason_automation.dead_condition": "Defekte Automationsbedingung",
   monitorReason_unknown: "Zustand unbekannt", monitorReason_status_unknown: "Zustand nicht lesbar",
 });
@@ -13038,11 +13043,15 @@ Object.assign(TEXT.en, {
   monitorUnresolved: "Last confirmed fault unresolved", monitorNoProof: "Check incomplete – no failure confirmed",
   monitorRequired: "Required", monitorAdditional: "Additional", monitorMembers: "Selected objects",
   monitorName: "Name", monitorDescription: "Description (optional)", monitorFindObject: "Add object",
-  monitorSearch: "Search name or ID …", monitorSearchHint: "Search for an entity, device, automation or integration.",
+  monitorSearch: "Search name or ID …", monitorSearchHint: "Search entities, devices, automations, scenes, integrations and more.",
+  monitorTypeFilter: "Object type", monitorTypeAll: "All", monitorTypeEntity: "Entities", monitorTypeDevice: "Devices",
+  monitorTypeAutomation: "Automations", monitorTypeScene: "Scenes", monitorTypeIntegration: "Integrations", monitorTypeOther: "Other",
+  monitorType_entity: "Entity", monitorType_device: "Device", monitorType_automation: "Automation", monitorType_scene: "Scene",
+  monitorType_config_entry: "Integration", monitorType_script: "Script", monitorType_app: "App/Add-on", monitorAdded: "Added",
   monitorPick: "Add", monitorRemove: "Remove", monitorNotify: "Persistent HA notification for problems",
   monitorNotifyHint: "State changes are always available as HA events.", monitorSave: "Save",
   monitorCancel: "Cancel", monitorBack: "Back to home monitor", monitorBackShort: "Back", monitorAll: "All functions",
-  monitorSearchStart: "Enter at least two characters to find objects.", monitorSearchNone: "No matching objects found.",
+  monitorSearchStart: "Enter at least two characters to find objects.", monitorSearchNone: "No matching objects found.", monitorMoreResults: "More matches: refine the search or select a type.",
   monitorEmptyFiltered: "No function has this state.",
   monitorSaveFailed: "Could not save function: {reason}", monitorDeleteFailed: "Could not delete function: {reason}",
   monitorConfirmDelete: "The function “{name}”, its HA sensor and notification will be removed.",
@@ -13053,6 +13062,7 @@ Object.assign(TEXT.en, {
   monitorReason_scan_unverified: "Scan not reliable", monitorReason_no_required_members: "No required object",
   monitorReason_active: "No known fault", monitorReason_disabled: "Disabled", monitorReason_unavailable: "Unavailable",
   monitorReason_orphaned: "Orphaned", monitorReason_problem: "Integration not loaded", monitorReason_empty: "No entities",
+  monitorReason_broken_reference: "Broken reference", monitorReason_stopped: "App stopped",
   "monitorReason_automation.blocked": "Automation blocked", "monitorReason_automation.dead_actions": "Broken automation action", "monitorReason_automation.dead_condition": "Broken automation condition",
   monitorReason_unknown: "State unknown", monitorReason_status_unknown: "State unreadable",
 });
@@ -13066,6 +13076,14 @@ class MonitorMixin {
   monitorState(item) {
     const key = item.incident_open && item.state === "unverified" ? "monitorUnresolved" : `monitor${item.state === "ok" ? "Ok" : item.state === "problem" ? "Problem" : "Unverified"}`;
     return this.t(key);
+  }
+
+  monitorObjectContext(item) {
+    const device = item.device_id ? this.findObject(`device:${item.device_id}`) : null;
+    const area = this.findObject(`area:${item.area_id || device?.area_id}`);
+    const floor = area?.floor_id ? this.findObject(`floor:${area.floor_id}`) : null;
+    const labels = (item.labels || []).map(id => this.findObject(`label:${id}`)?.name || id);
+    return [area?.name, floor?.name, ...labels].filter(Boolean).join(" · ");
   }
 
   monitorView() {
@@ -13101,28 +13119,46 @@ class MonitorMixin {
     const form = this.monitorForm;
     const chosen = new Set(form.members.map(m => m.object_key));
     const query = this.monitorQuery.trim().toLowerCase();
-    const candidates = query.length < 2 ? [] : (this.data?.objects || []).filter(o => ["entity", "device", "automation", "config_entry"].includes(o.object_type) && o.status !== "ignored" && !chosen.has(this.objectKey(o)) && `${o.name} ${o.object_id}`.toLowerCase().includes(query)).slice(0, 25);
+    const groups = [["entity", "monitorTypeEntity"], ["device", "monitorTypeDevice"], ["automation", "monitorTypeAutomation"], ["scene", "monitorTypeScene"], ["config_entry", "monitorTypeIntegration"], ["other", "monitorTypeOther"]];
+    const objects = this.data?.objects || [];
+    const specialKeys = new Set(objects.filter(o => ["automation", "script", "scene"].includes(o.object_type)).map(o => o.object_id));
+    const typeOf = o => ["script", "app"].includes(o.object_type) ? "other" : o.object_type;
+    const available = objects.filter(o => groups.some(([kind]) => kind === typeOf(o)) && o.status !== "ignored" && !(o.object_type === "entity" && specialKeys.has(o.object_id)));
+    const matches = query.length < 2 ? [] : available.filter(o => `${o.name} ${o.object_id} ${o.aliases?.join?.(" ") || ""} ${this.monitorObjectContext(o)}`.toLowerCase().includes(query));
+    const grouped = groups.map(([kind]) => [kind, matches.filter(o => typeOf(o) === kind)]);
+    const candidates = grouped.flatMap(([kind, items]) => !this.monitorType || this.monitorType === kind ? items.slice(0, this.monitorType ? 50 : 10) : []);
+    const tabs = [["", "monitorTypeAll"], ...groups].map(([kind, label]) => `<button class="btn small ${this.monitorType === kind || !this.monitorType && !kind ? "primary" : "quiet"}" type="button" data-monitor-type="${kind}" aria-pressed="${this.monitorType === kind || !this.monitorType && !kind}">${this.t(label)}</button>`).join("");
     const selected = form.members.map((member, i) => {
       const object = this.findObject(member.object_key);
-      return `<div class="row monitor-member"><span class="row-text"><strong>${this.esc(object?.name || member.object_key)}</strong><small>${this.esc(member.object_key)}</small></span><label class="monitor-check"><input type="checkbox" data-monitor-required="${i}" ${member.required ? "checked" : ""}>${this.t("monitorRequired")}</label><button class="btn quiet" data-monitor-remove="${i}">${this.t("monitorRemove")}</button></div>`;
+      const kind = member.object_key.split(":")[0];
+      return `<div class="row monitor-member"><span class="tile mute"><ha-icon icon="${ICONS[kind] || "mdi:help-circle-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(object?.name || member.object_key)}</strong><small>${this.t(`monitorType_${kind}`)} · ${this.esc(member.object_key.split(":").slice(1).join(":"))}</small></span><label class="monitor-check"><input type="checkbox" data-monitor-required="${i}" ${member.required ? "checked" : ""}>${this.t("monitorRequired")}</label><button class="btn quiet" data-monitor-remove="${i}">${this.t("monitorRemove")}</button></div>`;
     }).join("");
-    const picks = candidates.map(o => `<div class="row monitor-choice"><span class="tile mute"><ha-icon icon="${ICONS[o.object_type] || "mdi:help-circle-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(o.name)}</strong><small>${this.esc(o.object_id)}</small></span><button class="btn" data-monitor-pick="${this.esc(this.objectKey(o))}">${this.t("monitorPick")}</button></div>`).join("");
+    const picks = groups.map(([kind, label]) => {
+      const items = candidates.filter(o => typeOf(o) === kind);
+      if (!items.length) return "";
+      return `<div class="monitor-group"><h3>${this.t(label)} <span>${grouped.find(([type]) => type === kind)[1].length}</span></h3>${items.map(o => {
+        const key = this.objectKey(o), added = chosen.has(key);
+        const context = this.monitorObjectContext(o);
+        return `<div class="row monitor-choice"><span class="tile mute"><ha-icon icon="${ICONS[o.object_type] || "mdi:help-circle-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(o.name || o.object_id)}</strong><small>${this.t(`monitorType_${o.object_type}`)} · ${this.esc(o.object_id)}${context ? ` · ${this.esc(context)}` : ""}</small></span><button class="btn small ${added ? "quiet" : ""}" type="button" data-monitor-pick="${this.esc(key)}" ${added ? "disabled" : ""}>${this.t(added ? "monitorAdded" : "monitorPick")}</button></div>`;
+      }).join("")}${grouped.find(([type]) => type === kind)[1].length > items.length ? `<p class="monitor-search-note">${this.t("monitorMoreResults")}</p>` : ""}</div>`;
+    }).join("");
     const searchResult = query.length < 2 ? this.t("monitorSearchStart") : candidates.length ? picks : this.t("monitorSearchNone");
-    return `<div class="monitor-editor"><button class="btn quiet monitor-back" data-monitor-cancel><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("monitorBackShort")}</button><section class="panel u-mb14"><div class="panelhead"><h2>${this.t(form.id ? "monitorEditTitle" : "monitorAdd")}</h2></div><div class="monitor-fields"><label>${this.t("monitorName")}<input data-monitor-name maxlength="80" value="${this.esc(form.name)}"></label><label>${this.t("monitorDescription")}<textarea data-monitor-description maxlength="240" rows="3">${this.esc(form.description)}</textarea></label></div><label class="row monitor-notify"><span class="row-text"><strong>${this.t("monitorNotify")}</strong><small>${this.t("monitorNotifyHint")}</small></span><input class="policyswitch" type="checkbox" role="switch" data-monitor-notify ${form.notify ? "checked" : ""}></label></section><section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("monitorMembers")}</h2><p>${this.t("monitorRequiredCount", { n: form.members.filter(m => m.required).length, m: form.members.filter(m => !m.required).length })}</p></div></div>${selected || `<div class="emptymsg">${this.t("monitorChoose")}</div>`}</section><section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("monitorFindObject")}</h2><p>${this.t("monitorSearchHint")}</p></div></div><div class="monitor-fields"><input type="search" data-monitor-search aria-label="${this.t("monitorSearchHint")}" placeholder="${this.t("monitorSearch")}" value="${this.esc(this.monitorQuery)}"></div><div class="monitor-results">${candidates.length ? searchResult : `<p class="monitor-search-note">${searchResult}</p>`}</div></section><div class="toolbar savebar"><span role="alert">${this.esc(this.monitorError)}</span><span class="toolgap"></span>${form.id ? `<button class="btn danger" data-monitor-delete>${this.t("monitorDelete")}</button>` : ""}<button class="btn" data-monitor-cancel>${this.t("monitorCancel")}</button><button class="btn primary" data-monitor-save ${!form.name.trim() || !form.members.length ? "disabled" : ""}>${this.t("monitorSave")}</button></div></div>`;
+    return `<div class="monitor-editor"><section class="panel u-mb14"><div class="panelhead monitor-editorhead"><h2>${this.t(form.id ? "monitorEditTitle" : "monitorAdd")}</h2><button class="btn quiet" data-monitor-cancel>${this.t("monitorCancel")}</button></div><div class="monitor-fields"><label>${this.t("monitorName")}<input data-monitor-name maxlength="80" value="${this.esc(form.name)}"></label><label>${this.t("monitorDescription")}<textarea data-monitor-description maxlength="240" rows="2">${this.esc(form.description)}</textarea></label></div><label class="row monitor-notify"><span class="row-text"><strong>${this.t("monitorNotify")}</strong><small>${this.t("monitorNotifyHint")}</small></span><input class="policyswitch" type="checkbox" role="switch" data-monitor-notify ${form.notify ? "checked" : ""}></label></section><section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("monitorMembers")}</h2><p>${this.t("monitorRequiredCount", { n: form.members.filter(m => m.required).length, m: form.members.filter(m => !m.required).length })}</p></div></div>${selected || `<div class="emptymsg">${this.t("monitorChoose")}</div>`}</section><section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("monitorFindObject")}</h2><p>${this.t("monitorSearchHint")}</p></div></div><div class="monitor-fields monitor-search"><input type="search" data-monitor-search aria-label="${this.t("monitorSearch")}" placeholder="${this.t("monitorSearch")}" value="${this.esc(this.monitorQuery)}"></div><div class="monitor-tabs" role="group" aria-label="${this.t("monitorTypeFilter")}">${tabs}</div><div class="monitor-results">${candidates.length ? searchResult : `<p class="monitor-search-note">${searchResult}</p>`}</div></section><div class="toolbar savebar"><span role="alert">${this.esc(this.monitorError)}</span><span class="toolgap"></span>${form.id ? `<button class="btn danger" data-monitor-delete>${this.t("monitorDelete")}</button>` : ""}<button class="btn" data-monitor-cancel>${this.t("monitorCancel")}</button><button class="btn primary" data-monitor-save ${!form.name.trim() || !form.members.length ? "disabled" : ""}>${this.t("monitorSave")}</button></div></div>`;
   }
 
   bindMonitor(root) {
-    root.querySelector("[data-monitor-add]")?.addEventListener("click", () => { this.monitorForm = { name: "", description: "", notify: true, members: [] }; this.monitorQuery = ""; this.monitorError = ""; this.render(); });
+    root.querySelector("[data-monitor-add]")?.addEventListener("click", () => { this.monitorForm = { name: "", description: "", notify: true, members: [] }; this.monitorQuery = ""; this.monitorType = ""; this.monitorError = ""; this.render(); });
     root.querySelectorAll("[data-monitor-filter]").forEach(el => el.onclick = () => { this.monitorFilter = el.dataset.monitorFilter; this.render(); });
     root.querySelectorAll("[data-monitor-open]").forEach(el => el.onclick = () => { this.monitorSelected = el.dataset.monitorOpen; this.render(); });
     root.querySelector("[data-monitor-back]")?.addEventListener("click", () => { this.monitorSelected = null; this.render(); });
-    root.querySelector("[data-monitor-edit]")?.addEventListener("click", () => { const item = this.monitorFunctions().find(f => f.id === this.monitorSelected); this.monitorForm = { id: item.id, name: item.name, description: item.description, notify: item.notify, members: item.members.map(m => ({ object_key: m.object_key, required: m.required })) }; this.monitorError = ""; this.render(); });
+    root.querySelector("[data-monitor-edit]")?.addEventListener("click", () => { const item = this.monitorFunctions().find(f => f.id === this.monitorSelected); this.monitorForm = { id: item.id, name: item.name, description: item.description, notify: item.notify, members: item.members.map(m => ({ object_key: m.object_key, required: m.required })) }; this.monitorQuery = ""; this.monitorType = ""; this.monitorError = ""; this.render(); });
     root.querySelectorAll("[data-monitor-cancel]").forEach(el => el.onclick = () => { this.monitorForm = null; this.monitorError = ""; this.render(); });
     root.querySelector("[data-monitor-name]")?.addEventListener("input", ev => { this.monitorForm.name = ev.target.value; root.querySelector("[data-monitor-save]").disabled = !this.monitorForm.name.trim() || !this.monitorForm.members.length; });
     root.querySelector("[data-monitor-description]")?.addEventListener("input", ev => { this.monitorForm.description = ev.target.value; });
     root.querySelector("[data-monitor-notify]")?.addEventListener("change", ev => { this.monitorForm.notify = ev.target.checked; });
     root.querySelector("[data-monitor-search]")?.addEventListener("input", ev => { this.monitorQuery = ev.target.value; const at = ev.target.selectionStart; globalThis.clearTimeout?.(this._monitorTimer); this._monitorTimer = globalThis.setTimeout?.(() => { this.render(); const input = this.shadowRoot.querySelector("[data-monitor-search]"); input?.focus(); input?.setSelectionRange?.(at, at); }, SEARCH_DEBOUNCE_MS); });
-    root.querySelectorAll("[data-monitor-pick]").forEach(el => el.onclick = () => { this.monitorForm.members.push({ object_key: el.dataset.monitorPick, required: true }); this.render(); });
+    root.querySelectorAll("[data-monitor-type]").forEach(el => el.onclick = () => { this.monitorType = el.dataset.monitorType; this.render(); this.shadowRoot.querySelector(`[data-monitor-type="${this.monitorType}"]`)?.focus(); });
+    root.querySelectorAll("[data-monitor-pick]").forEach(el => el.onclick = () => { if (this.monitorForm.members.some(m => m.object_key === el.dataset.monitorPick)) return; this.monitorForm.members.push({ object_key: el.dataset.monitorPick, required: true }); this.render(); });
     root.querySelectorAll("[data-monitor-remove]").forEach(el => el.onclick = () => { this.monitorForm.members.splice(Number(el.dataset.monitorRemove), 1); this.render(); });
     root.querySelectorAll("[data-monitor-required]").forEach(el => el.onchange = () => { this.monitorForm.members[Number(el.dataset.monitorRequired)].required = el.checked; this.render(); });
     root.querySelector("[data-monitor-save]")?.addEventListener("click", () => this.saveMonitor());

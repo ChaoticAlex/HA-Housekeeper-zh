@@ -76,6 +76,12 @@ test("Hausmonitor shows a confirmed fault, a scan gap, and escapes function name
 
 test("Hausmonitor editor keeps required members and offers only direct inventory objects", () => {
   const { el } = panel("en");
+  el.data = { ...DATA, objects: [...DATA.objects.map(o => o.object_id === "sensor.b" ? { ...o, area_id: "bedroom" } : o),
+    { object_type: "scene", object_id: "scene.home", name: "Home", status: "active" },
+    { object_type: "script", object_id: "script.start", name: "Start", status: "active" },
+    { object_type: "app", object_id: "mqtt", name: "MQTT", status: "stopped" },
+    { object_type: "area", object_id: "bedroom", name: "Bedroom", status: "active" },
+  ] };
   el.monitorForm = { name: "Water", description: "", notify: true, members: [{ object_key: "entity:sensor.b", required: false }] };
   assert.match(el.monitorEditor(), /Enter at least two characters/);
   assert.doesNotMatch(el.monitorEditor(), /data-monitor-pick=/);
@@ -86,6 +92,21 @@ test("Hausmonitor editor keeps required members and offers only direct inventory
   assert.doesNotMatch(html, /data-monitor-pick="entity:sensor.b"/);
   assert.match(html, /class="row monitor-choice"/);
   assert.match(el.styles(), /\.row\.monitor-choice\{grid-template-columns:auto minmax\(0,1fr\) auto\}/);
+  assert.match(html, /data-monitor-type="scene"/);
+  el.monitorQuery = "home";
+  assert.match(el.monitorEditor(), /data-monitor-pick="scene:scene.home"/);
+  el.monitorType = "other";
+  el.monitorQuery = "start";
+  assert.match(el.monitorEditor(), /data-monitor-pick="script:script.start"/);
+  el.monitorQuery = "mqtt";
+  assert.match(el.monitorEditor(), /data-monitor-pick="app:mqtt"/);
+  el.monitorQuery = "bedroom";
+  assert.doesNotMatch(el.monitorEditor(), /data-monitor-pick="area:/);
+  el.monitorType = "";
+  assert.match(el.monitorEditor(), /data-monitor-pick="entity:sensor.b" disabled/);
+  el.monitorQuery = "sensor.b";
+  assert.match(el.monitorEditor(), /Hinzugefügt|Added/);
+  assert.match(el.monitorEditor(), /data-monitor-pick="entity:sensor.b" disabled/);
 });
 
 test("Hausmonitor overview counts a known finding only once", () => {

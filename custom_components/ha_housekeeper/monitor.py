@@ -30,7 +30,7 @@ MAX_ITEMS = 30
 MAX_MEMBERS = 12
 NAME_MAX = 80
 DESCRIPTION_MAX = 240
-MEMBER_TYPES = frozenset({"entity", "device", "automation", "config_entry"})
+MEMBER_TYPES = frozenset({"entity", "device", "automation", "config_entry", "scene", "script", "app"})
 AUTOMATION_RULES = frozenset(
     {"automation.blocked", "automation.dead_actions", "automation.dead_condition"}
 )
@@ -46,6 +46,7 @@ REASONS_DE = {
     "automation.blocked": "Automation blockiert",
     "automation.dead_actions": "Automationsaktion mit defektem Verweis",
     "automation.dead_condition": "Automationsbedingung mit defektem Verweis",
+    "broken_reference": "Defekter Verweis", "stopped": "App gestoppt",
 }
 REASONS_EN = {
     "missing": "object missing", "disabled": "disabled", "orphaned": "orphaned",
@@ -54,6 +55,7 @@ REASONS_EN = {
     "automation.blocked": "automation blocked",
     "automation.dead_actions": "automation action has a broken reference",
     "automation.dead_condition": "automation condition has a broken reference",
+    "broken_reference": "broken reference", "stopped": "app stopped",
 }
 
 
@@ -69,7 +71,9 @@ def _time(value: Any) -> datetime | None:
 
 
 def _source(member_type: str) -> str:
-    return "automations" if member_type == "automation" else "registry"
+    if member_type in {"automation", "script", "scene"}:
+        return "automations"
+    return "apps" if member_type == "app" else "registry"
 
 
 def _member_state(
@@ -94,12 +98,18 @@ def _member_state(
             "device": {"disabled"},
             "automation": {"disabled", "unavailable"},
             "config_entry": {"disabled", "problem"},
+            "scene": {"unavailable"},
+            "script": {"unavailable"},
+            "app": {"stopped"},
         }[kind]
         uncertain = {
             "entity": {"unknown"},
             "device": {"empty"},
             "automation": {"unknown"},
             "config_entry": {"ignored"},
+            "scene": {"unknown"},
+            "script": {"unknown"},
+            "app": {"unknown"},
         }[kind]
         if status in bad:
             state, reason = STATE_PROBLEM, str(status)
@@ -107,17 +117,18 @@ def _member_state(
             state, reason = STATE_UNVERIFIED, str(status or "status_unknown")
         else:
             state, reason = STATE_OK, "active"
-        if kind == "automation" and state == STATE_OK:
+        if kind in {"automation", "script", "scene"} and state == STATE_OK:
             broken = next(
                 (
                     finding for finding in findings.get(key, ())
-                    if finding.get("classification") == "broken_reference"
-                    or finding.get("rule_id") in AUTOMATION_RULES
+                    if not finding.get("ignored") and not finding.get("runtime_created")
+                    and (finding.get("classification") == "broken_reference"
+                         or kind == "automation" and finding.get("rule_id") in AUTOMATION_RULES)
                 ),
                 None,
             )
             if broken is not None:
-                state, reason = STATE_PROBLEM, str(broken["rule_id"])
+                state, reason = STATE_PROBLEM, str(broken["rule_id"] if kind == "automation" else "broken_reference")
     return {"object_key": key, "state": state, "reason": reason, "required": member["required"]}
 
 
