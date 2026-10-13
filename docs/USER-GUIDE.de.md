@@ -60,7 +60,7 @@ config/
 
 ### Installationsübersicht
 
-- Inventar für Entitäten, Geräte, Integrationen beziehungsweise Config Entries, Bereiche, Etagen, Labels und Automationen
+- Inventar für Entitäten, Geräte, Integrationen beziehungsweise Config Entries, Bereiche, Etagen, Labels und Automationen; Entitäten lassen sich dort gesammelt deaktivieren, aktivieren, aus- und einblenden (Plan mit Vorschau und Rückgängig)
 - Suche nach Name, Objekt-ID, Unique ID, Plattform oder Integration
 - Filter nach Objekttyp und Zustand
 - sortierbares und paginiertes Inventar für größere Installationen

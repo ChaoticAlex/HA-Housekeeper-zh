@@ -83,6 +83,7 @@ from .cleanup import (
     REMOVAL_KINDS,
     RENAME_KINDS,
     REPAIR_KINDS,
+    STATE_KINDS,
     TRIM_KINDS,
     device_fingerprint,
     device_support,
@@ -177,6 +178,16 @@ def entity_restorable(hass: HomeAssistant, entry: Any) -> bool | None:
     if entry.config_entry_id is None:
         return True
     return hass.config_entries.async_get_entry(entry.config_entry_id) is not None
+
+
+def _state_reached(entry: Any, target: str) -> bool:
+    """Whether a registry entry shows the state ``target`` asked for."""
+    return {
+        "disable": entry.disabled_by is not None,
+        "enable": entry.disabled_by is None,
+        "hide": entry.hidden_by is not None,
+        "unhide": entry.hidden_by is None,
+    }[target]
 
 
 def _restore_data(entry: Any) -> dict[str, Any]:
@@ -729,6 +740,8 @@ class CleanupRunner:
             return self._set_area(action), "area_set"
         if kind in RENAME_KINDS:
             return await self._rename_entity(action), "entity_renamed"
+        if kind in STATE_KINDS:
+            return self._set_entity_state(action), "entity_state_set"
         if kind in LABEL_KINDS:
             registry = er.async_get(self.hass)
             entry = registry.async_get(object_id)
@@ -1497,6 +1510,16 @@ class CleanupRunner:
             if ar.async_get(self.hass).async_get_area(action["target"]) is None:
                 return "now_blocked"
             return None
+        if kind in STATE_KINDS:
+            entry = er.async_get(self.hass).async_get(object_id)
+            if entry is None:
+                return "entity_gone"
+            if (
+                action.get("fingerprint") is None
+                or registry_fingerprint(entry) != action["fingerprint"]
+            ):
+                return "entity_changed"
+            return None
         if kind in LABEL_KINDS:
             entry = er.async_get(self.hass).async_get(object_id)
             if entry is None:
@@ -1731,6 +1754,10 @@ class CleanupRunner:
                 entry = self._area_entry(object_id)
                 ok = entry is not None and entry.area_id == action["target"]
                 checks.append({"check": "area_set", "object_id": object_id, "ok": ok})
+            elif kind in STATE_KINDS:
+                entry = registry.async_get(object_id)
+                ok = entry is not None and _state_reached(entry, action["target"])
+                checks.append({"check": "entity_state", "object_id": object_id, "ok": ok})
             elif kind in LABEL_KINDS:
                 entry = registry.async_get(object_id)
                 ok = entry is not None and action["target"] in entry.labels
@@ -1905,6 +1932,8 @@ class CleanupRunner:
                 outcome = await self._undo_meter(result)
             elif kind in AREA_KINDS:
                 outcome = self._unset_area(action["object_id"], result)
+            elif kind in STATE_KINDS:
+                outcome = self._undo_entity_state(registry, action["object_id"], result)
             elif kind in LABEL_KINDS:
                 outcome = self._unlabel(registry, action["object_id"], result)
             elif kind in REPAIR_KINDS:
@@ -2062,6 +2091,45 @@ class CleanupRunner:
         if self._area_print(object_id) != result["after"]:
             return "conflict_changed"
         self._write_area(object_id, result.get("previous"))
+        return "undone"
+
+    def _set_entity_state(self, action: dict[str, Any]) -> dict[str, Any]:
+        registry = er.async_get(self.hass)
+        entry = registry.async_get(action["object_id"])
+        if entry is None:
+            raise StepAbort("entity_gone")
+        changes = {
+            "disable": {"disabled_by": er.RegistryEntryDisabler.USER},
+            "enable": {"disabled_by": None},
+            "hide": {"hidden_by": er.RegistryEntryHider.USER},
+            "unhide": {"hidden_by": None},
+        }[action["target"]]
+        updated = registry.async_update_entity(action["object_id"], **changes)
+        return {
+            "before": registry_fingerprint(entry),
+            "after": registry_fingerprint(updated),
+            "previous": {
+                "disabled_by": _value(entry.disabled_by),
+                "hidden_by": _value(entry.hidden_by),
+            },
+        }
+
+    @staticmethod
+    def _undo_entity_state(registry: Any, object_id: str, result: dict[str, Any]) -> str:
+        """Put the switches back as they were; a change made since then is left alone."""
+        entry = registry.async_get(object_id)
+        if entry is None:
+            return "conflict_gone"
+        if registry_fingerprint(entry) != result["after"]:
+            return "conflict_changed"
+        before = result["previous"]
+        registry.async_update_entity(
+            object_id,
+            disabled_by=er.RegistryEntryDisabler(before["disabled_by"])
+            if before["disabled_by"]
+            else None,
+            hidden_by=er.RegistryEntryHider(before["hidden_by"]) if before["hidden_by"] else None,
+        )
         return "undone"
 
     @staticmethod

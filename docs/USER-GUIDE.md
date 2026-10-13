@@ -62,7 +62,7 @@ config/
 
 ### Installation overview
 
-- Inventory of entities, devices, integrations/config entries, areas, floors, labels, and automations
+- Inventory of entities, devices, integrations/config entries, areas, floors, labels, and automations; entities can be disabled, enabled, hidden or shown in bulk there (a plan with preview and undo)
 - Search by name, object ID, unique ID, platform, or integration
 - Filter by object type and status
 - Sortable and paginated inventory for larger installations

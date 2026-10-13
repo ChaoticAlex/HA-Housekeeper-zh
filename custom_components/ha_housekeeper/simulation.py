@@ -40,7 +40,9 @@ def simulate(actions: list[dict[str, Any]]) -> dict[str, Any]:
         if kind in REMOVING:
             removed.update(entities)
             devices["removed"] += kind != "remove_entity"
-        elif kind in DISABLING:
+        elif kind in DISABLING or (
+            kind == "set_entity_state" and action.get("target") == "disable"
+        ):
             disabled.update(entities)
             devices["disabled"] += kind == "disable_device"
         if kind in REMOVING and action.get("has_statistics") and not action.get("recorder"):

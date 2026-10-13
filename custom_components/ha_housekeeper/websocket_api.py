@@ -40,6 +40,7 @@ from .cleanup import (
     REFERENCE_KINDS,
     RENAME_KINDS,
     REPAIR_KINDS,
+    STATE_KINDS,
     TRIM_KINDS,
     attach_history,
     build_plan,
@@ -381,6 +382,21 @@ async def _plan_from_requests(
             if key not in rename_data:
                 rename_data[key] = await rename.prepare(hass, snapshot, *key)
 
+    state_data = {}
+    for action in requests:
+        if action["kind"] in STATE_KINDS:
+            entry = er.async_get(hass).async_get(action["object_id"])
+            state_data[action["object_id"]] = {
+                "exists": entry is not None,
+                "disabled_by": str(getattr(entry.disabled_by, "value", entry.disabled_by or ""))
+                if entry
+                else "",
+                "hidden_by": str(getattr(entry.hidden_by, "value", entry.hidden_by or ""))
+                if entry
+                else "",
+                "fingerprint": registry_fingerprint(entry) if entry else None,
+            }
+
     area_data = {
         action["object_id"]: area_assign.prepare(
             hass, action["object_id"], action.get("target") or ""
@@ -449,6 +465,7 @@ async def _plan_from_requests(
         counter_data=counter_data,
         label_data=label_data,
         area_data=area_data,
+        state_data=state_data,
         rename_data=rename_data,
         trim_data=trim_data,
         backup_data=backup_data,

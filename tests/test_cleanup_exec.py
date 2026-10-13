@@ -637,6 +637,42 @@ async def test_adding_a_label_runs_is_verified_and_the_undo_keeps_other_labels(
     assert registry.async_get(entry.entity_id).labels == {old}
 
 
+async def test_switching_entities_disables_and_hides_them_and_the_undo_restores_both(
+    hass: HomeAssistant,
+) -> None:
+    registry = er.async_get(hass)
+    off, hidden, plain = (orphan(hass, n) for n in ("off", "hidden", "plain"))
+    scanner = await make_scanner(hass)
+    snapshot = await scanner.async_scan()
+    info = {
+        e.entity_id: {
+            "exists": True,
+            "disabled_by": "",
+            "hidden_by": "",
+            "fingerprint": registry_fingerprint(registry.async_get(e.entity_id)),
+        }
+        for e in (off, hidden, plain)
+    }
+    requests = [
+        {"kind": "set_entity_state", "object_id": off.entity_id, "target": "disable"},
+        {"kind": "set_entity_state", "object_id": hidden.entity_id, "target": "hide"},
+        {"kind": "set_entity_state", "object_id": plain.entity_id, "target": "enable"},
+    ]
+    plan = build_plan(snapshot, requests, datetime.now(UTC), state_data=info)
+    scanner.journal.add(plan)
+    assert [a["verdict"] for a in plan["actions"]] == ["ok", "ok", "blocked"]  # enable: nothing off
+
+    await run(scanner, plan)
+    assert registry.async_get(off.entity_id).disabled_by is er.RegistryEntryDisabler.USER
+    assert registry.async_get(hidden.entity_id).hidden_by is er.RegistryEntryHider.USER
+    assert plan["status"] == "verified" and plan["verification"]["ok"] is True
+
+    result = await scanner.cleanup.undo(plan["plan_id"], None)
+    assert {r["outcome"] for r in result["results"]} == {"undone"}
+    assert registry.async_get(off.entity_id).disabled_by is None
+    assert registry.async_get(hidden.entity_id).hidden_by is None
+
+
 async def test_trimming_the_history_of_one_entity_is_judged_run_verified_and_not_undone(
     hass: HomeAssistant, hass_ws_client
 ) -> None:

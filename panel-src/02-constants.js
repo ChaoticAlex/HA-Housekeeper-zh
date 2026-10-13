@@ -19,7 +19,7 @@ const DEVICE_KINDS = ["disable_device", "remove_device", "forget_device"];
 const DONE_RESULTS = Object.fromEntries([
   ...REMOVAL_KINDS.map(kind => [kind, "removed"]), ...REPAIR_KINDS.map(kind => [kind, "repaired"]), ...PURGE_KINDS.map(kind => [kind, "purged"]),
   ["delete_automation", "purged"], ["replace_references", "replaced"], ["refactor_automation", "refactored"], ["migrate_meter", "migrated"],
-  ["add_label", "labeled"], ["set_area", "area"], ["rename_entity", "renamed"],
+  ["add_label", "labeled"], ["set_entity_state", "entity_state"], ["set_area", "area"], ["rename_entity", "renamed"],
 ]);
 
 const MAX_PLAN_ACTIONS = 200; // as MAX_ACTIONS in cleanup.py: more entries do not fit into one plan

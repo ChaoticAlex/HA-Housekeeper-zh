@@ -837,6 +837,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.bindBackupCleanup(root);
     this.bindDetailEdit(root);
     this.bindPolSel(root);
+    this.bindInvSel(root);
     this.bindPolicyRow(root);
     this.bindCounter(root);
     this.bindPicker(root);

@@ -42,6 +42,9 @@ DELETE_AUTOMATION_KINDS = frozenset(
 REPAIR_KINDS = frozenset({"repair_counter", "repair_range"})
 LABEL_KINDS = frozenset({"add_label"})  # adds one existing label to an entity; Home Assistant only
 AREA_KINDS = frozenset({"set_area"})  # gives an entity or device without an area an existing one
+# Switches one entity between enabled and disabled or visible and hidden; the target says which way.
+STATE_KINDS = frozenset({"set_entity_state"})
+STATE_TARGETS = ("disable", "enable", "hide", "unhide")
 # What happens to the recorder rows of a removed entity: nothing, its statistics, or also its states.
 RECORDER_CHOICES = ("keep", "statistics", "states")
 REFACTOR_KINDS = frozenset({"refactor_automation"})
@@ -59,6 +62,7 @@ ACTION_KINDS = (
     | REPAIR_KINDS
     | LABEL_KINDS
     | AREA_KINDS
+    | STATE_KINDS
 )
 # Disabling is the quarantine; removing is only allowed after a full quarantine period.
 EXECUTABLE_KINDS = ACTION_KINDS
@@ -310,6 +314,9 @@ BLOCKING_REASONS = frozenset(
         "entity_working",
         "used_certain",
         "already_disabled",
+        "already_in_state",
+        "bad_state",
+        "not_user_disabled",
         "marked_keep",
         "not_quarantined",
         "quarantine_too_short",
@@ -929,6 +936,60 @@ def judge_area_action(object_id: str, name: str, info: dict[str, Any]) -> dict[s
     return action
 
 
+def judge_state_action(
+    object_id: str,
+    target: str,
+    name: str,
+    info: dict[str, Any],
+    used_by: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Judge enabling, disabling, hiding or showing one entity, whatever its status.
+
+    ``info`` is what the registry holds now. Only an entity the user disabled is enabled again, so
+    one an integration or its device switched off stays as it is. Disabling an entity something
+    certainly uses is blocked; hiding and the way back never are, they only change what lists show.
+    """
+    action: dict[str, Any] = {
+        "kind": "set_entity_state",
+        "object_id": object_id,
+        "object_type": "entity",
+        "name": name,
+        "target": target,
+        "verdict": "blocked",
+        "reasons": [],
+        "used_by": used_by if target == "disable" else [],
+        "has_statistics": False,
+    }
+    reasons = action["reasons"]
+    if not info.get("exists"):
+        reasons.append("not_found")
+    elif target not in STATE_TARGETS:
+        reasons.append("bad_state")
+    elif target == "disable":
+        if info.get("disabled_by"):
+            reasons.append("already_in_state")
+        if any(use["confidence"] == "certain" for use in used_by):
+            reasons.append("used_certain")
+        elif used_by:
+            reasons.append("used_probable")
+        if info.get("marked_keep"):
+            reasons.append("marked_keep")
+        if info.get("critical"):
+            reasons.append("critical_object")
+    elif target == "enable":
+        if not info.get("disabled_by"):
+            reasons.append("already_in_state")
+        elif info["disabled_by"] != "user":
+            reasons.append("not_user_disabled")
+    elif target == "hide":
+        if info.get("hidden_by"):
+            reasons.append("already_in_state")
+    elif not info.get("hidden_by"):
+        reasons.append("already_in_state")
+    _verdict(action)
+    return action
+
+
 def judge_meter_action(
     object_id: str,
     target: str | None,
@@ -1078,6 +1139,7 @@ def build_plan(
     counter_data: dict[tuple[str, str], dict[str, Any]] | None = None,
     label_data: dict[tuple[str, str], dict[str, Any]] | None = None,
     area_data: dict[str, dict[str, Any]] | None = None,
+    state_data: dict[str, dict[str, Any]] | None = None,
     rename_data: dict[tuple[str, str], dict[str, Any]] | None = None,
     trim_data: dict[tuple[str, int], dict[str, Any] | None] | None = None,
     backup_data: dict[str, dict[str, Any]] | None = None,
@@ -1166,6 +1228,17 @@ def build_plan(
             info = (area_data or {}).get(object_id, {})
             entry = objects.get(object_id) or devices.get(object_id) or {}
             action = judge_area_action(object_id, entry.get("name") or object_id, info)
+            action["fingerprint"] = info.get("fingerprint")
+        elif kind in STATE_KINDS:
+            info = (state_data or {}).get(object_id, {})
+            item = objects.get(object_id) or {}
+            action = judge_state_action(
+                object_id,
+                request.get("target") or "",
+                item.get("name") or object_id,
+                {**info, "marked_keep": item.get("marked_keep"), "critical": item.get("critical")},
+                _used_by(snapshot["edges"], f"entity:{object_id}"),
+            )
             action["fingerprint"] = info.get("fingerprint")
         elif kind in LABEL_KINDS:
             label_id = request.get("target") or ""
