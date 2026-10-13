@@ -67,6 +67,23 @@ test("shared list search keeps an accessible name after its placeholder disappea
   }
 });
 
+test("paging brings the new list page into view and announces its position", () => {
+  const { el, shadow } = panel("de");
+  el.pageSize = 20;
+  el.pages = { findings: 2 };
+  assert.match(el.paginate("findings", Array.from({ length: 45 }, (_, i) => i)).footer, /data-lpage-footer="findings" data-page-count="3"/);
+  const calls = [];
+  const region = {
+    setAttribute: (key, value) => calls.push([key, value]),
+    scrollIntoView: opts => calls.push(["scroll", opts.block]),
+    focus: opts => calls.push(["focus", opts.preventScroll]),
+  };
+  const footer = { dataset: { lpageFooter: "findings", pageCount: "3" }, closest: () => region };
+  shadow.querySelectorAll = () => [footer];
+  el.focusListPage("findings");
+  assert.deepEqual(calls, [["tabindex", "-1"], ["aria-label", "Seite 2 von 3"], ["scroll", "start"], ["focus", true]]);
+});
+
 test("every view renders without throwing and escapes object names", () => {
   const { el, shadow } = panel("de");
   for (const view of ["overview", "inventory", "findingsNav", "graph"]) {

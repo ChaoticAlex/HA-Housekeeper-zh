@@ -427,6 +427,17 @@ class HAHousekeeperPanel extends HTMLElement {
     }
   }
 
+  // After paging, return to the beginning of the affected list and announce the new page.
+  focusListPage(id) {
+    const footer = [...(this.shadowRoot?.querySelectorAll("[data-lpage-footer]") || [])].find(el => el.dataset.lpageFooter === id);
+    const region = footer?.closest(".foldbody, .panel") || footer?.parentElement;
+    if (!region) return;
+    region.setAttribute("tabindex", "-1");
+    region.setAttribute("aria-label", `${this.t("page")} ${this.pages[id]} ${this.t("of")} ${footer.dataset.pageCount}`);
+    region.scrollIntoView?.({ block: "start" });
+    region.focus?.({ preventScroll: true });
+  }
+
   // Derived data is kept per data set; it is rebuilt when the data, a change in place or one of the
   // given values changes.
   memo(name, deps, build) {
@@ -1044,7 +1055,7 @@ class HAHousekeeperPanel extends HTMLElement {
     });
     root.querySelectorAll("[data-dense]").forEach(el => el.onclick = () => { this.dense = !this.dense; try { globalThis.localStorage?.setItem("ha_housekeeper.dense", this.dense ? "1" : "0"); } catch (_) { /* kept until the page closes */ } this.render(); });
     root.querySelectorAll("[data-ld]").forEach(el => el.onclick = () => { const st = this.lv[el.dataset.ld]; st.dir = st.dir === "desc" ? "asc" : "desc"; this.persistLv(el.dataset.ld); this.pages = {}; this.render(); });
-    root.querySelectorAll("[data-lpage]").forEach(el => el.onclick = () => { const [id, n] = el.dataset.lpage.split("|"); this.pages[id] = Number(n); this.render(); });
+    root.querySelectorAll("[data-lpage]").forEach(el => el.onclick = () => { const [id, n] = el.dataset.lpage.split("|"); this.pages[id] = Number(n); this.render(); this.focusListPage(id); });
     root.querySelectorAll("[data-pagesize]").forEach(el => el.onchange = () => { this.pageSize = Number(el.value); this.pages = {}; this.render(); });
   }
 }

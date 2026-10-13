@@ -10,6 +10,8 @@
 
 ### Behoben
 
+- **Orientierung nach einem Seitenwechsel:** Lange Listen springen nach „Weiter“ oder „Zurück“ an den Anfang des betroffenen Bereichs. Der Tastaturfokus meldet die neue Seite.
+
 - **Listensuche zugänglich beschriftet:** Das Suchfeld in Listen hat jetzt auch nach dem Tippen eine Bezeichnung für Screenreader.
 
 - **Plan in einem Schritt bestätigen:** Die Vorschau zeigt Hinweis und eine größere Zusammenfassung; „Bestätigen“ fragt in einem Dialog nach und führt dann aus. Das Eintippen des Bestätigungsworts und der zweite Bildschirm entfallen. Die „Prüfung nach dem Lauf“ ist zugeklappt.
@@ -27,6 +29,8 @@
 - **Switch entities in bulk from the inventory:** Entity rows of the Inventory have a checkbox. The bar above disables, enables, hides or shows them, up to 200 entities per plan, with a preview and undo. An entity that something certainly uses is not disabled; only what you disabled yourself is enabled again.
 
 #### Fixed
+
+- **Orientation after changing pages:** Long lists return to the start of the affected section after “Next” or “Previous”. Keyboard focus announces the new page.
 
 - **Accessible list search label:** List search fields now keep a name for screen readers after typing.
 
