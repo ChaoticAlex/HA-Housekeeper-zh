@@ -118,7 +118,7 @@ class ListsMixin {
     requestAnimationFrame(() => this.shadowRoot?.querySelector(".filteron, .listbar")?.scrollIntoView?.({ block: "nearest" }));
   }
 
-  listBar(id, { sorts, filters = [], columns = [], dense = true }) {
+  listBar(id, { sorts, filters = [], columns = [], dense = true, table = false }) {
     const st = this.lv[id];
     for (const f of filters) if (st.f[f.name] && !f.options.some(([v]) => v === st.f[f.name])) delete st.f[f.name]; // a kept value this list no longer offers
     (this.lvDirs ||= {})[id] = Object.fromEntries(sorts.map(x => [x.key, x.dir]));
@@ -127,7 +127,7 @@ class ListsMixin {
     const sortOptions = sorts.map(x => `<option value="${x.key}" ${st.sort === x.key ? "selected" : ""}>${this.t(x.label)}${st.sort === x.key ? (desc ? " ↓" : " ↑") : ""}</option>`).join("");
     const on = filters.filter(f => st.f[f.name]).map(f => `${f.all}: ${(f.options.find(([v]) => v === st.f[f.name]) || [])[1] ?? st.f[f.name]}`);
     const note = this.filterNote(on, `data-lf-set="${id}||"`);
-    return `${note}<div class="listbar"><input type="search" data-lq="${id}" value="${this.esc(st.q)}" placeholder="${this.t("searchList")}" aria-label="${this.t("searchList")}">${selects}${sorts.length ? `<span class="sortgroup"><select data-ls="${id}" aria-label="${this.t("sortBy")}" title="${this.t("sortBy")}">${sortOptions}</select><button class="dirbtn" data-ld="${id}" title="${this.t(desc ? "sortDescending" : "sortAscending")}" aria-label="${this.t(desc ? "sortDescending" : "sortAscending")}"><ha-icon icon="${desc ? "mdi:sort-descending" : "mdi:sort-ascending"}"></ha-icon></button></span>` : ""}${this.viewsControl(id)}${dense ? this.denseButton() : ""}${this.listTools(id, columns)}</div>`;
+    return `${note}<div class="listbar"><input type="search" data-lq="${id}" value="${this.esc(st.q)}" placeholder="${this.t("searchList")}" aria-label="${this.t("searchList")}">${selects}${sorts.length ? `<span class="sortgroup${table ? " table-sort" : ""}"><select data-ls="${id}" aria-label="${this.t("sortBy")}" title="${this.t("sortBy")}">${sortOptions}</select><button class="dirbtn" data-ld="${id}" title="${this.t(desc ? "sortDescending" : "sortAscending")}" aria-label="${this.t(desc ? "sortDescending" : "sortAscending")}"><ha-icon icon="${desc ? "mdi:sort-descending" : "mdi:sort-ascending"}"></ha-icon></button></span>` : ""}${this.viewsControl(id)}${dense ? this.denseButton() : ""}${this.listTools(id, columns)}</div>`;
   }
 
   // Column picker and CSV export of a list; both are optional. `columns` are the switchable columns: { key, label }.
@@ -189,9 +189,9 @@ class ListsMixin {
     const st = this.lv[id];
     columns = columns.filter((c, i) => !i || !this.colHidden(id, c.key));
     const head = columns.map(c => {
-      const on = st.sort === c.key;
+      const on = st.sort === c.key, sortedHere = on || c.sortKeys?.includes(st.sort);
       const inner = c.allBox ? c.allBox(rows) : c.narrow ? `<ha-icon icon="mdi:checkbox-marked-outline" title="${this.esc(this.t(c.label))}"></ha-icon><span class="sr-only">${this.t(c.label)}</span>` : c.sortable === false ? this.t(c.label) : `<button type="button" class="thbtn" data-lsort="${id}|${c.key}|${c.dir || "asc"}">${this.t(c.label)}${on ? ` <span aria-hidden="true">${st.dir === "desc" ? "↓" : "↑"}</span>` : ""}</button>`;
-      return `<th scope="col"${c.narrow ? ' class="selcol"' : ""} aria-sort="${on ? (st.dir === "desc" ? "descending" : "ascending") : "none"}">${c.headPrefix ? `<span class="headsel">${c.headPrefix()}${inner}</span>` : inner}</th>`;
+      return `<th scope="col"${c.narrow ? ' class="selcol"' : ""} aria-sort="${sortedHere ? (st.dir === "desc" ? "descending" : "ascending") : "none"}">${c.headPrefix ? `<span class="headsel">${c.headPrefix()}${inner}</span>` : inner}${c.headSuffix ? c.headSuffix() : ""}</th>`;
     }).join("");
     const body = rows.map(item => {
       const attrs = rowAttrs(item);

@@ -919,6 +919,7 @@ test("unused entities are a table with columns that sort and filters for domain,
   el.render();
   let html = shadow.innerHTML;
   for (const head of ["Name", "Domain", "Device", "Area", "Integration", "Last change", "Last report", "Observed since", "Statistics"]) assert.ok(html.includes(`>${head}`), head);
+  assert.ok(html.includes('class="sortgroup table-sort"') && html.includes('data-lsort="unreferenced|id|asc"'), "the mobile sort control keeps ID sorting available in the desktop table header");
   assert.ok(html.includes("data-lsort=\"unreferenced|changed|desc\"") && html.includes('aria-sort="ascending"'));
   assert.ok(html.includes("3 days ago") && html.includes("30 days ago") && html.includes("Kitchen"));
   const order = () => [...shadow.innerHTML.matchAll(/<span class="id cut"[^>]*>([a-z_.]+)<\/span>/g)].map(m => m[1]);
@@ -3831,6 +3832,16 @@ test("tables and lists grow with their content: no height limit and no scrolling
   const css = fs.readFileSync(SOURCE, "utf8");
   assert.ok(!/\.tablewrap[^{}]*\{[^{}]*max-height/.test(css), "no table has a height limit");
   assert.ok(!/\.tablewrap\{[^{}]*overflow:auto/.test(css), "a table scrolls sideways only");
+});
+
+test("table sorting uses column headers on desktop and the sort control on mobile", () => {
+  const { el } = panel("en");
+  el.lvState("unreferenced", "name", "asc");
+  el.lvState("cleanup", "name", "asc");
+  const sorts = [{ key: "name", label: "sortName", dir: "asc" }];
+  assert.ok(el.listBar("unreferenced", { table: true, sorts }).includes('class="sortgroup table-sort"'));
+  assert.ok(el.listBar("cleanup", { sorts }).includes('class="sortgroup"'), "row lists keep visible sorting");
+  assert.ok(fs.readFileSync(SOURCE, "utf8").includes('@media(min-width:861px){.listbar .sortgroup.table-sort{display:none}}'));
 });
 
 test("the logbook has its own tab, entries use page editors, an action can suggest one and the object shows its latest", async () => {

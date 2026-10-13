@@ -1519,6 +1519,7 @@ class StylesMixin {
       .note-editor{min-width:0}.note-fields{display:grid;gap:14px;padding:16px}.note-fields>div{min-width:0}.note-fields h3{margin:0;font-size:calc(15px*var(--hk-fs,1))}.note-fields label{display:block;margin-bottom:6px;color:var(--hk-muted);font-size:calc(12.5px*var(--hk-fs,1));font-weight:600}.note-fields input,.note-fields textarea{box-sizing:border-box;width:100%;min-width:0;padding:10px 12px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.note-fields textarea{resize:vertical}.note-fields .picker{max-width:none}.note-fields .notetwo{grid-template-columns:repeat(2,minmax(0,1fr))}.note-fields .notetwo>div{min-width:0}.note-fields .notemeta{display:flex;align-items:center;align-self:end;gap:8px;flex-wrap:wrap;min-height:42px;color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));overflow-wrap:anywhere}.note-fields .notemeta strong{color:var(--hk-text)}.note-fields .notehint2{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.monitor-editor .note-editor .note-actions,.note-editor .note-actions{border:0;border-top:1px solid var(--hk-border);border-radius:0;background:var(--hk-soft)}.note-editor .danger-t{color:var(--hk-red)}.note-editor.inline .notetwo{grid-template-columns:1fr}@media(max-width:700px){.note-fields .notetwo{grid-template-columns:1fr}}
       .monitor-member-wrap{border-bottom:1px solid var(--hk-border)}.monitor-member-wrap:last-child{border-bottom:0}.monitor-member-wrap .row{border-bottom:0}.monitor-rules{padding:0 16px 12px 62px}.monitor-rules summary{color:var(--hk-blue-text);cursor:pointer;font-size:calc(12px*var(--hk-fs,1));font-weight:600}.monitor-rules p{margin:8px 0;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.monitor-rule{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:5px 0;font-size:calc(13px*var(--hk-fs,1))}.monitor-rule label{display:inline-flex;align-items:center;gap:8px;min-width:210px;cursor:pointer}.monitor-rule input[type=number]{width:100px;padding:7px 9px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit;font:inherit}.monitor-rule input[type=number]:disabled{opacity:.45}.monitor-preview-body{padding:12px 16px}.monitor-preview-body>p{margin:0;color:var(--hk-muted)}.monitor-preview-body>strong{display:block;margin-bottom:4px}.monitor-preview-body>small{display:block;margin-bottom:8px;color:var(--hk-muted)}.monitor-preview-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:7px 0;border-top:1px solid var(--hk-border)}.monitor-preview-row small{grid-column:1/-1;color:var(--hk-muted)}@media(max-width:600px){.monitor-rules{padding-left:16px}.monitor-rule label{min-width:0;flex:1 1 100%}.monitor-rule input[type=number]{width:90px}}
       .pin-editor{border-bottom:1px solid var(--hk-border)}.pin-fields{display:grid;gap:10px;padding:16px}.pin-fields h3{margin:0;font-size:calc(15px*var(--hk-fs,1))}.pin-fields p{margin:0;color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1))}.pin-fields label{display:block;margin:4px 0 6px;color:var(--hk-muted);font-size:calc(12.5px*var(--hk-fs,1));font-weight:600}.pin-fields input{box-sizing:border-box;width:100%;max-width:520px;min-height:40px;padding:8px 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.pin-fields small{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.pin-fields .notechips{margin-top:8px}.pin-editor .pin-actions{border-bottom:0;border-top:1px solid var(--hk-border);background:var(--hk-soft)}.pin-actions [role=status]{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}
+      @media(min-width:861px){.listbar .sortgroup.table-sort{display:none}}.th-alt{margin-left:8px;padding-left:8px;border-left:1px solid var(--hk-border);color:var(--hk-blue-text)}
       ${this.themeCss()}
     </style>`;
   }
@@ -1684,7 +1685,7 @@ class ListsMixin {
     requestAnimationFrame(() => this.shadowRoot?.querySelector(".filteron, .listbar")?.scrollIntoView?.({ block: "nearest" }));
   }
 
-  listBar(id, { sorts, filters = [], columns = [], dense = true }) {
+  listBar(id, { sorts, filters = [], columns = [], dense = true, table = false }) {
     const st = this.lv[id];
     for (const f of filters) if (st.f[f.name] && !f.options.some(([v]) => v === st.f[f.name])) delete st.f[f.name]; // a kept value this list no longer offers
     (this.lvDirs ||= {})[id] = Object.fromEntries(sorts.map(x => [x.key, x.dir]));
@@ -1693,7 +1694,7 @@ class ListsMixin {
     const sortOptions = sorts.map(x => `<option value="${x.key}" ${st.sort === x.key ? "selected" : ""}>${this.t(x.label)}${st.sort === x.key ? (desc ? " ↓" : " ↑") : ""}</option>`).join("");
     const on = filters.filter(f => st.f[f.name]).map(f => `${f.all}: ${(f.options.find(([v]) => v === st.f[f.name]) || [])[1] ?? st.f[f.name]}`);
     const note = this.filterNote(on, `data-lf-set="${id}||"`);
-    return `${note}<div class="listbar"><input type="search" data-lq="${id}" value="${this.esc(st.q)}" placeholder="${this.t("searchList")}" aria-label="${this.t("searchList")}">${selects}${sorts.length ? `<span class="sortgroup"><select data-ls="${id}" aria-label="${this.t("sortBy")}" title="${this.t("sortBy")}">${sortOptions}</select><button class="dirbtn" data-ld="${id}" title="${this.t(desc ? "sortDescending" : "sortAscending")}" aria-label="${this.t(desc ? "sortDescending" : "sortAscending")}"><ha-icon icon="${desc ? "mdi:sort-descending" : "mdi:sort-ascending"}"></ha-icon></button></span>` : ""}${this.viewsControl(id)}${dense ? this.denseButton() : ""}${this.listTools(id, columns)}</div>`;
+    return `${note}<div class="listbar"><input type="search" data-lq="${id}" value="${this.esc(st.q)}" placeholder="${this.t("searchList")}" aria-label="${this.t("searchList")}">${selects}${sorts.length ? `<span class="sortgroup${table ? " table-sort" : ""}"><select data-ls="${id}" aria-label="${this.t("sortBy")}" title="${this.t("sortBy")}">${sortOptions}</select><button class="dirbtn" data-ld="${id}" title="${this.t(desc ? "sortDescending" : "sortAscending")}" aria-label="${this.t(desc ? "sortDescending" : "sortAscending")}"><ha-icon icon="${desc ? "mdi:sort-descending" : "mdi:sort-ascending"}"></ha-icon></button></span>` : ""}${this.viewsControl(id)}${dense ? this.denseButton() : ""}${this.listTools(id, columns)}</div>`;
   }
 
   // Column picker and CSV export of a list; both are optional. `columns` are the switchable columns: { key, label }.
@@ -1755,9 +1756,9 @@ class ListsMixin {
     const st = this.lv[id];
     columns = columns.filter((c, i) => !i || !this.colHidden(id, c.key));
     const head = columns.map(c => {
-      const on = st.sort === c.key;
+      const on = st.sort === c.key, sortedHere = on || c.sortKeys?.includes(st.sort);
       const inner = c.allBox ? c.allBox(rows) : c.narrow ? `<ha-icon icon="mdi:checkbox-marked-outline" title="${this.esc(this.t(c.label))}"></ha-icon><span class="sr-only">${this.t(c.label)}</span>` : c.sortable === false ? this.t(c.label) : `<button type="button" class="thbtn" data-lsort="${id}|${c.key}|${c.dir || "asc"}">${this.t(c.label)}${on ? ` <span aria-hidden="true">${st.dir === "desc" ? "↓" : "↑"}</span>` : ""}</button>`;
-      return `<th scope="col"${c.narrow ? ' class="selcol"' : ""} aria-sort="${on ? (st.dir === "desc" ? "descending" : "ascending") : "none"}">${c.headPrefix ? `<span class="headsel">${c.headPrefix()}${inner}</span>` : inner}</th>`;
+      return `<th scope="col"${c.narrow ? ' class="selcol"' : ""} aria-sort="${sortedHere ? (st.dir === "desc" ? "descending" : "ascending") : "none"}">${c.headPrefix ? `<span class="headsel">${c.headPrefix()}${inner}</span>` : inner}${c.headSuffix ? c.headSuffix() : ""}</th>`;
     }).join("");
     const body = rows.map(item => {
       const attrs = rowAttrs(item);
@@ -4220,7 +4221,7 @@ class UnusedMixin {
     const units = [...new Set(all.map(o => o.unit).filter(Boolean))].sort();
     const AGES = [30, 365, 730];
     this.setExporter("orphanstats", "orphaned-statistics", ["ID", this.t("utKind"), this.t("utUnit"), this.t("utFirst"), this.t("utLast"), this.t("utRows"), this.t("inEnergy")], () => rows.map(o => [o.statistic_id, this.t(kind(o)), o.unit || "", firstOf(o) ? new Date(firstOf(o) * 1000).toISOString() : "", lastOf(o) ? new Date(lastOf(o) * 1000).toISOString() : "", rowsOf(o) ?? "", o.in_energy ? "yes" : "no"]));
-    const bar = this.listBar("orphanstats", { columns: [{ key: "kind", label: "utKind" }, { key: "unit", label: "utUnit" }, { key: "first", label: "utFirst" }, { key: "last", label: "utLast" }, { key: "rows", label: "utRows" }, { key: "energy", label: "utEnergy" }], sorts, filters: [
+    const bar = this.listBar("orphanstats", { table: true, columns: [{ key: "kind", label: "utKind" }, { key: "unit", label: "utUnit" }, { key: "first", label: "utFirst" }, { key: "last", label: "utLast" }, { key: "rows", label: "utRows" }, { key: "energy", label: "utEnergy" }], sorts, filters: [
       { name: "kind", all: this.t("allKinds"), options: kinds.map(k => [k, this.t(k)]) },
       { name: "unit", all: this.t("allUnits"), options: units.map(u => [u, u]) },
       { name: "age", all: this.t("allAges"), options: AGES.map(d => [String(d), this.t(`statAge${d}`)]) },
@@ -4323,7 +4324,7 @@ class UnusedMixin {
     const platforms = [...new Set(all.map(o => o.platform).filter(Boolean))].sort();
     const pickCols = ["domain", "device", "area", "platform", "changed", "reported", "since", "stats"].map(k => ({ key: k, label: { domain: "utDomain", device: "utDevice", area: "utArea", platform: "utIntegration", changed: "utChanged", reported: "utReported", since: "utSince", stats: "utStats" }[k] }));
     this.setExporter("unreferenced", "unused-entities", [this.t("utName"), "ID", this.t("utDomain"), this.t("utDevice"), this.t("utArea"), this.t("utIntegration"), this.t("utChanged"), this.t("utReported"), this.t("utSince"), this.t("utStats")], () => rows.map(o => [o.name, o.object_id, domainOf(o), deviceName(o), this.areaName(o), o.platform || "", o.last_changed || "", o.last_reported || o.last_updated || "", o.status_since || "", this.data.meta.recorder_available ? (o.has_statistics ? "yes" : "no") : ""]));
-    const bar = this.listBar("unreferenced", { columns: pickCols, sorts, filters: [
+    const bar = this.listBar("unreferenced", { table: true, columns: pickCols, sorts, filters: [
       { name: "domain", all: this.t("allDomains"), options: domains.map(d => [d, `${d} (${all.filter(o => domainOf(o) === d).length})`]) },
       { name: "area", all: this.t("allAreas"), options: areas.map(a => [a, a]) },
       { name: "platform", all: this.t("allIntegrations"), options: platforms.map(p => [p, p]) },
@@ -4335,7 +4336,7 @@ class UnusedMixin {
     const pg = this.paginate("unreferenced", rows);
     const dash = `<span class="muted">–</span>`;
     const columns = [
-      { key: "name", label: "utName", dir: "asc", cell: o => this.nameCell(o.name, o.object_id) },
+      { key: "name", label: "utName", dir: "asc", sortKeys: ["id"], headSuffix: () => `<button type="button" class="thbtn th-alt" data-lsort="unreferenced|id|asc">ID${this.lv.unreferenced.sort === "id" ? ` <span aria-hidden="true">${this.lv.unreferenced.dir === "desc" ? "↓" : "↑"}</span>` : ""}</button>`, cell: o => this.nameCell(o.name, o.object_id) },
       { key: "domain", label: "utDomain", cell: o => this.esc(domainOf(o)) },
       { key: "device", label: "utDevice", cell: o => this.esc(deviceName(o)) || dash },
       { key: "area", label: "utArea", cell: o => this.esc(this.areaName(o)) || dash },
@@ -4373,7 +4374,7 @@ class UnusedMixin {
     const areas = [...new Set(all.map(r => this.areaName(r.item)).filter(Boolean))].sort();
     const types = [...new Set(all.map(r => r.type).filter(Boolean))].sort();
     const need = this.data.meta.low_battery_percent ?? 20;
-    const bar = this.listBar("batteries", { sorts: this.batteryTableSorts(), filters: [
+    const bar = this.listBar("batteries", { table: true, sorts: this.batteryTableSorts(), filters: [
       { name: "soon", all: this.t("batteryAll"), options: [["soon", this.t("btFilterSoon")], ["untyped", this.t("btFilterUntyped")]] },
       { name: "type", all: this.t("btAllTypes"), options: types.map(x => [x, x]) },
       { name: "area", all: this.t("allAreas"), options: areas.map(a => [a, a]) },
@@ -5524,7 +5525,7 @@ class RunsMixin {
 
   runsBar(rows = []) {
     this.setExporter("runs", "runs", [this.t("runsColName"), "ID", this.t("runsColRuns"), this.t("runsColErrors"), this.t("runsColConditions"), `${this.t("runsColDuration")} (ms, mean)`, `${this.t("runsColDuration")} (ms, max)`], () => rows.map(r => [r.name, r.entity_id, r.runs, r.errors, r.conditions, r.mean_ms ?? "", r.max_ms ?? ""]));
-    return this.listBar("runs", { columns: [{ key: "runs", label: "runsColRuns" }, { key: "errors", label: "runsColErrors" }, { key: "conditions", label: "runsColConditions" }, { key: "duration", label: "runsColDuration" }, { key: "trend", label: "runsColTrend" }], sorts: this.runsSorts(), filters: [
+    return this.listBar("runs", { table: true, columns: [{ key: "runs", label: "runsColRuns" }, { key: "errors", label: "runsColErrors" }, { key: "conditions", label: "runsColConditions" }, { key: "duration", label: "runsColDuration" }, { key: "trend", label: "runsColTrend" }], sorts: this.runsSorts(), filters: [
       { name: "type", all: this.t("allTypes"), options: [["automation", this.t("automation")], ["script", this.t("script")]] },
       { name: "outcome", all: this.t("runsAllOutcomes"), options: [["errors", this.t("runsOnlyErrors")], ["flagged", this.t("runsOnlyFlagged")], ["never", this.t("ovRunsNever")]] },
     ] });
@@ -11861,7 +11862,7 @@ class SystemMixin {
   sysList(id, items, opt) {
     this.lvState(id, opt.sort, opt.dir || "asc");
     if (opt.exportName) this.setExporter(id, opt.exportName, opt.header, () => refined.map(opt.rows));
-    const bar = items.length >= 6 || this.lv[id].q || Object.values(this.lv[id].f).some(Boolean) ? this.listBar(id, { sorts: opt.sorts, filters: opt.filters || [] }) : "";
+    const bar = items.length >= 6 || this.lv[id].q || Object.values(this.lv[id].f).some(Boolean) ? this.listBar(id, { table: true, sorts: opt.sorts, filters: opt.filters || [] }) : "";
     const refined = this.refine(id, items, { text: opt.text, filters: opt.filterFns || {}, sorts: opt.sorts, tie: opt.tie });
     const pg = this.paginate(id, refined);
     const table = refined.length

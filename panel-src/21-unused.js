@@ -108,7 +108,7 @@ class UnusedMixin {
     const units = [...new Set(all.map(o => o.unit).filter(Boolean))].sort();
     const AGES = [30, 365, 730];
     this.setExporter("orphanstats", "orphaned-statistics", ["ID", this.t("utKind"), this.t("utUnit"), this.t("utFirst"), this.t("utLast"), this.t("utRows"), this.t("inEnergy")], () => rows.map(o => [o.statistic_id, this.t(kind(o)), o.unit || "", firstOf(o) ? new Date(firstOf(o) * 1000).toISOString() : "", lastOf(o) ? new Date(lastOf(o) * 1000).toISOString() : "", rowsOf(o) ?? "", o.in_energy ? "yes" : "no"]));
-    const bar = this.listBar("orphanstats", { columns: [{ key: "kind", label: "utKind" }, { key: "unit", label: "utUnit" }, { key: "first", label: "utFirst" }, { key: "last", label: "utLast" }, { key: "rows", label: "utRows" }, { key: "energy", label: "utEnergy" }], sorts, filters: [
+    const bar = this.listBar("orphanstats", { table: true, columns: [{ key: "kind", label: "utKind" }, { key: "unit", label: "utUnit" }, { key: "first", label: "utFirst" }, { key: "last", label: "utLast" }, { key: "rows", label: "utRows" }, { key: "energy", label: "utEnergy" }], sorts, filters: [
       { name: "kind", all: this.t("allKinds"), options: kinds.map(k => [k, this.t(k)]) },
       { name: "unit", all: this.t("allUnits"), options: units.map(u => [u, u]) },
       { name: "age", all: this.t("allAges"), options: AGES.map(d => [String(d), this.t(`statAge${d}`)]) },
@@ -211,7 +211,7 @@ class UnusedMixin {
     const platforms = [...new Set(all.map(o => o.platform).filter(Boolean))].sort();
     const pickCols = ["domain", "device", "area", "platform", "changed", "reported", "since", "stats"].map(k => ({ key: k, label: { domain: "utDomain", device: "utDevice", area: "utArea", platform: "utIntegration", changed: "utChanged", reported: "utReported", since: "utSince", stats: "utStats" }[k] }));
     this.setExporter("unreferenced", "unused-entities", [this.t("utName"), "ID", this.t("utDomain"), this.t("utDevice"), this.t("utArea"), this.t("utIntegration"), this.t("utChanged"), this.t("utReported"), this.t("utSince"), this.t("utStats")], () => rows.map(o => [o.name, o.object_id, domainOf(o), deviceName(o), this.areaName(o), o.platform || "", o.last_changed || "", o.last_reported || o.last_updated || "", o.status_since || "", this.data.meta.recorder_available ? (o.has_statistics ? "yes" : "no") : ""]));
-    const bar = this.listBar("unreferenced", { columns: pickCols, sorts, filters: [
+    const bar = this.listBar("unreferenced", { table: true, columns: pickCols, sorts, filters: [
       { name: "domain", all: this.t("allDomains"), options: domains.map(d => [d, `${d} (${all.filter(o => domainOf(o) === d).length})`]) },
       { name: "area", all: this.t("allAreas"), options: areas.map(a => [a, a]) },
       { name: "platform", all: this.t("allIntegrations"), options: platforms.map(p => [p, p]) },
@@ -223,7 +223,7 @@ class UnusedMixin {
     const pg = this.paginate("unreferenced", rows);
     const dash = `<span class="muted">–</span>`;
     const columns = [
-      { key: "name", label: "utName", dir: "asc", cell: o => this.nameCell(o.name, o.object_id) },
+      { key: "name", label: "utName", dir: "asc", sortKeys: ["id"], headSuffix: () => `<button type="button" class="thbtn th-alt" data-lsort="unreferenced|id|asc">ID${this.lv.unreferenced.sort === "id" ? ` <span aria-hidden="true">${this.lv.unreferenced.dir === "desc" ? "↓" : "↑"}</span>` : ""}</button>`, cell: o => this.nameCell(o.name, o.object_id) },
       { key: "domain", label: "utDomain", cell: o => this.esc(domainOf(o)) },
       { key: "device", label: "utDevice", cell: o => this.esc(deviceName(o)) || dash },
       { key: "area", label: "utArea", cell: o => this.esc(this.areaName(o)) || dash },
@@ -261,7 +261,7 @@ class UnusedMixin {
     const areas = [...new Set(all.map(r => this.areaName(r.item)).filter(Boolean))].sort();
     const types = [...new Set(all.map(r => r.type).filter(Boolean))].sort();
     const need = this.data.meta.low_battery_percent ?? 20;
-    const bar = this.listBar("batteries", { sorts: this.batteryTableSorts(), filters: [
+    const bar = this.listBar("batteries", { table: true, sorts: this.batteryTableSorts(), filters: [
       { name: "soon", all: this.t("batteryAll"), options: [["soon", this.t("btFilterSoon")], ["untyped", this.t("btFilterUntyped")]] },
       { name: "type", all: this.t("btAllTypes"), options: types.map(x => [x, x]) },
       { name: "area", all: this.t("allAreas"), options: areas.map(a => [a, a]) },
