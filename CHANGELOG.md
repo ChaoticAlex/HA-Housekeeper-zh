@@ -8,6 +8,8 @@
 
 ### Behoben
 
+- **Plan ausführen mit Rückfrage:** Das Eintippen des Bestätigungsworts („DEAKTIVIEREN“ usw.) entfällt. „Jetzt ausführen“ fragt stattdessen in einem Dialog nach. Der Schritt davor heißt „Weiter“ statt „Bestätigen …“, weil er noch nichts bestätigt, und die Zeile der Bestätigung ist aufgeräumt (Text links, „Zurück“ und „Jetzt ausführen“ rechts).
+
 - **Plan abbrechen:** Neben „Bestätigen …“ steht jetzt „Abbrechen“. Es verwirft die Vorschau wie „Schließen“ oben rechts; geändert wird nichts.
 
 - **Plan bestätigen:** Der Button „Bestätigen …“ zeigte statt seiner Beschriftung den Text der Löschfrage des Journals samt „{date}“. Er trägt wieder seine Beschriftung.
@@ -19,6 +21,8 @@
 - **Switch entities in bulk from the inventory:** Entity rows of the Inventory have a checkbox. The bar above disables, enables, hides or shows them, up to 200 entities per plan, with a preview and undo. An entity that something certainly uses is not disabled; only what you disabled yourself is enabled again.
 
 #### Fixed
+
+- **Running a plan asks in a dialog:** Typing the confirmation word (“DISABLE” etc.) is gone. “Run now” asks in a dialog instead. The step before is called “Continue” instead of “Confirm …” because it does not confirm anything yet, and the confirmation row is tidier (text on the left, “Back” and “Run now” on the right).
 
 - **Cancel a plan:** “Cancel” now stands next to “Confirm …”. It discards the preview like “Close” at the top right; nothing is changed.
 

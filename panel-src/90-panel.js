@@ -930,13 +930,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-repair-task]").forEach(el => el.onclick = () => { if (this.repairTask === el.dataset.repairTask) { this.repairTask = null; this.render(); return; } this.repairTask = el.dataset.repairTask; this.cleanupKind = this.repairTask; this.cleanupSel = new Set(); this.plan = null; this.render(); });
     root.querySelector("[data-ack-all]")?.addEventListener("change", e => { this.ack = new Set(e.target.checked ? this.plan.actions.filter(x => x.verdict === "review" && x.executable).map(x => x.object_id) : []); this.render(); });
     root.querySelector("[data-plan-confirm]")?.addEventListener("click", () => this.confirmPlan());
-    const word = root.querySelector("[data-confirm-word]");
-    if (word) word.oninput = () => {
-      this.confirmWord = word.value;
-      const run = this.shadowRoot.querySelector("[data-plan-execute]");
-      if (run) run.disabled = word.value.trim().toUpperCase() !== this.planWord(this.plan);
-    };
-    root.querySelector("[data-plan-execute]")?.addEventListener("click", () => this.executePlan());
+    root.querySelector("[data-plan-execute]")?.addEventListener("click", ev => this.confirmAsk(this.confirmSummary(this.plan, this.confirmation.execute.length), () => this.executePlan(), { title: this.t("confirmRunTitle"), yes: this.t("runNow"), danger: ev.currentTarget.dataset.risky === "true" }));
     root.querySelector("[data-plan-cancel]")?.addEventListener("click", () => this.cancelPlan());
     root.querySelector("[data-undo-all]")?.addEventListener("click", () => { this.undoAsk = "all"; this.render(); });
     root.querySelector("[data-undo-all-yes]")?.addEventListener("click", () => this.undoPlan());

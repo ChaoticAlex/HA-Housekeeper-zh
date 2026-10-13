@@ -130,7 +130,7 @@ const TEXT = {
     cleanupDryRun: "Nichts wird geändert, bis du einen Plan ausdrücklich bestätigst. Deaktivieren ist umkehrbar; Entfernen geht erst nach der Quarantäne und mit Backup.",
     reason_already_disabled: "Die Entität ist bereits deaktiviert.",
     skippedUnacknowledged: "{count} zu prüfende Einträge ohne ausdrückliche Bestätigung werden übersprungen.",
-    confirmPlan: "Bestätigen …", confirmPlanTitle: "Plan bestätigen", acknowledgeReview: "Ich habe das geprüft und will es trotzdem ausführen", confirmedSummary: "{count} Entitäten werden deaktiviert (Quarantäne). Das ist jederzeit umkehrbar, solange die Entität unverändert bleibt.",
+    confirmPlan: "Weiter", confirmPlanTitle: "Plan bestätigen", acknowledgeReview: "Ich habe das geprüft und will es trotzdem ausführen", confirmedSummary: "{count} Entitäten werden deaktiviert (Quarantäne). Das ist jederzeit umkehrbar, solange die Entität unverändert bleibt.",
     confirmTypeWord: "Zur Bestätigung „{word}“ eintippen:", confirmWord: "DEAKTIVIEREN", runNow: "Jetzt ausführen", cancelRun: "Abbrechen", notExecutableYet: "Entfernen ist noch nicht ausführbar; diese Vorschau dient nur der Prüfung.",
     running: "Läuft …", progressOf: "{done} von {total}", undoAll: "Alles rückgängig machen", undoOne: "Rückgängig", tokenExpired: "Die Bestätigung ist abgelaufen. Bitte erneut bestätigen.", nothingExecutable: "Keine ausführbaren Aktionen in diesem Plan.",
     plan_status_dry_run: "Vorschau", plan_status_running: "Läuft", plan_status_executed: "Ausgeführt", plan_status_verified: "Ausgeführt und geprüft", plan_status_partial: "Teilweise ausgeführt", plan_status_aborted: "Abgebrochen", plan_status_undone: "Rückgängig gemacht", plan_status_partially_undone: "Teilweise rückgängig",
@@ -313,7 +313,7 @@ const TEXT = {
     cleanupDryRun: "Nothing is changed until you explicitly confirm a plan. Disabling is reversible; removal only works after the quarantine and with a backup.",
     reason_already_disabled: "The entity is already disabled.",
     skippedUnacknowledged: "{count} entries to review without explicit confirmation will be skipped.",
-    confirmPlan: "Confirm …", confirmPlanTitle: "Confirm plan", acknowledgeReview: "I have checked this and want to run it anyway", confirmedSummary: "{count} entities will be disabled (quarantine). This is reversible at any time while the entity stays unchanged.",
+    confirmPlan: "Continue", confirmPlanTitle: "Confirm plan", acknowledgeReview: "I have checked this and want to run it anyway", confirmedSummary: "{count} entities will be disabled (quarantine). This is reversible at any time while the entity stays unchanged.",
     confirmTypeWord: "Type “{word}” to confirm:", confirmWord: "DISABLE", runNow: "Run now", cancelRun: "Cancel", notExecutableYet: "Removal cannot be executed yet; this preview is for checking only.",
     running: "Running …", progressOf: "{done} of {total}", undoAll: "Undo all", undoOne: "Undo", tokenExpired: "The confirmation expired. Please confirm again.", nothingExecutable: "No executable actions in this plan.",
     plan_status_dry_run: "Preview", plan_status_running: "Running", plan_status_executed: "Executed", plan_status_verified: "Executed and verified", plan_status_partial: "Partially executed", plan_status_aborted: "Aborted", plan_status_undone: "Undone", plan_status_partially_undone: "Partially undone",
@@ -3374,8 +3374,11 @@ class CleanupMixin {
       const reviewBox = review.length ? `<label class="factnote reportopt"><input type="checkbox" data-ack-all ${all ? "checked" : ""}><span><strong>${this.t("acknowledgeAll", { count: review.length })}</strong><small>${this.t("acknowledgeAllHint")}</small></span></label>` : "";
       control = `<div class="setrow planfoot">${reviewBox || `<small class="u-m0">${this.t("cleanupDryRun")}</small>`}<span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-plan-close>${this.t("confirmCancel")}</button><button class="btn primary" data-plan-confirm>${this.t("confirmPlan")}</button></span></div>`;
     }
-    else if (open && conf) control = `<div class="setrow planfoot"><button class="btn" data-plan-back><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("wzBack")}</button><div><strong>${this.t("confirmPlanTitle")}</strong><small>${this.confirmSummary(plan, conf.execute.length)}</small>${conf.needs_acknowledgement.length ? `<small>${this.t("skippedUnacknowledged", { count: conf.needs_acknowledgement.length })}</small>` : ""}</div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><label class="factnote u-m0">${this.t("confirmTypeWord", { word })}</label><input type="text" data-confirm-word value="${this.esc(this.confirmWord)}" style="max-width:180px" autocomplete="off"><button class="btn ${plan.actions.some(a => a.executable && (REMOVAL_KINDS.includes(a.kind) || PURGE_KINDS.includes(a.kind))) ? "danger" : "primary"}" data-plan-execute ${this.confirmWord.trim().toUpperCase() === word ? "" : "disabled"}>${this.t("runNow")} (${conf.execute.length})</button></div></div>`;
+    else if (open && conf) {
+      const risky = plan.actions.some(a => a.executable && (REMOVAL_KINDS.includes(a.kind) || PURGE_KINDS.includes(a.kind)));
+      control = `<div class="setrow planfoot"><div><strong>${this.t("confirmPlanTitle")}</strong><small>${this.confirmSummary(plan, conf.execute.length)}</small>${conf.needs_acknowledgement.length ? `<small>${this.t("skippedUnacknowledged", { count: conf.needs_acknowledgement.length })}</small>` : ""}</div>
+      <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn" data-plan-back>${this.t("wzBack")}</button><button class="btn ${risky ? "danger" : "primary"}" data-plan-execute data-risky="${risky}">${this.t("runNow")} (${conf.execute.length})</button></span></div>`;
+    }
     else if (plan.status === "aborted") {
       const small = plan.actions.some(a => a.result?.reason === "backup_small_failed");
       const full = small ? `<button class="btn" data-plan-repeat-full="${this.esc(plan.plan_id)}" ${this.cleanupBusy ? 'disabled aria-busy="true"' : ""}><ha-icon icon="mdi:backup-restore"></ha-icon>${this.t("repeatFull")}</button>` : "";
@@ -12488,12 +12491,12 @@ class HistoryTabMixin {
 
 // ConfirmMixin: one dialog for every deletion of something you made yourself (a reminder, a plan, a saved view, a template).
 // The buttons open `confirmAsk`; nothing is deleted before "Delete". Mixed into the panel in 99-register.js.
-Object.assign(TEXT.de, { confirmTitle: "Wirklich löschen?", confirmDelete: "Löschen", confirmCancel: "Abbrechen", confirmRem: "Die Erinnerung „{name}“ und ihre Historie werden gelöscht.", confirmRemDay: "Der Eintrag vom {date} wird aus der Historie von „{name}“ gelöscht. Die Fälligkeit bleibt.", confirmPlanDelete: "Der Plan vom {date} wird aus dem Journal gelöscht. Ein bereits ausgeführter Plan bleibt in Home Assistant wirksam; ein Rückgängig ist danach nicht mehr möglich.", confirmView: "Die gespeicherte Ansicht „{name}“ wird gelöscht.", confirmTpl: "Die Vorlage „{name}“ wird gelöscht." });
-Object.assign(TEXT.en, { confirmTitle: "Really delete?", confirmDelete: "Delete", confirmCancel: "Cancel", confirmRem: "The reminder “{name}” and its history will be deleted.", confirmRemDay: "The entry of {date} will be deleted from the history of “{name}”. The due day stays.", confirmPlanDelete: "The plan of {date} will be deleted from the journal. A plan that already ran stays in effect in Home Assistant; undoing it is no longer possible afterwards.", confirmView: "The saved view “{name}” will be deleted.", confirmTpl: "The template “{name}” will be deleted." });
+Object.assign(TEXT.de, { confirmRunTitle: "Plan jetzt ausführen?", confirmTitle: "Wirklich löschen?", confirmDelete: "Löschen", confirmCancel: "Abbrechen", confirmRem: "Die Erinnerung „{name}“ und ihre Historie werden gelöscht.", confirmRemDay: "Der Eintrag vom {date} wird aus der Historie von „{name}“ gelöscht. Die Fälligkeit bleibt.", confirmPlanDelete: "Der Plan vom {date} wird aus dem Journal gelöscht. Ein bereits ausgeführter Plan bleibt in Home Assistant wirksam; ein Rückgängig ist danach nicht mehr möglich.", confirmView: "Die gespeicherte Ansicht „{name}“ wird gelöscht.", confirmTpl: "Die Vorlage „{name}“ wird gelöscht." });
+Object.assign(TEXT.en, { confirmRunTitle: "Run the plan now?", confirmTitle: "Really delete?", confirmDelete: "Delete", confirmCancel: "Cancel", confirmRem: "The reminder “{name}” and its history will be deleted.", confirmRemDay: "The entry of {date} will be deleted from the history of “{name}”. The due day stays.", confirmPlanDelete: "The plan of {date} will be deleted from the journal. A plan that already ran stays in effect in Home Assistant; undoing it is no longer possible afterwards.", confirmView: "The saved view “{name}” will be deleted.", confirmTpl: "The template “{name}” will be deleted." });
 
 class ConfirmMixin {
   // `run` is called only after "Delete"; `text` is the sentence of the dialog.
-  confirmAsk(text, run) { this.confirmState = { text, run }; this._confirmFocus = true; this.render(); }
+  confirmAsk(text, run, opts = {}) { this.confirmState = { text, run, ...opts }; this._confirmFocus = true; this.render(); }
 
   confirmClose() { this.confirmState = null; this.render(); }
 
@@ -12501,9 +12504,9 @@ class ConfirmMixin {
     const c = this.confirmState;
     if (!c) return "";
     return `<div class="hkmodal" data-confirm-modal><div class="hkdialog" role="alertdialog" aria-modal="true" aria-labelledby="hk-confirm-head" aria-describedby="hk-confirm-text">
-      <div class="dhead"><h2 id="hk-confirm-head">${this.t("confirmTitle")}</h2></div>
+      <div class="dhead"><h2 id="hk-confirm-head">${this.esc(c.title || this.t("confirmTitle"))}</h2></div>
       <div class="dbody"><p id="hk-confirm-text" class="u-m0">${this.esc(c.text)}</p></div>
-      <div class="dfoot"><span></span><span class="dbtns"><button type="button" class="btn" data-confirm-no>${this.t("confirmCancel")}</button><button type="button" class="btn danger" data-confirm-yes>${this.t("confirmDelete")}</button></span></div></div></div>`;
+      <div class="dfoot"><span></span><span class="dbtns"><button type="button" class="btn" data-confirm-no>${this.t("confirmCancel")}</button><button type="button" class="btn ${c.danger === false ? "primary" : "danger"}" data-confirm-yes>${this.esc(c.yes || this.t("confirmDelete"))}</button></span></div></div></div>`;
   }
 
   bindConfirm(root) {
@@ -13899,13 +13902,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-repair-task]").forEach(el => el.onclick = () => { if (this.repairTask === el.dataset.repairTask) { this.repairTask = null; this.render(); return; } this.repairTask = el.dataset.repairTask; this.cleanupKind = this.repairTask; this.cleanupSel = new Set(); this.plan = null; this.render(); });
     root.querySelector("[data-ack-all]")?.addEventListener("change", e => { this.ack = new Set(e.target.checked ? this.plan.actions.filter(x => x.verdict === "review" && x.executable).map(x => x.object_id) : []); this.render(); });
     root.querySelector("[data-plan-confirm]")?.addEventListener("click", () => this.confirmPlan());
-    const word = root.querySelector("[data-confirm-word]");
-    if (word) word.oninput = () => {
-      this.confirmWord = word.value;
-      const run = this.shadowRoot.querySelector("[data-plan-execute]");
-      if (run) run.disabled = word.value.trim().toUpperCase() !== this.planWord(this.plan);
-    };
-    root.querySelector("[data-plan-execute]")?.addEventListener("click", () => this.executePlan());
+    root.querySelector("[data-plan-execute]")?.addEventListener("click", ev => this.confirmAsk(this.confirmSummary(this.plan, this.confirmation.execute.length), () => this.executePlan(), { title: this.t("confirmRunTitle"), yes: this.t("runNow"), danger: ev.currentTarget.dataset.risky === "true" }));
     root.querySelector("[data-plan-cancel]")?.addEventListener("click", () => this.cancelPlan());
     root.querySelector("[data-undo-all]")?.addEventListener("click", () => { this.undoAsk = "all"; this.render(); });
     root.querySelector("[data-undo-all-yes]")?.addEventListener("click", () => this.undoPlan());
