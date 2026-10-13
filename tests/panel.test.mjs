@@ -295,18 +295,18 @@ test("the status counts affected objects once, only of the base types, and not h
   const finding = (rule, id, extra = {}) => ({ rule_id: rule, object_id: id, classification: "orphaned", confidence: 0.9, evidence: [], impact: "medium", ...extra });
   const base = { ...DATA, objects };
   el.data = { ...base, findings: [finding("entity.state_missing", "sensor.s0"), finding("entity.duplicate", "sensor.s0"), finding("entity.unavailable", "sensor.s0")] };
-  assert.deepEqual([el.health().affected, el.health().base, el.health().percent], [1, 8, 94]); // one object, three entries of two points each
+  assert.deepEqual([el.health().affected, el.health().base, el.health().percent], [1, 8, 91]); // one object, three entries of three points each
   el.data = { ...base, findings: [finding("entity.state_missing", "sensor.s0"), finding("entity.state_missing", "sensor.s1", { ignored: true })] };
   assert.equal(el.health().affected, 1); // hidden findings do not count
   el.data = { ...base, findings: [finding("dashboard.missing_entity", "dash")] };
   assert.equal(el.health().affected, 0); // other object types are listed but not part of the ring
   el.data = { ...DATA, objects: [], findings: [finding("entity.state_missing", "sensor.s0")] };
-  assert.equal(el.health().percent, 98); // the score does not depend on the number of objects
+  assert.equal(el.health().percent, 97); // the score does not depend on the number of objects
   const many = Array.from({ length: 1000 }, (_, i) => entity(`sensor.m${i}`));
   el.data = { ...DATA, objects: many, findings: [finding("entity.state_missing", "sensor.m0")] };
-  assert.equal(el.health().percent, 98, "one entry takes its points, however many objects there are");
+  assert.equal(el.health().percent, 97, "one entry takes its points, however many objects there are");
   el.dbHealth = { available: true, findings: [{ level: "problem", kind: "gaps" }] };
-  assert.equal(el.health().percent, 98, "the database check only runs in Maintenance, so it never moves the number");
+  assert.equal(el.health().percent, 97, "the database check only runs in Maintenance, so it never moves the number");
   assert.ok(el.t("healthTip", { affected: 2, base: 8 }).includes("2") && el.t("healthHint").includes("findings list"));
 });
 
@@ -3769,7 +3769,7 @@ test("the status is a score: entries by impact, urgent state topics, followers n
   const items = [{ tone: "warn", key: "quarantine", area: "care", count: 2 }];
   el.todoItems = () => items;
   let h = el.health();
-  assert.equal(h.percent, 100 - 5 - 2 - 1, "the chain counts once at its top, the follower and the hidden finding not at all");
+  assert.equal(h.percent, 100 - 5 - 3 - 2, "the chain counts once at its top, the follower and the hidden finding not at all");
   assert.equal(h.tone, "warn", "a high entry is at least yellow");
   assert.equal(el.statusHeadline(h), "1 topic open");
   el.data = { ...el.data, causes: [], findings: Array.from({ length: 9 }, (_, i) => f(`x.${i}`, "high")) };

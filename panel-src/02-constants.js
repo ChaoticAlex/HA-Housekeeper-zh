@@ -12,7 +12,7 @@ const PURGE_KINDS = ["purge_statistics", "trim_history", "delete_backup"];
 // Reasons that mean "all is well, there is nothing to do" and not "Housekeeper may not".
 const NOTHING_REASONS = ["nothing_found", "nothing_to_do"];
 const REPAIR_KINDS = ["repair_counter", "repair_range"];
-const IMPACT_RANK = { none: 0, low: 1, medium: 2, high: 3 };
+const IMPACT_RANK = { none: 0, info: 1, low: 2, medium: 3, high: 4 };
 const BACKUP_FAILURES = ["backup_failed", "backup_small_failed", "backup_unavailable", "no_backup_agent"];
 const DEVICE_KINDS = ["disable_device", "remove_device", "forget_device"];
 // What a finished action says it did; kinds not listed just say "done".
@@ -79,7 +79,7 @@ const KNOWN_TYPES = ["entity", "device", "config_entry", "automation", "script"]
 // The ring of the status: points off for each urgent topic, and the most that can come off.
 // The status is a score from 100: each entry of the findings list takes points off by its impact (points each, at most),
 // each urgent topic of the state area takes 10 off (at most 30). Green from 90, yellow from 70.
-const HEALTH_POINTS = { high: [5, 30], medium: [2, 20], low: [1, 10] };
+const HEALTH_POINTS = { high: [5, 30], medium: [3, 20], low: [2, 10], info: [1, 5] };
 const HEALTH_STATE_POINTS = 10;
 const HEALTH_STATE_MAX = 30;
 const HEALTH_GREEN = 90;

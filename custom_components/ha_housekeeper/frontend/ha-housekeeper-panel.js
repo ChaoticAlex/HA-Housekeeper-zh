@@ -383,7 +383,7 @@ const PURGE_KINDS = ["purge_statistics", "trim_history", "delete_backup"];
 // Reasons that mean "all is well, there is nothing to do" and not "Housekeeper may not".
 const NOTHING_REASONS = ["nothing_found", "nothing_to_do"];
 const REPAIR_KINDS = ["repair_counter", "repair_range"];
-const IMPACT_RANK = { none: 0, low: 1, medium: 2, high: 3 };
+const IMPACT_RANK = { none: 0, info: 1, low: 2, medium: 3, high: 4 };
 const BACKUP_FAILURES = ["backup_failed", "backup_small_failed", "backup_unavailable", "no_backup_agent"];
 const DEVICE_KINDS = ["disable_device", "remove_device", "forget_device"];
 // What a finished action says it did; kinds not listed just say "done".
@@ -450,7 +450,7 @@ const KNOWN_TYPES = ["entity", "device", "config_entry", "automation", "script"]
 // The ring of the status: points off for each urgent topic, and the most that can come off.
 // The status is a score from 100: each entry of the findings list takes points off by its impact (points each, at most),
 // each urgent topic of the state area takes 10 off (at most 30). Green from 90, yellow from 70.
-const HEALTH_POINTS = { high: [5, 30], medium: [2, 20], low: [1, 10] };
+const HEALTH_POINTS = { high: [5, 30], medium: [3, 20], low: [2, 10], info: [1, 5] };
 const HEALTH_STATE_POINTS = 10;
 const HEALTH_STATE_MAX = 30;
 const HEALTH_GREEN = 90;
@@ -2397,7 +2397,7 @@ class FindingsMixin {
     const classes = [...new Set(all.map(f => f.classification))];
     const list = this.groupBroken(this.collapseFollowers(this.visibleFindings()));
     const types = [...new Set(all.map(f => this.findingType(f)))].sort();
-    const bar = this.listBar("findings", { sorts: this.findingSorts(), filters: [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }, { name: "impact", all: this.t("allImpacts"), options: ["high", "medium", "low", "none"].map(x => [x, this.t(`impact_${x}`)]) }] });
+    const bar = this.listBar("findings", { sorts: this.findingSorts(), filters: [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }, { name: "impact", all: this.t("allImpacts"), options: ["high", "medium", "low", "info", "none"].map(x => [x, this.t(`impact_${x}`)]) }] });
     const h = this.health();
     this.ensureSeries();
     const spark = (key, rising) => this.series ? this.sparkline(key, rising) : "";
@@ -6902,13 +6902,13 @@ class MarksMixin {
 
 // Texts for the impact of a finding (see impact.py); merged into TEXT.
 Object.assign(TEXT.de, {
-  sortImpact: "Auswirkung", allImpacts: "Alle Auswirkungen", impact_high: "Hohe Auswirkung", impact_medium: "Mittlere Auswirkung", impact_low: "Geringe Auswirkung", impact_none: "Keine Auswirkung",
+  sortImpact: "Auswirkung", allImpacts: "Alle Auswirkungen", impact_high: "Hohe Auswirkung", impact_medium: "Mittlere Auswirkung", impact_low: "Geringe Auswirkung", impact_info: "Info", impact_none: "Keine Auswirkung",
   impactFact_critical: "kritisch: {why}", impactFact_target_critical: "fehlendes Ziel {id} ist kritisch", impactFact_controls_critical: "steuert {n} kritische Objekte", impactFact_used_by_active: "von {n} aktiven Automationen oder Skripten genutzt", impactFact_on_dashboards: "auf {n} Dashboards", impactFact_many_dependents: "{n} Abhängige", impactFact_runs_active: "läuft aktiv", impactFact_runs_inactive: "ist deaktiviert",
   reason_critical_object: "Kritisches Objekt (Schloss, Alarm, Wasser- oder Rauchmelder, Label housekeeper_critical): bitte einzeln bestätigen.",
   impactWhy_label: "Label", impactWhy_device_label: "Label am Gerät", impactWhy_area_label: "Label am Bereich", impactWhy_kind: "Art des Objekts",
 });
 Object.assign(TEXT.en, {
-  sortImpact: "Impact", allImpacts: "All impacts", impact_high: "High impact", impact_medium: "Medium impact", impact_low: "Low impact", impact_none: "No impact",
+  sortImpact: "Impact", allImpacts: "All impacts", impact_high: "High impact", impact_medium: "Medium impact", impact_low: "Low impact", impact_info: "Info", impact_none: "No impact",
   impactFact_critical: "critical: {why}", impactFact_target_critical: "the missing target {id} is critical", impactFact_controls_critical: "controls {n} critical objects", impactFact_used_by_active: "used by {n} active automations or scripts", impactFact_on_dashboards: "on {n} dashboards", impactFact_many_dependents: "{n} dependents", impactFact_runs_active: "runs actively", impactFact_runs_inactive: "is disabled",
   reason_critical_object: "Critical object (lock, alarm, water or smoke sensor, label housekeeper_critical): confirm it on its own.",
   impactWhy_label: "label", impactWhy_device_label: "label on the device", impactWhy_area_label: "label on the area", impactWhy_kind: "kind of object",
@@ -9083,7 +9083,7 @@ Object.assign(TEXT.de, {
   undoAskAllHint: "Housekeeper stellt zurück, was dieser Plan geändert hat, soweit es unverändert ist.", undoAllHint: "Housekeeper kann zurückstellen, was dieser Plan geändert hat, solange es unverändert ist.", reportTitle: "Prüfbericht",
   statusUrgentOne: "1 Thema dringend", statusUrgent: "{n} Themen dringend", statusMoreOpen: "{n} weitere offen", statusOpenOne: "1 Thema offen", statusOpen: "{n} Themen offen",
   statusObjects: "{affected} von {base} Objekten mit Befund", statusTopicsCost: "Zustand: Abzug {n} Punkte", statusTopicsFree: "Zustand: kein Abzug", healthWhy: "Wie entsteht die Zahl?",
-  whyStart: "Ausgangswert", whyLevel: "{n} Einträge · {level} · je {each} Punkte", whyState: "{n} dringende Zustandsthemen · je {each} Punkte", whyTotal: "Punktestand", whyNote: "Jeder Eintrag der Befundliste zählt einmal, nach seiner Auswirkung; Folgebefunde einer Ursache zählen nicht extra. Hohe Auswirkung höchstens 30 Punkte, mittlere 20, niedrige 10; dringende Zustandsthemen (Backup, Datenträger) höchstens 30. Ab {green} grün, ab {yellow} gelb, darunter rot; ein Eintrag mit hoher Auswirkung oder ein dringendes Zustandsthema ist mindestens gelb. Ausgeblendete, bekannte und zurückgestellte Befunde zählen nicht.",
+  whyStart: "Ausgangswert", whyLevel: "{n} Einträge · {level} · je {each} Punkte", whyState: "{n} dringende Zustandsthemen · je {each} Punkte", whyTotal: "Punktestand", whyNote: "Jeder Eintrag der Befundliste zählt einmal, nach seiner Auswirkung; Folgebefunde einer Ursache zählen nicht extra. Hohe Auswirkung höchstens 30 Punkte, mittlere 20, niedrige 10, Info (ein Ausfall unter einer Stunde) 5; dringende Zustandsthemen (Backup, Datenträger) höchstens 30. Ab {green} grün, ab {yellow} gelb, darunter rot; ein Eintrag mit hoher Auswirkung oder ein dringendes Zustandsthema ist mindestens gelb. Ausgeblendete, bekannte und zurückgestellte Befunde zählen nicht.",
  
   unit_outages_1: "Ausfall", unit_outages_n: "Ausfälle", unit_followup_1: "Plan", unit_followup_n: "Pläne", unit_reminders_1: "Erinnerung", unit_reminders_n: "Erinnerungen", unit_criteria_1: "Ziel", unit_criteria_n: "Ziele", unit_critical_1: "Befund", unit_critical_n: "Befunde", unit_backup_1: "Problem", unit_backup_n: "Probleme", unit_quarantine_1: "Objekt", unit_quarantine_n: "Objekte",
   statusTasks: "{count} Aufgaben warten auf dich", statusTasksJump: "Zur Liste der Aufgaben springen", statusAllGood: "Alles in Ordnung",
@@ -9126,7 +9126,7 @@ Object.assign(TEXT.en, {
   undoAskAllHint: "Housekeeper puts back what this plan changed, as far as it is still unchanged.", undoAllHint: "Housekeeper can put back what this plan changed, as long as it is unchanged.", reportTitle: "Audit report",
   statusUrgentOne: "1 topic urgent", statusUrgent: "{n} topics urgent", statusMoreOpen: "{n} more open", statusOpenOne: "1 topic open", statusOpen: "{n} topics open",
   statusObjects: "{affected} of {base} objects with a finding", statusTopicsCost: "State: {n} points off", statusTopicsFree: "State: nothing off", healthWhy: "How is this number made?",
-  whyStart: "Starting value", whyLevel: "{n} entries · {level} · {each} points each", whyState: "{n} urgent state topics · {each} points each", whyTotal: "Score", whyNote: "Every entry of the findings list counts once, by its impact; follow-up findings of a cause do not count extra. High impact takes off at most 30 points, medium 20, low 10; urgent state topics (backup, disk) at most 30. Green from {green}, yellow from {yellow}, red below; an entry with high impact or an urgent state topic is at least yellow. Hidden, known and snoozed findings do not count.",
+  whyStart: "Starting value", whyLevel: "{n} entries · {level} · {each} points each", whyState: "{n} urgent state topics · {each} points each", whyTotal: "Score", whyNote: "Every entry of the findings list counts once, by its impact; follow-up findings of a cause do not count extra. High impact takes off at most 30 points, medium 20, low 10, info (an outage under an hour) 5; urgent state topics (backup, disk) at most 30. Green from {green}, yellow from {yellow}, red below; an entry with high impact or an urgent state topic is at least yellow. Hidden, known and snoozed findings do not count.",
  
   unit_outages_1: "outage", unit_outages_n: "outages", unit_followup_1: "plan", unit_followup_n: "plans", unit_reminders_1: "reminder", unit_reminders_n: "reminders", unit_criteria_1: "goal", unit_criteria_n: "goals", unit_critical_1: "finding", unit_critical_n: "findings", unit_backup_1: "problem", unit_backup_n: "problems", unit_quarantine_1: "object", unit_quarantine_n: "objects",
   statusTasks: "{count} tasks are waiting for you", statusTasksJump: "Jump to the list of tasks", statusAllGood: "All good",
