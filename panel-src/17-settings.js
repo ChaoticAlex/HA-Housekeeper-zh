@@ -134,9 +134,9 @@ class SettingsMixin {
       return `<div class="row"><span class="tile mute"><ha-icon icon="mdi:database-outline"></ha-icon></span><span class="row-text"><strong>${title}</strong><small>${text}${changed}</small></span><span class="pill mute">${this.formatBytes(item.bytes || 0)}</span></div>`;
     };
     const facts = `<div class="facts"><div class="fact"><span>${this.t("storeTotal")}</span><b>${this.formatBytes(total)}</b></div><div class="fact"><span>${this.t("storeCount")}</span><b>${this.formatNumber(all.length)}</b></div></div>`;
-    const body = groups.filter(([, names]) => names.length).map(([group, names], index) => {
+    const body = groups.filter(([, names]) => names.length).map(([group, names]) => {
       const size = names.reduce((sum, name) => sum + (files[name].bytes || 0), 0);
-      return `<details class="storegrp" ${index < 2 ? "open" : ""}><summary><strong>${this.t(`storeGroup_${group}`)}</strong> <span class="pill mute">${this.formatBytes(size)}</span></summary>${names.map(row).join("")}</details>`;
+      return `<details class="storegrp"><summary><strong>${this.t(`storeGroup_${group}`)}</strong> <span class="pill mute">${this.formatBytes(size)}</span></summary>${names.map(row).join("")}</details>`;
     }).join("");
     return facts + body;
   }
