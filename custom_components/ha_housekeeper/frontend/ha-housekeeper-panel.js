@@ -1329,6 +1329,7 @@ class StylesMixin {
       .sharebar{display:block;height:6px;border-radius:3px;background:var(--hk-soft);overflow:hidden;margin-top:4px}.sharebar i{display:block;height:100%;background:var(--hk-blue-solid)}
       .recchoice{display:inline-flex;align-items:center;gap:6px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}.recwarn{flex:1 1 100%;color:var(--hk-muted)}
       .selcount{display:inline-flex;align-items:center;min-height:30px;box-sizing:border-box;padding:4px 10px;border:1px solid color-mix(in srgb,var(--hk-blue-solid) 28%,var(--hk-border));border-radius:999px;background:color-mix(in srgb,var(--hk-blue-solid) 10%,var(--hk-surface));color:var(--hk-blue-text);font-size:calc(12px*var(--hk-fs,1));font-weight:700;white-space:nowrap}
+      .needsplit>div:only-child{grid-column:1/-1}
       .exbar{border-top:1px solid var(--hk-border)}.exblock{margin:0;max-height:none;border-radius:0}.exsteps{padding:10px 16px 12px;border-bottom:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(12.5px*var(--hk-fs,1))}.exsteps ol{margin:4px 0 0;padding-left:20px}.exsteps li{margin:2px 0}.exdone{opacity:.6}.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--hk-border)}.toolgap{flex:1}.btn.quiet{box-shadow:none;border-color:transparent;background:none;color:var(--hk-blue-text);padding:8px 10px}.btn.quiet:hover{background:var(--hk-soft)}.btn.quiet[disabled]{color:var(--hk-muted);opacity:.7;cursor:default}
       .btn.primary{border-color:var(--hk-blue-solid);color:var(--hk-on,#fff);background:var(--hk-blue-solid)}.btn.primary:hover{background:#0a8ccf}.btn[disabled]{opacity:.6;cursor:not-allowed}.btn[aria-busy="true"]{cursor:wait}
       .summary{display:grid;grid-template-columns:repeat(4,1fr) 1.3fr;gap:12px;margin-bottom:14px}
@@ -11586,9 +11587,9 @@ Object.assign(TEXT.de, {
   btColName: "Gerät", btColArea: "Bereich", btColType: "Typ", btColLevel: "Stand", btColSlope: "Verbrauch", btColLeft: "Leer in", btColAct: "Aktion", btTypeChange: "Typ ändern", btLevelOk: "in Ordnung",
   btSlopeDay: "{n} %/Tag", btVoltDay: "{n} V/Tag", btSlopeStable: "stabil", btLeftLow: "unter Grenze", btLeftDays: "{n} Tage", btLeftFar: "> {n} Tage", btLeftStable: "nicht absehbar",
   btFilterSoon: "Bald leer", btFilterUntyped: "Ohne Typ", btAllTypes: "Alle Typen",
-  needTitle: "Benötigte Batterien in den nächsten 30 Tagen", needSub: "{n} Geräte fallen laut Prognose in 30 Tagen unter die Grenze von {limit} %.", needSub1: "1 Gerät fällt laut Prognose in 30 Tagen unter die Grenze von {limit} %.",
-  needNone: "Keine Batterie wird in den nächsten 30 Tagen leer.", needUntyped: "ohne Typ", needUntypedHint: "Typ in der Tabelle setzen", needSoon: "In den nächsten 14 Tagen", needLater: "In 15 bis 30 Tagen", needMore: "… {n} weitere in der Tabelle",
-  needNote: "Gezählt werden Geräte, die laut Prognose innerhalb von 30 Tagen unter die Grenze fallen. Der Typ kommt von dir.",
+  needTitle: "Benötigte Batterien jetzt und in den nächsten 30 Tagen", needSub: "{n} Geräte sind bereits unter ihrer Grenze oder erreichen sie laut Prognose in 30 Tagen.", needSub1: "1 Gerät ist bereits unter seiner Grenze oder erreicht sie laut Prognose in 30 Tagen.",
+  needNone: "Keine Batterie ist unter ihrer Grenze oder erreicht sie laut Prognose in den nächsten 30 Tagen.", needUntyped: "ohne Typ", needUntypedHint: "Typ in der Tabelle setzen", needNow: "Bereits unter Grenze", needSoon: "In den nächsten 14 Tagen", needLater: "In 15 bis 30 Tagen", needMore: "… {n} weitere in der Tabelle",
+  needNote: "Gezählt werden bereits niedrige Batterien und Geräte, die laut Prognose innerhalb von 30 Tagen ihre Grenze erreichen. Der Typ kommt von dir.",
   btTableNote: "Prognose nur bis 90 Tage, aus den letzten fünf Wochen: eine Schätzung, keine Zusage. Ohne Prognose: {unknown} (zu wenige Tage oder stabil). Nach einem Wechsel zählt nur der Verlauf danach.",
   btFarMore: "{n} halten laut Prognose länger als 90 Tage.",
   fcTitle: "Prognose", fcHint: "Wann eine Batterie voraussichtlich die Grenze erreicht, bis 90 Tage, aus dem Verlauf der letzten fünf Wochen. Eine Schätzung, keine Zusage.",
@@ -11598,9 +11599,9 @@ Object.assign(TEXT.en, {
   btColName: "Device", btColArea: "Area", btColType: "Type", btColLevel: "Level", btColSlope: "Drain", btColLeft: "Empty in", btColAct: "Action", btTypeChange: "Change type", btLevelOk: "ok",
   btSlopeDay: "{n} %/day", btVoltDay: "{n} V/day", btSlopeStable: "stable", btLeftLow: "below limit", btLeftDays: "{n} days", btLeftFar: "> {n} days", btLeftStable: "no forecast",
   btFilterSoon: "Empty soon", btFilterUntyped: "No type", btAllTypes: "All types",
-  needTitle: "Batteries needed in the next 30 days", needSub: "{n} devices will fall below the limit of {limit} % within 30 days, by the forecast.", needSub1: "1 device will fall below the limit of {limit} % within 30 days, by the forecast.",
-  needNone: "No battery runs out in the next 30 days.", needUntyped: "no type", needUntypedHint: "set the type in the table", needSoon: "In the next 14 days", needLater: "In 15 to 30 days", needMore: "… {n} more in the table",
-  needNote: "Counted are devices that fall below the limit within 30 days by the forecast. The type comes from you.",
+  needTitle: "Batteries needed now and in the next 30 days", needSub: "{n} devices are already below their limit or are forecast to reach it within 30 days.", needSub1: "1 device is already below its limit or is forecast to reach it within 30 days.",
+  needNone: "No battery is below its limit or forecast to reach it within 30 days.", needUntyped: "no type", needUntypedHint: "set the type in the table", needNow: "Already below limit", needSoon: "In the next 14 days", needLater: "In 15 to 30 days", needMore: "… {n} more in the table",
+  needNote: "Counted are batteries already low and devices forecast to reach their limit within 30 days. The type comes from you.",
   btTableNote: "Forecast only up to 90 days, from the last five weeks: an estimate, not a promise. No forecast for {unknown} (too few days or stable). After a change only the time since counts.",
   btFarMore: "{n} last longer than 90 days by the forecast.",
   fcTitle: "Forecast", fcHint: "When a battery will probably reach the limit, up to 90 days, from the last five weeks. An estimate, not a promise.",
@@ -11721,16 +11722,26 @@ class BatteryTableMixin {
     return `<div class="panel"><div class="panelhead"><div><h2>${this.t("fcTitle")}</h2><p>${this.t("fcHint")}</p></div></div>${body}</div>`;
   }
 
+  // Include the current low state even when there is not enough recorder history for a forecast.
+  batteryNeedRows() {
+    const b = this.batteryTrend;
+    const byId = new Map([...(b?.rows || []), ...(b?.voltage?.rows || [])].map(r => [r.entity_id, r]));
+    for (const row of this.batteryRows()) {
+      if (!row.low) continue;
+      const id = row.item.object_id, forecast = byId.get(id) || {};
+      byId.set(id, { ...forecast, entity_id: id, name: row.item.name, level: row.level, state: "low", days_left: 0 });
+    }
+    return [...byId.values()].filter(r => r.state === "low" || (Number.isFinite(r.days_left) && r.days_left <= BATTERY_NEED_DAYS))
+      .sort((x, y) => (x.state === "low" ? -1 : x.days_left) - (y.state === "low" ? -1 : y.days_left) || String(x.name || "").localeCompare(String(y.name || "")));
+  }
+
   // The need of the next 30 days: how many of which cell to buy, tiles of one size, and who runs out first.
   batteryNeed() {
     const b = this.batteryTrend;
     if (this.batteryTrendError) return `<div class="panel"><div class="error">${this.esc(this.batteryTrendError)}</div></div>`;
     if (!b) return `<div class="panel"><div class="panelhead"><div><h2>${this.t("needTitle")}</h2></div></div>${this.skeleton("btLoading")}</div>`;
-    if (!b.available) return `<div class="panel"><div class="emptymsg">${this.t("btNoRecorder")}</div></div>`;
     if (b.busy) return `<div class="panel"><p class="factnote">${this.t("relBusy")}</p></div>`;
-    const soon = b.rows.filter(r => r.state === "low" || (r.days_left !== null && r.days_left <= BATTERY_NEED_DAYS))
-      .sort((x, y) => (x.state === "low" ? -1 : x.days_left) - (y.state === "low" ? -1 : y.days_left) || String(x.name || "").localeCompare(String(y.name || "")));
-    const limit = b.limit ?? this.data.meta.low_battery_percent ?? 20;
+    const soon = this.batteryNeedRows();
     const counts = new Map();
     let untyped = 0;
     for (const r of soon) {
@@ -11746,7 +11757,8 @@ class BatteryTableMixin {
     const name = r => { const item = this.findObject(`entity:${r.entity_id}`); return item ? this.batteryName(item).title : (r.name || r.entity_id); };
     const line = r => {
       const item = this.findObject(`entity:${r.entity_id}`);
-      const bits = [item ? this.areaName(item) : "", b.types?.[r.entity_id] || this.t("btTypeNone"), r.level !== null && r.level !== undefined ? `${Math.round(r.level)} %` : "", r.state === "low" ? this.t("btLeftLow") : this.t("btLeftDays", { n: r.days_left })];
+      const level = r.level === null || r.level === undefined ? "" : r.type && r.limit !== undefined ? this.voltNum(r.level) : `${Math.round(r.level)} %`;
+      const bits = [item ? this.areaName(item) : "", b.types?.[r.entity_id] || this.t("btTypeNone"), level, r.state === "low" ? this.t("btLeftLow") : this.t("btLeftDays", { n: r.days_left })];
       return `<li><button class="linkbtn" data-object="entity:${this.esc(r.entity_id)}">${this.esc(name(r))}</button> <span>${this.esc(bits.filter(Boolean).join(" · "))}</span></li>`;
     };
     const list = (title, rows) => {
@@ -11754,10 +11766,10 @@ class BatteryTableMixin {
       const shown = rows.slice(0, 5);
       return `<div><h3>${this.t(title)} · ${this.formatNumber(rows.length)}</h3><ul>${shown.map(line).join("")}${rows.length > shown.length ? `<li class="muted">${this.t("needMore", { n: rows.length - shown.length })}</li>` : ""}</ul></div>`;
     };
-    const near = soon.filter(r => r.state === "low" || r.days_left <= BATTERY_SOON_DAYS), later = soon.filter(r => !near.includes(r));
-    const sub = this.t(soon.length === 1 ? "needSub1" : "needSub", { n: this.formatNumber(soon.length), limit: this.formatNumber(limit) });
-    const body = soon.length ? `<div class="needgrid">${tiles.join("")}</div><div class="needsplit">${list("needSoon", near)}${list("needLater", later)}</div>` : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t("needNone")}</div>`;
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("needTitle")}</h2>${soon.length ? `<p>${this.esc(sub)}</p>` : ""}</div></div>${this.batterySuggestions()}${body}<p class="factnote">${this.t("needNote")}</p></div>`;
+    const now = soon.filter(r => r.state === "low"), near = soon.filter(r => r.state !== "low" && r.days_left <= BATTERY_SOON_DAYS), later = soon.filter(r => r.state !== "low" && r.days_left > BATTERY_SOON_DAYS);
+    const sub = this.t(soon.length === 1 ? "needSub1" : "needSub", { n: this.formatNumber(soon.length) });
+    const body = soon.length ? `<div class="needgrid">${tiles.join("")}</div>${now.length ? `<div class="needsplit">${list("needNow", now)}</div>` : ""}${near.length || later.length ? `<div class="needsplit">${list("needSoon", near)}${list("needLater", later)}</div>` : ""}` : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t("needNone")}</div>`;
+    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("needTitle")}</h2>${soon.length ? `<p>${this.esc(sub)}</p>` : ""}</div></div>${this.batterySuggestions()}${body}<p class="factnote">${this.t(b.available ? "needNote" : "btNoRecorder")}</p></div>`;
   }
 }
 

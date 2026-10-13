@@ -3433,7 +3433,7 @@ test("the batteries view shows the forecast with groups and the reminders, which
   el._btRequested = true; el._sysLightFor = el.data;
   el._hass = { language: "en", callWS: async msg => { calls.push(msg); return { reminders: [] }; } };
   const forecast = el.batteryNeed();
-  assert.ok(forecast.includes("Batteries needed in the next 30 days") && forecast.includes("20 days"));
+  assert.ok(forecast.includes("Batteries needed now and in the next 30 days") && forecast.includes("20 days"));
   const reminders = el.remindersCard();
   assert.ok(reminders.includes("Water filter") && reminders.includes("10 days overdue"));
   assert.ok(el.todoItems().some(i => i.key === "reminders"));
@@ -4110,6 +4110,29 @@ test("batteries: the shopping list counts the types, a detected replacement is o
   assert.ok(el.critHistory({ days: {} }).includes("No runs with a criterion"));
   const line = el.goalLine({ evidence: [{ missed: 5, reached: 2, window_days: 7 }] });
   assert.equal(line, "Goal missed 5 of 7 times in the last 7 days · criterion set by you");
+});
+
+test("battery shopping list includes current low levels without a forecast and low voltage batteries", () => {
+  const { el } = panel("en");
+  const battery = (id, state, unit = "%") => ({ object_type: "entity", object_id: id, name: id, status: "active", device_class: "battery", unit, state });
+  el.data = { ...DATA, objects: [battery("sensor.empty", "0"), battery("sensor.future", "40"), battery("sensor.volt", "2.37", "V")] };
+  el.batteryTrend = {
+    available: true, busy: false, types: { "sensor.empty": "2× AAA", "sensor.volt": "CR2450" },
+    rows: [
+      { entity_id: "sensor.empty", name: "Empty", state: "stable", days_left: null, level: 25 },
+      { entity_id: "sensor.future", name: "Future", state: "falling", days_left: 10, level: 40 },
+    ],
+    voltage: { rows: [{ entity_id: "sensor.volt", name: "Volt", type: "coin3", limit: 2.75, level: 2.37, state: "low", days_left: 0 }] },
+  };
+  const rows = el.batteryNeedRows();
+  assert.equal(rows.length, 3);
+  assert.equal(rows.filter(r => r.state === "low").map(r => r.entity_id).join(), "sensor.empty,sensor.volt");
+  const html = el.batteryNeed();
+  assert.ok(html.includes("Already below limit · 2") && html.includes("In the next 14 days · 1"));
+  assert.ok(html.includes("2×") && html.includes("AAA") && html.includes("CR2450"));
+  assert.ok(html.includes("0 %") && html.includes("2.37 V"));
+  el.batteryTrend = { available: false, busy: false, rows: [], types: {} };
+  assert.ok(el.batteryNeed().includes("sensor.empty") && el.batteryNeed().includes("no forecast without a recorder"));
 });
 
 test("housekeeper backups: the list marks protected ones, the rule picks the rest, the plan has no undo; an automation finding offers deleting", async () => {
