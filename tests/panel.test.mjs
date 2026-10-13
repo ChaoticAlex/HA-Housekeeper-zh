@@ -3415,16 +3415,16 @@ test("deleting asks in a dialog first; the deletion runs only from its confirmat
   assert.ok(el.t("confirmPlanDelete", { date: "x" }).includes("no longer possible") && el.t("confirmPlan") === "Confirm" && el.t("confirmRemDay", { date: "d", name: "n" }).includes("due day stays"));
 });
 
-test("the logbook dialog names the object it was opened for and offers the picker only when none is set or on request", () => {
+test("the logbook editor names the object it was opened for and offers the picker only when none is set or on request", () => {
   const { el } = panel("en");
   el.data = { ...DATA, notes: [] };
   el.noteOpen(null, "entity:sensor.a");
-  let html = el.noteDialog();
-  assert.ok(html.includes("data-note-retarget") && !html.includes('data-picker="note"') && html.includes("New entry") && !html.includes("audit report"));
+  let html = el.noteEditor();
+  assert.ok(html.includes("data-note-retarget") && !html.includes('data-picker="note"') && el.logbookView().includes("New entry") && !html.includes("audit report"));
   el.noteDraft.changeTarget = true;
-  assert.ok(el.noteDialog().includes('data-picker="note"'), "after 'change' the picker shows");
+  assert.ok(el.noteEditor().includes('data-picker="note"'), "after 'change' the picker shows");
   el.noteOpen(null, "");
-  html = el.noteDialog();
+  html = el.noteEditor();
   assert.ok(html.includes('data-picker="note"') && !html.includes("data-note-retarget"), "from the global logbook the object is chosen here");
 });
 
@@ -3833,7 +3833,7 @@ test("tables and lists grow with their content: no height limit and no scrolling
   assert.ok(!/\.tablewrap\{[^{}]*overflow:auto/.test(css), "a table scrolls sideways only");
 });
 
-test("the logbook has its own tab, entries are written in a dialog, an action can suggest one and the object shows its latest", async () => {
+test("the logbook has its own tab, entries use page editors, an action can suggest one and the object shows its latest", async () => {
   const { el, shadow } = panel("en");
   const sent = [];
   const entry = { id: "n1", title: "Zigbee stick replaced", at: "2026-10-08T18:05:00+00:00", target: "entity:light.a", note: "new <b>stick</b>", source: "me", ref: "" };
@@ -3847,17 +3847,17 @@ test("the logbook has its own tab, entries are written in a dialog, an action ca
   let html = shadow.innerHTML;
   assert.ok(html.includes("Zigbee stick replaced") && html.includes("Concerns: Lamp A") && html.includes("new &lt;b&gt;stick&lt;/b&gt;") && !html.includes("<b>stick</b>"), "an entry shows, escaped");
   assert.ok(html.includes("data-note-add") && html.includes('data-note-edit="n1"'));
-  // the dialog: chips fill the title, no title is refused, the buttons close it
+  // The editor replaces the global logbook list; chips, validation and actions stay available.
   el.noteOpen(); el.render();
-  assert.ok(shadow.innerHTML.includes("data-note-modal") && shadow.innerHTML.includes("data-note-chip"));
-  assert.ok(shadow.innerHTML.indexOf("data-note-cancel") < shadow.innerHTML.indexOf('type="submit"'), "Cancel left of Save, both in the right-aligned group");
+  assert.ok(shadow.innerHTML.includes("monitor-editor") && shadow.innerHTML.includes("data-note-form") && shadow.innerHTML.includes("data-note-chip") && !shadow.innerHTML.includes("data-note-modal"));
+  assert.ok(shadow.innerHTML.indexOf("data-note-cancel") < shadow.innerHTML.indexOf('type="submit"'), "Cancel sits left of Save");
   await el.noteSave();
   assert.ok(el.noteDraft.error.includes("title") && sent.length === 0);
   el.noteDraft.title = "Router update"; el.noteDraft.at = "2026-10-10T20:15";
   await el.noteSave();
   assert.equal(sent[0].type, "ha_housekeeper/note_set"); assert.equal(sent[0].action, "save"); assert.equal(sent[0].title, "Router update"); assert.ok(sent[0].at.endsWith("Z"));
   assert.equal(el.noteDraft, null); assert.equal(el.data.notes.length, 2);
-  // deleting is offered in the dialog and asks in the confirmation dialog first
+  // Deleting is offered in the editor and asks in the confirmation dialog first.
   el.noteOpen(entry); el.render();
   assert.ok(shadow.innerHTML.includes('data-note-del="n1"') && !shadow.innerHTML.includes("data-note-del-yes"));
   await el.noteDeleteConfirmed("n1");
@@ -3867,6 +3867,13 @@ test("the logbook has its own tab, entries are written in a dialog, an action ca
   el.data = { ...el.data, notes: [entry] };
   const card = el.noteCard({ object_type: "entity", object_id: "light.a" });
   assert.ok(card.includes("Zigbee stick replaced") && card.includes("data-note-edit"));
+  el.selected = el.findObject("entity:light.a");
+  el.noteOpen(null, "entity:light.a");
+  const editingCard = el.noteCard(el.selected);
+  assert.ok(editingCard.startsWith('<section class="panel">') && editingCard.includes('class="note-editor inline"') && editingCard.includes("data-note-form") && !editingCard.includes("data-note-add-for") && !editingCard.includes("data-note-modal"), "the object editor stays inside its logbook card");
+  assert.ok(!editingCard.includes('data-note-edit="n1"'), "the editor replaces the rows within the card");
+  el.noteDraft = null;
+  el.selected = null;
   assert.equal(el.noteCard({ object_type: "dashboard", object_id: "d" }), "");
   // a finished replace offers an entry; accepting saves it as suggested by Housekeeper with the plan as reference
   const plan = { plan_id: "p1", status: "verified", actions: [{ kind: "replace_references", object_id: "sensor.old", target: "sensor.new", result: { state: "done" } }] };

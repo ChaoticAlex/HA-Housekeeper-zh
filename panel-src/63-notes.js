@@ -46,12 +46,13 @@ class NotesMixin {
     return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
   }
 
-  // Opens the dialog: an entry to edit, or a new one that may already concern an object.
+  // Opens an entry editor in the current view, optionally tied to an object.
   noteOpen(note = null, target = "") {
     const obj = target ? this.findObject(target) : null;
+    const detailKey = this.selected ? this.objectKey(this.selected) : "";
     this.noteDraft = note
-      ? { id: note.id, title: note.title, at: this.noteLocal(note.at), target: note.target, targetText: this.findObject(note.target)?.name || note.target || "", note: note.note, source: note.source, ref: note.ref, error: "" }
-      : { id: null, title: "", at: this.noteLocal(new Date().toISOString()), target, targetText: obj?.name || "", note: "", error: "" };
+      ? { id: note.id, title: note.title, at: this.noteLocal(note.at), target: note.target, targetText: this.findObject(note.target)?.name || note.target || "", note: note.note, source: note.source, ref: note.ref, error: "", detailKey }
+      : { id: null, title: "", at: this.noteLocal(new Date().toISOString()), target, targetText: obj?.name || "", note: "", error: "", detailKey };
     this._noteFocus = true;
   }
 
@@ -59,7 +60,7 @@ class NotesMixin {
     return target ? this.findObject(target)?.name || target.split(":").slice(1).join(":") : "";
   }
 
-  // One entry of the logbook; the whole row opens it in the dialog.
+  // One entry of the logbook; the whole row opens its editor.
   noteRow(n) {
     const name = this.noteTargetName(n.target);
     const sub = [this.esc(this.formatDate(n.at)), name ? this.esc(this.t("noteConcerns", { name })) : "", n.note ? this.esc(n.note) : ""].filter(Boolean).join(" · ");
@@ -67,36 +68,38 @@ class NotesMixin {
     return `<button class="row rel" data-note-edit="${this.esc(n.id)}" title="${this.esc(this.t("noteEdit"))}"><span class="tile"><ha-icon icon="mdi:notebook-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(n.title)}</strong><small>${sub}</small></span>${pill}</button>`;
   }
 
-  // The dialog over the page you are on; the buttons sit on the right, deleting asks in place.
-  noteDialog() {
+  // Shared form for the full logbook page and the logbook card in object details.
+  noteEditor(inline = false) {
     const d = this.noteDraft;
     if (!d) return "";
     const chips = d.id ? "" : `<div class="notechips" role="group" aria-label="${this.esc(this.t("noteChips"))}">${["Stick", "Firmware", "Paired", "Moved"].map(k => `<button type="button" class="chip" data-note-chip="${this.esc(this.t(`noteChip${k}`))}">${this.t(`noteChip${k}`)}</button>`).join("")}</div>`;
-    const foot = `<div class="dfoot">${d.id ? `<button type="button" class="btn quiet danger-t" data-note-del="${this.esc(d.id)}">${this.t("noteDelete")}</button>` : ""}<span class="dbtns"><button type="button" class="btn" data-note-cancel>${this.t("noteCancel")}</button><button type="submit" class="btn primary">${this.t("noteSave")}</button></span></div>`;
-    return `<div class="hkmodal" data-note-modal><form class="hkdialog" role="dialog" aria-modal="true" aria-labelledby="hk-note-head" data-note-form>
-      <div class="dhead"><h2 id="hk-note-head">${this.t(d.id ? "noteDialogEdit" : "noteDialogNew")}</h2></div>
-      <div class="dbody polform">
+    const foot = `<div class="toolbar savebar note-actions">${d.id ? `<button type="button" class="btn quiet danger-t" data-note-del="${this.esc(d.id)}">${this.t("noteDelete")}</button>` : ""}<span class="toolgap"></span><button type="button" class="btn" data-note-cancel>${this.t("noteCancel")}</button><button type="submit" class="btn primary">${this.t("noteSave")}</button></div>`;
+    return `<form class="note-editor${inline ? " inline" : ""}" data-note-form>
+      <div class="note-fields">
+        ${inline ? `<h3>${this.t(d.id ? "noteDialogEdit" : "noteDialogNew")}</h3>` : ""}
         <div><label for="hk-note-title">${this.t("noteFormTitle")}</label><input id="hk-note-title" type="text" maxlength="80" data-note-title value="${this.esc(d.title)}" placeholder="${this.esc(this.t("noteTitlePh"))}" autocomplete="off">${chips}</div>
         <div class="notetwo"><div><label for="hk-note-at">${this.t("noteWhen")}</label><input id="hk-note-at" type="datetime-local" data-note-at value="${this.esc(d.at)}"></div>
         ${d.target && !d.changeTarget ? `<div class="notemeta"><span>${this.t("noteConcernsNow")} <strong>${this.esc(d.targetText || this.noteTargetName(d.target))}</strong></span><button type="button" class="linkbtn" data-note-retarget>${this.t("noteChange")}</button></div>` : `<div><label>${this.t("noteTarget")}</label>${this.pickerBox("note", this.t("noteTargetPh"))}</div>`}</div>
         <div><label for="hk-note-text">${this.t("noteText")}</label><textarea id="hk-note-text" rows="3" maxlength="500" data-note-text placeholder="${this.esc(this.t("noteTextPh"))}">${this.esc(d.note)}</textarea></div>
         <small class="notehint2">${this.t("noteHint")}</small>
         ${d.error ? `<div class="error" role="alert">${this.esc(d.error)}</div>` : ""}
-      </div>${foot}</form></div>`;
+      </div>${foot}</form>`;
   }
 
   // The logbook of one object, in its tab "History": every entry, newest first, and the button to add one.
   noteCard(item) {
     if (!NOTE_TYPES.includes(item.object_type)) return "";
     const key = this.objectKey(item), mine = this.notesList().filter(n => n.target === key);
+    const editing = this.noteDraft?.detailKey === key;
     const add = `<button class="btn primary" data-note-add-for="${this.esc(key)}"><ha-icon icon="mdi:plus"></ha-icon>${this.t("noteAddHere")}</button>`;
     const pg = this.paginate(`notes-${key}`, mine.map(n => this.noteRow(n)));
     const body = mine.length ? pg.rows.join("") + pg.footer : `<div class="emptymsg"><ha-icon icon="mdi:notebook-outline"></ha-icon>${this.t("noteDetailEmpty")}</div>`;
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("noteDetailTitle")}${mine.length ? ` <span class="pill mute">${this.formatNumber(mine.length)}</span>` : ""}</h2><p>${this.t("noteDetailHint")}</p></div>${add}</div>${body}</section>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("noteDetailTitle")}${mine.length ? ` <span class="pill mute">${this.formatNumber(mine.length)}</span>` : ""}</h2><p>${this.t("noteDetailHint")}</p></div>${editing ? "" : add}</div>${editing ? this.noteEditor(true) : body}</section>`;
   }
 
   // The logbook under Changes: all entries in one place, filtered by who wrote them and by object.
   logbookView() {
+    if (this.noteDraft && !this.noteDraft.detailKey) return `<div class="monitor-editor"><section class="panel u-mb14"><div class="panelhead"><h2>${this.t(this.noteDraft.id ? "noteDialogEdit" : "noteDialogNew")}</h2></div>${this.noteEditor()}</section></div>`;
     const all = this.notesList(), src = this.logbookSource || "", obj = this.logbookObject || "";
     const shown = all.filter(n => (!src || (n.source || "me") === src) && (!obj || n.target === obj));
     const chip = (id, label) => `<button class="chip ${src === id ? "on" : ""}" data-logbook-src="${id}" aria-pressed="${src === id}">${this.esc(label)}</button>`;
@@ -175,7 +178,7 @@ class NotesMixin {
     });
     root.querySelectorAll("[data-logbook-src]").forEach(el => el.onclick = () => { this.logbookSource = el.dataset.logbookSrc; this.pages = {}; this.render(); });
     root.querySelector("[data-logbook-clear]")?.addEventListener("click", () => { this.logbookObject = ""; this.pages = {}; this.render(); });
-    root.querySelector("[data-note-retarget]")?.addEventListener("click", () => { this.noteDraft.changeTarget = true; this.render(); this.shadowRoot?.querySelector?.("[data-note-modal] .picker input, [data-note-modal] input[data-picker]")?.focus?.(); });
+    root.querySelector("[data-note-retarget]")?.addEventListener("click", () => { this.noteDraft.changeTarget = true; this.render(); this.shadowRoot?.querySelector?.("[data-note-form] .picker input, [data-note-form] input[data-picker]")?.focus?.(); });
     root.querySelectorAll("[data-note-chip]").forEach(el => el.onclick = () => { this.noteDraft.title = el.dataset.noteChip; this.noteDraft.error = ""; this._noteFocus = true; this.render(); });
     root.querySelector("[data-note-del]")?.addEventListener("click", ev => { const id = ev.currentTarget.dataset.noteDel; this.confirmAsk(this.t("confirmNote", { title: this.noteDraft?.title || "" }), () => this.noteDeleteConfirmed(id)); });
     root.querySelector("[data-note-cancel]")?.addEventListener("click", () => { this.noteDraft = null; this.render(); });
@@ -183,12 +186,7 @@ class NotesMixin {
     root.querySelector("[data-note-at]")?.addEventListener("input", ev => { this.noteDraft.at = ev.target.value; });
     root.querySelector("[data-note-text]")?.addEventListener("input", ev => { this.noteDraft.note = ev.target.value; });
     root.querySelector("[data-note-form]")?.addEventListener("submit", ev => { ev.preventDefault(); this.noteSave(); });
-    const modal = root.querySelector("[data-note-modal]");
-    if (modal) {
-      modal.addEventListener("mousedown", ev => { if (ev.target === modal) { this.noteDraft = null; this.render(); } });
-      modal.addEventListener("keydown", ev => { if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); this.noteDraft = null; this.render(); } });
-      if (this._noteFocus) { this._noteFocus = false; modal.querySelector("[data-note-title]")?.focus(); }
-    }
+    if (this._noteFocus && root.querySelector("[data-note-form]")) { this._noteFocus = false; root.querySelector("[data-note-title]")?.focus(); }
     root.querySelectorAll("[data-log-suggest]").forEach(el => el.onclick = () => this.noteSuggestAccept(this.plan));
     root.querySelectorAll("[data-log-suggest-no]").forEach(el => el.onclick = () => { (this.logDismissed ||= new Set()).add(el.dataset.logSuggestNo); this.render(); });
   }
