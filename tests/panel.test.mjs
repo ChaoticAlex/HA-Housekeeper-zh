@@ -2490,12 +2490,16 @@ test("the load view, the policies and the exposure view have a search box once t
   el.policies = { available: true, enabled: 1, violations: 12, prefixes: {}, rules: [{ id: "entity_area", enabled: true, count: 12, ignored: 0, items }] };
   el._policiesRequested = true;
   html = el.policiesView();
-  assert.ok(html.includes('data-lq="policies"'), "the violations list has a search box");
+  assert.ok(html.includes('data-lq="policies"') && html.includes('data-dense'), "the violations list has search and a useful density control");
   el.lvState("policies", "", "asc").q = "lampe 11";
   html = el.policiesView();
   assert.ok(html.includes("Lampe 11") && !html.includes("Lampe 3"));
   el.exposure = { ...EXPO, findings: [{ kind: "alias_duplicate", level: "warn", assistant: "conversation", alias: "Küche", count: 6, items: Array.from({ length: 6 }, (_, i) => ({ entity_id: `light.k${i}`, name: `Küche ${i}` })) }, EXPO.findings[0]] };
-  assert.ok(el.exposureView().includes('data-lq="exposure"'));
+  html = el.exposureView();
+  assert.ok(html.includes('data-lq="exposure"') && !html.includes('data-dense'), "exposure findings have search but no ineffective density control");
+  const exposed = { ...EXPO, exposed_entities: Array.from({ length: 7 }, (_, i) => ({ entity_id: `light.ex${i}`, name: `Light ${i}`, assistants: ["conversation"] })) };
+  html = el.expoSourceTab(exposed, { id: "conversation", label: "Assist", status: "ok", count: 7 });
+  assert.ok(html.includes('data-lq="expo_conversation"') && !html.includes('data-dense'), "source lists omit the density control too");
   el.lvState("exposure", "", "asc").q = "küche 2";
   html = el.exposureView();
   assert.ok(html.includes("light.k2") && !html.includes("light.k4") && !html.includes("Door"), "only findings with a matching entity");

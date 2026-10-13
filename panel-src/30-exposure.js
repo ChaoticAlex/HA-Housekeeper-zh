@@ -59,7 +59,7 @@ class ExposureMixin {
   // The entities one assistant or bridge can reach, searchable; a click opens the entity.
   expoSourceTab(r, source) {
     const all = (r.exposed_entities || []).filter(e => e.assistants.includes(source.id));
-    const found = this.searchList(`expo_${source.id}`, all, e => [e.name, e.entity_id].join(" "));
+    const found = this.searchList(`expo_${source.id}`, all, e => [e.name, e.entity_id].join(" "), 6, { dense: false });
     const pg = this.paginate(`expo_${source.id}`, found.rows);
     const rows = pg.rows.map(e => {
       const others = e.assistants.filter(id => id !== source.id);
@@ -92,7 +92,7 @@ class ExposureMixin {
       this.lvState("exposure", "", "asc");
       const q = this.lv.exposure.q.trim().toLowerCase();
       const itemCount = r.findings.reduce((n, f) => n + (f.items || []).length, 0);
-      const bar = itemCount >= 6 || q ? this.listBar("exposure", { sorts: [] }) : "";
+      const bar = itemCount >= 6 || q ? this.listBar("exposure", { sorts: [], dense: false }) : "";
       const shown = q ? r.findings.filter(f => (f.items || []).some(item => [item.name, item.entity_id, ...(item.assistants || [])].join(" ").toLowerCase().includes(q))) : r.findings;
       const rows = shown.length ? this.expoSection("expoToCheck", shown.filter(f => f.level === "warn")) + this.expoSection("expoToNote", shown.filter(f => f.level !== "warn")) : q ? `<div class="emptymsg">${this.t("noMatches")}</div>` : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("expoNone")}</div>`;
       body = `<div class="panel">${bar}${rows}${this.howCounted("expoFootnote")}</div>`;
