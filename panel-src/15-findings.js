@@ -138,7 +138,8 @@ class FindingsMixin {
   findingsView() {
     const all = this.sortedFindings(true).filter(f => this.statusMatch(f));
     const classes = [...new Set(all.map(f => this.findingReason(f)))];
-    const list = this.groupBroken(this.collapseFollowers(this.visibleFindings()));
+    const open = !this.findingStatus && !this.findingFilter && !this.findingAfter && !this.lv.findings?.q && !Object.values(this.lv.findings?.f || {}).some(Boolean);
+    const list = this.groupBroken(this.collapseFollowers(this.visibleFindings(), !open));
     const types = [...new Set(all.map(f => this.findingType(f)))].sort();
     const bar = this.listBar("findings", { sorts: this.findingSorts(), filters: [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }, { name: "reason", all: this.t("allReasons"), options: classes.map(x => [x, this.reasonLabel(x)]) }, { name: "impact", all: this.t("allImpacts"), options: ["high", "medium", "low", "info", "none"].map(x => [x, this.t(`impact_${x}`)]) }] });
     this.ensureSeries();
@@ -154,7 +155,6 @@ class FindingsMixin {
     const dueCount = this.data.findings.filter(f => f.resurfaced).length;
     const followers = this.followerCount();
     const fixedView = this.findingStatus === "fixed";
-    const open = !this.findingStatus && !this.findingFilter && !this.findingAfter && !this.lv.findings?.q && !Object.values(this.lv.findings?.f || {}).some(Boolean);
     const entries = this.causeEntries(), withFollowers = entries.filter(c => this.causeTotal(c));
     // The list is one: the chains first (each a row with its counter), then the single findings, in the chosen sort.
     // Under a filter or in the flat list every finding stands for itself.

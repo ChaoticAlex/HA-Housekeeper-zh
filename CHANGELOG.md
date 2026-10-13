@@ -10,6 +10,10 @@
 
 - **Vermerk für mehrere Objekte:** Die Auswahlleiste der Befunde hat den Knopf „Vermerk setzen“. Er setzt Art, Begründung und Prüffrist in einem Zug an allen angekreuzten Entitäten, Geräten, Integrationen und Apps; andere Objekte in der Auswahl (zum Beispiel Automationen) bleiben unberührt.
 
+### Behoben
+
+- **Befunde:** Wer einen Status wie „Neu“ oder einen Filter wählte, sah die Ausfälle von Integrationen nicht, obwohl sie mitgezählt wurden. Sie stehen jetzt als eigene Zeilen in der Liste.
+
 ### English
 
 #### Changed
@@ -19,6 +23,10 @@
 #### New
 
 - **Mark for several objects:** The selection bar of the Findings page has a “Set a mark” button. It sets kind, reason and review date in one go on all ticked entities, devices, integrations and apps; other objects in the selection (for example automations) stay untouched.
+
+#### Fixed
+
+- **Findings:** Choosing a status such as “New” or a filter hid the outages of integrations although they were counted. They are rows of their own in the list now.
 
 ## 1.5.1 - 2026-10-12
 

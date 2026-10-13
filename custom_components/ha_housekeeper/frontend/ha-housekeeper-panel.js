@@ -2400,7 +2400,8 @@ class FindingsMixin {
   findingsView() {
     const all = this.sortedFindings(true).filter(f => this.statusMatch(f));
     const classes = [...new Set(all.map(f => this.findingReason(f)))];
-    const list = this.groupBroken(this.collapseFollowers(this.visibleFindings()));
+    const open = !this.findingStatus && !this.findingFilter && !this.findingAfter && !this.lv.findings?.q && !Object.values(this.lv.findings?.f || {}).some(Boolean);
+    const list = this.groupBroken(this.collapseFollowers(this.visibleFindings(), !open));
     const types = [...new Set(all.map(f => this.findingType(f)))].sort();
     const bar = this.listBar("findings", { sorts: this.findingSorts(), filters: [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }, { name: "reason", all: this.t("allReasons"), options: classes.map(x => [x, this.reasonLabel(x)]) }, { name: "impact", all: this.t("allImpacts"), options: ["high", "medium", "low", "info", "none"].map(x => [x, this.t(`impact_${x}`)]) }] });
     this.ensureSeries();
@@ -2416,7 +2417,6 @@ class FindingsMixin {
     const dueCount = this.data.findings.filter(f => f.resurfaced).length;
     const followers = this.followerCount();
     const fixedView = this.findingStatus === "fixed";
-    const open = !this.findingStatus && !this.findingFilter && !this.findingAfter && !this.lv.findings?.q && !Object.values(this.lv.findings?.f || {}).some(Boolean);
     const entries = this.causeEntries(), withFollowers = entries.filter(c => this.causeTotal(c));
     // The list is one: the chains first (each a row with its counter), then the single findings, in the chosen sort.
     // Under a filter or in the flat list every finding stands for itself.
@@ -6910,7 +6910,8 @@ class CausesMixin {
   causeList() { return this.data?.causes || []; }
 
   // Follow-up findings of a cause stay out of the list until asked for; the export keeps them.
-  collapseFollowers(list) { return this.showFollowers ? list : list.filter(f => !f.cause_id); }
+  // The finding of an outage itself stays when the list is not the grouped one (a status or a filter is set): there it is its own row.
+  collapseFollowers(list, keepOwn = false) { return this.showFollowers ? list : list.filter(f => !f.cause_id || (keepOwn && CAUSE_OWN_RULES.includes(f.rule_id))); }
 
   // "In the HA log: 3 errors, last 2 hours ago" (see log_facts.py: numbers and times, never a text).
   logLine(log) {

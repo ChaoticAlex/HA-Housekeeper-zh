@@ -3,7 +3,8 @@ class CausesMixin {
   causeList() { return this.data?.causes || []; }
 
   // Follow-up findings of a cause stay out of the list until asked for; the export keeps them.
-  collapseFollowers(list) { return this.showFollowers ? list : list.filter(f => !f.cause_id); }
+  // The finding of an outage itself stays when the list is not the grouped one (a status or a filter is set): there it is its own row.
+  collapseFollowers(list, keepOwn = false) { return this.showFollowers ? list : list.filter(f => !f.cause_id || (keepOwn && CAUSE_OWN_RULES.includes(f.rule_id))); }
 
   // "In the HA log: 3 errors, last 2 hours ago" (see log_facts.py: numbers and times, never a text).
   logLine(log) {

@@ -4578,3 +4578,13 @@ test("an integration outage is a reason of its own, with a tile and a filter of 
   el.findingFilter = "outage";
   assert.equal(el.visibleFindings().map(x => x.object_id).join(), "e1");
 });
+
+test("the finding of an outage is a row of its own as soon as a status or a filter is set", () => {
+  const { el } = panel("en");
+  const own = { rule_id: "config_entry.not_loaded", object_id: "e1", classification: "problem", confidence: 0.9, key: "config_entry.not_loaded|e1", ignored: false, evidence: [], impact: "low", cause_id: "integration_down:e1" };
+  const c = { id: "integration_down:e1", kind: "integration_down", object_type: "config_entry", object_id: "e1", name: "Hue", finding_key: own.key, follower_count: 0, total_followers: 0, child_ids: [], consumers: {}, impact: "low", parent_id: null };
+  el.data = { ...DATA, objects: [], causes: [c], findings: [own] };
+  assert.equal((el.findingsView().match(/data-fsel="config_entry.not_loaded\|e1"/g) || []).length, 1, "once in the grouped list");
+  el.findingFilter = "outage";
+  assert.equal((el.findingsView().match(/data-fsel="config_entry.not_loaded\|e1"/g) || []).length, 1, "and once under a filter");
+});
