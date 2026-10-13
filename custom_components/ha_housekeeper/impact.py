@@ -1,7 +1,7 @@
 """How much a finding matters, from what depends on the object and whether it is critical.
 
 Only reads the objects and edges of the last scan. The answer is a level (high, medium, low, none)
-with the facts behind it, never a score: "used by 3 automations", "critical area". A missing target
+with the facts behind it (an outage that has lasted under an hour is "info"), never a score: "used by 3 automations", "critical area". A missing target
 of a lock automation ranks above an orphaned temperature sensor nobody uses.
 
 An object is critical when it carries the label ``housekeeper_critical`` (itself, its device or
@@ -22,7 +22,8 @@ USAGE = ("TRIGGERS_ON", "USES_AS_CONDITION", "TARGETS", "REFERENCES", "SHOWS", "
 CONSUMERS = ("automation", "script")
 MANY = 5  # this many dependents make a finding high on their own
 FACT_LIMIT = 5
-RANK = {"none": 0, "low": 1, "medium": 2, "high": 3}
+RANK = {"none": 0, "info": 1, "low": 2, "medium": 3, "high": 4}
+OUTAGE_RULE = "config_entry.not_loaded"
 
 
 def _kind_critical(object_id: str, device_class: str | None) -> bool:
@@ -77,6 +78,12 @@ def apply_impact(
             controls.setdefault(edge["source"], []).append(edge["target"])
     for finding in findings:
         level, facts = _judge(finding, by_key, users, controls, critical)
+        if (
+            finding["rule_id"] == OUTAGE_RULE
+        ):  # the longer an integration stays down, the more it matters
+            aged = finding.pop("outage_level", "info")
+            facts.append({"fact": "outage_age", "level": aged})
+            level = max(level, aged, key=RANK.__getitem__)
         finding["impact"], finding["impact_facts"] = level, facts[:FACT_LIMIT]
 
 

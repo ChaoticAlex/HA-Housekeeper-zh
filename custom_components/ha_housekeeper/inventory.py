@@ -482,7 +482,19 @@ def _entity_findings(
     ]
 
 
-ENTRY_GRACE = timedelta(hours=1)  # a restart or a retry in progress is no finding
+ENTRY_INFO = timedelta(hours=1)  # a restart or a retry in progress is only an info
+ENTRY_MEDIUM = timedelta(days=1)
+
+
+def _outage_level(age: timedelta, min_unavailable_days: int) -> str:
+    """How much an integration that has not been loaded for ``age`` matters: info, low, medium, high."""
+    if age < ENTRY_INFO:
+        return "info"
+    if age < ENTRY_MEDIUM:
+        return "low"
+    return "medium" if age < timedelta(days=min_unavailable_days) else "high"
+
+
 FAILED_ENTRY_STATES = frozenset(
     {
         "setup_error",
@@ -498,15 +510,13 @@ FAILED_ENTRY_STATES = frozenset(
 def _config_entry_findings(
     integrations: list[dict[str, Any]], now: datetime, min_unavailable_days: int = 0
 ) -> list[dict[str, Any]]:
-    """Findings for active config entries that have not been loaded for longer than the grace."""
-    wait = max(ENTRY_GRACE, timedelta(days=min_unavailable_days))
+    """Findings for active config entries that are not loaded, graded by how long that has lasted."""
     findings = []
     for item in integrations:
         since = item.get("status_since")
         if item["status"] != "problem" or item["state"] not in FAILED_ENTRY_STATES or not since:
             continue
-        if now - datetime.fromisoformat(since) < wait:
-            continue
+        age = max(now - datetime.fromisoformat(since), timedelta(0))
         findings.append(
             {
                 "rule_id": "config_entry.not_loaded",
@@ -514,6 +524,7 @@ def _config_entry_findings(
                 "classification": "problem",
                 "confidence": 0.9 if item["state"] == "setup_error" else 0.75,
                 "first_detected_at": since,
+                "outage_level": _outage_level(age, min_unavailable_days),
                 "evidence": [
                     {"kind": item["state"], "source": "config_entries", "reason": item.get("error")}
                 ],

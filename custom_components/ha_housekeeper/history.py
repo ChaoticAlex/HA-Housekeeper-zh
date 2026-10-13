@@ -50,7 +50,8 @@ SETTING_RULES = {
 
 # The score from 100, as the panel reads it: points off for each entry of the findings list by its
 # impact (points each, at most), counted once for a chain of outages and not for its followers.
-SCORE_POINTS = {"high": (5, 30), "medium": (2, 20), "low": (1, 10)}
+# "info" (an outage under an hour) counts on the page but not here, so a restart leaves no dent in the curve.
+SCORE_POINTS = {"high": (5, 30), "medium": (3, 20), "low": (2, 10)}
 
 
 def _score(snapshot: dict[str, Any]) -> int:

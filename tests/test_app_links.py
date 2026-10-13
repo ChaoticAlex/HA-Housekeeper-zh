@@ -67,7 +67,7 @@ def test_a_stopped_app_is_a_finding_only_when_a_linked_integration_has_failed() 
     assert [(f["object_id"], f["affected_object"]) for f in found] == [("a_tail", "e1")]
 
 
-def test_a_config_entry_that_stays_unloaded_is_a_finding_after_the_grace() -> None:
+def test_a_config_entry_that_is_not_loaded_is_a_finding_graded_by_how_long() -> None:
     from datetime import UTC, datetime, timedelta
 
     from custom_components.ha_housekeeper.inventory import _config_entry_findings
@@ -86,11 +86,19 @@ def test_a_config_entry_that_stays_unloaded_is_a_finding_after_the_grace() -> No
     found = _config_entry_findings(
         [
             item("old", "setup_retry", "problem", 5),
+            item("day", "setup_retry", "problem", 30),
+            item("week", "setup_retry", "problem", 24 * 8),
             item("fresh", "setup_error", "problem", 0.2),
             item("fine", "loaded", "active", 9),
             item("off", "not_loaded", "disabled", 9),
             {**item("new", "setup_error", "problem", 9), "status_since": None},
         ],
         now,
+        7,
     )
-    assert [f["object_id"] for f in found] == ["old"]
+    assert {f["object_id"]: f["outage_level"] for f in found} == {
+        "old": "low",
+        "day": "medium",
+        "week": "high",
+        "fresh": "info",
+    }

@@ -102,3 +102,15 @@ def test_cleanup_asks_for_a_separate_confirmation_for_critical_objects() -> None
     critical = judge_action("disable_entity", "lock.front", entities, [])
     assert critical["verdict"] == "review" and "critical_object" in critical["reasons"]
     assert judge_action("disable_entity", "sensor.plain", entities, [])["verdict"] == "ok"
+
+
+def test_an_outage_is_at_least_as_important_as_it_is_old() -> None:
+    from custom_components.ha_housekeeper.impact import apply_impact
+
+    findings = [
+        {"rule_id": "config_entry.not_loaded", "object_id": "e1", "outage_level": "info"},
+        {"rule_id": "config_entry.not_loaded", "object_id": "e2", "outage_level": "medium"},
+    ]
+    apply_impact([], [], findings)
+    assert [f["impact"] for f in findings] == ["info", "medium"]
+    assert all("outage_level" not in f for f in findings)

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Geändert
+
+- **Ausfälle von Integrationen mit Schweregrad nach Dauer:** Eine nicht geladene Integration ist sofort ein Befund und wartet nicht mehr, bis die „Mindestdauer nicht verfügbar“ (Standard 7 Tage) vorbei ist. Die Dauer bestimmt die Auswirkung: unter 1 Stunde „Info“, ab 1 Stunde „Niedrig“, ab 1 Tag „Mittel“, ab der Mindestdauer „Hoch“. Neu ist die Stufe „Info“ (1 Punkt, höchstens 5); „Niedrig“ und „Mittel“ ziehen jetzt 2 und 3 Punkte statt 1 und 2 ab. Dadurch springt der Punktestand einmalig.
+
 ### Neu
 
 - **Vermerk für mehrere Objekte:** Die Auswahlleiste der Befunde hat den Knopf „Vermerk setzen“. Er setzt Art, Begründung und Prüffrist in einem Zug an allen angekreuzten Entitäten, Geräten, Integrationen und Apps; andere Objekte in der Auswahl (zum Beispiel Automationen) bleiben unberührt.
@@ -11,6 +15,10 @@
 - **Befunde:** Auch ein Ausfall, für den noch kein Befund besteht (die Wartezeit „Mindestdauer nicht verfügbar“ läuft noch), lässt sich ankreuzen. „Bekannt“, „Zurückstellen“ und „Ausblenden“ setzen dann den Vermerk „Absichtlich offline“ an der Integration (mit Begründung und Frist); solange er gilt, steht der Ausfall nicht in der Liste.
 
 ### English
+
+#### Changed
+
+- **Integration outages graded by duration:** An integration that is not loaded is a finding at once and no longer waits for “Minimum days unavailable” (default 7 days). How long it has lasted sets the impact: under 1 hour “Info”, from 1 hour “Low”, from 1 day “Medium”, from the minimum days “High”. “Info” is new (1 point, at most 5); “Low” and “Medium” now take off 2 and 3 points instead of 1 and 2, so the score jumps once.
 
 #### New
 
