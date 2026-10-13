@@ -5,28 +5,28 @@ Object.assign(TEXT.de, {
   pinName: "Name (optional)", pinNamePh: "z. B. Vor dem Umbau", pinChipRebuild: "Vor dem Umbau", pinChipUpdate: "Vor dem Update", pinChipOk: "Alles läuft",
   pinNote: "Es ändert nichts in Home Assistant. Ohne Namen heißt der Punkt wie der Zeitpunkt.", pinGo: "Scannen und merken", pinCancel: "Abbrechen",
   pinMine: "Eigener Punkt", pinDelete: "Löschen", confirmPin: "Der Scan-Punkt „{name}“ wird gelöscht.",
-  pinFailed: "Der Scan-Punkt konnte nicht gespeichert werden: {reason}", storedPin: "Eigener Scan-Punkt",
+  pinFailed: "Der Scan-Punkt konnte nicht gespeichert werden: {reason}", pinSaving: "Scan-Punkt wird gespeichert …", storedPin: "Eigener Scan-Punkt",
 });
 Object.assign(TEXT.en, {
   pinSet: "Set scan point", pinDialogTitle: "Set scan point", pinDialogHint: "Housekeeper scans now and keeps this state until you delete it.",
   pinName: "Name (optional)", pinNamePh: "e.g. Before the rebuild", pinChipRebuild: "Before the rebuild", pinChipUpdate: "Before the update", pinChipOk: "All is running",
   pinNote: "It changes nothing in Home Assistant. Without a name the point is called by its time.", pinGo: "Scan and keep", pinCancel: "Cancel",
   pinMine: "Own point", pinDelete: "Delete", confirmPin: "The scan point “{name}” will be deleted.",
-  pinFailed: "The scan point could not be saved: {reason}", storedPin: "Own scan point",
+  pinFailed: "The scan point could not be saved: {reason}", pinSaving: "Saving scan point …", storedPin: "Own scan point",
 });
 
 class ScanPointsMixin {
-  pinOpen() { this.pinDraft = { name: "" }; this._pinFocus = true; }
+  pinOpen() { this.pinDraft = { name: "", busy: false, error: "" }; this.pinPreviousCompare = this.compare; this._pinFocus = true; }
 
-  pinDialog() {
+  pinEditor() {
     const d = this.pinDraft;
     if (!d) return "";
-    const chips = ["Rebuild", "Update", "Ok"].map(k => `<button type="button" class="chip" data-pin-chip="${this.esc(this.t(`pinChip${k}`))}">${this.t(`pinChip${k}`)}</button>`).join("");
-    return `<div class="hkmodal" data-pin-modal><form class="hkdialog" role="dialog" aria-modal="true" aria-labelledby="hk-pin-head" data-pin-form>
-      <div class="dhead"><h2 id="hk-pin-head">${this.t("pinDialogTitle")}</h2><p class="factnote u-m0">${this.t("pinDialogHint")}</p></div>
-      <div class="dbody"><div><label for="hk-pin-name">${this.t("pinName")}</label><input id="hk-pin-name" type="text" maxlength="60" data-pin-name value="${this.esc(d.name)}" placeholder="${this.esc(this.t("pinNamePh"))}" autocomplete="off"><div class="notechips">${chips}</div></div>
-        <small class="factnote u-m0">${this.t("pinNote")}</small></div>
-      <div class="dfoot"><span class="dbtns"><button type="button" class="btn" data-pin-cancel>${this.t("pinCancel")}</button><button type="submit" class="btn primary">${this.t("pinGo")}</button></span></div></form></div>`;
+    const chips = ["Rebuild", "Update", "Ok"].map(k => `<button type="button" class="chip" data-pin-chip="${this.esc(this.t(`pinChip${k}`))}" ${d.busy ? "disabled" : ""}>${this.t(`pinChip${k}`)}</button>`).join("");
+    return `<form class="pin-editor" data-pin-form>
+      <div class="pin-fields"><h3>${this.t("pinDialogTitle")}</h3><p>${this.t("pinDialogHint")}</p>
+        <div><label for="hk-pin-name">${this.t("pinName")}</label><input id="hk-pin-name" type="text" maxlength="60" data-pin-name value="${this.esc(d.name)}" placeholder="${this.esc(this.t("pinNamePh"))}" autocomplete="off" ${d.busy ? "disabled" : ""}><div class="notechips">${chips}</div></div>
+        <small>${this.t("pinNote")}</small>${d.error ? `<div class="error" role="alert">${this.esc(d.error)}</div>` : ""}
+      </div><div class="toolbar savebar pin-actions"><span role="status">${d.busy ? d.phase === "save" ? this.t("pinSaving") : `${this.t("scanning")}${this.scanStatus?.running ? ` ${this.scanStatus.progress}%` : ""}` : ""}</span><span class="toolgap"></span><button type="button" class="btn" data-pin-cancel ${d.busy ? "disabled" : ""}>${this.t("pinCancel")}</button><button type="submit" class="btn primary" ${d.busy ? 'disabled aria-busy="true"' : ""}>${this.t("pinGo")}</button></div></form>`;
   }
 
   pinHeadButton() {
@@ -41,13 +41,17 @@ class ScanPointsMixin {
   }
 
   async pinSave() {
-    const name = this.pinDraft?.name || "";
-    this.pinDraft = null; this.render();
+    const d = this.pinDraft;
+    if (!d || d.busy || this.busy || this.cleanupRunning() || !this._hass) return;
+    const name = d.name;
+    d.busy = true; d.phase = "scan"; d.error = ""; this.render();
     await this.load(true);
-    if (!this.data || this.error) return;
+    if (!this.data || this.error) { d.busy = false; d.error = this.error || this.t("pinFailed", { reason: "" }); this.error = null; this.render(); return; }
+    d.phase = "save"; this.render();
     try {
       await this._hass.callWS({ type: "ha_housekeeper/scan_point", action: "save", name });
-    } catch (err) { this.toast(this.t("pinFailed", { reason: err?.message || String(err) })); }
+    } catch (err) { d.busy = false; d.error = this.t("pinFailed", { reason: err?.message || String(err) }); this.render(); return; }
+    this.pinDraft = null; this.pinPreviousCompare = null;
     this.compare = null; this.render(); this.loadCompare();
   }
 
@@ -63,7 +67,7 @@ class ScanPointsMixin {
     root.querySelector("[data-pin-add]")?.addEventListener("click", () => { this.pinOpen(); this.render(); });
     root.querySelectorAll("[data-pin-chip]").forEach(el => el.onclick = () => { this.pinDraft.name = el.dataset.pinChip; this._pinFocus = true; this.render(); });
     root.querySelector("[data-pin-name]")?.addEventListener("input", ev => { this.pinDraft.name = ev.target.value; });
-    root.querySelector("[data-pin-cancel]")?.addEventListener("click", () => { this.pinDraft = null; this.render(); });
+    root.querySelector("[data-pin-cancel]")?.addEventListener("click", () => { if (this.pinDraft?.busy) return; this.pinDraft = null; this.pinPreviousCompare = null; this.render(); });
     root.querySelector("[data-pin-form]")?.addEventListener("submit", ev => { ev.preventDefault(); this.pinSave(); });
     root.querySelectorAll("[data-pin-del]").forEach(el => el.onclick = ev => {
       ev.stopPropagation();
@@ -71,11 +75,6 @@ class ScanPointsMixin {
       this.confirmAsk(this.t("confirmPin", { name: b ? this.pinLabel(b) : "" }), () => this.pinDelete(id));
     });
     root.querySelectorAll("div[data-baseline]").forEach(el => el.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); el.click(); } }));
-    const modal = root.querySelector("[data-pin-modal]");
-    if (modal) {
-      modal.addEventListener("mousedown", ev => { if (ev.target === modal) { this.pinDraft = null; this.render(); } });
-      modal.addEventListener("keydown", ev => { if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); this.pinDraft = null; this.render(); } });
-      if (this._pinFocus) { this._pinFocus = false; modal.querySelector("[data-pin-name]")?.focus(); }
-    }
+    if (this._pinFocus && root.querySelector("[data-pin-form]")) { this._pinFocus = false; root.querySelector("[data-pin-name]")?.focus(); }
   }
 }

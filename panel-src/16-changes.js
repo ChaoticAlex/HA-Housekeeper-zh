@@ -3,13 +3,17 @@ const HISTORY_PREVIEW = 5;
 
 class ChangesMixin {
   async loadCompare() {
+    const request = this._compareRequest = (this._compareRequest || 0) + 1;
     this.compareLoading = true; this.render();
     try {
-      this.compare = await this._hass.callWS({ type: "ha_housekeeper/compare", baseline: this.compareBaseline });
+      const compare = await this._hass.callWS({ type: "ha_housekeeper/compare", baseline: this.compareBaseline });
+      if (request !== this._compareRequest) return;
+      this.compare = compare;
     } catch (err) {
+      if (request !== this._compareRequest) return;
       this.compare = null; this.failed(err);
     }
-    this.compareLoading = false; this.render();
+    if (request === this._compareRequest) { this.compareLoading = false; this.render(); }
   }
 
   // One row per stored scan (newest first) with its totals; a click picks it as the comparison base.
@@ -35,7 +39,7 @@ class ChangesMixin {
     const pg = collapsed ? { rows: list.map(e => e.html), footer: "" } : this.paginate("history", list.map(e => e.html));
     const toggle = scans.length > HISTORY_PREVIEW + 1 ? `<div class="tablefoot"><button class="link" data-history-all>${collapsed ? this.t("historyAll", { n: this.formatNumber(scans.length) }) : this.t("historyLess")}</button></div>` : "";
     const hint = baselines.length <= 1 ? `<p class="factnote" style="margin:10px 16px">${this.t("historyBuilding", { days: c.retention_days ?? 30 })}</p>` : "";
-    return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("historyTitle")}</h2><p>${this.t("historyHint", { days: c.retention_days ?? 30 })}</p></div><div class="actions">${this.baselineSelect(baselines)}${this.pinHeadButton()}</div></div>${hint}${pg.rows.join("")}${pg.footer}${toggle}</section>`;
+    return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("historyTitle")}</h2><p>${this.t("historyHint", { days: c.retention_days ?? 30 })}</p></div><div class="actions">${this.baselineSelect(baselines)}${this.pinDraft ? "" : this.pinHeadButton()}</div></div>${this.pinEditor()}${hint}${pg.rows.join("")}${pg.footer}${toggle}</section>`;
   }
 
   // The weekday, day, month and time of a stored scan, in the language of the panel.
@@ -87,7 +91,7 @@ class ChangesMixin {
   }
 
   changesCompare() {
-    const c = this.compare;
+    const c = this.compare?.available ? this.compare : (this.pinDraft && this.pinPreviousCompare) || this.compare;
     if (!c) return `${this.skeleton("loading")}`;
     this.ensureCorrelations();
     const baselines = c.baselines || [];

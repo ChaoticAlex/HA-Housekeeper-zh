@@ -3887,7 +3887,7 @@ test("the logbook has its own tab, entries use page editors, an action can sugge
   assert.ok(el.corrText({ kind: "note", title: "Zigbee <i>" }).includes("Zigbee &lt;i&gt;"));
 });
 
-test("an own scan point sits in the history of the scans with its name, is set through a dialog after a scan and deleted after asking", async () => {
+test("an own scan point is created inside the scan history, keeps its name on failure and is deleted after asking", async () => {
   const { el, shadow } = panel("en");
   const sent = [];
   el._hass.callWS = async msg => { sent.push(msg); return msg.type === "ha_housekeeper/scan" ? el.data : { baselines: [] }; };
@@ -3898,7 +3898,10 @@ test("an own scan point sits in the history of the scans with its name, is set t
   assert.ok(html.includes("Before the &lt;rebuild&gt;") && html.includes("Own point") && html.includes(`data-baseline="${pin.id}"`) && !html.includes("<rebuild>"), "the point shows by its name, escaped");
   assert.ok(html.indexOf("Previous scan") < html.indexOf("Before the &lt;rebuild&gt;"), "newest first");
   el.pinOpen(); el.render();
-  assert.ok(shadow.innerHTML.includes("data-pin-modal") && shadow.innerHTML.includes("data-pin-chip"));
+  html = shadow.innerHTML;
+  assert.ok(html.includes("data-pin-form") && html.includes("data-pin-chip") && !html.includes("data-pin-modal"));
+  assert.ok(html.indexOf("data-pin-form") < html.indexOf(`data-baseline="${pin.id}"`), "the editor stays inside the history card above its rows");
+  assert.ok(!html.includes("data-pin-add"), "the add button is hidden while editing");
   el.pinDraft.name = "Before the update";
   el.load = async fresh => { sent.push({ type: fresh ? "ha_housekeeper/scan" : "ha_housekeeper/inventory" }); };
   await el.pinSave();
@@ -3910,6 +3913,34 @@ test("an own scan point sits in the history of the scans with its name, is set t
   el.compareBaseline = pin.id;
   await el.pinDelete(pin.id);
   assert.equal(sent.at(-2).action, "delete"); assert.equal(sent.at(-2).baseline, pin.id); assert.equal(el.compareBaseline, "previous");
+  el.compare = { ...COMPARE, baselines: [pin], current: { objects: 6, findings: 1 }, retention_days: 30 };
+  el.pinOpen(); el.pinDraft.name = "Keep this name";
+  let finishScan;
+  el.load = async () => { await new Promise(resolve => { finishScan = resolve; }); el.error = "Scan failed"; };
+  const before = sent.length;
+  const saving = el.pinSave();
+  assert.equal(el.pinDraft.busy, true);
+  assert.ok(shadow.innerHTML.includes('data-pin-form') && shadow.innerHTML.includes('value="Keep this name"') && shadow.innerHTML.includes('aria-busy="true"'), "the editor remains visible and cannot be submitted twice during the scan");
+  finishScan();
+  await saving;
+  assert.equal(el.pinDraft.name, "Keep this name");
+  assert.equal(el.pinDraft.busy, false);
+  assert.ok(shadow.innerHTML.includes("Scan failed") && shadow.innerHTML.includes("Keep this name"));
+  assert.equal(sent.length, before, "a failed scan creates no saved scan point");
+});
+
+test("a newer scan comparison wins when an older request finishes last", async () => {
+  const { el } = panel("en");
+  el.view = "changes"; el.compare = COMPARE;
+  const pending = [];
+  el._hass.callWS = () => new Promise(resolve => pending.push(resolve));
+  const older = el.loadCompare();
+  const newer = el.loadCompare();
+  const fresh = { ...COMPARE, baseline: "fresh" };
+  pending[1](fresh); await newer;
+  pending[0]({ ...COMPARE, baseline: "old" }); await older;
+  assert.equal(el.compare.baseline, "fresh");
+  assert.equal(el.compareLoading, false);
 });
 
 test("the entity page sums up what is known in groups with the source of each line; recorder values come on request", () => {

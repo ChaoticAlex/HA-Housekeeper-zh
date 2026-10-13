@@ -1518,6 +1518,7 @@ class StylesMixin {
       .monitor-editor{max-width:960px;margin:0 auto}.monitor-fields{display:grid;gap:14px;padding:16px}.monitor-fields label{display:grid;gap:6px;font-weight:600}.monitor-fields input,.monitor-fields textarea{width:100%;padding:10px 12px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit;font:inherit}.monitor-fields textarea{min-height:0;box-sizing:border-box;resize:none;overflow-y:hidden}.monitor-check{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.monitor-check input{width:18px;height:18px}.row.monitor-member{grid-template-columns:auto minmax(0,1fr) auto auto}.row.monitor-choice{grid-template-columns:auto minmax(0,1fr) auto}.monitor-choice .btn,.monitor-member .btn{justify-self:end;width:auto;white-space:nowrap}.row.monitor-notify{grid-template-columns:minmax(0,1fr) auto;cursor:pointer}.monitor-notify .policyswitch{justify-self:end}.monitor-tabs{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 14px;border-bottom:1px solid var(--hk-border)}.monitor-tabs .btn{border-radius:99px;min-height:34px}.monitor-group h3{display:flex;gap:8px;align-items:center;margin:0;padding:10px 16px;background:var(--hk-soft);font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}.monitor-group h3 span{font-weight:400}.monitor-group .row{border-bottom:1px solid var(--hk-border)}.monitor-choice .btn:disabled{opacity:.65}.monitor-results{max-height:420px;overflow:auto}.monitor-search-note{padding:0 16px 18px;color:var(--hk-muted)}.monitor-editor .savebar{border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-surface)}@media(max-width:600px){.row.monitor-member{grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto;grid-auto-flow:row;gap:8px}.monitor-member .tile{grid-column:1;grid-row:1}.monitor-member .row-text{grid-column:2;grid-row:1}.monitor-member .monitor-check{grid-column:2;grid-row:2}.monitor-member .btn{grid-column:3;grid-row:1/3}}
       .note-editor{min-width:0}.note-fields{display:grid;gap:14px;padding:16px}.note-fields>div{min-width:0}.note-fields h3{margin:0;font-size:calc(15px*var(--hk-fs,1))}.note-fields label{display:block;margin-bottom:6px;color:var(--hk-muted);font-size:calc(12.5px*var(--hk-fs,1));font-weight:600}.note-fields input,.note-fields textarea{box-sizing:border-box;width:100%;min-width:0;padding:10px 12px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.note-fields textarea{resize:vertical}.note-fields .picker{max-width:none}.note-fields .notetwo{grid-template-columns:repeat(2,minmax(0,1fr))}.note-fields .notetwo>div{min-width:0}.note-fields .notemeta{display:flex;align-items:center;align-self:end;gap:8px;flex-wrap:wrap;min-height:42px;color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));overflow-wrap:anywhere}.note-fields .notemeta strong{color:var(--hk-text)}.note-fields .notehint2{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.monitor-editor .note-editor .note-actions,.note-editor .note-actions{border:0;border-top:1px solid var(--hk-border);border-radius:0;background:var(--hk-soft)}.note-editor .danger-t{color:var(--hk-red)}.note-editor.inline .notetwo{grid-template-columns:1fr}@media(max-width:700px){.note-fields .notetwo{grid-template-columns:1fr}}
       .monitor-member-wrap{border-bottom:1px solid var(--hk-border)}.monitor-member-wrap:last-child{border-bottom:0}.monitor-member-wrap .row{border-bottom:0}.monitor-rules{padding:0 16px 12px 62px}.monitor-rules summary{color:var(--hk-blue-text);cursor:pointer;font-size:calc(12px*var(--hk-fs,1));font-weight:600}.monitor-rules p{margin:8px 0;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.monitor-rule{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:5px 0;font-size:calc(13px*var(--hk-fs,1))}.monitor-rule label{display:inline-flex;align-items:center;gap:8px;min-width:210px;cursor:pointer}.monitor-rule input[type=number]{width:100px;padding:7px 9px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit;font:inherit}.monitor-rule input[type=number]:disabled{opacity:.45}.monitor-preview-body{padding:12px 16px}.monitor-preview-body>p{margin:0;color:var(--hk-muted)}.monitor-preview-body>strong{display:block;margin-bottom:4px}.monitor-preview-body>small{display:block;margin-bottom:8px;color:var(--hk-muted)}.monitor-preview-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:7px 0;border-top:1px solid var(--hk-border)}.monitor-preview-row small{grid-column:1/-1;color:var(--hk-muted)}@media(max-width:600px){.monitor-rules{padding-left:16px}.monitor-rule label{min-width:0;flex:1 1 100%}.monitor-rule input[type=number]{width:90px}}
+      .pin-editor{border-bottom:1px solid var(--hk-border)}.pin-fields{display:grid;gap:10px;padding:16px}.pin-fields h3{margin:0;font-size:calc(15px*var(--hk-fs,1))}.pin-fields p{margin:0;color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1))}.pin-fields label{display:block;margin:4px 0 6px;color:var(--hk-muted);font-size:calc(12.5px*var(--hk-fs,1));font-weight:600}.pin-fields input{box-sizing:border-box;width:100%;max-width:520px;min-height:40px;padding:8px 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.pin-fields small{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.pin-fields .notechips{margin-top:8px}.pin-editor .pin-actions{border-bottom:0;border-top:1px solid var(--hk-border);background:var(--hk-soft)}.pin-actions [role=status]{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}
       ${this.themeCss()}
     </style>`;
   }
@@ -2572,13 +2573,17 @@ const HISTORY_PREVIEW = 5;
 
 class ChangesMixin {
   async loadCompare() {
+    const request = this._compareRequest = (this._compareRequest || 0) + 1;
     this.compareLoading = true; this.render();
     try {
-      this.compare = await this._hass.callWS({ type: "ha_housekeeper/compare", baseline: this.compareBaseline });
+      const compare = await this._hass.callWS({ type: "ha_housekeeper/compare", baseline: this.compareBaseline });
+      if (request !== this._compareRequest) return;
+      this.compare = compare;
     } catch (err) {
+      if (request !== this._compareRequest) return;
       this.compare = null; this.failed(err);
     }
-    this.compareLoading = false; this.render();
+    if (request === this._compareRequest) { this.compareLoading = false; this.render(); }
   }
 
   // One row per stored scan (newest first) with its totals; a click picks it as the comparison base.
@@ -2604,7 +2609,7 @@ class ChangesMixin {
     const pg = collapsed ? { rows: list.map(e => e.html), footer: "" } : this.paginate("history", list.map(e => e.html));
     const toggle = scans.length > HISTORY_PREVIEW + 1 ? `<div class="tablefoot"><button class="link" data-history-all>${collapsed ? this.t("historyAll", { n: this.formatNumber(scans.length) }) : this.t("historyLess")}</button></div>` : "";
     const hint = baselines.length <= 1 ? `<p class="factnote" style="margin:10px 16px">${this.t("historyBuilding", { days: c.retention_days ?? 30 })}</p>` : "";
-    return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("historyTitle")}</h2><p>${this.t("historyHint", { days: c.retention_days ?? 30 })}</p></div><div class="actions">${this.baselineSelect(baselines)}${this.pinHeadButton()}</div></div>${hint}${pg.rows.join("")}${pg.footer}${toggle}</section>`;
+    return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("historyTitle")}</h2><p>${this.t("historyHint", { days: c.retention_days ?? 30 })}</p></div><div class="actions">${this.baselineSelect(baselines)}${this.pinDraft ? "" : this.pinHeadButton()}</div></div>${this.pinEditor()}${hint}${pg.rows.join("")}${pg.footer}${toggle}</section>`;
   }
 
   // The weekday, day, month and time of a stored scan, in the language of the panel.
@@ -2656,7 +2661,7 @@ class ChangesMixin {
   }
 
   changesCompare() {
-    const c = this.compare;
+    const c = this.compare?.available ? this.compare : (this.pinDraft && this.pinPreviousCompare) || this.compare;
     if (!c) return `${this.skeleton("loading")}`;
     this.ensureCorrelations();
     const baselines = c.baselines || [];
@@ -9794,28 +9799,28 @@ Object.assign(TEXT.de, {
   pinName: "Name (optional)", pinNamePh: "z. B. Vor dem Umbau", pinChipRebuild: "Vor dem Umbau", pinChipUpdate: "Vor dem Update", pinChipOk: "Alles läuft",
   pinNote: "Es ändert nichts in Home Assistant. Ohne Namen heißt der Punkt wie der Zeitpunkt.", pinGo: "Scannen und merken", pinCancel: "Abbrechen",
   pinMine: "Eigener Punkt", pinDelete: "Löschen", confirmPin: "Der Scan-Punkt „{name}“ wird gelöscht.",
-  pinFailed: "Der Scan-Punkt konnte nicht gespeichert werden: {reason}", storedPin: "Eigener Scan-Punkt",
+  pinFailed: "Der Scan-Punkt konnte nicht gespeichert werden: {reason}", pinSaving: "Scan-Punkt wird gespeichert …", storedPin: "Eigener Scan-Punkt",
 });
 Object.assign(TEXT.en, {
   pinSet: "Set scan point", pinDialogTitle: "Set scan point", pinDialogHint: "Housekeeper scans now and keeps this state until you delete it.",
   pinName: "Name (optional)", pinNamePh: "e.g. Before the rebuild", pinChipRebuild: "Before the rebuild", pinChipUpdate: "Before the update", pinChipOk: "All is running",
   pinNote: "It changes nothing in Home Assistant. Without a name the point is called by its time.", pinGo: "Scan and keep", pinCancel: "Cancel",
   pinMine: "Own point", pinDelete: "Delete", confirmPin: "The scan point “{name}” will be deleted.",
-  pinFailed: "The scan point could not be saved: {reason}", storedPin: "Own scan point",
+  pinFailed: "The scan point could not be saved: {reason}", pinSaving: "Saving scan point …", storedPin: "Own scan point",
 });
 
 class ScanPointsMixin {
-  pinOpen() { this.pinDraft = { name: "" }; this._pinFocus = true; }
+  pinOpen() { this.pinDraft = { name: "", busy: false, error: "" }; this.pinPreviousCompare = this.compare; this._pinFocus = true; }
 
-  pinDialog() {
+  pinEditor() {
     const d = this.pinDraft;
     if (!d) return "";
-    const chips = ["Rebuild", "Update", "Ok"].map(k => `<button type="button" class="chip" data-pin-chip="${this.esc(this.t(`pinChip${k}`))}">${this.t(`pinChip${k}`)}</button>`).join("");
-    return `<div class="hkmodal" data-pin-modal><form class="hkdialog" role="dialog" aria-modal="true" aria-labelledby="hk-pin-head" data-pin-form>
-      <div class="dhead"><h2 id="hk-pin-head">${this.t("pinDialogTitle")}</h2><p class="factnote u-m0">${this.t("pinDialogHint")}</p></div>
-      <div class="dbody"><div><label for="hk-pin-name">${this.t("pinName")}</label><input id="hk-pin-name" type="text" maxlength="60" data-pin-name value="${this.esc(d.name)}" placeholder="${this.esc(this.t("pinNamePh"))}" autocomplete="off"><div class="notechips">${chips}</div></div>
-        <small class="factnote u-m0">${this.t("pinNote")}</small></div>
-      <div class="dfoot"><span class="dbtns"><button type="button" class="btn" data-pin-cancel>${this.t("pinCancel")}</button><button type="submit" class="btn primary">${this.t("pinGo")}</button></span></div></form></div>`;
+    const chips = ["Rebuild", "Update", "Ok"].map(k => `<button type="button" class="chip" data-pin-chip="${this.esc(this.t(`pinChip${k}`))}" ${d.busy ? "disabled" : ""}>${this.t(`pinChip${k}`)}</button>`).join("");
+    return `<form class="pin-editor" data-pin-form>
+      <div class="pin-fields"><h3>${this.t("pinDialogTitle")}</h3><p>${this.t("pinDialogHint")}</p>
+        <div><label for="hk-pin-name">${this.t("pinName")}</label><input id="hk-pin-name" type="text" maxlength="60" data-pin-name value="${this.esc(d.name)}" placeholder="${this.esc(this.t("pinNamePh"))}" autocomplete="off" ${d.busy ? "disabled" : ""}><div class="notechips">${chips}</div></div>
+        <small>${this.t("pinNote")}</small>${d.error ? `<div class="error" role="alert">${this.esc(d.error)}</div>` : ""}
+      </div><div class="toolbar savebar pin-actions"><span role="status">${d.busy ? d.phase === "save" ? this.t("pinSaving") : `${this.t("scanning")}${this.scanStatus?.running ? ` ${this.scanStatus.progress}%` : ""}` : ""}</span><span class="toolgap"></span><button type="button" class="btn" data-pin-cancel ${d.busy ? "disabled" : ""}>${this.t("pinCancel")}</button><button type="submit" class="btn primary" ${d.busy ? 'disabled aria-busy="true"' : ""}>${this.t("pinGo")}</button></div></form>`;
   }
 
   pinHeadButton() {
@@ -9830,13 +9835,17 @@ class ScanPointsMixin {
   }
 
   async pinSave() {
-    const name = this.pinDraft?.name || "";
-    this.pinDraft = null; this.render();
+    const d = this.pinDraft;
+    if (!d || d.busy || this.busy || this.cleanupRunning() || !this._hass) return;
+    const name = d.name;
+    d.busy = true; d.phase = "scan"; d.error = ""; this.render();
     await this.load(true);
-    if (!this.data || this.error) return;
+    if (!this.data || this.error) { d.busy = false; d.error = this.error || this.t("pinFailed", { reason: "" }); this.error = null; this.render(); return; }
+    d.phase = "save"; this.render();
     try {
       await this._hass.callWS({ type: "ha_housekeeper/scan_point", action: "save", name });
-    } catch (err) { this.toast(this.t("pinFailed", { reason: err?.message || String(err) })); }
+    } catch (err) { d.busy = false; d.error = this.t("pinFailed", { reason: err?.message || String(err) }); this.render(); return; }
+    this.pinDraft = null; this.pinPreviousCompare = null;
     this.compare = null; this.render(); this.loadCompare();
   }
 
@@ -9852,7 +9861,7 @@ class ScanPointsMixin {
     root.querySelector("[data-pin-add]")?.addEventListener("click", () => { this.pinOpen(); this.render(); });
     root.querySelectorAll("[data-pin-chip]").forEach(el => el.onclick = () => { this.pinDraft.name = el.dataset.pinChip; this._pinFocus = true; this.render(); });
     root.querySelector("[data-pin-name]")?.addEventListener("input", ev => { this.pinDraft.name = ev.target.value; });
-    root.querySelector("[data-pin-cancel]")?.addEventListener("click", () => { this.pinDraft = null; this.render(); });
+    root.querySelector("[data-pin-cancel]")?.addEventListener("click", () => { if (this.pinDraft?.busy) return; this.pinDraft = null; this.pinPreviousCompare = null; this.render(); });
     root.querySelector("[data-pin-form]")?.addEventListener("submit", ev => { ev.preventDefault(); this.pinSave(); });
     root.querySelectorAll("[data-pin-del]").forEach(el => el.onclick = ev => {
       ev.stopPropagation();
@@ -9860,12 +9869,7 @@ class ScanPointsMixin {
       this.confirmAsk(this.t("confirmPin", { name: b ? this.pinLabel(b) : "" }), () => this.pinDelete(id));
     });
     root.querySelectorAll("div[data-baseline]").forEach(el => el.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); el.click(); } }));
-    const modal = root.querySelector("[data-pin-modal]");
-    if (modal) {
-      modal.addEventListener("mousedown", ev => { if (ev.target === modal) { this.pinDraft = null; this.render(); } });
-      modal.addEventListener("keydown", ev => { if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); this.pinDraft = null; this.render(); } });
-      if (this._pinFocus) { this._pinFocus = false; modal.querySelector("[data-pin-name]")?.focus(); }
-    }
+    if (this._pinFocus && root.querySelector("[data-pin-form]")) { this._pinFocus = false; root.querySelector("[data-pin-name]")?.focus(); }
   }
 }
 
@@ -13865,7 +13869,7 @@ class HAHousekeeperPanel extends HTMLElement {
     // A view that throws shows a message under the top bar instead of freezing the panel on the last page.
     let page;
     try { page = this.selected && this.data ? this.detail() : `${this.heading()}${this.content()}`; } catch (err) { page = this.renderFailed(err); }
-    const shell = `<div class="shell${this.dense ? " dense" : ""}"><div class="stickyhead">${this.topbar()}${this.safetyBar()}</div><main class="main">${page}</main>${this.pinDialog()}${this.confirmDialog()}<div class="sr-only" role="status" aria-live="polite">${this.esc(this.liveStatus())}</div></div>`;
+    const shell = `<div class="shell${this.dense ? " dense" : ""}"><div class="stickyhead">${this.topbar()}${this.safetyBar()}</div><main class="main">${page}</main>${this.confirmDialog()}<div class="sr-only" role="status" aria-live="polite">${this.esc(this.liveStatus())}</div></div>`;
     // The style sheet is only parsed again when the theme changed; otherwise just the page is replaced.
     const root = this.shadowRoot, css = this.themeCss(), current = root.querySelector?.(".shell");
     let swapped = false;
