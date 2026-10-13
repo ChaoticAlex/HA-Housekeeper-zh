@@ -258,6 +258,11 @@ class CleanupMixin {
     this.render();
   }
 
+  async confirmAndRun() {
+    await this.confirmPlan();
+    if (this.confirmation) await this.executePlan();
+  }
+
   async executePlan() {
     const { plan_id, token } = this.confirmation;
     try {
@@ -446,12 +451,9 @@ class CleanupMixin {
       const review = plan.actions.filter(a => a.verdict === "review" && a.executable);
       const all = review.length && review.every(a => this.ack.has(a.object_id));
       const reviewBox = review.length ? `<label class="factnote reportopt"><input type="checkbox" data-ack-all ${all ? "checked" : ""}><span><strong>${this.t("acknowledgeAll", { count: review.length })}</strong><small>${this.t("acknowledgeAllHint")}</small></span></label>` : "";
-      control = `<div class="setrow planfoot">${reviewBox || `<small class="u-m0">${this.t("cleanupDryRun")}</small>`}<span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-plan-close>${this.t("confirmCancel")}</button><button class="btn primary" data-plan-confirm>${this.t("confirmPlan")}</button></span></div>`;
-    }
-    else if (open && conf) {
-      const risky = plan.actions.some(a => a.executable && (REMOVAL_KINDS.includes(a.kind) || PURGE_KINDS.includes(a.kind)));
-      control = `<div class="setrow planfoot"><div><strong>${this.t("confirmPlanTitle")}</strong><small>${this.confirmSummary(plan, conf.execute.length)}</small>${conf.needs_acknowledgement.length ? `<small>${this.t("skippedUnacknowledged", { count: conf.needs_acknowledgement.length })}</small>` : ""}</div>
-      <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn" data-plan-back>${this.t("wzBack")}</button><button class="btn ${risky ? "danger" : "primary"}" data-plan-execute data-risky="${risky}">${this.t("runNow")} (${conf.execute.length})</button></span></div>`;
+      const run = plan.actions.filter(a => a.executable && (a.verdict !== "review" || this.ack.has(a.object_id)));
+      const risky = run.some(a => REMOVAL_KINDS.includes(a.kind) || PURGE_KINDS.includes(a.kind));
+      control = `<div class="setrow planfoot"><div>${run.length ? `<strong class="plansum">${this.confirmSummary(plan, run.length)}</strong>` : ""}<small>${this.t("cleanupDryRun")}</small>${reviewBox}</div><span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="btn" data-plan-close>${this.t("confirmCancel")}</button><button class="btn ${risky ? "danger" : "primary"}" data-plan-confirm data-risky="${risky}" data-count="${run.length}">${this.t("confirmPlan")}</button></span></div>`;
     }
     else if (plan.status === "aborted") {
       const small = plan.actions.some(a => a.result?.reason === "backup_small_failed");
@@ -462,7 +464,7 @@ class CleanupMixin {
     else if (plan.actions.some(a => a.result?.state === "done" && !PURGE_KINDS.includes(a.kind))) control = this.undoAsk === "all"
       ? `<div class="setrow planfoot askbox"><div><strong>${this.t("undoAskAll")}</strong><small>${this.t("undoAskAllHint")}</small></div><span class="askrow"><button class="btn danger" data-undo-all-yes><ha-icon icon="mdi:undo-variant"></ha-icon>${this.t("undoYes")}</button><button class="btn accent" data-undo-no>${this.t("cancelRun")}</button></span></div>`
       : `<div class="setrow planfoot"><small class="u-m0">${this.esc(this.undoMessage || this.t("undoAllHint"))}</small><button class="btn accent" data-undo-all><ha-icon icon="mdi:undo-variant"></ha-icon>${this.t("undoAll")}</button></div>`;
-    const checks = plan.verification ? `<div class="checkrow"><b>${this.t("verification")}</b>${plan.verification.checks.map(c => `<span class="pill ${c.ok ? "ok" : "red"}">${c.ok ? "✓" : "✗"} ${this.t(`check_${c.check}`)}${c.object_id ? ` (${this.esc(c.object_id)})` : ""}</span>`).join("")}</div>` : "";
+    const checks = plan.verification ? `<details class="checkdet"><summary><b>${this.t("verification")}</b></summary><div class="checkrow">${plan.verification.checks.map(c => `<span class="pill ${c.ok ? "ok" : "red"}">${c.ok ? "✓" : "✗"} ${this.t(`check_${c.check}`)}${c.object_id ? ` (${this.esc(c.object_id)})` : ""}</span>`).join("")}</div></details>` : "";
     const stage = this.planStage(plan, Boolean(conf));
     // Nothing can run: no steps and no confirmation, one clear band and the reasons.
     if (open && !executable) {

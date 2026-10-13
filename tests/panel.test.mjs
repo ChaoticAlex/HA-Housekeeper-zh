@@ -931,13 +931,14 @@ test("a dry-run plan is confirmed, typed, executed with progress, and can be und
   el.render();
   let html = shadow.innerHTML;
   assert.ok(html.includes("data-plan-confirm") && html.includes("data-plan-close>Cancel") && html.includes('data-ack-all') && !html.includes("data-plan-execute"));
-  el.ack.add("sensor.b");
+  el.ack.add("sensor.b"); el.render();
+  assert.ok(shadow.innerHTML.includes("2 entities will be disabled") && shadow.innerHTML.includes('data-count="2"'), "the preview already names what runs");
   await el.confirmPlan();
   const confirm = sent.find(m => m.type === "ha_housekeeper/plan_confirm");
   assert.equal(JSON.stringify(confirm.acknowledged), JSON.stringify(["sensor.b"]));
   el.render();
   html = shadow.innerHTML;
-  assert.ok(html.includes("2 entities will be disabled") && !html.includes("data-confirm-word") && html.includes("data-plan-execute") && !html.includes("disabled>Run now"), "no word to type: the button runs through a dialog");
+  assert.ok(!html.includes("data-confirm-word") && !html.includes("data-plan-execute"), "one step: no second screen and no word to type");
   current = { ...base, status: "verified", executed: true, run: { started_at: "x" }, verification: { ok: true, checks: [{ check: "disabled", object_id: "sensor.a", ok: true }, { check: "no_new_broken_references", ok: true }] },
     actions: [action("sensor.a", "ok", { result: { state: "done" } }), action("sensor.b", "review", { result: { state: "not_run", reason: "entity_changed" } })] };
   await el.executePlan();
@@ -973,9 +974,7 @@ test("a blocked removal cannot be confirmed; a ready one asks for the removal wo
   el.plan = plan(true, []);
   el._hass = { language: "en", callWS: async () => ({ plan_id: "p2", token: "t", expires_at: "x", execute: ["sensor.a"], removals: ["sensor.a"], needs_acknowledgement: [], skipped: [] }) };
   el.render();
-  assert.ok(shadow.innerHTML.includes("data-plan-confirm"));
-  await el.confirmPlan();
-  el.render();
+  assert.ok(shadow.innerHTML.includes("data-plan-confirm") && shadow.innerHTML.includes('data-risky="true"'));
   assert.ok(!shadow.innerHTML.includes("data-confirm-word") && shadow.innerHTML.includes("creates a Home Assistant backup first"));
 });
 
@@ -1976,7 +1975,7 @@ test("the whole confirmation flow works end to end against a scripted backend", 
 
   await el.confirmPlan();
   assert.equal(el.confirmation.token, "tok");
-  assert.ok(!shadow.innerHTML.includes("data-confirm-word") && shadow.innerHTML.includes("data-plan-execute"), "running asks in a dialog, no word is typed");
+  assert.ok(!shadow.innerHTML.includes("data-confirm-word") && !shadow.innerHTML.includes("data-plan-execute"), "one step, no word is typed");
 
   await el.executePlan();
   for (let i = 0; i < 100 && el._polling; i++) await new Promise(resolve => setTimeout(resolve, 0));
@@ -3158,7 +3157,7 @@ test("deleting asks in a dialog first; the deletion runs only from its confirmat
   el.confirmClose();
   assert.equal(el.confirmState, null);
   assert.equal(ran, 0, "cancel deletes nothing");
-  assert.ok(el.t("confirmPlanDelete", { date: "x" }).includes("no longer possible") && el.t("confirmPlan") === "Continue" && el.t("confirmRemDay", { date: "d", name: "n" }).includes("due day stays"));
+  assert.ok(el.t("confirmPlanDelete", { date: "x" }).includes("no longer possible") && el.t("confirmPlan") === "Confirm" && el.t("confirmRemDay", { date: "d", name: "n" }).includes("due day stays"));
 });
 
 test("the logbook dialog names the object it was opened for and offers the picker only when none is set or on request", () => {
@@ -3266,7 +3265,7 @@ test("the counter assistant scans, previews with a chart and asks for REPAIR", a
   el.confirmation = { plan_id: "r1", token: "t", execute: ["sensor.water"], needs_acknowledgement: [] };
   el.render();
   const html = shadow.innerHTML;
-  assert.ok(html.includes("<polyline") && html.includes("5-minute rows") && html.includes("data-plan-execute") && !html.includes("data-confirm-word"));
+  assert.ok(html.includes("<polyline") && html.includes("5-minute rows") && !html.includes("data-confirm-word"));
   // A range picked by hand becomes a repair_range request with seconds since 1970.
   el.counterId = "sensor.water"; el.rangeFrom = "2026-10-01T10:00"; el.rangeTo = "2026-10-01T12:00"; el.rangeMode = "fixed"; el.rangeFixed = "91,7";
   el.pickRange(shadow);
@@ -3514,7 +3513,7 @@ test("a plan runs as a wizard: review, confirm with a way back, run, result; lon
   let html = shadow.innerHTML;
   assert.ok(html.includes("1. Review") && html.includes("sensor.s0") && html.includes("sensor.s19") && !html.includes("sensor.s20") && html.includes("data-lpage"), "a long plan comes in pages");
   el.confirmation = { plan_id: "p", token: "t", execute: ["sensor.s0"], needs_acknowledgement: [] }; el.render();
-  assert.ok(shadow.innerHTML.includes("data-plan-back") && shadow.innerHTML.includes("data-plan-execute"));
+  assert.ok(!shadow.innerHTML.includes("data-plan-back") && !shadow.innerHTML.includes("data-plan-execute"), "no second screen");
   el.confirmation = null; el.render();
   assert.ok(shadow.innerHTML.includes("data-plan-confirm") && !shadow.innerHTML.includes("data-plan-back"));
 });

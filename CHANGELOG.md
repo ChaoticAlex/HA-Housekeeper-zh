@@ -8,9 +8,9 @@
 
 ### Behoben
 
-- **Plan ausführen mit Rückfrage:** Das Eintippen des Bestätigungsworts („DEAKTIVIEREN“ usw.) entfällt. „Jetzt ausführen“ fragt stattdessen in einem Dialog nach. Der Schritt davor heißt „Weiter“ statt „Bestätigen …“, weil er noch nichts bestätigt, und die Zeile der Bestätigung ist aufgeräumt (Text links, „Zurück“ und „Jetzt ausführen“ rechts).
+- **Plan in einem Schritt bestätigen:** Die Vorschau zeigt Hinweis und eine größere Zusammenfassung; „Bestätigen“ fragt in einem Dialog nach und führt dann aus. Das Eintippen des Bestätigungsworts und der zweite Bildschirm entfallen. Die „Prüfung nach dem Lauf“ ist zugeklappt.
 
-- **Plan abbrechen:** Neben „Bestätigen …“ steht jetzt „Abbrechen“. Es verwirft die Vorschau wie „Schließen“ oben rechts; geändert wird nichts.
+- **Plan abbrechen:** Neben „Bestätigen“ steht jetzt „Abbrechen“. Es verwirft die Vorschau wie „Schließen“ oben rechts; geändert wird nichts.
 
 - **Plan bestätigen:** Der Button „Bestätigen …“ zeigte statt seiner Beschriftung den Text der Löschfrage des Journals samt „{date}“. Er trägt wieder seine Beschriftung.
 
@@ -22,9 +22,9 @@
 
 #### Fixed
 
-- **Running a plan asks in a dialog:** Typing the confirmation word (“DISABLE” etc.) is gone. “Run now” asks in a dialog instead. The step before is called “Continue” instead of “Confirm …” because it does not confirm anything yet, and the confirmation row is tidier (text on the left, “Back” and “Run now” on the right).
+- **Confirm a plan in one step:** The preview shows the hint and a larger summary; “Confirm” asks in a dialog and then runs the plan. Typing the confirmation word and the second screen are gone. The “Check after the run” is collapsed.
 
-- **Cancel a plan:** “Cancel” now stands next to “Confirm …”. It discards the preview like “Close” at the top right; nothing is changed.
+- **Cancel a plan:** “Cancel” now stands next to “Confirm”. It discards the preview like “Close” at the top right; nothing is changed.
 
 - **Confirm plan:** The “Confirm …” button showed the text of the journal delete question, including “{date}”, instead of its label. It has its label again.
 
