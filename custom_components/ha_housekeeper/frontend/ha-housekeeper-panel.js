@@ -1510,7 +1510,7 @@ class StylesMixin {
       .btn.small{padding:5px 11px;font-size:calc(13px*var(--hk-fs,1))}.notehint{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 16px}.notehint small{display:block;color:var(--hk-muted)}.row.seeall{justify-content:flex-start;color:var(--hk-blue-text);font-weight:600}.logfilters{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.logfilters .chip{cursor:pointer}.logfilters .chip.on{border-color:var(--hk-blue);color:var(--hk-blue-text)}.logsuggest{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin:12px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 9%,transparent)}
       .hamenu{display:grid;place-items:center;flex:none;width:40px;height:40px;margin:0 -10px 0 -6px;padding:0;border:0;border-radius:50%;background:none;color:inherit}.hamenu:hover{background:var(--hk-soft)}.hamenu:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px}.hamenu ha-icon{--mdc-icon-size:24px}.sysmeter{display:block;height:6px;margin-top:6px;border-radius:99px;background:var(--hk-soft);overflow:hidden}.sysmeter i{display:block;height:100%;border-radius:99px;background:var(--hk-green)}.sysmeter.warn i{background:var(--hk-amber)}.sysmeter.red i{background:var(--hk-red)}.sysmeter.mute i{background:var(--hk-gray)}.sysshare{display:block;width:100%;min-width:120px;height:8px;margin-top:2px;border-radius:99px;background:var(--hk-soft);overflow:hidden}.sysshare i{display:block;height:100%;border-radius:99px;background:var(--hk-green)}.tablewrap.lt.acc td{white-space:normal}.pills{display:flex;flex-wrap:wrap;gap:4px}@media(min-width:641px){.sysnav .navtiles{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(min-width:1300px){.sysnav .navtiles{grid-template-columns:repeat(6,minmax(0,1fr))}}
       .intentry{margin:4px 2px 0;font-size:15px}.syssec{margin:18px 16px 6px;font-size:15px}.syssec:first-child{margin-top:12px}
-      .rowmenu{position:relative;flex:none;margin:0 10px 0 0}.rowmenu>summary{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;list-style:none;cursor:pointer;color:var(--hk-muted)}.rowmenu>summary::-webkit-details-marker{display:none}.rowmenu>summary:hover,.rowmenu[open]>summary{background:var(--hk-soft);color:inherit}.menupop{position:absolute;right:0;top:100%;z-index:20;display:grid;min-width:260px;padding:4px 0;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);box-shadow:0 6px 20px rgba(0,0,0,.18)}.menuitem{white-space:nowrap;display:flex;gap:10px;align-items:center;padding:8px 14px;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}.menuitem:hover{background:var(--hk-soft)}.menuitem ha-icon{--mdc-icon-size:18px;color:var(--hk-muted)}
+      .pill.kind{background:none;border:1px solid var(--hk-border);color:var(--hk-muted)}.rowmenu{position:relative;flex:none;margin:0 10px 0 0}.rowmenu>summary{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;list-style:none;cursor:pointer;color:var(--hk-muted)}.rowmenu>summary::-webkit-details-marker{display:none}.rowmenu>summary:hover,.rowmenu[open]>summary{background:var(--hk-soft);color:inherit}.menupop{position:absolute;right:0;top:100%;z-index:20;display:grid;min-width:260px;padding:4px 0;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);box-shadow:0 6px 20px rgba(0,0,0,.18)}.menuitem{white-space:nowrap;display:flex;gap:10px;align-items:center;padding:8px 14px;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}.menuitem:hover{background:var(--hk-soft)}.menuitem ha-icon{--mdc-icon-size:18px;color:var(--hk-muted)}
       ${this.themeCss()}
     </style>`;
   }
@@ -2327,7 +2327,7 @@ class FindingsMixin {
         : finding.affected_object
           ? [this.esc(finding.affected_object), this.esc(this.placeText(finding, inGroup)), this.esc(this.suggestText(finding))].filter(Boolean).join(" · ")
           : this.esc(object?.reason ? this.t(object.reason) : this.findingTitle(finding));
-    const button = `<button class="row ${finding.ignored ? "dim" : ""}" data-object="${this.esc(key)}">${this.tile(object?.object_type || "entity", this.tone(finding.classification))}<span class="row-text"><strong>${this.esc(title)}</strong><small>${subtitle}${finding.ignored ? ` · ${this.esc(finding.mark ? this.markLine(finding.mark) : this.decisionLabel(finding))}` : ""}${finding.resurfaced ? ` · ${this.t("dueLabel")}` : ""}${this.statusTags(finding)}${this.followOf(finding)}${finding.first_detected_at ? `<span class="msince"> · ${this.t("sortSince")} ${this.formatDate(finding.first_detected_at)}</span>` : ""}</small></span>${this.impactChip(finding.impact)}${this.pill(finding.classification)}<span class="date">${finding.first_detected_at ? this.formatDate(finding.first_detected_at) : ""}</span></button>`;
+    const button = `<button class="row ${finding.ignored ? "dim" : ""}" data-object="${this.esc(key)}">${this.tile(object?.object_type || "entity", this.tone(finding.classification))}<span class="row-text"><strong>${this.esc(title)}</strong><small>${subtitle}${finding.ignored ? ` · ${this.esc(finding.mark ? this.markLine(finding.mark) : this.decisionLabel(finding))}` : ""}${finding.resurfaced ? ` · ${this.t("dueLabel")}` : ""}${this.statusTags(finding)}${this.followOf(finding)}${finding.first_detected_at ? `<span class="msince"> · ${this.t("sortSince")} ${this.formatDate(finding.first_detected_at)}</span>` : ""}</small></span>${this.kindChip(finding.rule_id === "config_entry.not_loaded" ? this.t("chip_outage") : this.statusLabel(finding.classification))}${this.impactChip(finding.impact)}</button>`;
     return `<div class="rowwrap"><input type="checkbox" class="selbox" data-fsel="${this.esc(finding.key)}" ${this.findSel.has(finding.key) ? "checked" : ""} aria-label="${this.esc(title)}">${button}${this.rowMenu(finding)}</div>${this.rowDecide(finding)}`;
   }
 
@@ -2414,7 +2414,7 @@ class FindingsMixin {
     const dueCount = this.data.findings.filter(f => f.resurfaced).length;
     const followers = this.followerCount();
     const fixedView = this.findingStatus === "fixed";
-    const open = !this.findingStatus && !this.findingFilter && !this.findingAfter && !this.lv.findings?.q;
+    const open = !this.findingStatus && !this.findingFilter && !this.findingAfter && !this.lv.findings?.q && !Object.values(this.lv.findings?.f || {}).some(Boolean);
     const entries = this.causeEntries(), withFollowers = entries.filter(c => this.causeTotal(c));
     // The list is one: the chains first (each a row with its counter), then the single findings, in the chosen sort.
     // Under a filter or in the flat list every finding stands for itself.
@@ -6968,9 +6968,12 @@ class CausesMixin {
   // The impact as a chip of its own at the right of a row: how much the entry matters, or how long an outage has lasted.
   impactChip(level) {
     if (!level || level === "none") return "";
-    const tone = { high: "red", medium: "warn", low: "mute", info: "blue" }[level] || "mute";
+    const tone = { high: "red", medium: "warn", low: "blue", info: "mute" }[level] || "mute";
     return `<span class="pill ${tone}">${this.esc(this.t(`chip_${level}`))}</span>`;
   }
+
+  // The reason of an entry (outage, unused, broken reference): a neutral outlined chip, it only names; the colour belongs to the impact.
+  kindChip(label) { return `<span class="pill kind">${this.esc(label)}</span>`; }
 
   // The menu at the end of a row: what can be decided about the finding, and where it applies the removal.
   // An open decision shows its form below the row.
@@ -6988,9 +6991,9 @@ class CausesMixin {
     const total = this.causeTotal(c), link = `${c.object_type}:${c.object_id}`;
     const title = this.esc(this.t(`cause_${c.kind}`, { name: c.name })), own1 = c.finding_key && this.data.findings.find(x => x.key === c.finding_key);
     const sub = [total ? this.t("causeExplains", { n: this.formatNumber(total) }) : "", this.causeShort(c)].filter(Boolean).join(" · ");
-    if (!total) return `<div class="rowwrap">${this.causeBox(c)}<button class="row rel" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${title}</strong><small>${this.esc(sub)}</small></span>${this.impactChip(c.impact)}<span class="pill red">${this.t("chip_outage")}</span></button>${this.rowMenu(own1)}</div>${this.rowDecide(own1)}`;
+    if (!total) return `<div class="rowwrap">${this.causeBox(c)}<button class="row rel" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${title}</strong><small>${this.esc(sub)}</small></span>${this.kindChip(this.t("chip_outage"))}${this.impactChip(c.impact)}</button>${this.rowMenu(own1)}</div>${this.rowDecide(own1)}`;
     const byId = id => this.causeList().find(x => x.id === id);
-    const own = c.virtual ? "" : `<div class="rowwrap">${this.causeBox(c)}<button class="row" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span>${this.impactChip(own1 ? own1.impact : "")}<span class="pill red">${this.t("chip_outage")}</span></button>${this.rowMenu(own1)}</div>${this.rowDecide(own1)}`;
+    const own = c.virtual ? "" : `<div class="rowwrap">${this.causeBox(c)}<button class="row" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span>${this.kindChip(this.t("chip_outage"))}${this.impactChip(own1 ? own1.impact : "")}</button>${this.rowMenu(own1)}</div>${this.rowDecide(own1)}`;
     const below = (c.child_ids || []).map(byId).filter(Boolean).map(x => this.causeEntry(x)).join("");
     const followers = (this.data.findings || []).filter(f => f.cause_id === c.id && !f.ignored && !CAUSE_OWN_RULES.includes(f.rule_id));
     const pg = this.paginate(`cause_${c.id}`, followers.map(f => this.findingRow(f)));

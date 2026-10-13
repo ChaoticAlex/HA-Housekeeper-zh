@@ -63,9 +63,12 @@ class CausesMixin {
   // The impact as a chip of its own at the right of a row: how much the entry matters, or how long an outage has lasted.
   impactChip(level) {
     if (!level || level === "none") return "";
-    const tone = { high: "red", medium: "warn", low: "mute", info: "blue" }[level] || "mute";
+    const tone = { high: "red", medium: "warn", low: "blue", info: "mute" }[level] || "mute";
     return `<span class="pill ${tone}">${this.esc(this.t(`chip_${level}`))}</span>`;
   }
+
+  // The reason of an entry (outage, unused, broken reference): a neutral outlined chip, it only names; the colour belongs to the impact.
+  kindChip(label) { return `<span class="pill kind">${this.esc(label)}</span>`; }
 
   // The menu at the end of a row: what can be decided about the finding, and where it applies the removal.
   // An open decision shows its form below the row.
@@ -83,9 +86,9 @@ class CausesMixin {
     const total = this.causeTotal(c), link = `${c.object_type}:${c.object_id}`;
     const title = this.esc(this.t(`cause_${c.kind}`, { name: c.name })), own1 = c.finding_key && this.data.findings.find(x => x.key === c.finding_key);
     const sub = [total ? this.t("causeExplains", { n: this.formatNumber(total) }) : "", this.causeShort(c)].filter(Boolean).join(" · ");
-    if (!total) return `<div class="rowwrap">${this.causeBox(c)}<button class="row rel" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${title}</strong><small>${this.esc(sub)}</small></span>${this.impactChip(c.impact)}<span class="pill red">${this.t("chip_outage")}</span></button>${this.rowMenu(own1)}</div>${this.rowDecide(own1)}`;
+    if (!total) return `<div class="rowwrap">${this.causeBox(c)}<button class="row rel" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${title}</strong><small>${this.esc(sub)}</small></span>${this.kindChip(this.t("chip_outage"))}${this.impactChip(c.impact)}</button>${this.rowMenu(own1)}</div>${this.rowDecide(own1)}`;
     const byId = id => this.causeList().find(x => x.id === id);
-    const own = c.virtual ? "" : `<div class="rowwrap">${this.causeBox(c)}<button class="row" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span>${this.impactChip(own1 ? own1.impact : "")}<span class="pill red">${this.t("chip_outage")}</span></button>${this.rowMenu(own1)}</div>${this.rowDecide(own1)}`;
+    const own = c.virtual ? "" : `<div class="rowwrap">${this.causeBox(c)}<button class="row" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span>${this.kindChip(this.t("chip_outage"))}${this.impactChip(own1 ? own1.impact : "")}</button>${this.rowMenu(own1)}</div>${this.rowDecide(own1)}`;
     const below = (c.child_ids || []).map(byId).filter(Boolean).map(x => this.causeEntry(x)).join("");
     const followers = (this.data.findings || []).filter(f => f.cause_id === c.id && !f.ignored && !CAUSE_OWN_RULES.includes(f.rule_id));
     const pg = this.paginate(`cause_${c.id}`, followers.map(f => this.findingRow(f)));
