@@ -300,6 +300,10 @@ Der erste Scan legt die anfänglichen Beobachtungszeitpunkte fest. Nachfolgende 
 
 Die Versionshinweise auf Deutsch und Englisch stehen in [CHANGELOG.md](CHANGELOG.md).
 
+## Dank an die Contributors
+
+Vielen Dank an [@jayjojayson](https://github.com/jayjojayson) für die Beiträge und das Feedback, die HA Housekeeper besser gemacht haben.
+
 ## Haftungsausschluss
 
 HA Housekeeper ist ein privat entwickeltes, kostenloses Open-Source-Projekt und wird

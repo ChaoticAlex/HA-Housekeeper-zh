@@ -300,6 +300,10 @@ The first scan establishes the initial observation timestamps. Later scans prese
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes in English and German.
 
+## Thanks to the contributors
+
+Many thanks to [@jayjojayson](https://github.com/jayjojayson) for the contributions and feedback that helped improve HA Housekeeper.
+
 ## Disclaimer
 
 HA Housekeeper is a privately developed, free open-source project and is provided
