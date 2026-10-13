@@ -34,11 +34,28 @@ class EntityStateMixin {
     return `<td class="selcell"><input type="checkbox" class="selbox" data-inv-sel="${this.esc(item.object_id)}" ${this.invSel?.has(item.object_id) ? "checked" : ""} aria-label="${this.esc(item.name)}"></td>`;
   }
 
+  // Select only the entities on the current page; other inventory object types have no bulk action.
+  invHeadBox() {
+    const ids = this._invPage || [];
+    if (!ids.length) return "";
+    const n = ids.filter(id => this.invSel?.has(id)).length;
+    return `<input type="checkbox" class="selbox" data-inv-sel-page ${n === ids.length ? "checked" : ""} ${n && n < ids.length ? "data-partial" : ""} aria-label="${this.esc(this.t("selectPage"))}">`;
+  }
+
   bindInvSel(root) {
     root.querySelectorAll("[data-inv-sel]").forEach(el => {
       el.onclick = ev => ev.stopPropagation();
       el.onchange = () => { (this.invSel ||= new Set())[el.checked ? "add" : "delete"](el.dataset.invSel); this.render(); };
     });
+    const pageBox = root.querySelector("[data-inv-sel-page]");
+    if (pageBox) {
+      pageBox.indeterminate = pageBox.hasAttribute("data-partial");
+      pageBox.onchange = () => {
+        const sel = this.invSel ||= new Set();
+        for (const id of this._invPage) sel[pageBox.checked ? "add" : "delete"](id);
+        this.render();
+      };
+    }
     root.querySelector("[data-inv-sel-all]")?.addEventListener("click", () => {
       this.invSel = new Set([...(this.invSel || []), ...this.filtered().filter(r => r.object_type === "entity").map(r => r.object_id)]); this.render();
     });

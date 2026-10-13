@@ -77,6 +77,30 @@ test("detail page renders for an orphaned entity and escapes the name", () => {
   assert.ok(shadow.innerHTML.includes('data-action="back"'));
 });
 
+test("inventory header selects and clears only the entities on the current page", () => {
+  const { el } = panel();
+  el.typeFilter = "entity";
+  assert.match(el.inventory(), /data-inv-sel-page/);
+  el.typeFilter = "automation";
+  assert.doesNotMatch(el.inventory(), /data-inv-sel-page/);
+  el._invPage = ["sensor.a", "sensor.b"];
+  el.invSel = new Set(["sensor.a", "sensor.other"]);
+  assert.match(el.invHeadBox(), /data-partial/);
+  const box = { checked: true, hasAttribute: name => name === "data-partial" };
+  const root = { querySelector: selector => selector === "[data-inv-sel-page]" ? box : null, querySelectorAll: () => [] };
+  el.render = () => {};
+  el.bindInvSel(root);
+  assert.equal(box.indeterminate, true);
+  box.onchange();
+  assert.deepEqual([...el.invSel].sort(), ["sensor.a", "sensor.b", "sensor.other"]);
+  assert.match(el.invHeadBox(), /checked/);
+  box.checked = false;
+  box.onchange();
+  assert.deepEqual([...el.invSel], ["sensor.other"]);
+  el._invPage = [];
+  assert.equal(el.invHeadBox(), "");
+});
+
 test("navigation keeps a trail and goes back", () => {
   const { el } = panel();
   el.selected = DATA.objects[0];

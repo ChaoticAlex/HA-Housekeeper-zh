@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Seite im Inventar auswählen:** Ein Kästchen im Tabellenkopf markiert die auswählbaren Entitäten der aktuellen Seite. Bei teilweiser Auswahl zeigt es den Zwischenzustand; ein weiterer Klick hebt die Seitenauswahl auf. Die Auswahl aller gefilterten Entitäten bleibt über die Leiste möglich.
+
 - **Entitäten im Inventar gesammelt umschalten:** Die Entitätenzeilen des Inventars haben ein Kästchen. Die Leiste darüber deaktiviert, aktiviert, blendet aus oder ein, bis zu 200 Entitäten pro Plan, mit Vorschau und Rückgängig. Eine Entität, die etwas sicher benutzt, wird nicht deaktiviert; nur selbst Deaktiviertes wird wieder aktiviert.
 
 ### Behoben
@@ -17,6 +19,8 @@
 ### English
 
 #### New
+
+- **Select an inventory page:** A checkbox in the table header selects the selectable entities on the current page. It shows a mixed state when some are selected; another click clears the page selection. The bar still offers selection of all filtered entities.
 
 - **Switch entities in bulk from the inventory:** Entity rows of the Inventory have a checkbox. The bar above disables, enables, hides or shows them, up to 200 entities per plan, with a preview and undo. An entity that something certainly uses is not disabled; only what you disabled yourself is enabled again.
 
