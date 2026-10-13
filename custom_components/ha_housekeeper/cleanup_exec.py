@@ -129,7 +129,18 @@ LOGBOOK_KINDS = ("remove_device", "forget_device")  # written to the logbook whe
 # unless the cause is shared by all of them.
 INDEPENDENT_KINDS = PURGE_KINDS | TRIM_KINDS
 GLOBAL_STOPS = {"recorder_busy", "no_recorder"}
+LOCAL_AGENT = "backup.local"
 BACKUP_TIMEOUT = 30 * 60  # seconds; large installations can take a while
+
+
+def backup_is_local_only(hass: HomeAssistant) -> bool:
+    """True when no backup location is set up, so a plan's backup stays in the local storage."""
+    try:
+        from homeassistant.components.backup import async_get_manager
+
+        return not async_get_manager(hass).config.data.create_backup.agent_ids
+    except Exception:
+        return False
 
 
 class CleanupError(Exception):
@@ -519,9 +530,9 @@ class CleanupRunner:
             self._backup_failed(plan, "backup_unavailable")
             return
         settings = manager.config.data.create_backup
-        if not settings.agent_ids:
-            self._backup_failed(plan, "no_backup_agent")
-            return
+        # Without automatic backups set up there is no agent and no password: the backup then goes
+        # to Home Assistant's own storage and is not encrypted, so nobody has to invent a key first.
+        agent_ids = list(settings.agent_ids) or [LOCAL_AGENT]
         _event(plan, "backup_started")
         # A plan asks for the full backup only after the small one failed and the person chose it
         # (a new preview with ``full_backup``). It follows the contents of the user's automatic
@@ -531,7 +542,7 @@ class CleanupRunner:
         try:
             async with asyncio.timeout(BACKUP_TIMEOUT):
                 created = await manager.async_create_backup(
-                    agent_ids=list(settings.agent_ids),
+                    agent_ids=agent_ids,
                     extra_metadata={"housekeeper": True, "housekeeper_scope": scope},
                     include_addons=list(getattr(settings, "include_addons", None) or [])
                     if full
@@ -556,6 +567,8 @@ class CleanupRunner:
             "job_id": getattr(created, "backup_job_id", None),
             "at": _now().isoformat(),
             "scope": scope,
+            # Without a configured location the backup stays in Home Assistant's own storage.
+            "local_only": not settings.agent_ids,
         }
         _event(plan, "backup_done", job_id=plan["backup"]["job_id"])
         plan["status"] = "running"

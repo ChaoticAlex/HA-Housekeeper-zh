@@ -54,7 +54,7 @@ from .cleanup import (
     registry_fingerprint,
     trim_is_plain,
 )
-from .cleanup_exec import CleanupError, entity_restorable
+from .cleanup_exec import CleanupError, backup_is_local_only, entity_restorable
 from .const import DOMAIN, OPTION_LIMITS
 from .device_pairs import pair_devices
 from .history import PinError
@@ -520,6 +520,8 @@ async def websocket_plan_create(
     plan = await _plan_from_requests(hass, snapshot, msg["actions"], scanner.refactor.enabled)
     if msg["full_backup"]:
         plan["full_backup"] = True
+    if backup_is_local_only(hass):
+        plan["backup_local"] = True
     scanner.journal.add(plan)
     connection.send_result(msg["id"], _versioned(public_plan(plan)))
 

@@ -432,7 +432,6 @@ async def test_removal_needs_a_finished_quarantine(hass: HomeAssistant) -> None:
     ("manager_kwargs", "reason"),
     [
         ({"error": RuntimeError("disk full")}, "backup_small_failed"),
-        ({"agent_ids": ()}, "no_backup_agent"),
     ],
 )
 async def test_no_backup_means_no_removal(hass: HomeAssistant, manager_kwargs, reason) -> None:
@@ -445,6 +444,18 @@ async def test_no_backup_means_no_removal(hass: HomeAssistant, manager_kwargs, r
     assert er.async_get(hass).async_get(entry.entity_id) is not None
     assert plan["status"] == "aborted" and plan["executed"] is False
     assert plan["actions"][0]["result"]["reason"] == reason
+
+
+async def test_without_a_backup_agent_the_backup_goes_to_local_storage(hass: HomeAssistant) -> None:
+    scanner = await make_scanner(hass)
+    entry, _ = await quarantined_entity(hass, scanner, "protected")
+    manager, create = fake_backup(agent_ids=())
+
+    plan = await run_removal(scanner, hass, entry.entity_id, manager)
+
+    assert create.await_args.kwargs["agent_ids"] == ["backup.local"]
+    assert create.await_args.kwargs["password"] is None
+    assert plan["status"] != "aborted"
 
 
 async def test_a_missing_backup_component_blocks_removal(hass: HomeAssistant) -> None:

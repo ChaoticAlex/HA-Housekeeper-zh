@@ -354,10 +354,10 @@ class CleanupMixin {
     if (!needsBackup) steps.push({ id: "stepBackup", state: "skipped", note: this.t("stepBackupSkipped") });
     else if (backupFailure) steps.push({ id: "stepBackup", state: "failed", note: [this.t(`abort_${backupFailure}`), ...(plan.events || []).filter(e => e.error).slice(-2).map(e => e.error), this.t("backupFailHint")].join(" · ") });
     else if (status === "backup") steps.push({ id: "stepBackup", state: "current", note: this.t("backupRunning") });
-    else if (open) steps.push({ id: "stepBackup", state: "todo", note: plan.full_backup ? this.t("backupFullPlanned") : null });
+    else if (open) steps.push({ id: "stepBackup", state: "todo", note: [plan.full_backup ? this.t("backupFullPlanned") : "", plan.backup_local ? this.t("backupLocalPlanned") : ""].filter(Boolean).join(" · ") || null });
     else {
       const job = plan.backup?.job_id ? this.t("stepBackupJob", { id: plan.backup.job_id }) : "";
-      steps.push({ id: "stepBackup", state: "done", note: plan.backup?.at ? this.t("stepBackupDone", { date: this.formatDate(plan.backup.at), job }) : null });
+      steps.push({ id: "stepBackup", state: "done", note: plan.backup?.at ? [this.t("stepBackupDone", { date: this.formatDate(plan.backup.at), job }), plan.backup.local_only ? this.t("backupLocalDone") : ""].filter(Boolean).join(" · ") : null });
     }
     const ranStates = ["executed", "verified", "undone", "partially_undone"];
     steps.push(status === "running" ? { id: "stepRun", state: "current" }
@@ -389,17 +389,22 @@ class CleanupMixin {
     const status = plan.status, total = plan.actions.length;
     const done = plan.actions.filter(a => a.result?.state === "done").length;
     const failedCheck = plan.verification && !plan.verification.ok;
-    let tone, icon, text;
+    let tone, icon, text, reason = "";
     if (status === "verified") { tone = "ok"; icon = "mdi:check-circle"; text = this.t("outcomeDone", { done, total }); }
     else if (status === "executed" && !plan.verification) { tone = "mute"; icon = "mdi:progress-clock"; text = this.t("outcomeVerifying", { done, total }); }
     else if (status === "executed" && failedCheck) { tone = "warn"; icon = "mdi:alert-circle"; text = this.t("outcomeCheckFailed", { done, total }); }
     else if (status === "partial") { tone = "warn"; icon = "mdi:alert-circle"; text = this.t("outcomePartial", { done, total }); }
-    else if (status === "aborted") { tone = "red"; icon = "mdi:close-circle"; text = this.t("outcomeAborted"); }
+    else if (status === "aborted") {
+      tone = "red"; icon = "mdi:close-circle"; text = this.t("outcomeAborted");
+      // The reason belongs in the band itself: the person should not have to look for it further down.
+      const why = plan.actions.map(a => a.result?.reason).find(Boolean);
+      if (why) reason = this.t(`abort_${why}`);
+    }
     else return "";
     const doneActions = plan.actions.filter(a => a.result?.state === "done" && a.kind !== "delete_backup");
     const backupOnly = a => ["migrate_meter", ...PURGE_KINDS].includes(a.kind);
     const undo = !doneActions.length ? "" : doneActions.every(backupOnly) ? this.t("outcomeUndoBackup") : doneActions.some(backupOnly) ? this.t("outcomeUndoMixed") : this.t("outcomeUndoYes");
-    return `<div class="outcome ${tone}" role="status"><ha-icon icon="${icon}"></ha-icon><span><strong>${this.esc(text)}</strong>${undo ? `<small>${this.esc(undo)}</small>` : ""}</span></div>`;
+    return `<div class="outcome ${tone}" role="status"><ha-icon icon="${icon}"></ha-icon><span><strong>${this.esc(text)}</strong>${reason ? `<small>${this.esc(reason)}</small>` : ""}${undo ? `<small>${this.esc(undo)}</small>` : ""}</span></div>`;
   }
 
   planCard(plan) {

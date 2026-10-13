@@ -3280,10 +3280,10 @@ class CleanupMixin {
     if (!needsBackup) steps.push({ id: "stepBackup", state: "skipped", note: this.t("stepBackupSkipped") });
     else if (backupFailure) steps.push({ id: "stepBackup", state: "failed", note: [this.t(`abort_${backupFailure}`), ...(plan.events || []).filter(e => e.error).slice(-2).map(e => e.error), this.t("backupFailHint")].join(" · ") });
     else if (status === "backup") steps.push({ id: "stepBackup", state: "current", note: this.t("backupRunning") });
-    else if (open) steps.push({ id: "stepBackup", state: "todo", note: plan.full_backup ? this.t("backupFullPlanned") : null });
+    else if (open) steps.push({ id: "stepBackup", state: "todo", note: [plan.full_backup ? this.t("backupFullPlanned") : "", plan.backup_local ? this.t("backupLocalPlanned") : ""].filter(Boolean).join(" · ") || null });
     else {
       const job = plan.backup?.job_id ? this.t("stepBackupJob", { id: plan.backup.job_id }) : "";
-      steps.push({ id: "stepBackup", state: "done", note: plan.backup?.at ? this.t("stepBackupDone", { date: this.formatDate(plan.backup.at), job }) : null });
+      steps.push({ id: "stepBackup", state: "done", note: plan.backup?.at ? [this.t("stepBackupDone", { date: this.formatDate(plan.backup.at), job }), plan.backup.local_only ? this.t("backupLocalDone") : ""].filter(Boolean).join(" · ") : null });
     }
     const ranStates = ["executed", "verified", "undone", "partially_undone"];
     steps.push(status === "running" ? { id: "stepRun", state: "current" }
@@ -3315,17 +3315,22 @@ class CleanupMixin {
     const status = plan.status, total = plan.actions.length;
     const done = plan.actions.filter(a => a.result?.state === "done").length;
     const failedCheck = plan.verification && !plan.verification.ok;
-    let tone, icon, text;
+    let tone, icon, text, reason = "";
     if (status === "verified") { tone = "ok"; icon = "mdi:check-circle"; text = this.t("outcomeDone", { done, total }); }
     else if (status === "executed" && !plan.verification) { tone = "mute"; icon = "mdi:progress-clock"; text = this.t("outcomeVerifying", { done, total }); }
     else if (status === "executed" && failedCheck) { tone = "warn"; icon = "mdi:alert-circle"; text = this.t("outcomeCheckFailed", { done, total }); }
     else if (status === "partial") { tone = "warn"; icon = "mdi:alert-circle"; text = this.t("outcomePartial", { done, total }); }
-    else if (status === "aborted") { tone = "red"; icon = "mdi:close-circle"; text = this.t("outcomeAborted"); }
+    else if (status === "aborted") {
+      tone = "red"; icon = "mdi:close-circle"; text = this.t("outcomeAborted");
+      // The reason belongs in the band itself: the person should not have to look for it further down.
+      const why = plan.actions.map(a => a.result?.reason).find(Boolean);
+      if (why) reason = this.t(`abort_${why}`);
+    }
     else return "";
     const doneActions = plan.actions.filter(a => a.result?.state === "done" && a.kind !== "delete_backup");
     const backupOnly = a => ["migrate_meter", ...PURGE_KINDS].includes(a.kind);
     const undo = !doneActions.length ? "" : doneActions.every(backupOnly) ? this.t("outcomeUndoBackup") : doneActions.some(backupOnly) ? this.t("outcomeUndoMixed") : this.t("outcomeUndoYes");
-    return `<div class="outcome ${tone}" role="status"><ha-icon icon="${icon}"></ha-icon><span><strong>${this.esc(text)}</strong>${undo ? `<small>${this.esc(undo)}</small>` : ""}</span></div>`;
+    return `<div class="outcome ${tone}" role="status"><ha-icon icon="${icon}"></ha-icon><span><strong>${this.esc(text)}</strong>${reason ? `<small>${this.esc(reason)}</small>` : ""}${undo ? `<small>${this.esc(undo)}</small>` : ""}</span></div>`;
   }
 
   planCard(plan) {
@@ -9104,7 +9109,7 @@ Object.assign(TEXT.de, {
   loadingShort: "lädt …", resetFilters: "Filter zurücksetzen", showSelectedOnly: "Nur Ausgewählte zeigen", showAll: "Alle zeigen",
   verdictIrreversible: "Nicht umkehrbar",
   acknowledgeAll: "Ich habe die {count} zu prüfenden Einträge gesehen und führe sie mit aus", acknowledgeAllHint: "Ohne Haken laufen nur die unbedenklichen Einträge; zu prüfende werden übersprungen.",
-  outcomeDone: "Erfolgreich abgeschlossen: {done} von {total} erledigt, Prüfung bestanden.", outcomeVerifying: "Ausgeführt: {done} von {total} erledigt. Die Prüfung läuft noch …", outcomeCheckFailed: "{done} von {total} erledigt, aber die Prüfung hat etwas gefunden. Siehe unten.", outcomePartial: "Nur teilweise ausgeführt: {done} von {total} erledigt.", outcomeAborted: "Abgebrochen. Es wurde nichts geändert; der Grund steht unten.",
+  outcomeDone: "Erfolgreich abgeschlossen: {done} von {total} erledigt, Prüfung bestanden.", outcomeVerifying: "Ausgeführt: {done} von {total} erledigt. Die Prüfung läuft noch …", outcomeCheckFailed: "{done} von {total} erledigt, aber die Prüfung hat etwas gefunden. Siehe unten.", outcomePartial: "Nur teilweise ausgeführt: {done} von {total} erledigt.", backupLocalPlanned: "Kein Backup-Ziel eingerichtet: Das Backup liegt im lokalen Speicher von Home Assistant (Ordner /backup, unverschlüsselt). Eine Kopie außerhalb von Home Assistant, etwa dein Google-Drive-Backup, bleibt sinnvoll.", backupLocalDone: "lokal, unverschlüsselt", outcomeAborted: "Abgebrochen. Es wurde nichts gelöscht und nichts geändert.",
   repeatPlan: "Plan wiederholen", repeatHint: "Es wurde nichts geändert. Das erstellt eine neue Vorschau mit denselben Objekten.",
   planResultDone: "Plan", undoYes: "Ja, rückgängig machen", undoAskOne: "Diese Änderung zurücksetzen?", undoAskAll: "Alles rückgängig machen?",
   undoAskAllHint: "Housekeeper stellt zurück, was dieser Plan geändert hat, soweit es unverändert ist.", undoAllHint: "Housekeeper kann zurückstellen, was dieser Plan geändert hat, solange es unverändert ist.", reportTitle: "Prüfbericht",
@@ -9147,7 +9152,7 @@ Object.assign(TEXT.en, {
   loadingShort: "loading …", resetFilters: "Reset filters", showSelectedOnly: "Show selected only", showAll: "Show all",
   verdictIrreversible: "Not reversible",
   acknowledgeAll: "I have seen the {count} entries to review and run them too", acknowledgeAllHint: "Without the tick only the unproblematic entries run; entries to review are skipped.",
-  outcomeDone: "Completed successfully: {done} of {total} done, check passed.", outcomeVerifying: "Executed: {done} of {total} done. The check is still running …", outcomeCheckFailed: "{done} of {total} done, but the check found something. See below.", outcomePartial: "Only partly executed: {done} of {total} done.", outcomeAborted: "Aborted. Nothing was changed; the reason is below.",
+  outcomeDone: "Completed successfully: {done} of {total} done, check passed.", outcomeVerifying: "Executed: {done} of {total} done. The check is still running …", outcomeCheckFailed: "{done} of {total} done, but the check found something. See below.", outcomePartial: "Only partly executed: {done} of {total} done.", backupLocalPlanned: "No backup location is set up: the backup stays in the local storage of Home Assistant (folder /backup, not encrypted). A copy outside Home Assistant, such as your Google Drive backup, is still worth having.", backupLocalDone: "local, not encrypted", outcomeAborted: "Aborted. Nothing was deleted and nothing was changed.",
   repeatPlan: "Repeat plan", repeatHint: "Nothing was changed. This creates a new preview with the same objects.",
   planResultDone: "Plan", undoYes: "Yes, undo", undoAskOne: "Undo this change?", undoAskAll: "Undo everything?",
   undoAskAllHint: "Housekeeper puts back what this plan changed, as far as it is still unchanged.", undoAllHint: "Housekeeper can put back what this plan changed, as long as it is unchanged.", reportTitle: "Audit report",
@@ -12514,13 +12519,13 @@ class ConfirmMixin {
 // BrokenCardsMixin: where a broken dashboard reference sits (tab and card instead of a raw path), the close names that
 // do exist, and one row per card instead of one per reference. Mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
-  brokenView: "Tab „{view}“", brokenCard: "Karte {card}", brokenSection: "Abschnitt {n}", brokenMaybe: "Vielleicht: {ids}",
+  brokenView: "Tab „{view}“", brokenCard: "Karte {card}", brokenSection: "Abschnitt {n}", brokenMaybe: "Vielleicht: {ids}", brokenRuntimeScene: "Diese Szene legt eine Automation oder ein Skript selbst an (scene.create); sie existiert erst nach dem ersten Lauf und nach jedem Neustart wieder erst dann.",
   brokenCount: "{n} defekte Referenzen", brokenCardLabel: "Karte", brokenOrphanShort: "wirkt verwaist",
   brokenOrphanHint: "Die Karte {card} (Tab „{view}“) wirkt verwaist: {missing} von {total} Referenzen sind defekt. Prüfe, ob du sie ganz entfernen kannst, statt jede Zeile einzeln zu reparieren.",
   brokenOrphan: "Die Karte wirkt verwaist: {missing} von {total} Referenzen sind defekt. Prüfen, ob sie ganz entfernt werden kann, statt jede Zeile einzeln zu reparieren.",
 });
 Object.assign(TEXT.en, {
-  brokenView: "Tab “{view}”", brokenCard: "Card {card}", brokenSection: "Section {n}", brokenMaybe: "Maybe: {ids}",
+  brokenView: "Tab “{view}”", brokenCard: "Card {card}", brokenSection: "Section {n}", brokenMaybe: "Maybe: {ids}", brokenRuntimeScene: "An automation or script creates this scene itself (scene.create); it only exists after that action has run, and again only after the next run following a restart.",
   brokenCount: "{n} broken references", brokenCardLabel: "Card", brokenOrphanShort: "looks abandoned",
   brokenOrphanHint: "The card {card} (tab “{view}”) looks abandoned: {missing} of {total} references are broken. Check whether you can remove it as a whole instead of repairing each line.",
   brokenOrphan: "The card looks abandoned: {missing} of {total} references are broken. Check whether it can be removed as a whole instead of repairing each line.",
@@ -12540,7 +12545,10 @@ class BrokenCardsMixin {
       p.card ? `${this.t("brokenCard", { card: p.card })}${p.section ? ` (${this.t("brokenSection", { n: p.section })})` : ""}` : ""].filter(Boolean);
   }
 
-  suggestText(f) { return f.suggestions?.length ? this.t("brokenMaybe", { ids: f.suggestions.join(", ") }) : ""; }
+  suggestText(f) {
+    if (f.runtime_created) return this.t("brokenRuntimeScene");
+    return f.suggestions?.length ? this.t("brokenMaybe", { ids: f.suggestions.join(", ") }) : "";
+  }
 
   // One entry per card for broken dashboard references with a known card; a card with a single one stays a plain row.
   groupBroken(list) {

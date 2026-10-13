@@ -542,6 +542,28 @@ def _config_entry_findings(
     return findings
 
 
+def runtime_scene_ids(config: Any) -> set[str]:
+    """Scene entity IDs that an automation or script creates itself with ``scene.create``.
+
+    Such a scene does not exist until the action has run once (and again after each restart), so a
+    reference to it is not necessarily broken. Only fixed IDs count; templates are skipped.
+    """
+    found: set[str] = set()
+    stack = [config]
+    while stack:
+        node = stack.pop()
+        if isinstance(node, dict):
+            if "scene.create" in (node.get("action"), node.get("service")):
+                data = node.get("data")
+                scene_id = data.get("scene_id") if isinstance(data, dict) else None
+                if isinstance(scene_id, str) and is_concrete_id(scene_id):
+                    found.add(scene_id if scene_id.startswith("scene.") else f"scene.{scene_id}")
+            stack.extend(node.values())
+        elif isinstance(node, list):
+            stack.extend(node)
+    return found
+
+
 def _missing_findings(
     domain: str,
     object_id: str,
@@ -1452,6 +1474,7 @@ class InventoryScanner:
 
             missing = missing_references(references, existing)
             findings.extend(_missing_findings(domain, entity_id, missing, existing["entity"]))
+            self._created_scenes |= runtime_scene_ids(getattr(entity, "raw_config", None))
 
             attrs = state.attributes if state else {}
             blueprint = getattr(entity, "referenced_blueprint", None)
@@ -1490,6 +1513,7 @@ class InventoryScanner:
         self, existing: dict[str, set[str]]
     ) -> tuple[list[dict[str, Any]], list[dict[str, str]], list[dict[str, Any]]]:
         """Inspect automations, scripts and scenes."""
+        self._created_scenes: set[str] = set()
         automations, edges, findings = self._config_object_inventory(
             "automation", summarize_automation_config, existing
         )
@@ -1497,10 +1521,14 @@ class InventoryScanner:
             "script", summarize_script_config, existing
         )
         scenes, scene_edges, scene_findings = self._scene_inventory(existing)
+        all_findings = findings + script_findings + scene_findings
+        for finding in all_findings:
+            if finding["affected_object"] in self._created_scenes:
+                finding["runtime_created"] = True
         return (
             automations + scripts + scenes,
             edges + script_edges + scene_edges,
-            findings + script_findings + scene_findings,
+            all_findings,
         )
 
     def _helper_inventory(

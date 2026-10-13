@@ -22,6 +22,10 @@
 
 ### Behoben
 
+- **Backup vor dem Löschen ohne eingerichtete Backups:** Wer in Home Assistant noch keine automatischen Backups eingerichtet hat, musste dafür erst ein Backup-Ziel und einen Verschlüsselungsschlüssel anlegen. Housekeeper sichert jetzt in den lokalen Speicher von Home Assistant, ohne Passwort. Die Vorschau und der Backup-Schritt sagen, dass es lokal und unverschlüsselt liegt. Ein abgebrochener Plan nennt den Grund im roten Band („Es wurde nichts gelöscht und nichts geändert“).
+
+- **„Szene fehlt“ bei Szenen, die eine Automation selbst anlegt:** Legt eine Automation oder ein Skript die Szene mit `scene.create` an, nennt der Befund das jetzt: Die Szene existiert erst nach dem ersten Lauf.
+
 - **Richtlinien und andere Ansichten nach „Neu scannen“:** Die Liste der betroffenen Entitäten blieb nach einem neuen Scan auf dem alten Stand, bis man die Seite neu lud. Richtlinien, Freigaben, Automations-Qualität und Blueprints laden nach einem neuen Scan jetzt selbst neu (Issue #11).
 
 - **Menü auf schmalen Fenstern:** Die geöffnete Menüliste ist höher als das Fenster, etwa bei großer Schrift, und scrollt jetzt, sodass auch die unteren Einträge erreichbar sind (Issue #10).

@@ -1219,3 +1219,15 @@ async def test_a_rename_with_a_template_mention_is_blocked(hass: HomeAssistant) 
         )
     action = plan["actions"][0]
     assert action["verdict"] == "blocked" and "rename_templates" in action["reasons"]
+
+
+def test_scenes_created_by_an_action_are_recognised() -> None:
+    from custom_components.ha_housekeeper.inventory import runtime_scene_ids
+
+    config = {
+        "actions": [
+            {"if": [], "then": [{"action": "scene.create", "data": {"scene_id": "before"}}]},
+            {"action": "scene.create", "data": {"scene_id": "{{ x }}"}},
+        ]
+    }
+    assert runtime_scene_ids(config) == {"scene.before"}
