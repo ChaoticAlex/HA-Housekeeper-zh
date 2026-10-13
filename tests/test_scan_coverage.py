@@ -54,3 +54,14 @@ def test_retryable_gaps_leave_out_a_component_that_is_not_there() -> None:
     coverage.skipped("energy", "not_ready")
     coverage.absent("apps", "no_supervisor")
     assert retryable_gaps(coverage.report()) == ["energy", "statistics"]
+
+
+def test_counts_are_kept_only_for_a_source_that_was_read() -> None:
+    coverage = ScanCoverage()
+    coverage.checked("registry")
+    coverage.skipped("apps", "not_reachable")
+    coverage.counts("registry", entities=4)
+    coverage.counts("apps", apps=2)
+    by_source = {item["source"]: item for item in coverage.report()}
+    assert by_source["registry"]["counts"] == {"entities": 4}
+    assert "counts" not in by_source["apps"]

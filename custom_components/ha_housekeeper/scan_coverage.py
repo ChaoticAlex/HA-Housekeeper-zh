@@ -55,6 +55,12 @@ class ScanCoverage:
     def absent(self, source: str, reason: str) -> None:
         self._set(source, "absent", reason)
 
+    def counts(self, source: str, **amounts: int) -> None:
+        """How much of a source was read; only for a source that is not absent or skipped."""
+        item = self._items.get(source)
+        if item and item["state"] in ("checked", "partial"):
+            item["counts"] = amounts
+
     def report(self) -> list[dict[str, Any]]:
         """Every source in a fixed order; one the scan did not reach is ``unknown``."""
         return [

@@ -974,6 +974,7 @@ class InventoryScanner:
         dashboards, dashboard_edges, dashboard_findings = await self._dashboard_inventory(
             existing_objects
         )
+        dashboard_count = len(dashboards)
         energy, energy_edges = await self._energy_inventory(existing_objects)
         self.scan_coverage.checked("automations")
         dashboards.extend(energy)
@@ -1150,6 +1151,20 @@ class InventoryScanner:
                 self.scan_coverage.absent("database", "no_recorder")
             else:
                 self.scan_coverage.checked("database")
+
+        kinds = Counter(item["object_type"] for item in automations)
+        self.scan_coverage.counts(
+            "registry", entities=len(entities), devices=len(devices), areas=len(areas)
+        )
+        self.scan_coverage.counts(
+            "automations",
+            automations=kinds["automation"],
+            scripts=kinds["script"],
+            scenes=kinds["scene"],
+        )
+        self.scan_coverage.counts("dashboards", dashboards=dashboard_count)
+        self.scan_coverage.counts("apps", apps=len(apps))
+        self.scan_coverage.counts("statistics", statistics=len(statistics))
 
         lap("finalizing")
         _LOGGER.debug("Scan took %.2f s: %s", sum(timing.values()), timing)
