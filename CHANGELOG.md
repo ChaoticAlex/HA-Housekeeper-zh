@@ -4,6 +4,8 @@
 
 ### Geändert
 
+- **Aufklapp-Pfeile einheitlich:** Alle aufklappbaren Bereiche („Wie wird das gezählt?“, Dateigruppen, Details) haben denselben kleinen Pfeil, der nach rechts zeigt und sich beim Öffnen nach unten dreht, statt des groben Standard-Dreiecks.
+
 - **Listenleiste ruhiger:** Die Suche ist 200 px breit, der Filter heißt „Schweregrad“ (Hoch, Mittel, Niedrig, Info, Keine) und die Sortierung zeigt ihre Richtung im Eintrag („Schweregrad ↓“). Gespeicherte Ansichten sind ein Stern-Knopf mit Auswahl, Löschen je Eintrag und „Ansicht speichern“. „Kompakte Zeilen“ wirkt jetzt auch in der Befundliste.
 
 - **Ausfälle von Integrationen mit Schweregrad nach Dauer:** Eine nicht geladene Integration ist sofort ein Befund und wartet nicht mehr, bis die „Mindestdauer nicht verfügbar“ (Standard 7 Tage) vorbei ist. Die Dauer bestimmt die Auswirkung: unter 1 Stunde „Info“, ab 1 Stunde „Niedrig“, ab 1 Tag „Mittel“, ab der Mindestdauer „Hoch“. Neu ist die Stufe „Info“ (1 Punkt, höchstens 5); „Niedrig“ und „Mittel“ ziehen jetzt 2 und 3 Punkte statt 1 und 2 ab. Dadurch springt der Punktestand einmalig. In der Liste trägt jede Zeile ihre Auswirkung als Chip und ein „⋯“-Menü mit „Als bekannt markieren“, „Zurückstellen“, „Befund ausblenden“ (und „Löschen vorbereiten“, wo es passt); die breiten Knöpfe unter den Ausfällen und der Einzelknopf „Löschen vorbereiten“ entfallen. Im Detail stehen dieselben Aktionen jetzt auch bei Ausfällen. Die Zeile eines Ausfalls nennt nur noch, was betroffen ist und wie lange er dauert („seit 6 Std. · Mittel in 18 Std.“); Zustand und Fehlertext stehen im Detail. Jede Zeile hat zwei Chips: den Grund (grauer Umriss, zum Beispiel „Ausfall“, „Ungenutzt“) und die Auswirkung (farbig, Hoch rot bis Info grau); das Datum entfällt in der Zeile. Die Filter „Typ“ und „Auswirkung“ gelten jetzt auch für Ausfälle; neu ist der Filter „Grund“ (mit „Ausfall“ als eigener Kachel). Die Kachel „Housekeeping-Status“ der Befunde-Seite entfällt; ihr Verlauf („−27 in 2 Tagen“) steht in der Übersicht unter der Überschrift, der Link „Wie entsteht die Zahl?“ ist weg.
@@ -23,6 +25,8 @@
 ### English
 
 #### Changed
+
+- **Uniform expand arrows:** All collapsible sections ("How is this counted?", file groups, details) now share the same small chevron that points right and turns down when opened, instead of the coarse default triangle.
 
 - **Calmer list bar:** The search is 200 px wide, the filter is called "Severity" (High, Medium, Low, Info, None) and the sort shows its direction in the entry ("Severity ↓"). Saved views are one star button with a pick list, delete per entry and "Save view". "Compact rows" now works in the findings list too.
 
