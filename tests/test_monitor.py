@@ -7,6 +7,7 @@ import pytest
 pytest.importorskip("homeassistant")
 
 from custom_components.ha_housekeeper.monitor import (  # noqa: E402
+    MonitorError,
     MonitorStore,
     evaluate,
 )
@@ -85,6 +86,37 @@ def test_scenes_scripts_and_selected_apps_have_distinct_fault_rules():
     assert evaluate(script, snapshot([script_item], [{**broken, "rule_id": "script.dead_actions", "object_id": "script.arrival"}]), health(), NOW)["reason"] == "broken_reference"
     assert evaluate(app, snapshot([app_item]), health(), NOW)["reason"] == "stopped"
     assert evaluate(app, snapshot(apps="skipped"), health(), NOW)["state"] == "unverified"
+
+
+def test_entity_conditions_use_scan_evidence_and_keep_gaps_unknown():
+    item = definition(("entity:sensor.battery", True))
+    item["members"][0]["rules"] = [
+        {"kind": "freshness", "value": 24}, {"kind": "min_value", "value": 20},
+    ]
+    object_data = {
+        "object_type": "entity", "object_id": "sensor.battery", "status": "active",
+        "state": "19", "last_updated": (NOW - timedelta(hours=1)).isoformat(),
+    }
+    assert evaluate(item, snapshot([object_data]), health(), NOW)["reason"] == "rule_below_min"
+    assert evaluate(item, snapshot([{**object_data, "state": "21", "last_updated": (NOW - timedelta(hours=25)).isoformat()}]), health(), NOW)["reason"] == "rule_stale"
+    assert evaluate(item, snapshot([{**object_data, "state": "21", "last_updated": None}]), health(), NOW)["state"] == "unverified"
+    assert evaluate(item, snapshot([object_data], registry="skipped"), health(), NOW)["state"] == "unverified"
+
+
+def test_unavailable_grace_period_and_rule_validation():
+    item = definition(("entity:sensor.water", True))
+    item["members"][0]["rules"] = [{"kind": "unavailable_for", "value": 10}]
+    object_data = {
+        "object_type": "entity", "object_id": "sensor.water", "status": "unavailable",
+        "status_since": (NOW - timedelta(minutes=5)).isoformat(),
+    }
+    assert evaluate(item, snapshot([object_data]), health(), NOW)["reason"] == "rule_waiting"
+    assert evaluate(item, snapshot([{**object_data, "status_since": (NOW - timedelta(minutes=11)).isoformat()}]), health(), NOW)["reason"] == "rule_unavailable_long"
+    MonitorStore._validate(item["name"], "", True, item["members"])
+    for rules in ([{"kind": "freshness", "value": 0}], [{"kind": "min_value", "value": float("nan")}], [{"kind": "freshness", "value": 24}, {"kind": "freshness", "value": 12}]):
+        item["members"][0]["rules"] = rules
+        with pytest.raises(MonitorError):
+            MonitorStore._validate(item["name"], "", True, item["members"])
 
 
 def test_two_scans_are_needed_to_report_a_gap(monkeypatch):

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import secrets
 from datetime import UTC, datetime, timedelta
+from math import isfinite
 from typing import Any
 
 from homeassistant.components import persistent_notification
@@ -30,6 +31,8 @@ MAX_ITEMS = 30
 MAX_MEMBERS = 12
 NAME_MAX = 80
 DESCRIPTION_MAX = 240
+MAX_RULES = 3
+RULE_LIMITS = {"freshness": (1, 720), "min_value": (-1_000_000_000, 1_000_000_000), "unavailable_for": (1, 1440)}
 MEMBER_TYPES = frozenset({"entity", "device", "automation", "config_entry", "scene", "script", "app"})
 AUTOMATION_RULES = frozenset(
     {"automation.blocked", "automation.dead_actions", "automation.dead_condition"}
@@ -47,6 +50,9 @@ REASONS_DE = {
     "automation.dead_actions": "Automationsaktion mit defektem Verweis",
     "automation.dead_condition": "Automationsbedingung mit defektem Verweis",
     "broken_reference": "Defekter Verweis", "stopped": "App gestoppt",
+    "rule_stale": "Wert nicht rechtzeitig aktualisiert", "rule_below_min": "Mindestwert unterschritten",
+    "rule_unavailable_long": "Zu lange nicht verfügbar", "rule_waiting": "Wartezeit läuft",
+    "rule_no_value": "Kein numerischer Wert", "rule_no_timestamp": "Aktualisierungszeit unbekannt",
 }
 REASONS_EN = {
     "missing": "object missing", "disabled": "disabled", "orphaned": "orphaned",
@@ -56,6 +62,9 @@ REASONS_EN = {
     "automation.dead_actions": "automation action has a broken reference",
     "automation.dead_condition": "automation condition has a broken reference",
     "broken_reference": "broken reference", "stopped": "app stopped",
+    "rule_stale": "value not updated in time", "rule_below_min": "below minimum value",
+    "rule_unavailable_long": "unavailable for too long", "rule_waiting": "grace period running",
+    "rule_no_value": "no numeric value", "rule_no_timestamp": "update time unknown",
 }
 
 
@@ -81,10 +90,12 @@ def _member_state(
     objects: dict[str, dict[str, Any]],
     findings: dict[str, list[dict[str, Any]]],
     coverage: dict[str, str],
+    now: datetime,
 ) -> dict[str, Any]:
     key = member["object_key"]
     kind, _ = key.split(":", 1)
     item = objects.get(key)
+    rules = member.get("rules", [])
     source_state = coverage.get(_source(kind), "unknown")
     if item is None:
         state = STATE_PROBLEM if source_state == "checked" else STATE_UNVERIFIED
@@ -111,12 +122,41 @@ def _member_state(
             "script": {"unknown"},
             "app": {"unknown"},
         }[kind]
-        if status in bad:
+        grace = next((rule["value"] for rule in rules if rule["kind"] == "unavailable_for"), None)
+        if kind == "entity" and status == "unavailable" and grace is not None:
+            since = _time(item.get("status_since"))
+            if since is None:
+                state, reason = STATE_UNVERIFIED, "rule_no_timestamp"
+            elif now - since >= timedelta(minutes=grace):
+                state, reason = STATE_PROBLEM, "rule_unavailable_long"
+            else:
+                state, reason = STATE_UNVERIFIED, "rule_waiting"
+        elif status in bad:
             state, reason = STATE_PROBLEM, str(status)
         elif status in uncertain or status != "active":
             state, reason = STATE_UNVERIFIED, str(status or "status_unknown")
         else:
             state, reason = STATE_OK, "active"
+        if kind == "entity" and state == STATE_OK:
+            for rule in rules:
+                if rule["kind"] == "freshness":
+                    updated = _time(item.get("last_updated"))
+                    if updated is None:
+                        state, reason = STATE_UNVERIFIED, "rule_no_timestamp"
+                    elif now - updated > timedelta(hours=rule["value"]):
+                        state, reason = STATE_PROBLEM, "rule_stale"
+                elif rule["kind"] == "min_value":
+                    try:
+                        value = float(item.get("state"))
+                    except (TypeError, ValueError):
+                        state, reason = STATE_UNVERIFIED, "rule_no_value"
+                    else:
+                        if not isfinite(value):
+                            state, reason = STATE_UNVERIFIED, "rule_no_value"
+                        elif value < rule["value"]:
+                            state, reason = STATE_PROBLEM, "rule_below_min"
+                if state == STATE_PROBLEM:
+                    break
         if kind in {"automation", "script", "scene"} and state == STATE_OK:
             broken = next(
                 (
@@ -129,7 +169,7 @@ def _member_state(
             )
             if broken is not None:
                 state, reason = STATE_PROBLEM, str(broken["rule_id"] if kind == "automation" else "broken_reference")
-    return {"object_key": key, "state": state, "reason": reason, "required": member["required"]}
+    return {"object_key": key, "state": state, "reason": reason, "required": member["required"], "rules": rules}
 
 
 def evaluate(
@@ -149,7 +189,7 @@ def evaluate(
     }
     if not snapshot or stale or scan_unreliable:
         members = [
-            {"object_key": m["object_key"], "state": STATE_UNVERIFIED, "reason": "scan_unverified", "required": m["required"]}
+            {"object_key": m["object_key"], "state": STATE_UNVERIFIED, "reason": "scan_unverified", "required": m["required"], "rules": m.get("rules", [])}
             for m in definition["members"]
         ]
     else:
@@ -159,7 +199,7 @@ def evaluate(
             key = f"{str(finding.get('rule_id', '')).split('.')[0]}:{finding.get('object_id')}"
             findings.setdefault(key, []).append(finding)
         coverage = {item["source"]: item["state"] for item in meta.get("coverage", ())}
-        members = [_member_state(m, objects, findings, coverage) for m in definition["members"]]
+        members = [_member_state(m, objects, findings, coverage, now) for m in definition["members"]]
     required = [m for m in members if m["required"]]
     if any(m["state"] == STATE_PROBLEM for m in required):
         state = STATE_PROBLEM
@@ -208,6 +248,7 @@ class MonitorStore:
                 seen_ids.add(item["id"])
                 self.items.append({
                     **{key: item[key] for key in ("id", "name", "description", "notify", "members")},
+                    "members": [{**member, "rules": member.get("rules", [])} for member in item["members"]],
                     "created_at": item.get("created_at") if _time(item.get("created_at")) else None,
                     "updated_at": item.get("updated_at") if _time(item.get("updated_at")) else None,
                 })
@@ -254,6 +295,20 @@ class MonitorStore:
             kind, object_id = key.split(":", 1)
             if kind not in MEMBER_TYPES or not object_id or key in keys:
                 raise MonitorError("members")
+            rules = member.get("rules", [])
+            if not isinstance(rules, list) or len(rules) > MAX_RULES or rules and kind != "entity":
+                raise MonitorError("rules")
+            seen_rules: set[str] = set()
+            for rule in rules:
+                if not isinstance(rule, dict) or set(rule) != {"kind", "value"}:
+                    raise MonitorError("rules")
+                rule_kind, value = rule["kind"], rule["value"]
+                if not isinstance(rule_kind, str) or rule_kind not in RULE_LIMITS or rule_kind in seen_rules or isinstance(value, bool) or not isinstance(value, (int, float)):
+                    raise MonitorError("rules")
+                minimum, maximum = RULE_LIMITS[rule_kind]
+                if not minimum <= value <= maximum or not isfinite(value) or rule_kind != "min_value" and not isinstance(value, int):
+                    raise MonitorError("rules")
+                seen_rules.add(rule_kind)
             keys.add(key)
 
     def upsert(
@@ -287,7 +342,7 @@ class MonitorStore:
             self.items.append(old)
         old.update(
             name=name.strip(), description=description.strip(), notify=notify,
-            members=[{"object_key": m["object_key"], "required": m["required"]} for m in members],
+            members=[{"object_key": m["object_key"], "required": m["required"], "rules": [{"kind": r["kind"], "value": r["value"]} for r in m.get("rules", [])]} for m in members],
             updated_at=datetime.now(UTC).isoformat(),
         )
         if changed_members:

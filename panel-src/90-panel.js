@@ -108,7 +108,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.stopWarmupTicker?.();
     window.removeEventListener?.("popstate", this._onPop);
     window.removeEventListener?.("resize", this._onResize);
-    for (const name of ["_warmupTimer", "_searchTimer", "_tipTimer", "_monitorTimer"]) {
+    for (const name of ["_warmupTimer", "_searchTimer", "_tipTimer", "_monitorTimer", "_monitorPreviewTimer"]) {
       if (this[name]) globalThis.clearTimeout?.(this[name]);
       this[name] = null;
     }

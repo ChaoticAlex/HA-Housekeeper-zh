@@ -201,7 +201,17 @@ const PAGE = `<!doctype html><html lang="${language}"><head><meta charset="utf-8
     if (plan === "running") el.planProgress = { done: 1, total: 2 };
   }
   if (q.get("view")) { el.view = q.get("view"); if (el.view === "changes") await el.loadCompare(); }
-  if (q.get("editor")) { el.monitorForm = { name: document.documentElement.lang === "en" ? "Front door" : "Haustür", description: "", notify: true, members: [{ object_key: "entity:sensor.beispiel_7", required: true }] }; el.monitorQuery = "sensor"; }
+  if (q.get("editor")) {
+    el.monitorForm = { name: document.documentElement.lang === "en" ? "Front door" : "Haustür", description: "", notify: true, members: [
+      { object_key: "entity:sensor.beispiel_7", required: true, rules: [{ kind: "freshness", value: 24 }] },
+      { object_key: "automation:automation.a1", required: true, rules: [] },
+    ] };
+    el.monitorPreview = { state: "unverified", reason: "rule_no_timestamp", reason_key: "entity:sensor.beispiel_7", members: [
+      { object_key: "entity:sensor.beispiel_7", state: "unverified", reason: "rule_no_timestamp" },
+      { object_key: "automation:automation.a1", state: "ok", reason: "active" },
+    ] };
+    el.monitorQuery = "sensor";
+  }
   if (q.get("graph")) { el.graphSelected = el.findObject(q.get("gobj")); el.graphDepth = 3; el.view = "graph"; }
   else if (q.get("object")) { await el.openObject(el.findObject(q.get("object"))); el.detailTab = q.get("tab") || "overview"; }
   el.render();

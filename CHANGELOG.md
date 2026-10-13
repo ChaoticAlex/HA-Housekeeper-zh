@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Hausmonitor-Soll-Regeln:** Für Entitäten lassen sich Aktualisierungsfrist, numerischer Mindestwert und eine erlaubte Dauer für „nicht verfügbar“ festlegen. Der Editor zeigt eine Vorschau der aktuellen Scanbewertung und schlägt Objekte aus bekannten Abhängigkeiten als weitere Mitglieder vor; nur ausdrücklich hinzugefügte Vorschläge werden überwacht.
+
 - **Hausmonitor-Objektsuche:** Eine gemeinsame Suche gruppiert Treffer nach Typ. Filter für Entitäten, Geräte, Automationen, Szenen, Integrationen und Sonstiges helfen beim Eingrenzen. Szenen, Skripte und Apps/Add-ons lassen sich nun überwachen; eine ruhende Szene oder ein ruhendes Skript gilt nicht als Ausfall.
 
 - **Hausmonitor:** Wichtige Funktionen aus direkt gewählten Entitäten, Geräten, Automationen und Integrationen zusammenstellen. Die neue Seite zeigt belegte Defekte, Prüflücken und die letzte vollständige Prüfung; die Übersicht meldet beeinträchtigte Funktionen und unvollständige Prüfungen. Zustandswechsel stehen als HA-Ereignis und Event-Entität bereit, jede Funktion hat einen Sensor. Dauerhafte HA-Mitteilungen lassen sich pro Funktion einschalten.
@@ -35,6 +37,8 @@
 ### English
 
 #### New
+
+- **Home monitor expected conditions:** Entities can have an update deadline, a numeric minimum and an allowed duration of unavailability. The editor previews the latest scan evaluation and suggests objects from known dependencies as additional members; only explicitly added suggestions are monitored.
 
 - **Home monitor object search:** One search groups matches by type. Filters for entities, devices, automations, scenes, integrations and other objects narrow the results. Scenes, scripts and apps/add-ons can now be monitored; an idle scene or script is not considered a fault.
 

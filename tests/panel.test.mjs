@@ -109,6 +109,42 @@ test("Hausmonitor editor keeps required members and offers only direct inventory
   assert.match(el.monitorEditor(), /data-monitor-pick="entity:sensor.b" disabled/);
 });
 
+test("Hausmonitor suggests known dependencies and shows entity rules", () => {
+  const { el } = panel("de");
+  el.data = { ...DATA, objects: [...DATA.objects,
+    { object_type: "device", object_id: "d1", name: "Gerät", status: "active" },
+    { object_type: "config_entry", object_id: "c1", name: "Integration", status: "active" },
+    { object_type: "app", object_id: "mqtt", name: "MQTT", status: "active" },
+  ], edges: [
+    { source: "automation:automation.c", target: "entity:sensor.b", relation: "TARGETS", confidence: "certain" },
+    { source: "device:d1", target: "entity:sensor.b", relation: "PROVIDES", confidence: "certain" },
+    { source: "config_entry:c1", target: "entity:sensor.b", relation: "PROVIDES", confidence: "certain" },
+    { source: "config_entry:c1", target: "app:mqtt", relation: "CONNECTED", confidence: "probable" },
+  ] };
+  el.monitorForm = { name: "Test", description: "", notify: true, members: [
+    { object_key: "automation:automation.c", required: true, rules: [] },
+    { object_key: "entity:sensor.a", required: true, rules: [{ kind: "min_value", value: 20 }] },
+  ] };
+  const keys = el.monitorSuggestions().map(item => item.key);
+  assert.equal(keys.slice().sort().join(","), ["app:mqtt", "config_entry:c1", "device:d1", "entity:sensor.b"].sort().join(","));
+  const html = el.monitorEditor();
+  assert.match(html, /data-monitor-rule-toggle="1:min_value" checked/);
+  assert.match(html, /data-monitor-pick="app:mqtt"/);
+  assert.match(html, /vermutlich/);
+});
+
+test("Hausmonitor preview requests the backend evaluation without saving", async () => {
+  let run, request;
+  const { el } = panel("en", { setTimeout: fn => { run = fn; return 1; }, clearTimeout: () => {} });
+  el.monitorForm = { name: "Test", description: "", notify: false, members: [{ object_key: "entity:sensor.b", required: true, rules: [{ kind: "freshness", value: 24 }] }] };
+  el._hass.callWS = async msg => { request = msg; return { preview: { state: "problem", reason: "rule_stale", reason_key: "entity:sensor.b", members: [{ object_key: "entity:sensor.b", state: "problem", reason: "rule_stale" }] } }; };
+  el.queueMonitorPreview();
+  await run();
+  assert.equal(request.type, "ha_housekeeper/monitor_preview");
+  assert.equal(request.members[0].rules[0].value, 24);
+  assert.match(el.monitorPreviewHtml(), /Not updated in time/);
+});
+
 test("Hausmonitor overview counts a known finding only once", () => {
   const { el } = panel("de");
   el.ensureSysLight = el.ensureGoals = el.ensurePolicies = () => {};
@@ -1431,7 +1467,7 @@ test("the backup card says when the component is missing or the call fails", asy
   assert.ok(shadow.innerHTML.includes("kaputt") && !shadow.innerHTML.includes("nicht verfügbar"));
 });
 
-test("the two confirmations are saved with their date and can be taken back", async () => {
+test("backup confirmations are inline, saved with a date, and can be taken back", async () => {
   const { el, shadow } = panel("en");
   const sent = [];
   el._hass = { language: "en", callWS: async msg => { sent.push(JSON.stringify(msg)); return BACKUP_REPORT; } };
@@ -1442,10 +1478,15 @@ test("the two confirmations are saved with their date and can be taken back", as
   el.shadowRoot.querySelector = selector => { const m = /data-bh-date="(\w+)"/.exec(selector); return m ? dates[m[1]] || null : null; };
   el.render();
   assert.ok(shadow.innerHTML.includes('data-bh-open="emergency_kit"') && !shadow.innerHTML.includes("data-bh-save"), "the form opens only on a click");
+  assert.ok(shadow.innerHTML.includes('data-bh-open="targets"'), "storage locations can be confirmed");
+  assert.match(shadow.innerHTML, /<span class="bhactions"><span class="pill warn">Note<\/span><button class="bhopen" data-bh-open="targets"/, "the confirmation sits beside the badge");
+  assert.match(shadow.innerHTML, /<\/div><div class="panel"><div class="sectionlabel">Latest backups<\/div>/, "recent backups have their own card");
   el.bhForm = "emergency_kit"; el.render();
   assert.ok(shadow.innerHTML.includes('data-bh-save="emergency_kit"') && !shadow.innerHTML.includes('data-bh-clear="emergency_kit"'), "only a recorded one can be taken back");
   el.bhForm = "restore_test"; el.render();
   assert.ok(shadow.innerHTML.includes('data-bh-clear="restore_test"'));
+  el.bhForm = "targets"; el.render();
+  assert.ok(shadow.innerHTML.includes('data-bh-save="targets"'));
   sent.length = 0;
   kit.onclick();
   await Promise.resolve();
