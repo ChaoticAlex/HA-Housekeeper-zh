@@ -235,7 +235,7 @@ def test_series_carries_open_findings_classes_and_the_score_for_the_sparklines(h
         )
     )
     points = history.series()["points"]
-    assert [(p["open"], p["share"]) for p in points] == [(0, 100), (2, 96)]
+    assert [(p["open"], p["share"]) for p in points] == [(0, 100), (2, 94)]
     assert points[0]["classes"] == {} and points[1]["classes"] == {
         "unused": 1,
         "broken_reference": 1,

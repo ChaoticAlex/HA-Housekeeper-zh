@@ -1523,7 +1523,7 @@ class InventoryScanner:
         scenes, scene_edges, scene_findings = self._scene_inventory(existing)
         all_findings = findings + script_findings + scene_findings
         for finding in all_findings:
-            if finding["affected_object"] in self._created_scenes:
+            if finding.get("affected_object") in self._created_scenes:
                 finding["runtime_created"] = True
         return (
             automations + scripts + scenes,
