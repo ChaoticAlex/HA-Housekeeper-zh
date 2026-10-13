@@ -4564,3 +4564,15 @@ test("a finding row ends in an impact chip and a menu with the decisions; a hidd
   assert.equal(el.rowMenu({ ...f, ignored: true }), "");
   assert.equal(el.rowDecide(f), "");
 });
+
+test("an integration outage is a reason of its own, with a tile and a filter of the list bar", () => {
+  const { el } = panel("en");
+  const f = (rule, id, classification) => ({ rule_id: rule, object_id: id, classification, confidence: 0.9, key: `${rule}|${id}`, ignored: false, evidence: [], impact: "low" });
+  el.data = { ...DATA, objects: [], causes: [], findings: [f("config_entry.not_loaded", "e1", "problem"), f("entity.state_missing", "sensor.a", "orphaned")] };
+  assert.equal(el.findingReason(el.data.findings[0]), "outage");
+  assert.equal(el.findingReason(el.data.findings[1]), "orphaned");
+  const html = el.findingsView();
+  assert.ok(html.includes("All reasons") && html.includes("Outage"));
+  el.findingFilter = "outage";
+  assert.equal(el.visibleFindings().map(x => x.object_id).join(), "e1");
+});
