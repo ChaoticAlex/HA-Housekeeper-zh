@@ -77,10 +77,15 @@ test("Hausmonitor shows a confirmed fault, a scan gap, and escapes function name
 test("Hausmonitor editor keeps required members and offers only direct inventory objects", () => {
   const { el } = panel("en");
   el.monitorForm = { name: "Water", description: "", notify: true, members: [{ object_key: "entity:sensor.b", required: false }] };
+  assert.match(el.monitorEditor(), /Enter at least two characters/);
+  assert.doesNotMatch(el.monitorEditor(), /data-monitor-pick=/);
+  el.monitorQuery = "automation";
   const html = el.monitorEditor();
   assert.match(html, /data-monitor-required="0"/);
   assert.match(html, /data-monitor-pick="automation:automation.c"/);
   assert.doesNotMatch(html, /data-monitor-pick="entity:sensor.b"/);
+  assert.match(html, /class="row monitor-choice"/);
+  assert.match(el.styles(), /\.row\.monitor-choice\{grid-template-columns:auto minmax\(0,1fr\) auto\}/);
 });
 
 test("Hausmonitor overview counts a known finding only once", () => {

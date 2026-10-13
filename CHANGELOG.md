@@ -12,6 +12,8 @@
 
 ### Behoben
 
+- **Hausmonitor-Editor:** Das Formular hat eine gut lesbare Breite, kompaktere Felder und passende Schalter und Knöpfe. Die Objektsuche zeigt Treffer erst nach einer Eingabe und begrenzt die Ergebnisliste. „Funktion hinzufügen“ heißt jetzt „Monitor hinzufügen“.
+
 - **Fokus in Dialogen:** Während ein Dialog geöffnet ist, bleiben Seite und darunterliegende Dialoge für die Tastatur inaktiv. Tab und Umschalt+Tab bleiben im obersten Dialog; nach dem Schließen kehrt der Fokus zum auslösenden Steuerelement zurück.
 
 - **Orientierung nach einem Seitenwechsel:** Lange Listen springen nach „Weiter“ oder „Zurück“ an den Anfang des betroffenen Bereichs. Der Tastaturfokus meldet die neue Seite.
@@ -35,6 +37,8 @@
 - **Switch entities in bulk from the inventory:** Entity rows of the Inventory have a checkbox. The bar above disables, enables, hides or shows them, up to 200 entities per plan, with a preview and undo. An entity that something certainly uses is not disabled; only what you disabled yourself is enabled again.
 
 #### Fixed
+
+- **Home monitor editor:** The form has a readable width, more compact fields and correctly sized switches and buttons. Object search shows matches after typing and keeps the result list contained. “Add function” is now “Add monitor”.
 
 - **Focus in dialogs:** While a dialog is open, the page and dialogs beneath it are inactive for keyboard users. Tab and Shift+Tab stay in the top dialog; closing it returns focus to the control that opened it.
 

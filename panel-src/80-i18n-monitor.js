@@ -1,7 +1,7 @@
 // Texts for the Hausmonitor; merged into TEXT before the panel is registered.
 Object.assign(TEXT.de, {
   monitor: "Hausmonitor", monitorSubtitle: "Wichtige Funktionen und ihr zuletzt geprüfter Zustand.",
-  monitorAdd: "Funktion hinzufügen", monitorEdit: "Bearbeiten", monitorDelete: "Löschen",
+  monitorAdd: "Monitor hinzufügen", monitorEdit: "Bearbeiten", monitorEditTitle: "Monitor bearbeiten", monitorDelete: "Löschen",
   monitorEmpty: "Noch keine Funktion festgelegt.", monitorEmptyHint: "Wähle die wenigen Objekte, von denen eine wichtige Funktion direkt abhängt.",
   monitorProblem: "Beeinträchtigt", monitorUnverified: "Unbekannt", monitorOk: "Unauffällig",
   monitorLastScan: "Letzter Scan: {date}", monitorLastVerified: "Letzte vollständige Prüfung: {date}", monitorNeverVerified: "Noch nie vollständig geprüft",
@@ -11,7 +11,8 @@ Object.assign(TEXT.de, {
   monitorSearch: "Name oder ID suchen …", monitorSearchHint: "Entität, Gerät, Automation oder Integration suchen.",
   monitorPick: "Hinzufügen", monitorRemove: "Entfernen", monitorNotify: "Dauerhafte HA-Mitteilung bei Problemen",
   monitorNotifyHint: "Zustandswechsel stehen unabhängig davon als HA-Ereignis bereit.", monitorSave: "Speichern",
-  monitorCancel: "Abbrechen", monitorBack: "Zum Hausmonitor", monitorAll: "Alle Funktionen",
+  monitorCancel: "Abbrechen", monitorBack: "Zum Hausmonitor", monitorBackShort: "Zurück", monitorAll: "Alle Funktionen",
+  monitorSearchStart: "Mindestens zwei Zeichen eingeben, um Objekte zu finden.", monitorSearchNone: "Keine passenden Objekte gefunden.",
   monitorEmptyFiltered: "Für diesen Zustand gibt es keine Funktion.",
   monitorSaveFailed: "Funktion konnte nicht gespeichert werden: {reason}", monitorDeleteFailed: "Funktion konnte nicht gelöscht werden: {reason}",
   monitorConfirmDelete: "Die Funktion „{name}“, ihr HA-Sensor und ihre Mitteilung werden entfernt.",
@@ -27,7 +28,7 @@ Object.assign(TEXT.de, {
 });
 Object.assign(TEXT.en, {
   monitor: "Home monitor", monitorSubtitle: "Important functions and their last checked state.",
-  monitorAdd: "Add function", monitorEdit: "Edit", monitorDelete: "Delete",
+  monitorAdd: "Add monitor", monitorEdit: "Edit", monitorEditTitle: "Edit monitor", monitorDelete: "Delete",
   monitorEmpty: "No function defined yet.", monitorEmptyHint: "Choose the few objects an important function directly depends on.",
   monitorProblem: "Impaired", monitorUnverified: "Unknown", monitorOk: "No known fault",
   monitorLastScan: "Last scan: {date}", monitorLastVerified: "Last complete check: {date}", monitorNeverVerified: "Never checked completely",
@@ -37,7 +38,8 @@ Object.assign(TEXT.en, {
   monitorSearch: "Search name or ID …", monitorSearchHint: "Search for an entity, device, automation or integration.",
   monitorPick: "Add", monitorRemove: "Remove", monitorNotify: "Persistent HA notification for problems",
   monitorNotifyHint: "State changes are always available as HA events.", monitorSave: "Save",
-  monitorCancel: "Cancel", monitorBack: "Back to home monitor", monitorAll: "All functions",
+  monitorCancel: "Cancel", monitorBack: "Back to home monitor", monitorBackShort: "Back", monitorAll: "All functions",
+  monitorSearchStart: "Enter at least two characters to find objects.", monitorSearchNone: "No matching objects found.",
   monitorEmptyFiltered: "No function has this state.",
   monitorSaveFailed: "Could not save function: {reason}", monitorDeleteFailed: "Could not delete function: {reason}",
   monitorConfirmDelete: "The function “{name}”, its HA sensor and notification will be removed.",
