@@ -16,12 +16,6 @@ Die ausführliche Dokumentation von HA Housekeeper. Einen kurzen Überblick und 
 | **Abhängigkeiten** | Beziehungen zwischen Integration, Gerät, Entität, Bereich und Automation mit Vertrauensstufe |
 | **Sicherheit** | Nur für Administratoren; serverseitige Schutzmodi, Vorschau und ausdrückliche Bestätigung; je nach Aktion Backup, Prüfung und Rückgängig |
 
-## Warum HA Housekeeper?
-
-In gewachsenen Home-Assistant-Installationen sammeln sich häufig Registry-Einträge, nicht verfügbare Entitäten, ausgetauschte Geräte, alte Statistiken und schwer nachvollziehbare Automationsreferenzen an. Ein fehlender Zustand allein erklärt nicht, ob eine Entität absichtlich deaktiviert wurde, ihre Integration deaktiviert ist oder das zugrunde liegende Gerät nicht mehr existiert.
-
-Housekeeper verbindet Registry-Daten mit der laufenden Home-Assistant-Instanz und stellt diesen Zusammenhang in einem gemeinsamen, nur für Administratoren erreichbaren Panel dar.
-
 ## Installation
 
 ### Über HACS (empfohlen)

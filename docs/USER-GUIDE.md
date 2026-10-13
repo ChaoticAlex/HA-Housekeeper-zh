@@ -2,7 +2,7 @@
 
 The detailed documentation of HA Housekeeper. For a short overview and the quick start, see the [README](../README.md). Deutsch: [Benutzerhandbuch](USER-GUIDE.de.md).
 
-**Contents:** [What Housekeeper does](#what-housekeeper-does) · [Why](#why-ha-housekeeper) · [Installation](#installation) · [Features](#features) · [Safety model](#safety-model) · [Usage](#usage) · [Current limitations](#current-limitations)
+**Contents:** [What Housekeeper does](#what-housekeeper-does) · [Installation](#installation) · [Features](#features) · [Safety model](#safety-model) · [Usage](#usage) · [Current limitations](#current-limitations)
 
 ## What Housekeeper does
 
@@ -17,12 +17,6 @@ The detailed documentation of HA Housekeeper. For a short overview and the quick
 | **Sensors and hints** | Counters as sensors, aggregated repair hints, findings export as CSV/JSON and inventory export as CSV/Markdown/JSON |
 | **Dependencies** | Relationships between integration, device, entity, area, and automation with a confidence level |
 | **Safety** | Administrators only; server-side protection modes, previews and explicit confirmation; backup, verification and undo where the action supports them |
-
-## Why HA Housekeeper?
-
-Mature Home Assistant installations often accumulate registry entries, unavailable entities, replaced devices, old statistics, and automation references that are difficult to assess safely. A missing state alone does not explain whether an entity was intentionally disabled, whether its integration is disabled, or whether the underlying device no longer exists.
-
-Housekeeper combines registry data and the live Home Assistant runtime to provide that context in one administrator-only panel.
 
 ## Installation
 
