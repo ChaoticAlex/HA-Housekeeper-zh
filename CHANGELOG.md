@@ -18,6 +18,8 @@
 
 ### Behoben
 
+- **Menü auf schmalen Fenstern:** Die geöffnete Menüliste ist höher als das Fenster, etwa bei großer Schrift, und scrollt jetzt, sodass auch die unteren Einträge erreichbar sind (Issue #10).
+
 - **Sortierrichtung:** Bei gleichen Werten drehte der Pfeil „Aufsteigend/Absteigend“ die Reihenfolge nicht um; jetzt dreht er die ganze Liste.
 
 - **Befunde:** Wer einen Status wie „Neu“ oder einen Filter wählte, sah die Ausfälle von Integrationen nicht, obwohl sie mitgezählt wurden. Sie stehen jetzt als eigene Zeilen in der Liste.
@@ -39,6 +41,8 @@
 - **Mark for several objects:** The selection bar of the Findings page has a “Set a mark” button. It sets kind, reason and review date in one go on all ticked entities, devices, integrations and apps; other objects in the selection (for example automations) stay untouched.
 
 #### Fixed
+
+- **Menu on narrow windows:** The open menu list is taller than the window, for example with large fonts, and now scrolls, so the lower entries can be reached (issue #10).
 
 - **Sort direction:** With equal values the ascending/descending arrow did not reverse the order; it now reverses the whole list.
 

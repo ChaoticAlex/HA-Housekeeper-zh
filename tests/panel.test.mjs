@@ -4511,6 +4511,11 @@ test("the info page lists the phases of the last scan, longest first, and the re
   assert.equal(el.sysState("storage").at, "2026-10-12T20:00:00+00:00", "the page shows when the sizes were read");
 });
 
+test("the open menu list of a narrow window scrolls instead of outgrowing the sticky bar", () => {
+  const { el } = panel("en");
+  assert.match(el.styles(), /\.top\.open \.topnav\{display:flex;max-height:[^}]*overflow-y:auto/);
+});
+
 test("a top bar that does not fit changes into the menu button instead of being cut off, and goes back once it fits", () => {
   const { el } = panel("en");
   el.navCompact = true;

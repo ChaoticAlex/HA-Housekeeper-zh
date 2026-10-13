@@ -6,7 +6,7 @@ function navCompactRules(compact) {
     [".top", "flex-wrap:wrap;gap:8px;padding:8px 12px"],
     [".navtoggle", "display:inline-flex"],
     [".topnav", "display:none;flex:1 1 100%;flex-direction:column;align-items:stretch;gap:0;padding-bottom:8px"],
-    [".top.open .topnav", "display:flex"],
+    [".top.open .topnav", "display:flex;max-height:calc(100vh - 110px);overflow-y:auto;overscroll-behavior:contain"],
     [".navmenu", "display:block"],
     [".navmenu>.menubtn", "display:none"],
     [".navpop", "display:grid;position:static;min-width:0;padding:0;border:0;box-shadow:none;background:transparent"],
