@@ -2882,29 +2882,16 @@ test("Done lists what a plan fixed and what ended by itself; objects removed or 
   assert.ok(html.includes("Object removed (not fixed)"));
 });
 
-test("an outage without a finding is picked by its integration and marked instead of hidden", async () => {
-  const { el } = panel("en");
-  const calls = [];
-  const c = { id: "integration_down:e1", kind: "integration_down", object_type: "config_entry", object_id: "e1", name: "Hue", follower_count: 0, total_followers: 0, child_ids: [], consumers: {}, impact: "none" };
-  el.data = { ...DATA, findings: [], causes: [c] };
-  assert.ok(el.findingsView().includes('data-fsel="mark:config_entry:e1"'));
-  el._hass = { language: "en", callWS: async msg => { calls.push(msg); return msg.type === "ha_housekeeper/inventory" ? { ...DATA, findings: [], causes: [] } : {}; } };
-  el.findSel = new Set(["mark:config_entry:e1"]);
-  await el.hideSelectedFindings();
-  assert.equal(JSON.stringify(calls[0]), JSON.stringify({ type: "ha_housekeeper/mark_set", object_type: "config_entry", object_id: "e1", kind: "expected_offline", reason: "" }));
-  assert.equal(el.causeList().length, 0);
-});
-
 test("the selection bar sets a mark on every picked object that can carry one", async () => {
   const { el } = panel("en");
   const calls = [];
   const obj = (type, id) => ({ object_type: type, object_id: id, name: id, status: "active" });
   const f = (rule, id) => ({ rule_id: rule, object_id: id, classification: "unavailable", confidence: 0.9, key: `${rule}|${id}`, ignored: false, evidence: [] });
-  el.data = { ...DATA, objects: [obj("entity", "sensor.a"), obj("automation", "automation.x")], findings: [f("entity.state_unavailable", "sensor.a"), f("automation.stale", "automation.x")], causes: [] };
+  el.data = { ...DATA, objects: [obj("entity", "sensor.a"), obj("automation", "automation.x"), obj("config_entry", "e1")], findings: [f("entity.state_unavailable", "sensor.a"), f("automation.stale", "automation.x"), f("config_entry.not_loaded", "e1")], causes: [] };
   el.findSel = new Set(["entity.state_unavailable|sensor.a", "automation.stale|automation.x"]);
   assert.equal([...el.markTargets().values()].join(), "entity:sensor.a", "an automation cannot be marked");
   assert.ok(el.findSelBar([]).includes('data-fsel-state="mark"'));
-  el.findSel.add("mark:config_entry:e1");
+  el.findSel.add("config_entry.not_loaded|e1");
   assert.equal(el.markKindsFor(el.markTargets()).join(), "expected_offline,seasonal,spare", "an integration takes fewer kinds");
   el._hass = { language: "en", callWS: async msg => { calls.push(JSON.stringify(msg)); return msg.type === "ha_housekeeper/inventory" ? { ...DATA, findings: [], causes: [] } : {}; } };
   el.bulk = { kind: "mark", reason: "away", days: 30, markKind: "seasonal", error: "" };

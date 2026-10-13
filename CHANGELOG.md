@@ -10,10 +10,6 @@
 
 - **Vermerk für mehrere Objekte:** Die Auswahlleiste der Befunde hat den Knopf „Vermerk setzen“. Er setzt Art, Begründung und Prüffrist in einem Zug an allen angekreuzten Entitäten, Geräten, Integrationen und Apps; andere Objekte in der Auswahl (zum Beispiel Automationen) bleiben unberührt.
 
-### Behoben
-
-- **Befunde:** Auch ein Ausfall, für den noch kein Befund besteht (die Wartezeit „Mindestdauer nicht verfügbar“ läuft noch), lässt sich ankreuzen. „Bekannt“, „Zurückstellen“ und „Ausblenden“ setzen dann den Vermerk „Absichtlich offline“ an der Integration (mit Begründung und Frist); solange er gilt, steht der Ausfall nicht in der Liste.
-
 ### English
 
 #### Changed
@@ -23,10 +19,6 @@
 #### New
 
 - **Mark for several objects:** The selection bar of the Findings page has a “Set a mark” button. It sets kind, reason and review date in one go on all ticked entities, devices, integrations and apps; other objects in the selection (for example automations) stay untouched.
-
-#### Fixed
-
-- **Findings:** An outage that has no finding yet (the wait “Minimum days unavailable” is still running) can be ticked too. “Known”, “Snooze” and “Hide” then set the mark “Offline on purpose” on the integration (with reason and review date); while it holds, the outage is not in the list.
 
 ## 1.5.1 - 2026-10-12
 

@@ -226,19 +226,3 @@ def test_log_facts_count_per_integration_and_never_carry_a_message():
     assert facts["hue"]["level"] == "error" and facts["hue"]["count"] == 5
     assert "SECRET" not in repr(facts)
     assert log_facts(NS(data={})) == {}
-
-
-def test_a_marked_integration_without_a_finding_is_not_listed_until_the_review_date() -> None:
-    entry = {
-        "object_type": "config_entry",
-        "object_id": "e1",
-        "name": "Hue",
-        "status": "problem",
-        "mark": {"kind": "expected_offline"},
-    }
-    assert apply_causes([entry], [], []) == []
-    entry["mark_due"] = True
-    assert [c["id"] for c in apply_causes([entry], [], [])] == ["integration_down:e1"]
-    entry.pop("mark_due")
-    entry["mark"] = {"kind": "keep"}
-    assert len(apply_causes([entry], [], [])) == 1
