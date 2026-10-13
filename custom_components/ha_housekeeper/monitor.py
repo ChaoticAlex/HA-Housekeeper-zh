@@ -40,6 +40,7 @@ AUTOMATION_RULES = frozenset(
 STATE_OK = "ok"
 STATE_PROBLEM = "problem"
 STATE_UNVERIFIED = "unverified"
+STATE_DISABLED = "disabled"
 MANUAL_STALE_AFTER = timedelta(days=7)
 EVENT_NAME = f"{DOMAIN}_monitor"
 REASONS_DE = {
@@ -181,6 +182,19 @@ def evaluate(
     """Evaluate one function without changing the stored definition or incident."""
     meta = (snapshot or {}).get("meta") or {}
     scanned_at = meta.get("scanned_at")
+    if definition.get("enabled") is False:
+        return {
+            "id": definition["id"], "name": definition["name"],
+            "description": definition["description"], "notify": definition["notify"],
+            "enabled": False, "members": [
+                {"object_key": member["object_key"], "state": STATE_DISABLED,
+                 "reason": "disabled", "required": member["required"],
+                 "rules": member.get("rules", [])}
+                for member in definition["members"]
+            ],
+            "state": STATE_DISABLED, "reason": "disabled", "reason_key": None,
+            "scanned_at": scanned_at, "fully_verified": False,
+        }
     limit = stale_after(int((health or {}).get("interval_hours") or 0)) or MANUAL_STALE_AFTER
     scanned = _time(scanned_at)
     stale = scanned is None or now - scanned > limit
@@ -213,6 +227,7 @@ def evaluate(
         "name": definition["name"],
         "description": definition["description"],
         "notify": definition["notify"],
+        "enabled": definition.get("enabled", True),
         "members": members,
         "state": state,
         "reason": reason["reason"] if reason else "no_required_members",
@@ -241,13 +256,14 @@ class MonitorStore:
             if not isinstance(item, dict):
                 continue
             try:
-                self._validate(item.get("name"), item.get("description"), item.get("notify"), item.get("members"))
+                self._validate(item.get("name"), item.get("description"), item.get("notify"), item.get("members"), item.get("enabled", True))
             except MonitorError:
                 continue
             if isinstance(item.get("id"), str) and item["id"] and item["id"] not in seen_ids:
                 seen_ids.add(item["id"])
                 self.items.append({
                     **{key: item[key] for key in ("id", "name", "description", "notify", "members")},
+                    "enabled": item.get("enabled", True),
                     "members": [{**member, "rules": member.get("rules", [])} for member in item["members"]],
                     "created_at": item.get("created_at") if _time(item.get("created_at")) else None,
                     "updated_at": item.get("updated_at") if _time(item.get("updated_at")) else None,
@@ -276,13 +292,15 @@ class MonitorStore:
         )
 
     @staticmethod
-    def _validate(name: Any, description: Any, notify: Any, members: Any) -> None:
+    def _validate(name: Any, description: Any, notify: Any, members: Any, enabled: Any = True) -> None:
         if not isinstance(name, str) or not name.strip() or len(name.strip()) > NAME_MAX:
             raise MonitorError("name")
         if not isinstance(description, str) or len(description) > DESCRIPTION_MAX:
             raise MonitorError("description")
         if not isinstance(notify, bool):
             raise MonitorError("notify")
+        if not isinstance(enabled, bool):
+            raise MonitorError("enabled")
         if not isinstance(members, list) or not 1 <= len(members) <= MAX_MEMBERS:
             raise MonitorError("members")
         keys: set[str] = set()
@@ -320,8 +338,9 @@ class MonitorStore:
         members: list[dict[str, Any]],
         snapshot: dict[str, Any] | None,
         health: dict[str, Any] | None,
+        enabled: bool = True,
     ) -> str:
-        self._validate(name, description, notify, members)
+        self._validate(name, description, notify, members, enabled)
         old = next((item for item in self.items if item["id"] == item_id), None)
         if item_id and old is None:
             raise MonitorError("not_found")
@@ -335,17 +354,18 @@ class MonitorStore:
         if any(m["object_key"] not in available | existing for m in members):
             raise MonitorError("object_key")
         changed_members = old is None or members != old["members"]
-        enabled_notification = old is not None and not changed_members and not old["notify"] and notify
+        changed_enabled = old is not None and old.get("enabled", True) != enabled
+        enabled_notification = old is not None and not changed_members and not changed_enabled and enabled and not old["notify"] and notify
         if old is None:
             item_id = secrets.token_hex(6)
             old = {"id": item_id, "created_at": datetime.now(UTC).isoformat()}
             self.items.append(old)
         old.update(
-            name=name.strip(), description=description.strip(), notify=notify,
+            name=name.strip(), description=description.strip(), notify=notify, enabled=enabled,
             members=[{"object_key": m["object_key"], "required": m["required"], "rules": [{"kind": r["kind"], "value": r["value"]} for r in m.get("rules", [])]} for m in members],
             updated_at=datetime.now(UTC).isoformat(),
         )
-        if changed_members:
+        if changed_members or changed_enabled:
             self._dismiss(item_id)
             self.runtime.pop(item_id, None)
         elif not notify and self.runtime.get(item_id, {}).get("notified"):
@@ -434,6 +454,13 @@ class MonitorStore:
         for item in self.items:
             result = evaluate(item, snapshot, health, now)
             runtime = self.runtime.setdefault(item["id"], {})
+            if not item.get("enabled", True):
+                result.update(state=STATE_DISABLED, reason="disabled", reason_key=None,
+                              fully_verified=False, incident_open=False,
+                              last_verified_at=runtime.get("last_verified_at"),
+                              last_problem_reason=None, last_problem_key=None)
+                results.append(result)
+                continue
             old = runtime.get("state")
             state = result["state"]
             if (snapshot or {}).get("meta", {}).get("preliminary"):

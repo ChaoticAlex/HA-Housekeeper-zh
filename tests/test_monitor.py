@@ -119,6 +119,28 @@ def test_unavailable_grace_period_and_rule_validation():
             MonitorStore._validate(item["name"], "", True, item["members"])
 
 
+def test_disabled_monitor_keeps_its_definition_without_evaluating_or_alerting(monkeypatch):
+    item = {**definition(("entity:sensor.water", True)), "enabled": False}
+    bad = snapshot([{"object_type": "entity", "object_id": "sensor.water", "status": "unavailable"}])
+    assert evaluate(item, bad, health(), NOW)["state"] == "disabled"
+    with pytest.raises(MonitorError):
+        MonitorStore._validate(item["name"], "", True, item["members"], "no")
+    events = []
+    store = MonitorStore.__new__(MonitorStore)
+    store.hass = object()
+    store.items = [item]
+    store.runtime = {}
+    store.results = []
+    monkeypatch.setattr(store, "_save", lambda: None)
+    monkeypatch.setattr(store, "_event", lambda kind, *_: events.append(kind))
+    monkeypatch.setattr(store, "_notify", lambda *_a, **_k: events.append("notification"))
+    monkeypatch.setattr("custom_components.ha_housekeeper.monitor.async_dispatcher_send", lambda *_: None)
+    store.refresh(bad, health(), new_scan=True)
+    assert store.results[0]["state"] == "disabled"
+    assert store.results[0]["incident_open"] is False
+    assert events == []
+
+
 def test_two_scans_are_needed_to_report_a_gap(monkeypatch):
     events = []
     store = MonitorStore.__new__(MonitorStore)

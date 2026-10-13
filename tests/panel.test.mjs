@@ -94,6 +94,20 @@ test("Hausmonitor shows a confirmed fault, a scan gap, and escapes function name
   assert.match(el.monitorDetail(), /Letzter Scan/);
 });
 
+test("a disabled Hausmonitor remains editable but does not appear as an overview alarm", () => {
+  const { el } = panel("de");
+  el.data = { ...DATA, monitor: [{ id: "paused", name: "Wasseralarm", description: "", enabled: false, state: "disabled", reason: "disabled", members: [], incident_open: false }] };
+  assert.match(el.monitorView(), /Deaktiviert/);
+  el.monitorFilter = "disabled";
+  assert.match(el.monitorView(), /Wasseralarm/);
+  el.monitorSelected = "paused";
+  assert.match(el.monitorDetail(), /Deaktiviert/);
+  el.monitorForm = { id: "paused", name: "Wasseralarm", description: "", enabled: false, notify: true, members: [] };
+  assert.match(el.monitorEditor(), /data-monitor-enabled /);
+  assert.doesNotMatch(el.monitorEditor(), /data-monitor-enabled checked/);
+  assert.ok(!el.todoItems().some(item => item.key.startsWith("monitor_")));
+});
+
 test("Hausmonitor editor keeps required members and offers only direct inventory objects", () => {
   const { el } = panel("en");
   el.data = { ...DATA, objects: [...DATA.objects.map(o => o.object_id === "sensor.b" ? { ...o, area_id: "bedroom" } : o),

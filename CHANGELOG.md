@@ -4,25 +4,13 @@
 
 ### Neu
 
-- **Hausmonitor-Soll-Regeln:** Für Entitäten lassen sich Aktualisierungsfrist, numerischer Mindestwert und eine erlaubte Dauer für „nicht verfügbar“ festlegen. Der Editor zeigt eine Vorschau der aktuellen Scanbewertung und schlägt Objekte aus bekannten Abhängigkeiten als weitere Mitglieder vor; nur ausdrücklich hinzugefügte Vorschläge werden überwacht.
-
-- **Hausmonitor-Objektsuche:** Eine gemeinsame Suche gruppiert Treffer nach Typ. Filter für Entitäten, Geräte, Automationen, Szenen, Integrationen und Sonstiges helfen beim Eingrenzen. Szenen, Skripte und Apps/Add-ons lassen sich nun überwachen; eine ruhende Szene oder ein ruhendes Skript gilt nicht als Ausfall.
-
-- **Hausmonitor:** Wichtige Funktionen aus direkt gewählten Entitäten, Geräten, Automationen und Integrationen zusammenstellen. Die neue Seite zeigt belegte Defekte, Prüflücken und die letzte vollständige Prüfung; die Übersicht meldet beeinträchtigte Funktionen und unvollständige Prüfungen. Zustandswechsel stehen als HA-Ereignis und Event-Entität bereit, jede Funktion hat einen Sensor. Dauerhafte HA-Mitteilungen lassen sich pro Funktion einschalten.
+- **Hausmonitor:** Wichtige Hausfunktionen aus direkt gewählten Entitäten, Geräten, Automationen, Szenen, Skripten, Integrationen und Apps/Add-ons zusammenstellen. Die gemeinsame Objektsuche gruppiert Treffer nach Typ und schlägt bekannte Abhängigkeiten vor; nur ausdrücklich hinzugefügte Objekte werden überwacht. Für Entitäten lassen sich Aktualisierungsfrist, Mindestwert und eine Dauer für „nicht verfügbar“ festlegen. Der kompakte Editor hat eine mitwachsende Beschreibung, zeigt eine Vorschau der letzten Scanbewertung und lässt Monitore vorübergehend deaktivieren. Die Seite unterscheidet belegte Defekte, Prüflücken, unauffällige und deaktivierte Monitore; die Übersicht meldet aktive Probleme. Zustandswechsel stehen als HA-Ereignis und Event-Entität bereit, jede Funktion hat einen Sensor. Dauerhafte HA-Mitteilungen sind pro Monitor einstellbar.
 
 - **Seite im Inventar auswählen:** Ein Kästchen im Tabellenkopf markiert die auswählbaren Entitäten der aktuellen Seite. Bei teilweiser Auswahl zeigt es den Zwischenzustand; ein weiterer Klick hebt die Seitenauswahl auf. Die Auswahl aller gefilterten Entitäten bleibt über die Leiste möglich.
 
 - **Entitäten im Inventar gesammelt umschalten:** Die Entitätenzeilen des Inventars haben ein Kästchen. Die Leiste darüber deaktiviert, aktiviert, blendet aus oder ein, bis zu 200 Entitäten pro Plan, mit Vorschau und Rückgängig. Eine Entität, die etwas sicher benutzt, wird nicht deaktiviert; nur selbst Deaktiviertes wird wieder aktiviert.
 
 ### Behoben
-
-- **Hausmonitor-Detailansicht:** Der Zurück-Knopf hat wieder Abstand zur darunterliegenden Karte.
-
-- **Hausmonitor-Editor:** Abbrechen steht im Formularkopf, die Beschreibung ist kompakter und ausgewählte Objekte zeigen Typ und ID. Suchtreffer haben kurze Hinzufügen-Knöpfe; bereits gewählte Objekte sind erkennbar und nicht erneut auswählbar.
-
-- **Hausmonitor ohne Einträge:** Die leere Ansicht zeigt nun ein sichtbares Haussymbol und einen kurzen Beispieltext wie die Wartungserinnerungen.
-
-- **Hausmonitor-Editor:** Das Formular hat eine gut lesbare Breite, kompaktere Felder und passende Schalter und Knöpfe. Die Objektsuche zeigt Treffer erst nach einer Eingabe und begrenzt die Ergebnisliste. „Funktion hinzufügen“ heißt jetzt „Monitor hinzufügen“.
 
 - **Fokus in Dialogen:** Während ein Dialog geöffnet ist, bleiben Seite und darunterliegende Dialoge für die Tastatur inaktiv. Tab und Umschalt+Tab bleiben im obersten Dialog; nach dem Schließen kehrt der Fokus zum auslösenden Steuerelement zurück.
 
@@ -40,25 +28,13 @@
 
 #### New
 
-- **Home monitor expected conditions:** Entities can have an update deadline, a numeric minimum and an allowed duration of unavailability. The editor previews the latest scan evaluation and suggests objects from known dependencies as additional members; only explicitly added suggestions are monitored.
-
-- **Home monitor object search:** One search groups matches by type. Filters for entities, devices, automations, scenes, integrations and other objects narrow the results. Scenes, scripts and apps/add-ons can now be monitored; an idle scene or script is not considered a fault.
-
-- **Home monitor:** Group important functions from directly selected entities, devices, automations and integrations. The new page shows confirmed faults, check gaps and the last complete check; the overview highlights impaired functions and incomplete checks. State changes are available as HA bus events and an event entity, with one sensor per function. Persistent HA notifications can be enabled per function.
+- **Home monitor:** Group important home functions from directly selected entities, devices, automations, scenes, scripts, integrations and apps/add-ons. The shared object search groups results by type and suggests known dependencies; only explicitly added objects are monitored. Entities support update deadlines, minimum values and a grace period for unavailability. The compact editor has a description field that grows with its text, previews the latest scan evaluation and lets monitors be temporarily disabled. The page distinguishes confirmed faults, check gaps, healthy and disabled monitors; the overview highlights active problems. State changes are available as HA events and an event entity, with one sensor per function. Persistent HA notifications are configurable per monitor.
 
 - **Select an inventory page:** A checkbox in the table header selects the selectable entities on the current page. It shows a mixed state when some are selected; another click clears the page selection. The bar still offers selection of all filtered entities.
 
 - **Switch entities in bulk from the inventory:** Entity rows of the Inventory have a checkbox. The bar above disables, enables, hides or shows them, up to 200 entities per plan, with a preview and undo. An entity that something certainly uses is not disabled; only what you disabled yourself is enabled again.
 
 #### Fixed
-
-- **Home monitor detail view:** The back button now has space before the card below it.
-
-- **Home monitor editor:** Cancel is in the form header, the description field is smaller, and selected objects show their type and ID. Search results have compact Add buttons; selected objects remain visible and cannot be added twice.
-
-- **Empty home monitor:** The empty view now shows a visible home icon and a short example, matching maintenance reminders.
-
-- **Home monitor editor:** The form has a readable width, more compact fields and correctly sized switches and buttons. Object search shows matches after typing and keeps the result list contained. “Add function” is now “Add monitor”.
 
 - **Focus in dialogs:** While a dialog is open, the page and dialogs beneath it are inactive for keyboard users. Tab and Shift+Tab stay in the top dialog; closing it returns focus to the control that opened it.
 

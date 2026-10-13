@@ -1132,6 +1132,7 @@ def websocket_monitor_list(
         vol.Required("name"): str,
         vol.Optional("description", default=""): str,
         vol.Required("notify"): bool,
+        vol.Optional("enabled", default=True): bool,
         vol.Required("members"): [
             {vol.Required("object_key"): str, vol.Required("required"): bool,
              vol.Optional("rules", default=[]): [{vol.Required("kind"): str, vol.Required("value"): vol.Any(int, float)}]}
@@ -1154,7 +1155,7 @@ async def websocket_monitor_save(
         snapshot = await scanner.async_get_snapshot()
         function_id = scanner.monitor.upsert(
             msg.get("function_id"), msg["name"], msg["description"], msg["notify"],
-            msg["members"], snapshot, scanner.health_report(),
+            msg["members"], snapshot, scanner.health_report(), msg["enabled"],
         )
     except MonitorError as err:
         connection.send_error(msg["id"], "invalid_format", str(err))

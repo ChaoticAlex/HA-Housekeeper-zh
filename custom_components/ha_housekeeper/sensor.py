@@ -166,7 +166,7 @@ class MonitorSensor(SensorEntity):
     _attr_has_entity_name = True
     _attr_should_poll = False
     _attr_device_class = SensorDeviceClass.ENUM
-    _attr_options = ["ok", "problem", "unverified"]
+    _attr_options = ["ok", "problem", "unverified", "disabled"]
 
     def __init__(self, entry: ConfigEntry, function_id: str) -> None:
         self.function_id = function_id
