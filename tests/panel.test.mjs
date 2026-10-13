@@ -84,6 +84,69 @@ test("paging brings the new list page into view and announces its position", () 
   assert.deepEqual(calls, [["tabindex", "-1"], ["aria-label", "Seite 2 von 3"], ["scroll", "start"], ["focus", true]]);
 });
 
+test("modal focus stays in the top dialog and the page behind it is inert", () => {
+  const { el } = panel();
+  const focused = [];
+  const control = name => ({
+    name, focus: () => { root.activeElement = controls[name]; focused.push(name); },
+    closest: () => null, getClientRects: () => [1],
+  });
+  const controls = { no: control("no"), yes: control("yes") };
+  const dialog = { setAttribute() {}, focus() {} };
+  const handlers = {};
+  const top = {
+    dataset: { confirmModal: "" },
+    querySelector: () => dialog,
+    querySelectorAll: () => [controls.no, controls.yes],
+    contains: item => item === controls.no || item === controls.yes,
+    addEventListener: (name, fn) => { handlers[name] = fn; },
+  };
+  const lower = { dataset: { noteModal: "" }, inert: false };
+  const background = { inert: false };
+  const root = {
+    activeElement: controls.no,
+    querySelectorAll: () => [lower, top],
+    querySelector: () => background,
+  };
+  assert.equal(el.modalKey(top), "confirmModal");
+  el.bindModalFocus(root);
+  assert.equal(background.inert, true);
+  assert.equal(lower.inert, true);
+  const key = (shiftKey, target) => {
+    root.activeElement = target;
+    let prevented = false;
+    handlers.keydown({ key: "Tab", shiftKey, preventDefault: () => { prevented = true; } });
+    return prevented;
+  };
+  assert.equal(key(true, controls.no), true);
+  assert.equal(key(false, controls.yes), true);
+  assert.deepEqual(focused, ["yes", "no"]);
+});
+
+test("closing a confirmation dialog restores focus to its opener", () => {
+  const { el, shadow } = panel();
+  const opener = { selector: '[data-plan-delete="p1"]', start: null, end: null };
+  const cancel = { selector: "[data-confirm-no]", start: null, end: null };
+  const modal = { dataset: { confirmModal: "" } };
+  let shown = false, focused = opener;
+  const restored = [];
+  Object.defineProperty(shadow, "innerHTML", { configurable: true, set: html => { shown = html.includes("data-confirm-modal"); }, get: () => "" });
+  shadow.querySelectorAll = () => shown ? [modal] : [];
+  shadow.querySelector = () => null;
+  el.captureFocus = () => focused;
+  el.restoreFocus = saved => { if (saved) restored.push(saved.selector); };
+  el.bind = () => { if (shown) focused = cancel; };
+  el.bindModalFocus = () => {};
+  el.fitNav = () => {};
+  el.syncGuard = () => {};
+  el.syncUrl = () => {};
+  el.confirmAsk("Run?", () => {});
+  assert.equal(el._modalReturnFocus.get("confirmModal"), opener);
+  el.confirmClose();
+  assert.equal(restored.at(-1), opener.selector);
+  assert.equal(el._modalReturnFocus.size, 0);
+});
+
 test("every view renders without throwing and escapes object names", () => {
   const { el, shadow } = panel("de");
   for (const view of ["overview", "inventory", "findingsNav", "graph"]) {

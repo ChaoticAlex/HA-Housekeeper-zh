@@ -13419,6 +13419,39 @@ class HAHousekeeperPanel extends HTMLElement {
     }
   }
 
+  activeModal(root = this.shadowRoot) {
+    return [...(root?.querySelectorAll?.(".hkmodal") || [])].at(-1) || null;
+  }
+
+  modalKey(modal) {
+    return modal ? Object.keys(modal.dataset || {}).find(key => key.endsWith("Modal")) || null : null;
+  }
+
+  // Keep the background out of the tab order and wrap Tab within the topmost dialog.
+  bindModalFocus(root) {
+    const modals = [...root.querySelectorAll(".hkmodal")], top = modals.at(-1);
+    for (const selector of [".stickyhead", ".main"]) {
+      const background = root.querySelector(selector);
+      if (background) background.inert = !!top;
+    }
+    modals.slice(0, -1).forEach(modal => { modal.inert = true; });
+    if (!top) return;
+    const dialog = top.querySelector(".hkdialog");
+    top.addEventListener("keydown", ev => {
+      if (ev.key !== "Tab") return;
+      const controls = [...top.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')]
+        .filter(el => !el.closest("[inert]") && el.getClientRects().length);
+      if (!controls.length) { ev.preventDefault(); dialog?.focus(); return; }
+      const first = controls[0], last = controls.at(-1), current = root.activeElement;
+      if (ev.shiftKey && (current === first || !top.contains(current))) { ev.preventDefault(); last.focus(); }
+      else if (!ev.shiftKey && (current === last || !top.contains(current))) { ev.preventDefault(); first.focus(); }
+    });
+    if (!top.contains(root.activeElement)) {
+      dialog?.setAttribute("tabindex", "-1");
+      dialog?.focus();
+    }
+  }
+
   // After paging, return to the beginning of the affected list and announce the new page.
   focusListPage(id) {
     const footer = [...(this.shadowRoot?.querySelectorAll("[data-lpage-footer]") || [])].find(el => el.dataset.lpageFooter === id);
@@ -13485,6 +13518,7 @@ class HAHousekeeperPanel extends HTMLElement {
     if (this._searchTimer) { globalThis.clearTimeout?.(this._searchTimer); this._searchTimer = null; }
     const started = this._debug ? globalThis.performance?.now?.() : null;
     const focus = this.captureFocus();
+    const previousModal = this.modalKey(this.activeModal());
     // A view that throws shows a message under the top bar instead of freezing the panel on the last page.
     let page;
     try { page = this.selected && this.data ? this.detail() : `${this.heading()}${this.content()}`; } catch (err) { page = this.renderFailed(err); }
@@ -13498,8 +13532,15 @@ class HAHousekeeperPanel extends HTMLElement {
       try { const tpl = document.createElement("template"); tpl.innerHTML = shell; current.replaceWith(tpl.content); swapped = true; } catch (err) { this.logRenderError(err); }
     }
     if (!swapped) { root.innerHTML = `${this.styles()}${shell}`; this._styleKey = css; }
+    const currentModal = this.modalKey(this.activeModal(root));
+    if (currentModal && currentModal !== previousModal) (this._modalReturnFocus ||= new Map()).set(currentModal, focus);
     this.restoreFocus(focus);
     this.bind();
+    if (previousModal && previousModal !== currentModal) {
+      this.restoreFocus(this._modalReturnFocus?.get(previousModal));
+      this._modalReturnFocus?.delete(previousModal);
+    }
+    this.bindModalFocus(root);
     this.fitNav(root);
     if (this._scrollPlan) { this._scrollPlan = false; setTimeout(() => root.querySelector("[data-plan-card]")?.scrollIntoView?.({ block: "start", behavior: "smooth" }), 30); }
     if (started !== null) console.debug(`[ha_housekeeper] render ${this.selected ? "detail" : this.view}: ${(globalThis.performance.now() - started).toFixed(1)} ms`);

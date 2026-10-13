@@ -10,6 +10,8 @@
 
 ### Behoben
 
+- **Fokus in Dialogen:** Während ein Dialog geöffnet ist, bleiben Seite und darunterliegende Dialoge für die Tastatur inaktiv. Tab und Umschalt+Tab bleiben im obersten Dialog; nach dem Schließen kehrt der Fokus zum auslösenden Steuerelement zurück.
+
 - **Orientierung nach einem Seitenwechsel:** Lange Listen springen nach „Weiter“ oder „Zurück“ an den Anfang des betroffenen Bereichs. Der Tastaturfokus meldet die neue Seite.
 
 - **Listensuche zugänglich beschriftet:** Das Suchfeld in Listen hat jetzt auch nach dem Tippen eine Bezeichnung für Screenreader.
@@ -29,6 +31,8 @@
 - **Switch entities in bulk from the inventory:** Entity rows of the Inventory have a checkbox. The bar above disables, enables, hides or shows them, up to 200 entities per plan, with a preview and undo. An entity that something certainly uses is not disabled; only what you disabled yourself is enabled again.
 
 #### Fixed
+
+- **Focus in dialogs:** While a dialog is open, the page and dialogs beneath it are inactive for keyboard users. Tab and Shift+Tab stay in the top dialog; closing it returns focus to the control that opened it.
 
 - **Orientation after changing pages:** Long lists return to the start of the affected section after “Next” or “Previous”. Keyboard focus announces the new page.
 
