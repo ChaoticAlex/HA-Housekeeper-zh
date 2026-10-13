@@ -337,7 +337,9 @@ async def test_scripts_and_scenes_are_inventoried_with_missing_references(
     assert types["script.tidy"] == "script"
     assert types["scene.evening"] == "scene"
 
-    rules = {(f["rule_id"], f["object_id"], f["affected_object"]) for f in snapshot["findings"]}
+    rules = {
+        (f["rule_id"], f["object_id"], f.get("affected_object")) for f in snapshot["findings"]
+    }
     assert ("script.missing_entity", "script.tidy", "light.gone") in rules
     assert ("scene.missing_entity", "scene.evening", "light.vanished") in rules
     assert not any(affected == "light.present" for _, _, affected in rules)
