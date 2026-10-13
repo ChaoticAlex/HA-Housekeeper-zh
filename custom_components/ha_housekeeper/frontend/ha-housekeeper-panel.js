@@ -1330,6 +1330,7 @@ class StylesMixin {
       .recchoice{display:inline-flex;align-items:center;gap:6px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}.recwarn{flex:1 1 100%;color:var(--hk-muted)}
       .selcount{display:inline-flex;align-items:center;min-height:30px;box-sizing:border-box;padding:4px 10px;border:1px solid color-mix(in srgb,var(--hk-blue-solid) 28%,var(--hk-border));border-radius:999px;background:color-mix(in srgb,var(--hk-blue-solid) 10%,var(--hk-surface));color:var(--hk-blue-text);font-size:calc(12px*var(--hk-fs,1));font-weight:700;white-space:nowrap}
       .needsplit>div:only-child{grid-column:1/-1}
+      .rem-editor .remgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:16px}.rem-editor .remfield.wide,.rem-editor .remfield.full{grid-column:1/-1}.rem-editor .remfield input{box-sizing:border-box;width:100%;height:40px;padding:8px 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.rem-editor .remfield:focus-within>span:first-child{color:var(--hk-blue-text)}@media(max-width:700px){.rem-editor .remgrid{grid-template-columns:1fr}}
       .exbar{border-top:1px solid var(--hk-border)}.exblock{margin:0;max-height:none;border-radius:0}.exsteps{padding:10px 16px 12px;border-bottom:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(12.5px*var(--hk-fs,1))}.exsteps ol{margin:4px 0 0;padding-left:20px}.exsteps li{margin:2px 0}.exdone{opacity:.6}.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--hk-border)}.toolgap{flex:1}.btn.quiet{box-shadow:none;border-color:transparent;background:none;color:var(--hk-blue-text);padding:8px 10px}.btn.quiet:hover{background:var(--hk-soft)}.btn.quiet[disabled]{color:var(--hk-muted);opacity:.7;cursor:default}
       .btn.primary{border-color:var(--hk-blue-solid);color:var(--hk-on,#fff);background:var(--hk-blue-solid)}.btn.primary:hover{background:#0a8ccf}.btn[disabled]{opacity:.6;cursor:not-allowed}.btn[aria-busy="true"]{cursor:wait}
       .summary{display:grid;grid-template-columns:repeat(4,1fr) 1.3fr;gap:12px;margin-bottom:14px}
@@ -8235,20 +8236,19 @@ class BatteryCareMixin {
     return `${main}<tr class="static remhist"><td colspan="5"><h3>${this.t("remHistory", { n: hist.length })}</h3>${list}</td></tr>`;
   }
 
-  // The dialog for a new or an edited reminder: labels above fields of one height; "due" follows the interval until it is set by hand.
-  remDialog() {
+  // The page editor for a new or an edited reminder; "due" follows the interval until it is set by hand.
+  remEditor() {
     const d = this.remDraft;
     if (!d) return "";
     const field = (key, label, body, extra = "") => `<label class="remfield ${extra}"><span>${this.t(label)}</span>${body}</label>`;
     const chips = [30, 90, 180, 365].map(n => `<button type="button" class="chip${Number(d.interval_days) === n ? " on" : ""}" data-rem-chip="${n}">${n}</button>`).join("");
-    return `<div class="hkmodal" data-rem-modal><form class="hkdialog" role="dialog" aria-modal="true" aria-labelledby="hk-rem-head" data-rem-form>
-      <div class="dhead"><h2 id="hk-rem-head">${this.t(d.id ? "remDialogEdit" : "remDialogNew")}</h2></div>
-      <div class="dbody"><div class="remgrid">${field("name", "remFName", `<input data-rem-field="name" placeholder="${this.esc(this.t("remName"))}" value="${this.esc(d.name)}" maxlength="80">`, "wide")}${field("interval_days", "remFEvery", `<input data-rem-field="interval_days" type="number" min="1" max="3650" value="${this.esc(d.interval_days)}"><span class="remchips">${chips}</span>`)}${field("due", "remFDue", `<input data-rem-field="due" type="date" value="${this.esc(d.due)}"><span class="remhint" data-rem-hint>${this.esc(this.remWhen(this.remDaysLeft(d.due)))}</span>`)}${field("note", "remFNote", `<input data-rem-field="note" placeholder="${this.esc(this.t("remNote"))}" value="${this.esc(d.note)}" maxlength="200">`, "full")}</div>${this.remError ? `<div class="error" role="alert">${this.esc(this.remError)}</div>` : ""}</div>
-      <div class="dfoot"><span></span><span class="dbtns"><button type="button" class="btn" data-rem-cancel>${this.t("remCancel")}</button><button type="submit" class="btn primary" data-rem-save>${this.t(d.id ? "remSave" : "remAdd")}</button></span></div></form></div>`;
+    return `<div class="monitor-editor rem-editor"><form data-rem-form><section class="panel u-mb14"><div class="panelhead"><h2>${this.t(d.id ? "remDialogEdit" : "remDialogNew")}</h2></div>
+      <div class="remgrid">${field("name", "remFName", `<input data-rem-field="name" placeholder="${this.esc(this.t("remName"))}" value="${this.esc(d.name)}" maxlength="80" required>`, "wide")}${field("interval_days", "remFEvery", `<input data-rem-field="interval_days" type="number" min="1" max="3650" value="${this.esc(d.interval_days)}" required><span class="remchips">${chips}</span>`)}${field("due", "remFDue", `<input data-rem-field="due" type="date" value="${this.esc(d.due)}" required><span class="remhint" data-rem-hint>${this.esc(this.remWhen(this.remDaysLeft(d.due)))}</span>`)}${field("note", "remFNote", `<input data-rem-field="note" placeholder="${this.esc(this.t("remNote"))}" value="${this.esc(d.note)}" maxlength="200">`, "full")}</div></section>
+      <div class="toolbar savebar"><span role="alert">${this.esc(this.remError || "")}</span><span class="toolgap"></span><button type="button" class="btn" data-rem-cancel>${this.t("remCancel")}</button><button type="submit" class="btn primary" data-rem-save>${this.t(d.id ? "remSave" : "remAdd")}</button></div></form></div>`;
   }
 
   // Own view under "Maintain": own reminders (filter, descaling, changing batteries) with a date when they are due.
-  remindersView() { return `<div class="stack">${this.remindersCard()}</div>`; }
+  remindersView() { return this.remDraft ? this.remEditor() : `<div class="stack">${this.remindersCard()}</div>`; }
 
   remindersCard() {
     const items = this.data.reminders || [];
@@ -8292,12 +8292,7 @@ class BatteryCareMixin {
       if (input) input.value = this.remDraft.interval_days;
       syncForm();
     }));
-    const remModal = root.querySelector("[data-rem-modal]");
-    if (remModal) {
-      remModal.addEventListener("mousedown", ev => { if (ev.target === remModal) { this.remDraft = null; this.remError = ""; this.render(); } });
-      remModal.addEventListener("keydown", ev => { if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); this.remDraft = null; this.remError = ""; this.render(); } });
-      if (this._remFocus) { this._remFocus = false; remModal.querySelector('[data-rem-field="name"]')?.focus(); }
-    }
+    if (this._remFocus && root.querySelector("[data-rem-form]")) { this._remFocus = false; root.querySelector('[data-rem-field="name"]')?.focus(); }
     root.querySelector("[data-rem-form]")?.addEventListener("submit", ev => {
       ev.preventDefault();
       const d = this.remDraft;
@@ -13852,7 +13847,7 @@ class HAHousekeeperPanel extends HTMLElement {
     // A view that throws shows a message under the top bar instead of freezing the panel on the last page.
     let page;
     try { page = this.selected && this.data ? this.detail() : `${this.heading()}${this.content()}`; } catch (err) { page = this.renderFailed(err); }
-    const shell = `<div class="shell${this.dense ? " dense" : ""}"><div class="stickyhead">${this.topbar()}${this.safetyBar()}</div><main class="main">${page}</main>${this.noteDialog()}${this.pinDialog()}${this.remDialog()}${this.confirmDialog()}<div class="sr-only" role="status" aria-live="polite">${this.esc(this.liveStatus())}</div></div>`;
+    const shell = `<div class="shell${this.dense ? " dense" : ""}"><div class="stickyhead">${this.topbar()}${this.safetyBar()}</div><main class="main">${page}</main>${this.noteDialog()}${this.pinDialog()}${this.confirmDialog()}<div class="sr-only" role="status" aria-live="polite">${this.esc(this.liveStatus())}</div></div>`;
     // The style sheet is only parsed again when the theme changed; otherwise just the page is replaced.
     const root = this.shadowRoot, css = this.themeCss(), current = root.querySelector?.(".shell");
     let swapped = false;

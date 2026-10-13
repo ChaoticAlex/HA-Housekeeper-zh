@@ -3443,8 +3443,15 @@ test("the batteries view shows the forecast with groups and the reminders, which
   assert.equal(el.remDraft, null);
   el.remOpen = ["r1"];
   assert.ok(el.reminderRow({ id: "r1", name: "Water filter", interval_days: 90, last_done: "2026-07-01", history: ["2026-07-01"], due: "2026-09-29", days_left: -10, state: "due", note: "" }).includes("data-rem-hdel=\"r1|2026-07-01\""));
+  el.view = "reminders";
   el.remDraft = el.remBlank();
-  assert.ok(el.remDialog().includes("data-rem-save") && el.remDialog().includes("New reminder") && !el.remindersCard().includes("data-rem-save"), "the form is a dialog, the card keeps its button");
+  const editor = el.remindersView();
+  assert.ok(editor.includes("data-rem-form") && editor.includes("New reminder") && editor.includes("monitor-editor") && !editor.includes('role="dialog"'), "the reminder uses a page editor");
+  assert.ok(!editor.includes("data-rem-new") && !el.remindersCard().includes("data-rem-save"));
+  el.remDraft = { ...el.remDraft, id: "r1" };
+  assert.ok(el.remindersView().includes("Edit reminder"));
+  el.remDraft = null;
+  assert.ok(el.remindersView().includes("data-rem-new") && !el.remindersView().includes("data-rem-form"));
   const row = el.relRowBody({ title: "Hue", domain: "hue", entities: 3, availability: 99, setup: { count: 2, days: 7, last: "2026-10-08T10:00:00+00:00", state: "setup_retry" } });
   assert.ok(row.includes("Setup failures: 2 in 7 days") && row.includes("Currently in state setup_retry"));
   assert.equal(el.relSetupHint({ availability: 90, setup: { count: 3, days: 7 } }), "relHintOffline");

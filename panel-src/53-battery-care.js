@@ -57,20 +57,19 @@ class BatteryCareMixin {
     return `${main}<tr class="static remhist"><td colspan="5"><h3>${this.t("remHistory", { n: hist.length })}</h3>${list}</td></tr>`;
   }
 
-  // The dialog for a new or an edited reminder: labels above fields of one height; "due" follows the interval until it is set by hand.
-  remDialog() {
+  // The page editor for a new or an edited reminder; "due" follows the interval until it is set by hand.
+  remEditor() {
     const d = this.remDraft;
     if (!d) return "";
     const field = (key, label, body, extra = "") => `<label class="remfield ${extra}"><span>${this.t(label)}</span>${body}</label>`;
     const chips = [30, 90, 180, 365].map(n => `<button type="button" class="chip${Number(d.interval_days) === n ? " on" : ""}" data-rem-chip="${n}">${n}</button>`).join("");
-    return `<div class="hkmodal" data-rem-modal><form class="hkdialog" role="dialog" aria-modal="true" aria-labelledby="hk-rem-head" data-rem-form>
-      <div class="dhead"><h2 id="hk-rem-head">${this.t(d.id ? "remDialogEdit" : "remDialogNew")}</h2></div>
-      <div class="dbody"><div class="remgrid">${field("name", "remFName", `<input data-rem-field="name" placeholder="${this.esc(this.t("remName"))}" value="${this.esc(d.name)}" maxlength="80">`, "wide")}${field("interval_days", "remFEvery", `<input data-rem-field="interval_days" type="number" min="1" max="3650" value="${this.esc(d.interval_days)}"><span class="remchips">${chips}</span>`)}${field("due", "remFDue", `<input data-rem-field="due" type="date" value="${this.esc(d.due)}"><span class="remhint" data-rem-hint>${this.esc(this.remWhen(this.remDaysLeft(d.due)))}</span>`)}${field("note", "remFNote", `<input data-rem-field="note" placeholder="${this.esc(this.t("remNote"))}" value="${this.esc(d.note)}" maxlength="200">`, "full")}</div>${this.remError ? `<div class="error" role="alert">${this.esc(this.remError)}</div>` : ""}</div>
-      <div class="dfoot"><span></span><span class="dbtns"><button type="button" class="btn" data-rem-cancel>${this.t("remCancel")}</button><button type="submit" class="btn primary" data-rem-save>${this.t(d.id ? "remSave" : "remAdd")}</button></span></div></form></div>`;
+    return `<div class="monitor-editor rem-editor"><form data-rem-form><section class="panel u-mb14"><div class="panelhead"><h2>${this.t(d.id ? "remDialogEdit" : "remDialogNew")}</h2></div>
+      <div class="remgrid">${field("name", "remFName", `<input data-rem-field="name" placeholder="${this.esc(this.t("remName"))}" value="${this.esc(d.name)}" maxlength="80" required>`, "wide")}${field("interval_days", "remFEvery", `<input data-rem-field="interval_days" type="number" min="1" max="3650" value="${this.esc(d.interval_days)}" required><span class="remchips">${chips}</span>`)}${field("due", "remFDue", `<input data-rem-field="due" type="date" value="${this.esc(d.due)}" required><span class="remhint" data-rem-hint>${this.esc(this.remWhen(this.remDaysLeft(d.due)))}</span>`)}${field("note", "remFNote", `<input data-rem-field="note" placeholder="${this.esc(this.t("remNote"))}" value="${this.esc(d.note)}" maxlength="200">`, "full")}</div></section>
+      <div class="toolbar savebar"><span role="alert">${this.esc(this.remError || "")}</span><span class="toolgap"></span><button type="button" class="btn" data-rem-cancel>${this.t("remCancel")}</button><button type="submit" class="btn primary" data-rem-save>${this.t(d.id ? "remSave" : "remAdd")}</button></div></form></div>`;
   }
 
   // Own view under "Maintain": own reminders (filter, descaling, changing batteries) with a date when they are due.
-  remindersView() { return `<div class="stack">${this.remindersCard()}</div>`; }
+  remindersView() { return this.remDraft ? this.remEditor() : `<div class="stack">${this.remindersCard()}</div>`; }
 
   remindersCard() {
     const items = this.data.reminders || [];
@@ -114,12 +113,7 @@ class BatteryCareMixin {
       if (input) input.value = this.remDraft.interval_days;
       syncForm();
     }));
-    const remModal = root.querySelector("[data-rem-modal]");
-    if (remModal) {
-      remModal.addEventListener("mousedown", ev => { if (ev.target === remModal) { this.remDraft = null; this.remError = ""; this.render(); } });
-      remModal.addEventListener("keydown", ev => { if (ev.key === "Escape") { ev.preventDefault(); ev.stopPropagation(); this.remDraft = null; this.remError = ""; this.render(); } });
-      if (this._remFocus) { this._remFocus = false; remModal.querySelector('[data-rem-field="name"]')?.focus(); }
-    }
+    if (this._remFocus && root.querySelector("[data-rem-form]")) { this._remFocus = false; root.querySelector('[data-rem-field="name"]')?.focus(); }
     root.querySelector("[data-rem-form]")?.addEventListener("submit", ev => {
       ev.preventDefault();
       const d = this.remDraft;
