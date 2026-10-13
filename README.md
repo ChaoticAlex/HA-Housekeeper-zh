@@ -48,6 +48,12 @@ The goal is not aggressive automatic cleanup. Housekeeper helps you understand w
 | --- | --- |
 | ![Automations](screenshots/showcase-en/runs-desktop-light.png) | ![Reliability](screenshots/showcase-en/reliability-desktop-light.png) |
 
+## Why HA Housekeeper?
+
+Mature Home Assistant installations often accumulate registry entries, unavailable entities, replaced devices, old statistics, and automation references that are difficult to assess safely. A missing state alone does not explain whether an entity was intentionally disabled, whether its integration is disabled, or whether the underlying device no longer exists.
+
+Housekeeper combines registry data and the live Home Assistant runtime to provide that context in one administrator-only panel.
+
 ## Highlights
 
 - **Inventory and diagnostics**: entities, devices, integrations, areas and automations in one place; every object is classified (active, unavailable, disabled, orphaned) with a reason.

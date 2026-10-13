@@ -49,6 +49,12 @@ Das Ziel ist keine aggressive automatische Bereinigung. Housekeeper hilft zunäc
 | ![Automationen](screenshots/showcase/runs-desktop-light.png) | ![Zuverlässigkeit](screenshots/showcase/reliability-desktop-light.png) |
 
 
+## Warum HA Housekeeper?
+
+In gewachsenen Home-Assistant-Installationen sammeln sich häufig Registry-Einträge, nicht verfügbare Entitäten, ausgetauschte Geräte, alte Statistiken und schwer nachvollziehbare Automationsreferenzen an. Ein fehlender Zustand allein erklärt nicht, ob eine Entität absichtlich deaktiviert wurde, ihre Integration deaktiviert ist oder das zugrunde liegende Gerät nicht mehr existiert.
+
+Housekeeper verbindet Registry-Daten mit der laufenden Home-Assistant-Instanz und stellt diesen Zusammenhang in einem gemeinsamen, nur für Administratoren erreichbaren Panel dar.
+
 ## Highlights
 
 - **Inventar und Diagnose**: Entitäten, Geräte, Integrationen, Bereiche und Automationen an einem Ort; jedes Objekt wird mit Begründung eingeordnet (aktiv, nicht verfügbar, deaktiviert, verwaist).
