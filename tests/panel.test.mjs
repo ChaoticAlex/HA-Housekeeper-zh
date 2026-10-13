@@ -3167,7 +3167,7 @@ test("deleting asks in a dialog first; the deletion runs only from its confirmat
   el.confirmClose();
   assert.equal(el.confirmState, null);
   assert.equal(ran, 0, "cancel deletes nothing");
-  assert.ok(el.t("confirmPlan", { date: "x" }).includes("no longer possible") && el.t("confirmRemDay", { date: "d", name: "n" }).includes("due day stays"));
+  assert.ok(el.t("confirmPlanDelete", { date: "x" }).includes("no longer possible") && el.t("confirmPlan") === "Confirm …" && el.t("confirmRemDay", { date: "d", name: "n" }).includes("due day stays"));
 });
 
 test("the logbook dialog names the object it was opened for and offers the picker only when none is set or on request", () => {

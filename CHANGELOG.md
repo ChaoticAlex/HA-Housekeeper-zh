@@ -6,11 +6,19 @@
 
 - **Entitäten im Inventar gesammelt umschalten:** Die Entitätenzeilen des Inventars haben ein Kästchen. Die Leiste darüber deaktiviert, aktiviert, blendet aus oder ein, bis zu 200 Entitäten pro Plan, mit Vorschau und Rückgängig. Eine Entität, die etwas sicher benutzt, wird nicht deaktiviert; nur selbst Deaktiviertes wird wieder aktiviert.
 
+### Behoben
+
+- **Plan bestätigen:** Der Button „Bestätigen …“ zeigte statt seiner Beschriftung den Text der Löschfrage des Journals samt „{date}“. Er trägt wieder seine Beschriftung.
+
 ### English
 
 #### New
 
 - **Switch entities in bulk from the inventory:** Entity rows of the Inventory have a checkbox. The bar above disables, enables, hides or shows them, up to 200 entities per plan, with a preview and undo. An entity that something certainly uses is not disabled; only what you disabled yourself is enabled again.
+
+#### Fixed
+
+- **Confirm plan:** The “Confirm …” button showed the text of the journal delete question, including “{date}”, instead of its label. It has its label again.
 
 ## 1.6.0 - 2026-10-13
 
