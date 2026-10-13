@@ -3971,15 +3971,17 @@ test("the overview counts batteries that report volts as low too", () => {
   assert.ok(el.lowBatteries().some(r => r.volt));
 });
 
-test("the findings tiles carry a sparkline for the status, the total and each class", () => {
+test("the findings tiles carry a sparkline for the total and each class, the status line of the overview the one for the score", () => {
   const { el } = panel("en");
   const day = (n, share, open, unused) => ({ at: `2026-10-0${n}T08:00:00+00:00`, objects: 10, findings: open, open, share, classes: { unused } });
   el.series = { points: [day(1, 90, 4, 2), day(2, 80, 6, 3), day(3, 70, 8, 5)] };
   const html = el.findingsView();
-  assert.ok((html.match(/class="spark"/g) || []).length >= 3);
+  assert.ok((html.match(/class="spark"/g) || []).length >= 2);
   assert.ok(el.sparkline("class:unused", "bad").includes("+3"));
   assert.ok(el.sparkline("class:missing", "bad").includes("±0"));
-  assert.ok(html.includes(`${el.health().percent} %`), "the tile shows the score");
+  assert.ok(!html.includes(`${el.health().percent} %`), "the score is not a tile of this page any more");
+  el.view = "overview"; el.render();
+  assert.ok(el.shadowRoot.innerHTML.includes("statustext") && /statustext[\s\S]*?class="spark"/.test(el.shadowRoot.innerHTML), "the score history sits under the headline");
 });
 
 test("an entity row shows the id in mono under the name and the extra facts in a line of their own", () => {
