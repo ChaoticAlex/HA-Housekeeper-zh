@@ -63,6 +63,7 @@ from .ignored import KINDS as IGNORE_KINDS
 from .ignored import REASON_LIMIT as IGNORE_REASON_LIMIT
 from .inventory import InventoryScanner
 from .meter import prepare_meter
+from .monitor import MonitorError
 from .protection import MODES as PROTECTION_MODES
 from .recorder_purge import MAX_IDS as PURGE_MAX_IDS
 from .recorder_purge import TRIM_MAX_DAYS, TRIM_TABLES, count_history, count_older, count_trim
@@ -100,7 +101,11 @@ async def _send_inventory_result(
         connection.send_error(msg["id"], "scan_failed", f"{type(err).__name__}: {err}")
         return
     # The snapshot is from the last success; the health says whether it is still being refreshed.
-    result = {**result, "meta": {**result["meta"], "scan_health": scanner.health_report()}}
+    result = {
+        **result,
+        "meta": {**result["meta"], "scan_health": scanner.health_report()},
+        "monitor": scanner.monitor.report(),
+    }
     connection.send_result(msg["id"], _versioned(result))
 
 
@@ -1105,6 +1110,83 @@ def websocket_events(
     )
 
 
+@websocket_api.require_admin
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/monitor_list"})
+@callback
+@with_scanner
+def websocket_monitor_list(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """Return definitions with the latest evaluation, without starting a scan."""
+    connection.send_result(msg["id"], _versioned({"functions": scanner.monitor.report()}))
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): f"{DOMAIN}/monitor_save",
+        vol.Optional("function_id"): str,
+        vol.Required("name"): str,
+        vol.Optional("description", default=""): str,
+        vol.Required("notify"): bool,
+        vol.Required("members"): [
+            {vol.Required("object_key"): str, vol.Required("required"): bool}
+        ],
+    }
+)
+@websocket_api.async_response
+@with_scanner
+async def websocket_monitor_save(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """Save one explicitly selected function; only Housekeeper's definition changes."""
+    if scanner.warming_up:
+        connection.send_error(msg["id"], "busy", "Home Assistant is still starting")
+        return
+    try:
+        snapshot = await scanner.async_get_snapshot()
+        function_id = scanner.monitor.upsert(
+            msg.get("function_id"), msg["name"], msg["description"], msg["notify"],
+            msg["members"], snapshot, scanner.health_report(),
+        )
+    except MonitorError as err:
+        connection.send_error(msg["id"], "invalid_format", str(err))
+        return
+    except Exception as err:
+        connection.send_error(msg["id"], "scan_failed", f"{type(err).__name__}: {err}")
+        return
+    connection.send_result(
+        msg["id"], _versioned({"function_id": function_id, "functions": scanner.monitor.report()})
+    )
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command(
+    {vol.Required("type"): f"{DOMAIN}/monitor_delete", vol.Required("function_id"): str}
+)
+@callback
+@with_scanner
+def websocket_monitor_delete(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """Delete a definition and its persistent notification."""
+    try:
+        scanner.monitor.delete(msg["function_id"])
+    except MonitorError as err:
+        connection.send_error(msg["id"], "invalid_format", str(err))
+        return
+    connection.send_result(msg["id"], _versioned({"functions": scanner.monitor.report()}))
+
+
 def async_register(hass: HomeAssistant) -> None:
     """Register Housekeeper WebSocket commands."""
     ws_automations.async_register(hass)
@@ -1138,3 +1220,6 @@ def async_register(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_backup_cleanup)
     websocket_api.async_register_command(hass, websocket_window_reload)
     websocket_api.async_register_command(hass, websocket_events)
+    websocket_api.async_register_command(hass, websocket_monitor_list)
+    websocket_api.async_register_command(hass, websocket_monitor_save)
+    websocket_api.async_register_command(hass, websocket_monitor_delete)

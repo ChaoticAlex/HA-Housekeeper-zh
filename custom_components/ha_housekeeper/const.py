@@ -36,6 +36,7 @@ WINDOW_STORAGE_KEY: Final = f"{DOMAIN}.window"
 NOTIFY_STORAGE_KEY: Final = f"{DOMAIN}.notify"
 STALE_STORAGE_KEY: Final = f"{DOMAIN}.stale"
 SCAN_HEALTH_STORAGE_KEY: Final = f"{DOMAIN}.scan_health"
+MONITOR_STORAGE_KEY: Final = f"{DOMAIN}.monitor"
 LOAD_STORAGE_KEY: Final = f"{DOMAIN}.load"
 STORAGE_VERSION: Final = 1
 
@@ -71,6 +72,8 @@ WARMUP_SECONDS: Final = 300
 # Version of the WebSocket reply contract; raise it when a field is renamed or removed.
 API_SCHEMA: Final = 1
 SIGNAL_SCAN_COMPLETE: Final = f"{DOMAIN}_scan_complete"
+SIGNAL_MONITOR_DEFINITIONS: Final = f"{DOMAIN}_monitor_definitions"
+SIGNAL_MONITOR_EVENT: Final = f"{DOMAIN}_monitor_event"
 
 # Undo data kept in the journal for a rewritten YAML file: files up to MAX_FILE_BACKUP are kept
 # whole (byte-exact undo); one plan keeps at most MAX_PLAN_SNAPSHOTS of such copies.

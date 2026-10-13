@@ -18,8 +18,9 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers import entity_registry as er
 
-from .const import DOMAIN, NAME, SIGNAL_SCAN_COMPLETE
+from .const import DOMAIN, NAME, SIGNAL_MONITOR_DEFINITIONS, SIGNAL_SCAN_COMPLETE
 from .scan_coverage import gaps
 from .scan_health import STATES
 
@@ -89,6 +90,18 @@ async def async_setup_entry(
             ScanHealthSensor(entry, HEALTH_DESCRIPTION),
         ]
     )
+    scanner = hass.data[DOMAIN]["scanner"]
+    known: set[str] = set()
+
+    @callback
+    def _check_functions() -> None:
+        fresh = {item["id"] for item in scanner.monitor.items} - known
+        if fresh:
+            known.update(fresh)
+            async_add_entities([MonitorSensor(entry, function_id) for function_id in sorted(fresh)])
+
+    _check_functions()
+    entry.async_on_unload(async_dispatcher_connect(hass, SIGNAL_MONITOR_DEFINITIONS, _check_functions))
 
 
 class HousekeeperSensor(SensorEntity):
@@ -144,4 +157,62 @@ class ScanHealthSensor(HousekeeperSensor):
             }
             if report
             else {}
+        )
+
+
+class MonitorSensor(SensorEntity):
+    """The current, possibly unverified state of one selected function."""
+
+    _attr_has_entity_name = True
+    _attr_should_poll = False
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = ["ok", "problem", "unverified"]
+
+    def __init__(self, entry: ConfigEntry, function_id: str) -> None:
+        self.function_id = function_id
+        self._attr_unique_id = f"{entry.entry_id}_monitor_{function_id}"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)}, name=NAME, entry_type=DeviceEntryType.SERVICE
+        )
+        self._attr_native_value = "unverified"
+        self._removed = False
+
+    async def async_added_to_hass(self) -> None:
+        self._update()
+        self.async_on_remove(
+            async_dispatcher_connect(self.hass, SIGNAL_MONITOR_DEFINITIONS, self._handle_update)
+        )
+
+    @callback
+    def _handle_update(self) -> None:
+        scanner = self.hass.data.get(DOMAIN, {}).get("scanner")
+        if scanner and not any(item["id"] == self.function_id for item in scanner.monitor.items):
+            if not self._removed:
+                self._removed = True
+                registry = er.async_get(self.hass)
+                entity_id = registry.async_get_entity_id("sensor", DOMAIN, self.unique_id)
+                if entity_id:
+                    registry.async_remove(entity_id)
+                self.hass.async_create_task(self.async_remove())
+            return
+        self._update()
+        self.async_write_ha_state()
+
+    def _update(self) -> None:
+        scanner = self.hass.data.get(DOMAIN, {}).get("scanner")
+        definition = next(
+            (item for item in scanner.monitor.items if item["id"] == self.function_id), None
+        ) if scanner else None
+        result = next(
+            (item for item in scanner.monitor.results if item["id"] == self.function_id), None
+        ) if scanner else None
+        self._attr_name = f"Hausmonitor {definition['name']}" if definition else "Hausmonitor"
+        self._attr_native_value = result["state"] if result else "unverified"
+        self._attr_extra_state_attributes = (
+            {
+                "reason": result["reason"],
+                "scanned_at": result["scanned_at"],
+                "last_verified_at": result["last_verified_at"],
+            }
+            if result else {}
         )

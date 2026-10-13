@@ -82,6 +82,7 @@ from .load_history import LoadStore
 from .log_facts import log_facts
 from .maintenance import PreflightStore
 from .marks import KINDS, KINDS_OF, MarkStore, apply_marks, mark_key
+from .monitor import MonitorStore
 from .notes import NoteStore
 from .notify import NotifyStore, async_announce
 from .observations import ObservationStore
@@ -698,6 +699,7 @@ class InventoryScanner:
         self.batteries = BatteryStore(hass)
         self.window = WindowStore(hass)
         self.notify = NotifyStore(hass)
+        self.monitor = MonitorStore(hass)
         self.runs = RunStore(hass)
         self.config_changes = ChangeStore(hass)
         self.cleanup = CleanupRunner(hass, self)
@@ -756,6 +758,7 @@ class InventoryScanner:
         await self.batteries.async_load()
         await self.window.async_load()
         await self.notify.async_load()
+        await self.monitor.async_load()
         await self.runs.async_load()
         await self.config_changes.async_load()
 
@@ -824,6 +827,7 @@ class InventoryScanner:
                         self._announce(snapshot), "HA Housekeeper events"
                     )
                 self.health.succeeded(datetime.now(UTC), time.monotonic() - began, preliminary)
+                self.monitor.refresh(snapshot, self.health_report(), new_scan=not preliminary)
                 self.async_check_health()
                 self.status.update(running=False, phase="complete", progress=100)
                 return snapshot
@@ -844,6 +848,7 @@ class InventoryScanner:
     def async_check_health(self) -> None:
         """Raise or clear the repair hint for a scan that keeps failing, and tell the sensor."""
         async_sync_scan_issue(self.hass, self.health_report())
+        self.monitor.refresh(self._snapshot, self.health_report(), new_scan=False)
         async_dispatcher_send(self.hass, SIGNAL_SCAN_COMPLETE)
 
     async def _announce(self, snapshot: dict[str, Any]) -> None:

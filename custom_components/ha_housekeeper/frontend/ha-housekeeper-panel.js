@@ -474,6 +474,7 @@ const NAV = [
   ["exposure", "mdi:shield-search"],
   ["policies", "mdi:clipboard-check-outline"],
   ["reliability", "mdi:chart-timeline-variant"],
+  ["monitor", "mdi:home-heart"],
   ["runs", "mdi:robot-outline"],
   ["recorder", "mdi:database-clock-outline"],
   ["batteries", "mdi:battery-alert-variant-outline"],
@@ -486,7 +487,7 @@ const NAV_GROUPS = [
   ["navGroupActions", ["overview", "findingsNav"]],
   ["navGroupClean", ["cleanup", "repair", "journal"]],
   ["navGroupMaintain", ["maintenance", "batteries", "reminders", "policies"]],
-  ["navGroupOperation", ["reliability", "runs", "recorder", "storage"]],
+  ["navGroupOperation", ["monitor", "reliability", "runs", "recorder", "storage"]],
   ["navGroupSecurity", ["exposure", "dataflow", "secrets"]],
   ["navGroupExplore", ["inventory", "components", "graph", "changes"]],
 ];
@@ -1511,6 +1512,7 @@ class StylesMixin {
       .hamenu{display:grid;place-items:center;flex:none;width:40px;height:40px;margin:0 -10px 0 -6px;padding:0;border:0;border-radius:50%;background:none;color:inherit}.hamenu:hover{background:var(--hk-soft)}.hamenu:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px}.hamenu ha-icon{--mdc-icon-size:24px}.sysmeter{display:block;height:6px;margin-top:6px;border-radius:99px;background:var(--hk-soft);overflow:hidden}.sysmeter i{display:block;height:100%;border-radius:99px;background:var(--hk-green)}.sysmeter.warn i{background:var(--hk-amber)}.sysmeter.red i{background:var(--hk-red)}.sysmeter.mute i{background:var(--hk-gray)}.sysshare{display:block;width:100%;min-width:120px;height:8px;margin-top:2px;border-radius:99px;background:var(--hk-soft);overflow:hidden}.sysshare i{display:block;height:100%;border-radius:99px;background:var(--hk-green)}.tablewrap.lt.acc td{white-space:normal}.pills{display:flex;flex-wrap:wrap;gap:4px}@media(min-width:641px){.sysnav .navtiles{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(min-width:1300px){.sysnav .navtiles{grid-template-columns:repeat(6,minmax(0,1fr))}}
       .intentry{margin:4px 2px 0;font-size:15px}.syssec{margin:18px 16px 6px;font-size:15px}.syssec:first-child{margin-top:12px}
       .pill.kind{background:none;border:1px solid var(--hk-border);color:var(--hk-muted)}.rowmenu{position:relative;flex:none;margin:0 10px 0 0}.rowmenu>summary{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;list-style:none;cursor:pointer;color:var(--hk-muted)}.rowmenu>summary::-webkit-details-marker{display:none}.rowmenu>summary:hover,.rowmenu[open]>summary{background:var(--hk-soft);color:inherit}.menupop{position:absolute;right:0;top:100%;z-index:20;display:grid;min-width:260px;padding:4px 0;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);box-shadow:0 6px 20px rgba(0,0,0,.18)}.menuitem{white-space:nowrap;display:flex;gap:10px;align-items:center;padding:8px 14px;border:0;background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}.menuitem:hover{background:var(--hk-soft)}.menuitem ha-icon{--mdc-icon-size:18px;color:var(--hk-muted)}
+      .monitor-fields{display:grid;gap:14px;padding:16px}.monitor-fields label{display:grid;gap:6px;font-weight:600}.monitor-fields input,.monitor-fields textarea{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit;font:inherit}.monitor-fields textarea{min-height:80px;resize:vertical}.monitor-check{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.monitor-check input{width:18px;height:18px}
       ${this.themeCss()}
     </style>`;
   }
@@ -1975,6 +1977,15 @@ class OverviewMixin {
   // overdue scan and the backup, then removals that are ready. Rows without data are left out.
   todoItems() {
     const items = [], m = this.data.meta;
+    const monitored = this.monitorFunctions?.() || [];
+    const impaired = monitored.filter(item => item.state === "problem" || item.incident_open);
+    const uncertain = monitored.filter(item => item.state === "unverified" && !item.incident_open);
+    if (impaired.length) {
+      const first = impaired[0], key = first.state === "unverified" ? first.last_problem_key : first.reason_key, object = key ? this.findObject(key) : null;
+      const uncovered = impaired.some(item => !(this.data.findings || []).some(f => !f.ignored && this.findingKey(f) === (item.state === "unverified" ? item.last_problem_key : item.reason_key)));
+      items.push({ key: "monitor_problem", area: uncovered ? "state" : "findings", tone: "red", icon: "mdi:home-alert-outline", text: this.t("monitorOverviewProblem", { n: impaired.length }), hintText: `${first.name} · ${first.incident_open && first.state === "unverified" ? `${this.t("monitorOverviewUnresolved")}: ${this.monitorReason(first.last_problem_reason)}` : [object?.name || key, this.monitorReason(first.reason)].filter(Boolean).join(" · ")} · ${this.t("monitorFindingAt", { date: this.formatDate(first.scanned_at) })}`, view: "monitor", filter: "problem" });
+    }
+    if (uncertain.length) items.push({ key: "monitor_unknown", area: "state", tone: "warn", icon: "mdi:home-question-outline", text: this.t("monitorOverviewUnknown", { n: uncertain.length }), hintText: uncertain[0].last_verified_at ? this.t("monitorLastVerified", { date: this.formatDate(uncertain[0].last_verified_at) }) : this.t("monitorNeverVerified"), view: "monitor", filter: "unverified" });
     const outages = this.causeList();
     if (outages.length) items.push({ key: "outages", area: "findings", tone: "red", icon: "mdi:source-branch", label: "actOutages", hintText: this.outagesHint(outages), count: outages.length, view: "findingsNav", filter: "" });
     const regressions = (this.data.regressions || []).length;
@@ -2070,7 +2081,7 @@ class OverviewMixin {
     const inArea = area => items.filter(i => i.area === area && i.key !== "outages"); // the outages are entries of the list itself
     const entries = this.findingEntries();
     const entryRow = e => (e.cause ? this.overviewCause(e.cause) : this.findingRow(e.finding));
-    const findingRows = [...inArea("findings").map(row), ...entries.slice(0, LIMIT).map(entryRow)];
+    const findingRows = [...inArea("findings").filter(i => i.key === "monitor_problem").map(row), ...inArea("findings").filter(i => i.key !== "monitor_problem").map(row), ...entries.slice(0, LIMIT).map(entryRow)];
     const all = `<button class="link" data-jump="findingsNav">${this.t("allFindings")} (${this.formatNumber(this.findingTotal())}) <ha-icon icon="mdi:chevron-right"></ha-icon></button>`;
     const state = [...inArea("state")].sort((x, y) => (y.tone === "red") - (x.tone === "red"));
     const care = inArea("care");
@@ -12990,6 +13001,146 @@ class EntityStateMixin {
   }
 }
 
+// Texts for the Hausmonitor; merged into TEXT before the panel is registered.
+Object.assign(TEXT.de, {
+  monitor: "Hausmonitor", monitorSubtitle: "Wichtige Funktionen und ihr zuletzt geprüfter Zustand.",
+  monitorAdd: "Funktion hinzufügen", monitorEdit: "Bearbeiten", monitorDelete: "Löschen",
+  monitorEmpty: "Noch keine Funktion festgelegt.", monitorEmptyHint: "Wähle die wenigen Objekte, von denen eine wichtige Funktion direkt abhängt.",
+  monitorProblem: "Beeinträchtigt", monitorUnverified: "Unbekannt", monitorOk: "Unauffällig",
+  monitorLastScan: "Letzter Scan: {date}", monitorLastVerified: "Letzte vollständige Prüfung: {date}", monitorNeverVerified: "Noch nie vollständig geprüft",
+  monitorUnresolved: "Letzter belegter Defekt ungeklärt", monitorNoProof: "Prüfung unvollständig – kein Ausfall belegt",
+  monitorRequired: "Erforderlich", monitorAdditional: "Zusätzlich", monitorMembers: "Zugeordnete Objekte",
+  monitorName: "Name", monitorDescription: "Beschreibung (optional)", monitorFindObject: "Objekt hinzufügen",
+  monitorSearch: "Name oder ID suchen …", monitorSearchHint: "Entität, Gerät, Automation oder Integration suchen.",
+  monitorPick: "Hinzufügen", monitorRemove: "Entfernen", monitorNotify: "Dauerhafte HA-Mitteilung bei Problemen",
+  monitorNotifyHint: "Zustandswechsel stehen unabhängig davon als HA-Ereignis bereit.", monitorSave: "Speichern",
+  monitorCancel: "Abbrechen", monitorBack: "Zum Hausmonitor", monitorAll: "Alle Funktionen",
+  monitorEmptyFiltered: "Für diesen Zustand gibt es keine Funktion.",
+  monitorSaveFailed: "Funktion konnte nicht gespeichert werden: {reason}", monitorDeleteFailed: "Funktion konnte nicht gelöscht werden: {reason}",
+  monitorConfirmDelete: "Die Funktion „{name}“, ihr HA-Sensor und ihre Mitteilung werden entfernt.",
+  monitorChoose: "Mindestens ein Objekt auswählen.", monitorRequiredCount: "{n} erforderlich · {m} zusätzlich",
+  monitorOverviewProblem: "{n} wichtige Funktion(en) beeinträchtigt", monitorOverviewUnknown: "Prüfung unvollständig: {n} Funktion(en)",
+  monitorOverviewUnresolved: "Letzter Defekt ungeklärt", monitorFindingAt: "Befund: {date}",
+  monitorReason_missing: "Objekt fehlt", monitorReason_source_unread: "Quelle nicht gelesen",
+  monitorReason_scan_unverified: "Scan nicht verlässlich", monitorReason_no_required_members: "Kein erforderliches Objekt",
+  monitorReason_active: "Kein bekannter Defekt", monitorReason_disabled: "Deaktiviert", monitorReason_unavailable: "Nicht verfügbar",
+  monitorReason_orphaned: "Verwaist", monitorReason_problem: "Integration nicht geladen", monitorReason_empty: "Ohne Entitäten",
+  "monitorReason_automation.blocked": "Automation blockiert", "monitorReason_automation.dead_actions": "Defekte Automationsaktion", "monitorReason_automation.dead_condition": "Defekte Automationsbedingung",
+  monitorReason_unknown: "Zustand unbekannt", monitorReason_status_unknown: "Zustand nicht lesbar",
+});
+Object.assign(TEXT.en, {
+  monitor: "Home monitor", monitorSubtitle: "Important functions and their last checked state.",
+  monitorAdd: "Add function", monitorEdit: "Edit", monitorDelete: "Delete",
+  monitorEmpty: "No function defined yet.", monitorEmptyHint: "Choose the few objects an important function directly depends on.",
+  monitorProblem: "Impaired", monitorUnverified: "Unknown", monitorOk: "No known fault",
+  monitorLastScan: "Last scan: {date}", monitorLastVerified: "Last complete check: {date}", monitorNeverVerified: "Never checked completely",
+  monitorUnresolved: "Last confirmed fault unresolved", monitorNoProof: "Check incomplete – no failure confirmed",
+  monitorRequired: "Required", monitorAdditional: "Additional", monitorMembers: "Selected objects",
+  monitorName: "Name", monitorDescription: "Description (optional)", monitorFindObject: "Add object",
+  monitorSearch: "Search name or ID …", monitorSearchHint: "Search for an entity, device, automation or integration.",
+  monitorPick: "Add", monitorRemove: "Remove", monitorNotify: "Persistent HA notification for problems",
+  monitorNotifyHint: "State changes are always available as HA events.", monitorSave: "Save",
+  monitorCancel: "Cancel", monitorBack: "Back to home monitor", monitorAll: "All functions",
+  monitorEmptyFiltered: "No function has this state.",
+  monitorSaveFailed: "Could not save function: {reason}", monitorDeleteFailed: "Could not delete function: {reason}",
+  monitorConfirmDelete: "The function “{name}”, its HA sensor and notification will be removed.",
+  monitorChoose: "Select at least one object.", monitorRequiredCount: "{n} required · {m} additional",
+  monitorOverviewProblem: "{n} important function(s) impaired", monitorOverviewUnknown: "Check incomplete: {n} function(s)",
+  monitorOverviewUnresolved: "Last fault unresolved", monitorFindingAt: "Finding: {date}",
+  monitorReason_missing: "Object missing", monitorReason_source_unread: "Source not read",
+  monitorReason_scan_unverified: "Scan not reliable", monitorReason_no_required_members: "No required object",
+  monitorReason_active: "No known fault", monitorReason_disabled: "Disabled", monitorReason_unavailable: "Unavailable",
+  monitorReason_orphaned: "Orphaned", monitorReason_problem: "Integration not loaded", monitorReason_empty: "No entities",
+  "monitorReason_automation.blocked": "Automation blocked", "monitorReason_automation.dead_actions": "Broken automation action", "monitorReason_automation.dead_condition": "Broken automation condition",
+  monitorReason_unknown: "State unknown", monitorReason_status_unknown: "State unreadable",
+});
+
+// User-selected direct dependencies of important home functions.
+class MonitorMixin {
+  monitorFunctions() { return this.data?.monitor || []; }
+
+  monitorReason(reason) { if (!reason) return ""; return this.t(`monitorReason_${reason}`) === `monitorReason_${reason}` ? reason : this.t(`monitorReason_${reason}`); }
+
+  monitorState(item) {
+    const key = item.incident_open && item.state === "unverified" ? "monitorUnresolved" : `monitor${item.state === "ok" ? "Ok" : item.state === "problem" ? "Problem" : "Unverified"}`;
+    return this.t(key);
+  }
+
+  monitorView() {
+    if (this.monitorForm) return this.monitorEditor();
+    if (this.monitorSelected) return this.monitorDetail();
+    const rank = { problem: 0, unverified: 1, ok: 2 };
+    const items = this.monitorFunctions().filter(item => !this.monitorFilter || item.state === this.monitorFilter || (this.monitorFilter === "problem" && item.incident_open)).sort((a, b) => (rank[a.state] - rank[b.state]) || a.name.localeCompare(b.name, this.lang));
+    const filters = [["", "monitorAll"], ["problem", "monitorProblem"], ["unverified", "monitorUnverified"], ["ok", "monitorOk"]].map(([key, label]) => `<button class="btn ${this.monitorFilter === key ? "primary" : "quiet"}" data-monitor-filter="${key}">${this.t(label)}</button>`).join("");
+    const rows = items.map(item => {
+      const tone = item.incident_open || item.state === "problem" ? "red" : item.state === "unverified" ? "warn" : "ok";
+      const key = item.incident_open && item.state === "unverified" ? item.last_problem_key : item.reason_key;
+      const reason = key ? this.findObject(key)?.name || key : "";
+      const detail = item.incident_open && item.state === "unverified" ? `${this.t("monitorUnresolved")}: ${this.monitorReason(item.last_problem_reason)}` : this.monitorReason(item.reason);
+      return `<button class="row" data-monitor-open="${this.esc(item.id)}"><span class="tile ${tone}"><ha-icon icon="mdi:home-heart"></ha-icon></span><span class="row-text"><strong>${this.esc(item.name)}</strong><small>${this.esc([reason, detail, this.t("monitorLastScan", { date: this.formatDate(item.scanned_at) })].filter(Boolean).join(" · "))}</small></span><span class="pill ${tone}">${this.monitorState(item)}</span></button>`;
+    }).join("");
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("monitor")}</h2><p>${this.t("monitorSubtitle")}</p></div><button class="btn primary" data-monitor-add><ha-icon icon="mdi:plus"></ha-icon>${this.t("monitorAdd")}</button></div>${this.monitorFunctions().length ? `<div class="toolbar">${filters}</div>${rows || `<div class="emptymsg">${this.t("monitorEmptyFiltered")}</div>`}` : `<div class="emptymsg"><ha-icon icon="mdi:home-heart-outline"></ha-icon>${this.t("monitorEmpty")}<small>${this.t("monitorEmptyHint")}</small></div>`}</section>`;
+  }
+
+  monitorDetail() {
+    const item = this.monitorFunctions().find(f => f.id === this.monitorSelected);
+    if (!item) { this.monitorSelected = null; return this.monitorView(); }
+    const tone = item.incident_open || item.state === "problem" ? "red" : item.state === "unverified" ? "warn" : "ok";
+    const members = item.members.map(member => {
+      const object = this.findObject(member.object_key);
+      const title = object?.name || member.object_key;
+      const status = member.state === "problem" ? "red" : member.state === "unverified" ? "warn" : "ok";
+      return `<div class="row"><span class="tile ${status}"><ha-icon icon="${ICONS[member.object_key.split(":")[0]] || "mdi:help-circle-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(title)}</strong><small>${this.esc(member.object_key)} · ${this.t(member.required ? "monitorRequired" : "monitorAdditional")} · ${this.esc(this.monitorReason(member.reason))}</small></span>${object ? `<button class="btn" data-object="${this.esc(member.object_key)}">${this.t("details")}</button>` : ""}</div>`;
+    }).join("");
+    return `<button class="btn" data-monitor-back><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("monitorBack")}</button><section class="panel u-mb14"><div class="panelhead"><div><h2>${this.esc(item.name)} <span class="pill ${tone}">${this.monitorState(item)}</span></h2><p>${this.esc(item.description || this.t("monitorSubtitle"))}</p></div><button class="btn" data-monitor-edit>${this.t("monitorEdit")}</button></div><div class="facts"><div class="fact"><span>${this.t("monitorLastScan", { date: this.formatDate(item.scanned_at) })}</span></div><div class="fact"><span>${item.last_verified_at ? this.t("monitorLastVerified", { date: this.formatDate(item.last_verified_at) }) : this.t("monitorNeverVerified")}</span></div></div>${item.state === "unverified" ? `<div class="row"><span class="tile warn"><ha-icon icon="mdi:help-circle-outline"></ha-icon></span><span class="row-text"><strong>${this.t(item.incident_open ? "monitorUnresolved" : "monitorNoProof")}</strong>${item.incident_open && item.last_problem_reason ? `<small>${this.esc(this.monitorReason(item.last_problem_reason))}</small>` : ""}</span></div>` : ""}</section><section class="panel"><div class="panelhead"><h2>${this.t("monitorMembers")}</h2></div>${members}</section>`;
+  }
+
+  monitorEditor() {
+    const form = this.monitorForm;
+    const chosen = new Set(form.members.map(m => m.object_key));
+    const candidates = (this.data?.objects || []).filter(o => ["entity", "device", "automation", "config_entry"].includes(o.object_type) && o.status !== "ignored" && !chosen.has(this.objectKey(o)) && (!this.monitorQuery || `${o.name} ${o.object_id}`.toLowerCase().includes(this.monitorQuery.toLowerCase()))).slice(0, 25);
+    const selected = form.members.map((member, i) => {
+      const object = this.findObject(member.object_key);
+      return `<div class="row"><span class="row-text"><strong>${this.esc(object?.name || member.object_key)}</strong><small>${this.esc(member.object_key)}</small></span><label class="monitor-check"><input type="checkbox" data-monitor-required="${i}" ${member.required ? "checked" : ""}>${this.t("monitorRequired")}</label><button class="btn quiet" data-monitor-remove="${i}">${this.t("monitorRemove")}</button></div>`;
+    }).join("");
+    const picks = candidates.map(o => `<div class="row"><span class="row-text"><strong>${this.esc(o.name)}</strong><small>${this.esc(o.object_id)}</small></span><button class="btn" data-monitor-pick="${this.esc(this.objectKey(o))}">${this.t("monitorPick")}</button></div>`).join("");
+    return `<button class="btn" data-monitor-cancel><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("monitorCancel")}</button><section class="panel u-mb14"><div class="panelhead"><h2>${this.t(form.id ? "monitorEdit" : "monitorAdd")}</h2></div><div class="monitor-fields"><label>${this.t("monitorName")}<input data-monitor-name maxlength="80" value="${this.esc(form.name)}"></label><label>${this.t("monitorDescription")}<textarea data-monitor-description maxlength="240">${this.esc(form.description)}</textarea></label></div><div class="row"><span class="row-text"><strong>${this.t("monitorNotify")}</strong><small>${this.t("monitorNotifyHint")}</small></span><input type="checkbox" data-monitor-notify ${form.notify ? "checked" : ""}></div></section><section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("monitorMembers")}</h2><p>${this.t("monitorRequiredCount", { n: form.members.filter(m => m.required).length, m: form.members.filter(m => !m.required).length })}</p></div></div>${selected || `<div class="emptymsg">${this.t("monitorChoose")}</div>`}</section><section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("monitorFindObject")}</h2><p>${this.t("monitorSearchHint")}</p></div></div><div class="monitor-fields"><input data-monitor-search aria-label="${this.t("monitorSearchHint")}" placeholder="${this.t("monitorSearch")}" value="${this.esc(this.monitorQuery)}"></div>${picks}</section><div class="toolbar savebar"><span role="alert">${this.esc(this.monitorError)}</span><span class="toolgap"></span>${form.id ? `<button class="btn danger" data-monitor-delete>${this.t("monitorDelete")}</button>` : ""}<button class="btn" data-monitor-cancel>${this.t("monitorCancel")}</button><button class="btn primary" data-monitor-save ${!form.name.trim() || !form.members.length ? "disabled" : ""}>${this.t("monitorSave")}</button></div>`;
+  }
+
+  bindMonitor(root) {
+    root.querySelector("[data-monitor-add]")?.addEventListener("click", () => { this.monitorForm = { name: "", description: "", notify: true, members: [] }; this.monitorQuery = ""; this.monitorError = ""; this.render(); });
+    root.querySelectorAll("[data-monitor-filter]").forEach(el => el.onclick = () => { this.monitorFilter = el.dataset.monitorFilter; this.render(); });
+    root.querySelectorAll("[data-monitor-open]").forEach(el => el.onclick = () => { this.monitorSelected = el.dataset.monitorOpen; this.render(); });
+    root.querySelector("[data-monitor-back]")?.addEventListener("click", () => { this.monitorSelected = null; this.render(); });
+    root.querySelector("[data-monitor-edit]")?.addEventListener("click", () => { const item = this.monitorFunctions().find(f => f.id === this.monitorSelected); this.monitorForm = { id: item.id, name: item.name, description: item.description, notify: item.notify, members: item.members.map(m => ({ object_key: m.object_key, required: m.required })) }; this.monitorError = ""; this.render(); });
+    root.querySelectorAll("[data-monitor-cancel]").forEach(el => el.onclick = () => { this.monitorForm = null; this.monitorError = ""; this.render(); });
+    root.querySelector("[data-monitor-name]")?.addEventListener("input", ev => { this.monitorForm.name = ev.target.value; root.querySelector("[data-monitor-save]").disabled = !this.monitorForm.name.trim() || !this.monitorForm.members.length; });
+    root.querySelector("[data-monitor-description]")?.addEventListener("input", ev => { this.monitorForm.description = ev.target.value; });
+    root.querySelector("[data-monitor-notify]")?.addEventListener("change", ev => { this.monitorForm.notify = ev.target.checked; });
+    root.querySelector("[data-monitor-search]")?.addEventListener("input", ev => { this.monitorQuery = ev.target.value; globalThis.clearTimeout?.(this._monitorTimer); this._monitorTimer = globalThis.setTimeout?.(() => { this.render(); this.shadowRoot.querySelector("[data-monitor-search]")?.focus(); }, SEARCH_DEBOUNCE_MS); });
+    root.querySelectorAll("[data-monitor-pick]").forEach(el => el.onclick = () => { this.monitorForm.members.push({ object_key: el.dataset.monitorPick, required: true }); this.render(); });
+    root.querySelectorAll("[data-monitor-remove]").forEach(el => el.onclick = () => { this.monitorForm.members.splice(Number(el.dataset.monitorRemove), 1); this.render(); });
+    root.querySelectorAll("[data-monitor-required]").forEach(el => el.onchange = () => { this.monitorForm.members[Number(el.dataset.monitorRequired)].required = el.checked; this.render(); });
+    root.querySelector("[data-monitor-save]")?.addEventListener("click", () => this.saveMonitor());
+    root.querySelector("[data-monitor-delete]")?.addEventListener("click", () => this.confirmAsk(this.t("monitorConfirmDelete", { name: this.monitorForm.name }), () => this.deleteMonitor()));
+  }
+
+  async saveMonitor() {
+    const form = this.monitorForm;
+    try {
+      const response = await this._hass.callWS({ type: "ha_housekeeper/monitor_save", ...(form.id ? { function_id: form.id } : {}), name: form.name, description: form.description, notify: form.notify, members: form.members });
+      this.data.monitor = response.functions; this.monitorSelected = response.function_id; this.monitorForm = null; this.monitorError = ""; this.render();
+    } catch (err) { this.monitorError = this.t("monitorSaveFailed", { reason: err.message || String(err) }); this.render(); }
+  }
+
+  async deleteMonitor() {
+    try {
+      const response = await this._hass.callWS({ type: "ha_housekeeper/monitor_delete", function_id: this.monitorForm.id });
+      this.data.monitor = response.functions; this.monitorSelected = null; this.monitorForm = null; this.monitorError = ""; this.render();
+    } catch (err) { this.monitorError = this.t("monitorDeleteFailed", { reason: err.message || String(err) }); this.render(); }
+  }
+}
+
 class HAHousekeeperPanel extends HTMLElement {
   constructor() {
     super();
@@ -13005,6 +13156,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.findingFilter = ""; this.findingAfter = false; this.findingDue = false; this.showFollowers = false; this.findingWithFollowers = false; this.goals = null; this.goalsLoading = false; this.goalForm = null; this.decide = null; this.markForm = null;
     this.findingStatus = ""; this.bulk = null;
     this.batteryFilter = "all";
+    this.monitorFilter = ""; this.monitorSelected = null; this.monitorForm = null; this.monitorQuery = ""; this.monitorError = "";
 
     this._urlApplied = false;
     this.sort = "name";
@@ -13099,7 +13251,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.stopWarmupTicker?.();
     window.removeEventListener?.("popstate", this._onPop);
     window.removeEventListener?.("resize", this._onResize);
-    for (const name of ["_warmupTimer", "_searchTimer", "_tipTimer"]) {
+    for (const name of ["_warmupTimer", "_searchTimer", "_tipTimer", "_monitorTimer"]) {
       if (this[name]) globalThis.clearTimeout?.(this[name]);
       this[name] = null;
     }
@@ -13569,7 +13721,8 @@ class HAHousekeeperPanel extends HTMLElement {
     const view = params.get("view") === "storms" ? "recorder" : params.get("view"); // the load view moved into "Recorder"
     if (view && (view === "unreferenced" || NAV.some(([name]) => name === view))) this.view = view;
     else if (!params.get("object") && this.prefs.startView !== "overview") this.view = this.prefs.startView;
-    if (params.get("filter")) this.findingFilter = params.get("filter");
+    if (params.get("filter")) { if (this.view === "monitor") this.monitorFilter = params.get("filter"); else this.findingFilter = params.get("filter"); }
+    if (this.view === "monitor" && this.monitorFunctions().some(item => item.id === params.get("function"))) this.monitorSelected = params.get("function");
     this._pendingTab = params.get("tab");
     if (view && params.get("tab") && !params.get("object")) (this.viewTab ||= {})[this.view] = params.get("tab");
     const obj = this.findObject(params.get("object") || "");
@@ -13589,6 +13742,7 @@ class HAHousekeeperPanel extends HTMLElement {
       if (this.view !== "overview") params.set("view", this.view);
       if (this.viewTab?.[this.view]) params.set("tab", this.viewTab[this.view]);
       if (this.view === "findingsNav" && this.findingFilter) params.set("filter", this.findingFilter);
+      if (this.view === "monitor") { if (this.monitorSelected) params.set("function", this.monitorSelected); else if (this.monitorFilter) params.set("filter", this.monitorFilter); }
     }
     const query = params.toString();
     try { window.history.replaceState(window.history.state, "", window.location.pathname + (query ? `?${query}` : "")); } catch (_) { /* ignore */ }
@@ -13677,6 +13831,7 @@ class HAHousekeeperPanel extends HTMLElement {
       journal: [this.t("journal"), this.t("journalSubtitle")],
       maintenance: [this.t("maintenance"), this.t("maintenanceSubtitle")],
       reliability: [this.t("reliability"), this.t("reliabilitySubtitle")],
+      monitor: [this.t("monitor"), this.t("monitorSubtitle")],
       runs: [this.t("runsHeading"), this.t("runsSubtitle")],
       recorder: [this.t("recorder"), this.t("recorderSubtitle")],
       exposure: [this.t("exposure"), this.t("exposureSubtitle")],
@@ -13686,7 +13841,7 @@ class HAHousekeeperPanel extends HTMLElement {
       secrets: [this.t("secrets"), this.t("secretsSubtitle")],
     };
     const [title, sub] = titles[this.view] || titles.overview;
-    const writes = ["cleanup", "repair", "maintenance", "policies"].includes(this.view);
+    const writes = ["cleanup", "repair", "maintenance", "policies", "monitor"].includes(this.view);
     const modePill = this.view === "overview" || this.view === "settings" ? "" : `<span class="pill ${writes ? "warn" : "mute"} modepill" title="${this.esc(this.t(writes ? "canChangeHint" : "readOnlyHint"))}"><ha-icon icon="${writes ? "mdi:pencil-outline" : "mdi:eye-outline"}"></ha-icon>${this.t(writes ? "canChange" : "readOnly")}</span>`;
     const scanned = this.data?.meta?.scanned_at;
     const ago = scanned ? `<span class="scanago" title="${this.esc(this.formatDate(scanned))}">${this.t("lastScan")}: ${this.agoText(scanned)}</span>` : "";
@@ -13704,6 +13859,7 @@ class HAHousekeeperPanel extends HTMLElement {
     if (this.error) return `<div class="error"><strong>${this.t("loadError")}</strong><br>${this.esc(this.error)}</div>`;
     if (!this.data) { const pct = this.scanStatus?.running ? Math.max(0, Math.min(100, Number(this.scanStatus.progress) || 0)) : null; return `${this.skeleton("loading")}${pct === null ? "" : `<div class="panel"><p class="factnote">${this.t("firstScan", { percent: pct })}</p><div class="bar"><i style="width:${pct}%"></i></div></div>`}`; }
     if (this.view === "inventory") return this.inventory();
+    if (this.view === "monitor") return this.monitorView();
     if (this.view === "findingsNav") return this.findingsView();
     if (this.view === "changes") return this.changesView();
     if (this.view === "components") return this.componentsView();
@@ -13821,7 +13977,7 @@ class HAHousekeeperPanel extends HTMLElement {
       this.noteJump(el.dataset.jump);
       this.view = el.dataset.jump; this.pages = {};
       if (el.dataset.jumpTab) (this.viewTab ||= {})[this.view] = el.dataset.jumpTab;
-      if (el.dataset.filter !== undefined) this.findingFilter = el.dataset.filter;
+      if (el.dataset.filter !== undefined) { if (el.dataset.jump === "monitor") this.monitorFilter = el.dataset.filter; else this.findingFilter = el.dataset.filter; }
       if (el.dataset.jump === "inventory") { this.statusFilter = el.dataset.status || ""; this.typeFilter = el.dataset.type || ""; this.originFilter = ""; this.pages = {}; }
       this.render();
     });
@@ -13886,6 +14042,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.bindCounter(root);
     this.bindPicker(root);
     this.bindSystem(root);
+    this.bindMonitor(root);
     root.querySelectorAll("[data-decide-open]").forEach(el => el.onclick = () => this.openDecide(el.dataset.decideOpen, el.dataset.decidePreset));
     root.querySelectorAll("[data-decide-form]").forEach(form => {
       form.onsubmit = ev => { ev.preventDefault(); this.commitDecide(); };
@@ -14094,7 +14251,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, SearchPagesMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, EntityStateMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, ScanCoverageMixin, ScanTimingMixin, SparklineMixin, BrokenCardsMixin, SystemMixin, ComponentsMixin, IntegrationPageMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, SearchPagesMixin, LayoutMixin, FlowMixin, CorrelationMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, EntityStateMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, ScanCoverageMixin, ScanTimingMixin, SparklineMixin, BrokenCardsMixin, SystemMixin, ComponentsMixin, IntegrationPageMixin, MonitorMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }

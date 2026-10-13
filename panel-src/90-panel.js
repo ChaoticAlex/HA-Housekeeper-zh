@@ -13,6 +13,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.findingFilter = ""; this.findingAfter = false; this.findingDue = false; this.showFollowers = false; this.findingWithFollowers = false; this.goals = null; this.goalsLoading = false; this.goalForm = null; this.decide = null; this.markForm = null;
     this.findingStatus = ""; this.bulk = null;
     this.batteryFilter = "all";
+    this.monitorFilter = ""; this.monitorSelected = null; this.monitorForm = null; this.monitorQuery = ""; this.monitorError = "";
 
     this._urlApplied = false;
     this.sort = "name";
@@ -107,7 +108,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.stopWarmupTicker?.();
     window.removeEventListener?.("popstate", this._onPop);
     window.removeEventListener?.("resize", this._onResize);
-    for (const name of ["_warmupTimer", "_searchTimer", "_tipTimer"]) {
+    for (const name of ["_warmupTimer", "_searchTimer", "_tipTimer", "_monitorTimer"]) {
       if (this[name]) globalThis.clearTimeout?.(this[name]);
       this[name] = null;
     }
@@ -577,7 +578,8 @@ class HAHousekeeperPanel extends HTMLElement {
     const view = params.get("view") === "storms" ? "recorder" : params.get("view"); // the load view moved into "Recorder"
     if (view && (view === "unreferenced" || NAV.some(([name]) => name === view))) this.view = view;
     else if (!params.get("object") && this.prefs.startView !== "overview") this.view = this.prefs.startView;
-    if (params.get("filter")) this.findingFilter = params.get("filter");
+    if (params.get("filter")) { if (this.view === "monitor") this.monitorFilter = params.get("filter"); else this.findingFilter = params.get("filter"); }
+    if (this.view === "monitor" && this.monitorFunctions().some(item => item.id === params.get("function"))) this.monitorSelected = params.get("function");
     this._pendingTab = params.get("tab");
     if (view && params.get("tab") && !params.get("object")) (this.viewTab ||= {})[this.view] = params.get("tab");
     const obj = this.findObject(params.get("object") || "");
@@ -597,6 +599,7 @@ class HAHousekeeperPanel extends HTMLElement {
       if (this.view !== "overview") params.set("view", this.view);
       if (this.viewTab?.[this.view]) params.set("tab", this.viewTab[this.view]);
       if (this.view === "findingsNav" && this.findingFilter) params.set("filter", this.findingFilter);
+      if (this.view === "monitor") { if (this.monitorSelected) params.set("function", this.monitorSelected); else if (this.monitorFilter) params.set("filter", this.monitorFilter); }
     }
     const query = params.toString();
     try { window.history.replaceState(window.history.state, "", window.location.pathname + (query ? `?${query}` : "")); } catch (_) { /* ignore */ }
@@ -685,6 +688,7 @@ class HAHousekeeperPanel extends HTMLElement {
       journal: [this.t("journal"), this.t("journalSubtitle")],
       maintenance: [this.t("maintenance"), this.t("maintenanceSubtitle")],
       reliability: [this.t("reliability"), this.t("reliabilitySubtitle")],
+      monitor: [this.t("monitor"), this.t("monitorSubtitle")],
       runs: [this.t("runsHeading"), this.t("runsSubtitle")],
       recorder: [this.t("recorder"), this.t("recorderSubtitle")],
       exposure: [this.t("exposure"), this.t("exposureSubtitle")],
@@ -694,7 +698,7 @@ class HAHousekeeperPanel extends HTMLElement {
       secrets: [this.t("secrets"), this.t("secretsSubtitle")],
     };
     const [title, sub] = titles[this.view] || titles.overview;
-    const writes = ["cleanup", "repair", "maintenance", "policies"].includes(this.view);
+    const writes = ["cleanup", "repair", "maintenance", "policies", "monitor"].includes(this.view);
     const modePill = this.view === "overview" || this.view === "settings" ? "" : `<span class="pill ${writes ? "warn" : "mute"} modepill" title="${this.esc(this.t(writes ? "canChangeHint" : "readOnlyHint"))}"><ha-icon icon="${writes ? "mdi:pencil-outline" : "mdi:eye-outline"}"></ha-icon>${this.t(writes ? "canChange" : "readOnly")}</span>`;
     const scanned = this.data?.meta?.scanned_at;
     const ago = scanned ? `<span class="scanago" title="${this.esc(this.formatDate(scanned))}">${this.t("lastScan")}: ${this.agoText(scanned)}</span>` : "";
@@ -712,6 +716,7 @@ class HAHousekeeperPanel extends HTMLElement {
     if (this.error) return `<div class="error"><strong>${this.t("loadError")}</strong><br>${this.esc(this.error)}</div>`;
     if (!this.data) { const pct = this.scanStatus?.running ? Math.max(0, Math.min(100, Number(this.scanStatus.progress) || 0)) : null; return `${this.skeleton("loading")}${pct === null ? "" : `<div class="panel"><p class="factnote">${this.t("firstScan", { percent: pct })}</p><div class="bar"><i style="width:${pct}%"></i></div></div>`}`; }
     if (this.view === "inventory") return this.inventory();
+    if (this.view === "monitor") return this.monitorView();
     if (this.view === "findingsNav") return this.findingsView();
     if (this.view === "changes") return this.changesView();
     if (this.view === "components") return this.componentsView();
@@ -829,7 +834,7 @@ class HAHousekeeperPanel extends HTMLElement {
       this.noteJump(el.dataset.jump);
       this.view = el.dataset.jump; this.pages = {};
       if (el.dataset.jumpTab) (this.viewTab ||= {})[this.view] = el.dataset.jumpTab;
-      if (el.dataset.filter !== undefined) this.findingFilter = el.dataset.filter;
+      if (el.dataset.filter !== undefined) { if (el.dataset.jump === "monitor") this.monitorFilter = el.dataset.filter; else this.findingFilter = el.dataset.filter; }
       if (el.dataset.jump === "inventory") { this.statusFilter = el.dataset.status || ""; this.typeFilter = el.dataset.type || ""; this.originFilter = ""; this.pages = {}; }
       this.render();
     });
@@ -894,6 +899,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this.bindCounter(root);
     this.bindPicker(root);
     this.bindSystem(root);
+    this.bindMonitor(root);
     root.querySelectorAll("[data-decide-open]").forEach(el => el.onclick = () => this.openDecide(el.dataset.decideOpen, el.dataset.decidePreset));
     root.querySelectorAll("[data-decide-form]").forEach(form => {
       form.onsubmit = ev => { ev.preventDefault(); this.commitDecide(); };

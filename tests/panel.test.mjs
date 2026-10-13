@@ -58,6 +58,43 @@ test("German and English texts define the same keys", () => {
   assert.deepEqual(Object.keys(TEXT.de).sort(), Object.keys(TEXT.en).sort());
 });
 
+test("Hausmonitor shows a confirmed fault, a scan gap, and escapes function names", () => {
+  const { el, NAV_GROUPS } = panel("de");
+  assert.ok(NAV_GROUPS.find(([group]) => group === "navGroupOperation")[1].includes("monitor"));
+  el.data = { ...DATA, monitor: [
+    { id: "one", name: "<img src=x>", description: "", state: "problem", reason: "unavailable", reason_key: "entity:sensor.a", scanned_at: DATA.meta.scanned_at, members: [], incident_open: true },
+    { id: "two", name: "Türklingel", description: "", state: "unverified", reason: "source_unread", scanned_at: DATA.meta.scanned_at, members: [], incident_open: false },
+  ] };
+  const html = el.monitorView();
+  assert.match(html, /Beeinträchtigt/);
+  assert.match(html, /Unbekannt/);
+  assert.match(html, /&lt;img src=x&gt;/);
+  assert.doesNotMatch(html, /<img src=x>/);
+  el.monitorSelected = "one";
+  assert.match(el.monitorDetail(), /Letzter Scan/);
+});
+
+test("Hausmonitor editor keeps required members and offers only direct inventory objects", () => {
+  const { el } = panel("en");
+  el.monitorForm = { name: "Water", description: "", notify: true, members: [{ object_key: "entity:sensor.b", required: false }] };
+  const html = el.monitorEditor();
+  assert.match(html, /data-monitor-required="0"/);
+  assert.match(html, /data-monitor-pick="automation:automation.c"/);
+  assert.doesNotMatch(html, /data-monitor-pick="entity:sensor.b"/);
+});
+
+test("Hausmonitor overview counts a known finding only once", () => {
+  const { el } = panel("de");
+  el.ensureSysLight = el.ensureGoals = el.ensurePolicies = () => {};
+  el.staleScan = () => null;
+  el.causeList = () => [];
+  const problem = { id: "one", name: "Water", state: "problem", reason: "orphaned", reason_key: "entity:sensor.a", scanned_at: DATA.meta.scanned_at, incident_open: true };
+  el.data = { ...DATA, monitor: [problem], quarantine: [] };
+  assert.equal(el.todoItems().find(i => i.key === "monitor_problem").area, "findings");
+  el.data = { ...DATA, monitor: [{ ...problem, reason_key: "entity:sensor.b" }], quarantine: [] };
+  assert.equal(el.todoItems().find(i => i.key === "monitor_problem").area, "state");
+});
+
 test("shared list search keeps an accessible name after its placeholder disappears", () => {
   for (const lang of ["de", "en"]) {
     const { el } = panel(lang);
