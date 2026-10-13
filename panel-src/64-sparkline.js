@@ -19,6 +19,8 @@ class SparklineMixin {
     } catch (_) { if (this.data === data) this.series = null; }
   }
 
+  // The end point is a zero-length line with round caps and a non-scaling stroke: the SVG is stretched
+  // (preserveAspectRatio none), which would turn a circle into an ellipse.
   // Line, end point and the change over the period for one key of the series ("objects", "findings",
   // "unavailable"). "rising" says whether more is worse; without it the colour stays neutral.
   sparkline(key, rising) {
@@ -38,6 +40,6 @@ class SparklineMixin {
     const sign = change > 0 ? "+" : change < 0 ? "−" : "±";
     const text = this.t("sparkChange", { change: `${sign}${this.formatNumber(Math.abs(change))}`, days: this.formatNumber(days) });
     const label = this.t("sparkLabel", { from: this.formatNumber(first), to: this.formatNumber(last), days: this.formatNumber(days) });
-    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${this.esc(label)}"><polyline fill="none" stroke="var(--hk-muted)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points="${values.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ")}"/><circle class="spark-end ${tone}" cx="${x(n - 1).toFixed(1)}" cy="${y(last).toFixed(1)}" r="3.5"/></svg><span class="spark-cap ${tone}">${this.esc(text)}</span>`;
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${this.esc(label)}"><polyline fill="none" stroke="var(--hk-muted)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points="${values.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ")}"/><line class="spark-halo" x1="${x(n - 1).toFixed(1)}" y1="${y(last).toFixed(1)}" x2="${x(n - 1).toFixed(1)}" y2="${y(last).toFixed(1)}"/><line class="spark-end ${tone}" x1="${x(n - 1).toFixed(1)}" y1="${y(last).toFixed(1)}" x2="${x(n - 1).toFixed(1)}" y2="${y(last).toFixed(1)}"/></svg><span class="spark-cap ${tone}">${this.esc(text)}</span>`;
   }
 }

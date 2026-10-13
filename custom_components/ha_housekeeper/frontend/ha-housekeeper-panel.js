@@ -1469,7 +1469,7 @@ class StylesMixin {
       .kpis{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(120px,1fr);gap:10px;margin-left:auto}@media(max-width:640px){.kpis{grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);width:100%;gap:8px}}
       .kpi{display:block;min-width:0;text-align:left;padding:9px 14px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-soft);color:inherit;font:inherit;cursor:pointer;box-shadow:var(--hk-hi)}.kpi:hover{box-shadow:var(--hk-sh2)}
       .kpi small{display:block;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.kpi strong{font-size:calc(20px*var(--hk-fs,1));font-weight:600}.kpi.red strong{color:var(--hk-red)}.kpi.warn strong{color:var(--hk-amber)}
-      .spark-row{display:block;margin-top:4px}.spark{display:block;width:100%;height:36px}.sysmeter+.spark,.sysmeter+.spark-hint{margin-top:14px}.sysmeter+.spark polyline{opacity:.65}.spark-end{fill:var(--hk-muted);stroke:var(--hk-soft);stroke-width:1.5}.spark-end.red{fill:var(--hk-red)}.spark-end.ok{fill:var(--hk-green)}.spark-cap,.spark-hint{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.spark-cap.red{color:var(--hk-red)}.spark-cap.ok{color:var(--hk-green)}
+      .spark-row{display:block;margin-top:4px}.spark{display:block;width:100%;height:36px}.sysmeter+.spark,.sysmeter+.spark-hint{margin-top:14px}.sysmeter+.spark polyline{opacity:.65}.spark-end,.spark-halo{stroke-linecap:round;vector-effect:non-scaling-stroke}.spark-halo{stroke:var(--hk-soft);stroke-width:10}.spark-end{stroke:var(--hk-muted);stroke-width:7}.spark-end.red{stroke:var(--hk-red)}.spark-end.ok{stroke:var(--hk-green)}.spark-cap,.spark-hint{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.spark-cap.red{color:var(--hk-red)}.spark-cap.ok{color:var(--hk-green)}
       .taskgrid{gap:14px}
       .taskcard{--c:var(--hk-blue);position:relative;overflow:hidden;padding-left:20px;box-shadow:var(--hk-sh1),var(--hk-hi)}
       .taskcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c)}
@@ -10813,6 +10813,8 @@ class SparklineMixin {
     } catch (_) { if (this.data === data) this.series = null; }
   }
 
+  // The end point is a zero-length line with round caps and a non-scaling stroke: the SVG is stretched
+  // (preserveAspectRatio none), which would turn a circle into an ellipse.
   // Line, end point and the change over the period for one key of the series ("objects", "findings",
   // "unavailable"). "rising" says whether more is worse; without it the colour stays neutral.
   sparkline(key, rising) {
@@ -10832,7 +10834,7 @@ class SparklineMixin {
     const sign = change > 0 ? "+" : change < 0 ? "−" : "±";
     const text = this.t("sparkChange", { change: `${sign}${this.formatNumber(Math.abs(change))}`, days: this.formatNumber(days) });
     const label = this.t("sparkLabel", { from: this.formatNumber(first), to: this.formatNumber(last), days: this.formatNumber(days) });
-    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${this.esc(label)}"><polyline fill="none" stroke="var(--hk-muted)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points="${values.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ")}"/><circle class="spark-end ${tone}" cx="${x(n - 1).toFixed(1)}" cy="${y(last).toFixed(1)}" r="3.5"/></svg><span class="spark-cap ${tone}">${this.esc(text)}</span>`;
+    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="${this.esc(label)}"><polyline fill="none" stroke="var(--hk-muted)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points="${values.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ")}"/><line class="spark-halo" x1="${x(n - 1).toFixed(1)}" y1="${y(last).toFixed(1)}" x2="${x(n - 1).toFixed(1)}" y2="${y(last).toFixed(1)}"/><line class="spark-end ${tone}" x1="${x(n - 1).toFixed(1)}" y1="${y(last).toFixed(1)}" x2="${x(n - 1).toFixed(1)}" y2="${y(last).toFixed(1)}"/></svg><span class="spark-cap ${tone}">${this.esc(text)}</span>`;
   }
 }
 
