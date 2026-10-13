@@ -930,7 +930,7 @@ test("a dry-run plan is confirmed, typed, executed with progress, and can be und
   } };
   el.render();
   let html = shadow.innerHTML;
-  assert.ok(html.includes("data-plan-confirm") && html.includes('data-ack-all') && !html.includes("data-plan-execute"));
+  assert.ok(html.includes("data-plan-confirm") && html.includes("data-plan-close>Cancel") && html.includes('data-ack-all') && !html.includes("data-plan-execute"));
   el.ack.add("sensor.b");
   await el.confirmPlan();
   const confirm = sent.find(m => m.type === "ha_housekeeper/plan_confirm");

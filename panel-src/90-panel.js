@@ -995,7 +995,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-pf-refresh]")?.addEventListener("click", () => this.loadPreflight());
     root.querySelector("[data-pf-save]")?.addEventListener("click", () => this.loadPreflight("save"));
     root.querySelector("[data-pf-clear]")?.addEventListener("click", () => this.loadPreflight("clear"));
-    root.querySelector("[data-plan-close]")?.addEventListener("click", () => { this.plan = null; this.render(); });
+    root.querySelectorAll("[data-plan-close]").forEach(el => el.addEventListener("click", () => { this.plan = null; this.render(); }));
     root.querySelectorAll("[data-plan-open]").forEach(el => el.onclick = () => this.openPlan(el.dataset.planOpen));
     root.querySelectorAll("[data-merge-sel]").forEach(el => el.onchange = () => { this.mergeSel = new Set(this.mergeSel || []); el.checked ? this.mergeSel.add(el.dataset.mergeSel) : this.mergeSel.delete(el.dataset.mergeSel); this.render(); });
     root.querySelector("[data-merge]")?.addEventListener("click", () => this.mergePlans());

@@ -3372,7 +3372,7 @@ class CleanupMixin {
       const review = plan.actions.filter(a => a.verdict === "review" && a.executable);
       const all = review.length && review.every(a => this.ack.has(a.object_id));
       const reviewBox = review.length ? `<label class="factnote reportopt"><input type="checkbox" data-ack-all ${all ? "checked" : ""}><span><strong>${this.t("acknowledgeAll", { count: review.length })}</strong><small>${this.t("acknowledgeAllHint")}</small></span></label>` : "";
-      control = `<div class="setrow planfoot">${reviewBox || `<small class="u-m0">${this.t("cleanupDryRun")}</small>`}<button class="btn primary" data-plan-confirm>${this.t("confirmPlan")}</button></div>`;
+      control = `<div class="setrow planfoot">${reviewBox || `<small class="u-m0">${this.t("cleanupDryRun")}</small>`}<span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-plan-close>${this.t("confirmCancel")}</button><button class="btn primary" data-plan-confirm>${this.t("confirmPlan")}</button></span></div>`;
     }
     else if (open && conf) control = `<div class="setrow planfoot"><button class="btn" data-plan-back><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("wzBack")}</button><div><strong>${this.t("confirmPlanTitle")}</strong><small>${this.confirmSummary(plan, conf.execute.length)}</small>${conf.needs_acknowledgement.length ? `<small>${this.t("skippedUnacknowledged", { count: conf.needs_acknowledgement.length })}</small>` : ""}</div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><label class="factnote u-m0">${this.t("confirmTypeWord", { word })}</label><input type="text" data-confirm-word value="${this.esc(this.confirmWord)}" style="max-width:180px" autocomplete="off"><button class="btn ${plan.actions.some(a => a.executable && (REMOVAL_KINDS.includes(a.kind) || PURGE_KINDS.includes(a.kind))) ? "danger" : "primary"}" data-plan-execute ${this.confirmWord.trim().toUpperCase() === word ? "" : "disabled"}>${this.t("runNow")} (${conf.execute.length})</button></div></div>`;
@@ -13964,7 +13964,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-pf-refresh]")?.addEventListener("click", () => this.loadPreflight());
     root.querySelector("[data-pf-save]")?.addEventListener("click", () => this.loadPreflight("save"));
     root.querySelector("[data-pf-clear]")?.addEventListener("click", () => this.loadPreflight("clear"));
-    root.querySelector("[data-plan-close]")?.addEventListener("click", () => { this.plan = null; this.render(); });
+    root.querySelectorAll("[data-plan-close]").forEach(el => el.addEventListener("click", () => { this.plan = null; this.render(); }));
     root.querySelectorAll("[data-plan-open]").forEach(el => el.onclick = () => this.openPlan(el.dataset.planOpen));
     root.querySelectorAll("[data-merge-sel]").forEach(el => el.onchange = () => { this.mergeSel = new Set(this.mergeSel || []); el.checked ? this.mergeSel.add(el.dataset.mergeSel) : this.mergeSel.delete(el.dataset.mergeSel); this.render(); });
     root.querySelector("[data-merge]")?.addEventListener("click", () => this.mergePlans());

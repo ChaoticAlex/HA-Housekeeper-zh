@@ -8,6 +8,8 @@
 
 ### Behoben
 
+- **Plan abbrechen:** Neben „Bestätigen …“ steht jetzt „Abbrechen“. Es verwirft die Vorschau wie „Schließen“ oben rechts; geändert wird nichts.
+
 - **Plan bestätigen:** Der Button „Bestätigen …“ zeigte statt seiner Beschriftung den Text der Löschfrage des Journals samt „{date}“. Er trägt wieder seine Beschriftung.
 
 ### English
@@ -17,6 +19,8 @@
 - **Switch entities in bulk from the inventory:** Entity rows of the Inventory have a checkbox. The bar above disables, enables, hides or shows them, up to 200 entities per plan, with a preview and undo. An entity that something certainly uses is not disabled; only what you disabled yourself is enabled again.
 
 #### Fixed
+
+- **Cancel a plan:** “Cancel” now stands next to “Confirm …”. It discards the preview like “Close” at the top right; nothing is changed.
 
 - **Confirm plan:** The “Confirm …” button showed the text of the journal delete question, including “{date}”, instead of its label. It has its label again.
 
