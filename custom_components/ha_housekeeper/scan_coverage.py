@@ -3,7 +3,7 @@
 A source is *checked* when it was read, *partial* when only a part of it was, *skipped* when it exists
 but could not be read, *absent* when the installation does not have it (no Supervisor, no Energy
 dashboard) and *unknown* when the scan never got that far. Only reasons are kept, never error texts
-or names, so the report can go into the diagnostics as it is.
+or secrets (dashboard paths and a failure category may be named), so the report can go into the diagnostics as it is.
 """
 
 from __future__ import annotations
@@ -38,7 +38,7 @@ class ScanCoverage:
     def reset(self) -> None:
         self._items = {}
 
-    def _set(self, source: str, state: str, reason: str | None, **extra: int) -> None:
+    def _set(self, source: str, state: str, reason: str | None, **extra: Any) -> None:
         self._items[source] = {"source": source, "state": state, "reason": reason, **extra}
 
     def checked(self, source: str) -> None:
@@ -49,7 +49,7 @@ class ScanCoverage:
     def skipped(self, source: str, reason: str) -> None:
         self._set(source, "skipped", reason)
 
-    def partial(self, source: str, reason: str, **counts: int) -> None:
+    def partial(self, source: str, reason: str, **counts: Any) -> None:
         self._set(source, "partial", reason, **counts)
 
     def absent(self, source: str, reason: str) -> None:

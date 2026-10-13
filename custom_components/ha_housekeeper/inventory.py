@@ -486,6 +486,15 @@ ENTRY_INFO = timedelta(hours=1)  # a restart or a retry in progress is only an i
 ENTRY_MEDIUM = timedelta(days=1)
 
 
+def _dashboard_failure(err: Exception) -> str:
+    """Why a dashboard could not be read: a category only, never the error text."""
+    if type(err).__name__ == "ConfigNotFound":
+        return "auto_generated"
+    if type(err).__name__ in ("HomeAssistantError", "JSONDecodeError", "ValueError"):
+        return "invalid"
+    return "error"
+
+
 def _outage_level(age: timedelta, min_unavailable_days: int) -> str:
     """How much an integration that has not been loaded for ``age`` matters: info, low, medium, high."""
     if age < ENTRY_INFO:
@@ -1646,14 +1655,16 @@ class InventoryScanner:
         edges: list[dict[str, str]] = []
         findings: list[dict[str, Any]] = []
         configs: dict[str, Any] = {}
-        unreadable = 0
+        unreadable: list[dict[str, str]] = []
         for url_path, dashboard in lovelace.dashboards.items():
             try:
                 config = await dashboard.async_load(False)
-            except Exception:  # Auto-generated, missing or invalid dashboards have nothing to read.
+            except Exception as err:  # Missing or invalid dashboards have nothing to read.
                 # One that had findings before and cannot be read now has not become clean.
                 self._unchecked.add(f"dashboard:{url_path or 'lovelace'}")
-                unreadable += 1
+                reason = _dashboard_failure(err)
+                if reason != "auto_generated":  # Nothing was saved, so there is nothing to miss.
+                    unreadable.append({"id": url_path or "lovelace", "reason": reason})
                 continue
             object_id = url_path or "lovelace"
             configs[object_id] = config
@@ -1705,7 +1716,11 @@ class InventoryScanner:
             item["health"] = dashboard_health(configs[item["object_id"]], views_of, resources)
         if unreadable:
             self.scan_coverage.partial(
-                "dashboards", "unreadable", read=len(dashboards), failed=unreadable
+                "dashboards",
+                "unreadable",
+                read=len(dashboards),
+                failed=len(unreadable),
+                items=unreadable,
             )
         elif resources is None:
             self.scan_coverage.partial("dashboards", "resources_unknown")

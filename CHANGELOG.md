@@ -12,6 +12,8 @@
 
 ### Neu
 
+- **Prüfung nennt nicht lesbare Dashboards:** Unter „Was zuletzt geprüft wurde“ steht bei Dashboards jetzt, welche nicht gelesen werden konnten und warum („Konfiguration ungültig“, „Konnte nicht geladen werden“). Ein Dashboard, das Home Assistant automatisch erzeugt und nie gespeichert wurde, gilt nicht mehr als Lücke.
+
 - **Lücken in der Prüfung werden nachgeholt:** Konnte ein Scan eine Quelle nicht vollständig lesen (etwa Dashboards, weil Lovelace noch nicht bereit war), startet Housekeeper nach 5 Minuten einen neuen Scan, höchstens dreimal hintereinander. Die Leiste „Prüfung“ sagt dazu, dass es noch einmal versucht wird. Fehlt eine Komponente ganz, wird nicht wiederholt.
 
 - **Vermerk für mehrere Objekte:** Die Auswahlleiste der Befunde hat den Knopf „Vermerk setzen“. Er setzt Art, Begründung und Prüffrist in einem Zug an allen angekreuzten Entitäten, Geräten, Integrationen und Apps; andere Objekte in der Auswahl (zum Beispiel Automationen) bleiben unberührt.

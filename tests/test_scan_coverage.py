@@ -23,12 +23,15 @@ def test_a_gap_noted_earlier_is_not_overwritten_by_checked() -> None:
     coverage = ScanCoverage()
     coverage.skipped("automations", "automation_not_ready")
     coverage.checked("automations")
-    coverage.partial("dashboards", "unreadable", read=3, failed=1)
+    coverage.partial(
+        "dashboards", "unreadable", read=3, failed=1, items=[{"id": "keller", "reason": "invalid"}]
+    )
     coverage.checked("dashboards")
     coverage.absent("apps", "no_supervisor")
     by_source = {item["source"]: item for item in coverage.report()}
     assert by_source["automations"]["state"] == "skipped"
     assert by_source["dashboards"]["state"] == "partial" and by_source["dashboards"]["failed"] == 1
+    assert by_source["dashboards"]["items"] == [{"id": "keller", "reason": "invalid"}]
     assert by_source["apps"]["state"] == "absent"
 
 

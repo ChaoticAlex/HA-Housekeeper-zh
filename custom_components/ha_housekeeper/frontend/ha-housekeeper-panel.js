@@ -9480,6 +9480,9 @@ Object.assign(TEXT.de, {
   covReason_resources_unknown: "Dashboard-Ressourcen unbekannt",
   covReason_automation_not_ready: "Automationen noch nicht bereit",
   covReason_script_not_ready: "Skripte noch nicht bereit",
+  covItemReason_invalid: "Konfiguration ungültig",
+  covItemReason_error: "Konnte nicht geladen werden",
+  covItems: "Nicht lesbar: {list}",
   endedUncheckedSrc: "Quelle nicht gelesen: {source}",
 });
 Object.assign(TEXT.en, {
@@ -9513,6 +9516,9 @@ Object.assign(TEXT.en, {
   covReason_resources_unknown: "Dashboard resources unknown",
   covReason_automation_not_ready: "Automations not ready yet",
   covReason_script_not_ready: "Scripts not ready yet",
+  covItemReason_invalid: "Configuration invalid",
+  covItemReason_error: "Could not be loaded",
+  covItems: "Not readable: {list}",
   endedUncheckedSrc: "Source not read: {source}",
 });
 
@@ -9529,6 +9535,13 @@ class ScanCoverageMixin {
     const reason = item.reason ? this.t(`covReason_${item.reason}`) : "";
     const part = item.state === "partial" && item.failed ? this.t("covPartial", { read: item.read ?? 0, failed: item.failed }) : "";
     return [reason, part].filter(Boolean).join(" · ");
+  }
+
+  // The objects of a partly read source that failed, each with its category: "keller (Konfiguration ungültig)".
+  scanCoverageItemsLabel(item) {
+    if (!item.items?.length) return "";
+    const list = item.items.map(i => `${i.id} (${this.t(`covItemReason_${i.reason}`)})`).join(", ");
+    return this.t("covItems", { list });
   }
 
   // One row in the overview, grey while everything was read and yellow with the names once something was not.
@@ -9549,7 +9562,7 @@ class ScanCoverageMixin {
     const rows = [...items].sort((a, b) => rank[a.state] - rank[b.state]).map(c => {
       const tone = c.state === "checked" ? "ok" : c.state === "absent" ? "mute" : "warn";
       const reason = this.scanCoverageLabel(c);
-      return `<div class="row" data-coverage-source="${this.esc(c.source)}"><span class="tile mute"><ha-icon icon="mdi:shield-search"></ha-icon></span><span class="row-text"><strong>${this.t(`covSrc_${c.source}`)}</strong>${reason ? `<small>${this.esc(reason)}</small>` : ""}</span><span class="pill ${tone}">${this.t(`covState_${c.state}`)}</span></div>`;
+      return `<div class="row" data-coverage-source="${this.esc(c.source)}"><span class="tile mute"><ha-icon icon="mdi:shield-search"></ha-icon></span><span class="row-text"><strong>${this.t(`covSrc_${c.source}`)}</strong>${reason ? `<small>${this.esc(reason)}</small>` : ""}${this.scanCoverageItemsLabel(c) ? `<small>${this.esc(this.scanCoverageItemsLabel(c))}</small>` : ""}</span><span class="pill ${tone}">${this.t(`covState_${c.state}`)}</span></div>`;
     }).join("");
     const at = this.data?.meta?.scanned_at ? this.formatDate(this.data.meta.scanned_at) : "–";
     return `<section class="panel"><div class="panelhead"><div><h2>${this.t("covListTitle")}</h2><p>${this.t("covListHint", { date: at })}</p></div></div>${rows}</section>`;
