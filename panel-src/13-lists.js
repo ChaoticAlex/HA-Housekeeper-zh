@@ -50,7 +50,7 @@ class ListsMixin {
       const x = a.key, y = b.key;
       if (empty(x) !== empty(y)) return empty(x) ? 1 : -1;
       const order = typeof x === "number" && typeof y === "number" ? x - y : natural.compare(String(x ?? ""), String(y ?? ""));
-      return order * sign || ids.compare(String(tie(a.it)), String(tie(b.it)));
+      return order * sign || ids.compare(String(tie(a.it)), String(tie(b.it))) * sign; // equal keys turn around with the direction too
     });
     return rows.map(row => row.it);
   }
@@ -123,11 +123,11 @@ class ListsMixin {
     for (const f of filters) if (st.f[f.name] && !f.options.some(([v]) => v === st.f[f.name])) delete st.f[f.name]; // a kept value this list no longer offers
     (this.lvDirs ||= {})[id] = Object.fromEntries(sorts.map(x => [x.key, x.dir]));
     const selects = filters.map(f => `<select data-lf="${id}|${f.name}" aria-label="${this.esc(f.all)}"><option value="">${this.esc(f.all)}</option>${f.options.map(([v, label]) => `<option value="${this.esc(v)}" ${st.f[f.name] === v ? "selected" : ""}>${this.esc(label)}</option>`).join("")}</select>`).join("");
-    const sortOptions = sorts.map(x => `<option value="${x.key}" ${st.sort === x.key ? "selected" : ""}>${this.t(x.label)}</option>`).join("");
     const desc = st.dir === "desc";
+    const sortOptions = sorts.map(x => `<option value="${x.key}" ${st.sort === x.key ? "selected" : ""}>${this.t(x.label)}${st.sort === x.key ? (desc ? " ↓" : " ↑") : ""}</option>`).join("");
     const on = filters.filter(f => st.f[f.name]).map(f => `${f.all}: ${(f.options.find(([v]) => v === st.f[f.name]) || [])[1] ?? st.f[f.name]}`);
     const note = this.filterNote(on, `data-lf-set="${id}||"`);
-    return `${note}<div class="listbar"><input type="search" data-lq="${id}" value="${this.esc(st.q)}" placeholder="${this.t("searchList")}">${selects}${sorts.length ? `<span class="sortgroup"><select data-ls="${id}" aria-label="${this.t("sortBy")}">${sortOptions}</select><button class="dirbtn" data-ld="${id}" title="${this.t(desc ? "sortDescending" : "sortAscending")}" aria-label="${this.t(desc ? "sortDescending" : "sortAscending")}"><ha-icon icon="${desc ? "mdi:sort-descending" : "mdi:sort-ascending"}"></ha-icon></button></span>` : ""}${this.viewsControl(id)}${this.denseButton()}${this.listTools(id, columns)}</div>`;
+    return `${note}<div class="listbar"><input type="search" data-lq="${id}" value="${this.esc(st.q)}" placeholder="${this.t("searchList")}">${selects}${sorts.length ? `<span class="sortgroup"><select data-ls="${id}" aria-label="${this.t("sortBy")}" title="${this.t("sortBy")}">${sortOptions}</select><button class="dirbtn" data-ld="${id}" title="${this.t(desc ? "sortDescending" : "sortAscending")}" aria-label="${this.t(desc ? "sortDescending" : "sortAscending")}"><ha-icon icon="${desc ? "mdi:sort-descending" : "mdi:sort-ascending"}"></ha-icon></button></span>` : ""}${this.viewsControl(id)}${this.denseButton()}${this.listTools(id, columns)}</div>`;
   }
 
   // Column picker and CSV export of a list; both are optional. `columns` are the switchable columns: { key, label }.
@@ -244,25 +244,28 @@ class ListsMixin {
     const view = saved.find(v => v.name === st.view);
     const dirty = shape(st.q, st.f, st.sort, st.dir) !== (view ? shape(view.q, view.f, view.sort, view.dir) : shape("", {}, st.base?.sort ?? st.sort, st.base?.dir ?? st.dir));
     if (!saved.length && !dirty) return "";
-    const select = saved.length ? `<select data-lview="${id}" aria-label="${this.esc(this.t("viewsLabel"))}"><option value="">${this.t("viewsNone")}</option>${saved.map(v => `<option value="${this.esc(v.name)}" ${st.view === v.name ? "selected" : ""}>${this.esc(v.name)}</option>`).join("")}</select>` : "";
     if (this.viewNaming === id) {
       return `<form class="viewgroup" data-lview-form="${id}"><input data-lview-name="${id}" maxlength="40" autocomplete="off" value="${this.esc(this.viewDraft)}" aria-label="${this.esc(this.t("viewName"))}" placeholder="${this.esc(this.t("viewName"))}"><button type="submit" class="btn">${this.t("viewSave")}</button><button type="button" class="btn quiet" data-lview-cancel="${id}">${this.t("cancelRun")}</button></form>`;
     }
-    const save = dirty ? `<button type="button" class="btn quiet" data-lview-save="${id}"><ha-icon icon="mdi:star-outline"></ha-icon>${this.t("viewSave")}</button>` : "";
-    const remove = st.view && saved.some(v => v.name === st.view) ? `<button type="button" class="btn quiet" data-lview-delete="${id}">${this.t("viewDelete")}</button>` : "";
-    return `<span class="viewgroup">${select}${save}${remove}</span>`;
+    const save = `<button type="button" class="viewitem" data-lview-save="${id}"><ha-icon icon="mdi:star-plus-outline"></ha-icon>${this.t("viewSave")}</button>`;
+    // Nothing saved yet: the star is the save button itself.
+    if (!saved.length) return `<button type="button" class="dirbtn" data-lview-save="${id}" title="${this.esc(this.t("viewSave"))}" aria-label="${this.esc(this.t("viewSave"))}"><ha-icon icon="mdi:star-outline"></ha-icon></button>`;
+    const open = this._viewOpen === id, name = view ? view.name : "";
+    const item = v => `<span class="viewrow"><button type="button" class="viewitem ${v.name === name ? "on" : ""}" data-lview-pick="${id}" data-name="${this.esc(v.name)}" ${v.name === name ? 'aria-current="true"' : ""}>${this.esc(v.name)}</button><button type="button" class="viewdel" data-lview-delete="${id}" data-name="${this.esc(v.name)}" title="${this.esc(this.t("viewDelete"))}" aria-label="${this.esc(this.t("viewDelete"))}: ${this.esc(v.name)}"><ha-icon icon="mdi:delete-outline"></ha-icon></button></span>`;
+    const pop = open ? `<span class="colpop viewpop" role="group" aria-label="${this.esc(this.t("viewsLabel"))}">${saved.map(item).join("")}${name ? `<button type="button" class="viewitem" data-lview-pick="${id}" data-name="">${this.t("viewsClear")}</button>` : ""}${dirty ? save : ""}</span>` : "";
+    return `<span class="colwrap"><button type="button" class="dirbtn ${name ? "withname" : ""} ${open || name ? "on" : ""}" data-lview-open="${id}" aria-expanded="${open}" title="${this.esc(this.t("viewsLabel"))}" aria-label="${this.esc(this.t("viewsLabel"))}${name ? `: ${this.esc(name)}` : ""}"><ha-icon icon="${name ? "mdi:star" : "mdi:star-outline"}"></ha-icon>${name ? `<span class="viewname">${this.esc(name)}</span>` : ""}</button>${pop}</span>`;
   }
 
   applyView(id, name) {
     const st = this.lv[id], view = (this.viewsStore()[id] || []).find(v => v.name === name);
-    st.view = view ? view.name : "";
+    st.view = view ? view.name : ""; this._viewOpen = "";
     if (view) { st.q = view.q; st.f = { ...view.f }; st.sort = view.sort; st.dir = view.dir; }
     this.pages = {}; this.render();
   }
 
   // Naming a view happens in a small inline form (name, save, cancel), not in a browser prompt.
   saveView(id) {
-    this.viewNaming = id; this.viewDraft = this.lv[id].view || "";
+    this.viewNaming = id; this._viewOpen = ""; this.viewDraft = this.lv[id].view || "";
     this.render();
     this.shadowRoot?.querySelector?.(`[data-lview-name="${id}"]`)?.focus?.();
   }
@@ -270,7 +273,7 @@ class ListsMixin {
   cancelView(id) {
     this.viewNaming = null;
     this.render();
-    this.shadowRoot?.querySelector?.(`[data-lview-save="${id}"]`)?.focus?.();
+    this.shadowRoot?.querySelector?.(`[data-lview-save="${id}"], [data-lview-open="${id}"]`)?.focus?.();
   }
 
   commitView(id, text) {
@@ -283,13 +286,14 @@ class ListsMixin {
     if (at < 0 && list.length >= VIEWS_LIMIT) { this.toast(this.t("viewsFull", { n: VIEWS_LIMIT }), true); return; }
     if (at >= 0) list[at] = view; else list.push(view);
     st.view = name; this.viewNaming = null; this.persistViews(); this.render();
-    this.shadowRoot?.querySelector?.(`[data-lview-save="${id}"]`)?.focus?.();
+    this.shadowRoot?.querySelector?.(`[data-lview-save="${id}"], [data-lview-open="${id}"]`)?.focus?.();
   }
 
-  deleteView(id) {
+  deleteView(id, name = this.lv[id]?.view) {
     const st = this.lv[id], store = this.viewsStore();
-    store[id] = (store[id] || []).filter(v => v.name !== st.view);
-    st.view = ""; this.persistViews(); this.render();
+    store[id] = (store[id] || []).filter(v => v.name !== name);
+    if (st.view === name) st.view = "";
+    this.persistViews(); this.render();
   }
 
   // Long explanations of how a number is counted fold away, so the lists end earlier.

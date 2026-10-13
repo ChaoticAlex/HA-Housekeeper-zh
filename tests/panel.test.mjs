@@ -2631,14 +2631,16 @@ test("a list view can be saved under a name, applied again, overwritten and dele
   el.applyView("inv", "Kaputte Sensoren");
   assert.equal(st.q, "sensor"); assert.equal(st.f.status, "orphaned"); assert.equal(st.sort, "name"); assert.equal(st.dir, "asc");
   const bar = el.viewsControl("inv");
-  assert.ok(bar.includes("data-lview=") && bar.includes("data-lview-delete") && bar.includes("selected"));
+  assert.ok(bar.includes("data-lview-open") && bar.includes("withname"));
+  el._viewOpen = "inv";
+  assert.ok(el.viewsControl("inv").includes("data-lview-pick") && el.viewsControl("inv").includes("data-lview-delete"));
   st.q = "neu"; save("Kaputte Sensoren");
   assert.equal(read().inv.length, 1, "the same name overwrites");
   save("  ");
   assert.equal(read().inv.length, 1, "no name, no view");
   el.cancelView("inv");
   assert.ok(!el.viewsControl("inv").includes("data-lview-form"), "cancel closes the form");
-  el.deleteView("inv");
+  el.deleteView("inv", "Kaputte Sensoren");
   assert.equal(read().inv.length, 0);
 });
 
@@ -4471,7 +4473,7 @@ test("a sort alone can be saved as a view, and the save button goes away when th
   assert.equal(el.viewsControl("inv"), "", "back at the default: nothing to save");
   st.sort = "status"; el.saveView("inv"); el.commitView("inv", "By status");
   assert.ok(!el.viewsControl("inv").includes("data-lview-save"), "equal to the chosen view: nothing new to save");
-  st.dir = "desc";
+  st.dir = "desc"; el._viewOpen = "inv";
   assert.ok(el.viewsControl("inv").includes("data-lview-save"), "a change against the chosen view can be saved");
 });
 

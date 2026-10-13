@@ -4,6 +4,8 @@
 
 ### Geändert
 
+- **Listenleiste ruhiger:** Die Suche ist 200 px breit, der Filter heißt „Schweregrad“ (Hoch, Mittel, Niedrig, Info, Keine) und die Sortierung zeigt ihre Richtung im Eintrag („Schweregrad ↓“). Gespeicherte Ansichten sind ein Stern-Knopf mit Auswahl, Löschen je Eintrag und „Ansicht speichern“. „Kompakte Zeilen“ wirkt jetzt auch in der Befundliste.
+
 - **Ausfälle von Integrationen mit Schweregrad nach Dauer:** Eine nicht geladene Integration ist sofort ein Befund und wartet nicht mehr, bis die „Mindestdauer nicht verfügbar“ (Standard 7 Tage) vorbei ist. Die Dauer bestimmt die Auswirkung: unter 1 Stunde „Info“, ab 1 Stunde „Niedrig“, ab 1 Tag „Mittel“, ab der Mindestdauer „Hoch“. Neu ist die Stufe „Info“ (1 Punkt, höchstens 5); „Niedrig“ und „Mittel“ ziehen jetzt 2 und 3 Punkte statt 1 und 2 ab. Dadurch springt der Punktestand einmalig. In der Liste trägt jede Zeile ihre Auswirkung als Chip und ein „⋯“-Menü mit „Als bekannt markieren“, „Zurückstellen“, „Befund ausblenden“ (und „Löschen vorbereiten“, wo es passt); die breiten Knöpfe unter den Ausfällen und der Einzelknopf „Löschen vorbereiten“ entfallen. Im Detail stehen dieselben Aktionen jetzt auch bei Ausfällen. Die Zeile eines Ausfalls nennt nur noch, was betroffen ist und wie lange er dauert („seit 6 Std. · Mittel in 18 Std.“); Zustand und Fehlertext stehen im Detail. Jede Zeile hat zwei Chips: den Grund (grauer Umriss, zum Beispiel „Ausfall“, „Ungenutzt“) und die Auswirkung (farbig, Hoch rot bis Info grau); das Datum entfällt in der Zeile. Die Filter „Typ“ und „Auswirkung“ gelten jetzt auch für Ausfälle; neu ist der Filter „Grund“ (mit „Ausfall“ als eigener Kachel). Die Kachel „Housekeeping-Status“ der Befunde-Seite entfällt; ihr Verlauf („−27 in 2 Tagen“) steht in der Übersicht unter der Überschrift, der Link „Wie entsteht die Zahl?“ ist weg.
 
 ### Neu
@@ -12,11 +14,15 @@
 
 ### Behoben
 
+- **Sortierrichtung:** Bei gleichen Werten drehte der Pfeil „Aufsteigend/Absteigend“ die Reihenfolge nicht um; jetzt dreht er die ganze Liste.
+
 - **Befunde:** Wer einen Status wie „Neu“ oder einen Filter wählte, sah die Ausfälle von Integrationen nicht, obwohl sie mitgezählt wurden. Sie stehen jetzt als eigene Zeilen in der Liste.
 
 ### English
 
 #### Changed
+
+- **Calmer list bar:** The search is 200 px wide, the filter is called "Severity" (High, Medium, Low, Info, None) and the sort shows its direction in the entry ("Severity ↓"). Saved views are one star button with a pick list, delete per entry and "Save view". "Compact rows" now works in the findings list too.
 
 - **Integration outages graded by duration:** An integration that is not loaded is a finding at once and no longer waits for “Minimum days unavailable” (default 7 days). How long it has lasted sets the impact: under 1 hour “Info”, from 1 hour “Low”, from 1 day “Medium”, from the minimum days “High”. “Info” is new (1 point, at most 5); “Low” and “Medium” now take off 2 and 3 points instead of 1 and 2, so the score jumps once. In the list every row carries its impact as a chip and a “⋯” menu with “Mark as known”, “Snooze”, “Hide finding” (and “Prepare deletion” where it fits); the wide buttons under outages and the single “Prepare deletion” button are gone. The detail page shows the same actions for outages now. The row of an outage only says what is affected and how long it has lasted (“for 6 h · Medium in 18 h”); state and error text are on the detail page. Each row has two chips: the reason (grey outline, for example “Outage”, “Unused”) and the impact (coloured, High red down to Info grey); the date is gone from the row. The filters “Type” and “Impact” now apply to outages too; there is a new filter “Reason” (with “Outage” as a tile of its own). The “Housekeeping status” tile of the Findings page is gone; its history (“−27 in 2 days”) sits under the headline of the overview, and the link “How is the number made?” is removed.
 
@@ -25,6 +31,8 @@
 - **Mark for several objects:** The selection bar of the Findings page has a “Set a mark” button. It sets kind, reason and review date in one go on all ticked entities, devices, integrations and apps; other objects in the selection (for example automations) stay untouched.
 
 #### Fixed
+
+- **Sort direction:** With equal values the ascending/descending arrow did not reverse the order; it now reverses the whole list.
 
 - **Findings:** Choosing a status such as “New” or a filter hid the outages of integrations although they were counted. They are rows of their own in the list now.
 

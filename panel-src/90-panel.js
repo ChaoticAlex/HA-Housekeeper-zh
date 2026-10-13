@@ -1020,7 +1020,8 @@ class HAHousekeeperPanel extends HTMLElement {
       this.lv[input.dataset.lq].q = input.value; this.pages = {};
       this.scheduleRender();
     });
-    root.querySelectorAll("[data-lview]").forEach(el => el.onchange = () => this.applyView(el.dataset.lview, el.value));
+    root.querySelectorAll("[data-lview-open]").forEach(el => el.onclick = () => { this._viewOpen = this._viewOpen === el.dataset.lviewOpen ? "" : el.dataset.lviewOpen; this.render(); });
+    root.querySelectorAll("[data-lview-pick]").forEach(el => el.onclick = () => this.applyView(el.dataset.lviewPick, el.dataset.name));
     root.querySelectorAll("[data-lview-save]").forEach(el => el.onclick = () => this.saveView(el.dataset.lviewSave));
     root.querySelectorAll("[data-lview-form]").forEach(form => form.onsubmit = ev => {
       ev.preventDefault();
@@ -1031,7 +1032,7 @@ class HAHousekeeperPanel extends HTMLElement {
       el.onkeydown = ev => { if (ev.key === "Escape") { ev.preventDefault(); this.cancelView(el.dataset.lviewName); } };
     });
     root.querySelectorAll("[data-lview-cancel]").forEach(el => el.onclick = () => this.cancelView(el.dataset.lviewCancel));
-    root.querySelectorAll("[data-lview-delete]").forEach(el => el.onclick = () => { const id = el.dataset.lviewDelete; this.confirmAsk(this.t("confirmView", { name: this.lv[id]?.view || "" }), () => this.deleteView(id)); });
+    root.querySelectorAll("[data-lview-delete]").forEach(el => el.onclick = () => { const id = el.dataset.lviewDelete, name = el.dataset.name; this.confirmAsk(this.t("confirmView", { name }), () => this.deleteView(id, name)); });
     root.querySelectorAll("[data-lf]").forEach(el => el.onchange = () => { const [id, name] = el.dataset.lf.split("|"); this.lv[id].f[name] = el.value; this.persistLv(id); this.pages = {}; this.render(); });
     root.querySelectorAll("[data-ls]").forEach(el => el.onchange = () => { const st = this.lv[el.dataset.ls]; st.sort = el.value; st.dir = this.lvDirs[el.dataset.ls][el.value] || "asc"; this.persistLv(el.dataset.ls); this.pages = {}; this.render(); });
     root.querySelectorAll("[data-lsort]").forEach(el => el.onclick = () => {

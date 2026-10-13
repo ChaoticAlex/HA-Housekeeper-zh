@@ -1354,7 +1354,7 @@ class StylesMixin {
       .filters{display:grid;grid-template-columns:minmax(240px,1fr) 190px 190px;gap:10px;padding:14px;border-bottom:1px solid var(--hk-border)}
       input,select{border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);padding:9px 12px;min-width:0}
       select{appearance:none;-webkit-appearance:none;padding-right:36px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23808a84' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;background-size:12px 8px;cursor:pointer}input:focus,select:focus{border-color:var(--hk-blue)}input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px}
-      .listbar{display:flex;flex-wrap:wrap;gap:10px;padding:12px 14px;border-bottom:1px solid var(--hk-border)}.listbar input{flex:3 1 260px}.listbar select{flex:0 1 150px}.sortgroup{display:flex;gap:4px;margin-left:auto;min-width:0}.sortgroup select{flex:0 1 150px;min-width:0}.dirbtn{flex:none}@media(max-width:560px){.listbar>select{flex:1 1 130px}.viewgroup{flex:1 1 100%}.sortgroup{flex:1 1 100%;margin-left:0}.sortgroup select{flex:1 1 auto}}.dirbtn{display:grid;place-items:center;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit;padding:0 10px}.dirbtn:hover{border-color:var(--hk-blue)}
+      .listbar{display:flex;flex-wrap:wrap;gap:10px;padding:12px 14px;border-bottom:1px solid var(--hk-border)}.listbar input{flex:0 1 200px;min-width:0}.listbar select{flex:0 1 180px;min-width:0}.sortgroup{display:flex;gap:4px;margin-left:auto;min-width:0}.sortgroup select{flex:0 1 180px;min-width:0}.dirbtn{flex:none}@media(max-width:560px){.listbar>select{flex:1 1 130px}.viewgroup{flex:1 1 100%}.sortgroup{flex:1 1 100%;margin-left:0}.sortgroup select{flex:1 1 auto}}.dirbtn{display:grid;place-items:center;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit;padding:0 10px}.dirbtn:hover{border-color:var(--hk-blue)}
       .setrow{display:grid;grid-template-columns:minmax(150px,240px) 1fr;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--hk-border)}.setrow:last-child{border-bottom:0}.setrow small{display:block;margin-top:3px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.setrow select{max-width:240px}.setrow .btn{justify-self:start}.seg{display:flex;flex-wrap:wrap;gap:8px}.swatch{display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:50%;vertical-align:-1px}a.btn{color:inherit;text-decoration:none}
       @media(max-width:700px){.setrow{grid-template-columns:1fr}}
       .row,.btn,.card,.chip,.nav,.dirbtn{transition:background-color .15s ease,border-color .15s ease,color .15s ease}.bar i{transition:width .4s ease}@keyframes hk-spin{to{transform:rotate(360deg)}}.loading ha-icon,.btn[aria-busy="true"] ha-icon{animation:hk-spin 1s linear infinite}
@@ -1364,7 +1364,7 @@ class StylesMixin {
       .chip em{font-style:normal;opacity:.7;margin-left:4px}.chip .tabdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:6px;background:var(--hk-red)}.chips .spacer{flex:1}.chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.chip{border:1px solid var(--hk-border);background:var(--hk-surface);border-radius:99px;padding:5px 12px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}.chip.active{color:var(--hk-blue-text);border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 11%,transparent);font-weight:600}
       .emptymsg,.loading{padding:46px;text-align:center;color:var(--hk-muted)}.viewgroup{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}.skeleton{display:grid;gap:10px;padding:18px 16px}.skeleton i{display:block;height:14px;border-radius:7px;background:linear-gradient(90deg,var(--hk-soft),color-mix(in srgb,var(--hk-soft) 55%,var(--hk-surface)),var(--hk-soft)) 0 0/200% 100%;animation:hk-shimmer 1.4s ease-in-out infinite}.skeleton i:nth-of-type(2){width:80%}.skeleton i:nth-of-type(3){width:60%}@keyframes hk-shimmer{to{background-position:-200% 0}}@media(prefers-reduced-motion:reduce){.skeleton i{animation:none}}.coverage{display:flex;gap:6px;align-items:flex-start}.coverage ha-icon{--mdc-icon-size:16px;flex:none;margin-top:1px}.fline{display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin-top:6px}.fline .fnote{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.emptymsg ha-icon{--mdc-icon-size:34px;color:var(--hk-green);display:block;margin:0 auto 8px}.error{padding:18px;border-radius:12px;background:color-mix(in srgb,var(--hk-red) 12%,transparent);color:var(--hk-red)}
       .bh .btn.small{margin-left:8px;flex:none}.bh.open{background:var(--hk-soft)}.bhattest{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:4px 16px 14px 62px;background:var(--hk-soft)}.bhattest label{display:flex;align-items:center;gap:8px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}.bhattest input{padding:6px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.bhcancel,.bhtake{border:0;background:none;padding:4px 2px;font:inherit;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);cursor:pointer;text-decoration:underline}.bhtake{margin-left:auto;color:var(--hk-red)}.bhcancel:hover{color:var(--hk-text)}
-      .dense .row-text small:not(:first-of-type){display:none}.dense .bh .row-text small:not(:first-of-type){display:block}.dirbtn[aria-pressed="true"]{border-color:var(--hk-blue);color:var(--hk-blue)}
+      .dense .row-text small:not(:first-of-type),.dense .fextra,.dense .msince{display:none!important}.viewpop{min-width:220px;gap:2px;padding:6px}.viewrow{display:flex;align-items:center;gap:2px}.viewitem{display:flex;flex:1;gap:8px;align-items:center;padding:8px 10px;border:0;border-radius:6px;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}.viewitem:hover,.viewdel:hover{background:var(--hk-soft)}.viewitem.on{font-weight:700;color:var(--hk-blue)}.viewdel{display:grid;place-items:center;padding:6px;border:0;border-radius:6px;background:none;color:var(--hk-muted);cursor:pointer}.viewitem ha-icon,.viewdel ha-icon{--mdc-icon-size:18px}.dirbtn.withname{display:inline-flex;align-items:center;gap:6px;max-width:170px}.viewname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.viewpop .viewitem[data-lview-save]{border-top:1px solid var(--hk-border);border-radius:0 0 6px 6px;margin-top:4px}.dense .bh .row-text small:not(:first-of-type){display:block}.dirbtn[aria-pressed="true"]{border-color:var(--hk-blue);color:var(--hk-blue)}
       .bh .row-text small{overflow:visible;white-space:normal;text-overflow:clip}
       .bhguide{padding:12px 16px;border-top:1px solid var(--hk-border)}.bhguide summary{font-size:calc(12px*var(--hk-fs,1))}.bhguide .factnote{padding:8px 0 0;border:0}
       .graphbar{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;padding:10px 14px;margin-bottom:14px}.graphctl{display:flex;align-items:center;gap:8px}.graphctl small{color:var(--hk-muted)}.graphwrap{overflow:auto;padding:14px;min-height:360px;display:grid;align-content:center;justify-items:start}.graphphone{margin:0 0 14px;border:0;padding:0 2px}@media(max-width:600px){.node strong{white-space:normal;overflow-wrap:anywhere}.node span.meta{overflow-wrap:anywhere}}.graphsvg{display:block;max-width:none}
@@ -1608,7 +1608,7 @@ class ListsMixin {
       const x = a.key, y = b.key;
       if (empty(x) !== empty(y)) return empty(x) ? 1 : -1;
       const order = typeof x === "number" && typeof y === "number" ? x - y : natural.compare(String(x ?? ""), String(y ?? ""));
-      return order * sign || ids.compare(String(tie(a.it)), String(tie(b.it)));
+      return order * sign || ids.compare(String(tie(a.it)), String(tie(b.it))) * sign; // equal keys turn around with the direction too
     });
     return rows.map(row => row.it);
   }
@@ -1681,11 +1681,11 @@ class ListsMixin {
     for (const f of filters) if (st.f[f.name] && !f.options.some(([v]) => v === st.f[f.name])) delete st.f[f.name]; // a kept value this list no longer offers
     (this.lvDirs ||= {})[id] = Object.fromEntries(sorts.map(x => [x.key, x.dir]));
     const selects = filters.map(f => `<select data-lf="${id}|${f.name}" aria-label="${this.esc(f.all)}"><option value="">${this.esc(f.all)}</option>${f.options.map(([v, label]) => `<option value="${this.esc(v)}" ${st.f[f.name] === v ? "selected" : ""}>${this.esc(label)}</option>`).join("")}</select>`).join("");
-    const sortOptions = sorts.map(x => `<option value="${x.key}" ${st.sort === x.key ? "selected" : ""}>${this.t(x.label)}</option>`).join("");
     const desc = st.dir === "desc";
+    const sortOptions = sorts.map(x => `<option value="${x.key}" ${st.sort === x.key ? "selected" : ""}>${this.t(x.label)}${st.sort === x.key ? (desc ? " ↓" : " ↑") : ""}</option>`).join("");
     const on = filters.filter(f => st.f[f.name]).map(f => `${f.all}: ${(f.options.find(([v]) => v === st.f[f.name]) || [])[1] ?? st.f[f.name]}`);
     const note = this.filterNote(on, `data-lf-set="${id}||"`);
-    return `${note}<div class="listbar"><input type="search" data-lq="${id}" value="${this.esc(st.q)}" placeholder="${this.t("searchList")}">${selects}${sorts.length ? `<span class="sortgroup"><select data-ls="${id}" aria-label="${this.t("sortBy")}">${sortOptions}</select><button class="dirbtn" data-ld="${id}" title="${this.t(desc ? "sortDescending" : "sortAscending")}" aria-label="${this.t(desc ? "sortDescending" : "sortAscending")}"><ha-icon icon="${desc ? "mdi:sort-descending" : "mdi:sort-ascending"}"></ha-icon></button></span>` : ""}${this.viewsControl(id)}${this.denseButton()}${this.listTools(id, columns)}</div>`;
+    return `${note}<div class="listbar"><input type="search" data-lq="${id}" value="${this.esc(st.q)}" placeholder="${this.t("searchList")}">${selects}${sorts.length ? `<span class="sortgroup"><select data-ls="${id}" aria-label="${this.t("sortBy")}" title="${this.t("sortBy")}">${sortOptions}</select><button class="dirbtn" data-ld="${id}" title="${this.t(desc ? "sortDescending" : "sortAscending")}" aria-label="${this.t(desc ? "sortDescending" : "sortAscending")}"><ha-icon icon="${desc ? "mdi:sort-descending" : "mdi:sort-ascending"}"></ha-icon></button></span>` : ""}${this.viewsControl(id)}${this.denseButton()}${this.listTools(id, columns)}</div>`;
   }
 
   // Column picker and CSV export of a list; both are optional. `columns` are the switchable columns: { key, label }.
@@ -1802,25 +1802,28 @@ class ListsMixin {
     const view = saved.find(v => v.name === st.view);
     const dirty = shape(st.q, st.f, st.sort, st.dir) !== (view ? shape(view.q, view.f, view.sort, view.dir) : shape("", {}, st.base?.sort ?? st.sort, st.base?.dir ?? st.dir));
     if (!saved.length && !dirty) return "";
-    const select = saved.length ? `<select data-lview="${id}" aria-label="${this.esc(this.t("viewsLabel"))}"><option value="">${this.t("viewsNone")}</option>${saved.map(v => `<option value="${this.esc(v.name)}" ${st.view === v.name ? "selected" : ""}>${this.esc(v.name)}</option>`).join("")}</select>` : "";
     if (this.viewNaming === id) {
       return `<form class="viewgroup" data-lview-form="${id}"><input data-lview-name="${id}" maxlength="40" autocomplete="off" value="${this.esc(this.viewDraft)}" aria-label="${this.esc(this.t("viewName"))}" placeholder="${this.esc(this.t("viewName"))}"><button type="submit" class="btn">${this.t("viewSave")}</button><button type="button" class="btn quiet" data-lview-cancel="${id}">${this.t("cancelRun")}</button></form>`;
     }
-    const save = dirty ? `<button type="button" class="btn quiet" data-lview-save="${id}"><ha-icon icon="mdi:star-outline"></ha-icon>${this.t("viewSave")}</button>` : "";
-    const remove = st.view && saved.some(v => v.name === st.view) ? `<button type="button" class="btn quiet" data-lview-delete="${id}">${this.t("viewDelete")}</button>` : "";
-    return `<span class="viewgroup">${select}${save}${remove}</span>`;
+    const save = `<button type="button" class="viewitem" data-lview-save="${id}"><ha-icon icon="mdi:star-plus-outline"></ha-icon>${this.t("viewSave")}</button>`;
+    // Nothing saved yet: the star is the save button itself.
+    if (!saved.length) return `<button type="button" class="dirbtn" data-lview-save="${id}" title="${this.esc(this.t("viewSave"))}" aria-label="${this.esc(this.t("viewSave"))}"><ha-icon icon="mdi:star-outline"></ha-icon></button>`;
+    const open = this._viewOpen === id, name = view ? view.name : "";
+    const item = v => `<span class="viewrow"><button type="button" class="viewitem ${v.name === name ? "on" : ""}" data-lview-pick="${id}" data-name="${this.esc(v.name)}" ${v.name === name ? 'aria-current="true"' : ""}>${this.esc(v.name)}</button><button type="button" class="viewdel" data-lview-delete="${id}" data-name="${this.esc(v.name)}" title="${this.esc(this.t("viewDelete"))}" aria-label="${this.esc(this.t("viewDelete"))}: ${this.esc(v.name)}"><ha-icon icon="mdi:delete-outline"></ha-icon></button></span>`;
+    const pop = open ? `<span class="colpop viewpop" role="group" aria-label="${this.esc(this.t("viewsLabel"))}">${saved.map(item).join("")}${name ? `<button type="button" class="viewitem" data-lview-pick="${id}" data-name="">${this.t("viewsClear")}</button>` : ""}${dirty ? save : ""}</span>` : "";
+    return `<span class="colwrap"><button type="button" class="dirbtn ${name ? "withname" : ""} ${open || name ? "on" : ""}" data-lview-open="${id}" aria-expanded="${open}" title="${this.esc(this.t("viewsLabel"))}" aria-label="${this.esc(this.t("viewsLabel"))}${name ? `: ${this.esc(name)}` : ""}"><ha-icon icon="${name ? "mdi:star" : "mdi:star-outline"}"></ha-icon>${name ? `<span class="viewname">${this.esc(name)}</span>` : ""}</button>${pop}</span>`;
   }
 
   applyView(id, name) {
     const st = this.lv[id], view = (this.viewsStore()[id] || []).find(v => v.name === name);
-    st.view = view ? view.name : "";
+    st.view = view ? view.name : ""; this._viewOpen = "";
     if (view) { st.q = view.q; st.f = { ...view.f }; st.sort = view.sort; st.dir = view.dir; }
     this.pages = {}; this.render();
   }
 
   // Naming a view happens in a small inline form (name, save, cancel), not in a browser prompt.
   saveView(id) {
-    this.viewNaming = id; this.viewDraft = this.lv[id].view || "";
+    this.viewNaming = id; this._viewOpen = ""; this.viewDraft = this.lv[id].view || "";
     this.render();
     this.shadowRoot?.querySelector?.(`[data-lview-name="${id}"]`)?.focus?.();
   }
@@ -1828,7 +1831,7 @@ class ListsMixin {
   cancelView(id) {
     this.viewNaming = null;
     this.render();
-    this.shadowRoot?.querySelector?.(`[data-lview-save="${id}"]`)?.focus?.();
+    this.shadowRoot?.querySelector?.(`[data-lview-save="${id}"], [data-lview-open="${id}"]`)?.focus?.();
   }
 
   commitView(id, text) {
@@ -1841,13 +1844,14 @@ class ListsMixin {
     if (at < 0 && list.length >= VIEWS_LIMIT) { this.toast(this.t("viewsFull", { n: VIEWS_LIMIT }), true); return; }
     if (at >= 0) list[at] = view; else list.push(view);
     st.view = name; this.viewNaming = null; this.persistViews(); this.render();
-    this.shadowRoot?.querySelector?.(`[data-lview-save="${id}"]`)?.focus?.();
+    this.shadowRoot?.querySelector?.(`[data-lview-save="${id}"], [data-lview-open="${id}"]`)?.focus?.();
   }
 
-  deleteView(id) {
+  deleteView(id, name = this.lv[id]?.view) {
     const st = this.lv[id], store = this.viewsStore();
-    store[id] = (store[id] || []).filter(v => v.name !== st.view);
-    st.view = ""; this.persistViews(); this.render();
+    store[id] = (store[id] || []).filter(v => v.name !== name);
+    if (st.view === name) st.view = "";
+    this.persistViews(); this.render();
   }
 
   // Long explanations of how a number is counted fold away, so the lists end earlier.
@@ -2331,7 +2335,7 @@ class FindingsMixin {
         : finding.affected_object
           ? [this.esc(finding.affected_object), this.esc(this.placeText(finding, inGroup)), this.esc(this.suggestText(finding))].filter(Boolean).join(" · ")
           : this.esc(object?.reason ? this.t(object.reason) : this.findingTitle(finding));
-    const button = `<button class="row ${finding.ignored ? "dim" : ""}" data-object="${this.esc(key)}">${this.tile(object?.object_type || "entity", this.tone(finding.classification))}<span class="row-text"><strong>${this.esc(title)}</strong><small>${subtitle}${finding.ignored ? ` · ${this.esc(finding.mark ? this.markLine(finding.mark) : this.decisionLabel(finding))}` : ""}${finding.resurfaced ? ` · ${this.t("dueLabel")}` : ""}${this.statusTags(finding)}${this.followOf(finding)}${finding.first_detected_at ? `<span class="msince"> · ${this.t("sortSince")} ${this.formatDate(finding.first_detected_at)}</span>` : ""}</small></span>${this.kindChip(this.reasonLabel(this.findingReason(finding)))}${this.impactChip(finding.impact)}</button>`;
+    const button = `<button class="row ${finding.ignored ? "dim" : ""}" data-object="${this.esc(key)}">${this.tile(object?.object_type || "entity", this.tone(finding.classification))}<span class="row-text"><strong>${this.esc(title)}</strong><small>${subtitle}${finding.ignored ? ` · ${this.esc(finding.mark ? this.markLine(finding.mark) : this.decisionLabel(finding))}` : ""}${finding.resurfaced ? ` · ${this.t("dueLabel")}` : ""}<span class="fextra">${this.statusTags(finding)}${this.followOf(finding)}</span>${finding.first_detected_at ? `<span class="msince"> · ${this.t("sortSince")} ${this.formatDate(finding.first_detected_at)}</span>` : ""}</small></span>${this.kindChip(this.reasonLabel(this.findingReason(finding)))}${this.impactChip(finding.impact)}</button>`;
     return `<div class="rowwrap"><input type="checkbox" class="selbox" data-fsel="${this.esc(finding.key)}" ${this.findSel.has(finding.key) ? "checked" : ""} aria-label="${this.esc(title)}">${button}${this.rowMenu(finding)}</div>${this.rowDecide(finding)}`;
   }
 
@@ -2403,7 +2407,7 @@ class FindingsMixin {
     const open = !this.findingStatus && !this.findingFilter && !this.findingAfter && !this.lv.findings?.q && !Object.values(this.lv.findings?.f || {}).some(Boolean);
     const list = this.groupBroken(this.collapseFollowers(this.visibleFindings(), !open));
     const types = [...new Set(all.map(f => this.findingType(f)))].sort();
-    const bar = this.listBar("findings", { sorts: this.findingSorts(), filters: [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }, { name: "reason", all: this.t("allReasons"), options: classes.map(x => [x, this.reasonLabel(x)]) }, { name: "impact", all: this.t("allImpacts"), options: ["high", "medium", "low", "info", "none"].map(x => [x, this.t(`impact_${x}`)]) }] });
+    const bar = this.listBar("findings", { sorts: this.findingSorts(), filters: [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }, { name: "reason", all: this.t("allReasons"), options: classes.map(x => [x, this.reasonLabel(x)]) }, { name: "impact", all: this.t("allSeverities"), options: ["high", "medium", "low", "info", "none"].map(x => [x, this.t(`chip_${x}`)]) }] });
     this.ensureSeries();
     const spark = (key, rising) => this.series ? this.sparkline(key, rising) : "";
     const classTone = c => { const tone = this.tone(c); return tone === "red" ? "red" : tone === "warn" ? "warn" : "mute"; };
@@ -6893,13 +6897,13 @@ class MarksMixin {
 
 // Texts for the impact of a finding (see impact.py); merged into TEXT.
 Object.assign(TEXT.de, {
-  sortImpact: "Auswirkung", allImpacts: "Alle Auswirkungen", impact_high: "Hohe Auswirkung", impact_medium: "Mittlere Auswirkung", impact_low: "Geringe Auswirkung", impact_info: "Info", outageFor: "seit {span}", outageNext: "{level} in {span}", unitMin: "Min.", unitHour: "Std.", unitDay: "Tagen", chip_outage: "Ausfall", allReasons: "Alle Gründe", chip_high: "Hoch", chip_medium: "Mittel", chip_low: "Niedrig", chip_info: "Info", rowMenu: "Aktionen für diese Zeile", impact_none: "Keine Auswirkung",
+  sortImpact: "Schweregrad", allSeverities: "Alle Schweregrade", chip_none: "Keine", viewsClear: "Keine Ansicht", impact_high: "Hohe Auswirkung", impact_medium: "Mittlere Auswirkung", impact_low: "Geringe Auswirkung", impact_info: "Info", outageFor: "seit {span}", outageNext: "{level} in {span}", unitMin: "Min.", unitHour: "Std.", unitDay: "Tagen", chip_outage: "Ausfall", allReasons: "Alle Gründe", chip_high: "Hoch", chip_medium: "Mittel", chip_low: "Niedrig", chip_info: "Info", rowMenu: "Aktionen für diese Zeile", impact_none: "Keine Auswirkung",
   impactFact_outage_age: "Dauer des Ausfalls", impactFact_critical: "kritisch: {why}", impactFact_target_critical: "fehlendes Ziel {id} ist kritisch", impactFact_controls_critical: "steuert {n} kritische Objekte", impactFact_used_by_active: "von {n} aktiven Automationen oder Skripten genutzt", impactFact_on_dashboards: "auf {n} Dashboards", impactFact_many_dependents: "{n} Abhängige", impactFact_runs_active: "läuft aktiv", impactFact_runs_inactive: "ist deaktiviert",
   reason_critical_object: "Kritisches Objekt (Schloss, Alarm, Wasser- oder Rauchmelder, Label housekeeper_critical): bitte einzeln bestätigen.",
   impactWhy_label: "Label", impactWhy_device_label: "Label am Gerät", impactWhy_area_label: "Label am Bereich", impactWhy_kind: "Art des Objekts",
 });
 Object.assign(TEXT.en, {
-  sortImpact: "Impact", allImpacts: "All impacts", impact_high: "High impact", impact_medium: "Medium impact", impact_low: "Low impact", impact_info: "Info", outageFor: "for {span}", outageNext: "{level} in {span}", unitMin: "min", unitHour: "h", unitDay: "days", chip_outage: "Outage", allReasons: "All reasons", chip_high: "High", chip_medium: "Medium", chip_low: "Low", chip_info: "Info", rowMenu: "Actions for this row", impact_none: "No impact",
+  sortImpact: "Severity", allSeverities: "All severities", chip_none: "None", viewsClear: "No view", impact_high: "High impact", impact_medium: "Medium impact", impact_low: "Low impact", impact_info: "Info", outageFor: "for {span}", outageNext: "{level} in {span}", unitMin: "min", unitHour: "h", unitDay: "days", chip_outage: "Outage", allReasons: "All reasons", chip_high: "High", chip_medium: "Medium", chip_low: "Low", chip_info: "Info", rowMenu: "Actions for this row", impact_none: "No impact",
   impactFact_outage_age: "length of the outage", impactFact_critical: "critical: {why}", impactFact_target_critical: "the missing target {id} is critical", impactFact_controls_critical: "controls {n} critical objects", impactFact_used_by_active: "used by {n} active automations or scripts", impactFact_on_dashboards: "on {n} dashboards", impactFact_many_dependents: "{n} dependents", impactFact_runs_active: "runs actively", impactFact_runs_inactive: "is disabled",
   reason_critical_object: "Critical object (lock, alarm, water or smoke sensor, label housekeeper_critical): confirm it on its own.",
   impactWhy_label: "label", impactWhy_device_label: "label on the device", impactWhy_area_label: "label on the area", impactWhy_kind: "kind of object",
@@ -13888,7 +13892,8 @@ class HAHousekeeperPanel extends HTMLElement {
       this.lv[input.dataset.lq].q = input.value; this.pages = {};
       this.scheduleRender();
     });
-    root.querySelectorAll("[data-lview]").forEach(el => el.onchange = () => this.applyView(el.dataset.lview, el.value));
+    root.querySelectorAll("[data-lview-open]").forEach(el => el.onclick = () => { this._viewOpen = this._viewOpen === el.dataset.lviewOpen ? "" : el.dataset.lviewOpen; this.render(); });
+    root.querySelectorAll("[data-lview-pick]").forEach(el => el.onclick = () => this.applyView(el.dataset.lviewPick, el.dataset.name));
     root.querySelectorAll("[data-lview-save]").forEach(el => el.onclick = () => this.saveView(el.dataset.lviewSave));
     root.querySelectorAll("[data-lview-form]").forEach(form => form.onsubmit = ev => {
       ev.preventDefault();
@@ -13899,7 +13904,7 @@ class HAHousekeeperPanel extends HTMLElement {
       el.onkeydown = ev => { if (ev.key === "Escape") { ev.preventDefault(); this.cancelView(el.dataset.lviewName); } };
     });
     root.querySelectorAll("[data-lview-cancel]").forEach(el => el.onclick = () => this.cancelView(el.dataset.lviewCancel));
-    root.querySelectorAll("[data-lview-delete]").forEach(el => el.onclick = () => { const id = el.dataset.lviewDelete; this.confirmAsk(this.t("confirmView", { name: this.lv[id]?.view || "" }), () => this.deleteView(id)); });
+    root.querySelectorAll("[data-lview-delete]").forEach(el => el.onclick = () => { const id = el.dataset.lviewDelete, name = el.dataset.name; this.confirmAsk(this.t("confirmView", { name }), () => this.deleteView(id, name)); });
     root.querySelectorAll("[data-lf]").forEach(el => el.onchange = () => { const [id, name] = el.dataset.lf.split("|"); this.lv[id].f[name] = el.value; this.persistLv(id); this.pages = {}; this.render(); });
     root.querySelectorAll("[data-ls]").forEach(el => el.onchange = () => { const st = this.lv[el.dataset.ls]; st.sort = el.value; st.dir = this.lvDirs[el.dataset.ls][el.value] || "asc"; this.persistLv(el.dataset.ls); this.pages = {}; this.render(); });
     root.querySelectorAll("[data-lsort]").forEach(el => el.onclick = () => {
