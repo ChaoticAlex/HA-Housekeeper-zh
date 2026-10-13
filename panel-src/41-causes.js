@@ -51,15 +51,15 @@ class CausesMixin {
 
   causeEntry(c) {
     const total = this.causeTotal(c), link = `${c.object_type}:${c.object_id}`;
-    const title = this.esc(this.t(`cause_${c.kind}`, { name: c.name })), decide = this.causeDecide(c);
+    const title = this.esc(this.t(`cause_${c.kind}`, { name: c.name }));
     const sub = [total ? this.t("causeExplains", { n: this.formatNumber(total) }) : "", this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · ");
-    if (!total) return `<div class="rowwrap">${this.causeBox(c)}<button class="row rel" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${title}</strong><small>${this.esc(sub)}</small></span></button></div>${decide}`;
+    if (!total) return `<div class="rowwrap">${this.causeBox(c)}<button class="row rel" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${title}</strong><small>${this.esc(sub)}</small></span></button></div>`;
     const byId = id => this.causeList().find(x => x.id === id);
     const own = c.virtual ? "" : `<div class="rowwrap">${this.causeBox(c)}<button class="row" data-object="${this.esc(link)}">${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(c.name)}</strong></span></button></div>`;
     const below = (c.child_ids || []).map(byId).filter(Boolean).map(x => this.causeEntry(x)).join("");
     const followers = (this.data.findings || []).filter(f => f.cause_id === c.id && !f.ignored && !CAUSE_OWN_RULES.includes(f.rule_id));
     const pg = this.paginate(`cause_${c.id}`, followers.map(f => this.findingRow(f)));
-    return this.fold(`cause_${c.id}`, { tone: "red", title, sub, pill: this.t("causeFollowers", { n: this.formatNumber(total) }) }, `${own}${below}${pg.rows.join("")}${pg.footer}${decide}`, false);
+    return this.fold(`cause_${c.id}`, { tone: "red", title, sub, pill: this.t("causeFollowers", { n: this.formatNumber(total) }) }, `${own}${below}${pg.rows.join("")}${pg.footer}`, false);
   }
 
   // The entries at the top of the findings list, as the overview shows them: by impact, a chain once at its top.
@@ -79,15 +79,6 @@ class CausesMixin {
   followOf(f) {
     const c = f.cause_id && !CAUSE_OWN_RULES.includes(f.rule_id) ? this.causeList().find(x => x.id === f.cause_id) : null;
     return this.showFollowers && c ? ` · ${this.esc(this.t("causeFollowOf", { name: c.name }))}` : "";
-  }
-
-  // What can be decided about an outage that is a finding of its own: known, snoozed, hidden.
-  causeDecide(c) {
-    const f = c.finding_key && this.data.findings.find(x => x.key === c.finding_key);
-    if (!f) return "";
-    if (this.decide && this.decide.key === f.key) return `<div class="pad">${this.decideForm(f)}</div>`;
-    const btn = (preset, icon, label) => `<button class="btn" data-decide-open="${this.esc(f.key)}"${preset ? ` data-decide-preset="${preset}"` : ""}><ha-icon icon="${icon}"></ha-icon>${this.t(label)}</button>`;
-    return `<div class="pad"><div class="fbtns">${btn("keep", "mdi:bookmark-check-outline", "markKnown")}${btn("snooze", "mdi:clock-outline", "fselSnooze")}${btn("", "mdi:eye-off-outline", "hideFinding")}</div></div>`;
   }
 
   // The number the findings are counted by: every chain of outages once, at its top, and every finding without an outage behind it; the follow-up findings of an outage are not counted again.
