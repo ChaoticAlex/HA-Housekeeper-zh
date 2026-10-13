@@ -2,7 +2,7 @@
 // a list in Settings > Info. Mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
   covLine: "Prüfung: {n} von {m} Quellen",
-  covAll: "Prüfung: alle {m} Quellen gelesen",
+  covAll: "Prüfung: alle {m} Quellen gelesen", covBar: "Prüfung vollständig",
   covGaps: "Nicht vollständig gelesen: {list}. Befunde dort fehlen in den Zahlen.", covRetry: "Housekeeper versucht es in {n} Minuten noch einmal.",
   covDetails: "Details",
   covListTitle: "Was zuletzt geprüft wurde",
@@ -39,7 +39,7 @@ Object.assign(TEXT.de, {
 });
 Object.assign(TEXT.en, {
   covLine: "Check: {n} of {m} sources",
-  covAll: "Check: all {m} sources read",
+  covAll: "Check: all {m} sources read", covBar: "Check complete",
   covGaps: "Not read in full: {list}. Findings there are missing from the numbers.", covRetry: "Housekeeper tries again in {n} minutes.",
   covDetails: "Details",
   covListTitle: "What was checked last",
@@ -103,10 +103,16 @@ class ScanCoverageMixin {
   }
 
   // One row in the overview, grey while everything was read and yellow with the names once something was not.
+  scanCoverageComplete() {
+    const items = this.scanCoverageItems().filter(c => c.state !== "absent");
+    return items.length > 0 && !this.scanCoverageGaps().length;
+  }
+
   scanCoverageLine() {
     const items = this.scanCoverageItems().filter(c => c.state !== "absent");
     if (!items.length) return "";
     const gaps = this.scanCoverageGaps(), read = items.length - gaps.length;
+    if (!gaps.length) return ""; // A complete check is one item in the bar under the menu (safetyItems).
     const text = gaps.length ? this.t("covLine", { n: read, m: items.length }) : this.t("covAll", { m: items.length });
     const list = gaps.map(c => this.t(`covSrc_${c.source}`)).join(", ");
     return `<div class="panel u-mb14" data-coverage><div class="row"><span class="tile ${gaps.length ? "warn" : "mute"}"><ha-icon icon="${gaps.length ? "mdi:shield-alert-outline" : "mdi:shield-check-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(text)}</strong>${gaps.length ? `<small>${this.esc(this.t("covGaps", { list }))}${this.data?.meta?.coverage_retry_minutes ? ` ${this.esc(this.t("covRetry", { n: this.data.meta.coverage_retry_minutes }))}` : ""}</small>` : ""}</span><button class="btn" data-cov-details>${this.t("covDetails")}</button></div></div>`;

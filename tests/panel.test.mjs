@@ -4495,7 +4495,8 @@ test("the coverage of a scan shows in the overview as one line, lists each sourc
   const { el } = panel("en");
   const cov = (extra = []) => [{ source: "registry", state: "checked", reason: null }, { source: "apps", state: "absent", reason: "no_supervisor" }, ...extra];
   el.data = { ...DATA, meta: { ...DATA.meta, scanned_at: "2026-10-12T20:22:00+00:00", coverage: cov([{ source: "dashboards", state: "checked", reason: null }]) } };
-  assert.ok(el.scanCoverageLine().includes("all 2 sources read") && !el.scanCoverageLine().includes("warn"), "absent sources do not count; grey while all is read");
+  assert.equal(el.scanCoverageLine(), "", "no bar in the overview while all is read");
+  assert.ok(el.scanCoverageComplete() && el.safetyItems().some(i => i[0] === "coverage" && i[2] === "Check complete"), "absent sources do not count; one item in the bar under the menu");
   el.data.meta.coverage = cov([{ source: "dashboards", state: "partial", reason: "unreadable", read: 3, failed: 1 }, { source: "statistics", state: "skipped", reason: "not_ready" }]);
   const line = el.scanCoverageLine();
   assert.ok(line.includes("Check: 1 of 3 sources") && line.includes("Dashboards, Long-term statistics") && line.includes("data-cov-details") && line.includes('class="tile warn"'));

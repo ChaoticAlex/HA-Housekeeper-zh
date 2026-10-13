@@ -18,6 +18,7 @@ class SafetyMixin {
       items.push(["last", "mute", this.t("safeLast", { when: this.formatDate(last.finished_at) }), "journal"]);
       items.push(["undo", last.undoable ? "ok" : "mute", this.t(last.undoable ? "safeUndo" : "safeNoUndo"), "journal"]);
     }
+    if (this.scanCoverageComplete()) items.push(["coverage", "ok", this.t("covBar"), "settings"]);
     const watching = plans.filter(p => p.followup === "watching").length;
     if (watching) items.push(["watch", "warn", this.t(watching === 1 ? "safeWatching1" : "safeWatching", { n: watching }), "journal"]);
     const regress = plans.filter(p => p.followup === "regression").length;

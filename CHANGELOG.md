@@ -12,6 +12,8 @@
 
 ### Neu
 
+- **Vollständige Prüfung nur noch als Hinweis:** Wurden alle Quellen gelesen, entfällt die Leiste „Prüfung“ in der Übersicht. Stattdessen steht „Prüfung vollständig“ in der Statusleiste unter dem Menü (ein Klick öffnet die Liste). Bei einer Lücke bleibt die gelbe Leiste.
+
 - **Prüfung nennt nicht lesbare Dashboards:** Unter „Was zuletzt geprüft wurde“ steht bei Dashboards jetzt, welche nicht gelesen werden konnten und warum („Konfiguration ungültig“, „Konnte nicht geladen werden“). Ein Dashboard, das Home Assistant automatisch erzeugt und nie gespeichert wurde, gilt nicht mehr als Lücke. Jede gelesene Quelle nennt außerdem ihre Menge („412 Entitäten, 58 Geräte“).
 
 - **Lücken in der Prüfung werden nachgeholt:** Konnte ein Scan eine Quelle nicht vollständig lesen (etwa Dashboards, weil Lovelace noch nicht bereit war), startet Housekeeper nach 5 Minuten einen neuen Scan, höchstens dreimal hintereinander. Die Leiste „Prüfung“ sagt dazu, dass es noch einmal versucht wird. Fehlt eine Komponente ganz, wird nicht wiederholt.
