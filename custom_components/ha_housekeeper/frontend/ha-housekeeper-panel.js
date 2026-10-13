@@ -13046,7 +13046,9 @@ class HAHousekeeperPanel extends HTMLElement {
     let progressTimer = null;
     if (fresh) progressTimer = window.setInterval(() => this.updateScanStatus(), 250);
     try {
+      const scannedBefore = this.data?.meta?.scanned_at;
       this.data = await this._hass.callWS({ type: fresh ? "ha_housekeeper/scan" : "ha_housekeeper/inventory" });
+      if (this.data?.meta?.scanned_at !== scannedBefore) this.forgetScanViews();
       this.details = new Map();
       this.compare = null;
       this.applyUrl();
@@ -13070,6 +13072,11 @@ class HAHousekeeperPanel extends HTMLElement {
       const wait = ((Number(this.data.meta.warmup_seconds_left) || 0) + 20) * 1000;
       this.retryWarmup(wait);
     }
+  }
+
+  // What these views computed from the last scan is out of date after a new one: the next time a view is drawn it asks again (the old rows stay until the answer is there).
+  forgetScanViews() {
+    this._policiesRequested = false; this._exposureRequested = false; this._qualityRequested = false; this._blueprintsRequested = false;
   }
 
   // Asks again until the final scan has replaced the preliminary one; a busy panel or a failed request tries again later.

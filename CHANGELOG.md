@@ -18,6 +18,8 @@
 
 ### Behoben
 
+- **Richtlinien und andere Ansichten nach „Neu scannen“:** Die Liste der betroffenen Entitäten blieb nach einem neuen Scan auf dem alten Stand, bis man die Seite neu lud. Richtlinien, Freigaben, Automations-Qualität und Blueprints laden nach einem neuen Scan jetzt selbst neu (Issue #11).
+
 - **Menü auf schmalen Fenstern:** Die geöffnete Menüliste ist höher als das Fenster, etwa bei großer Schrift, und scrollt jetzt, sodass auch die unteren Einträge erreichbar sind (Issue #10).
 
 - **Sortierrichtung:** Bei gleichen Werten drehte der Pfeil „Aufsteigend/Absteigend“ die Reihenfolge nicht um; jetzt dreht er die ganze Liste.
@@ -41,6 +43,8 @@
 - **Mark for several objects:** The selection bar of the Findings page has a “Set a mark” button. It sets kind, reason and review date in one go on all ticked entities, devices, integrations and apps; other objects in the selection (for example automations) stay untouched.
 
 #### Fixed
+
+- **Policies and other views after “Scan now”:** The list of affected entities stayed at the old state after a new scan until the page was reloaded. Policies, exposure, automation quality and blueprints now load again by themselves after a new scan (issue #11).
 
 - **Menu on narrow windows:** The open menu list is taller than the window, for example with large fonts, and now scrolls, so the lower entries can be reached (issue #10).
 

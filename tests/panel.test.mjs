@@ -731,6 +731,20 @@ test("changes can be searched and filtered by object type", () => {
   assert.ok(!shadow.innerHTML.includes("data-ls="));
 });
 
+test("a new scan makes the views computed from the last one load again", async () => {
+  const { el } = panel("en", { setTimeout: () => 0, window: { location: { search: "", pathname: "/ha-housekeeper" }, dispatchEvent() {}, history: {}, setInterval: () => 0, clearInterval() {}, clearTimeout() {}, setTimeout: () => 0 } });
+  const answers = { "ha_housekeeper/scan": { meta: { scanned_at: "b" }, findings: [], objects: [] } };
+  el._hass = { language: "en", callWS: async msg => answers[msg.type] || {} };
+  el.data = { meta: { scanned_at: "a" }, findings: [], objects: [] };
+  el.view = "cleanup";
+  el._policiesRequested = el._exposureRequested = el._qualityRequested = el._blueprintsRequested = true;
+  await el.load(true);
+  assert.ok(!el._policiesRequested && !el._exposureRequested && !el._qualityRequested && !el._blueprintsRequested);
+  el._policiesRequested = true;
+  await el.load(true);
+  assert.ok(el._policiesRequested, "the same scan again changes nothing");
+});
+
 test("policies: rules switch, violations list with hide buttons, hidden ones are folded away", async () => {
   const calls = [];
   const { el, shadow } = panel("en", { setTimeout: () => 0 });
