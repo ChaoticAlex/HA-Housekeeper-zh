@@ -136,7 +136,7 @@ class SettingsMixin {
     const facts = `<div class="facts"><div class="fact"><span>${this.t("storeTotal")}</span><b>${this.formatBytes(total)}</b></div><div class="fact"><span>${this.t("storeCount")}</span><b>${this.formatNumber(all.length)}</b></div></div>`;
     const body = groups.filter(([, names]) => names.length).map(([group, names], index) => {
       const size = names.reduce((sum, name) => sum + (files[name].bytes || 0), 0);
-      return `<details ${index < 2 ? "open" : ""}><summary><strong>${this.t(`storeGroup_${group}`)}</strong> <span class="pill mute">${this.formatBytes(size)}</span></summary>${names.map(row).join("")}</details>`;
+      return `<details class="storegrp" ${index < 2 ? "open" : ""}><summary><strong>${this.t(`storeGroup_${group}`)}</strong> <span class="pill mute">${this.formatBytes(size)}</span></summary>${names.map(row).join("")}</details>`;
     }).join("");
     return facts + body;
   }
