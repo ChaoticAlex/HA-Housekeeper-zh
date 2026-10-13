@@ -4,7 +4,7 @@
 
 ### Geändert
 
-- **Ausfälle von Integrationen mit Schweregrad nach Dauer:** Eine nicht geladene Integration ist sofort ein Befund und wartet nicht mehr, bis die „Mindestdauer nicht verfügbar“ (Standard 7 Tage) vorbei ist. Die Dauer bestimmt die Auswirkung: unter 1 Stunde „Info“, ab 1 Stunde „Niedrig“, ab 1 Tag „Mittel“, ab der Mindestdauer „Hoch“. Neu ist die Stufe „Info“ (1 Punkt, höchstens 5); „Niedrig“ und „Mittel“ ziehen jetzt 2 und 3 Punkte statt 1 und 2 ab. Dadurch springt der Punktestand einmalig.
+- **Ausfälle von Integrationen mit Schweregrad nach Dauer:** Eine nicht geladene Integration ist sofort ein Befund und wartet nicht mehr, bis die „Mindestdauer nicht verfügbar“ (Standard 7 Tage) vorbei ist. Die Dauer bestimmt die Auswirkung: unter 1 Stunde „Info“, ab 1 Stunde „Niedrig“, ab 1 Tag „Mittel“, ab der Mindestdauer „Hoch“. Neu ist die Stufe „Info“ (1 Punkt, höchstens 5); „Niedrig“ und „Mittel“ ziehen jetzt 2 und 3 Punkte statt 1 und 2 ab. Dadurch springt der Punktestand einmalig. In der Liste trägt jede Zeile ihre Auswirkung als Chip und ein „⋯“-Menü mit „Als bekannt markieren“, „Zurückstellen“, „Befund ausblenden“ (und „Löschen vorbereiten“, wo es passt); die breiten Knöpfe unter den Ausfällen und der Einzelknopf „Löschen vorbereiten“ entfallen. Im Detail stehen dieselben Aktionen jetzt auch bei Ausfällen.
 
 ### Neu
 
@@ -18,7 +18,7 @@
 
 #### Changed
 
-- **Integration outages graded by duration:** An integration that is not loaded is a finding at once and no longer waits for “Minimum days unavailable” (default 7 days). How long it has lasted sets the impact: under 1 hour “Info”, from 1 hour “Low”, from 1 day “Medium”, from the minimum days “High”. “Info” is new (1 point, at most 5); “Low” and “Medium” now take off 2 and 3 points instead of 1 and 2, so the score jumps once.
+- **Integration outages graded by duration:** An integration that is not loaded is a finding at once and no longer waits for “Minimum days unavailable” (default 7 days). How long it has lasted sets the impact: under 1 hour “Info”, from 1 hour “Low”, from 1 day “Medium”, from the minimum days “High”. “Info” is new (1 point, at most 5); “Low” and “Medium” now take off 2 and 3 points instead of 1 and 2, so the score jumps once. In the list every row carries its impact as a chip and a “⋯” menu with “Mark as known”, “Snooze”, “Hide finding” (and “Prepare deletion” where it fits); the wide buttons under outages and the single “Prepare deletion” button are gone. The detail page shows the same actions for outages now.
 
 #### New
 

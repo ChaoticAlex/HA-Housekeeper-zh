@@ -4567,3 +4567,13 @@ test("the search finds pages, settings tabs and finding filters, puts the better
   assert.ok(bar.includes('aria-label="Settings"') && bar.includes("nav iconly") && !bar.includes('data-view="overview" ><ha-icon') , "settings is the gear");
   assert.ok(bar.includes('class="brand') && bar.includes("brandtext") && !bar.includes('class="nav  active" data-view="overview"') && !bar.includes('class="nav " data-view="overview"'), "the brand carries the overview");
 });
+
+test("a finding row ends in an impact chip and a menu with the decisions; a hidden one has no menu", () => {
+  const { el } = panel("en");
+  const f = { key: "k1", rule_id: "automation.stale", object_id: "automation.a", impact: "info" };
+  assert.ok(el.impactChip("info").includes("Info") && el.impactChip("none") === "");
+  const menu = el.rowMenu(f);
+  assert.ok(["keep", "snooze"].every(p => menu.includes(`data-decide-preset="${p}"`)) && menu.includes('data-decide-open="k1"') && menu.includes('data-auto-delete="automation.a"'));
+  assert.equal(el.rowMenu({ ...f, ignored: true }), "");
+  assert.equal(el.rowDecide(f), "");
+});
