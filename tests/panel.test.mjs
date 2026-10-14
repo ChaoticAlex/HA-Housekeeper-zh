@@ -1573,6 +1573,7 @@ test("the recorder costs are a sortable table with a bar column, clickable tiles
   let html = shadow.innerHTML;
   assert.ok(html.indexOf("sensor.loud") < html.indexOf("sensor.history"), "current rate first");
   assert.ok(html.includes("calculated in 1,234 ms") && html.includes('data-lf-set="costlist|state|suggest"') && html.includes("sysshare") && html.includes("3,000"));
+  assert.ok(html.indexOf('class="sumtiles"') < html.indexOf('<div class="panel">'), "the tiles stand free above the card of the list, not inside it");
   assert.ok(!html.includes("data-cost-sort") && !html.includes("data-ex-only"));
   el.lv.costlist.sort = "states"; el.lv.costlist.dir = "desc"; el.render();
   html = shadow.innerHTML;

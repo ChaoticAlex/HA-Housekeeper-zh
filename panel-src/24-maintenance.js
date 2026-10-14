@@ -38,7 +38,8 @@ class MaintenanceMixin {
   recorderCard() {
     this.ensureCosts();
     const c = this.costs;
-    const head = (extra = "", attr = "") => `${this.pageBar({ left: extra, at: this.isoOf(c?.computed_at) || this.loadedAt("costs"), loading: this.costsLoading, attr, refresh: Boolean(attr) })}<div class="panel">`;
+    const bar = (extra = "", attr = "") => this.pageBar({ left: extra, at: this.isoOf(c?.computed_at) || this.loadedAt("costs"), loading: this.costsLoading, attr, refresh: Boolean(attr) });
+    const head = (extra = "", attr = "") => `${bar(extra, attr)}<div class="panel">`; // the states without a list: the card holds the message
     if (this.costsLoading) return `<div class="stack">${head("", "data-costs-load")}${this.skeleton("recorderLoading")}</div></div>`;
     if (this.costsError) return `<div class="stack">${head("", "data-costs-load")}<div class="error">${this.esc(this.costsError)}</div></div></div>`;
     if (!c) return `<div class="stack">${head(`<button class="btn primary" data-costs-load>${this.t("recorderLoad")}</button>`)}</div></div>`;
@@ -93,7 +94,8 @@ class MaintenanceMixin {
       ],
     }) : "";
     const snippet = this.excludeCard(this.suggestedExclusions(), { only: false });
-    return `<div class="stack">${head("", "data-costs-load data-refresh")}${tiles}<p class="factnote">${this.esc(summary)}</p>${snippet}${list}${stats ? this.fold("recorder_stats", { title: this.t("recorderStats"), pill: this.formatNumber((c.statistics || []).length) }, stats, false) : ""}</div></div>`;
+    // The key figures stand free above the card of the list, with the usual gap.
+    return `<div class="stack">${bar("", "data-costs-load data-refresh")}${tiles}<div class="panel"><p class="factnote">${this.esc(summary)}</p>${snippet}${list}${stats ? this.fold("recorder_stats", { title: this.t("recorderStats"), pill: this.formatNumber((c.statistics || []).length) }, stats, false) : ""}</div></div>`;
   }
 
   // One line per check; `level` decides the colour.
