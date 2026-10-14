@@ -87,6 +87,34 @@
           "preliminary": "Vorläufig"
         }
       }
+    },
+    "button": {
+      "scan": {
+        "name": "Scan starten"
+      }
+    }
+  },
+  "services": {
+    "scan": {
+      "name": "Scan starten",
+      "description": "Startet einen Scan von HA Housekeeper. Mehrere Aufrufe ergeben einen Scan; kurz nach einem Scan wird keiner gestartet.",
+      "fields": {
+        "wait": {
+          "name": "Auf das Ende warten",
+          "description": "Wartet, bis der Scan fertig ist, und gibt die Zahlen zurück. Ohne diese Option wird der Scan nur gestartet."
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "not_loaded": {
+      "message": "HA Housekeeper ist nicht geladen."
+    },
+    "cleanup_busy": {
+      "message": "Ein Plan läuft gerade und scannt selbst. Später erneut versuchen."
+    },
+    "starting": {
+      "message": "Home Assistant startet noch. Ein Scan wäre vorläufig und wird nicht gespeichert."
     }
   }
 }

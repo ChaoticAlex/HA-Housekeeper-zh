@@ -20,6 +20,8 @@
 
 - **Fehlender Blueprint:** Eine Automation oder ein Skript, dessen Blueprint nicht mehr existiert, wird als Befund gemeldet; fehlt er für mehrere, steht er als gemeinsame Ursache in der Liste. Die Blueprint-Seite zählt solche Pfade jetzt auch.
 
+- **Scan von außen starten:** Neuer Dienst `ha_housekeeper.scan` (mit „Auf das Ende warten“ liefert er die Zahlen zurück) und ein Knopf „Scan starten“ für Dashboards. Mehrere Aufrufe ergeben einen Scan, kurz nach einem Scan startet keiner, und während eines Plans oder beim Start von Home Assistant wird abgelehnt.
+
 ### English
 
 #### New
@@ -39,6 +41,8 @@
 - **Outages:** The detail page of a failed integration says how long the outage has lasted and when it becomes more serious.
 
 - **Missing blueprint:** An automation or script whose blueprint no longer exists is reported as a finding; when several lack it, it shows as a shared cause in the list. The blueprints page now counts such paths too.
+
+- **Start a scan from outside:** New service `ha_housekeeper.scan` (with “Wait for the end” it returns the counts) and a “Start scan” button for dashboards. Several calls make one scan, none starts right after a scan, and it is refused during a plan or while Home Assistant starts.
 
 ## 1.6.0 - 2026-10-13
 

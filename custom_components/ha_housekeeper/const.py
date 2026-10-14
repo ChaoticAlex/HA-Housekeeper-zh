@@ -72,6 +72,7 @@ WARMUP_SECONDS: Final = 300
 # Version of the WebSocket reply contract; raise it when a field is renamed or removed.
 API_SCHEMA: Final = 1
 SIGNAL_SCAN_COMPLETE: Final = f"{DOMAIN}_scan_complete"
+SIGNAL_SCAN_STARTED: Final = f"{DOMAIN}_scan_started"
 SIGNAL_MONITOR_DEFINITIONS: Final = f"{DOMAIN}_monitor_definitions"
 SIGNAL_MONITOR_EVENT: Final = f"{DOMAIN}_monitor_event"
 

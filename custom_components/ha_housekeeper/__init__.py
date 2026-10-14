@@ -51,6 +51,7 @@ from .issues import async_clear_issues
 from .maintenance import recorder_costs
 from .runs import run_key
 from .scan_coverage import RETRY_LIMIT, RETRY_MINUTES, retryable_gaps
+from .services import async_register_services
 from .system_usage import system_light
 from .websocket_api import async_register as async_register_websocket
 
@@ -58,7 +59,7 @@ _LOGGER = logging.getLogger(__name__)
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
-PLATFORMS = [Platform.SENSOR, Platform.EVENT]
+PLATFORMS = [Platform.SENSOR, Platform.EVENT, Platform.BUTTON]
 REPLY_PAUSE = 20  # seconds between two prepared views
 
 
@@ -74,6 +75,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up global API handlers once."""
     hass.data.setdefault(DOMAIN, {})
     async_register_websocket(hass)
+    async_register_services(hass)
     return True
 
 

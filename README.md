@@ -61,7 +61,7 @@ Housekeeper combines registry data and the live Home Assistant runtime to provid
 - **Dependencies**: see what an entity, device or automation is connected to, and what would break if you removed it.
 - **Guided cleanup**: preview, explicit confirmation, backup, verification and undo, step by step. Nothing runs on its own.
 - **Maintenance views**: batteries, reliability of integrations, recorder load and database, backup protection, automation runs and more.
-- **Changes since the last scan**, sensors and repair hints for your own dashboards and automations.
+- **Changes since the last scan**, sensors, repair hints, a scan button and the service `ha_housekeeper.scan` for your own dashboards and automations.
 
 ## Quick start
 

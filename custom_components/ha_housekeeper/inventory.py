@@ -46,6 +46,7 @@ from .const import (
     IGNORE_LABEL,
     QUARANTINE_DAYS,
     SIGNAL_SCAN_COMPLETE,
+    SIGNAL_SCAN_STARTED,
     WARMUP_SECONDS,
 )
 from .coverage import CoverageStore
@@ -95,6 +96,7 @@ from .reminders import ReminderStore
 from .runs import RunStore
 from .scan_coverage import RETRY_LIMIT, RETRY_MINUTES, ScanCoverage, retryable_gaps
 from .scan_health import ScanHealth
+from .scan_trigger import scan_request
 from .blueprints import async_available, blueprint_path, missing_blueprint_findings
 from .service_check import missing_service_findings
 from .signals import SignalStore, situations
@@ -713,6 +715,8 @@ class InventoryScanner:
         self._unchecked: set[str] = set()
         self.scan_coverage = ScanCoverage()
         self._lock = asyncio.Lock()
+        self._scan_task: asyncio.Task[None] | None = None  # a scan the service or button started
+        self._last_scan_end: float | None = None
         self._snapshot: dict[str, Any] | None = None
         self._details: dict[str, dict[str, Any]] = {}
         self.min_unavailable_days = DEFAULT_MIN_UNAVAILABLE_DAYS
@@ -795,6 +799,7 @@ class InventoryScanner:
         """Scan registries and states. Concurrent callers share serialized work."""
         async with self._lock:
             self.status.update(running=True, phase="registries", progress=5, last_error=None)
+            async_dispatcher_send(self.hass, SIGNAL_SCAN_STARTED)
             began = time.monotonic()
             self.health.started(datetime.now(UTC))
             try:
@@ -831,6 +836,7 @@ class InventoryScanner:
                 self.monitor.refresh(snapshot, self.health_report(), new_scan=not preliminary)
                 self.async_check_health()
                 self.status.update(running=False, phase="complete", progress=100)
+                self._last_scan_end = time.monotonic()
                 return snapshot
             except Exception as err:
                 self.health.failed(datetime.now(UTC), str(self.status.get("phase")), err)
@@ -841,6 +847,54 @@ class InventoryScanner:
                 )
                 self.async_check_health()
                 raise
+
+    async def async_request_scan(self, wait: bool = False) -> dict[str, Any]:
+        """Start a scan for the service or the button; many requests make one scan.
+
+        Returns how the request went (``start``, ``join``, ``recent``) and, once there is a
+        snapshot, the counts of the latest one. Raises ``ScanRefused`` while a plan runs or Home
+        Assistant boots. With ``wait`` it returns after the scan has ended.
+        """
+        task = self._scan_task if self._scan_task and not self._scan_task.done() else None
+        decision = scan_request(
+            running=bool(self.status["running"]) or task is not None,
+            cleanup_busy=self.cleanup.running or self.paused,
+            warming_up=self.warming_up,
+            since_last=None
+            if self._last_scan_end is None
+            else time.monotonic() - self._last_scan_end,
+        )
+        if decision == "start":
+            task = self._scan_task = self.hass.async_create_background_task(
+                self._requested_scan(), "HA Housekeeper requested scan"
+            )
+        if wait and decision != "recent":
+            if task is not None:
+                await asyncio.shield(task)
+            else:  # the panel's scan is running: wait for its lock
+                async with self._lock:
+                    pass
+        return self.scan_summary(decision)
+
+    async def _requested_scan(self) -> None:
+        try:
+            await self.async_scan()
+        except Exception as err:  # the status and the scan health keep the reason
+            _LOGGER.warning("The requested scan failed: %s", type(err).__name__)
+
+    def scan_summary(self, decision: str) -> dict[str, Any]:
+        """How a requested scan went and the counts of the latest snapshot; no names, no texts."""
+        result: dict[str, Any] = {"status": decision}
+        snapshot = self._snapshot
+        if snapshot is not None:
+            active = [f for f in snapshot["findings"] if not f.get("ignored")]
+            result.update(
+                findings=len(active),
+                high=sum(1 for f in active if f.get("impact") == "high"),
+                scanned_at=snapshot["meta"]["scanned_at"],
+                preliminary=bool(snapshot["meta"].get("preliminary")),
+            )
+        return result
 
     def health_report(self) -> dict[str, Any]:
         """The scan health as the panel and the sensor read it."""

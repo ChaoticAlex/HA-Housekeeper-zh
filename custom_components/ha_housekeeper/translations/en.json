@@ -87,6 +87,34 @@
           "preliminary": "Preliminary"
         }
       }
+    },
+    "button": {
+      "scan": {
+        "name": "Start scan"
+      }
+    }
+  },
+  "services": {
+    "scan": {
+      "name": "Start scan",
+      "description": "Starts a scan of HA Housekeeper. Several calls make one scan; none starts right after a scan.",
+      "fields": {
+        "wait": {
+          "name": "Wait for the end",
+          "description": "Waits until the scan is done and returns the counts. Without it the scan is only started."
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "not_loaded": {
+      "message": "HA Housekeeper is not loaded."
+    },
+    "cleanup_busy": {
+      "message": "A plan is running and scans by itself. Try again later."
+    },
+    "starting": {
+      "message": "Home Assistant is still starting. A scan would be preliminary and is not kept."
     }
   }
 }
