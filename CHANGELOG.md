@@ -14,6 +14,8 @@
 
 ### Behoben
 
+- **CSV-Export rechts ausgerichtet:** Der Download-Button steht in Listenleisten jetzt immer am rechten Rand. Im Inventar ist er außerdem die letzte Aktion der Leiste.
+
 - **Status in der Backup-Prüfung ausgerichtet:** Aktionen wie „Erneut bestätigen“ stehen vor dem Status-Chip. Dadurch bleibt der Status in allen Zeilen als feste rechte Spalte ausgerichtet.
 
 - **Fokus in Dialogen:** Während ein Dialog geöffnet ist, bleiben Seite und darunterliegende Dialoge für die Tastatur inaktiv. Tab und Umschalt+Tab bleiben im obersten Dialog; nach dem Schließen kehrt der Fokus zum auslösenden Steuerelement zurück.
@@ -41,6 +43,8 @@
 - **Switch entities in bulk from the inventory:** Entity rows of the Inventory have a checkbox. The bar above disables, enables, hides or shows them, up to 200 entities per plan, with a preview and undo. An entity that something certainly uses is not disabled; only what you disabled yourself is enabled again.
 
 #### Fixed
+
+- **CSV export aligned right:** The download button now always sits at the right edge of list toolbars. In the Inventory, it is also the final toolbar action.
 
 - **Backup check status alignment:** Actions such as “Confirm again” now sit before the status chip. This keeps the status aligned as the fixed right-hand column in every row.
 

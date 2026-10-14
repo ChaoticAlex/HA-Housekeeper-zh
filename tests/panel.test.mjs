@@ -3027,6 +3027,7 @@ test("a list can hide columns and offers its rows as CSV", () => {
   const { el, shadow } = panel("en");
   el.data = DATA; el.view = "inventory"; el.render();
   assert.ok(shadow.innerHTML.includes('data-export-list="inventory"') && shadow.innerHTML.includes('data-col-open="inventory"'));
+  assert.ok(shadow.innerHTML.indexOf("data-xp-open") < shadow.innerHTML.indexOf('data-export-list="inventory"'), "the CSV download stays the rightmost inventory action");
   assert.ok(shadow.innerHTML.includes(">Type<"));
   el.toggleCol("inventory", "type");
   assert.ok(!shadow.innerHTML.includes('<th scope="col"') && !shadow.innerHTML.includes('data-sort="type"'));
