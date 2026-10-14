@@ -103,6 +103,30 @@ def window_active(
     return False
 
 
+def counts_from(
+    mark: dict[str, Any], local_now: datetime, sun: tuple[bool, datetime] | None = None
+) -> datetime | None:
+    """When an outage of the marked object starts to count: the end of the window plus its grace.
+
+    None without a window, while the window hides, or when the end is unknown. An outage that began
+    in the night is not a day old in the morning; it is as old as the time since it matters.
+    """
+    window = mark.get("window")
+    if not window or window_active(mark, local_now, sun):
+        return None
+    grace = timedelta(minutes=clean_grace(mark.get("grace")))
+    if window["mode"] == "sun":
+        return sun[1] + grace if sun else None
+    end = time.fromisoformat(window["to"])
+    day = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
+    ended = [
+        e
+        for base in (day, day - timedelta(days=1))
+        if (e := base.replace(hour=end.hour, minute=end.minute)) <= local_now
+    ]
+    return max(ended) + grace if ended else None
+
+
 def _clean(value: Any) -> dict[str, Any] | None:
     if not isinstance(value, dict) or value.get("kind") not in KINDS:
         return None

@@ -85,7 +85,16 @@ from .issues import async_sync_issues, async_sync_scan_issue
 from .load_history import LoadStore
 from .log_facts import log_facts
 from .maintenance import PreflightStore
-from .marks import KINDS, KINDS_OF, MarkStore, apply_marks, mark_key, window_active
+from .marks import (
+    HIDING_KINDS,
+    KINDS,
+    KINDS_OF,
+    MarkStore,
+    apply_marks,
+    counts_from,
+    mark_key,
+    window_active,
+)
 from .monitor import MonitorStore
 from .notes import NoteStore
 from .notify import NotifyStore, async_announce
@@ -523,24 +532,44 @@ FAILED_ENTRY_STATES = frozenset(
 )
 
 
+def _graded_outage(
+    began: str, now: datetime, min_unavailable_days: int, counted_from: datetime | None
+) -> tuple[str, str]:
+    """``(since, level)`` of an outage that began at ``began``; a mark window moves ``since`` later."""
+    started = datetime.fromisoformat(began)
+    if counted_from and counted_from > started:
+        started = counted_from
+    age = max(now - started, timedelta(0))
+    return started.isoformat(), _outage_level(age, min_unavailable_days)
+
+
 def _config_entry_findings(
-    integrations: list[dict[str, Any]], now: datetime, min_unavailable_days: int = 0
+    integrations: list[dict[str, Any]],
+    now: datetime,
+    min_unavailable_days: int = 0,
+    counted_from: dict[str, datetime] | None = None,
 ) -> list[dict[str, Any]]:
-    """Findings for active config entries that are not loaded, graded by how long that has lasted."""
+    """Findings for active config entries that are not loaded, graded by how long that has lasted.
+
+    ``counted_from`` holds, per entry with a mark window, when the window ended: what happened
+    before is expected, the outage counts from then on.
+    """
     findings = []
     for item in integrations:
         since = item.get("status_since")
         if item["status"] != "problem" or item["state"] not in FAILED_ENTRY_STATES or not since:
             continue
-        age = max(now - datetime.fromisoformat(since), timedelta(0))
+        counted, level = _graded_outage(
+            since, now, min_unavailable_days, (counted_from or {}).get(item["object_id"])
+        )
         findings.append(
             {
                 "rule_id": "config_entry.not_loaded",
                 "object_id": item["object_id"],
                 "classification": "problem",
                 "confidence": 0.9 if item["state"] == "setup_error" else 0.75,
-                "first_detected_at": since,
-                "outage_level": _outage_level(age, min_unavailable_days),
+                "first_detected_at": counted,
+                "outage_level": level,
                 "evidence": [
                     {"kind": item["state"], "source": "config_entries", "reason": item.get("error")}
                 ],
@@ -1219,7 +1248,9 @@ class InventoryScanner:
                     },
                 )
             )
-            + _config_entry_findings(integrations, observed_at, self.min_unavailable_days)
+            + _config_entry_findings(
+                integrations, observed_at, self.min_unavailable_days, self._counts_from()
+            )
         )
         findings += device_down_findings(entities, devices, findings)
 
@@ -1488,6 +1519,17 @@ class InventoryScanner:
             return None
         return state.state == "below_horizon", state.last_changed
 
+    def _counts_from(self) -> dict[str, datetime]:
+        """Per integration with a mark window: when its outage starts to count (see ``counts_from``)."""
+        sun, local = self._sun(), dt_util.now()
+        result = {}
+        for key, mark in self.marks.items.items():
+            if not key.startswith("config_entry:") or mark["kind"] not in HIDING_KINDS:
+                continue
+            if counted := counts_from(mark, local, sun):
+                result[key.split(":", 1)[1]] = counted
+        return result
+
     def _window_states(self, sun: tuple[bool, datetime] | None) -> dict[str, bool]:
         local = dt_util.now()
         return {
@@ -1502,10 +1544,23 @@ class InventoryScanner:
         self._window_seen = self._window_states(sun)
 
     @callback
-    def refresh_marks_on_window_change(self) -> None:
-        """Bring the findings up to date when a mark window opened or closed; no scan is needed."""
-        if self._snapshot and self._window_states(self._sun()) != self._window_seen:
-            self._refresh_marks()
+    def refresh_marks_on_window_change(self) -> bool:
+        """Bring the findings up to date when a mark window opened or closed; no scan is needed.
+
+        True when the window of an integration closed: its outage is graded at the scan, so the
+        caller asks for one.
+        """
+        if not self._snapshot:
+            return False
+        states = self._window_states(self._sun())
+        if states == self._window_seen:
+            return False
+        closed = any(
+            key.startswith("config_entry:") and self._window_seen.get(key) and not active
+            for key, active in states.items()
+        )
+        self._refresh_marks()
+        return closed
 
     def _refresh_marks(self) -> None:
         """Bring the objects and findings of the cached snapshot up to date with the marks."""

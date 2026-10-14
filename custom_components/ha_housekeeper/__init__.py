@@ -57,6 +57,7 @@ from .issues import async_clear_issues
 from .maintenance import recorder_costs
 from .runs import run_key
 from .scan_coverage import RETRY_LIMIT, RETRY_MINUTES, retryable_gaps
+from .scan_trigger import ScanRefused
 from .services import async_register_services
 from .system_usage import system_light
 from .websocket_api import async_register as async_register_websocket
@@ -199,9 +200,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     entry.async_on_unload(async_track_time_interval(hass, _watch_tick, timedelta(minutes=5)))
 
-    @callback
-    def _mark_windows(_: Any) -> None:
-        scanner.refresh_marks_on_window_change()
+    async def _mark_windows(_: Any) -> None:
+        if scanner.refresh_marks_on_window_change():
+            try:  # an outage counts from the end of the window: the scan grades it anew
+                await scanner.async_request_scan()
+            except ScanRefused:  # a plan or the start is in the way
+                return
 
     # A mark with a window hides only inside it: look again when the clock or the sun moves it.
     entry.async_on_unload(async_track_time_interval(hass, _mark_windows, timedelta(minutes=5)))

@@ -138,3 +138,16 @@ def test_a_mark_with_a_window_hides_only_inside_it_and_its_grace() -> None:
     objects, findings = _world()
     apply_marks(objects, findings, {"entity:sensor.b": sun}, NOW, (True, NOW))
     assert findings[1]["ignored"]
+
+
+def test_an_outage_with_a_window_counts_from_the_end_of_the_window() -> None:
+    from custom_components.ha_housekeeper.marks import counts_from  # noqa: E402
+
+    mark = _mark("expected_offline") | {
+        "window": {"mode": "time", "from": "21:00", "to": "06:00"},
+        "grace": 30,
+    }
+    morning = datetime(2026, 10, 9, 8, 0, tzinfo=UTC)
+    assert counts_from(mark, morning) == datetime(2026, 10, 9, 6, 30, tzinfo=UTC)
+    assert counts_from(mark, datetime(2026, 10, 9, 2, 0, tzinfo=UTC)) is None, "still hidden"
+    assert counts_from(_mark("expected_offline"), morning) is None, "no window"
