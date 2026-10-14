@@ -3087,7 +3087,11 @@ test("findings that began with an update get a line, a tile and a filter", () =>
   assert.deepEqual(el.visibleFindings().length, 2);
   el.findingAfter = true;
   assert.deepEqual(el.visibleFindings().map(f => f.key), ["k1"]);
-  assert.ok(el.findingsView().includes('data-finding-after="1"') && el.corrGroupsCard().includes("Update of hue"));
+  assert.ok(el.findingsView().includes('data-finding-after="1"') && el.findingsView().includes('data-fold="corr"'));
+  assert.ok(!el.corrGroupsCard().includes("Update of hue"));
+  el.folds = { corr: true, "corr_g": true };
+  const card = el.corrGroupsCard();
+  assert.ok(card.includes("Update of hue 1 → 2") && card.includes("1× ") && card.includes('data-object="entity:light.a"'));
 });
 
 test("a device has a history tab with its steps and no note; removed devices show their logbook entry in Maintenance", () => {

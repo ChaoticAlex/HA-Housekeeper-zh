@@ -14,7 +14,7 @@ WINDOW_BEFORE = timedelta(minutes=30)  # an event this long before the finding b
 WINDOW_AFTER = timedelta(minutes=10)  # the event may be logged shortly after the finding began
 GROUP_ONLY = ("start", "plan", "purge")  # too common to name as a reason on a single finding
 GROUP_LIMIT = 50
-KEYS_PER_GROUP = 50
+KEYS_PER_GROUP = 500
 BY_KEY_LIMIT = 2000
 FIELDS = ("kind", "at", "domain", "from", "to", "down_seconds", "title")
 
