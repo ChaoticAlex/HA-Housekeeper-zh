@@ -709,6 +709,39 @@ test("findings can be searched, filtered by type, and sorted; export follows", (
   assert.ok(shadow.innerHTML.includes("No matches"));
 });
 
+test("findings render as a sortable table and compact rows change its layout", () => {
+  const storage = fakeStorage();
+  const { el } = panel("en", { localStorage: storage });
+  el.data = { ...DATA, causes: [], findings: DATA.findings.map((f, i) => ({ ...f, key: `finding-${i}`, impact: i ? "low" : "high" })) };
+  let html = el.findingsView();
+  assert.match(html, /class="tablewrap lt findings-table"/);
+  assert.match(html, /<th scope="col" aria-sort="descending"><button type="button" class="thbtn" data-lsort="findings\|impact\|desc"/);
+  assert.match(html, /data-lsort="findings\|id\|asc"/);
+  assert.match(html, /data-dense="findings" aria-pressed="false"/);
+  assert.match(html, /<td data-label="Severity">/);
+  assert.equal((html.match(/class="finding-data/g) || []).length, 2);
+  el.render = () => {};
+  el.toggleDenseList("findings");
+  html = el.findingsView();
+  assert.match(html, /class="tablewrap lt findings-table dense-list"/);
+  assert.equal(JSON.parse(storage.getItem("ha_housekeeper.dense_lists")).findings, true);
+});
+
+test("grouped causes and single findings obey the same table sort", () => {
+  const { el } = panel("en");
+  const cause = { id: "outage-z", kind: "integration_down", object_type: "config_entry", object_id: "z", name: "Zulu", follower_count: 1, total_followers: 1, child_ids: [], consumers: {}, impact: "high" };
+  const single = { key: "single", rule_id: "entity.state_missing", object_id: "sensor.a", classification: "orphaned", confidence: 0.8, impact: "low", ignored: false };
+  const follower = { ...single, key: "follower", object_id: "sensor.z", cause_id: cause.id };
+  el.data = { ...DATA, causes: [cause], findings: [single, follower] };
+  el.lvState("findings", "impact", "desc");
+  el.lv.findings.sort = "name"; el.lv.findings.dir = "asc";
+  let html = el.findingsView();
+  assert.ok(html.indexOf('data-fsel="single"') < html.indexOf("Integration Zulu is not loaded"));
+  el.lv.findings.dir = "desc";
+  html = el.findingsView();
+  assert.ok(html.indexOf("Integration Zulu is not loaded") < html.indexOf('data-fsel="single"'));
+});
+
 test("batteries and unreferenced lists filter by area and sort", () => {
   const { el } = panel("en");
   const ent = (id, name, area, extra = {}) => ({ object_type: "entity", object_id: id, name, area_id: area, status: "active", device_class: "battery", state: "50", unit: "%", ...extra });
@@ -759,6 +792,7 @@ test("compact rows belong to each eligible table and keep their own browser stat
   const legacy = panel("en", { localStorage: fakeStorage({ "ha_housekeeper.dense": "1" }) }).el;
   assert.equal(legacy.isDenseList("unreferenced"), true);
   assert.equal(legacy.isDenseList("runs"), true);
+  assert.equal(legacy.isDenseList("findings"), false);
   assert.equal(legacy.isDenseList("orphanstats"), false);
 });
 

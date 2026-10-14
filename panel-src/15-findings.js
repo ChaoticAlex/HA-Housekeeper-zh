@@ -55,7 +55,7 @@ class FindingsMixin {
     return { percent, tone, label, affected: affected.size, base, tasks, red, later: tasks - red, penalty, lines, stateRed, statePoints, entries: levels.length };
   }
 
-  findingRow(finding, inGroup = false) {
+  findingRowContent(finding, inGroup = false) {
     const key = this.findingKey(finding), object = this.findObject(key);
     const title = object?.name || finding.object_id;
     const subtitle = finding.rule_id === "entity.possible_duplicate"
@@ -69,8 +69,54 @@ class FindingsMixin {
         : finding.affected_object
           ? [this.esc(finding.affected_object), this.esc(this.placeText(finding, inGroup)), this.esc(this.suggestText(finding))].filter(Boolean).join(" · ")
           : this.esc(object?.reason ? this.t(object.reason) : this.findingTitle(finding));
-    const button = `<button class="row ${finding.ignored ? "dim" : ""}" data-object="${this.esc(key)}">${this.tile(object?.object_type || "entity", this.tone(finding.classification))}<span class="row-text"><strong>${this.esc(title)}</strong><small>${subtitle}${finding.ignored ? ` · ${this.esc(finding.mark ? this.markLine(finding.mark) : this.decisionLabel(finding))}` : ""}${finding.resurfaced ? ` · ${this.t("dueLabel")}` : ""}<span class="fextra">${this.statusTags(finding)}${this.followOf(finding)}</span>${finding.first_detected_at ? `<span class="msince"> · ${this.t("sortSince")} ${this.formatDate(finding.first_detected_at)}</span>` : ""}</small></span>${this.kindChip(this.reasonLabel(this.findingReason(finding)))}${this.impactChip(finding.impact)}</button>`;
+    return { key, object, title, subtitle: `${subtitle}${finding.ignored ? ` · ${this.esc(finding.mark ? this.markLine(finding.mark) : this.decisionLabel(finding))}` : ""}${finding.resurfaced ? ` · ${this.t("dueLabel")}` : ""}<span class="fextra">${this.statusTags(finding)}${this.followOf(finding)}</span>` };
+  }
+
+  findingRow(finding, inGroup = false) {
+    const { key, object, title, subtitle } = this.findingRowContent(finding, inGroup);
+    const button = `<button class="row ${finding.ignored ? "dim" : ""}" data-object="${this.esc(key)}">${this.tile(object?.object_type || "entity", this.tone(finding.classification))}<span class="row-text"><strong>${this.esc(title)}</strong><small>${subtitle}${finding.first_detected_at ? `<span class="msince"> · ${this.t("sortSince")} ${this.formatDate(finding.first_detected_at)}</span>` : ""}</small></span>${this.kindChip(this.reasonLabel(this.findingReason(finding)))}${this.impactChip(finding.impact)}</button>`;
     return `<div class="rowwrap"><input type="checkbox" class="selbox" data-fsel="${this.esc(finding.key)}" ${this.findSel.has(finding.key) ? "checked" : ""} aria-label="${this.esc(title)}">${button}${this.rowMenu(finding)}</div>${this.rowDecide(finding)}`;
+  }
+
+  findingsTable(items) {
+    const st = this.lv.findings, header = (key, label, dir = "asc") => {
+      const on = st.sort === key;
+      return `<th scope="col" aria-sort="${on ? (st.dir === "desc" ? "descending" : "ascending") : "none"}"><button type="button" class="thbtn" data-lsort="findings|${key}|${dir}">${this.t(label)}${on ? ` <span aria-hidden="true">${st.dir === "desc" ? "↓" : "↑"}</span>` : ""}</button></th>`;
+    };
+    const idSort = `<button type="button" class="thbtn th-alt" data-lsort="findings|id|asc">${this.t("sortId")}${st.sort === "id" ? ` <span aria-hidden="true">${st.dir === "desc" ? "↓" : "↑"}</span>` : ""}</button>`;
+    const head = `<thead><tr><th scope="col" class="selcol"><span class="sr-only">${this.t("selectPage")}</span></th><th scope="col" aria-sort="${["name", "id"].includes(st.sort) ? (st.dir === "desc" ? "descending" : "ascending") : "none"}"><button type="button" class="thbtn" data-lsort="findings|name|asc">${this.t("sortName")}${st.sort === "name" ? ` <span aria-hidden="true">${st.dir === "desc" ? "↓" : "↑"}</span>` : ""}</button>${idSort}</th>${header("impact", "sortImpact", "desc")}${header("certainty", "sortCertainty", "desc")}${header("since", "sortSince", "desc")}${header("rule", "sortRule")}<th scope="col"><span class="sr-only">${this.t("rowMenu")}</span></th></tr></thead>`;
+    const rows = items.map(item => {
+      if (item.cause || item.members) return `<tr class="finding-group"><td colspan="7">${item.cause ? this.causeEntry(item.cause) : this.findingGroup(item)}</td></tr>`;
+      const f = item, { key, object, title, subtitle } = this.findingRowContent(f);
+      const pick = `<input type="checkbox" class="selbox" data-fsel="${this.esc(f.key)}" ${this.findSel.has(f.key) ? "checked" : ""} aria-label="${this.esc(title)}">`;
+      const name = `<button type="button" class="finding-link" data-object="${this.esc(key)}">${this.tile(object?.object_type || "entity", this.tone(f.classification))}<span class="finding-name"><strong>${this.esc(title)}</strong><span class="id">${this.esc(f.object_id)}</span><small>${subtitle}</small></span></button>`;
+      const detail = this.rowDecide(f);
+      return `<tr class="finding-data${f.ignored ? " dim" : ""}"><td class="selcol">${pick}</td><td>${name}</td><td data-label="${this.t("sortImpact")}">${this.impactChip(f.impact) || `<span class="muted">–</span>`}</td><td data-label="${this.t("sortCertainty")}">${f.confidence == null ? "–" : `${Math.round(f.confidence * 100)} %`}</td><td data-label="${this.t("sortSince")}">${this.ageCell(f.first_detected_at)}</td><td data-label="${this.t("sortRule")}"><span class="finding-rule">${this.esc(f.rule_id)}</span><small>${this.esc(this.reasonLabel(this.findingReason(f)))}</small></td><td class="finding-action">${this.rowMenu(f)}</td></tr>${detail ? `<tr class="finding-detail"><td colspan="7">${detail}</td></tr>` : ""}`;
+    }).join("");
+    return `<div class="tablewrap lt findings-table${this.isDenseList("findings") ? " dense-list" : ""}"><table>${head}<tbody>${rows}</tbody></table></div>`;
+  }
+
+  sortFindingEntries(items) {
+    const st = this.lv.findings, { natural, ids } = this.collators(), sign = st.dir === "desc" ? -1 : 1;
+    const findingOf = item => item.cause ? this.data.findings.find(f => f.key === item.cause.finding_key) : item.members ? item.members[0] : item;
+    const value = item => {
+      const c = item.cause, f = findingOf(item);
+      switch (st.sort) {
+        case "name": return c ? c.name : this.findObject(this.findingKey(f))?.name || f.object_id;
+        case "id": return c ? c.object_id : f.object_id;
+        case "since": return f?.first_detected_at;
+        case "rule": return c ? f?.rule_id || c.kind : f.rule_id;
+        case "certainty": return f?.confidence;
+        default: return c ? (IMPACT_RANK[c.impact] ?? 0) + (f?.confidence || 0) / 2 : this.impactScore(f);
+      }
+    };
+    return items.map(item => ({ item, key: value(item) })).sort((a, b) => {
+      const emptyA = a.key == null || a.key === "", emptyB = b.key == null || b.key === "";
+      if (emptyA !== emptyB) return emptyA ? 1 : -1;
+      const order = typeof a.key === "number" && typeof b.key === "number" ? a.key - b.key : natural.compare(String(a.key ?? ""), String(b.key ?? ""));
+      const id = item => item.cause?.id || item.members?.[0]?.key || item.key || item.object_id;
+      return order * sign || ids.compare(String(id(a.item)), String(id(b.item))) * sign;
+    }).map(x => x.item);
   }
 
   findingSorts() {
@@ -139,9 +185,11 @@ class FindingsMixin {
     const all = this.sortedFindings(true).filter(f => this.statusMatch(f));
     const classes = [...new Set(all.map(f => this.findingReason(f)))];
     const open = !this.findingStatus && !this.findingFilter && !this.findingAfter && !this.lv.findings?.q && !Object.values(this.lv.findings?.f || {}).some(Boolean);
-    const list = this.groupBroken(this.collapseFollowers(this.visibleFindings(), !open));
+    const sorted = this.visibleFindings();
+    const grouped = open && !this.showFollowers;
+    const list = this.groupBroken(this.collapseFollowers(sorted, !grouped));
     const types = [...new Set(all.map(f => this.findingType(f)))].sort();
-    const bar = this.listBar("findings", { sorts: this.findingSorts(), filters: [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }, { name: "reason", all: this.t("allReasons"), options: classes.map(x => [x, this.reasonLabel(x)]) }, { name: "impact", all: this.t("allSeverities"), options: ["high", "medium", "low", "info", "none"].map(x => [x, this.t(`chip_${x}`)]) }] });
+    const bar = this.listBar("findings", { table: true, dense: true, sorts: this.findingSorts(), filters: [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }, { name: "reason", all: this.t("allReasons"), options: classes.map(x => [x, this.reasonLabel(x)]) }, { name: "impact", all: this.t("allSeverities"), options: ["high", "medium", "low", "info", "none"].map(x => [x, this.t(`chip_${x}`)]) }] });
     this.ensureSeries();
     const spark = (key, rising) => this.series ? this.sparkline(key, rising) : "";
     const classTone = c => { const tone = this.tone(c); return tone === "red" ? "red" : tone === "warn" ? "warn" : "mute"; };
@@ -156,13 +204,11 @@ class FindingsMixin {
     const followers = this.followerCount();
     const fixedView = this.findingStatus === "fixed";
     const entries = this.causeEntries(), withFollowers = entries.filter(c => this.causeTotal(c));
-    // The list is one: the chains first (each a row with its counter), then the single findings, in the chosen sort.
-    // Under a filter or in the flat list every finding stands for itself.
-    const grouped = open && !this.showFollowers;
-    let items = grouped ? [...entries.map(cause => ({ cause })), ...list] : list;
+    // Chains and single findings share the chosen order. Under a filter or in the flat list every finding stands for itself.
+    let items = grouped ? this.sortFindingEntries([...entries.map(cause => ({ cause })), ...list]) : list;
     if (this.findingWithFollowers) items = grouped ? items.filter(i => i.cause && this.causeTotal(i.cause)) : items.filter(i => i.cause_id);
     const pg = this.paginate("findings", items);
-    const body = fixedView ? this.fixedList() : `${this.findSelBar(pg.rows)}${items.length ? pg.rows.map(i => (i.cause ? this.causeEntry(i.cause) : i.members ? this.findingGroup(i) : this.findingRow(i))).join("") : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${all.length ? this.noMatches("findings") : this.t("noFindings")}</div>`}${pg.footer}`;
+    const body = fixedView ? this.fixedList() : `${this.findSelBar(pg.rows)}${items.length ? this.findingsTable(pg.rows) : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${all.length ? this.noMatches("findings") : this.t("noFindings")}</div>`}${pg.footer}`;
     return `<div class="stack">${tiles}<div class="panel"><div class="chips">${this.statusChips()}${followers ? `<button class="chip ${this.showFollowers ? "active" : ""}" data-toggle-followers>${this.t("flatList")}</button>` : ""}${followers ? `<button class="chip ${this.findingWithFollowers ? "active" : ""}" data-with-followers>${this.t("withFollowers")} (${withFollowers.length})</button>` : ""}${dueCount ? `<button class="chip ${this.findingDue ? "active" : ""}" data-finding-due>${this.t("dueFilter")} (${dueCount})</button>` : ""}<span class="spacer"></span><button class="chip" data-export="csv" title="${this.t("exportTitle")}">${this.t("exportCsv")}</button><button class="chip" data-export="json" title="${this.t("exportTitle")}">${this.t("exportJson")}</button></div>
       ${this.findingNote()}${fixedView ? "" : bar}${body}</div></div>`;
   }

@@ -2,7 +2,8 @@
 const VIEWS_KEY = "ha_housekeeper.views";
 const VIEWS_LIMIT = 10;
 const DENSE_LISTS_KEY = "ha_housekeeper.dense_lists";
-const DENSE_LIST_IDS = ["unreferenced", "batteries", "runs"];
+const DENSE_LIST_IDS = ["unreferenced", "batteries", "runs", "findings"];
+const DENSE_LEGACY_IDS = ["unreferenced", "batteries", "runs"];
 
 class ListsMixin {
   th(key, label) {
@@ -184,7 +185,7 @@ class ListsMixin {
     let saved = {};
     try {
       const raw = globalThis.localStorage?.getItem(DENSE_LISTS_KEY);
-      saved = raw ? JSON.parse(raw) : globalThis.localStorage?.getItem("ha_housekeeper.dense") === "1" ? Object.fromEntries(DENSE_LIST_IDS.map(id => [id, true])) : {};
+      saved = raw ? JSON.parse(raw) : globalThis.localStorage?.getItem("ha_housekeeper.dense") === "1" ? Object.fromEntries(DENSE_LEGACY_IDS.map(id => [id, true])) : {};
     } catch (_) { saved = {}; }
     return (this._denseLists = saved && typeof saved === "object" && !Array.isArray(saved) ? Object.fromEntries(DENSE_LIST_IDS.map(id => [id, saved[id] === true])) : {});
   }
