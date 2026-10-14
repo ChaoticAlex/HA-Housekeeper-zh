@@ -5267,3 +5267,15 @@ test("the inventory is the shared list: origin only for integrations, core and c
   html = shadow.innerHTML;
   assert.ok(html.includes('data-lf="inventory|idle"') && html.includes('data-lsort="inventory|usedByCol|desc"') && !html.includes('data-lf="inventory|origin"'));
 });
+
+test("the mark form offers a time window and the mark line says when it applies", () => {
+  const { el } = panel("en");
+  const window = { mode: "time", from: "21:00", to: "06:00" };
+  assert.ok(el.markLine({ kind: "expected_offline", window, grace: 30 }).includes("21:00–06:00, then 30 min grace"));
+  assert.ok(el.markLine({ kind: "expected_offline", window: { mode: "sun" }, grace: 0 }).includes("in the dark"));
+  const form = f => el.markFormHtml({ kind: "expected_offline", reason: "", target: "", days: 0, wmode: "", from: "21:00", to: "06:00", grace: 30, ...f }, "config_entry:x");
+  assert.ok(!form({}).includes("data-mark-from"), "no window, no clock fields");
+  assert.ok(form({ wmode: "time" }).includes("data-mark-from") && form({ wmode: "time" }).includes("data-mark-grace"));
+  assert.ok(!form({ wmode: "sun" }).includes("data-mark-from") && form({ wmode: "sun" }).includes("data-mark-grace"));
+  assert.ok(!form({ kind: "keep", wmode: "sun" }).includes("data-mark-wmode"), "keep has no window");
+});
