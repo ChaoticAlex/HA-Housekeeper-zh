@@ -718,6 +718,7 @@ test("findings render as a sortable table and compact rows change its layout", (
   assert.match(html, /<th scope="col" aria-sort="descending"><button type="button" class="thbtn" data-lsort="findings\|impact\|desc"/);
   assert.match(html, /data-lsort="findings\|id\|asc"/);
   assert.match(html, /data-dense="findings" aria-pressed="false"/);
+  assert.match(html, /<span class="listbar-actions">/);
   assert.match(html, /<td data-label="Severity">/);
   assert.equal((html.match(/class="finding-data/g) || []).length, 2);
   el.render = () => {};
@@ -725,6 +726,28 @@ test("findings render as a sortable table and compact rows change its layout", (
   html = el.findingsView();
   assert.match(html, /class="tablewrap lt findings-table dense-list"/);
   assert.equal(JSON.parse(storage.getItem("ha_housekeeper.dense_lists")).findings, true);
+});
+
+test("cause and dashboard groups use the findings table columns in both densities", () => {
+  const { el } = panel("en");
+  const cause = { id: "outage-z", kind: "integration_down", object_type: "config_entry", object_id: "z", name: "Cloud", follower_count: 1, total_followers: 1, child_ids: [], consumers: {}, impact: "high" };
+  const follower = { key: "follower", rule_id: "entity.state_unavailable", object_id: "sensor.b", classification: "unavailable", confidence: 0.9, impact: "medium", cause_id: cause.id, ignored: false };
+  el.data = { ...DATA, causes: [cause], findings: [follower] };
+  let html = el.findingsView();
+  assert.match(html, /class="finding-data finding-cause"/);
+  assert.match(html, /data-fold="cause_outage-z"/);
+  assert.doesNotMatch(html, /class="finding-group"/);
+  el.folds = { "cause_outage-z": true };
+  el.denseLists().findings = true;
+  html = el.findingsView();
+  assert.match(html, /class="tablewrap lt findings-table dense-list"/);
+  assert.match(html, /class="finding-detail"/);
+  const place = { view: "Archive", card: "Card", card_path: "views/0/cards/0", card_refs: 3, card_missing: 2 };
+  const broken = i => ({ key: `broken-${i}`, rule_id: "dashboard.missing_entity", object_id: "dash", classification: "broken_reference", confidence: 0.9, impact: "low", affected_object: `sensor.${i}`, evidence: [{ location: `views/0/cards/0/${i}`, place }] });
+  el.data = { ...DATA, causes: [], findings: [broken(1), broken(2)] };
+  html = el.findingsView();
+  assert.match(html, /class="finding-data finding-cause"/);
+  assert.match(html, /data-fsel-group="dash\|views\/0\/cards\/0"/);
 });
 
 test("grouped causes and single findings obey the same table sort", () => {
@@ -2939,7 +2962,7 @@ test("the search opens the chosen object and closes; the keyboard moves through 
 test("a list view can be saved under a name, applied again, overwritten and deleted", () => {
   const storage = fakeStorage({});
   const { el } = panel("en", { localStorage: storage });
-  const save = name => { el.saveView("inv"); assert.ok(el.viewsControl("inv").includes("data-lview-form")); el.commitView("inv", name); };
+  const save = name => { el.saveView("inv"); assert.ok(el.viewsControl("inv").includes('class="viewform"')); el.commitView("inv", name); };
   const read = () => JSON.parse(storage.getItem("ha_housekeeper.views"));
   el.data = DATA;
   const st = el.lvState("inv", "name", "asc");
