@@ -2554,7 +2554,7 @@ class FindingsMixin {
     this.lvState("findings", "impact", "desc");
     return this.refine("findings", byClass, {
       text: f => [this.findObject(this.findingKey(f))?.name, f.object_id, f.rule_id, f.affected_object].join(" "),
-      filters: { type: (f, v) => this.findingType(f) === v, reason: (f, v) => this.findingReason(f) === v, impact: (f, v) => (f.impact || "none") === v },
+      filters: { type: (f, v) => this.findingType(f) === v, fresh: (f, v) => this.freshMatch(f, v), impact: (f, v) => (f.impact || "none") === v },
       sorts: this.findingSorts(), tie: f => f.object_id,
     });
   }
@@ -2604,14 +2604,14 @@ class FindingsMixin {
     const grouped = open && !this.showFollowers;
     const list = this.groupBroken(this.collapseFollowers(sorted, !grouped));
     const types = [...new Set(all.map(f => this.findingType(f)))].sort();
-    const bar = this.listBar("findings", { table: true, dense: true, sorts: this.findingSorts(), filters: [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }, { name: "reason", all: this.t("allReasons"), options: classes.map(x => [x, this.reasonLabel(x)]) }, { name: "impact", all: this.t("allSeverities"), options: ["high", "medium", "low", "info", "none"].map(x => [x, this.t(`chip_${x}`)]) }] });
+    const bar = this.listBar("findings", { table: true, dense: true, sorts: this.findingSorts(), filters: [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }, this.freshFilter(), { name: "impact", all: this.t("allSeverities"), options: ["high", "medium", "low", "info", "none"].map(x => [x, this.t(`chip_${x}`)]) }] });
     this.ensureSeries();
     const spark = (key, rising) => this.series ? this.sparkline(key, rising) : "";
     const classTone = c => { const tone = this.tone(c); return tone === "red" ? "red" : tone === "warn" ? "warn" : "mute"; };
     this.ensureCorrelations();
     const afterCount = all.filter(f => this.corr?.by_key?.[f.key]).length;
     const tiles = this.sumTiles([
-      { label: this.t("all"), value: this.formatNumber(this.findingTotal()), sub: this.followerCount() ? this.esc(this.t("findingsFollowSub", { n: this.formatNumber(this.followerCount()) })) : undefined, tone: this.findingTotal() ? "warn" : "ok", filter: "", active: !this.findingFilter, spark: spark("open", "bad") },
+      { label: this.t("allFindings"), value: this.formatNumber(this.findingTotal()), sub: this.followerCount() ? this.esc(this.t("findingsFollowSub", { n: this.formatNumber(this.followerCount()) })) : undefined, tone: this.findingTotal() ? "warn" : "ok", filter: "", active: !this.findingFilter, spark: spark("open", "bad") },
       afterCount ? { label: this.t("corrTile"), value: this.formatNumber(afterCount), sub: this.t("corrTileSub"), tone: "warn", attr: ["data-finding-after", "1"], active: this.findingAfter } : null,
       ...classes.map(c => ({ label: this.reasonLabel(c), value: this.formatNumber(all.filter(f => this.findingReason(f) === c).length), tone: classTone(c), filter: c, active: this.findingFilter === c, spark: spark(`class:${c}`, "bad") })),
     ]);
@@ -6377,7 +6377,11 @@ class SearchPagesMixin {
     if (entry.settingsTab) this.settingsTab = entry.settingsTab;
     if (entry.viewTab) (this.viewTab ||= {})[view] = entry.viewTab;
     if (entry.kind === "filter" && entry.objectStatus) { this.statusFilter = entry.objectStatus; this.typeFilter = ""; this.originFilter = ""; }
-    if (entry.kind === "filter" && !entry.objectStatus) this.findingStatus = entry.findingStatus;
+    if (entry.kind === "filter" && !entry.objectStatus) {
+      const fresh = FRESH_STATES.includes(entry.findingStatus);
+      this.findingStatus = fresh ? "" : entry.findingStatus;
+      if (fresh) this.lvState("findings", "impact", "desc").f.fresh = entry.findingStatus;
+    }
     this.render();
     if (view === "changes" && !this.compare) this.loadCompare();
   }
@@ -8958,7 +8962,8 @@ Object.assign(TEXT.en, {
 // snoozed, hidden), some follow from what Housekeeper sees (new, in work, fixed). Nothing here stores anything:
 // the decisions are the ones of the ignore list, the rest is derived from the scan and the journal of plans.
 const NEW_FINDING_DAYS = 7, DONE_PERIODS = [7, 30, 90], ACTIVE_PLAN = ["dry_run", "backup", "running"];
-const FINDING_STATES = ["new", "inwork", "known", "snoozed", "hidden"];
+// The chips of the list are states that exclude each other; "new" and "in work" are subsets of the open ones and live in the list bar as one filter.
+const FINDING_STATES = ["known", "snoozed", "hidden"], FRESH_STATES = ["new", "inwork"];
 
 Object.assign(TEXT.de, {
   bandChange: "Ändern", bandUndo: "Wieder aufnehmen", bandByLabel: "Per Label ausgeblendet", bandMark: "Markiert: {kind}", bandRemoveMark: "Entfernen",
@@ -9028,6 +9033,13 @@ class FindingStatusMixin {
   statusTags(f) {
     return [this.isNewFinding(f) ? this.t("stateNew") : "", this.inWork(f) ? this.t("stateInwork") : ""].filter(Boolean).map(x => ` · ${x}`).join("");
   }
+
+  // The filter of the list bar: findings first seen in the last days, or touched by a plan that is running.
+  freshFilter() {
+    return { name: "fresh", all: this.t("freshAll"), options: [["new", this.t("freshNew", { days: NEW_FINDING_DAYS })], ["inwork", this.t("freshInwork")]] };
+  }
+
+  freshMatch(f, value) { return value === "new" ? this.isNewFinding(f) : this.inWork(f); }
 
   statusChips() {
     const chip = (state, label, count) => `<button class="chip ${(this.findingStatus || "") === state ? "active" : ""}" data-fstatus="${state || "open"}">${label} (${this.formatNumber(count)})</button>`;
@@ -9247,12 +9259,12 @@ class FindingStatusMixin {
   }
 }
 Object.assign(TEXT.de, {
-  stateOpen: "Offen", state_fixed: "Erledigt", stateNew: "Neu", stateInwork: "In Arbeit", state_new: "Neu", state_inwork: "In Arbeit", state_known: "Bekannt", state_snoozed: "Zurückgestellt", state_hidden: "Ausgeblendet",
+  stateOpen: "Offen", freshAll: "Neu und in Arbeit", freshNew: "Neu (letzte {days} Tage)", freshInwork: "In Arbeit", state_fixed: "Erledigt", stateNew: "Neu", stateInwork: "In Arbeit", state_new: "Neu", state_inwork: "In Arbeit", state_known: "Bekannt", state_snoozed: "Zurückgestellt", state_hidden: "Ausgeblendet",
   doneNone: "In den letzten {days} Tagen wurde nichts erledigt.", donePeriod: "Zeitraum", doneDays: "{n} Tage", doneByPlan: "Durch einen Plan behoben", doneBack: "Von selbst wieder in Ordnung", doneRemoved: "Objekt entfernt (nicht behoben)", doneUnread: "Quelle nicht gelesen (nicht behoben)", doneOther: "Grund unbekannt (nicht behoben)", donePlan: "Plan", doneObjects: "{n} Objekte", doneUndoYes: "rückgängig möglich: ja", doneUndoNo: "rückgängig möglich: nein", doneSince: "Verglichen mit dem Scan vom {date}.", actKind_add_label: "Label ergänzt", actKind_delete_automation: "Automation gelöscht", actKind_delete_backup: "Backup gelöscht", actKind_migrate_meter: "Zähler gewechselt", actKind_purge_statistics: "Statistiken bereinigt", actKind_trim_history: "Verlauf gekürzt", actKind_refactor_automation: "Automation umgebaut", actKind_rename_entity: "Entität umbenannt", actKind_replace_references: "Verweise ersetzt", actKind_set_area: "Bereich gesetzt", actKind_disable_entity: "Entität deaktiviert", actKind_remove_entity: "Entität entfernt", actKind_disable_device: "Gerät deaktiviert", actKind_remove_device: "Gerät entfernt", actKind_forget_device: "Gerät vergessen", actKind_repair_range: "Zählerbereich repariert", actKind_quarantine: "In Quarantäne gelegt", fselKnown: "Als bekannt markieren", fselSnooze: "Zurückstellen", fselLabel: "Label ergänzen", state_label: "Label ergänzen", labelChoose: "Label", labelNone: "Es gibt noch kein Label. Lege in Home Assistant eines an (Einstellungen → Bereiche, Labels & Zonen → Labels).", labelNoEntities: "Unter der Auswahl sind keine Entitäten, Automationen, Skripte oder Szenen.", confirmedSummaryLabel: "{count} Entitäten bekommen ein Label (nur in Home Assistant, Rückgängig entfernt es wieder).", reason_label_missing: "Das Label gibt es nicht mehr.", reason_already_labelled: "Hat dieses Label schon.", result_labeled: "Label ergänzt", undo_unlabelled: "Label wieder entfernt",
   notDuplicate: "Ist kein Duplikat", notDuplicateReason: "Kein Duplikat (bestätigt)", openTwin: "Funktionierende Entität öffnen", markKnown: "Als bekannt markieren",
 });
 Object.assign(TEXT.en, {
-  stateOpen: "Open", state_fixed: "Done", stateNew: "New", stateInwork: "In work", state_new: "New", state_inwork: "In work", state_known: "Known", state_snoozed: "Snoozed", state_hidden: "Hidden",
+  stateOpen: "Open", freshAll: "New and in work", freshNew: "New (last {days} days)", freshInwork: "In work", state_fixed: "Done", stateNew: "New", stateInwork: "In work", state_new: "New", state_inwork: "In work", state_known: "Known", state_snoozed: "Snoozed", state_hidden: "Hidden",
   doneNone: "Nothing was done in the last {days} days.", donePeriod: "Period", doneDays: "{n} days", doneByPlan: "Fixed by a plan", doneBack: "Back in order by itself", doneRemoved: "Object removed (not fixed)", doneUnread: "Source not read (not fixed)", doneOther: "Reason unknown (not fixed)", donePlan: "Plan", doneObjects: "{n} objects", doneUndoYes: "can be undone: yes", doneUndoNo: "can be undone: no", doneSince: "Compared with the scan of {date}.", actKind_add_label: "Label added", actKind_delete_automation: "Automation deleted", actKind_delete_backup: "Backup deleted", actKind_migrate_meter: "Meter replaced", actKind_purge_statistics: "Statistics cleaned", actKind_trim_history: "History trimmed", actKind_refactor_automation: "Automation reworked", actKind_rename_entity: "Entity renamed", actKind_replace_references: "References replaced", actKind_set_area: "Area set", actKind_disable_entity: "Entity disabled", actKind_remove_entity: "Entity removed", actKind_disable_device: "Device disabled", actKind_remove_device: "Device removed", actKind_forget_device: "Device forgotten", actKind_repair_range: "Meter range repaired", actKind_quarantine: "Put in quarantine", fselKnown: "Mark as known", fselSnooze: "Snooze", fselLabel: "Add label", state_label: "Add label", labelChoose: "Label", labelNone: "There is no label yet. Create one in Home Assistant (Settings → Areas, labels & zones → Labels).", labelNoEntities: "The selection holds no entities, automations, scripts or scenes.", confirmedSummaryLabel: "{count} entities get a label (in Home Assistant only, undo takes it off again).", reason_label_missing: "The label no longer exists.", reason_already_labelled: "Already has this label.", result_labeled: "Label added", undo_unlabelled: "label taken off again",
   notDuplicate: "Not a duplicate", notDuplicateReason: "Not a duplicate (confirmed)", openTwin: "Open the working entity", markKnown: "Mark as known",
 });

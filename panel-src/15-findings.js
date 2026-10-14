@@ -166,7 +166,7 @@ class FindingsMixin {
     this.lvState("findings", "impact", "desc");
     return this.refine("findings", byClass, {
       text: f => [this.findObject(this.findingKey(f))?.name, f.object_id, f.rule_id, f.affected_object].join(" "),
-      filters: { type: (f, v) => this.findingType(f) === v, reason: (f, v) => this.findingReason(f) === v, impact: (f, v) => (f.impact || "none") === v },
+      filters: { type: (f, v) => this.findingType(f) === v, fresh: (f, v) => this.freshMatch(f, v), impact: (f, v) => (f.impact || "none") === v },
       sorts: this.findingSorts(), tie: f => f.object_id,
     });
   }
@@ -216,14 +216,14 @@ class FindingsMixin {
     const grouped = open && !this.showFollowers;
     const list = this.groupBroken(this.collapseFollowers(sorted, !grouped));
     const types = [...new Set(all.map(f => this.findingType(f)))].sort();
-    const bar = this.listBar("findings", { table: true, dense: true, sorts: this.findingSorts(), filters: [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }, { name: "reason", all: this.t("allReasons"), options: classes.map(x => [x, this.reasonLabel(x)]) }, { name: "impact", all: this.t("allSeverities"), options: ["high", "medium", "low", "info", "none"].map(x => [x, this.t(`chip_${x}`)]) }] });
+    const bar = this.listBar("findings", { table: true, dense: true, sorts: this.findingSorts(), filters: [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }, this.freshFilter(), { name: "impact", all: this.t("allSeverities"), options: ["high", "medium", "low", "info", "none"].map(x => [x, this.t(`chip_${x}`)]) }] });
     this.ensureSeries();
     const spark = (key, rising) => this.series ? this.sparkline(key, rising) : "";
     const classTone = c => { const tone = this.tone(c); return tone === "red" ? "red" : tone === "warn" ? "warn" : "mute"; };
     this.ensureCorrelations();
     const afterCount = all.filter(f => this.corr?.by_key?.[f.key]).length;
     const tiles = this.sumTiles([
-      { label: this.t("all"), value: this.formatNumber(this.findingTotal()), sub: this.followerCount() ? this.esc(this.t("findingsFollowSub", { n: this.formatNumber(this.followerCount()) })) : undefined, tone: this.findingTotal() ? "warn" : "ok", filter: "", active: !this.findingFilter, spark: spark("open", "bad") },
+      { label: this.t("allFindings"), value: this.formatNumber(this.findingTotal()), sub: this.followerCount() ? this.esc(this.t("findingsFollowSub", { n: this.formatNumber(this.followerCount()) })) : undefined, tone: this.findingTotal() ? "warn" : "ok", filter: "", active: !this.findingFilter, spark: spark("open", "bad") },
       afterCount ? { label: this.t("corrTile"), value: this.formatNumber(afterCount), sub: this.t("corrTileSub"), tone: "warn", attr: ["data-finding-after", "1"], active: this.findingAfter } : null,
       ...classes.map(c => ({ label: this.reasonLabel(c), value: this.formatNumber(all.filter(f => this.findingReason(f) === c).length), tone: classTone(c), filter: c, active: this.findingFilter === c, spark: spark(`class:${c}`, "bad") })),
     ]);

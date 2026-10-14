@@ -5058,8 +5058,14 @@ test("an integration outage is a reason of its own, with a tile and a filter of 
   assert.equal(el.findingReason(el.data.findings[0]), "outage");
   assert.equal(el.findingReason(el.data.findings[1]), "orphaned");
   const html = el.findingsView();
-  assert.ok(html.includes("All reasons") && html.includes("Outage"));
+  assert.ok(html.includes("Outage") && html.includes("All findings") && !html.includes("All reasons"), "the reason is set by the tiles only");
+  assert.ok(html.includes('data-lf="findings|fresh"') && !html.includes('data-fstatus="new"'), "new and in work are a filter of the list bar, not chips");
   el.findingFilter = "outage";
+  assert.equal(el.visibleFindings().map(x => x.object_id).join(), "e1");
+  el.findingFilter = "";
+  el.data.findings[1].first_detected_at = "2020-01-01T00:00:00Z";
+  el.data.findings[0].first_detected_at = new Date().toISOString();
+  el.lvState("findings", "impact", "desc").f.fresh = "new";
   assert.equal(el.visibleFindings().map(x => x.object_id).join(), "e1");
 });
 

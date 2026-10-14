@@ -102,7 +102,11 @@ class SearchPagesMixin {
     if (entry.settingsTab) this.settingsTab = entry.settingsTab;
     if (entry.viewTab) (this.viewTab ||= {})[view] = entry.viewTab;
     if (entry.kind === "filter" && entry.objectStatus) { this.statusFilter = entry.objectStatus; this.typeFilter = ""; this.originFilter = ""; }
-    if (entry.kind === "filter" && !entry.objectStatus) this.findingStatus = entry.findingStatus;
+    if (entry.kind === "filter" && !entry.objectStatus) {
+      const fresh = FRESH_STATES.includes(entry.findingStatus);
+      this.findingStatus = fresh ? "" : entry.findingStatus;
+      if (fresh) this.lvState("findings", "impact", "desc").f.fresh = entry.findingStatus;
+    }
     this.render();
     if (view === "changes" && !this.compare) this.loadCompare();
   }
