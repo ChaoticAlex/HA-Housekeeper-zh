@@ -5056,8 +5056,8 @@ class DiagnosisMixin {
   // Tabs offered for one object; "attributes" only when it has some, so an empty tab never shows.
   detailTabs(item, key) {
     if (item.object_type === "integration") return this.intTabs(item);
-    // An app has no actions of its own; its rights and its load come from the two system reports, its relations are the integrations that seem to use it.
-    if (item.object_type === "app") return [["overview", "tabOverview"], ...(this.edgesTo(key).length ? [["relations", "tabRelations", this.edgesTo(key).length]] : []), ["access", "accAppTab", null, this.appAccessTone(item)], ["storage", "accAppLoad"], ["technical", "tabTechnical"]];
+    // An app has only the mark as an action; its rights and its load come from the two system reports, its relations are the integrations that seem to use it.
+    if (item.object_type === "app") return [["overview", "tabOverview"], ...(this.hasActionsTab(item, key) ? [["actions", "tabActions", 0]] : []), ...(this.edgesTo(key).length ? [["relations", "tabRelations", this.edgesTo(key).length]] : []), ["access", "accAppTab", null, this.appAccessTone(item)], ["storage", "accAppLoad"], ["technical", "tabTechnical"]];
     const tabs = [["overview", "tabOverview"], ["relations", "tabRelations", this.edgesTo(key).length + this.edgesFrom(key).length], ["technical", "tabTechnical"]];
     if (this.hasActionsTab(item, key)) tabs.splice(1, 0, ["actions", "tabActions", this.fixItems(item, key).items.length]);
     if (item.attributes && Object.keys(item.attributes).length) tabs.push(["attributes", "tabAttributes"]);
@@ -9786,7 +9786,7 @@ class DetailActionsMixin {
 
   // Whether the tab "Actions" has anything to show for this object: findings to decide, buttons, a label or an edit form.
   hasActionsTab(item, key) {
-    if (!ACTION_TYPES.includes(item.object_type)) return false;
+    if (!ACTION_TYPES.includes(item.object_type) && item.object_type !== "app") return false;
     return Boolean(this.findingRows(key) || this.fixItems(item, key).items.length || this.labelForm(item) || this.detailEditCard(item) || this.entityTrimCard(item) || this.staleCard(item) || (MARK_TYPES.includes(item.object_type) && this.markRows(item).length));
   }
 
@@ -12979,7 +12979,7 @@ class SystemMixin {
       item.stage && item.stage !== "stable" ? fact("appStage", this.esc(item.stage)) : "",
     ].join("");
     const text = item.description ? `<div class="pad"><p class="factnote">${this.esc(item.description)}</p></div>` : "";
-    return `<div class="stack"><section class="panel"><div class="panelhead"><div><h2>${this.t("app")}</h2><p>${this.t("appHint")}</p></div></div><div class="facts">${rows}</div>${text}</section>${this.markCard(item)}</div>`;
+    return `<div class="stack"><section class="panel"><div class="panelhead"><div><h2>${this.t("app")}</h2><p>${this.t("appHint")}</p></div></div><div class="facts">${rows}</div>${text}</section></div>`;
   }
 
   appAccessCard(item) {

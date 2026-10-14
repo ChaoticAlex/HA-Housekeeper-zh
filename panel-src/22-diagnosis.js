@@ -310,8 +310,8 @@ class DiagnosisMixin {
   // Tabs offered for one object; "attributes" only when it has some, so an empty tab never shows.
   detailTabs(item, key) {
     if (item.object_type === "integration") return this.intTabs(item);
-    // An app has no actions of its own; its rights and its load come from the two system reports, its relations are the integrations that seem to use it.
-    if (item.object_type === "app") return [["overview", "tabOverview"], ...(this.edgesTo(key).length ? [["relations", "tabRelations", this.edgesTo(key).length]] : []), ["access", "accAppTab", null, this.appAccessTone(item)], ["storage", "accAppLoad"], ["technical", "tabTechnical"]];
+    // An app has only the mark as an action; its rights and its load come from the two system reports, its relations are the integrations that seem to use it.
+    if (item.object_type === "app") return [["overview", "tabOverview"], ...(this.hasActionsTab(item, key) ? [["actions", "tabActions", 0]] : []), ...(this.edgesTo(key).length ? [["relations", "tabRelations", this.edgesTo(key).length]] : []), ["access", "accAppTab", null, this.appAccessTone(item)], ["storage", "accAppLoad"], ["technical", "tabTechnical"]];
     const tabs = [["overview", "tabOverview"], ["relations", "tabRelations", this.edgesTo(key).length + this.edgesFrom(key).length], ["technical", "tabTechnical"]];
     if (this.hasActionsTab(item, key)) tabs.splice(1, 0, ["actions", "tabActions", this.fixItems(item, key).items.length]);
     if (item.attributes && Object.keys(item.attributes).length) tabs.push(["attributes", "tabAttributes"]);

@@ -44,7 +44,7 @@ class DetailActionsMixin {
 
   // Whether the tab "Actions" has anything to show for this object: findings to decide, buttons, a label or an edit form.
   hasActionsTab(item, key) {
-    if (!ACTION_TYPES.includes(item.object_type)) return false;
+    if (!ACTION_TYPES.includes(item.object_type) && item.object_type !== "app") return false;
     return Boolean(this.findingRows(key) || this.fixItems(item, key).items.length || this.labelForm(item) || this.detailEditCard(item) || this.entityTrimCard(item) || this.staleCard(item) || (MARK_TYPES.includes(item.object_type) && this.markRows(item).length));
   }
 

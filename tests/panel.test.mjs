@@ -4940,7 +4940,10 @@ test("an app is an object of its own: status, detail tabs with rights and load, 
   el._sys.dataflow.data = { ...ACCESS, apps_available: true, apps: [{ slug: "core_ssh", name: "SSH", state: "started", checked: true, risk: "high", access: [{ kind: "full_access", detail: null, level: "high" }] }] };
   assert.equal(el.tone("stopped"), "mute", "a stopped app is not a problem");
   assert.equal(el.haPath(app), "/hassio/addon/core_ssh/info");
-  assert.equal(JSON.stringify(el.detailTabs(app, "app:core_ssh").map(t => t[0])), JSON.stringify(["overview", "access", "storage", "technical"]));
+  assert.equal(JSON.stringify(el.detailTabs(app, "app:core_ssh").map(t => t[0])), JSON.stringify(["overview", "actions", "access", "storage", "technical"]));
+  const appActions = el.detailPanel("actions", app, "app:core_ssh");
+  assert.ok(appActions.includes("Notizen") && appActions.includes("data-mark-open"), "the mark of an app is in the Actions tab");
+  assert.ok(!el.detailPanel("overview", app, "app:core_ssh").includes("data-mark-open"), "no longer a card on the overview");
   assert.equal(el.accessTone(app), "", "an integration helper is not used for apps");
   assert.equal(el.appAccessTone(app), "red");
   const overview = el.appOverview(app);
