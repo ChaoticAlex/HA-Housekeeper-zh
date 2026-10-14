@@ -41,8 +41,14 @@ HISTORY_KINDS = HISTORY_STATES | {"created", "edited", "enabled", "disabled", "f
 FLAP_CHANGES = 4
 FLAP_WINDOW = timedelta(hours=3)
 HISTORY_LISTS = ("added", "removed", "changed", "fields")
-RULE_LIMITS = {"freshness": (1, 720), "min_value": (-1_000_000_000, 1_000_000_000), "unavailable_for": (1, 1440)}
-MEMBER_TYPES = frozenset({"entity", "device", "automation", "config_entry", "scene", "script", "app"})
+RULE_LIMITS = {
+    "freshness": (1, 720),
+    "min_value": (-1_000_000_000, 1_000_000_000),
+    "unavailable_for": (1, 1440),
+}
+MEMBER_TYPES = frozenset(
+    {"entity", "device", "automation", "config_entry", "scene", "script", "app"}
+)
 AUTOMATION_RULES = frozenset(
     {"automation.blocked", "automation.dead_actions", "automation.dead_condition"}
 )
@@ -53,28 +59,44 @@ STATE_DISABLED = "disabled"
 MANUAL_STALE_AFTER = timedelta(days=7)
 EVENT_NAME = f"{DOMAIN}_monitor"
 REASONS_DE = {
-    "missing": "Objekt fehlt", "disabled": "deaktiviert", "orphaned": "verwaist",
-    "unavailable": "nicht verfügbar", "problem": "Integration nicht geladen",
-    "source_unread": "Quelle nicht gelesen", "scan_unverified": "Scan nicht verlässlich",
+    "missing": "Objekt fehlt",
+    "disabled": "deaktiviert",
+    "orphaned": "verwaist",
+    "unavailable": "nicht verfügbar",
+    "problem": "Integration nicht geladen",
+    "source_unread": "Quelle nicht gelesen",
+    "scan_unverified": "Scan nicht verlässlich",
     "automation.blocked": "Automation blockiert",
     "automation.dead_actions": "Automationsaktion mit defektem Verweis",
     "automation.dead_condition": "Automationsbedingung mit defektem Verweis",
-    "broken_reference": "Defekter Verweis", "stopped": "App gestoppt",
-    "rule_stale": "Wert nicht rechtzeitig aktualisiert", "rule_below_min": "Mindestwert unterschritten",
-    "rule_unavailable_long": "Zu lange nicht verfügbar", "rule_waiting": "Wartezeit läuft",
-    "rule_no_value": "Kein numerischer Wert", "rule_no_timestamp": "Aktualisierungszeit unbekannt",
+    "broken_reference": "Defekter Verweis",
+    "stopped": "App gestoppt",
+    "rule_stale": "Wert nicht rechtzeitig aktualisiert",
+    "rule_below_min": "Mindestwert unterschritten",
+    "rule_unavailable_long": "Zu lange nicht verfügbar",
+    "rule_waiting": "Wartezeit läuft",
+    "rule_no_value": "Kein numerischer Wert",
+    "rule_no_timestamp": "Aktualisierungszeit unbekannt",
 }
 REASONS_EN = {
-    "missing": "object missing", "disabled": "disabled", "orphaned": "orphaned",
-    "unavailable": "unavailable", "problem": "integration not loaded",
-    "source_unread": "source unread", "scan_unverified": "scan not reliable",
+    "missing": "object missing",
+    "disabled": "disabled",
+    "orphaned": "orphaned",
+    "unavailable": "unavailable",
+    "problem": "integration not loaded",
+    "source_unread": "source unread",
+    "scan_unverified": "scan not reliable",
     "automation.blocked": "automation blocked",
     "automation.dead_actions": "automation action has a broken reference",
     "automation.dead_condition": "automation condition has a broken reference",
-    "broken_reference": "broken reference", "stopped": "app stopped",
-    "rule_stale": "value not updated in time", "rule_below_min": "below minimum value",
-    "rule_unavailable_long": "unavailable for too long", "rule_waiting": "grace period running",
-    "rule_no_value": "no numeric value", "rule_no_timestamp": "update time unknown",
+    "broken_reference": "broken reference",
+    "stopped": "app stopped",
+    "rule_stale": "value not updated in time",
+    "rule_below_min": "below minimum value",
+    "rule_unavailable_long": "unavailable for too long",
+    "rule_waiting": "grace period running",
+    "rule_no_value": "no numeric value",
+    "rule_no_timestamp": "update time unknown",
 }
 
 
@@ -98,7 +120,8 @@ def _segments(entries: list[dict[str, Any]], now: datetime) -> list[tuple[dateti
         elif kind == "flapping" and (until := _time(entry.get("until"))):
             timeline += [(at, "flapping"), (until, entry["state"])]
         elif kind in ("created", "enabled", "disabled") or (
-            kind == "edited" and (entry.get("added") or entry.get("removed") or entry.get("changed"))
+            kind == "edited"
+            and (entry.get("added") or entry.get("removed") or entry.get("changed"))
         ):
             timeline.append((at, None))
     segments: list[tuple[datetime, datetime, str]] = []
@@ -114,7 +137,9 @@ def _segments(entries: list[dict[str, Any]], now: datetime) -> list[tuple[dateti
     return segments
 
 
-def availability(entries: list[dict[str, Any]], now: datetime, days: int = AVAILABILITY_DAYS) -> dict[str, Any]:
+def availability(
+    entries: list[dict[str, Any]], now: datetime, days: int = AVAILABILITY_DAYS
+) -> dict[str, Any]:
     """How long the function was in which state during the last `days`, and how it went day by day."""
     start = now - timedelta(days=days)
     seconds = {"ok": 0.0, "problem": 0.0, "unverified": 0.0, "flapping": 0.0}
@@ -125,7 +150,9 @@ def availability(entries: list[dict[str, Any]], now: datetime, days: int = AVAIL
             clipped.append((begin, end, state))
             seconds[state] += (end - begin).total_seconds()
     observed = sum(seconds.values())
-    problems = [(end - begin).total_seconds() for begin, end, state in clipped if state == "problem"]
+    problems = [
+        (end - begin).total_seconds() for begin, end, state in clipped if state == "problem"
+    ]
     worst: dict[str, str] = {}
     for begin, end, state in clipped:
         day = dt_util.as_local(begin).date()
@@ -244,16 +271,30 @@ def _member_state(
         if kind in {"automation", "script", "scene"} and state == STATE_OK:
             broken = next(
                 (
-                    finding for finding in findings.get(key, ())
-                    if not finding.get("ignored") and not finding.get("runtime_created")
-                    and (finding.get("classification") == "broken_reference"
-                         or kind == "automation" and finding.get("rule_id") in AUTOMATION_RULES)
+                    finding
+                    for finding in findings.get(key, ())
+                    if not finding.get("ignored")
+                    and not finding.get("runtime_created")
+                    and (
+                        finding.get("classification") == "broken_reference"
+                        or kind == "automation"
+                        and finding.get("rule_id") in AUTOMATION_RULES
+                    )
                 ),
                 None,
             )
             if broken is not None:
-                state, reason = STATE_PROBLEM, str(broken["rule_id"] if kind == "automation" else "broken_reference")
-    return {"object_key": key, "state": state, "reason": reason, "required": member["required"], "rules": rules}
+                state, reason = (
+                    STATE_PROBLEM,
+                    str(broken["rule_id"] if kind == "automation" else "broken_reference"),
+                )
+    return {
+        "object_key": key,
+        "state": state,
+        "reason": reason,
+        "required": member["required"],
+        "rules": rules,
+    }
 
 
 def evaluate(
@@ -267,26 +308,44 @@ def evaluate(
     scanned_at = meta.get("scanned_at")
     if definition.get("enabled") is False:
         return {
-            "id": definition["id"], "name": definition["name"],
-            "description": definition["description"], "notify": definition["notify"],
-            "enabled": False, "members": [
-                {"object_key": member["object_key"], "state": STATE_DISABLED,
-                 "reason": "disabled", "required": member["required"],
-                 "rules": member.get("rules", [])}
+            "id": definition["id"],
+            "name": definition["name"],
+            "description": definition["description"],
+            "notify": definition["notify"],
+            "enabled": False,
+            "members": [
+                {
+                    "object_key": member["object_key"],
+                    "state": STATE_DISABLED,
+                    "reason": "disabled",
+                    "required": member["required"],
+                    "rules": member.get("rules", []),
+                }
                 for member in definition["members"]
             ],
-            "state": STATE_DISABLED, "reason": "disabled", "reason_key": None,
-            "scanned_at": scanned_at, "fully_verified": False,
+            "state": STATE_DISABLED,
+            "reason": "disabled",
+            "reason_key": None,
+            "scanned_at": scanned_at,
+            "fully_verified": False,
         }
     limit = stale_after(int((health or {}).get("interval_hours") or 0)) or MANUAL_STALE_AFTER
     scanned = _time(scanned_at)
     stale = scanned is None or now - scanned > limit
     scan_unreliable = meta.get("preliminary") or (health or {}).get("state") in {
-        "failed", "stale", "preliminary"
+        "failed",
+        "stale",
+        "preliminary",
     }
     if not snapshot or stale or scan_unreliable:
         members = [
-            {"object_key": m["object_key"], "state": STATE_UNVERIFIED, "reason": "scan_unverified", "required": m["required"], "rules": m.get("rules", [])}
+            {
+                "object_key": m["object_key"],
+                "state": STATE_UNVERIFIED,
+                "reason": "scan_unverified",
+                "required": m["required"],
+                "rules": m.get("rules", []),
+            }
             for m in definition["members"]
         ]
     else:
@@ -296,7 +355,9 @@ def evaluate(
             key = f"{str(finding.get('rule_id', '')).split('.')[0]}:{finding.get('object_id')}"
             findings.setdefault(key, []).append(finding)
         coverage = {item["source"]: item["state"] for item in meta.get("coverage", ())}
-        members = [_member_state(m, objects, findings, coverage, now) for m in definition["members"]]
+        members = [
+            _member_state(m, objects, findings, coverage, now) for m in definition["members"]
+        ]
     required = [m for m in members if m["required"]]
     if any(m["state"] == STATE_PROBLEM for m in required):
         state = STATE_PROBLEM
@@ -341,18 +402,36 @@ class MonitorStore:
             if not isinstance(item, dict):
                 continue
             try:
-                self._validate(item.get("name"), item.get("description"), item.get("notify"), item.get("members"), item.get("enabled", True))
+                self._validate(
+                    item.get("name"),
+                    item.get("description"),
+                    item.get("notify"),
+                    item.get("members"),
+                    item.get("enabled", True),
+                )
             except MonitorError:
                 continue
             if isinstance(item.get("id"), str) and item["id"] and item["id"] not in seen_ids:
                 seen_ids.add(item["id"])
-                self.items.append({
-                    **{key: item[key] for key in ("id", "name", "description", "notify", "members")},
-                    "enabled": item.get("enabled", True),
-                    "members": [{**member, "rules": member.get("rules", [])} for member in item["members"]],
-                    "created_at": item.get("created_at") if _time(item.get("created_at")) else None,
-                    "updated_at": item.get("updated_at") if _time(item.get("updated_at")) else None,
-                })
+                self.items.append(
+                    {
+                        **{
+                            key: item[key]
+                            for key in ("id", "name", "description", "notify", "members")
+                        },
+                        "enabled": item.get("enabled", True),
+                        "members": [
+                            {**member, "rules": member.get("rules", [])}
+                            for member in item["members"]
+                        ],
+                        "created_at": item.get("created_at")
+                        if _time(item.get("created_at"))
+                        else None,
+                        "updated_at": item.get("updated_at")
+                        if _time(item.get("updated_at"))
+                        else None,
+                    }
+                )
         self.items = self.items[:MAX_ITEMS]
         saved_history = data.get("history")
         if isinstance(saved_history, dict):
@@ -367,44 +446,69 @@ class MonitorStore:
                 if isinstance(value, dict):
                     self.runtime[item["id"]] = {
                         "primed": value.get("primed") is True,
-                        "state": value.get("state") if value.get("state") in {STATE_OK, STATE_PROBLEM, STATE_UNVERIFIED} else STATE_UNVERIFIED,
+                        "state": value.get("state")
+                        if value.get("state") in {STATE_OK, STATE_PROBLEM, STATE_UNVERIFIED}
+                        else STATE_UNVERIFIED,
                         "open_incident": value.get("open_incident") is True,
                         "notified": value.get("notified") is True,
                         "unknown_notified": value.get("unknown_notified") is True,
-                        "unknown_count": max(0, min(2, value.get("unknown_count", 0))) if isinstance(value.get("unknown_count"), int) else 0,
-                        "last_verified_at": value.get("last_verified_at") if _time(value.get("last_verified_at")) else None,
-                        "last_problem_reason": value.get("last_problem_reason") if isinstance(value.get("last_problem_reason"), str) else None,
-                        "last_problem_key": value.get("last_problem_key") if isinstance(value.get("last_problem_key"), str) else None,
+                        "unknown_count": max(0, min(2, value.get("unknown_count", 0)))
+                        if isinstance(value.get("unknown_count"), int)
+                        else 0,
+                        "last_verified_at": value.get("last_verified_at")
+                        if _time(value.get("last_verified_at"))
+                        else None,
+                        "last_problem_reason": value.get("last_problem_reason")
+                        if isinstance(value.get("last_problem_reason"), str)
+                        else None,
+                        "last_problem_key": value.get("last_problem_key")
+                        if isinstance(value.get("last_problem_key"), str)
+                        else None,
                     }
 
     def _save(self) -> None:
         self._store.async_delay_save(
-            lambda: {"items": self.items, "runtime": self.runtime, "history": self.history}, SAVE_DELAY
+            lambda: {"items": self.items, "runtime": self.runtime, "history": self.history},
+            SAVE_DELAY,
         )
 
     @staticmethod
     def _history_entry(value: Any) -> dict[str, Any] | None:
         """Keep only what the history writes itself, so a damaged store cannot reach the panel."""
-        if not isinstance(value, dict) or value.get("kind") not in HISTORY_KINDS or not _time(value.get("at")):
+        if (
+            not isinstance(value, dict)
+            or value.get("kind") not in HISTORY_KINDS
+            or not _time(value.get("at"))
+        ):
             return None
         entry: dict[str, Any] = {"at": value["at"], "kind": value["kind"]}
         if value["kind"] == "flapping":
-            if not _time(value.get("until")) or value.get("state") not in HISTORY_STATES or not isinstance(value.get("count"), int):
+            if (
+                not _time(value.get("until"))
+                or value.get("state") not in HISTORY_STATES
+                or not isinstance(value.get("count"), int)
+            ):
                 return None
-            entry.update(until=value["until"], state=value["state"], count=max(1, min(value["count"], 100000)))
+            entry.update(
+                until=value["until"],
+                state=value["state"],
+                count=max(1, min(value["count"], 100000)),
+            )
         for key in ("reason", "key"):
             if isinstance(value.get(key), str):
                 entry[key] = value[key][:200]
         for key in HISTORY_LISTS:
             if isinstance(value.get(key), list):
-                entry[key] = [v[:200] for v in value[key] if isinstance(v, str)][:MAX_MEMBERS * 2]
+                entry[key] = [v[:200] for v in value[key] if isinstance(v, str)][: MAX_MEMBERS * 2]
         return entry
 
     def _log(self, item_id: str, kind: str, now: datetime, **fields: Any) -> bool:
         """Append one dated entry; a repeat of the previous one is not written again."""
         entry = {"at": now.isoformat(), "kind": kind, **{k: v for k, v in fields.items() if v}}
         entries = self.history.setdefault(item_id, [])
-        if entries and {k: v for k, v in entries[-1].items() if k != "at"} == {k: v for k, v in entry.items() if k != "at"}:
+        if entries and {k: v for k, v in entries[-1].items() if k != "at"} == {
+            k: v for k, v in entry.items() if k != "at"
+        }:
             return False
         if kind in HISTORY_STATES and self._flap(entries, entry, now):
             self._prune(item_id, now)
@@ -418,10 +522,17 @@ class MonitorStore:
         """Fold a run of quick state changes into one entry, so a wobbling object cannot fill the history."""
         last = entries[-1] if entries else None
         latest = {k: entry[k] for k in ("reason", "key") if k in entry}
-        if last and last["kind"] == "flapping" and (until := _time(last["until"])) and now - until <= FLAP_WINDOW:
+        if (
+            last
+            and last["kind"] == "flapping"
+            and (until := _time(last["until"]))
+            and now - until <= FLAP_WINDOW
+        ):
             for key in ("reason", "key"):
                 last.pop(key, None)
-            last.update(until=now.isoformat(), count=last["count"] + 1, state=entry["kind"], **latest)
+            last.update(
+                until=now.isoformat(), count=last["count"] + 1, state=entry["kind"], **latest
+            )
             return True
         recent: list[dict[str, Any]] = []
         for old in reversed(entries):
@@ -431,8 +542,17 @@ class MonitorStore:
             recent.append(old)
         if len(recent) + 1 < FLAP_CHANGES:
             return False
-        del entries[-len(recent):]
-        entries.append({"at": recent[-1]["at"], "until": now.isoformat(), "kind": "flapping", "count": len(recent) + 1, "state": entry["kind"], **latest})
+        del entries[-len(recent) :]
+        entries.append(
+            {
+                "at": recent[-1]["at"],
+                "until": now.isoformat(),
+                "kind": "flapping",
+                "count": len(recent) + 1,
+                "state": entry["kind"],
+                **latest,
+            }
+        )
         return True
 
     def _prune(self, item_id: str, now: datetime) -> bool:
@@ -441,7 +561,11 @@ class MonitorStore:
         if not entries:
             return False
         cutoff = now - timedelta(days=self.retention_days)
-        kept = [e for e in entries if (at := _time(e.get("until") or e["at"])) is not None and at >= cutoff][-MAX_HISTORY:]
+        kept = [
+            e
+            for e in entries
+            if (at := _time(e.get("until") or e["at"])) is not None and at >= cutoff
+        ][-MAX_HISTORY:]
         if len(kept) == len(entries):
             return False
         self.history[item_id] = kept
@@ -450,11 +574,17 @@ class MonitorStore:
     def availability_of(self, item_id: str, now: datetime | None = None) -> dict[str, Any]:
         """The state shares of one function over the last 30 days (less if the retention is shorter)."""
         entries = self.history.get(item_id, [])
-        return availability(entries, now or datetime.now(UTC), min(AVAILABILITY_DAYS, self.retention_days))
+        return availability(
+            entries, now or datetime.now(UTC), min(AVAILABILITY_DAYS, self.retention_days)
+        )
 
     def last_problem_at(self, item_id: str, now: datetime | None = None) -> str | None:
         """When the function was last impaired or unstable (now, while it still is), if the history knows."""
-        ends = [end for _, end, state in _segments(self.history.get(item_id, []), now or datetime.now(UTC)) if state in ("problem", "flapping")]
+        ends = [
+            end
+            for _, end, state in _segments(self.history.get(item_id, []), now or datetime.now(UTC))
+            if state in ("problem", "flapping")
+        ]
         return max(ends).isoformat() if ends else None
 
     def history_of(self, item_id: str) -> list[dict[str, Any]]:
@@ -462,7 +592,9 @@ class MonitorStore:
         return list(reversed(self.history.get(item_id, ())))
 
     @staticmethod
-    def _validate(name: Any, description: Any, notify: Any, members: Any, enabled: Any = True) -> None:
+    def _validate(
+        name: Any, description: Any, notify: Any, members: Any, enabled: Any = True
+    ) -> None:
         if not isinstance(name, str) or not name.strip() or len(name.strip()) > NAME_MAX:
             raise MonitorError("name")
         if not isinstance(description, str) or len(description) > DESCRIPTION_MAX:
@@ -491,10 +623,21 @@ class MonitorStore:
                 if not isinstance(rule, dict) or set(rule) != {"kind", "value"}:
                     raise MonitorError("rules")
                 rule_kind, value = rule["kind"], rule["value"]
-                if not isinstance(rule_kind, str) or rule_kind not in RULE_LIMITS or rule_kind in seen_rules or isinstance(value, bool) or not isinstance(value, (int, float)):
+                if (
+                    not isinstance(rule_kind, str)
+                    or rule_kind not in RULE_LIMITS
+                    or rule_kind in seen_rules
+                    or isinstance(value, bool)
+                    or not isinstance(value, (int, float))
+                ):
                     raise MonitorError("rules")
                 minimum, maximum = RULE_LIMITS[rule_kind]
-                if not minimum <= value <= maximum or not isfinite(value) or rule_kind != "min_value" and not isinstance(value, int):
+                if (
+                    not minimum <= value <= maximum
+                    or not isfinite(value)
+                    or rule_kind != "min_value"
+                    and not isinstance(value, int)
+                ):
                     raise MonitorError("rules")
                 seen_rules.add(rule_kind)
             keys.add(key)
@@ -518,39 +661,91 @@ class MonitorStore:
             raise MonitorError("too_many")
         existing = {m["object_key"] for m in old["members"]} if old else set()
         available = {
-            f"{o['object_type']}:{o['object_id']}" for o in (snapshot or {}).get("objects", ())
+            f"{o['object_type']}:{o['object_id']}"
+            for o in (snapshot or {}).get("objects", ())
             if o.get("status") != "ignored"
         }
         if any(m["object_key"] not in available | existing for m in members):
             raise MonitorError("object_key")
         now = datetime.now(UTC)
-        before = None if old is None else {
-            "members": {m["object_key"]: (m["required"], m.get("rules", [])) for m in old["members"]},
-            "fields": {"name": old["name"], "description": old["description"], "notify": old["notify"]},
-            "enabled": old.get("enabled", True),
-        }
+        before = (
+            None
+            if old is None
+            else {
+                "members": {
+                    m["object_key"]: (m["required"], m.get("rules", [])) for m in old["members"]
+                },
+                "fields": {
+                    "name": old["name"],
+                    "description": old["description"],
+                    "notify": old["notify"],
+                },
+                "enabled": old.get("enabled", True),
+            }
+        )
         changed_members = old is None or members != old["members"]
         changed_enabled = old is not None and old.get("enabled", True) != enabled
-        enabled_notification = old is not None and not changed_members and not changed_enabled and enabled and not old["notify"] and notify
+        enabled_notification = (
+            old is not None
+            and not changed_members
+            and not changed_enabled
+            and enabled
+            and not old["notify"]
+            and notify
+        )
         if old is None:
             item_id = secrets.token_hex(6)
             old = {"id": item_id, "created_at": datetime.now(UTC).isoformat()}
             self.items.append(old)
         old.update(
-            name=name.strip(), description=description.strip(), notify=notify, enabled=enabled,
-            members=[{"object_key": m["object_key"], "required": m["required"], "rules": [{"kind": r["kind"], "value": r["value"]} for r in m.get("rules", [])]} for m in members],
+            name=name.strip(),
+            description=description.strip(),
+            notify=notify,
+            enabled=enabled,
+            members=[
+                {
+                    "object_key": m["object_key"],
+                    "required": m["required"],
+                    "rules": [{"kind": r["kind"], "value": r["value"]} for r in m.get("rules", [])],
+                }
+                for m in members
+            ],
             updated_at=datetime.now(UTC).isoformat(),
         )
         if before is None:
             self._log(item_id, "created", now, added=[m["object_key"] for m in members])
         else:
-            after = {m["object_key"]: (m["required"], [{"kind": r["kind"], "value": r["value"]} for r in m.get("rules", [])]) for m in members}
-            fields = [k for k, v in {"name": name.strip(), "description": description.strip(), "notify": notify}.items() if before["fields"][k] != v]
+            after = {
+                m["object_key"]: (
+                    m["required"],
+                    [{"kind": r["kind"], "value": r["value"]} for r in m.get("rules", [])],
+                )
+                for m in members
+            }
+            fields = [
+                k
+                for k, v in {
+                    "name": name.strip(),
+                    "description": description.strip(),
+                    "notify": notify,
+                }.items()
+                if before["fields"][k] != v
+            ]
             added = [k for k in after if k not in before["members"]]
             removed = [k for k in before["members"] if k not in after]
-            changed = [k for k in after if k in before["members"] and after[k] != before["members"][k]]
+            changed = [
+                k for k in after if k in before["members"] and after[k] != before["members"][k]
+            ]
             if added or removed or changed or fields:
-                self._log(item_id, "edited", now, added=added, removed=removed, changed=changed, fields=fields)
+                self._log(
+                    item_id,
+                    "edited",
+                    now,
+                    added=added,
+                    removed=removed,
+                    changed=changed,
+                    fields=fields,
+                )
             if changed_enabled:
                 self._log(item_id, "enabled" if enabled else "disabled", now)
         if changed_members or changed_enabled:
@@ -591,7 +786,9 @@ class MonitorStore:
         language = self.hass.config.language.split("-")[0]
         if language == "de":
             reason = REASONS_DE.get(result["reason"], result["reason"])
-            last_reason = REASONS_DE.get(result.get("last_problem_reason"), result.get("last_problem_reason") or reason)
+            last_reason = REASONS_DE.get(
+                result.get("last_problem_reason"), result.get("last_problem_reason") or reason
+            )
             title = f"Housekeeper: {result['name']}"
             body = (
                 f"Prüfung unvollständig; letzter bestätigter Defekt ({last_reason}) bleibt ungeklärt."
@@ -603,7 +800,9 @@ class MonitorStore:
             link = "Hausfunktionen öffnen"
         else:
             reason = REASONS_EN.get(result["reason"], result["reason"])
-            last_reason = REASONS_EN.get(result.get("last_problem_reason"), result.get("last_problem_reason") or reason)
+            last_reason = REASONS_EN.get(
+                result.get("last_problem_reason"), result.get("last_problem_reason") or reason
+            )
             title = f"Housekeeper: {result['name']}"
             body = (
                 f"Check incomplete; the last confirmed fault ({last_reason}) remains unresolved."
@@ -644,10 +843,16 @@ class MonitorStore:
             result = evaluate(item, snapshot, health, now)
             runtime = self.runtime.setdefault(item["id"], {})
             if not item.get("enabled", True):
-                result.update(state=STATE_DISABLED, reason="disabled", reason_key=None,
-                              fully_verified=False, incident_open=False,
-                              last_verified_at=runtime.get("last_verified_at"),
-                              last_problem_reason=None, last_problem_key=None)
+                result.update(
+                    state=STATE_DISABLED,
+                    reason="disabled",
+                    reason_key=None,
+                    fully_verified=False,
+                    incident_open=False,
+                    last_verified_at=runtime.get("last_verified_at"),
+                    last_problem_reason=None,
+                    last_problem_key=None,
+                )
                 results.append(result)
                 continue
             old = runtime.get("state")
@@ -669,9 +874,11 @@ class MonitorStore:
                     and (health or {}).get("state") == "ok"
                 ):
                     runtime.update(
-                        primed=True, state=state,
+                        primed=True,
+                        state=state,
                         open_incident=state == STATE_PROBLEM,
-                        notified=False, unknown_notified=False,
+                        notified=False,
+                        unknown_notified=False,
                         unknown_count=1 if state == STATE_UNVERIFIED and new_scan else 0,
                     )
                     if result["fully_verified"]:
@@ -679,7 +886,9 @@ class MonitorStore:
                     if state == STATE_PROBLEM:
                         runtime["last_problem_reason"] = result["reason"]
                         runtime["last_problem_key"] = result["reason_key"]
-                    self._log(item["id"], state, now, reason=result["reason"], key=result["reason_key"])
+                    self._log(
+                        item["id"], state, now, reason=result["reason"], key=result["reason_key"]
+                    )
                     changed = True
             elif old != state:
                 runtime["state"] = state
@@ -709,32 +918,67 @@ class MonitorStore:
                     runtime.update(open_incident=False, notified=False, unknown_notified=False)
                     runtime["last_problem_reason"] = None
                     runtime["last_problem_key"] = None
-                elif state == STATE_UNVERIFIED and runtime.get("open_incident") and runtime.get("notified"):
-                    self._notify({**result, "incident_open": True, "last_problem_reason": runtime.get("last_problem_reason")}, uncertain=True)
-            elif state == STATE_PROBLEM and runtime.get("open_incident") and (
-                runtime.get("last_problem_reason") != result["reason"]
-                or runtime.get("last_problem_key") != result["reason_key"]
+                elif (
+                    state == STATE_UNVERIFIED
+                    and runtime.get("open_incident")
+                    and runtime.get("notified")
+                ):
+                    self._notify(
+                        {
+                            **result,
+                            "incident_open": True,
+                            "last_problem_reason": runtime.get("last_problem_reason"),
+                        },
+                        uncertain=True,
+                    )
+            elif (
+                state == STATE_PROBLEM
+                and runtime.get("open_incident")
+                and (
+                    runtime.get("last_problem_reason") != result["reason"]
+                    or runtime.get("last_problem_key") != result["reason_key"]
+                )
             ):
                 runtime["last_problem_reason"] = result["reason"]
                 runtime["last_problem_key"] = result["reason_key"]
-                self._log(item["id"], STATE_PROBLEM, now, reason=result["reason"], key=result["reason_key"])
+                self._log(
+                    item["id"],
+                    STATE_PROBLEM,
+                    now,
+                    reason=result["reason"],
+                    key=result["reason_key"],
+                )
                 changed = True
                 if runtime.get("notified"):
                     self._notify({**result, "incident_open": True})
             if state == STATE_UNVERIFIED:
                 if new_scan:
-                    runtime["unknown_count"] = min(2, runtime.get("unknown_count", 0) + 1 if old == STATE_UNVERIFIED else 1)
+                    runtime["unknown_count"] = min(
+                        2, runtime.get("unknown_count", 0) + 1 if old == STATE_UNVERIFIED else 1
+                    )
                     changed = True
                 old_scan = _time(result["scanned_at"])
-                limit = stale_after(int((health or {}).get("interval_hours") or 0)) or MANUAL_STALE_AFTER
+                limit = (
+                    stale_after(int((health or {}).get("interval_hours") or 0))
+                    or MANUAL_STALE_AFTER
+                )
                 overdue = old_scan is not None and now - old_scan > limit
-                if runtime.get("primed") and not runtime.get("unknown_notified") and (
-                    runtime.get("unknown_count", 0) >= 2 or overdue
+                if (
+                    runtime.get("primed")
+                    and not runtime.get("unknown_notified")
+                    and (runtime.get("unknown_count", 0) >= 2 or overdue)
                 ):
                     runtime["unknown_notified"] = True
                     self._event("pruefung_unvollstaendig", result, now)
                     if item["notify"]:
-                        self._notify({**result, "incident_open": bool(runtime.get("open_incident")), "last_problem_reason": runtime.get("last_problem_reason")}, uncertain=True)
+                        self._notify(
+                            {
+                                **result,
+                                "incident_open": bool(runtime.get("open_incident")),
+                                "last_problem_reason": runtime.get("last_problem_reason"),
+                            },
+                            uncertain=True,
+                        )
                         runtime["notified"] = True
                     changed = True
             else:

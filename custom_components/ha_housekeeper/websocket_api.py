@@ -1134,8 +1134,13 @@ def websocket_monitor_list(
         vol.Required("notify"): bool,
         vol.Optional("enabled", default=True): bool,
         vol.Required("members"): [
-            {vol.Required("object_key"): str, vol.Required("required"): bool,
-             vol.Optional("rules", default=[]): [{vol.Required("kind"): str, vol.Required("value"): vol.Any(int, float)}]}
+            {
+                vol.Required("object_key"): str,
+                vol.Required("required"): bool,
+                vol.Optional("rules", default=[]): [
+                    {vol.Required("kind"): str, vol.Required("value"): vol.Any(int, float)}
+                ],
+            }
         ],
     }
 )
@@ -1154,8 +1159,14 @@ async def websocket_monitor_save(
     try:
         snapshot = await scanner.async_get_snapshot()
         function_id = scanner.monitor.upsert(
-            msg.get("function_id"), msg["name"], msg["description"], msg["notify"],
-            msg["members"], snapshot, scanner.health_report(), msg["enabled"],
+            msg.get("function_id"),
+            msg["name"],
+            msg["description"],
+            msg["notify"],
+            msg["members"],
+            snapshot,
+            scanner.health_report(),
+            msg["enabled"],
         )
     except MonitorError as err:
         connection.send_error(msg["id"], "invalid_format", str(err))
@@ -1173,8 +1184,13 @@ async def websocket_monitor_save(
     {
         vol.Required("type"): f"{DOMAIN}/monitor_preview",
         vol.Required("members"): [
-            {vol.Required("object_key"): str, vol.Required("required"): bool,
-             vol.Optional("rules", default=[]): [{vol.Required("kind"): str, vol.Required("value"): vol.Any(int, float)}]}
+            {
+                vol.Required("object_key"): str,
+                vol.Required("required"): bool,
+                vol.Optional("rules", default=[]): [
+                    {vol.Required("kind"): str, vol.Required("value"): vol.Any(int, float)}
+                ],
+            }
         ],
     }
 )
@@ -1191,9 +1207,16 @@ async def websocket_monitor_preview(
         MonitorStore._validate("Preview", "", False, msg["members"])
         snapshot = await scanner.async_get_snapshot()
         result = evaluate(
-            {"id": "preview", "name": "Preview", "description": "", "notify": False,
-             "members": msg["members"]},
-            snapshot, scanner.health_report(), datetime.now(UTC),
+            {
+                "id": "preview",
+                "name": "Preview",
+                "description": "",
+                "notify": False,
+                "members": msg["members"],
+            },
+            snapshot,
+            scanner.health_report(),
+            datetime.now(UTC),
         )
     except MonitorError as err:
         connection.send_error(msg["id"], "invalid_format", str(err))
@@ -1222,11 +1245,13 @@ def websocket_monitor_history(
         return
     connection.send_result(
         msg["id"],
-        _versioned({
-            "entries": scanner.monitor.history_of(msg["function_id"]),
-            "retention_days": scanner.monitor.retention_days,
-            "availability": scanner.monitor.availability_of(msg["function_id"]),
-        }),
+        _versioned(
+            {
+                "entries": scanner.monitor.history_of(msg["function_id"]),
+                "retention_days": scanner.monitor.retention_days,
+                "availability": scanner.monitor.availability_of(msg["function_id"]),
+            }
+        ),
     )
 
 

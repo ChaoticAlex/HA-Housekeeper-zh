@@ -142,7 +142,8 @@ def storage_breakdown(config_dir: str, budget: _Budget | None = None) -> dict[st
     for target_id, rel, kind in STORAGE_TARGETS:
         if kind == "db":
             size = sum(
-                path_size(os.path.join(config_dir, rel + suffix), budget) for suffix in ("", "-wal", "-shm")
+                path_size(os.path.join(config_dir, rel + suffix), budget)
+                for suffix in ("", "-wal", "-shm")
             )
         else:
             size = path_size(os.path.join(config_dir, rel), budget)
@@ -243,7 +244,12 @@ def card_sizes(
         }
         parent = os.path.realpath(os.path.dirname(path))
         if os.path.isfile(path) and parent != www and parent.startswith(www + os.sep):
-            result[url] = {"bytes": path_size(parent, budget), "scope": "folder", "path": parent, **extra}
+            result[url] = {
+                "bytes": path_size(parent, budget),
+                "scope": "folder",
+                "path": parent,
+                **extra,
+            }
         else:
             result[url] = {"bytes": path_size(path, budget), "scope": "file", "path": path, **extra}
     return result

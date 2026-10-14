@@ -102,7 +102,9 @@ async def async_setup_entry(
             async_add_entities([MonitorSensor(entry, function_id) for function_id in sorted(fresh)])
 
     _check_functions()
-    entry.async_on_unload(async_dispatcher_connect(hass, SIGNAL_MONITOR_DEFINITIONS, _check_functions))
+    entry.async_on_unload(
+        async_dispatcher_connect(hass, SIGNAL_MONITOR_DEFINITIONS, _check_functions)
+    )
 
 
 class HousekeeperSensor(SensorEntity):
@@ -201,12 +203,16 @@ class MonitorSensor(SensorEntity):
 
     def _update(self) -> None:
         scanner = self.hass.data.get(DOMAIN, {}).get("scanner")
-        definition = next(
-            (item for item in scanner.monitor.items if item["id"] == self.function_id), None
-        ) if scanner else None
-        result = next(
-            (item for item in scanner.monitor.results if item["id"] == self.function_id), None
-        ) if scanner else None
+        definition = (
+            next((item for item in scanner.monitor.items if item["id"] == self.function_id), None)
+            if scanner
+            else None
+        )
+        result = (
+            next((item for item in scanner.monitor.results if item["id"] == self.function_id), None)
+            if scanner
+            else None
+        )
         self._attr_name = f"Hausfunktion {definition['name']}" if definition else "Hausfunktionen"
         self._attr_native_value = result["state"] if result else "unverified"
         self._attr_extra_state_attributes = (
@@ -216,7 +222,8 @@ class MonitorSensor(SensorEntity):
                 "last_verified_at": result["last_verified_at"],
                 **self._history_attributes(scanner.monitor),
             }
-            if result else {}
+            if result
+            else {}
         )
 
     def _history_attributes(self, monitor: Any) -> dict[str, Any]:
@@ -227,5 +234,7 @@ class MonitorSensor(SensorEntity):
             "last_problem_at": monitor.last_problem_at(self.function_id),
             "problems_30d": shares["incidents"],
             "downtime_30d_minutes": round(shares["problem_seconds"] / 60),
-            "availability_30d": math.floor(shares["ok_seconds"] / observed * 1000) / 10 if observed else None,
+            "availability_30d": math.floor(shares["ok_seconds"] / observed * 1000) / 10
+            if observed
+            else None,
         }

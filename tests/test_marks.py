@@ -161,7 +161,9 @@ def test_the_scanner_looks_again_when_the_window_of_an_integration_closes() -> N
     sun = {"state": "below_horizon"}
     scanner = InventoryScanner.__new__(InventoryScanner)
     scanner.marks = SimpleNamespace(
-        items={"config_entry:abc": _mark("expected_offline") | {"window": {"mode": "sun"}, "grace": 30}}
+        items={
+            "config_entry:abc": _mark("expected_offline") | {"window": {"mode": "sun"}, "grace": 30}
+        }
     )
     scanner._snapshot = {"findings": []}
     scanner._window_seen = {}
