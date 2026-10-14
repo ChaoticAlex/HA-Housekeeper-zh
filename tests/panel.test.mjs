@@ -3099,8 +3099,12 @@ test("the old load link opens the Recorder view", () => {
 test("a list can hide columns and offers its rows as CSV", () => {
   const { el, shadow } = panel("en");
   el.data = DATA; el.view = "inventory"; el.render();
-  assert.ok(shadow.innerHTML.includes('data-export-list="inventory"') && shadow.innerHTML.includes('data-col-open="inventory"'));
-  assert.ok(shadow.innerHTML.indexOf('data-export-list="inventory"') < shadow.innerHTML.indexOf("data-xp-open"), "the export assistant sits under the list bar");
+  assert.ok(shadow.innerHTML.includes('data-exp-menu="inventory"') && shadow.innerHTML.includes('data-col-open="inventory"'), "the inventory has one export menu in the list bar");
+  assert.ok(!shadow.innerHTML.includes('data-export-list="inventory"') && !shadow.innerHTML.includes("data-xp-open"), "no separate download button and no extra row");
+  assert.ok(!shadow.innerHTML.includes('data-exp-csv'), "the menu is closed at first");
+  el._expOpen = "inventory"; el.render();
+  assert.ok(shadow.innerHTML.includes('data-exp-csv="inventory"') && shadow.innerHTML.includes("data-exp-guided"), "the open menu offers the CSV and the guided export");
+  el._expOpen = "";
   assert.ok(shadow.innerHTML.includes(">Type<"));
   el.toggleCol("inventory", "type");
   assert.ok(!shadow.innerHTML.includes('data-lsort="inventory|type|asc"'), "a hidden column has no header");
@@ -3109,7 +3113,7 @@ test("a list can hide columns and offers its rows as CSV", () => {
   assert.equal(ex.rows().length, el.filtered().length);
   el._colOpen = "inventory"; el.render();
   const pop = shadow.innerHTML.match(/class="colpop"[\s\S]*?<\/span><\/span>/)[0];
-  assert.ok((pop.match(/<label><input type="checkbox" data-col="inventory\|/g) || []).length >= 3, "every column has a checkbox row in the open picker");
+  assert.ok((pop.match(/<label><span>[^<]*<\/span><input type="checkbox" data-col="inventory\|/g) || []).length >= 3, "every column has a row with the name left and the checkbox right");
 });
 
 test("the flow tab shows triggers, conditions and nested actions and marks missing objects", () => {

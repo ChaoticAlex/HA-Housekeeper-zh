@@ -755,6 +755,18 @@ class HAHousekeeperPanel extends HTMLElement {
         this.menuOpen = null; this.render();
       });
       root.addEventListener("click", ev => { this._shift = ev.shiftKey; }, true);
+      // The column and export pop-ups close on a click elsewhere and on Escape.
+      root.addEventListener("click", ev => {
+        if (!this._colOpen && !this._expOpen) return;
+        if ((ev.composedPath?.() || []).some(node => node.classList?.contains?.("colwrap"))) return;
+        this._colOpen = ""; this._expOpen = ""; this.render();
+      });
+      root.addEventListener("keydown", ev => {
+        if (ev.key !== "Escape" || (!this._colOpen && !this._expOpen)) return;
+        const id = this._colOpen ? `[data-col-open="${this._colOpen}"]` : `[data-exp-menu="${this._expOpen}"]`;
+        this._colOpen = ""; this._expOpen = ""; this.render();
+        root.querySelector(id)?.focus?.();
+      });
       // Arrow keys move between the rows of a list: to the first control of the next or previous row.
       root.addEventListener("keydown", ev => {
         if (ev.key !== "ArrowDown" && ev.key !== "ArrowUp") return;
@@ -843,6 +855,9 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-col-open]").forEach(el => el.onclick = () => { this._colOpen = this._colOpen === el.dataset.colOpen ? "" : el.dataset.colOpen; this.render(); });
     root.querySelectorAll("[data-col]").forEach(el => el.onchange = () => { const [id, key] = el.dataset.col.split("|"); this.toggleCol(id, key); });
     root.querySelectorAll("[data-export-list]").forEach(el => el.onclick = () => this.exportList(el.dataset.exportList));
+    root.querySelectorAll("[data-exp-menu]").forEach(el => el.onclick = () => { this._expOpen = this._expOpen === el.dataset.expMenu ? "" : el.dataset.expMenu; this._colOpen = ""; this.render(); });
+    root.querySelectorAll("[data-exp-csv]").forEach(el => el.onclick = () => { this._expOpen = ""; this.exportList(el.dataset.expCsv); this.render(); });
+    root.querySelectorAll("[data-exp-guided]").forEach(el => el.onclick = () => { this._expOpen = ""; this.xpOpen(); });
     root.querySelectorAll("[data-win-act]").forEach(el => el.onclick = () => { const [name, ...rest] = el.dataset.winAct.split(":"); this.winAct(name, rest.join(":")); });
     root.querySelectorAll("[data-inv-filter]").forEach(el => el.onclick = () => { const [type, status, origin = ""] = el.dataset.invFilter.split("|"), same = (type || status) && this.typeFilter === type && this.statusFilter === status && this.originFilter === origin; this.typeFilter = same ? "" : type; this.statusFilter = same ? "" : status; this.originFilter = same ? "" : origin; this.pages = {}; (this.folds ||= {}).inv_types = !(this.typeFilter || this.statusFilter); this.render(); this.showList(); });
     root.querySelectorAll("[data-inv-more]").forEach(el => el.onclick = () => { this.invAllTypes = !this.invAllTypes; this.render(); });

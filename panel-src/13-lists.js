@@ -5,6 +5,9 @@ const DENSE_LISTS_KEY = "ha_housekeeper.dense_lists";
 const DENSE_LIST_ID = /^[\w:.-]{1,80}$/, DENSE_LISTS_MAX = 80; // any list that offers compact rows
 const DENSE_LEGACY_IDS = ["unreferenced", "batteries", "runs"];
 
+// Lists whose export has a guided dialog next to the CSV download.
+const GUIDED_EXPORT_LISTS = ["inventory"];
+
 class ListsMixin {
 
   // Shared list controls: per-list search, filters and sort kept in this.lv[id].
@@ -132,7 +135,13 @@ class ListsMixin {
   // Column picker and CSV export of a list; both are optional. `columns` are the switchable columns: { key, label }.
   listTools(id, columns = []) {
     const open = this._colOpen === id;
-    const picker = columns.length ? `<span class="colwrap"><button type="button" class="dirbtn ${open ? "on" : ""}" data-col-open="${id}" aria-expanded="${open}" title="${this.esc(this.t("colsLabel"))}" aria-label="${this.esc(this.t("colsLabel"))}"><ha-icon icon="mdi:table-column"></ha-icon></button>${open ? `<span class="colpop" role="group" aria-label="${this.esc(this.t("colsLabel"))}">${columns.map(c => `<label><input type="checkbox" data-col="${id}|${c.key}" ${this.colHidden(id, c.key) ? "" : "checked"}> ${this.t(c.label)}</label>`).join("")}</span>` : ""}</span>` : "";
+    const picker = columns.length ? `<span class="colwrap"><button type="button" class="dirbtn ${open ? "on" : ""}" data-col-open="${id}" aria-expanded="${open}" title="${this.esc(this.t("colsLabel"))}" aria-label="${this.esc(this.t("colsLabel"))}"><ha-icon icon="mdi:table-column"></ha-icon></button>${open ? `<span class="colpop" role="group" aria-label="${this.esc(this.t("colsLabel"))}">${columns.map(c => `<label><span>${this.t(c.label)}</span><input type="checkbox" data-col="${id}|${c.key}" ${this.colHidden(id, c.key) ? "" : "checked"}></label>`).join("")}</span>` : ""}</span>` : "";
+    // Lists with a guided export get one menu (list as CSV, guided export); the others keep the plain download button.
+    if (this._exporters?.[id] && GUIDED_EXPORT_LISTS.includes(id)) {
+      const expOpen = this._expOpen === id;
+      const menu = expOpen ? `<span class="colpop exppop" role="menu"><button type="button" class="expitem" role="menuitem" data-exp-csv="${id}"><strong>${this.t("exportCsvItem")}</strong><small>${this.t("exportCsvHint")}</small></button><button type="button" class="expitem" role="menuitem" data-exp-guided><strong>${this.t("xpGuided")}</strong><small>${this.t("xpGuidedHint")}</small></button></span>` : "";
+      return `${picker}<span class="colwrap"><button type="button" class="btn expbtn ${expOpen ? "on" : ""}" data-exp-menu="${id}" aria-haspopup="menu" aria-expanded="${expOpen}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}<ha-icon icon="mdi:chevron-down"></ha-icon></button>${menu}</span>`;
+    }
     const download = this._exporters?.[id] ? `<button type="button" class="dirbtn" data-export-list="${id}" title="${this.esc(this.t("exportListTitle"))}" aria-label="${this.esc(this.t("exportListTitle"))}"><ha-icon icon="mdi:download"></ha-icon></button>` : "";
     return picker + download;
   }
