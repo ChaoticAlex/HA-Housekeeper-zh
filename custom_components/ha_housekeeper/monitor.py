@@ -600,7 +600,7 @@ class MonitorStore:
                 if uncertain
                 else f"Wichtige Funktion beeinträchtigt: {reason}"
             )
-            link = "Hausmonitor öffnen"
+            link = "Hausfunktionen öffnen"
         else:
             reason = REASONS_EN.get(result["reason"], result["reason"])
             last_reason = REASONS_EN.get(result.get("last_problem_reason"), result.get("last_problem_reason") or reason)
@@ -612,7 +612,7 @@ class MonitorStore:
                 if uncertain
                 else f"Important function impaired: {reason}"
             )
-            link = "Open home monitor"
+            link = "Open home functions"
         persistent_notification.async_create(
             self.hass,
             f"{body} [{link}](/{PANEL_URL}?view=monitor&function={result['id']})",

@@ -207,7 +207,7 @@ class MonitorSensor(SensorEntity):
         result = next(
             (item for item in scanner.monitor.results if item["id"] == self.function_id), None
         ) if scanner else None
-        self._attr_name = f"Hausmonitor {definition['name']}" if definition else "Hausmonitor"
+        self._attr_name = f"Hausfunktion {definition['name']}" if definition else "Hausfunktionen"
         self._attr_native_value = result["state"] if result else "unverified"
         self._attr_extra_state_attributes = (
             {

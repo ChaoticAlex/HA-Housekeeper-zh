@@ -1,4 +1,4 @@
-"""The Hausmonitor only reports defects supported by the latest readable scan."""
+"""The home functions only report defects supported by the latest readable scan."""
 
 from datetime import UTC, datetime, timedelta
 

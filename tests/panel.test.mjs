@@ -78,7 +78,7 @@ test("German and English texts define the same keys", () => {
   assert.deepEqual(Object.keys(TEXT.de).sort(), Object.keys(TEXT.en).sort());
 });
 
-test("Hausmonitor shows a confirmed fault, a scan gap, and escapes function names", () => {
+test("home functions show a confirmed fault, a scan gap, and escapes function names", () => {
   const { el, NAV_GROUPS } = panel("de");
   assert.ok(NAV_GROUPS.find(([group]) => group === "navGroupOperation")[1].includes("monitor"));
   el.data = { ...DATA, monitor: [
@@ -99,7 +99,7 @@ test("Hausmonitor shows a confirmed fault, a scan gap, and escapes function name
   assert.match(el.monitorDetail(), /Letzter Scan/);
 });
 
-test("the Hausmonitor history shows a flapping run as one line and filters by kind", () => {
+test("the home functions history shows a flapping run as one line and filters by kind", () => {
   const { el } = panel("de");
   const at = "2026-10-14T09:00:00+00:00";
   el.data = { ...DATA, monitor: [{ id: "one", name: "Wasser", description: "", state: "ok", scanned_at: at, members: [{ object_key: "entity:sensor.x", required: true, rules: [] }], incident_open: false }] };
@@ -125,7 +125,7 @@ test("the Hausmonitor history shows a flapping run as one line and filters by ki
   assert.match(filtered, /Geändert/);
 });
 
-test("a disabled Hausmonitor remains editable but does not appear as an overview alarm", () => {
+test("a disabled home function remains editable but does not appear as an overview alarm", () => {
   const { el } = panel("de");
   el.data = { ...DATA, monitor: [{ id: "paused", name: "Wasseralarm", description: "", enabled: false, state: "disabled", reason: "disabled", members: [], incident_open: false }] };
   assert.match(el.monitorView(), /Deaktiviert/);
@@ -139,7 +139,7 @@ test("a disabled Hausmonitor remains editable but does not appear as an overview
   assert.ok(!el.todoItems().some(item => item.key.startsWith("monitor_")));
 });
 
-test("Hausmonitor editor keeps required members and offers only direct inventory objects", () => {
+test("home functions editor keeps required members and offers only direct inventory objects", () => {
   const { el } = panel("en");
   el.data = { ...DATA, objects: [...DATA.objects.map(o => o.object_id === "sensor.b" ? { ...o, area_id: "bedroom" } : o),
     { object_type: "scene", object_id: "scene.home", name: "Home", status: "active" },
@@ -174,7 +174,7 @@ test("Hausmonitor editor keeps required members and offers only direct inventory
   assert.match(el.monitorEditor(), /data-monitor-pick="entity:sensor.b" disabled/);
 });
 
-test("Hausmonitor suggests known dependencies and shows entity rules", () => {
+test("home functions suggest known dependencies and shows entity rules", () => {
   const { el } = panel("de");
   el.data = { ...DATA, objects: [...DATA.objects,
     { object_type: "device", object_id: "d1", name: "Gerät", status: "active" },
@@ -198,7 +198,7 @@ test("Hausmonitor suggests known dependencies and shows entity rules", () => {
   assert.match(html, /vermutlich/);
 });
 
-test("Hausmonitor preview requests the backend evaluation without saving", async () => {
+test("home functions preview requests the backend evaluation without saving", async () => {
   let run, request;
   const { el } = panel("en", { setTimeout: fn => { run = fn; return 1; }, clearTimeout: () => {} });
   el.monitorForm = { name: "Test", description: "", notify: false, members: [{ object_key: "entity:sensor.b", required: true, rules: [{ kind: "freshness", value: 24 }] }] };
@@ -210,7 +210,7 @@ test("Hausmonitor preview requests the backend evaluation without saving", async
   assert.match(el.monitorPreviewHtml(), /Not updated in time/);
 });
 
-test("Hausmonitor overview counts a known finding only once", () => {
+test("home functions overview counts a known finding only once", () => {
   const { el } = panel("de");
   el.ensureSysLight = el.ensureGoals = el.ensurePolicies = () => {};
   el.staleScan = () => null;
@@ -1988,7 +1988,7 @@ test("a plan with many rows has a search box for its rows, and the editors share
   el.noteOpen({ id: "n1", title: "t", at: "2026-10-08T18:05:00+00:00", target: "", note: "", source: "me", ref: "" });
   assert.ok(el.noteEditor().includes("btn quiet danger-t"), "delete is the quiet red button");
   el.monitorForm = { id: "f1", name: "x", description: "", enabled: true, notify: true, members: [] };
-  assert.ok(el.monitorEditor().includes("btn quiet danger-t") && !el.monitorEditor().includes("btn danger"), "the same in the home monitor editor");
+  assert.ok(el.monitorEditor().includes("btn quiet danger-t") && !el.monitorEditor().includes("btn danger"), "the same in the home functions editor");
 });
 
 test("the plan card shows the steps with text, marks undo kinds and folds the details", () => {

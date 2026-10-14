@@ -951,7 +951,7 @@ Object.assign(TEXT.de, {
   optUnusedAutomationTitle: "Ungenutzte Automationen", optUnusedAutomationHint: "Ab wie vielen Tagen ohne Auslösung eine Automation als ungenutzt gilt. 0 schaltet die Prüfung aus.",
   optScanIntervalTitle: "Automatischer Scan", optScanIntervalHint: "Wie oft Housekeeper von selbst scannt. 0 schaltet den automatischen Scan aus.",
   optLowBatteryTitle: "Schwache Batterie", optLowBatteryHint: "Unter diesem Ladestand erscheint ein Batteriegerät in der Liste der schwachen Batterien.",
-  optHistoryDaysTitle: "Verläufe", optHistoryDaysHint: "Wie viele Tage der letzte Scan jedes Tages als Vergleichspunkt und der Verlauf der Hausmonitor-Funktionen erhalten bleiben.",
+  optHistoryDaysTitle: "Verläufe", optHistoryDaysHint: "Wie viele Tage der letzte Scan jedes Tages als Vergleichspunkt und der Verlauf der Hausfunktionen erhalten bleiben.",
   quickPlaceholder: "Suchen …", quickLabel: "Alles durchsuchen", quickNone: "Keine Treffer",
   viewsLabel: "Gespeicherte Ansichten", viewsNone: "Ansichten …", viewSave: "Ansicht speichern", viewDelete: "Ansicht löschen", viewName: "Name der Ansicht", viewLocalHint: "Bleibt nur in diesem Browser gespeichert.",
   exclLine: "Nicht mitgezählt: {list}.", exclIgnored: "{n} ausgeblendet", exclDisabled: "{n} deaktiviert", exclPermanent: "{n} dauerhaft ausgefallen",
@@ -977,7 +977,7 @@ Object.assign(TEXT.en, {
   optUnusedAutomationTitle: "Unused automations", optUnusedAutomationHint: "After how many days without a trigger an automation counts as unused. 0 turns the check off.",
   optScanIntervalTitle: "Automatic scan", optScanIntervalHint: "How often Housekeeper scans by itself. 0 turns the automatic scan off.",
   optLowBatteryTitle: "Low battery", optLowBatteryHint: "Below this level a battery device appears in the list of low batteries.",
-  optHistoryDaysTitle: "Histories", optHistoryDaysHint: "How many days the last scan of each day (comparison point) and the history of the house monitor functions are kept.",
+  optHistoryDaysTitle: "Histories", optHistoryDaysHint: "How many days the last scan of each day (comparison point) and the history of the home functions are kept.",
   quickPlaceholder: "Search …", quickLabel: "Search everything", quickNone: "No results",
   viewsLabel: "Saved views", viewsNone: "Views …", viewSave: "Save view", viewDelete: "Delete view", viewName: "View name", viewLocalHint: "Saved only in this browser.",
   exclLine: "Not counted: {list}.", exclIgnored: "{n} hidden", exclDisabled: "{n} disabled", exclPermanent: "{n} down all the time",
@@ -13886,11 +13886,11 @@ class EntityStateMixin {
   }
 }
 
-// Texts for the Hausmonitor; merged into TEXT before the panel is registered.
+// Texts for the home functions page (Hausfunktionen); merged into TEXT before the panel is registered.
 Object.assign(TEXT.de, {
-  monitor: "Hausmonitor", monitorSubtitle: "Wichtige Funktionen und ihr zuletzt geprüfter Zustand.",
-  monitorAdd: "Monitor hinzufügen", monitorEdit: "Bearbeiten", monitorEditTitle: "Monitor bearbeiten", monitorDelete: "Löschen",
-  monitorEmpty: "Noch kein Monitor. Lege zum Beispiel einen Wasseralarm oder eine Türklingel an.",
+  monitor: "Hausfunktionen", monitorSubtitle: "Wichtige Funktionen und ihr zuletzt geprüfter Zustand.",
+  monitorAdd: "Funktion hinzufügen", monitorEdit: "Bearbeiten", monitorEditTitle: "Funktion bearbeiten", monitorDelete: "Löschen",
+  monitorEmpty: "Noch keine Funktion. Lege zum Beispiel einen Wasseralarm oder eine Türklingel an.",
   monitorProblem: "Beeinträchtigt", monitorUnverified: "Unbekannt", monitorOk: "Unauffällig", monitorDisabled: "Deaktiviert",
   monitorLastScan: "Letzter Scan: {date}", monitorLastVerified: "Letzte vollständige Prüfung: {date}", monitorNeverVerified: "Noch nie vollständig geprüft",
   monitorUnresolved: "Letzter belegter Defekt ungeklärt", monitorNoProof: "Prüfung unvollständig – kein Ausfall belegt",
@@ -13909,9 +13909,9 @@ Object.assign(TEXT.de, {
   monitorPreviewLoading: "Prüfe den letzten Scan …", monitorPreviewError: "Vorschau nicht möglich: {reason}",
   monitorSuggestions: "Passende Abhängigkeiten", monitorSuggestionsHint: "Aus bekannten Verbindungen vorgeschlagen. Nur ausdrücklich hinzugefügte Objekte werden überwacht.",
   monitorSuggestionUsedBy: "Von {name} verwendet", monitorSuggestionProvides: "Stellt {name} bereit", monitorSuggestionConnected: "Möglicherweise mit der Integration verbunden", monitorSuggestionProbable: "vermutlich",
-  monitorPick: "Hinzufügen", monitorRemove: "Entfernen", monitorEnabled: "Monitor aktiv", monitorEnabledHint: "Deaktiviert: keine Bewertung, Alarme oder HA-Ereignisse. Der Sensor bleibt erhalten.", monitorNotify: "Dauerhafte HA-Mitteilung bei Problemen",
-  monitorNotifyHint: "Bei aktivem Monitor stehen Zustandswechsel unabhängig davon als HA-Ereignis bereit.", monitorSave: "Speichern",
-  monitorCancel: "Abbrechen", monitorBack: "Zum Hausmonitor", monitorBackShort: "Zurück", monitorAll: "Alle Funktionen",
+  monitorPick: "Hinzufügen", monitorRemove: "Entfernen", monitorEnabled: "Funktion aktiv", monitorEnabledHint: "Deaktiviert: keine Bewertung, Alarme oder HA-Ereignisse. Der Sensor bleibt erhalten.", monitorNotify: "Dauerhafte HA-Mitteilung bei Problemen",
+  monitorNotifyHint: "Bei aktiver Funktion stehen Zustandswechsel unabhängig davon als HA-Ereignis bereit.", monitorSave: "Speichern",
+  monitorCancel: "Abbrechen", monitorBack: "Zu den Hausfunktionen", monitorBackShort: "Zurück", monitorAll: "Alle Funktionen",
   monitorSearchStart: "Mindestens zwei Zeichen eingeben, um Objekte zu finden.", monitorSearchNone: "Keine passenden Objekte gefunden.", monitorMoreResults: "Weitere Treffer: Suche verfeinern oder Typ auswählen.",
   monitorColReason: "Grund", monitorColLastProblem: "Letzte Störung", monitorColScan: "Zuletzt geprüft", monitorColKind: "Art", monitorColRole: "Rolle", monitorColWhen: "Zeit", monitorColEvent: "Ereignis", monitorColDetails: "Einzelheiten", monitorColObject: "Objekt",
   monitorSaveFailed: "Funktion konnte nicht gespeichert werden: {reason}", monitorDeleteFailed: "Funktion konnte nicht gelöscht werden: {reason}",
@@ -13929,9 +13929,9 @@ Object.assign(TEXT.de, {
   monitorReason_unknown: "Zustand unbekannt", monitorReason_status_unknown: "Zustand nicht lesbar",
 });
 Object.assign(TEXT.en, {
-  monitor: "Home monitor", monitorSubtitle: "Important functions and their last checked state.",
-  monitorAdd: "Add monitor", monitorEdit: "Edit", monitorEditTitle: "Edit monitor", monitorDelete: "Delete",
-  monitorEmpty: "No monitor yet. Add a water alarm or a doorbell, for example.",
+  monitor: "Home functions", monitorSubtitle: "Important functions and their last checked state.",
+  monitorAdd: "Add function", monitorEdit: "Edit", monitorEditTitle: "Edit function", monitorDelete: "Delete",
+  monitorEmpty: "No function yet. Add a water alarm or a doorbell, for example.",
   monitorProblem: "Impaired", monitorUnverified: "Unknown", monitorOk: "No known fault", monitorDisabled: "Disabled",
   monitorLastScan: "Last scan: {date}", monitorLastVerified: "Last complete check: {date}", monitorNeverVerified: "Never checked completely",
   monitorUnresolved: "Last confirmed fault unresolved", monitorNoProof: "Check incomplete – no failure confirmed",
@@ -13950,9 +13950,9 @@ Object.assign(TEXT.en, {
   monitorPreviewLoading: "Checking the latest scan …", monitorPreviewError: "Preview unavailable: {reason}",
   monitorSuggestions: "Related dependencies", monitorSuggestionsHint: "Suggested from known connections. Only explicitly added objects are monitored.",
   monitorSuggestionUsedBy: "Used by {name}", monitorSuggestionProvides: "Provides {name}", monitorSuggestionConnected: "Possibly connected to the integration", monitorSuggestionProbable: "probable",
-  monitorPick: "Add", monitorRemove: "Remove", monitorEnabled: "Monitor active", monitorEnabledHint: "Disabled: no evaluation, alerts or HA events. The sensor remains available.", monitorNotify: "Persistent HA notification for problems",
-  monitorNotifyHint: "For active monitors, state changes are available as HA events regardless of this setting.", monitorSave: "Save",
-  monitorCancel: "Cancel", monitorBack: "Back to home monitor", monitorBackShort: "Back", monitorAll: "All functions",
+  monitorPick: "Add", monitorRemove: "Remove", monitorEnabled: "Function active", monitorEnabledHint: "Disabled: no evaluation, alerts or HA events. The sensor remains available.", monitorNotify: "Persistent HA notification for problems",
+  monitorNotifyHint: "For active functions, state changes are available as HA events regardless of this setting.", monitorSave: "Save",
+  monitorCancel: "Cancel", monitorBack: "Back to home functions", monitorBackShort: "Back", monitorAll: "All functions",
   monitorSearchStart: "Enter at least two characters to find objects.", monitorSearchNone: "No matching objects found.", monitorMoreResults: "More matches: refine the search or select a type.",
   monitorColReason: "Reason", monitorColLastProblem: "Last fault", monitorColScan: "Last checked", monitorColKind: "Kind", monitorColRole: "Role", monitorColWhen: "Time", monitorColEvent: "Event", monitorColDetails: "Details", monitorColObject: "Object",
   monitorSaveFailed: "Could not save function: {reason}", monitorDeleteFailed: "Could not delete function: {reason}",
