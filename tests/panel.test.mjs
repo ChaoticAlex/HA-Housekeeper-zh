@@ -4232,6 +4232,11 @@ test("devices, integrations, automations and scripts sum up what is known in gro
   assert.ok(aut.includes('class="ksrc">Runs'), "the runs are named as the source");
   // the facts card keeps scenes and other objects
   assert.ok(el.factsCard({ object_type: "scene", object_id: "scene.x", name: "S", status: "active" }, "scene:scene.x").includes(el.t("facts")));
+  // an outage names its length and when it becomes more serious
+  const down = { rule_id: "config_entry.not_loaded", object_id: "e1", classification: "problem", confidence: 1, first_detected_at: new Date(Date.now() - 6 * 3.6e6).toISOString(), ignored: false };
+  el.data = { ...el.data, findings: [down], meta: { ...el.data.meta, min_unavailable_days: 7 } };
+  const outage = el.factsCard({ object_type: "config_entry", object_id: "e1", name: "MQTT", status: "active" }, "config_entry:e1");
+  assert.ok(outage.includes(el.t("chip_outage")) && outage.includes("6 ") && outage.includes(el.t("chip_medium")), "the length and the next level stand in the facts");
 });
 
 test("the export started from a detail page returns to that page", () => {

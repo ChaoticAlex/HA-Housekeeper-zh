@@ -19,8 +19,10 @@ class CausesMixin {
   }
 
   // How long an integration has not been loaded and when that becomes more serious: "for 6 h · Medium in 18 h".
-  outageLine(c) {
-    const f = c.finding_key && this.data.findings.find(x => x.key === c.finding_key);
+  outageLine(c) { return this.outageLineOf(c.finding_key && this.data.findings.find(x => x.key === c.finding_key)); }
+
+  // The same for the finding of an outage itself, as the detail page shows it.
+  outageLineOf(f) {
     const since = f && Date.parse(f.first_detected_at);
     if (!since) return "";
     const hours = Math.max(0, (Date.now() - since) / 3600000), high = Math.max(24, (this.data.meta?.min_unavailable_days || 0) * 24);

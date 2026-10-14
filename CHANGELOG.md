@@ -16,6 +16,8 @@
 
 - **Speicher und System:** Die Messung der Ordner stoppt nach 20 Sekunden (etwa bei einer langsamen Netzfreigabe unter /config); die Seite nennt die Größen dann Mindestwerte.
 
+- **Ausfälle:** Die Detailseite einer ausgefallenen Integration nennt, wie lange der Ausfall dauert und wann er schwerer wiegt.
+
 ### English
 
 #### New
@@ -31,6 +33,8 @@
 - **Interface:** Corrections and small improvements to lists, tables, dialogs and handling: more consistent lists and tables on every page (search, sorting, filters, pages and CSV export, the whole row clickable, compact rows), page selection in the inventory, confirming or cancelling plans in one step, cleanly aligned actions and better keyboard and screen reader support.
 
 - **Storage and system:** The folder measurement stops after 20 seconds (for example on a slow network share under /config); the page then calls the sizes minimums.
+
+- **Outages:** The detail page of a failed integration says how long the outage has lasted and when it becomes more serious.
 
 ## 1.6.0 - 2026-10-13
 
