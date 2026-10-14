@@ -8,27 +8,11 @@
 
 - **Hausmonitor:** Wichtige Hausfunktionen aus direkt gewählten Entitäten, Geräten, Automationen, Szenen, Skripten, Integrationen und Apps/Add-ons zusammenstellen. Die gemeinsame Objektsuche gruppiert Treffer nach Typ und schlägt bekannte Abhängigkeiten vor; nur ausdrücklich hinzugefügte Objekte werden überwacht. Für Entitäten lassen sich Aktualisierungsfrist, Mindestwert und eine Dauer für „nicht verfügbar“ festlegen. Der kompakte Editor hat eine mitwachsende Beschreibung, zeigt eine Vorschau der letzten Scanbewertung und lässt Monitore vorübergehend deaktivieren. Die Seite unterscheidet belegte Defekte, Prüflücken, unauffällige und deaktivierte Monitore; die Übersicht meldet aktive Probleme und nennt sonst die zuletzt beeinträchtigte Funktion. Zustandswechsel stehen als HA-Ereignis und Event-Entität bereit, jede Funktion hat einen Sensor, dessen Attribute auch letzten Defekt, Vorfälle, Ausfallminuten und Verfügbarkeit der letzten 30 Tage nennen. Dauerhafte HA-Mitteilungen sind pro Monitor einstellbar. Zugeordnete Objekte sind anklickbar, auch beim Anlegen und Bearbeiten. Jede Funktion hat einen Verlauf mit Zustandswechseln und Änderungen (mit Suche, Filter und Seiten, auch Pläne zu den Objekten; schnelles Hin und Her wird zu einer Zeile zusammengefasst) und zeigt die Verfügbarkeit der letzten 30 Tage mit Vorfällen und einem Feld je Tag; die Aufbewahrung (1 bis 365 Tage, Standard 30) gilt auch für den Scan-Verlauf und steht unter Einstellungen.
 
-- **Seite im Inventar auswählen:** Ein Kästchen im Tabellenkopf markiert die auswählbaren Entitäten der aktuellen Seite. Bei teilweiser Auswahl zeigt es den Zwischenzustand; ein weiterer Klick hebt die Seitenauswahl auf. Die Auswahl aller gefilterten Entitäten bleibt über die Leiste möglich.
-
 - **Entitäten im Inventar gesammelt umschalten:** Die Entitätenzeilen des Inventars haben ein Kästchen. Die Leiste darüber deaktiviert, aktiviert, blendet aus oder ein, bis zu 200 Entitäten pro Plan, mit Vorschau und Rückgängig. Eine Entität, die etwas sicher benutzt, wird nicht deaktiviert; nur selbst Deaktiviertes wird wieder aktiviert.
 
 ### Behoben
 
-- **CSV-Export rechts ausgerichtet:** Der Download-Button steht in Listenleisten jetzt immer am rechten Rand. Im Inventar ist er außerdem die letzte Aktion der Leiste.
-
-- **Status in der Backup-Prüfung ausgerichtet:** Aktionen wie „Erneut bestätigen“ stehen vor dem Status-Chip. Dadurch bleibt der Status in allen Zeilen als feste rechte Spalte ausgerichtet.
-
-- **Fokus in Dialogen:** Während ein Dialog geöffnet ist, bleiben Seite und darunterliegende Dialoge für die Tastatur inaktiv. Tab und Umschalt+Tab bleiben im obersten Dialog; nach dem Schließen kehrt der Fokus zum auslösenden Steuerelement zurück.
-
-- **Orientierung nach einem Seitenwechsel:** Lange Listen springen nach „Weiter“ oder „Zurück“ an den Anfang des betroffenen Bereichs. Der Tastaturfokus meldet die neue Seite.
-
-- **Listensuche zugänglich beschriftet:** Das Suchfeld in Listen hat jetzt auch nach dem Tippen eine Bezeichnung für Screenreader.
-
-- **Plan in einem Schritt bestätigen:** Die Vorschau zeigt Hinweis und eine größere Zusammenfassung; „Bestätigen“ fragt in einem Dialog nach und führt dann aus. Das Eintippen des Bestätigungsworts und der zweite Bildschirm entfallen. Die „Prüfung nach dem Lauf“ ist zugeklappt.
-
-- **Plan abbrechen:** Neben „Bestätigen“ steht jetzt „Abbrechen“. Es verwirft die Vorschau wie „Schließen“ oben rechts; geändert wird nichts.
-
-- **Plan bestätigen:** Der Button „Bestätigen …“ zeigte statt seiner Beschriftung den Text der Löschfrage des Journals samt „{date}“. Er trägt wieder seine Beschriftung.
+- **Oberfläche:** Korrekturen und kleine Verbesserungen an Listen, Tabellen, Dialogen und der Bedienung: einheitlichere Listen und Tabellen mit kompakten Zeilen, Seitenauswahl im Inventar, Pläne in einem Schritt bestätigen oder abbrechen, sauber ausgerichtete Aktionen sowie bessere Tastatur- und Screenreader-Unterstützung.
 
 ### English
 
@@ -38,27 +22,11 @@
 
 - **Home monitor:** Group important home functions from directly selected entities, devices, automations, scenes, scripts, integrations and apps/add-ons. The shared object search groups results by type and suggests known dependencies; only explicitly added objects are monitored. Entities support update deadlines, minimum values and a grace period for unavailability. The compact editor has a description field that grows with its text, previews the latest scan evaluation and lets monitors be temporarily disabled. The page distinguishes confirmed faults, check gaps, healthy and disabled monitors; the overview highlights active problems and otherwise names the function impaired last. State changes are available as HA events and an event entity, with one sensor per function whose attributes also give the last fault, incidents, downtime minutes and availability of the last 30 days. Persistent HA notifications are configurable per monitor. Assigned objects are clickable, also while creating and editing. Each function has a history of state changes and edits (with search, filter and paging, also plans for the objects; quick back and forth is folded into one line) and shows the availability of the last 30 days with incidents and one square per day; the retention (1 to 365 days, default 30) also applies to the scan history and is set in Settings.
 
-- **Select an inventory page:** A checkbox in the table header selects the selectable entities on the current page. It shows a mixed state when some are selected; another click clears the page selection. The bar still offers selection of all filtered entities.
-
 - **Switch entities in bulk from the inventory:** Entity rows of the Inventory have a checkbox. The bar above disables, enables, hides or shows them, up to 200 entities per plan, with a preview and undo. An entity that something certainly uses is not disabled; only what you disabled yourself is enabled again.
 
 #### Fixed
 
-- **CSV export aligned right:** The download button now always sits at the right edge of list toolbars. In the Inventory, it is also the final toolbar action.
-
-- **Backup check status alignment:** Actions such as “Confirm again” now sit before the status chip. This keeps the status aligned as the fixed right-hand column in every row.
-
-- **Focus in dialogs:** While a dialog is open, the page and dialogs beneath it are inactive for keyboard users. Tab and Shift+Tab stay in the top dialog; closing it returns focus to the control that opened it.
-
-- **Orientation after changing pages:** Long lists return to the start of the affected section after “Next” or “Previous”. Keyboard focus announces the new page.
-
-- **Accessible list search label:** List search fields now keep a name for screen readers after typing.
-
-- **Confirm a plan in one step:** The preview shows the hint and a larger summary; “Confirm” asks in a dialog and then runs the plan. Typing the confirmation word and the second screen are gone. The “Check after the run” is collapsed.
-
-- **Cancel a plan:** “Cancel” now stands next to “Confirm”. It discards the preview like “Close” at the top right; nothing is changed.
-
-- **Confirm plan:** The “Confirm …” button showed the text of the journal delete question, including “{date}”, instead of its label. It has its label again.
+- **Interface:** Corrections and small improvements to lists, tables, dialogs and handling: more consistent lists and tables with compact rows, page selection in the inventory, confirming or cancelling plans in one step, cleanly aligned actions and better keyboard and screen reader support.
 
 ## 1.6.0 - 2026-10-13
 
