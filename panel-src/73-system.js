@@ -120,8 +120,9 @@ class SystemMixin {
         ["folder", "sysByFolder", r.breakdown.length],
         ["misc", "sysByMisc", r.cards.length + r.blueprints.length + (r.other || []).length + (r.other_rest?.count || 0)],
       ];
-      const by = chips.some(([id]) => id === this.storageBy) ? this.storageBy : chips[0][0];
-      const choice = `<div class="chips">${chips.map(([id, key, n]) => `<button class="chip ${by === id ? "active" : ""}" data-storage-by="${id}" aria-pressed="${by === id}">${this.t(key)} <em>${this.formatNumber(n)}</em>${id === "misc" && miss ? '<i class="tabdot red" aria-hidden="true"></i>' : ""}</button>`).join("")}</div>`;
+      const tabs = chips.map(([id, key, n]) => ({ id, label: this.t(key), count: n, tone: id === "misc" && miss ? "red" : "" }));
+      const by = this.viewTabOf("storage", tabs, chips[0][0]);
+      const choice = this.viewTabBar("storage", tabs, by);
       const title = key => `<h3 class="syssec">${this.esc(this.t(key))}</h3>`;
       const apps = `<p class="factnote">${this.t("sysAppsHint")} <button type="button" class="link" data-view="components">${this.t("components")}</button></p>`;
       const list = by === "misc" ? this.sysMisc(r) : `${title(by === "category" ? "sysHeadCategory" : "sysHeadFolder")}${by === "category" ? this.sysCategories(cats) : this.sysConsumers(r.breakdown)}${apps}`;
@@ -185,8 +186,9 @@ class SystemMixin {
 
   // Everything that is not a place of its own: the dashboard cards, the blueprints and the other entries under /config.
   sysMisc(r) {
-    const part = (title, body) => `<h3 class="syssec">${this.esc(this.t(title))}</h3>${body}`;
-    return `${part("sysTabCards", this.sysCards(r.cards))}${part("sysTabBlueprints", this.sysBlueprints(r.blueprints))}${part("sysSecOther", this.sysOther(r.other || [], r.other_rest))}`;
+    const part = (title, body, count, index) => this.fold(`sysmisc_${index}`, { tone: index === 0 && r.cards.some(c => c.status === "missing") ? "red" : "mute", title: this.esc(this.t(title)), pill: this.formatNumber(count) }, body, index === 0);
+    const other = r.other || [];
+    return `${part("sysTabCards", this.sysCards(r.cards), r.cards.length, 0)}${part("sysTabBlueprints", this.sysBlueprints(r.blueprints), r.blueprints.length, 1)}${part("sysSecOther", this.sysOther(other, r.other_rest), other.length + (r.other_rest?.count || 0), 2)}`;
   }
 
   sysOther(items, rest) {
