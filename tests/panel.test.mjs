@@ -102,7 +102,9 @@ test("the Hausmonitor history shows a flapping run as one line and filters by ki
   el.monitorHistory = { one: { sig: "ok|" + at + "|undefined", retention_days: 30, entries: [
     { at, until: at, kind: "flapping", count: 7, state: "ok" }, { at, kind: "edited", added: ["entity:sensor.x"] },
   ] } };
+  el.monitorHistory.one.availability = { window_days: 30, since: at, observed_seconds: 1000, ok_seconds: 999, problem_seconds: 1, unknown_seconds: 0, unstable_seconds: 0, incidents: 1, longest_seconds: 1, days: [{ date: "2026-10-14", state: "problem" }] };
   const html = el.monitorDetail();
+  assert.match(html, /Unauffällig: 99,9 %/);
   assert.match(html, /Wechselt häufig/);
   assert.match(html, /7 Wechsel/);
   el.lvState("monitor-history", "", "asc").f.kind = "config";

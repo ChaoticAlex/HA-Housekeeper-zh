@@ -15,6 +15,7 @@ from homeassistant.components import persistent_notification
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.storage import Store
+from homeassistant.util import dt as dt_util
 
 from .const import (
     DEFAULT_HISTORY_DAYS,
@@ -75,6 +76,80 @@ REASONS_EN = {
     "rule_unavailable_long": "unavailable for too long", "rule_waiting": "grace period running",
     "rule_no_value": "no numeric value", "rule_no_timestamp": "update time unknown",
 }
+
+
+AVAILABILITY_DAYS = 30
+_DAY_RANK = {"ok": 1, "unverified": 2, "flapping": 3, "problem": 4}
+
+
+def _segments(entries: list[dict[str, Any]], now: datetime) -> list[tuple[datetime, datetime, str]]:
+    """The stretches of time in which the function had one known state, from the dated entries (oldest first).
+
+    Disabled periods, the time after an edit of the members and the time before the first evaluation have no
+    state and are left out, so they count neither for nor against the function.
+    """
+    timeline: list[tuple[datetime, str | None]] = []
+    for entry in entries:
+        at, kind = _time(entry["at"]), entry["kind"]
+        if at is None:
+            continue
+        if kind in HISTORY_STATES:
+            timeline.append((at, kind))
+        elif kind == "flapping" and (until := _time(entry.get("until"))):
+            timeline += [(at, "flapping"), (until, entry["state"])]
+        elif kind in ("created", "enabled", "disabled") or (
+            kind == "edited" and (entry.get("added") or entry.get("removed") or entry.get("changed"))
+        ):
+            timeline.append((at, None))
+    segments: list[tuple[datetime, datetime, str]] = []
+    for index, (begin, state) in enumerate(timeline):
+        end = timeline[index + 1][0] if index + 1 < len(timeline) else now
+        end = min(end, now)
+        if state is None or end <= begin:
+            continue
+        if segments and segments[-1][2] == state and segments[-1][1] == begin:
+            segments[-1] = (segments[-1][0], end, state)
+        else:
+            segments.append((begin, end, state))
+    return segments
+
+
+def availability(entries: list[dict[str, Any]], now: datetime, days: int = AVAILABILITY_DAYS) -> dict[str, Any]:
+    """How long the function was in which state during the last `days`, and how it went day by day."""
+    start = now - timedelta(days=days)
+    seconds = {"ok": 0.0, "problem": 0.0, "unverified": 0.0, "flapping": 0.0}
+    clipped: list[tuple[datetime, datetime, str]] = []
+    for begin, end, state in _segments(entries, now):
+        begin = max(begin, start)
+        if end > begin:
+            clipped.append((begin, end, state))
+            seconds[state] += (end - begin).total_seconds()
+    observed = sum(seconds.values())
+    problems = [(end - begin).total_seconds() for begin, end, state in clipped if state == "problem"]
+    worst: dict[str, str] = {}
+    for begin, end, state in clipped:
+        day = dt_util.as_local(begin).date()
+        last = dt_util.as_local(end - timedelta(microseconds=1)).date()
+        while day <= last:
+            if _DAY_RANK[state] > _DAY_RANK.get(worst.get(day.isoformat(), ""), 0):
+                worst[day.isoformat()] = state
+            day += timedelta(days=1)
+    first = dt_util.as_local(start).date()
+    return {
+        "window_days": days,
+        "since": clipped[0][0].isoformat() if clipped else None,
+        "observed_seconds": round(observed),
+        "ok_seconds": round(seconds["ok"]),
+        "problem_seconds": round(seconds["problem"]),
+        "unknown_seconds": round(seconds["unverified"]),
+        "unstable_seconds": round(seconds["flapping"]),
+        "incidents": len(problems),
+        "longest_seconds": round(max(problems, default=0)),
+        "days": [
+            {"date": (day := (first + timedelta(days=i)).isoformat()), "state": worst.get(day)}
+            for i in range((dt_util.as_local(now).date() - first).days + 1)
+        ],
+    }
 
 
 class MonitorError(Exception):
@@ -371,6 +446,11 @@ class MonitorStore:
             return False
         self.history[item_id] = kept
         return True
+
+    def availability_of(self, item_id: str, now: datetime | None = None) -> dict[str, Any]:
+        """The state shares of one function over the last 30 days (less if the retention is shorter)."""
+        entries = self.history.get(item_id, [])
+        return availability(entries, now or datetime.now(UTC), min(AVAILABILITY_DAYS, self.retention_days))
 
     def history_of(self, item_id: str) -> list[dict[str, Any]]:
         """The entries of one function, newest first."""

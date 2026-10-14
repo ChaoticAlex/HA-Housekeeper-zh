@@ -214,3 +214,20 @@ def test_quick_state_changes_become_one_flapping_entry_that_later_changes_extend
     store._log("water", "ok", start + timedelta(minutes=50))
     assert store.history["water"][0]["count"] == 6 and "reason" not in store.history["water"][0]
     assert MonitorStore._history_entry(store.history["water"][0]) == store.history["water"][0]
+
+
+def test_availability_counts_known_stretches_and_leaves_out_gaps_and_disabled_time():
+    from custom_components.ha_housekeeper.monitor import availability
+
+    now = datetime(2026, 10, 14, 12, tzinfo=UTC)
+    at = lambda hours: (now - timedelta(hours=hours)).isoformat()  # noqa: E731
+    entries = [
+        {"at": at(30), "kind": "created"}, {"at": at(29), "kind": "ok"},
+        {"at": at(10), "kind": "problem", "reason": "unavailable"}, {"at": at(8), "kind": "ok"},
+        {"at": at(6), "kind": "disabled"}, {"at": at(4), "kind": "enabled"}, {"at": at(3), "kind": "unverified"},
+    ]
+    result = availability(entries, now, 30)
+    assert (result["ok_seconds"], result["problem_seconds"], result["unknown_seconds"]) == ((19 + 2) * 3600, 2 * 3600, 3 * 3600)
+    assert (result["incidents"], result["longest_seconds"]) == (1, 2 * 3600)
+    assert result["since"] == at(29) and len(result["days"]) == 31 and result["days"][-1]["state"] == "problem"
+    assert result["days"][0]["state"] is None

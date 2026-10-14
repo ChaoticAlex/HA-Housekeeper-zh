@@ -1222,7 +1222,11 @@ def websocket_monitor_history(
         return
     connection.send_result(
         msg["id"],
-        _versioned({"entries": scanner.monitor.history_of(msg["function_id"]), "retention_days": scanner.monitor.retention_days}),
+        _versioned({
+            "entries": scanner.monitor.history_of(msg["function_id"]),
+            "retention_days": scanner.monitor.retention_days,
+            "availability": scanner.monitor.availability_of(msg["function_id"]),
+        }),
     )
 
 

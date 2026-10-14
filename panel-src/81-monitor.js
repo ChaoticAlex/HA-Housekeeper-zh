@@ -154,14 +154,40 @@ class MonitorMixin {
     const page = this.paginate("monitor-history", shown);
     const rows = page.rows.map(item => item.html).join("") + page.footer;
     const none = items.length && !shown.length ? `<div class="emptymsg">${this.t("noMatches")}</div>` : "";
-    return `<section class="panel">${head}${bar}${rows || none || `<div class="emptymsg"><ha-icon icon="mdi:history"></ha-icon>${this.t("monitorHistoryEmpty")}</div>`}</section>`;
+    return `${this.monitorAvailabilityHtml(cache.availability)}<section class="panel">${head}${bar}${rows || none || `<div class="emptymsg"><ha-icon icon="mdi:history"></ha-icon>${this.t("monitorHistoryEmpty")}</div>`}</section>`;
+  }
+
+  monitorDuration(seconds) {
+    const minutes = Math.round(seconds / 60), hours = Math.floor(minutes / 60), days = Math.floor(hours / 24);
+    if (seconds > 0 && minutes < 1) return this.t("monitorDurLess");
+    if (days) return this.t("monitorDurDays", { d: days, h: hours % 24 });
+    return hours ? this.t("monitorDurHours", { h: hours, m: minutes % 60 }) : this.t("monitorDurMinutes", { n: minutes });
+  }
+
+  // The shares of time in each state over the last days and one square per day (the worst state of that day).
+  monitorAvailabilityHtml(a) {
+    if (!a) return "";
+    const head = `<div class="panelhead"><div><h2>${this.t("monitorAvail")}</h2><p>${this.t("monitorAvailHint", { days: a.window_days })}</p></div></div>`;
+    if (!a.observed_seconds) return `<section class="panel u-mb14">${head}<div class="emptymsg"><ha-icon icon="mdi:chart-timeline-variant"></ha-icon>${this.t("monitorAvailNone")}</div></section>`;
+    const pct = Math.floor((a.ok_seconds / a.observed_seconds) * 1000) / 10; // a fault never rounds up to 100 %
+    const percent = new Intl.NumberFormat(this.lang, { maximumFractionDigits: 1, minimumFractionDigits: 1 }).format(pct);
+    const facts = [
+      this.t("monitorAvailOk", { pct: percent }),
+      a.problem_seconds ? this.t("monitorAvailProblem", { time: this.monitorDuration(a.problem_seconds), n: a.incidents, longest: this.monitorDuration(a.longest_seconds) }) : this.t("monitorAvailNoProblem"),
+      a.unknown_seconds ? this.t("monitorAvailUnknown", { time: this.monitorDuration(a.unknown_seconds) }) : "",
+      a.unstable_seconds ? this.t("monitorAvailUnstable", { time: this.monitorDuration(a.unstable_seconds) }) : "",
+      this.t("monitorAvailSince", { date: this.formatDate(a.since) }),
+    ].filter(Boolean).map(text => `<div class="fact"><span>${this.esc(text)}</span></div>`).join("");
+    const labels = { ok: "monitorOk", problem: "monitorProblem", unverified: "monitorUnverified", flapping: "monitorHist_flapping" };
+    const days = a.days.map(day => `<i class="${day.state || "none"}" title="${this.esc(`${day.date}: ${day.state ? this.t(labels[day.state]) : this.t("monitorAvailNoData")}`)}"></i>`).join("");
+    return `<section class="panel u-mb14">${head}<div class="facts">${facts}</div><div class="monitor-days" role="img" aria-label="${this.esc(this.t("monitorAvail"))}">${days}</div></section>`;
   }
 
   async loadMonitorHistory(id, sig) {
     const cache = this.monitorHistory[id] = { ...this.monitorHistory[id], sig };
     try {
       const response = await this._hass.callWS({ type: "ha_housekeeper/monitor_history", function_id: id });
-      Object.assign(cache, { entries: response.entries, retention_days: response.retention_days });
+      Object.assign(cache, { entries: response.entries, retention_days: response.retention_days, availability: response.availability });
     } catch (_) { Object.assign(cache, { entries: cache.entries || [] }); }
     if (this.view === "monitor" && this.monitorSelected === id && !this.monitorForm && !this.selected) this.render();
   }
