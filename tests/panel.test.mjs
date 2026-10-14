@@ -90,6 +90,11 @@ test("Hausmonitor shows a confirmed fault, a scan gap, and escapes function name
   assert.match(html, /Unbekannt/);
   assert.match(html, /&lt;img src=x&gt;/);
   assert.doesNotMatch(html, /<img src=x>/);
+  assert.ok(html.includes('data-monitor-open="one"') && html.includes('data-lsort="monitor|state|asc"') && html.includes('class="tablewrap lt'), "the functions are a table; a row opens the function");
+  el.monitorFilter = "unverified";
+  assert.ok(el.monitorView().includes("Türklingel") && !el.monitorView().includes("&lt;img src=x&gt;") && el.lv.monitor.f.state === "unverified", "the deep-link filter lands in the list filter");
+  el.monitorFilter = "";
+  assert.ok(el.monitorView().includes("&lt;img src=x&gt;") && !el.lv.monitor.f.state, "clearing it shows every function again");
   el.monitorSelected = "one";
   assert.match(el.monitorDetail(), /Letzter Scan/);
 });
@@ -107,6 +112,7 @@ test("the Hausmonitor history shows a flapping run as one line and filters by ki
   const html = el.monitorDetail();
   assert.match(html, /Unauffällig: 99,9 %/);
   assert.match(html, /data-plan-open="p1"/);
+  assert.ok(html.includes('data-lsort="monitor-history|time|desc"') && html.includes('data-lsort="monitor-members|state|asc"') && html.includes('data-object="entity:sensor.x"') === false, "history and objects are tables (the object is not in the inventory here, so its row opens nothing)");
   el.data.monitor[0].last_problem_at = new Date(Date.now() - 2 * 86400000).toISOString();
   assert.match(el.monitorLastProblemLine(), /Zuletzt beeinträchtigt.*Wasser.*2/);
   el.data.monitor[0].state = "problem";

@@ -95,31 +95,73 @@ class MonitorMixin {
     if (this.monitorForm) return this.monitorEditor();
     if (this.monitorSelected) return this.monitorDetail();
     const rank = { problem: 0, unverified: 1, ok: 2, disabled: 3 };
-    const items = this.monitorFunctions().filter(item => !this.monitorFilter || item.state === this.monitorFilter || (this.monitorFilter === "problem" && item.incident_open)).sort((a, b) => (rank[a.state] - rank[b.state]) || a.name.localeCompare(b.name, this.lang));
-    const filters = [["", "monitorAll"], ["problem", "monitorProblem"], ["unverified", "monitorUnverified"], ["ok", "monitorOk"], ["disabled", "monitorDisabled"]].map(([key, label]) => `<button class="btn ${this.monitorFilter === key ? "primary" : "quiet"}" data-monitor-filter="${key}">${this.t(label)}</button>`).join("");
-    const rows = items.map(item => {
-      const tone = item.enabled === false ? "mute" : item.incident_open || item.state === "problem" ? "red" : item.state === "unverified" ? "warn" : "ok";
+    // The deep links and the overview set `monitorFilter`; from there on the filter of the list is the one source.
+    const st = this.lvState("monitor", "state", "asc");
+    if (this._monitorFilterSeen !== this.monitorFilter) { if (this.monitorFilter) st.f.state = this.monitorFilter; else delete st.f.state; }
+    this.monitorFilter = this._monitorFilterSeen = st.f.state || "";
+    const toneOf = item => (item.enabled === false ? "mute" : item.incident_open || item.state === "problem" ? "red" : item.state === "unverified" ? "warn" : "ok");
+    const reasonOf = item => {
       const key = item.incident_open && item.state === "unverified" ? item.last_problem_key : item.reason_key;
-      const reason = key ? this.findObject(key)?.name || key : "";
+      const object = key ? this.findObject(key)?.name || key : "";
       const detail = item.incident_open && item.state === "unverified" ? `${this.t("monitorUnresolved")}: ${this.monitorReason(item.last_problem_reason)}` : this.monitorReason(item.reason);
-      const earlier = item.last_problem_at && item.state !== "problem" && !item.incident_open ? this.t("monitorLastProblem", { when: this.agoText(item.last_problem_at) }) : "";
-      return `<button class="row" data-monitor-open="${this.esc(item.id)}"><span class="tile ${tone}"><ha-icon icon="mdi:home-heart"></ha-icon></span><span class="row-text"><strong>${this.esc(item.name)}</strong><small>${this.esc([reason, detail, earlier, this.t("monitorLastScan", { date: this.formatDate(item.scanned_at) })].filter(Boolean).join(" · "))}</small></span><span class="pill ${tone}">${this.monitorState(item)}</span></button>`;
-    }).join("");
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("monitor")}</h2><p>${this.t("monitorSubtitle")}</p></div><button class="btn primary" data-monitor-add><ha-icon icon="mdi:plus"></ha-icon>${this.t("monitorAdd")}</button></div>${this.monitorFunctions().length ? `<div class="toolbar">${filters}</div>${rows || `<div class="emptymsg">${this.t("monitorEmptyFiltered")}</div>`}` : `<div class="emptymsg"><ha-icon icon="mdi:home-heart"></ha-icon>${this.t("monitorEmpty")}</div>`}</section>`;
+      return [object, detail].filter(Boolean).join(" · ");
+    };
+    const sorts = [
+      { key: "state", label: "sysColState", dir: "asc", get: item => (item.enabled === false ? rank.disabled : item.incident_open && item.state !== "problem" ? rank.problem : rank[item.state] ?? 9) },
+      { key: "name", label: "sortName", dir: "asc", get: item => item.name },
+      { key: "problem", label: "monitorColLastProblem", dir: "desc", get: item => (item.last_problem_at ? Date.parse(item.last_problem_at) : 0) },
+      { key: "scan", label: "monitorColScan", dir: "desc", get: item => (item.scanned_at ? Date.parse(item.scanned_at) : 0) },
+    ];
+    const list = this.monitorFunctions().length ? this.sysList("monitor", this.monitorFunctions(), {
+      sort: "state", sorts, tie: item => item.name, empty: "monitorEmpty",
+      text: item => [item.name, item.description, reasonOf(item)].join(" "),
+      filters: [{ name: "state", all: this.t("monitorAll"), options: [["problem", this.t("monitorProblem")], ["unverified", this.t("monitorUnverified")], ["ok", this.t("monitorOk")], ["disabled", this.t("monitorDisabled")]] }],
+      filterFns: { state: (item, v) => (v === "disabled" ? item.enabled === false || item.state === "disabled" : item.state === v || (v === "problem" && item.incident_open)) },
+      rowAttrs: item => `data-monitor-open="${this.esc(item.id)}" tabindex="0" role="button" aria-label="${this.esc(item.name)}"`,
+      columns: [
+        { key: "name", label: "sortName", dir: "asc", cell: item => this.nameCell(item.name, item.description || "") },
+        { key: "state", label: "sysColState", dir: "asc", cell: item => `<span class="pill ${toneOf(item)}">${this.monitorState(item)}</span>` },
+        { key: "reason", label: "monitorColReason", sortable: false, cell: item => this.esc(reasonOf(item) || "—") },
+        { key: "problem", label: "monitorColLastProblem", dir: "desc", cell: item => (item.last_problem_at ? this.esc(this.agoText(item.last_problem_at)) : "—") },
+        { key: "scan", label: "monitorColScan", dir: "desc", cell: item => (item.scanned_at ? this.esc(this.formatDate(item.scanned_at)) : "—") },
+      ],
+    }) : `<div class="emptymsg"><ha-icon icon="mdi:home-heart"></ha-icon>${this.t("monitorEmpty")}</div>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("monitor")}</h2><p>${this.t("monitorSubtitle")}</p></div><button class="btn primary" data-monitor-add><ha-icon icon="mdi:plus"></ha-icon>${this.t("monitorAdd")}</button></div>${list}</section>`;
   }
 
   monitorDetail() {
     const item = this.monitorFunctions().find(f => f.id === this.monitorSelected);
     if (!item) { this.monitorSelected = null; return this.monitorView(); }
     const tone = item.enabled === false ? "mute" : item.incident_open || item.state === "problem" ? "red" : item.state === "unverified" ? "warn" : "ok";
-    const members = item.members.map(member => {
-      const object = this.findObject(member.object_key);
-      const title = object?.name || member.object_key;
-      const status = member.state === "disabled" ? "mute" : member.state === "problem" ? "red" : member.state === "unverified" ? "warn" : "ok";
-      const rules = (member.rules || []).map(rule => this.monitorRuleText(rule, object)).join("; ");
-      return `<div class="row"${object ? ` data-object="${this.esc(member.object_key)}"` : ""}><span class="tile ${status}"><ha-icon icon="${ICONS[member.object_key.split(":")[0]] || "mdi:help-circle-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(title)}</strong><small>${this.esc(member.object_key)} · ${this.t(member.required ? "monitorRequired" : "monitorAdditional")} · ${this.esc(this.monitorReason(member.reason))}${rules ? ` · ${this.esc(rules)}` : ""}</small></span>${object ? `<button class="btn" data-object="${this.esc(member.object_key)}">${this.t("details")}</button>` : ""}</div>`;
-    }).join("");
-    return `<div class="u-mb14"><button class="btn" data-monitor-back><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("monitorBack")}</button></div><section class="panel u-mb14"><div class="panelhead"><div><h2>${this.esc(item.name)} <span class="pill ${tone}">${this.monitorState(item)}</span></h2><p>${this.esc(item.description || this.t("monitorSubtitle"))}</p></div><button class="btn" data-monitor-edit>${this.t("monitorEdit")}</button></div><div class="facts"><div class="fact"><span>${this.t("monitorLastScan", { date: this.formatDate(item.scanned_at) })}</span></div><div class="fact"><span>${item.last_verified_at ? this.t("monitorLastVerified", { date: this.formatDate(item.last_verified_at) }) : this.t("monitorNeverVerified")}</span></div></div>${item.state === "unverified" ? `<div class="row"><span class="tile warn"><ha-icon icon="mdi:help-circle-outline"></ha-icon></span><span class="row-text"><strong>${this.t(item.incident_open ? "monitorUnresolved" : "monitorNoProof")}</strong>${item.incident_open && item.last_problem_reason ? `<small>${this.esc(this.monitorReason(item.last_problem_reason))}</small>` : ""}</span></div>` : ""}</section><section class="panel u-mb14"><div class="panelhead"><h2>${this.t("monitorMembers")}</h2></div>${members}</section>${this.monitorHistoryHtml(item)}`;
+    return `<div class="u-mb14"><button class="btn" data-monitor-back><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("monitorBack")}</button></div><section class="panel u-mb14"><div class="panelhead"><div><h2>${this.esc(item.name)} <span class="pill ${tone}">${this.monitorState(item)}</span></h2><p>${this.esc(item.description || this.t("monitorSubtitle"))}</p></div><button class="btn" data-monitor-edit>${this.t("monitorEdit")}</button></div><div class="facts"><div class="fact"><span>${this.t("monitorLastScan", { date: this.formatDate(item.scanned_at) })}</span></div><div class="fact"><span>${item.last_verified_at ? this.t("monitorLastVerified", { date: this.formatDate(item.last_verified_at) }) : this.t("monitorNeverVerified")}</span></div></div>${item.state === "unverified" ? `<div class="row"><span class="tile warn"><ha-icon icon="mdi:help-circle-outline"></ha-icon></span><span class="row-text"><strong>${this.t(item.incident_open ? "monitorUnresolved" : "monitorNoProof")}</strong>${item.incident_open && item.last_problem_reason ? `<small>${this.esc(this.monitorReason(item.last_problem_reason))}</small>` : ""}</span></div>` : ""}</section><section class="panel u-mb14"><div class="panelhead"><h2>${this.t("monitorMembers")}</h2></div>${this.monitorMembersTable(item)}</section>${this.monitorHistoryHtml(item)}`;
+  }
+
+  // The objects of one function as a table: a row opens the object.
+  monitorMembersTable(item) {
+    const rows = item.members.map(member => ({ member, object: this.findObject(member.object_key) }));
+    const toneOf = ({ member }) => (member.state === "disabled" ? "mute" : member.state === "problem" ? "red" : member.state === "unverified" ? "warn" : "ok");
+    const stateText = ({ member }) => this.t(member.state === "disabled" ? "monitorDisabled" : member.state === "problem" ? "monitorProblem" : member.state === "unverified" ? "monitorUnverified" : "monitorOk");
+    const titleOf = ({ member, object }) => object?.name || member.object_key;
+    const rulesOf = ({ member, object }) => (member.rules || []).map(rule => this.monitorRuleText(rule, object)).join("; ");
+    const sorts = [
+      { key: "name", label: "sortName", dir: "asc", get: titleOf },
+      { key: "kind", label: "monitorColKind", dir: "asc", get: r => r.member.object_key.split(":")[0] },
+      { key: "role", label: "monitorColRole", dir: "asc", get: r => (r.member.required ? 0 : 1) },
+      { key: "state", label: "sysColState", dir: "asc", get: r => ({ problem: 0, unverified: 1, ok: 2, disabled: 3 }[r.member.state] ?? 9) },
+    ];
+    return this.sysList("monitor-members", rows, {
+      sort: "state", sorts, tie: titleOf, empty: "monitorEmpty",
+      text: r => [titleOf(r), r.member.object_key, this.monitorReason(r.member.reason), rulesOf(r)].join(" "),
+      rowAttrs: r => (r.object ? `data-object="${this.esc(r.member.object_key)}" tabindex="0" role="button" aria-label="${this.esc(titleOf(r))}"` : 'class="static"'),
+      columns: [
+        { key: "name", label: "sortName", dir: "asc", cell: r => `<div class="statcell">${this.tile(r.member.object_key.split(":")[0], "")}<div>${this.nameCell(titleOf(r), r.member.object_key)}</div></div>` },
+        { key: "kind", label: "monitorColKind", dir: "asc", cell: r => this.esc(this.t(`monitorType_${r.member.object_key.split(":")[0]}`)) },
+        { key: "role", label: "monitorColRole", dir: "asc", cell: r => this.t(r.member.required ? "monitorRequired" : "monitorAdditional") },
+        { key: "state", label: "sysColState", dir: "asc", cell: r => `<span class="pill ${toneOf(r)}">${stateText(r)}</span>` },
+        { key: "reason", label: "monitorColReason", sortable: false, cell: r => this.esc(this.monitorReason(r.member.reason) || "—") },
+        { key: "rules", label: "monitorRules", sortable: false, cell: r => this.esc(rulesOf(r) || "—") },
+      ],
+    });
   }
 
   // The dated state changes and edits of one function; asked for again whenever the function was evaluated anew.
@@ -136,16 +178,15 @@ class MonitorMixin {
     const items = cache.entries.map(entry => {
       const state = stateKinds.includes(entry.kind), flap = entry.kind === "flapping";
       const tone = entry.kind === "problem" ? "red" : entry.kind === "unverified" || flap ? "warn" : entry.kind === "ok" ? "ok" : "mute";
-      const icon = { ok: "mdi:check-circle-outline", problem: "mdi:alert-circle-outline", unverified: "mdi:help-circle-outline", flapping: "mdi:swap-vertical", created: "mdi:plus-circle-outline", edited: "mdi:pencil-outline", enabled: "mdi:play-circle-outline", disabled: "mdi:pause-circle-outline" }[entry.kind] || "mdi:history";
       const label = state ? stateLabel(entry.kind) : this.t(`monitorHist_${entry.kind}`);
-      const parts = [this.formatDate(entry.at)];
+      const parts = [];
       if (flap) parts.push(this.t("monitorHistFlap", { n: entry.count, until: this.formatDate(entry.until), state: stateLabel(entry.state) }));
-      if (state || flap) parts.push(...[this.monitorReason(entry.reason), entry.key && name(entry.key)].filter(Boolean));
+      if (state || flap) parts.push(this.monitorReason(entry.reason));
       if (entry.kind === "created" && entry.added?.length) parts.push(this.t("monitorHistObjects", { n: entry.added.length }));
       for (const [list, text] of [["added", "monitorHistAdded"], ["removed", "monitorHistRemoved"], ["changed", "monitorHistChanged"]]) if (entry[list]?.length) parts.push(`${this.t(text)}: ${entry[list].map(name).join(", ")}`);
       if (entry.fields?.length) parts.push(`${this.t("monitorHistFields")}: ${entry.fields.map(f => this.t(`monitorHistField_${f}`)).join(", ")}`);
-      const target = ((state || flap) && entry.key && this.findObject(entry.key)) ? ` data-object="${this.esc(entry.key)}"` : "";
-      return { entry, text: `${label} ${parts.join(" ")}`, html: `<div class="row"${target}><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.esc(label)}</strong><small>${this.esc(parts.join(" · "))}</small></span></div>` };
+      const key = (state || flap) && entry.key ? entry.key : "";
+      return { entry, tone, label, details: parts.filter(Boolean).join(" · "), object: key ? name(key) : "", target: key && this.findObject(key) ? key : "", planId: "" };
     });
     // Plans of the journal that touched an object of this function, within the same period: they often explain a change.
     if (this.journal === null && !this._journalRequested) { this._journalRequested = true; this.loadJournal(); }
@@ -154,20 +195,30 @@ class MonitorMixin {
     for (const plan of this.journal || []) {
       const touched = [...new Set((plan.objects || []).filter(id => memberOf.has(id)).map(id => memberOf.get(id)))];
       if (!touched.length || !(Date.parse(plan.created_at) >= cutoff)) continue;
-      const parts = [this.formatDate(plan.created_at), this.t(`plan_status_${plan.status || "dry_run"}`), this.t("planSummary", { total: plan.summary?.total ?? 0, ok: plan.summary?.ok ?? 0, review: plan.summary?.review ?? 0, blocked: plan.summary?.blocked ?? 0 }), touched.map(name).join(", ")];
-      const label = this.t("monitorHist_plan");
-      items.push({ entry: { kind: "plan", at: plan.created_at }, text: `${label} ${parts.join(" ")}`, html: `<div class="row jrow"><span class="tile mute"><ha-icon icon="mdi:clipboard-text-clock-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(label)}</strong><small>${this.esc(parts.join(" · "))}</small></span><button class="btn small" data-plan-open="${this.esc(plan.plan_id)}">${this.t("openPlan")}</button></div>` });
+      const details = [this.t(`plan_status_${plan.status || "dry_run"}`), this.t("planSummary", { total: plan.summary?.total ?? 0, ok: plan.summary?.ok ?? 0, review: plan.summary?.review ?? 0, blocked: plan.summary?.blocked ?? 0 })].join(" · ");
+      items.push({ entry: { kind: "plan", at: plan.created_at }, tone: "mute", label: this.t("monitorHist_plan"), details, object: touched.map(name).join(", "), target: "", planId: plan.plan_id });
     }
-    items.sort((a, b) => Date.parse(b.entry.at) - Date.parse(a.entry.at));
-    // The shared list controls: search, a filter by kind and the page size of all lists.
-    const st = this.lvState("monitor-history", "", "asc"), query = st.q.trim().toLowerCase();
-    const inKind = ({ entry }) => !st.f.kind || (st.f.kind === "state" ? [...stateKinds, "flapping"].includes(entry.kind) : st.f.kind === "config" ? ["created", "edited", "enabled", "disabled"].includes(entry.kind) : entry.kind === st.f.kind);
-    const shown = items.filter(item => inKind(item) && (!query || item.text.toLowerCase().includes(query)));
-    const bar = items.length >= 6 || st.q || st.f.kind ? this.listBar("monitor-history", { sorts: [], filters: [{ name: "kind", all: this.t("monitorHistAll"), options: [["state", this.t("monitorHistStates")], ["problem", this.t("monitorProblem")], ["unverified", this.t("monitorUnverified")], ["ok", this.t("monitorOk")], ["flapping", this.t("monitorHist_flapping")], ["config", this.t("monitorHistConfig")], ["plan", this.t("monitorHist_plan")]] }] }) : "";
-    const page = this.paginate("monitor-history", shown);
-    const rows = page.rows.map(item => item.html).join("") + page.footer;
-    const none = items.length && !shown.length ? `<div class="emptymsg">${this.t("noMatches")}</div>` : "";
-    return `${this.monitorAvailabilityHtml(cache.availability)}<section class="panel">${head}${bar}${rows || none || `<div class="emptymsg"><ha-icon icon="mdi:history"></ha-icon>${this.t("monitorHistoryEmpty")}</div>`}</section>`;
+    const hasPlan = items.some(item => item.planId);
+    const inKind = (item, kind) => (kind === "state" ? [...stateKinds, "flapping"].includes(item.entry.kind) : kind === "config" ? ["created", "edited", "enabled", "disabled"].includes(item.entry.kind) : item.entry.kind === kind);
+    const sorts = [
+      { key: "time", label: "monitorColWhen", dir: "desc", get: item => Date.parse(item.entry.at) },
+      { key: "event", label: "monitorColEvent", dir: "asc", get: item => item.label },
+    ];
+    const list = items.length ? this.sysList("monitor-history", items, {
+      sort: "time", dir: "desc", sorts, tie: item => Date.parse(item.entry.at), empty: "monitorHistoryEmpty",
+      text: item => [this.formatDate(item.entry.at), item.label, item.details, item.object].join(" "),
+      filters: [{ name: "kind", all: this.t("monitorHistAll"), options: [["state", this.t("monitorHistStates")], ["problem", this.t("monitorProblem")], ["unverified", this.t("monitorUnverified")], ["ok", this.t("monitorOk")], ["flapping", this.t("monitorHist_flapping")], ["config", this.t("monitorHistConfig")], ["plan", this.t("monitorHist_plan")]] }],
+      filterFns: { kind: inKind },
+      rowAttrs: item => (item.target ? `data-object="${this.esc(item.target)}" tabindex="0" role="button" aria-label="${this.esc(item.label)}"` : 'class="static"'),
+      columns: [
+        { key: "time", label: "monitorColWhen", dir: "desc", cell: item => this.esc(this.formatDate(item.entry.at)) },
+        { key: "event", label: "monitorColEvent", dir: "asc", cell: item => `<span class="pill ${item.tone}">${this.esc(item.label)}</span>` },
+        { key: "details", label: "monitorColDetails", sortable: false, cell: item => this.esc(item.details || "—") },
+        { key: "object", label: "monitorColObject", sortable: false, cell: item => this.esc(item.object || "—") },
+        ...(hasPlan ? [{ key: "act", label: "btColAct", sortable: false, cell: item => (item.planId ? `<button class="btn small" data-plan-open="${this.esc(item.planId)}">${this.t("openPlan")}</button>` : "") }] : []),
+      ],
+    }) : `<div class="emptymsg"><ha-icon icon="mdi:history"></ha-icon>${this.t("monitorHistoryEmpty")}</div>`;
+    return `${this.monitorAvailabilityHtml(cache.availability)}<section class="panel">${head}${list}</section>`;
   }
 
   monitorDuration(seconds) {
