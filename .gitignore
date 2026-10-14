@@ -9,9 +9,8 @@ dist/
 uv.lock
 .DS_Store
 
-# Private product and development plan
-PLAN.md
-PLAN-ARCHIV.md
+# Private product and development plans
+*PLAN*.md
 
 # Private design mockups
 mockups/
@@ -21,4 +20,4 @@ CHANGELOG-INTERNAL.md
 TESTLISTE.md
 
 # Local review notes
-CODE_REVIEW*.md
+*REVIEW*.md
