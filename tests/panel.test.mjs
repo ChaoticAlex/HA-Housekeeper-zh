@@ -97,14 +97,16 @@ test("Hausmonitor shows a confirmed fault, a scan gap, and escapes function name
 test("the Hausmonitor history shows a flapping run as one line and filters by kind", () => {
   const { el } = panel("de");
   const at = "2026-10-14T09:00:00+00:00";
-  el.data = { ...DATA, monitor: [{ id: "one", name: "Wasser", description: "", state: "ok", scanned_at: at, members: [], incident_open: false }] };
+  el.data = { ...DATA, monitor: [{ id: "one", name: "Wasser", description: "", state: "ok", scanned_at: at, members: [{ object_key: "entity:sensor.x", required: true, rules: [] }], incident_open: false }] };
   el.monitorSelected = "one";
+  el.journal = [{ plan_id: "p1", created_at: new Date().toISOString(), status: "verified", objects: ["sensor.x", "sensor.other"], summary: { total: 1, ok: 1 } }];
   el.monitorHistory = { one: { sig: "ok|" + at + "|undefined", retention_days: 30, entries: [
     { at, until: at, kind: "flapping", count: 7, state: "ok" }, { at, kind: "edited", added: ["entity:sensor.x"] },
   ] } };
   el.monitorHistory.one.availability = { window_days: 30, since: at, observed_seconds: 1000, ok_seconds: 999, problem_seconds: 1, unknown_seconds: 0, unstable_seconds: 0, incidents: 1, longest_seconds: 1, days: [{ date: "2026-10-14", state: "problem" }] };
   const html = el.monitorDetail();
   assert.match(html, /Unauffällig: 99,9 %/);
+  assert.match(html, /data-plan-open="p1"/);
   el.data.monitor[0].last_problem_at = new Date(Date.now() - 2 * 86400000).toISOString();
   assert.match(el.monitorLastProblemLine(), /Zuletzt beeinträchtigt.*Wasser.*2/);
   el.data.monitor[0].state = "problem";

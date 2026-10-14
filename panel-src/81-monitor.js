@@ -147,11 +147,23 @@ class MonitorMixin {
       const target = ((state || flap) && entry.key && this.findObject(entry.key)) ? ` data-object="${this.esc(entry.key)}"` : "";
       return { entry, text: `${label} ${parts.join(" ")}`, html: `<div class="row"${target}><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.esc(label)}</strong><small>${this.esc(parts.join(" · "))}</small></span></div>` };
     });
+    // Plans of the journal that touched an object of this function, within the same period: they often explain a change.
+    if (this.journal === null && !this._journalRequested) { this._journalRequested = true; this.loadJournal(); }
+    const memberOf = new Map(item.members.map(m => [m.object_key.split(":").slice(1).join(":"), m.object_key]));
+    const cutoff = Date.now() - (cache.retention_days ?? 0) * 86400000;
+    for (const plan of this.journal || []) {
+      const touched = [...new Set((plan.objects || []).filter(id => memberOf.has(id)).map(id => memberOf.get(id)))];
+      if (!touched.length || !(Date.parse(plan.created_at) >= cutoff)) continue;
+      const parts = [this.formatDate(plan.created_at), this.t(`plan_status_${plan.status || "dry_run"}`), this.t("planSummary", { total: plan.summary?.total ?? 0, ok: plan.summary?.ok ?? 0, review: plan.summary?.review ?? 0, blocked: plan.summary?.blocked ?? 0 }), touched.map(name).join(", ")];
+      const label = this.t("monitorHist_plan");
+      items.push({ entry: { kind: "plan", at: plan.created_at }, text: `${label} ${parts.join(" ")}`, html: `<div class="row jrow"><span class="tile mute"><ha-icon icon="mdi:clipboard-text-clock-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(label)}</strong><small>${this.esc(parts.join(" · "))}</small></span><button class="btn small" data-plan-open="${this.esc(plan.plan_id)}">${this.t("openPlan")}</button></div>` });
+    }
+    items.sort((a, b) => Date.parse(b.entry.at) - Date.parse(a.entry.at));
     // The shared list controls: search, a filter by kind and the page size of all lists.
     const st = this.lvState("monitor-history", "", "asc"), query = st.q.trim().toLowerCase();
     const inKind = ({ entry }) => !st.f.kind || (st.f.kind === "state" ? [...stateKinds, "flapping"].includes(entry.kind) : st.f.kind === "config" ? ["created", "edited", "enabled", "disabled"].includes(entry.kind) : entry.kind === st.f.kind);
     const shown = items.filter(item => inKind(item) && (!query || item.text.toLowerCase().includes(query)));
-    const bar = items.length >= 6 || st.q || st.f.kind ? this.listBar("monitor-history", { sorts: [], filters: [{ name: "kind", all: this.t("monitorHistAll"), options: [["state", this.t("monitorHistStates")], ["problem", this.t("monitorProblem")], ["unverified", this.t("monitorUnverified")], ["ok", this.t("monitorOk")], ["flapping", this.t("monitorHist_flapping")], ["config", this.t("monitorHistConfig")]] }] }) : "";
+    const bar = items.length >= 6 || st.q || st.f.kind ? this.listBar("monitor-history", { sorts: [], filters: [{ name: "kind", all: this.t("monitorHistAll"), options: [["state", this.t("monitorHistStates")], ["problem", this.t("monitorProblem")], ["unverified", this.t("monitorUnverified")], ["ok", this.t("monitorOk")], ["flapping", this.t("monitorHist_flapping")], ["config", this.t("monitorHistConfig")], ["plan", this.t("monitorHist_plan")]] }] }) : "";
     const page = this.paginate("monitor-history", shown);
     const rows = page.rows.map(item => item.html).join("") + page.footer;
     const none = items.length && !shown.length ? `<div class="emptymsg">${this.t("noMatches")}</div>` : "";

@@ -13263,8 +13263,8 @@ Object.assign(TEXT.de, {
   monitorAvailOk: "Unauffällig: {pct} %", monitorAvailProblem: "Beeinträchtigt: {time} · {n} Vorfälle · längster {longest}", monitorAvailNoProblem: "Kein Defekt belegt", monitorAvailUnknown: "Unbekannt: {time}", monitorAvailUnstable: "Instabil: {time}", monitorAvailSince: "Beobachtet seit {date}", monitorAvailNoData: "keine Bewertung",
   monitorDurLess: "unter 1 Min.", monitorDurMinutes: "{n} Min.", monitorDurHours: "{h} Std. {m} Min.", monitorDurDays: "{d} T. {h} Std.",
   monitorLastProblem: "zuletzt beeinträchtigt {when}", monitorLastProblemLine: "Zuletzt beeinträchtigt",
-  monitorHistory: "Verlauf", monitorHistoryHint: "Zustandswechsel und Änderungen der letzten {days} Tage, neueste zuerst. Die Dauer ist unter Einstellungen einstellbar.", monitorHistoryEmpty: "Noch keine Einträge.", monitorHistoryLoading: "Verlauf wird geladen …",
-  monitorHist_flapping: "Wechselt häufig", monitorHistFlap: "{n} Wechsel bis {until}, zuletzt {state}", monitorHistAll: "Alle Einträge", monitorHistStates: "Zustandswechsel", monitorHistConfig: "Änderungen", monitorHist_created: "Angelegt", monitorHist_edited: "Geändert", monitorHist_enabled: "Aktiviert", monitorHist_disabled: "Deaktiviert",
+  monitorHistory: "Verlauf", monitorHistoryHint: "Zustandswechsel, Änderungen und Pläne zu diesen Objekten der letzten {days} Tage, neueste zuerst. Die Dauer ist unter Einstellungen einstellbar.", monitorHistoryEmpty: "Noch keine Einträge.", monitorHistoryLoading: "Verlauf wird geladen …",
+  monitorHist_flapping: "Wechselt häufig", monitorHist_plan: "Plan", monitorHistFlap: "{n} Wechsel bis {until}, zuletzt {state}", monitorHistAll: "Alle Einträge", monitorHistStates: "Zustandswechsel", monitorHistConfig: "Änderungen", monitorHist_created: "Angelegt", monitorHist_edited: "Geändert", monitorHist_enabled: "Aktiviert", monitorHist_disabled: "Deaktiviert",
   monitorHistObjects: "{n} Objekte", monitorHistAdded: "Hinzugefügt", monitorHistRemoved: "Entfernt", monitorHistChanged: "Geändert (Pflicht oder Regeln)", monitorHistFields: "Angaben",
   monitorHistField_name: "Name", monitorHistField_description: "Beschreibung", monitorHistField_notify: "Benachrichtigung",
 });
@@ -13273,8 +13273,8 @@ Object.assign(TEXT.en, {
   monitorAvailOk: "No known fault: {pct} %", monitorAvailProblem: "Impaired: {time} · {n} incidents · longest {longest}", monitorAvailNoProblem: "No fault confirmed", monitorAvailUnknown: "Unknown: {time}", monitorAvailUnstable: "Unstable: {time}", monitorAvailSince: "Observed since {date}", monitorAvailNoData: "no evaluation",
   monitorDurLess: "under 1 min", monitorDurMinutes: "{n} min", monitorDurHours: "{h} h {m} min", monitorDurDays: "{d} d {h} h",
   monitorLastProblem: "last impaired {when}", monitorLastProblemLine: "Last impaired",
-  monitorHistory: "History", monitorHistoryHint: "State changes and edits of the last {days} days, newest first. The period is set in Settings.", monitorHistoryEmpty: "No entries yet.", monitorHistoryLoading: "Loading the history …",
-  monitorHist_flapping: "Changes often", monitorHistFlap: "{n} changes until {until}, latest {state}", monitorHistAll: "All entries", monitorHistStates: "State changes", monitorHistConfig: "Edits", monitorHist_created: "Created", monitorHist_edited: "Edited", monitorHist_enabled: "Enabled", monitorHist_disabled: "Disabled",
+  monitorHistory: "History", monitorHistoryHint: "State changes, edits and plans for these objects of the last {days} days, newest first. The period is set in Settings.", monitorHistoryEmpty: "No entries yet.", monitorHistoryLoading: "Loading the history …",
+  monitorHist_flapping: "Changes often", monitorHist_plan: "Plan", monitorHistFlap: "{n} changes until {until}, latest {state}", monitorHistAll: "All entries", monitorHistStates: "State changes", monitorHistConfig: "Edits", monitorHist_created: "Created", monitorHist_edited: "Edited", monitorHist_enabled: "Enabled", monitorHist_disabled: "Disabled",
   monitorHistObjects: "{n} objects", monitorHistAdded: "Added", monitorHistRemoved: "Removed", monitorHistChanged: "Changed (required or rules)", monitorHistFields: "Details",
   monitorHistField_name: "Name", monitorHistField_description: "Description", monitorHistField_notify: "Notification",
 });
@@ -13428,11 +13428,23 @@ class MonitorMixin {
       const target = ((state || flap) && entry.key && this.findObject(entry.key)) ? ` data-object="${this.esc(entry.key)}"` : "";
       return { entry, text: `${label} ${parts.join(" ")}`, html: `<div class="row"${target}><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.esc(label)}</strong><small>${this.esc(parts.join(" · "))}</small></span></div>` };
     });
+    // Plans of the journal that touched an object of this function, within the same period: they often explain a change.
+    if (this.journal === null && !this._journalRequested) { this._journalRequested = true; this.loadJournal(); }
+    const memberOf = new Map(item.members.map(m => [m.object_key.split(":").slice(1).join(":"), m.object_key]));
+    const cutoff = Date.now() - (cache.retention_days ?? 0) * 86400000;
+    for (const plan of this.journal || []) {
+      const touched = [...new Set((plan.objects || []).filter(id => memberOf.has(id)).map(id => memberOf.get(id)))];
+      if (!touched.length || !(Date.parse(plan.created_at) >= cutoff)) continue;
+      const parts = [this.formatDate(plan.created_at), this.t(`plan_status_${plan.status || "dry_run"}`), this.t("planSummary", { total: plan.summary?.total ?? 0, ok: plan.summary?.ok ?? 0, review: plan.summary?.review ?? 0, blocked: plan.summary?.blocked ?? 0 }), touched.map(name).join(", ")];
+      const label = this.t("monitorHist_plan");
+      items.push({ entry: { kind: "plan", at: plan.created_at }, text: `${label} ${parts.join(" ")}`, html: `<div class="row jrow"><span class="tile mute"><ha-icon icon="mdi:clipboard-text-clock-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(label)}</strong><small>${this.esc(parts.join(" · "))}</small></span><button class="btn small" data-plan-open="${this.esc(plan.plan_id)}">${this.t("openPlan")}</button></div>` });
+    }
+    items.sort((a, b) => Date.parse(b.entry.at) - Date.parse(a.entry.at));
     // The shared list controls: search, a filter by kind and the page size of all lists.
     const st = this.lvState("monitor-history", "", "asc"), query = st.q.trim().toLowerCase();
     const inKind = ({ entry }) => !st.f.kind || (st.f.kind === "state" ? [...stateKinds, "flapping"].includes(entry.kind) : st.f.kind === "config" ? ["created", "edited", "enabled", "disabled"].includes(entry.kind) : entry.kind === st.f.kind);
     const shown = items.filter(item => inKind(item) && (!query || item.text.toLowerCase().includes(query)));
-    const bar = items.length >= 6 || st.q || st.f.kind ? this.listBar("monitor-history", { sorts: [], filters: [{ name: "kind", all: this.t("monitorHistAll"), options: [["state", this.t("monitorHistStates")], ["problem", this.t("monitorProblem")], ["unverified", this.t("monitorUnverified")], ["ok", this.t("monitorOk")], ["flapping", this.t("monitorHist_flapping")], ["config", this.t("monitorHistConfig")]] }] }) : "";
+    const bar = items.length >= 6 || st.q || st.f.kind ? this.listBar("monitor-history", { sorts: [], filters: [{ name: "kind", all: this.t("monitorHistAll"), options: [["state", this.t("monitorHistStates")], ["problem", this.t("monitorProblem")], ["unverified", this.t("monitorUnverified")], ["ok", this.t("monitorOk")], ["flapping", this.t("monitorHist_flapping")], ["config", this.t("monitorHistConfig")], ["plan", this.t("monitorHist_plan")]] }] }) : "";
     const page = this.paginate("monitor-history", shown);
     const rows = page.rows.map(item => item.html).join("") + page.footer;
     const none = items.length && !shown.length ? `<div class="emptymsg">${this.t("noMatches")}</div>` : "";

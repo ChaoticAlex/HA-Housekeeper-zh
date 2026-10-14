@@ -86,8 +86,8 @@ Object.assign(TEXT.de, {
   monitorAvailOk: "Unauffällig: {pct} %", monitorAvailProblem: "Beeinträchtigt: {time} · {n} Vorfälle · längster {longest}", monitorAvailNoProblem: "Kein Defekt belegt", monitorAvailUnknown: "Unbekannt: {time}", monitorAvailUnstable: "Instabil: {time}", monitorAvailSince: "Beobachtet seit {date}", monitorAvailNoData: "keine Bewertung",
   monitorDurLess: "unter 1 Min.", monitorDurMinutes: "{n} Min.", monitorDurHours: "{h} Std. {m} Min.", monitorDurDays: "{d} T. {h} Std.",
   monitorLastProblem: "zuletzt beeinträchtigt {when}", monitorLastProblemLine: "Zuletzt beeinträchtigt",
-  monitorHistory: "Verlauf", monitorHistoryHint: "Zustandswechsel und Änderungen der letzten {days} Tage, neueste zuerst. Die Dauer ist unter Einstellungen einstellbar.", monitorHistoryEmpty: "Noch keine Einträge.", monitorHistoryLoading: "Verlauf wird geladen …",
-  monitorHist_flapping: "Wechselt häufig", monitorHistFlap: "{n} Wechsel bis {until}, zuletzt {state}", monitorHistAll: "Alle Einträge", monitorHistStates: "Zustandswechsel", monitorHistConfig: "Änderungen", monitorHist_created: "Angelegt", monitorHist_edited: "Geändert", monitorHist_enabled: "Aktiviert", monitorHist_disabled: "Deaktiviert",
+  monitorHistory: "Verlauf", monitorHistoryHint: "Zustandswechsel, Änderungen und Pläne zu diesen Objekten der letzten {days} Tage, neueste zuerst. Die Dauer ist unter Einstellungen einstellbar.", monitorHistoryEmpty: "Noch keine Einträge.", monitorHistoryLoading: "Verlauf wird geladen …",
+  monitorHist_flapping: "Wechselt häufig", monitorHist_plan: "Plan", monitorHistFlap: "{n} Wechsel bis {until}, zuletzt {state}", monitorHistAll: "Alle Einträge", monitorHistStates: "Zustandswechsel", monitorHistConfig: "Änderungen", monitorHist_created: "Angelegt", monitorHist_edited: "Geändert", monitorHist_enabled: "Aktiviert", monitorHist_disabled: "Deaktiviert",
   monitorHistObjects: "{n} Objekte", monitorHistAdded: "Hinzugefügt", monitorHistRemoved: "Entfernt", monitorHistChanged: "Geändert (Pflicht oder Regeln)", monitorHistFields: "Angaben",
   monitorHistField_name: "Name", monitorHistField_description: "Beschreibung", monitorHistField_notify: "Benachrichtigung",
 });
@@ -96,8 +96,8 @@ Object.assign(TEXT.en, {
   monitorAvailOk: "No known fault: {pct} %", monitorAvailProblem: "Impaired: {time} · {n} incidents · longest {longest}", monitorAvailNoProblem: "No fault confirmed", monitorAvailUnknown: "Unknown: {time}", monitorAvailUnstable: "Unstable: {time}", monitorAvailSince: "Observed since {date}", monitorAvailNoData: "no evaluation",
   monitorDurLess: "under 1 min", monitorDurMinutes: "{n} min", monitorDurHours: "{h} h {m} min", monitorDurDays: "{d} d {h} h",
   monitorLastProblem: "last impaired {when}", monitorLastProblemLine: "Last impaired",
-  monitorHistory: "History", monitorHistoryHint: "State changes and edits of the last {days} days, newest first. The period is set in Settings.", monitorHistoryEmpty: "No entries yet.", monitorHistoryLoading: "Loading the history …",
-  monitorHist_flapping: "Changes often", monitorHistFlap: "{n} changes until {until}, latest {state}", monitorHistAll: "All entries", monitorHistStates: "State changes", monitorHistConfig: "Edits", monitorHist_created: "Created", monitorHist_edited: "Edited", monitorHist_enabled: "Enabled", monitorHist_disabled: "Disabled",
+  monitorHistory: "History", monitorHistoryHint: "State changes, edits and plans for these objects of the last {days} days, newest first. The period is set in Settings.", monitorHistoryEmpty: "No entries yet.", monitorHistoryLoading: "Loading the history …",
+  monitorHist_flapping: "Changes often", monitorHist_plan: "Plan", monitorHistFlap: "{n} changes until {until}, latest {state}", monitorHistAll: "All entries", monitorHistStates: "State changes", monitorHistConfig: "Edits", monitorHist_created: "Created", monitorHist_edited: "Edited", monitorHist_enabled: "Enabled", monitorHist_disabled: "Disabled",
   monitorHistObjects: "{n} objects", monitorHistAdded: "Added", monitorHistRemoved: "Removed", monitorHistChanged: "Changed (required or rules)", monitorHistFields: "Details",
   monitorHistField_name: "Name", monitorHistField_description: "Description", monitorHistField_notify: "Notification",
 });
