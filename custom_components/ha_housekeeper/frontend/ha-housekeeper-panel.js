@@ -1406,7 +1406,7 @@ class StylesMixin {
       .sumline{display:flex;flex-wrap:wrap;gap:10px 26px;padding:12px 18px;margin-bottom:14px}.sumline span{display:grid;gap:3px;align-content:start}.sumline small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.sumline b{font-size:calc(13px*var(--hk-fs,1));font-weight:600}
       .tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--hk-border);overflow-x:auto;background:linear-gradient(to right,var(--hk-bg),transparent) left/36px 100% no-repeat local,linear-gradient(to left,var(--hk-bg),transparent) right/36px 100% no-repeat local,linear-gradient(to right,rgba(0,0,0,.16),transparent) left/10px 100% no-repeat scroll,linear-gradient(to left,rgba(0,0,0,.16),transparent) right/10px 100% no-repeat scroll}.tab{flex:none;padding:10px 14px;border:0;border-bottom:2px solid transparent;background:none;color:var(--hk-muted);white-space:nowrap}.tab em{font-style:normal;font-size:calc(11px*var(--hk-fs,1));padding:1px 6px;border-radius:10px;background:var(--hk-soft)}.tab[aria-selected="true"]{color:var(--hk-blue-text);border-bottom-color:var(--hk-blue);font-weight:600}
       .needgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:16px}.needtile{display:flex;flex-direction:column;justify-content:center;gap:4px;height:92px;padding:0 16px;border:1px solid var(--hk-border);border-radius:14px;background:var(--hk-soft);min-width:0}.needtile b{font-size:calc(28px*var(--hk-fs,1));line-height:1;font-variant-numeric:tabular-nums}.needtile span{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.needtile.miss{border-style:dashed}.needtile.miss b{color:var(--hk-amber)}.tablewrap.lt.batt .iconbtn{padding:3px 6px;margin-left:4px;--mdc-icon-size:16px}.linkbtn{border:0;background:none;padding:0;font:inherit;color:var(--hk-text);cursor:pointer;text-decoration:underline;text-decoration-color:var(--hk-border)}.linkbtn:hover{text-decoration-color:currentColor}.tablewrap.lt.batt .lvl{display:flex;align-items:center;gap:8px;min-width:130px}.tablewrap.lt.batt .lvl .bar{flex:1;height:7px;border-radius:4px;background:var(--hk-border);overflow:hidden;min-width:48px}.tablewrap.lt.batt .lvl .bar i{display:block;height:100%}.lvl .lvlnum{min-width:4.2em;text-align:right;white-space:nowrap}.lvl .lvlnum small{display:block;color:var(--hk-muted);font-size:calc(11.5px*var(--hk-fs,1))}.tablewrap.lt.batt .red{color:var(--hk-red)}.tablewrap.lt.batt .amber{color:var(--hk-amber)}.tablewrap.lt.batt .green{color:var(--hk-green)}.tablewrap.lt.batt td .btedit{display:flex;flex-wrap:wrap;gap:6px;white-space:normal}.tablewrap.lt.batt .btedit label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.tablewrap.lt.batt .bkedit{padding:0;background:none;border:0}.tablewrap.lt.batt .bkedit .factnote{display:none}.tablewrap.lt.batt .btn.miss{border-style:dashed;color:var(--hk-amber)}.btn.miss ha-icon{--mdc-icon-size:14px;margin-left:6px}.tablewrap.lt.batt td:last-child{text-align:right}@media(max-width:700px){}.bkedit{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 16px 12px 62px;background:var(--hk-soft);border-bottom:1px solid var(--hk-border)}.bkedit select,.bkrow select{padding:5px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit;font-size:calc(13px*var(--hk-fs,1))}.bkcancel{border:0;background:none;padding:4px 2px;font:inherit;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);cursor:pointer;text-decoration:underline}.bkrow{gap:8px;padding-right:12px;flex-wrap:wrap}.bkall,.bkask{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--hk-border)}.bkask{background:var(--hk-soft)}.rowwrap{display:flex;align-items:center;border-bottom:1px solid var(--hk-border)}.rowwrap:last-child{border-bottom:0}.rowwrap .row{border-bottom:0;flex:1;min-width:0}.selbox{margin:0 0 0 16px;flex:none}.selcell{width:34px;padding-right:0}.selcell .selbox{margin:0}.statcell{display:flex;gap:10px;align-items:flex-start}.outcome{display:flex;gap:12px;align-items:center;margin:14px 16px 4px;padding:14px 16px;border-radius:12px;--oc:var(--hk-gray);color:color-mix(in srgb,var(--oc) 55%,var(--hk-text));background:color-mix(in srgb,var(--oc) 13%,transparent);border:1px solid color-mix(in srgb,var(--oc) 30%,transparent)}.outcome ha-icon{--mdc-icon-size:26px;flex:none}.outcome.ok{--oc:var(--hk-green)}.outcome.warn{--oc:var(--hk-amber)}.outcome.red{--oc:var(--hk-red)}.namecell{position:relative}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;padding:10px 16px;border-radius:10px;background:var(--hk-text);color:var(--hk-bg);font-weight:600;box-shadow:var(--hk-sh2);pointer-events:none}.toast.bad{border-left:5px solid var(--hk-red);max-width:min(560px,calc(100vw - 32px))}.modepill{display:inline-flex;align-items:center;gap:5px;--mdc-icon-size:14px}.outcome small{display:block;font-weight:400;margin-top:2px}.visitline{display:flex;gap:8px;align-items:center;margin:0 0 12px}.visitline ha-icon{--mdc-icon-size:16px}.headsel{display:flex;gap:10px;align-items:center}.statcell .selbox{margin:3px 0 0}.statcell>div{min-width:0}.btcart,.btsuggest{margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 10%,transparent);border:1px solid color-mix(in srgb,var(--hk-blue) 30%,transparent)}.btcart strong{display:block;margin-bottom:2px}.btsuggest{background:color-mix(in srgb,var(--hk-green) 11%,transparent);border-color:color-mix(in srgb,var(--hk-green) 30%,transparent)}.btsuggest h3{margin:0 0 4px}.btrepl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}.btrepl .row-text{flex:1;min-width:200px}.btct{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 16px;border-top:1px solid var(--hk-border)}.btct .factnote{flex:1;min-width:120px;margin:0}.btct input{padding:5px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.btctl,.btedit{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 16px 0 8px}.btedit{flex-basis:100%;margin:0;padding:8px 16px 12px}.rowwrap:has(.btedit){flex-wrap:wrap}.chcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;padding:0 16px}.chcols>div{padding:8px 0}.chcols .big{font-size:22px;font-weight:700}.chbars{display:flex;gap:3px;align-items:flex-end;height:54px;padding:8px 16px 4px}.chbars i{flex:1;max-width:14px;min-width:3px;border-radius:3px 3px 0 0;background:var(--hk-green);display:block}.chbars i.m{background:var(--hk-red)}.chaxis{display:flex;justify-content:space-between;padding:0 16px 12px;color:var(--hk-muted);font-size:12px}.trimbox{margin:14px 16px 0;padding-top:14px;border-top:1px solid var(--hk-border)}.trimbox .actions{margin-top:8px}
-      .row.politem[data-pol-row]{cursor:pointer}.poldetail{cursor:auto;display:grid;gap:12px;margin-top:10px}.poldetail h4{margin:0 0 4px;font-size:calc(11px*var(--hk-fs,1));font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--hk-muted)}.poldetail p{margin:0}.poledit{display:grid;gap:6px}.poldetail .inline{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.poldetail .inline input,.poldetail .inline select{height:36px;min-width:0}.poldetail .acts{display:flex;flex-wrap:wrap;gap:8px}.poldetail .btn.on{border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 14%,var(--hk-surface));color:var(--hk-blue-text);font-weight:700}.poldetail .btn small{font-weight:400;color:var(--hk-muted);margin-left:4px}.polcheck{font-size:calc(13px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted)}.polcheck.ok{color:var(--hk-green)}.polcheck.bad{color:var(--hk-red,#b3392f)}.row.politem.open{background:var(--hk-soft)}
+      .row.politem[data-pol-row],tr[data-pol-row]{cursor:pointer}.tablewrap.lt tr.poldetailrow td{white-space:normal;background:var(--hk-soft)}.poldetail{cursor:auto;display:grid;gap:12px;margin-top:10px}.poldetail h4{margin:0 0 4px;font-size:calc(11px*var(--hk-fs,1));font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--hk-muted)}.poldetail p{margin:0}.poledit{display:grid;gap:6px}.poldetail .inline{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.poldetail .inline input,.poldetail .inline select{height:36px;min-width:0}.poldetail .acts{display:flex;flex-wrap:wrap;gap:8px}.poldetail .btn.on{border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 14%,var(--hk-surface));color:var(--hk-blue-text);font-weight:700}.poldetail .btn small{font-weight:400;color:var(--hk-muted);margin-left:4px}.polcheck{font-size:calc(13px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted)}.polcheck.ok{color:var(--hk-green)}.polcheck.bad{color:var(--hk-red,#b3392f)}.row.politem.open{background:var(--hk-soft)}
       .remform{display:grid;gap:14px;padding:16px;border-top:1px solid var(--hk-border);background:var(--hk-soft)}.remgrid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;align-items:start}.remfield{display:grid;grid-template-rows:auto 40px auto;gap:4px;font-size:calc(12px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted);min-width:0}.remfield input{height:40px;min-width:0}.remfield.full{grid-column:1/-1;grid-template-rows:auto 40px}.remchips{display:flex;gap:6px;flex-wrap:wrap}.remchips .chip{padding:2px 10px;font-size:calc(12px*var(--hk-fs,1))}.remhint{color:var(--hk-blue-text);font-weight:600}.remactions{display:flex;gap:14px;align-items:center;justify-content:flex-end}
       .tablewrap.rem td:first-child{white-space:normal}.chevbtn{display:inline-flex;vertical-align:middle;padding:0;margin-right:4px;border:0;background:none;color:var(--hk-muted);cursor:pointer}.remnote{display:block;margin-left:28px;color:var(--hk-muted)}.remact{text-align:right;white-space:nowrap}.remact .btn{margin-left:6px}.remhist td{padding:10px 16px 14px 44px;background:var(--hk-soft)}.remhist h3{margin:0 0 6px;font-size:calc(11px*var(--hk-fs,1));font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--hk-muted)}.remhist ul{display:grid;gap:4px;margin:0;padding:0;list-style:none}.remhist li{display:flex;gap:12px;align-items:center}.remhist li .linkbtn{margin-left:auto;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.remhist p{margin:0}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
       @media(max-width:700px){.remact{display:flex;flex-wrap:wrap;gap:8px;white-space:normal}.remact .btn{margin-left:0}.remgrid{grid-template-columns:1fr}.remfield.wide,.remfield.full{grid-column:auto}}
@@ -1557,7 +1557,7 @@ Object.assign(TEXT.en, {
 
 // Texts for the policies view; merged into TEXT.
 Object.assign(TEXT.de, {
-  polAllRules: "Alle Regeln", polNoViolations: "Keine Verstöße.", polSumRules: "Regeln an", polSumViolations: "Verstöße", polSumHidden: "Ausgeblendet", polTabViolations: "Verstöße", polTabRules: "Regeln",
+  polAllRules: "Alle Regeln", polColRule: "Regel", polColNote: "Hinweis", polNoViolations: "Keine Verstöße.", polSumRules: "Regeln an", polSumViolations: "Verstöße", polSumHidden: "Ausgeblendet", polTabViolations: "Verstöße", polTabRules: "Regeln",
   policies: "Richtlinien", policiesSubtitle: "Eigene Regeln für Ordnung in Home Assistant. Hinweise, keine Defekte; liest nur.", polOverviewViolations: "Richtlinienverstöße", polOverviewRules: "{n} Regeln aktiv", polOverviewRuleOne: "1 Regel aktiv",
   polObjTitle: "Richtlinien · {n} Verstöße", polObjTitleOne: "Richtlinien · 1 Verstoß", polObjHint: "Regeln, gegen die dieses Objekt verstößt. Ausgeblendete Verstöße stehen nicht hier.", polObjAll: "Alle Richtlinien",
   polHint: "Schalte ein, was in deiner Installation gelten soll. Alle Regeln sind zunächst aus.", polLoading: "Richtlinien werden geprüft",
@@ -1576,7 +1576,7 @@ Object.assign(TEXT.de, {
   polRule_state_rate: "Zustandsänderungen pro Tag", polDesc_state_rate: "Entitäten, die in den zuletzt berechneten Last-Zahlen mindestens so oft am Tag ihren Zustand geändert haben, wie die Grenze sagt. Die Regel startet keine Recorder-Abfrage.", polLimit: "Grenze (Änderungen pro Entität und Tag)", polLimitSave: "Speichern", polPending: "Noch nicht berechnet: Öffne Recorder → Last einmal, dann prüft die Regel diese Zahlen.", polRate: "{n} Änderungen pro Tag",
 });
 Object.assign(TEXT.en, {
-  polAllRules: "All rules", polNoViolations: "No violations.", polSumRules: "Rules on", polSumViolations: "Violations", polSumHidden: "Hidden", polTabViolations: "Violations", polTabRules: "Rules",
+  polAllRules: "All rules", polColRule: "Rule", polColNote: "Note", polNoViolations: "No violations.", polSumRules: "Rules on", polSumViolations: "Violations", polSumHidden: "Hidden", polTabViolations: "Violations", polTabRules: "Rules",
   policies: "Policies", policiesSubtitle: "Your own rules for tidiness in Home Assistant. Hints, not defects; only reads.", polOverviewViolations: "Policy violations", polOverviewRules: "{n} active rules", polOverviewRuleOne: "1 active rule",
   polObjTitle: "Policies · {n} violations", polObjTitleOne: "Policies · 1 violation", polObjHint: "Rules this object breaks. Hidden violations are not shown here.", polObjAll: "All policies",
   polHint: "Switch on what should apply to your installation. All rules start off.", polLoading: "Checking policies",
@@ -6648,7 +6648,8 @@ class PoliciesMixin {
     return this.changePolicy({ type: "ha_housekeeper/set_policy_limit", limit });
   }
 
-  polItemRow(item, compact = false) {
+  // The pieces of a violation that the compact row (the object's own page) and the table of the policies page share.
+  polItemParts(item) {
     const pill = item.ignored ? `<span class="pill mute">${this.t(item.by === "label" ? "polByLabel" : "polHiddenLabel")}</span>` : "";
     const due = item.resurfaced ? `<span class="pill warn">${this.t("dueLabel")}</span>` : "";
     const button = item.by === "label" ? ""
@@ -6656,13 +6657,18 @@ class PoliciesMixin {
       : `<button class="btn" data-decide-open="${this.esc(item.key)}">${this.t("polHide")}</button>`;
     const decision = item.ignored && item.by === "user" ? `<small>${this.esc(this.decisionLabel(item))}</small>` : "";
     const form = this.decide?.key === item.key ? this.decideForm(item) : "";
-    const box = compact ? "" : this.polSelBox(item);
     const open = this.polIsOpen(item), main = this.polMainAction(item);
-    const chev = this.expandBtn("data-pol-open", item.key, open, this.t(open ? "polCloseRow" : "polOpenRow"));
     // A row with a fix offers it as its button (it folds the row open); the other rows keep their hide button; an opened row has it next to "open object".
     const act = open ? "" : main ? `<button class="btn" data-pol-open="${this.esc(item.key)}">${this.t(main)}</button>` : button;
+    return { pill, due, button, decision, form, open, act };
+  }
+
+  // The compact row of the object's own page: the violation with its note and fix, no table around it.
+  polItemRow(item) {
+    const { pill, due, button, decision, form, open, act } = this.polItemParts(item);
+    const chev = this.expandBtn("data-pol-open", item.key, open, this.t(open ? "polCloseRow" : "polOpenRow"));
     const detail = open ? this.polDetail(item, button) : "";
-    return `${box ? `<div class="rowwrap">${box}` : ""}<div class="row politem${open ? " open" : ""}" data-pol-row="${this.esc(item.key)}">${chev}<span class="row-text">${["recorder", "system", "user"].includes(item.object_type) || compact ? `<strong>${this.esc(item.name)}</strong>` : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong></button>`}${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}${detail}</span>${due}${pill}${act}</div>${box ? "</div>" : ""}${form}`;
+    return `<div class="row politem${open ? " open" : ""}" data-pol-row="${this.esc(item.key)}">${chev}<span class="row-text"><strong>${this.esc(item.name)}</strong>${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}${detail}</span>${due}${pill}${act}</div>${form}`;
   }
 
   // The violations of one object, on its overview: the same rows as in the policies view, so a fix can be made here.
@@ -6674,7 +6680,7 @@ class PoliciesMixin {
       .filter(i => !i.ignored && i.object_type === item.object_type && i.object_id === item.object_id);
     if (!items.length) return "";
     const title = this.t(items.length === 1 ? "polObjTitleOne" : "polObjTitle", { n: this.formatNumber(items.length) });
-    return `<section class="panel"><div class="panelhead"><div><h2>${title}</h2><p>${this.t("polObjHint")}</p></div><div class="actions"><button class="btn" data-view="policies">${this.t("polObjAll")}</button></div></div>${items.map(i => this.polItemRow(i, true)).join("")}</section>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${title}</h2><p>${this.t("polObjHint")}</p></div><div class="actions"><button class="btn" data-view="policies">${this.t("polObjAll")}</button></div></div>${items.map(i => this.polItemRow(i)).join("")}</section>`;
   }
 
   // One rule on the "Rules" tab: what it checks, how many violations, and its switch.
@@ -6688,23 +6694,52 @@ class PoliciesMixin {
     return head + extra;
   }
 
-  // The violations of all switched-on rules in one list: filter by rule, search, open the entity.
+  // The box in the table head: all rows of the page that can be picked.
+  polHeadBox() {
+    const ids = this._polPage || [];
+    if (!ids.length) return "";
+    const n = ids.filter(id => this.polSel?.has(id)).length;
+    return `<input type="checkbox" class="selbox" data-pol-page ${n === ids.length ? "checked" : ""} ${n && n < ids.length ? "data-partial" : ""} aria-label="${this.esc(this.t("selectPage"))}">`;
+  }
+
+  // The violations of all switched-on rules as one table: filter by rule, search, sort, open a row for the fix.
   polViolations(r) {
     const on = r.rules.filter(rule => rule.enabled);
     if (!on.length) return `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:toggle-switch-off-outline"></ha-icon>${this.t("polNoneOn")}</div></div>`;
-    const wanted = on.some(rule => rule.id === this.polRule) ? this.polRule : "";
-    const chip = (id, label, count) => `<button class="chip ${wanted === id ? "active" : ""}" data-pol-rule="${this.esc(id)}" aria-pressed="${wanted === id}">${this.esc(label)} <em>${this.formatNumber(count)}</em></button>`;
-    const chips = `<div class="chips">${chip("", this.t("polAllRules"), on.reduce((n, rule) => n + rule.count, 0))}${on.map(rule => chip(rule.id, this.t(`polRule_${rule.id}`), rule.count)).join("")}</div>`;
-    const items = on.filter(rule => !wanted || rule.id === wanted).flatMap(rule => rule.items.map(item => ({ ...item, rule: rule.id })))
-      .filter(item => this.policyShowHidden || !item.ignored);
-    const found = this.searchList("policies", items, item => [item.name, item.object_id, ...(item.also || [])].join(" "));
-    const pg = this.paginate("polviol", found.rows);
+    const id = "polviol";
+    this.lvState(id, "name", "asc");
+    const ruleName = item => this.t(`polRule_${item.rule}`);
+    const sorts = [
+      { key: "name", label: "sortName", dir: "asc", get: item => item.name },
+      { key: "rule", label: "polColRule", dir: "asc", get: ruleName },
+      { key: "status", label: "sortStatus", dir: "asc", get: item => (item.ignored ? 2 : item.resurfaced ? 0 : 1) },
+    ];
+    const bar = this.listBar(id, { table: true, dense: true, sorts, filters: [{ name: "rule", all: this.t("polAllRules"), options: on.map(rule => [rule.id, `${this.t(`polRule_${rule.id}`)} (${this.formatNumber(rule.count)})`]) }] });
+    const items = on.flatMap(rule => rule.items.map(item => ({ ...item, rule: rule.id }))).filter(item => this.policyShowHidden || !item.ignored);
+    const shown = this.refine(id, items, { text: item => [item.name, item.object_id, ...(item.also || [])].join(" "), filters: { rule: (item, v) => item.rule === v }, sorts, tie: item => item.key });
+    const pg = this.paginate(id, shown);
     this._polPage = pg.rows.filter(i => !i.ignored && ["entity", "device"].includes(i.object_type)).map(i => i.key);
-    const rows = pg.rows.map(item => this.polItemRow(item)).join("");
+    const columns = [
+      { key: "sel", label: "selectPage", narrow: true, sortable: false, allBox: () => this.polHeadBox(), cell: item => this.polSelBox(item) },
+      { key: "name", label: "sortName", dir: "asc", cell: item => {
+        const { open } = this.polItemParts(item);
+        const name = this.nameCell(item.name, item.object_id, "span");
+        const link = ["recorder", "system", "user"].includes(item.object_type) ? name : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}">${name}</button>`;
+        return `<div class="statcell">${this.expandBtn("data-pol-open", item.key, open, this.t(open ? "polCloseRow" : "polOpenRow"))}<div>${link}</div></div>`;
+      } },
+      { key: "rule", label: "polColRule", dir: "asc", cell: item => this.esc(ruleName(item)) },
+      { key: "note", label: "polColNote", sortable: false, cell: item => `${this.polItemNote(item)}${this.polItemParts(item).decision}` || "—" },
+      { key: "status", label: "sortStatus", dir: "asc", cell: item => { const { pill, due } = this.polItemParts(item); return `${due}${pill}` || "—"; } },
+      { key: "act", label: "btColAct", sortable: false, cell: item => this.polItemParts(item).act },
+    ];
+    const after = item => {
+      const { open, button, form } = this.polItemParts(item);
+      return `${open ? `<tr class="static poldetailrow"><td colspan="${columns.length}">${this.polDetail(item, button)}</td></tr>` : ""}${form ? `<tr class="static poldetailrow"><td colspan="${columns.length}">${form}</td></tr>` : ""}`;
+    };
     const hidden = on.reduce((n, rule) => n + (rule.ignored || 0), 0);
     const note = hidden && !this.policyShowHidden ? `<p class="factnote">${this.t("polHiddenN", { n: this.formatNumber(hidden) })}</p>` : "";
-    const empty = !found.rows.length && !found.none ? `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("polNoViolations")}</div>` : "";
-    return `<div class="panel">${chips}${found.bar}${this.polSelBar()}${found.none}${empty}${rows}${pg.footer}${note}</div>`;
+    const table = shown.length ? this.listTable(id, columns, pg.rows, { cls: "pols", rowAttrs: item => `data-pol-row="${this.esc(item.key)}"`, after }) : `<div class="emptymsg">${items.length ? this.noMatches(id) : `<ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("polNoViolations")}`}</div>`;
+    return `<div class="panel">${bar}${this.polSelBar()}${table}${pg.footer}${note}</div>`;
   }
 
   policiesView() {
@@ -11721,7 +11756,7 @@ class AreaAssignMixin {
   // The bar over the policy list: how many are ticked and what can be done with them.
   polSelBar() {
     const n = this.polSel?.size || 0;
-    return `<div class="toolbar${n ? "" : " nosel"}"><button class="btn quiet" data-pol-sel-page>${this.t("selectPage")}</button><button class="btn quiet" data-pol-sel-clear ${n ? "" : "disabled"}>${this.t("clearSelection")}</button><span class="selcount" role="status">${this.t("selectedCount", { count: n })}</span><span class="toolgap"></span>${n ? `<div class="fbtns"><button class="btn" data-pol-bulk="area">${this.t("fselArea")}</button></div>` : ""}</div>${this.bulk && this.bulk.kind === "area" ? this.bulkForm() : ""}`;
+    return `<div class="toolbar${n ? "" : " nosel"}"><button class="btn quiet" data-pol-sel-clear ${n ? "" : "disabled"}>${this.t("clearSelection")}</button><span class="selcount" role="status">${this.t("selectedCount", { count: n })}</span><span class="toolgap"></span>${n ? `<div class="fbtns"><button class="btn" data-pol-bulk="area">${this.t("fselArea")}</button></div>` : ""}</div>${this.bulk && this.bulk.kind === "area" ? this.bulkForm() : ""}`;
   }
 
   polSelBox(item) {
@@ -11731,7 +11766,8 @@ class AreaAssignMixin {
 
   bindPolSel(root) {
     root.querySelectorAll("[data-pol-sel]").forEach(el => el.onchange = () => { (this.polSel ||= new Set())[el.checked ? "add" : "delete"](el.dataset.polSel); this.render(); });
-    root.querySelector("[data-pol-sel-page]")?.addEventListener("click", () => { this.polSel = new Set([...(this.polSel || []), ...(this._polPage || [])]); this.render(); });
+    root.querySelector("[data-pol-page]")?.addEventListener("change", ev => { this.polSel = new Set(this.polSel || []); (this._polPage || []).forEach(id => (ev.target.checked ? this.polSel.add(id) : this.polSel.delete(id))); this.render(); });
+    const pageBox = root.querySelector("[data-pol-page]"); if (pageBox) pageBox.indeterminate = pageBox.hasAttribute("data-partial");
     root.querySelector("[data-pol-sel-clear]")?.addEventListener("click", () => { this.polSel = new Set(); this.bulk = null; this.render(); });
     root.querySelectorAll("[data-pol-bulk]").forEach(el => el.addEventListener("click", () => { this.bulk = { kind: el.dataset.polBulk, mode: "strip", find: "", with: "", area: "", error: "" }; this.render(); }));
   }
@@ -14977,7 +15013,6 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-rel-refresh]")?.addEventListener("click", () => this.loadReliability(true));
     root.querySelector("[data-expo-refresh]")?.addEventListener("click", () => this.loadExposure());
     root.querySelector("[data-policy-refresh]")?.addEventListener("click", () => this.loadPolicies());
-    root.querySelectorAll("[data-pol-rule]").forEach(el => el.onclick = () => { this.polRule = el.dataset.polRule; this.pages = {}; this.render(); });
     root.querySelector("[data-policy-hidden]")?.addEventListener("click", () => { this.policyShowHidden = !this.policyShowHidden; this.render(); });
     root.querySelectorAll("[data-policy-toggle]").forEach(el => el.onchange = () => this.changePolicy({ type: "ha_housekeeper/set_policy", rule: el.dataset.policyToggle, enabled: el.checked }));
     root.querySelector("[data-policy-limit-save]")?.addEventListener("click", () => this.setPolicyLimit(root.querySelector("#polLimit")?.value));

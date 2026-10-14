@@ -2621,8 +2621,9 @@ test("the load view, the policies and the exposure view have a search box once t
   el.policies = { available: true, enabled: 1, violations: 12, prefixes: {}, rules: [{ id: "entity_area", enabled: true, count: 12, ignored: 0, items }] };
   el._policiesRequested = true;
   html = el.policiesView();
-  assert.ok(html.includes('data-lq="policies"') && !html.includes('data-dense'), "the violations list has search but no table density control");
-  el.lvState("policies", "", "asc").q = "lampe 11";
+  assert.ok(html.includes('data-lq="polviol"') && html.includes('data-dense="polviol"') && html.includes('data-lsort="polviol|rule|asc"'), "the violations table has search, density control and sortable columns");
+  assert.ok(html.includes("data-pol-page") && html.includes('data-lf="polviol|rule"') && html.includes('class="tablewrap lt pols'), "page box in the head, filter by rule");
+  el.lvState("polviol", "", "asc").q = "lampe 11";
   html = el.policiesView();
   assert.ok(html.includes("Lampe 11") && !html.includes("Lampe 3"));
   el.exposure = { ...EXPO, findings: [{ kind: "alias_duplicate", level: "warn", assistant: "conversation", alias: "Küche", count: 6, items: Array.from({ length: 6 }, (_, i) => ({ entity_id: `light.k${i}`, name: `Küche ${i}` })) }, EXPO.findings[0]] };

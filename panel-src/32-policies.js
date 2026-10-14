@@ -60,7 +60,8 @@ class PoliciesMixin {
     return this.changePolicy({ type: "ha_housekeeper/set_policy_limit", limit });
   }
 
-  polItemRow(item, compact = false) {
+  // The pieces of a violation that the compact row (the object's own page) and the table of the policies page share.
+  polItemParts(item) {
     const pill = item.ignored ? `<span class="pill mute">${this.t(item.by === "label" ? "polByLabel" : "polHiddenLabel")}</span>` : "";
     const due = item.resurfaced ? `<span class="pill warn">${this.t("dueLabel")}</span>` : "";
     const button = item.by === "label" ? ""
@@ -68,13 +69,18 @@ class PoliciesMixin {
       : `<button class="btn" data-decide-open="${this.esc(item.key)}">${this.t("polHide")}</button>`;
     const decision = item.ignored && item.by === "user" ? `<small>${this.esc(this.decisionLabel(item))}</small>` : "";
     const form = this.decide?.key === item.key ? this.decideForm(item) : "";
-    const box = compact ? "" : this.polSelBox(item);
     const open = this.polIsOpen(item), main = this.polMainAction(item);
-    const chev = this.expandBtn("data-pol-open", item.key, open, this.t(open ? "polCloseRow" : "polOpenRow"));
     // A row with a fix offers it as its button (it folds the row open); the other rows keep their hide button; an opened row has it next to "open object".
     const act = open ? "" : main ? `<button class="btn" data-pol-open="${this.esc(item.key)}">${this.t(main)}</button>` : button;
+    return { pill, due, button, decision, form, open, act };
+  }
+
+  // The compact row of the object's own page: the violation with its note and fix, no table around it.
+  polItemRow(item) {
+    const { pill, due, button, decision, form, open, act } = this.polItemParts(item);
+    const chev = this.expandBtn("data-pol-open", item.key, open, this.t(open ? "polCloseRow" : "polOpenRow"));
     const detail = open ? this.polDetail(item, button) : "";
-    return `${box ? `<div class="rowwrap">${box}` : ""}<div class="row politem${open ? " open" : ""}" data-pol-row="${this.esc(item.key)}">${chev}<span class="row-text">${["recorder", "system", "user"].includes(item.object_type) || compact ? `<strong>${this.esc(item.name)}</strong>` : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}"><strong>${this.esc(item.name)}</strong></button>`}${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}${detail}</span>${due}${pill}${act}</div>${box ? "</div>" : ""}${form}`;
+    return `<div class="row politem${open ? " open" : ""}" data-pol-row="${this.esc(item.key)}">${chev}<span class="row-text"><strong>${this.esc(item.name)}</strong>${this.rowId(item.object_id, item.rule ? this.t(`polRule_${item.rule}`) : "")}${this.polItemNote(item)}${decision}${detail}</span>${due}${pill}${act}</div>${form}`;
   }
 
   // The violations of one object, on its overview: the same rows as in the policies view, so a fix can be made here.
@@ -86,7 +92,7 @@ class PoliciesMixin {
       .filter(i => !i.ignored && i.object_type === item.object_type && i.object_id === item.object_id);
     if (!items.length) return "";
     const title = this.t(items.length === 1 ? "polObjTitleOne" : "polObjTitle", { n: this.formatNumber(items.length) });
-    return `<section class="panel"><div class="panelhead"><div><h2>${title}</h2><p>${this.t("polObjHint")}</p></div><div class="actions"><button class="btn" data-view="policies">${this.t("polObjAll")}</button></div></div>${items.map(i => this.polItemRow(i, true)).join("")}</section>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${title}</h2><p>${this.t("polObjHint")}</p></div><div class="actions"><button class="btn" data-view="policies">${this.t("polObjAll")}</button></div></div>${items.map(i => this.polItemRow(i)).join("")}</section>`;
   }
 
   // One rule on the "Rules" tab: what it checks, how many violations, and its switch.
@@ -100,23 +106,52 @@ class PoliciesMixin {
     return head + extra;
   }
 
-  // The violations of all switched-on rules in one list: filter by rule, search, open the entity.
+  // The box in the table head: all rows of the page that can be picked.
+  polHeadBox() {
+    const ids = this._polPage || [];
+    if (!ids.length) return "";
+    const n = ids.filter(id => this.polSel?.has(id)).length;
+    return `<input type="checkbox" class="selbox" data-pol-page ${n === ids.length ? "checked" : ""} ${n && n < ids.length ? "data-partial" : ""} aria-label="${this.esc(this.t("selectPage"))}">`;
+  }
+
+  // The violations of all switched-on rules as one table: filter by rule, search, sort, open a row for the fix.
   polViolations(r) {
     const on = r.rules.filter(rule => rule.enabled);
     if (!on.length) return `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:toggle-switch-off-outline"></ha-icon>${this.t("polNoneOn")}</div></div>`;
-    const wanted = on.some(rule => rule.id === this.polRule) ? this.polRule : "";
-    const chip = (id, label, count) => `<button class="chip ${wanted === id ? "active" : ""}" data-pol-rule="${this.esc(id)}" aria-pressed="${wanted === id}">${this.esc(label)} <em>${this.formatNumber(count)}</em></button>`;
-    const chips = `<div class="chips">${chip("", this.t("polAllRules"), on.reduce((n, rule) => n + rule.count, 0))}${on.map(rule => chip(rule.id, this.t(`polRule_${rule.id}`), rule.count)).join("")}</div>`;
-    const items = on.filter(rule => !wanted || rule.id === wanted).flatMap(rule => rule.items.map(item => ({ ...item, rule: rule.id })))
-      .filter(item => this.policyShowHidden || !item.ignored);
-    const found = this.searchList("policies", items, item => [item.name, item.object_id, ...(item.also || [])].join(" "));
-    const pg = this.paginate("polviol", found.rows);
+    const id = "polviol";
+    this.lvState(id, "name", "asc");
+    const ruleName = item => this.t(`polRule_${item.rule}`);
+    const sorts = [
+      { key: "name", label: "sortName", dir: "asc", get: item => item.name },
+      { key: "rule", label: "polColRule", dir: "asc", get: ruleName },
+      { key: "status", label: "sortStatus", dir: "asc", get: item => (item.ignored ? 2 : item.resurfaced ? 0 : 1) },
+    ];
+    const bar = this.listBar(id, { table: true, dense: true, sorts, filters: [{ name: "rule", all: this.t("polAllRules"), options: on.map(rule => [rule.id, `${this.t(`polRule_${rule.id}`)} (${this.formatNumber(rule.count)})`]) }] });
+    const items = on.flatMap(rule => rule.items.map(item => ({ ...item, rule: rule.id }))).filter(item => this.policyShowHidden || !item.ignored);
+    const shown = this.refine(id, items, { text: item => [item.name, item.object_id, ...(item.also || [])].join(" "), filters: { rule: (item, v) => item.rule === v }, sorts, tie: item => item.key });
+    const pg = this.paginate(id, shown);
     this._polPage = pg.rows.filter(i => !i.ignored && ["entity", "device"].includes(i.object_type)).map(i => i.key);
-    const rows = pg.rows.map(item => this.polItemRow(item)).join("");
+    const columns = [
+      { key: "sel", label: "selectPage", narrow: true, sortable: false, allBox: () => this.polHeadBox(), cell: item => this.polSelBox(item) },
+      { key: "name", label: "sortName", dir: "asc", cell: item => {
+        const { open } = this.polItemParts(item);
+        const name = this.nameCell(item.name, item.object_id, "span");
+        const link = ["recorder", "system", "user"].includes(item.object_type) ? name : `<button class="linklike" data-object="${this.esc(`${item.object_type}:${item.object_id}`)}">${name}</button>`;
+        return `<div class="statcell">${this.expandBtn("data-pol-open", item.key, open, this.t(open ? "polCloseRow" : "polOpenRow"))}<div>${link}</div></div>`;
+      } },
+      { key: "rule", label: "polColRule", dir: "asc", cell: item => this.esc(ruleName(item)) },
+      { key: "note", label: "polColNote", sortable: false, cell: item => `${this.polItemNote(item)}${this.polItemParts(item).decision}` || "—" },
+      { key: "status", label: "sortStatus", dir: "asc", cell: item => { const { pill, due } = this.polItemParts(item); return `${due}${pill}` || "—"; } },
+      { key: "act", label: "btColAct", sortable: false, cell: item => this.polItemParts(item).act },
+    ];
+    const after = item => {
+      const { open, button, form } = this.polItemParts(item);
+      return `${open ? `<tr class="static poldetailrow"><td colspan="${columns.length}">${this.polDetail(item, button)}</td></tr>` : ""}${form ? `<tr class="static poldetailrow"><td colspan="${columns.length}">${form}</td></tr>` : ""}`;
+    };
     const hidden = on.reduce((n, rule) => n + (rule.ignored || 0), 0);
     const note = hidden && !this.policyShowHidden ? `<p class="factnote">${this.t("polHiddenN", { n: this.formatNumber(hidden) })}</p>` : "";
-    const empty = !found.rows.length && !found.none ? `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("polNoViolations")}</div>` : "";
-    return `<div class="panel">${chips}${found.bar}${this.polSelBar()}${found.none}${empty}${rows}${pg.footer}${note}</div>`;
+    const table = shown.length ? this.listTable(id, columns, pg.rows, { cls: "pols", rowAttrs: item => `data-pol-row="${this.esc(item.key)}"`, after }) : `<div class="emptymsg">${items.length ? this.noMatches(id) : `<ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("polNoViolations")}`}</div>`;
+    return `<div class="panel">${bar}${this.polSelBar()}${table}${pg.footer}${note}</div>`;
   }
 
   policiesView() {
