@@ -5,18 +5,12 @@ class HAHousekeeperPanel extends HTMLElement {
     this._hass = null;
     this.data = null;
     this.view = "overview";
-    this.query = "";
-    this.typeFilter = "";
-    this.statusFilter = "";
-    this.originFilter = "";
-    this.helperIdle = "";
     this.findingFilter = ""; this.findingAfter = false; this.findingDue = false; this.showFollowers = false; this.findingWithFollowers = false; this.goals = null; this.goalsLoading = false; this.goalForm = null; this.decide = null; this.markForm = null;
     this.findingStatus = ""; this.bulk = null;
     this.batteryFilter = "all";
     this.monitorFilter = ""; this.monitorSelected = null; this.monitorForm = null; this.monitorQuery = ""; this.monitorError = "";
 
     this._urlApplied = false;
-    this.sort = "name";
     this.selected = null;
     this.detailTab = "overview";
     this.settingsTab = "look";
@@ -48,7 +42,6 @@ class HAHousekeeperPanel extends HTMLElement {
     this.journal = null;
     this.prefs = this.loadPrefs();
     this.pageSize = this.prefs.pageSize;
-    this.sortDir = "asc";
     this.pages = {};
     this.busy = false;
     this.scanStatus = null;
@@ -851,7 +844,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-col]").forEach(el => el.onchange = () => { const [id, key] = el.dataset.col.split("|"); this.toggleCol(id, key); });
     root.querySelectorAll("[data-export-list]").forEach(el => el.onclick = () => this.exportList(el.dataset.exportList));
     root.querySelectorAll("[data-win-act]").forEach(el => el.onclick = () => { const [name, ...rest] = el.dataset.winAct.split(":"); this.winAct(name, rest.join(":")); });
-    root.querySelectorAll("[data-inv-filter]").forEach(el => el.onclick = () => { const [type, status] = el.dataset.invFilter.split("|"), same = (type || status) && this.typeFilter === type && this.statusFilter === status; this.typeFilter = same ? "" : type; this.statusFilter = same ? "" : status; this.originFilter = ""; this.pages = {}; (this.folds ||= {}).inv_types = !(this.typeFilter || this.statusFilter); this.render(); this.showList(); });
+    root.querySelectorAll("[data-inv-filter]").forEach(el => el.onclick = () => { const [type, status, origin = ""] = el.dataset.invFilter.split("|"), same = (type || status) && this.typeFilter === type && this.statusFilter === status && this.originFilter === origin; this.typeFilter = same ? "" : type; this.statusFilter = same ? "" : status; this.originFilter = same ? "" : origin; this.pages = {}; (this.folds ||= {}).inv_types = !(this.typeFilter || this.statusFilter); this.render(); this.showList(); });
     root.querySelectorAll("[data-inv-more]").forEach(el => el.onclick = () => { this.invAllTypes = !this.invAllTypes; this.render(); });
     root.querySelectorAll("[data-type-jump]").forEach(el => el.onclick = () => { this.noteJump("inventory"); this.typeFilter = el.dataset.typeJump; this.statusFilter = ""; this.originFilter = ""; this.pages = {}; this.view = "inventory"; this.render(); });
     root.querySelectorAll("[data-export]").forEach(el => el.onclick = () => this.exportFindings(el.dataset.export));
@@ -924,21 +917,9 @@ class HAHousekeeperPanel extends HTMLElement {
       const input = root.querySelector(selector);
       if (input) input.oninput = () => { setter(input.value); this.scheduleRender(); };
     };
-    searchField("#query", v => { this.query = v; this.pages = {}; });
     root.querySelectorAll("[data-baseline]").forEach(b => b.addEventListener("click", () => { this.compareBaseline = b.dataset.baseline; this.pages = {}; this.loadCompare(); }));
     root.querySelector("[data-history-all]")?.addEventListener("click", () => { this.historyAll = !this.historyAll; this.pages = {}; this.render(); });
     const bl = root.querySelector("#baseline"); if (bl) bl.onchange = () => { this.compareBaseline = bl.value; this.pages = {}; this.loadCompare(); };
-    const tf = root.querySelector("#typeFilter"); if (tf) tf.onchange = () => { this.typeFilter = tf.value; this.pages = {}; this.render(); };
-    const hi = root.querySelector("#helperIdle"); if (hi) hi.onchange = () => { this.helperIdle = hi.value; this.pages = {}; this.render(); };
-    const of = root.querySelector("#originFilter"); if (of) of.onchange = () => { this.originFilter = of.value; this.pages = {}; this.render(); };
-    const sf = root.querySelector("#statusFilter"); if (sf) sf.onchange = () => { this.statusFilter = sf.value; this.pages = {}; this.render(); };
-    const sk = root.querySelector("#sortKey"); if (sk) sk.onchange = () => { this.sort = sk.value; this.pages = {}; this.render(); };
-    const sd = root.querySelector("#sortDir"); if (sd) sd.onclick = () => { this.sortDir = this.sortDir === "asc" ? "desc" : "asc"; this.pages = {}; this.render(); };
-    root.querySelectorAll("th[data-sort]").forEach(el => el.onclick = () => {
-      if (this.sort === el.dataset.sort) this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
-      else { this.sort = el.dataset.sort; this.sortDir = "asc"; }
-      this.pages = {}; this.render();
-    });
     root.querySelectorAll("[data-object]").forEach(el => el.onclick = ev => { const inner = ev?.target?.closest?.("button, select, input, a, label"); if (inner && inner !== el && el.contains(inner)) return; const obj = this.findObject(el.dataset.object); if (obj) this.openObject(obj); });
     // Table rows and graph nodes are not native buttons: Enter and Space open them like a click.
     const openByKey = el => el.onkeydown = ev => {

@@ -2,14 +2,10 @@
 const VIEWS_KEY = "ha_housekeeper.views";
 const VIEWS_LIMIT = 10;
 const DENSE_LISTS_KEY = "ha_housekeeper.dense_lists";
-const DENSE_LIST_IDS = ["unreferenced", "batteries", "runs", "findings"];
+const DENSE_LIST_ID = /^[\w:.-]{1,80}$/, DENSE_LISTS_MAX = 80; // any list that offers compact rows
 const DENSE_LEGACY_IDS = ["unreferenced", "batteries", "runs"];
 
 class ListsMixin {
-  th(key, label) {
-    const on = this.sort === key;
-    return `<th data-sort="${key}" aria-sort="${on ? (this.sortDir === "desc" ? "descending" : "ascending") : "none"}"><button type="button" class="thbtn" data-sortbtn="${key}">${this.t(label)}${on ? ` <span aria-hidden="true">${this.sortDir === "desc" ? "▼" : "▲"}</span>` : ""}</button></th>`;
-  }
 
   // Shared list controls: per-list search, filters and sort kept in this.lv[id].
   // The sort and the filters of a list come back at the next visit (this browser only); the search text does not.
@@ -179,7 +175,7 @@ class ListsMixin {
 
   setExporter(id, name, header, rows) { (this._exporters ||= {})[id] = { name, header, rows }; }
 
-  // Only long tables with an optional ID line offer compact rows, saved separately per list.
+  // Tables offer compact rows (one line, no ID line), saved separately per list.
   denseLists() {
     if (this._denseLists) return this._denseLists;
     let saved = {};
@@ -187,15 +183,15 @@ class ListsMixin {
       const raw = globalThis.localStorage?.getItem(DENSE_LISTS_KEY);
       saved = raw ? JSON.parse(raw) : globalThis.localStorage?.getItem("ha_housekeeper.dense") === "1" ? Object.fromEntries(DENSE_LEGACY_IDS.map(id => [id, true])) : {};
     } catch (_) { saved = {}; }
-    return (this._denseLists = saved && typeof saved === "object" && !Array.isArray(saved) ? Object.fromEntries(DENSE_LIST_IDS.map(id => [id, saved[id] === true])) : {});
+    return (this._denseLists = saved && typeof saved === "object" && !Array.isArray(saved) ? Object.fromEntries(Object.entries(saved).filter(([id, on]) => on === true && DENSE_LIST_ID.test(id)).slice(0, DENSE_LISTS_MAX)) : {});
   }
 
   isDenseList(id) { return this.denseLists()[id] === true; }
 
   toggleDenseList(id) {
-    if (!DENSE_LIST_IDS.includes(id)) return;
+    if (!DENSE_LIST_ID.test(id)) return;
     const lists = this.denseLists();
-    lists[id] = !lists[id];
+    if (lists[id]) delete lists[id]; else if (Object.keys(lists).length < DENSE_LISTS_MAX) lists[id] = true;
     try { globalThis.localStorage?.setItem(DENSE_LISTS_KEY, JSON.stringify(lists)); } catch (_) { /* kept until the page closes */ }
     this.render();
   }
@@ -241,7 +237,7 @@ class ListsMixin {
       { name: "state", all: this.t("objAllStatus"), options: [...new Map(rows.map(r => [r.state, r.stateLabel])).entries()].sort((a, b) => String(a[1]).localeCompare(String(b[1]), this.lang)) },
     ];
     const st = this.lv[id];
-    const bar = withBar && (rows.length >= min || st.q) ? this.listBar(id, { table: true, sorts, filters }) : "";
+    const bar = withBar && (rows.length >= min || st.q) ? this.listBar(id, { table: true, dense: true, sorts, filters }) : "";
     const shown = this.refine(id, rows, { text: r => [r.name, r.sub, ...extras.map(x => String(x.get(r) ?? ""))].join(" "), filters: { type: (r, v) => r.type === v, state: (r, v) => r.state === v }, sorts, tie: r => r.key });
     const pg = this.paginate(id, shown);
     const columns = [

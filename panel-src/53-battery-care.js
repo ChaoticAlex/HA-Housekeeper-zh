@@ -89,7 +89,7 @@ class BatteryCareMixin {
       { key: "last", label: "remColLast", dir: "desc", get: r => r.last_done || "" },
       { key: "due", label: "remColDue", dir: "asc", get: r => r.days_left },
     ];
-    const bar = items.length ? this.listBar("reminders", { table: true, sorts, filters: [{ name: "state", all: this.t("remAllStates"), options: [["due", this.t("remStateDue")], ["soon", this.t("remStateSoon")], ["ok", this.t("remStateOk")]] }] }) : "";
+    const bar = items.length ? this.listBar("reminders", { table: true, dense: true, sorts, filters: [{ name: "state", all: this.t("remAllStates"), options: [["due", this.t("remStateDue")], ["soon", this.t("remStateSoon")], ["ok", this.t("remStateOk")]] }] }) : "";
     const rows = this.refine("reminders", items, { text: r => [r.name, r.note].join(" "), filters: { state: (r, v) => r.state === v }, sorts, tie: r => r.id });
     const pg = this.paginate("reminders", rows);
     const table = !items.length ? `<div class="emptymsg"><ha-icon icon="mdi:calendar-clock-outline"></ha-icon>${this.t("remEmpty")}</div>`

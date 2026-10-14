@@ -86,7 +86,7 @@ class ExposureMixin {
       { key: "area", label: "expoColArea", dir: "asc", get: e => e.area },
       { key: "also", label: "expoColAlso", dir: "desc", get: e => e.others.length },
     ];
-    const bar = all.length ? this.listBar(id, { table: true, sorts, filters: [
+    const bar = all.length ? this.listBar(id, { table: true, dense: true, sorts, filters: [
       { name: "domain", all: this.t("expoAllDomains"), options: domains.map(d => [d, d]) },
       ...(others.length ? [{ name: "also", all: this.t("expoAllAlso"), options: others.map(o => [o, this.expoAssistantName(o)]) }] : []),
     ] }) : "";

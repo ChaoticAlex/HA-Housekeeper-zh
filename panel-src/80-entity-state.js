@@ -23,15 +23,15 @@ class EntityStateMixin {
   invSelBar(rows) {
     const sel = this.invSel ||= new Set(), n = sel.size;
     const entities = rows.filter(r => r.object_type === "entity");
-    if (!n && this.typeFilter !== "entity") return "";
+    if (!n && !entities.length) return "";
     const tooMany = n > MAX_PLAN_ACTIONS, busy = this.planBusy ? 'disabled aria-busy="true"' : "";
     const btn = (target, icon) => `<button class="btn" data-inv-state="${target}" ${n && !tooMany ? busy : "disabled"}><ha-icon icon="${icon}"></ha-icon>${this.t(`state${target[0].toUpperCase()}${target.slice(1)}`)}</button>`;
     return `<div class="toolbar${n ? "" : " nosel"}"><button class="btn quiet" data-inv-sel-all ${entities.length ? "" : "disabled"}>${this.t("stateAllFiltered", { count: this.formatNumber(entities.length) })}</button><button class="btn quiet" data-inv-sel-clear ${n ? "" : "disabled"}>${this.t("stateClear")}</button><span class="selcount" role="status">${this.t("stateSel", { count: n })}</span><span class="toolgap"></span><div class="fbtns">${btn("disable", "mdi:cancel")}${btn("enable", "mdi:check-circle-outline")}${btn("hide", "mdi:eye-off-outline")}${btn("unhide", "mdi:eye-outline")}</div></div>${tooMany ? `<small class="error" role="alert" style="padding:6px 16px;display:block">${this.esc(this.t("stateTooMany", { max: MAX_PLAN_ACTIONS }))}</small>` : ""}`;
   }
 
   invSelBox(item) {
-    if (item.object_type !== "entity") return "<td></td>";
-    return `<td class="selcell"><input type="checkbox" class="selbox" data-inv-sel="${this.esc(item.object_id)}" ${this.invSel?.has(item.object_id) ? "checked" : ""} aria-label="${this.esc(item.name)}"></td>`;
+    if (item.object_type !== "entity") return "";
+    return `<input type="checkbox" class="selbox" data-inv-sel="${this.esc(item.object_id)}" ${this.invSel?.has(item.object_id) ? "checked" : ""} aria-label="${this.esc(item.name)}">`;
   }
 
   // Select only the entities on the current page; other inventory object types have no bulk action.

@@ -108,7 +108,7 @@ class UnusedMixin {
     const units = [...new Set(all.map(o => o.unit).filter(Boolean))].sort();
     const AGES = [30, 365, 730];
     this.setExporter("orphanstats", "orphaned-statistics", ["ID", this.t("utKind"), this.t("utUnit"), this.t("utFirst"), this.t("utLast"), this.t("utRows"), this.t("inEnergy")], () => rows.map(o => [o.statistic_id, this.t(kind(o)), o.unit || "", firstOf(o) ? new Date(firstOf(o) * 1000).toISOString() : "", lastOf(o) ? new Date(lastOf(o) * 1000).toISOString() : "", rowsOf(o) ?? "", o.in_energy ? "yes" : "no"]));
-    const bar = this.listBar("orphanstats", { table: true, columns: [{ key: "kind", label: "utKind" }, { key: "unit", label: "utUnit" }, { key: "first", label: "utFirst" }, { key: "last", label: "utLast" }, { key: "rows", label: "utRows" }, { key: "energy", label: "utEnergy" }], sorts, filters: [
+    const bar = this.listBar("orphanstats", { table: true, dense: true, columns: [{ key: "kind", label: "utKind" }, { key: "unit", label: "utUnit" }, { key: "first", label: "utFirst" }, { key: "last", label: "utLast" }, { key: "rows", label: "utRows" }, { key: "energy", label: "utEnergy" }], sorts, filters: [
       { name: "kind", all: this.t("allKinds"), options: kinds.map(k => [k, this.t(k)]) },
       { name: "unit", all: this.t("allUnits"), options: units.map(u => [u, u]) },
       { name: "age", all: this.t("allAges"), options: AGES.map(d => [String(d), this.t(`statAge${d}`)]) },

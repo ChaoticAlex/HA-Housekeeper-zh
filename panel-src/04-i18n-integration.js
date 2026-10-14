@@ -1,6 +1,6 @@
 // Texts for the integration detail page; merged into TEXT.
 Object.assign(TEXT.de, {
-  originKindCore: "Core", originKindCustom: "Custom", allOrigins: "Alle Herkünfte", helperKind: "Helfer", usedByCol: "Verwendet von", changedCol: "Zuletzt geändert", helperIdleLabel: "Nutzung", helperIdleAny: "Alle Helfer", helperIdleOpt: "Vermutlich ungenutzt, {days} Tage unverändert", helperIdleHint: "Nur ein Hinweis: Diese Helfer werden in dem, was Housekeeper liest (Automationen, Skripte, Szenen, Dashboards, Gruppen), nicht verwendet. Dashboards außerhalb des Scans, Apps und YAML können sie trotzdem nutzen.",
+  originKindCore: "Core", originKindCustom: "Custom", invOfCore: "davon Core", invOfCustom: "davon Custom", allOrigins: "Alle Herkünfte", helperKind: "Helfer", usedByCol: "Verwendet von", changedCol: "Zuletzt geändert", helperIdleLabel: "Nutzung", helperIdleAny: "Alle Helfer", helperIdleOpt: "Vermutlich ungenutzt, {days} Tage unverändert", helperIdleHint: "Nur ein Hinweis: Diese Helfer werden in dem, was Housekeeper liest (Automationen, Skripte, Szenen, Dashboards, Gruppen), nicht verwendet. Dashboards außerhalb des Scans, Apps und YAML können sie trotzdem nutzen.",
   ignored: "Ignoriert", integrationCard: "Integration", integrationName: "Integration", origin: "Herkunft", originBuiltIn: "In Home Assistant enthalten", originCustom: "Benutzerdefiniert · {path}{version}",
   entrySource: "Eingerichtet über", entryError: "Fehlermeldung", entryId: "Eintrags-ID", entryUniqueId: "Eindeutige ID", entryCreated: "Angelegt", entryModified: "Geändert", entryEntities: "Entitäten", entryDevices: "Geräte",
   entryDocs: "Dokumentation", entryHaPath: "Pfad in Home Assistant", noneValue: "keine",
@@ -10,7 +10,7 @@ Object.assign(TEXT.de, {
   cause_entry_problem_error: "Die Integration ist nicht geladen ({state}). Meldung: {error}",
 });
 Object.assign(TEXT.en, {
-  originKindCore: "Core", originKindCustom: "Custom", allOrigins: "All origins", helperKind: "Helpers", usedByCol: "Used by", changedCol: "Last changed", helperIdleLabel: "Use", helperIdleAny: "All helpers", helperIdleOpt: "Probably unused, unchanged for {days} days", helperIdleHint: "A hint only: nothing Housekeeper reads (automations, scripts, scenes, dashboards, groups) uses these helpers. Dashboards outside the scan, apps and YAML may still use them.",
+  originKindCore: "Core", originKindCustom: "Custom", invOfCore: "of which core", invOfCustom: "of which custom", allOrigins: "All origins", helperKind: "Helpers", usedByCol: "Used by", changedCol: "Last changed", helperIdleLabel: "Use", helperIdleAny: "All helpers", helperIdleOpt: "Probably unused, unchanged for {days} days", helperIdleHint: "A hint only: nothing Housekeeper reads (automations, scripts, scenes, dashboards, groups) uses these helpers. Dashboards outside the scan, apps and YAML may still use them.",
   ignored: "Ignored", integrationCard: "Integration", integrationName: "Integration", origin: "Origin", originBuiltIn: "Included with Home Assistant", originCustom: "Custom · {path}{version}",
   entrySource: "Set up via", entryError: "Error message", entryId: "Entry ID", entryUniqueId: "Unique ID", entryCreated: "Created", entryModified: "Modified", entryEntities: "Entities", entryDevices: "Devices",
   entryDocs: "Documentation", entryHaPath: "Path in Home Assistant", noneValue: "none",

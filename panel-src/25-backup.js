@@ -92,7 +92,7 @@ class BackupMixin {
       { key: "size", label: "bhColSize", dir: "desc", get: b => b.size },
       { key: "protected", label: "bhColProtected", dir: "desc", get: b => (b.protected ? 1 : 0) },
     ];
-    const bar = this.listBar(id, { table: true, sorts, filters: [{ name: "protected", all: this.t("bhAllProtected"), options: [["yes", this.t("bhYes")], ["no", this.t("bhNo")]] }] });
+    const bar = this.listBar(id, { table: true, dense: true, sorts, filters: [{ name: "protected", all: this.t("bhAllProtected"), options: [["yes", this.t("bhYes")], ["no", this.t("bhNo")]] }] });
     const rows = this.refine(id, list, { text: b => [this.formatDate(b.date), ...(b.agents || [])].join(" "), filters: { protected: (b, v) => Boolean(b.protected) === (v === "yes") }, sorts, tie: b => b.date });
     const pg = this.paginate(id, rows);
     const columns = [

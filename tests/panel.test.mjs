@@ -821,9 +821,9 @@ test("compact rows belong to each eligible table and keep their own browser stat
   const columns = [{ key: "name", label: "utName", cell: item => el.nameCell(item.name, item.id) }];
   const rows = [{ name: "Sensor", id: "sensor.a" }];
   for (const id of ["unreferenced", "batteries", "runs", "orphanstats"]) el.lvState(id, "name", "asc");
-  const bar = id => el.listBar(id, { sorts: [], dense: id !== "orphanstats" });
+  const bar = id => el.listBar(id, { sorts: [], dense: true });
   assert.match(bar("unreferenced"), /data-dense="unreferenced" aria-pressed="false"/);
-  assert.doesNotMatch(bar("orphanstats"), /data-dense/);
+  assert.match(bar("orphanstats"), /data-dense="orphanstats"/, "every table offers compact rows");
   el.render = () => {};
   el.toggleDenseList("unreferenced");
   assert.match(bar("unreferenced"), /data-dense="unreferenced" aria-pressed="true"/);
@@ -831,7 +831,7 @@ test("compact rows belong to each eligible table and keep their own browser stat
   assert.doesNotMatch(el.listTable("batteries", columns, rows), /dense-list/);
   assert.doesNotMatch(el.listTable("orphanstats", columns, rows), /dense-list/);
   el.toggleDenseList("batteries");
-  assert.equal(JSON.parse(storage.getItem("ha_housekeeper.dense_lists")).runs, false);
+  assert.equal(JSON.parse(storage.getItem("ha_housekeeper.dense_lists")).runs, undefined, "only lists that are on are kept");
   const { el: reopened } = panel("en", { localStorage: storage });
   assert.equal(reopened.isDenseList("unreferenced"), true);
   assert.equal(reopened.isDenseList("batteries"), true);
@@ -1663,7 +1663,7 @@ test("inventory rows and sortable headers can be used with the keyboard", () => 
   el.render();
   const html = shadow.innerHTML;
   assert.ok(/<tr data-object="[^"]+" tabindex="0" role="button" aria-label="[^"]+">/.test(html), "rows are focusable");
-  assert.ok(/<th data-sort="name" aria-sort="[a-z]+"><button type="button" class="thbtn" data-sortbtn="name">/.test(html), "headers hold a real button");
+  assert.ok(/<th scope="col" aria-sort="[a-z]+"><button type="button" class="thbtn" data-lsort="inventory\|name\|asc">/.test(html), "headers hold a real button");
   const key = (k, target = row) => { const ev = { key: k, target, prevented: false, preventDefault() { this.prevented = true; } }; row.onkeydown(ev); return ev; };
   assert.ok(key("Enter").prevented && row.clicked === 1);
   assert.ok(key(" ").prevented && row.clicked === 2);
@@ -1689,8 +1689,8 @@ test("typing in a search field changes the state at once and renders once after 
   el.view = "inventory";
   const queued = [];
   el.defer = fn => { queued.push(fn); return queued.length; };
-  const input = { value: "" };
-  shadow.querySelector = selector => (selector === "#query" ? input : null);
+  const input = { value: "", dataset: { lq: "inventory" } };
+  shadow.querySelectorAll = selector => (selector === "[data-lq]" ? [input] : []);
   el.render(); // binds the field
   let renders = 0;
   const render = el.render.bind(el);
@@ -1858,6 +1858,7 @@ test("the overview starts with what needs doing, most urgent first", () => {
 test("jumping from a to-do row to the inventory sets its type and status filter", () => {
   const { el, shadow } = panel("en");
   const row = { dataset: { jump: "inventory", type: "config_entry", status: "problem" } };
+  el.data = { ...DATA, objects: [...DATA.objects, { object_type: "config_entry", object_id: "E9", name: "Broken", domain: "hue", status: "problem" }] };
   shadow.querySelectorAll = selector => (selector === "[data-jump]" ? [row] : []);
   el.render();
   el.statusFilter = "x"; el.typeFilter = "y";
@@ -2624,7 +2625,7 @@ test("the load view, the policies and the exposure view have a search box once t
   assert.ok(html.includes('data-lq="exposure"') && !html.includes('data-dense'), "exposure findings have search but no ineffective density control");
   const exposed = { ...EXPO, exposed_entities: Array.from({ length: 7 }, (_, i) => ({ entity_id: `light.ex${i}`, name: `Light ${i}`, assistants: ["conversation"] })) };
   html = el.expoSourceTab(exposed, { id: "conversation", label: "Assist", status: "ok", count: 7 });
-  assert.ok(html.includes('data-lq="expo_conversation"') && !html.includes('data-dense'), "source lists omit the density control too");
+  assert.ok(html.includes('data-lq="expo_conversation"') && html.includes('data-dense="expo_conversation"'), "a table of a source offers compact rows");
   assert.ok(html.includes("<table") && html.includes('data-lf="expo_conversation|domain"') && html.includes("mdi:lightbulb-outline") && !html.includes("mdi:chevron-right"), "a source is a table with a domain filter and domain symbols, no arrow");
   el.lvState("exposure", "", "asc").q = "küche 2";
   html = el.exposureView();
@@ -3053,10 +3054,10 @@ test("a list can hide columns and offers its rows as CSV", () => {
   const { el, shadow } = panel("en");
   el.data = DATA; el.view = "inventory"; el.render();
   assert.ok(shadow.innerHTML.includes('data-export-list="inventory"') && shadow.innerHTML.includes('data-col-open="inventory"'));
-  assert.ok(shadow.innerHTML.indexOf("data-xp-open") < shadow.innerHTML.indexOf('data-export-list="inventory"'), "the CSV download stays the rightmost inventory action");
+  assert.ok(shadow.innerHTML.indexOf('data-export-list="inventory"') < shadow.innerHTML.indexOf("data-xp-open"), "the export assistant sits under the list bar");
   assert.ok(shadow.innerHTML.includes(">Type<"));
   el.toggleCol("inventory", "type");
-  assert.ok(!shadow.innerHTML.includes('<th scope="col"') && !shadow.innerHTML.includes('data-sort="type"'));
+  assert.ok(!shadow.innerHTML.includes('data-lsort="inventory|type|asc"'), "a hidden column has no header");
   assert.ok(el.colHidden("inventory", "type") && !el.colHidden("inventory", "status"));
   const ex = el._exporters.inventory;
   assert.equal(ex.rows().length, el.filtered().length);
@@ -4523,10 +4524,13 @@ test("origin filter keeps only core or custom config entries", () => {
     { object_type: "config_entry", object_id: "E1", name: "Core", domain: "hue", custom: false, status: "active", entity_count: 2 },
     { object_type: "config_entry", object_id: "E2", name: "Cust", domain: "hacs", custom: true, integration_version: "2.0", status: "active", entity_count: 5 },
   ] };
+  el.typeFilter = "config_entry";
   el.originFilter = "custom";
   assert.deepEqual(el.filtered().map(o => o.object_id), ["E2"]);
   el.originFilter = "core";
   assert.deepEqual(el.filtered().map(o => o.object_id), ["E1"]);
+  el.typeFilter = "entity";
+  assert.equal(el.originFilter, "", "the origin goes with any other type than integration");
 });
 
 test("helper filter keeps helper entries and entities and counts what uses them", () => {
@@ -4555,7 +4559,7 @@ test("the idle helper hint needs no use and a change older than the chosen days"
   el.typeFilter = "helper";
   el.helperIdle = "180";
   assert.deepEqual(el.filtered().map(o => o.object_id), ["input_boolean.idle"]);
-  assert.ok(el.inventory().includes('id="helperIdle"') && el.inventory().includes("Housekeeper"), "the select and the hint show in helper mode");
+  assert.ok(el.inventory().includes('data-lf="inventory|idle"') && el.inventory().includes("Housekeeper"), "the select and the hint show in helper mode");
   el.helperIdle = "";
   assert.equal(el.filtered().length, 4);
 });
@@ -5016,7 +5020,7 @@ test("a top bar that does not fit changes into the menu button instead of being 
 test("the search finds pages, settings tabs and finding filters, puts the better matching block first, and opens them", () => {
   const { el } = panel("en");
   const known = { rule_id: "entity.state_unavailable", object_id: "sensor.spare", classification: "unavailable", confidence: 0.75, key: "k1", ignored: true, ignored_by: "user", ignore_info: { kind: "keep", reason: "Spare" } };
-  el.data = { ...DATA, meta: { ...DATA.meta, status_counts: { active: 2, unavailable: 4 } }, findings: [...DATA.findings, known] };
+  el.data = { ...DATA, objects: [...DATA.objects, { object_type: "entity", object_id: "sensor.u", name: "U", status: "unavailable" }], meta: { ...DATA.meta, status_counts: { active: 2, unavailable: 4 } }, findings: [...DATA.findings, known] };
   const kinds = query => { el.quickQuery = query; return el.quickEntries().map(e => `${e.kind}:${e.label || e.item?.object_id}`); };
   assert.equal(kinds("k").length, 0, "one letter does not search");
   const known1 = kinds("known");
@@ -5105,4 +5109,25 @@ test("the changes page counts what a filter shows, says so, and lists objects as
   el.changesCat = "removedObjects";
   el.render();
   assert.ok(shadow.innerHTML.includes("1 of 1") && shadow.innerHTML.includes("of 1"), "the sections show how many of all");
+});
+
+test("the inventory is the shared list: origin only for integrations, core and custom under integration, helper columns, selection and compact rows", () => {
+  const { el, shadow } = panel("en");
+  el.data = { ...DATA, objects: [
+    ...DATA.objects,
+    { object_type: "config_entry", object_id: "E1", name: "Core", domain: "hue", custom: false, status: "active", entity_count: 2 },
+    { object_type: "config_entry", object_id: "E2", name: "Cust", domain: "hacs", custom: true, integration_version: "2.0", status: "active", entity_count: 5 },
+    { object_type: "entity", object_id: "input_boolean.h", name: "H", platform: "input_boolean", status: "active" },
+  ] };
+  el.view = "inventory"; el.render();
+  let html = shadow.innerHTML;
+  assert.ok(html.includes('data-lf="inventory|type"') && html.includes("All types") && !html.includes('data-lf="inventory|origin"'), "no origin filter without the integration type");
+  assert.ok(html.includes('data-inv-filter="config_entry||custom"') && html.includes("of which custom") && html.includes("data-inv-sel-page"), "sub rows under integration, selection always there");
+  assert.ok(html.includes('data-dense="inventory"') && html.includes('data-lsort="inventory|reason|asc"'));
+  el.typeFilter = "config_entry"; el.render();
+  html = shadow.innerHTML;
+  assert.ok(html.includes('data-lf="inventory|origin"') && html.includes('data-lsort="inventory|version|asc"'));
+  el.typeFilter = "helper"; el.render();
+  html = shadow.innerHTML;
+  assert.ok(html.includes('data-lf="inventory|idle"') && html.includes('data-lsort="inventory|usedByCol|desc"') && !html.includes('data-lf="inventory|origin"'));
 });
