@@ -130,6 +130,8 @@ def test_disabled_monitor_keeps_its_definition_without_evaluating_or_alerting(mo
     store.hass = object()
     store.items = [item]
     store.runtime = {}
+    store.history = {}
+    store.retention_days = 90
     store.results = []
     monkeypatch.setattr(store, "_save", lambda: None)
     monkeypatch.setattr(store, "_event", lambda kind, *_: events.append(kind))
@@ -147,6 +149,8 @@ def test_two_scans_are_needed_to_report_a_gap(monkeypatch):
     store.hass = object()
     store.items = [definition(("entity:sensor.water", True))]
     store.runtime = {}
+    store.history = {}
+    store.retention_days = 90
     store.results = []
     monkeypatch.setattr(store, "_save", lambda: None)
     monkeypatch.setattr(store, "_event", lambda kind, *_: events.append(kind))
@@ -167,6 +171,8 @@ def test_incident_stays_open_during_gap_and_closes_after_proven_recovery(monkeyp
     store.hass = object()
     store.items = [definition(("entity:sensor.water", True))]
     store.runtime = {}
+    store.history = {}
+    store.retention_days = 90
     store.results = []
     monkeypatch.setattr(store, "_save", lambda: None)
     monkeypatch.setattr(store, "_event", lambda kind, *_: events.append(kind))
@@ -184,3 +190,14 @@ def test_incident_stays_open_during_gap_and_closes_after_proven_recovery(monkeyp
     assert events == ["wieder_unauffaellig"]
     store.refresh(bad, health(), new_scan=True)
     assert events == ["wieder_unauffaellig", "beeintraechtigt"]
+
+
+def test_history_records_changes_and_drops_what_is_older_than_the_retention(monkeypatch):
+    store = MonitorStore.__new__(MonitorStore)
+    store.history, store.retention_days = {}, 30
+    now = datetime.now(UTC)
+    assert store._log("water", "problem", now - timedelta(days=40), reason="unavailable", key="entity:sensor.water")
+    assert not store._log("water", "problem", now - timedelta(days=39), reason="unavailable", key="entity:sensor.water")
+    assert store._log("water", "edited", now, added=["entity:sensor.leak"])
+    assert [e["kind"] for e in store.history_of("water")] == ["edited"]
+    assert MonitorStore._history_entry({"at": "x", "kind": "ok"}) is None

@@ -17,6 +17,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.storage import Store
 
 from .const import (
+    DEFAULT_HISTORY_DAYS,
     DOMAIN,
     MONITOR_STORAGE_KEY,
     PANEL_URL,
@@ -32,6 +33,10 @@ MAX_MEMBERS = 12
 NAME_MAX = 80
 DESCRIPTION_MAX = 240
 MAX_RULES = 3
+MAX_HISTORY = 300
+HISTORY_STATES = frozenset({"ok", "problem", "unverified"})
+HISTORY_KINDS = HISTORY_STATES | {"created", "edited", "enabled", "disabled"}
+HISTORY_LISTS = ("added", "removed", "changed", "fields")
 RULE_LIMITS = {"freshness": (1, 720), "min_value": (-1_000_000_000, 1_000_000_000), "unavailable_for": (1, 1440)}
 MEMBER_TYPES = frozenset({"entity", "device", "automation", "config_entry", "scene", "script", "app"})
 AUTOMATION_RULES = frozenset(
@@ -246,6 +251,8 @@ class MonitorStore:
         self.items: list[dict[str, Any]] = []
         self.runtime: dict[str, dict[str, Any]] = {}
         self.results: list[dict[str, Any]] = []
+        self.history: dict[str, list[dict[str, Any]]] = {}
+        self.retention_days = DEFAULT_HISTORY_DAYS
 
     async def async_load(self) -> None:
         data = await self._store.async_load()
@@ -269,6 +276,12 @@ class MonitorStore:
                     "updated_at": item.get("updated_at") if _time(item.get("updated_at")) else None,
                 })
         self.items = self.items[:MAX_ITEMS]
+        saved_history = data.get("history")
+        if isinstance(saved_history, dict):
+            for item in self.items:
+                entries = saved_history.get(item["id"])
+                if isinstance(entries, list):
+                    self.history[item["id"]] = [e for e in map(self._history_entry, entries) if e]
         saved = data.get("runtime")
         if isinstance(saved, dict):
             for item in self.items:
@@ -288,8 +301,48 @@ class MonitorStore:
 
     def _save(self) -> None:
         self._store.async_delay_save(
-            lambda: {"items": self.items, "runtime": self.runtime}, SAVE_DELAY
+            lambda: {"items": self.items, "runtime": self.runtime, "history": self.history}, SAVE_DELAY
         )
+
+    @staticmethod
+    def _history_entry(value: Any) -> dict[str, Any] | None:
+        """Keep only what the history writes itself, so a damaged store cannot reach the panel."""
+        if not isinstance(value, dict) or value.get("kind") not in HISTORY_KINDS or not _time(value.get("at")):
+            return None
+        entry: dict[str, Any] = {"at": value["at"], "kind": value["kind"]}
+        for key in ("reason", "key"):
+            if isinstance(value.get(key), str):
+                entry[key] = value[key][:200]
+        for key in HISTORY_LISTS:
+            if isinstance(value.get(key), list):
+                entry[key] = [v[:200] for v in value[key] if isinstance(v, str)][:MAX_MEMBERS * 2]
+        return entry
+
+    def _log(self, item_id: str, kind: str, now: datetime, **fields: Any) -> bool:
+        """Append one dated entry; a repeat of the previous one is not written again."""
+        entry = {"at": now.isoformat(), "kind": kind, **{k: v for k, v in fields.items() if v}}
+        entries = self.history.setdefault(item_id, [])
+        if entries and {k: v for k, v in entries[-1].items() if k != "at"} == {k: v for k, v in entry.items() if k != "at"}:
+            return False
+        entries.append(entry)
+        self._prune(item_id, now)
+        return True
+
+    def _prune(self, item_id: str, now: datetime) -> bool:
+        """Drop entries older than the retention and keep the list bounded."""
+        entries = self.history.get(item_id)
+        if not entries:
+            return False
+        cutoff = now - timedelta(days=self.retention_days)
+        kept = [e for e in entries if (at := _time(e["at"])) is not None and at >= cutoff][-MAX_HISTORY:]
+        if len(kept) == len(entries):
+            return False
+        self.history[item_id] = kept
+        return True
+
+    def history_of(self, item_id: str) -> list[dict[str, Any]]:
+        """The entries of one function, newest first."""
+        return list(reversed(self.history.get(item_id, ())))
 
     @staticmethod
     def _validate(name: Any, description: Any, notify: Any, members: Any, enabled: Any = True) -> None:
@@ -353,6 +406,12 @@ class MonitorStore:
         }
         if any(m["object_key"] not in available | existing for m in members):
             raise MonitorError("object_key")
+        now = datetime.now(UTC)
+        before = None if old is None else {
+            "members": {m["object_key"]: (m["required"], m.get("rules", [])) for m in old["members"]},
+            "fields": {"name": old["name"], "description": old["description"], "notify": old["notify"]},
+            "enabled": old.get("enabled", True),
+        }
         changed_members = old is None or members != old["members"]
         changed_enabled = old is not None and old.get("enabled", True) != enabled
         enabled_notification = old is not None and not changed_members and not changed_enabled and enabled and not old["notify"] and notify
@@ -365,6 +424,18 @@ class MonitorStore:
             members=[{"object_key": m["object_key"], "required": m["required"], "rules": [{"kind": r["kind"], "value": r["value"]} for r in m.get("rules", [])]} for m in members],
             updated_at=datetime.now(UTC).isoformat(),
         )
+        if before is None:
+            self._log(item_id, "created", now, added=[m["object_key"] for m in members])
+        else:
+            after = {m["object_key"]: (m["required"], [{"kind": r["kind"], "value": r["value"]} for r in m.get("rules", [])]) for m in members}
+            fields = [k for k, v in {"name": name.strip(), "description": description.strip(), "notify": notify}.items() if before["fields"][k] != v]
+            added = [k for k in after if k not in before["members"]]
+            removed = [k for k in before["members"] if k not in after]
+            changed = [k for k in after if k in before["members"] and after[k] != before["members"][k]]
+            if added or removed or changed or fields:
+                self._log(item_id, "edited", now, added=added, removed=removed, changed=changed, fields=fields)
+            if changed_enabled:
+                self._log(item_id, "enabled" if enabled else "disabled", now)
         if changed_members or changed_enabled:
             self._dismiss(item_id)
             self.runtime.pop(item_id, None)
@@ -388,6 +459,7 @@ class MonitorStore:
             raise MonitorError("not_found")
         self.items = [item for item in self.items if item["id"] != item_id]
         self.runtime.pop(item_id, None)
+        self.history.pop(item_id, None)
         self.results = [result for result in self.results if result["id"] != item_id]
         self._dismiss(item_id)
         self._save()
@@ -490,9 +562,11 @@ class MonitorStore:
                     if state == STATE_PROBLEM:
                         runtime["last_problem_reason"] = result["reason"]
                         runtime["last_problem_key"] = result["reason_key"]
+                    self._log(item["id"], state, now, reason=result["reason"], key=result["reason_key"])
                     changed = True
             elif old != state:
                 runtime["state"] = state
+                self._log(item["id"], state, now, reason=result["reason"], key=result["reason_key"])
                 changed = True
                 if state == STATE_PROBLEM and not runtime.get("open_incident"):
                     runtime["open_incident"] = True
@@ -526,6 +600,7 @@ class MonitorStore:
             ):
                 runtime["last_problem_reason"] = result["reason"]
                 runtime["last_problem_key"] = result["reason_key"]
+                self._log(item["id"], STATE_PROBLEM, now, reason=result["reason"], key=result["reason_key"])
                 changed = True
                 if runtime.get("notified"):
                     self._notify({**result, "incident_open": True})
@@ -554,6 +629,8 @@ class MonitorStore:
             result["last_problem_key"] = runtime.get("last_problem_key")
             results.append(result)
         self.results = results
+        for item in self.items:
+            changed = self._prune(item["id"], now) or changed
         if changed:
             self._save()
         async_dispatcher_send(self.hass, SIGNAL_MONITOR_DEFINITIONS)

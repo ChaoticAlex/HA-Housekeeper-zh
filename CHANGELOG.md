@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Hausmonitor-Verlauf:** Jede Funktion zeigt Zustandswechsel und Änderungen (angelegt, bearbeitet, aktiviert, deaktiviert) mit Datum. Die Aufbewahrung (1 bis 365 Tage, Standard 90) gilt auch für den Scan-Verlauf und steht unter Einstellungen. Zugeordnete Objekte sind anklickbar, auch beim Anlegen und Bearbeiten.
+
 - **Hausmonitor:** Wichtige Hausfunktionen aus direkt gewählten Entitäten, Geräten, Automationen, Szenen, Skripten, Integrationen und Apps/Add-ons zusammenstellen. Die gemeinsame Objektsuche gruppiert Treffer nach Typ und schlägt bekannte Abhängigkeiten vor; nur ausdrücklich hinzugefügte Objekte werden überwacht. Für Entitäten lassen sich Aktualisierungsfrist, Mindestwert und eine Dauer für „nicht verfügbar“ festlegen. Der kompakte Editor hat eine mitwachsende Beschreibung, zeigt eine Vorschau der letzten Scanbewertung und lässt Monitore vorübergehend deaktivieren. Die Seite unterscheidet belegte Defekte, Prüflücken, unauffällige und deaktivierte Monitore; die Übersicht meldet aktive Probleme. Zustandswechsel stehen als HA-Ereignis und Event-Entität bereit, jede Funktion hat einen Sensor. Dauerhafte HA-Mitteilungen sind pro Monitor einstellbar.
 
 - **Seite im Inventar auswählen:** Ein Kästchen im Tabellenkopf markiert die auswählbaren Entitäten der aktuellen Seite. Bei teilweiser Auswahl zeigt es den Zwischenzustand; ein weiterer Klick hebt die Seitenauswahl auf. Die Auswahl aller gefilterten Entitäten bleibt über die Leiste möglich.
@@ -27,6 +29,8 @@
 ### English
 
 #### New
+
+- **Home monitor history:** Each function shows its state changes and edits (created, edited, enabled, disabled) with dates. The retention (1 to 365 days, default 90) also applies to the scan history and is set in Settings. Assigned objects are clickable, also while creating and editing.
 
 - **Home monitor:** Group important home functions from directly selected entities, devices, automations, scenes, scripts, integrations and apps/add-ons. The shared object search groups results by type and suggests known dependencies; only explicitly added objects are monitored. Entities support update deadlines, minimum values and a grace period for unavailability. The compact editor has a description field that grows with its text, previews the latest scan evaluation and lets monitors be temporarily disabled. The page distinguishes confirmed faults, check gaps, healthy and disabled monitors; the overview highlights active problems. State changes are available as HA events and an event entity, with one sensor per function. Persistent HA notifications are configurable per monitor.
 

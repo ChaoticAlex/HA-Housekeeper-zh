@@ -1206,6 +1206,28 @@ async def websocket_monitor_preview(
 
 @websocket_api.require_admin
 @websocket_api.websocket_command(
+    {vol.Required("type"): f"{DOMAIN}/monitor_history", vol.Required("function_id"): str}
+)
+@callback
+@with_scanner
+def websocket_monitor_history(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """Return the dated changes of one function, newest first."""
+    if not any(item["id"] == msg["function_id"] for item in scanner.monitor.items):
+        connection.send_error(msg["id"], "invalid_format", "not_found")
+        return
+    connection.send_result(
+        msg["id"],
+        _versioned({"entries": scanner.monitor.history_of(msg["function_id"]), "retention_days": scanner.monitor.retention_days}),
+    )
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command(
     {vol.Required("type"): f"{DOMAIN}/monitor_delete", vol.Required("function_id"): str}
 )
 @callback
@@ -1261,4 +1283,5 @@ def async_register(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_monitor_list)
     websocket_api.async_register_command(hass, websocket_monitor_save)
     websocket_api.async_register_command(hass, websocket_monitor_preview)
+    websocket_api.async_register_command(hass, websocket_monitor_history)
     websocket_api.async_register_command(hass, websocket_monitor_delete)

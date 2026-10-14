@@ -51,7 +51,7 @@ DEFAULT_LOW_BATTERY_PERCENT: Final = 20
 CONF_STALE_HOURS: Final = "stale_hours"
 DEFAULT_STALE_HOURS: Final = 48
 CONF_HISTORY_DAYS: Final = "history_days"
-DEFAULT_HISTORY_DAYS: Final = 30
+DEFAULT_HISTORY_DAYS: Final = 90
 JOURNAL_STORAGE_KEY: Final = f"{DOMAIN}.journal"
 # Earliest point at which a quarantined entity may be removed (a later step, preview only today).
 QUARANTINE_DAYS: Final = 14

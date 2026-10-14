@@ -22,7 +22,7 @@
           "low_battery_percent": "Report batteries as low at or below (percent)",
           "scan_interval_hours": "Scan automatically every (hours, 0 = off)",
           "stale_hours": "Report sensors without new values after (hours, 0 = off)",
-          "history_days": "Keep scan history for (days)"
+          "history_days": "Keep histories for (days)"
         }
       }
     },
