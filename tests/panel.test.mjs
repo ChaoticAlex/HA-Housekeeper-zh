@@ -56,7 +56,7 @@ function panel(lang = "en", extra = {}) {
 test("the overview has one findings link and shows active policy violations among hints", () => {
   const { el } = panel("de");
   el.findingEntries = () => Array.from({ length: 6 }, (_, i) => ({ finding: { id: i } }));
-  el.findingRow = () => '<div class="row">Befund</div>';
+  el.overviewFinding = () => '<div class="row">Befund</div>';
   el.findingTotal = () => 6;
   el.todoItems = () => [];
   const todo = el.todoCard();

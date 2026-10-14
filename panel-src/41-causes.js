@@ -114,6 +114,12 @@ class CausesMixin {
     return `<button class="row rel" ${target}>${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(this.t(`cause_${c.kind}`, { name: c.name }))}</strong><small>${this.esc(sub)}</small></span>${total ? `<span class="pill red">${this.esc(this.t("causeFollowers", { n: this.formatNumber(total) }))}</span>` : ""}</button>`;
   }
 
+  // A single finding as a plain row of the overview: it opens the object; deciding and selecting happen on the Findings page.
+  overviewFinding(finding) {
+    const { key, object, title, subtitle } = this.findingRowContent(finding);
+    return `<button class="row" data-object="${this.esc(key)}">${this.tile(object?.object_type || "entity", this.tone(finding.classification))}<span class="row-text"><strong>${this.esc(title)}</strong><small>${subtitle}</small></span>${this.impactChip(finding.impact)}</button>`;
+  }
+
   // Only in the flat view: "Follow-up of Integration Cloud" next to a finding that a cause explains.
   followOf(f) {
     const c = f.cause_id && !CAUSE_OWN_RULES.includes(f.rule_id) ? this.causeList().find(x => x.id === f.cause_id) : null;

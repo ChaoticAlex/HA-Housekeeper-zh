@@ -2183,7 +2183,7 @@ class OverviewMixin {
     };
     const inArea = area => items.filter(i => i.area === area && i.key !== "outages"); // the outages are entries of the list itself
     const entries = this.findingEntries();
-    const entryRow = e => (e.cause ? this.overviewCause(e.cause) : this.findingRow(e.finding));
+    const entryRow = e => (e.cause ? this.overviewCause(e.cause) : this.overviewFinding(e.finding));
     const findingRows = [...inArea("findings").filter(i => i.key === "monitor_problem").map(row), ...inArea("findings").filter(i => i.key !== "monitor_problem").map(row), ...entries.slice(0, LIMIT).map(entryRow)];
     const all = `<button class="link" data-jump="findingsNav">${this.t("allFindings")} (${this.formatNumber(this.findingTotal())}) <ha-icon icon="mdi:chevron-right"></ha-icon></button>`;
     const state = [...inArea("state")].sort((x, y) => (y.tone === "red") - (x.tone === "red"));
@@ -7384,6 +7384,12 @@ class CausesMixin {
     const total = this.causeTotal(c), sub = [this.causeCounts(c), this.causeLine(c)].filter(Boolean).join(" · ");
     const target = c.virtual ? 'data-jump="findingsNav"' : `data-object="${this.esc(`${c.object_type}:${c.object_id}`)}"`;
     return `<button class="row rel" ${target}>${this.tile(c.object_type, "red")}<span class="row-text"><strong>${this.esc(this.t(`cause_${c.kind}`, { name: c.name }))}</strong><small>${this.esc(sub)}</small></span>${total ? `<span class="pill red">${this.esc(this.t("causeFollowers", { n: this.formatNumber(total) }))}</span>` : ""}</button>`;
+  }
+
+  // A single finding as a plain row of the overview: it opens the object; deciding and selecting happen on the Findings page.
+  overviewFinding(finding) {
+    const { key, object, title, subtitle } = this.findingRowContent(finding);
+    return `<button class="row" data-object="${this.esc(key)}">${this.tile(object?.object_type || "entity", this.tone(finding.classification))}<span class="row-text"><strong>${this.esc(title)}</strong><small>${subtitle}</small></span>${this.impactChip(finding.impact)}</button>`;
   }
 
   // Only in the flat view: "Follow-up of Integration Cloud" next to a finding that a cause explains.

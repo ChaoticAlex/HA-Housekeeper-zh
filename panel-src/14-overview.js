@@ -183,7 +183,7 @@ class OverviewMixin {
     };
     const inArea = area => items.filter(i => i.area === area && i.key !== "outages"); // the outages are entries of the list itself
     const entries = this.findingEntries();
-    const entryRow = e => (e.cause ? this.overviewCause(e.cause) : this.findingRow(e.finding));
+    const entryRow = e => (e.cause ? this.overviewCause(e.cause) : this.overviewFinding(e.finding));
     const findingRows = [...inArea("findings").filter(i => i.key === "monitor_problem").map(row), ...inArea("findings").filter(i => i.key !== "monitor_problem").map(row), ...entries.slice(0, LIMIT).map(entryRow)];
     const all = `<button class="link" data-jump="findingsNav">${this.t("allFindings")} (${this.formatNumber(this.findingTotal())}) <ha-icon icon="mdi:chevron-right"></ha-icon></button>`;
     const state = [...inArea("state")].sort((x, y) => (y.tone === "red") - (x.tone === "red"));
