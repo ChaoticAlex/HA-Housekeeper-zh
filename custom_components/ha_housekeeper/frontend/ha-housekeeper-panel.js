@@ -13251,13 +13251,13 @@ Object.assign(TEXT.en, {
 });
 Object.assign(TEXT.de, {
   monitorHistory: "Verlauf", monitorHistoryHint: "Zustandswechsel und Änderungen der letzten {days} Tage, neueste zuerst. Die Dauer ist unter Einstellungen einstellbar.", monitorHistoryEmpty: "Noch keine Einträge.", monitorHistoryLoading: "Verlauf wird geladen …",
-  monitorHist_created: "Angelegt", monitorHist_edited: "Geändert", monitorHist_enabled: "Aktiviert", monitorHist_disabled: "Deaktiviert",
+  monitorHist_flapping: "Wechselt häufig", monitorHistFlap: "{n} Wechsel bis {until}, zuletzt {state}", monitorHistAll: "Alle Einträge", monitorHistStates: "Zustandswechsel", monitorHistConfig: "Änderungen", monitorHist_created: "Angelegt", monitorHist_edited: "Geändert", monitorHist_enabled: "Aktiviert", monitorHist_disabled: "Deaktiviert",
   monitorHistObjects: "{n} Objekte", monitorHistAdded: "Hinzugefügt", monitorHistRemoved: "Entfernt", monitorHistChanged: "Geändert (Pflicht oder Regeln)", monitorHistFields: "Angaben",
   monitorHistField_name: "Name", monitorHistField_description: "Beschreibung", monitorHistField_notify: "Benachrichtigung",
 });
 Object.assign(TEXT.en, {
   monitorHistory: "History", monitorHistoryHint: "State changes and edits of the last {days} days, newest first. The period is set in Settings.", monitorHistoryEmpty: "No entries yet.", monitorHistoryLoading: "Loading the history …",
-  monitorHist_created: "Created", monitorHist_edited: "Edited", monitorHist_enabled: "Enabled", monitorHist_disabled: "Disabled",
+  monitorHist_flapping: "Changes often", monitorHistFlap: "{n} changes until {until}, latest {state}", monitorHistAll: "All entries", monitorHistStates: "State changes", monitorHistConfig: "Edits", monitorHist_created: "Created", monitorHist_edited: "Edited", monitorHist_enabled: "Enabled", monitorHist_disabled: "Disabled",
   monitorHistObjects: "{n} objects", monitorHistAdded: "Added", monitorHistRemoved: "Removed", monitorHistChanged: "Changed (required or rules)", monitorHistFields: "Details",
   monitorHistField_name: "Name", monitorHistField_description: "Description", monitorHistField_notify: "Notification",
 });
@@ -13394,20 +13394,31 @@ class MonitorMixin {
     const head = `<div class="panelhead"><div><h2>${this.t("monitorHistory")}</h2><p>${this.t("monitorHistoryHint", { days: days ?? "…" })}</p></div></div>`;
     if (!cache?.entries) return `<section class="panel">${head}${this.skeleton("monitorHistoryLoading")}</section>`;
     const name = key => this.findObject(key)?.name || key;
-    const rows = cache.entries.map(entry => {
-      const state = ["ok", "problem", "unverified"].includes(entry.kind);
-      const tone = entry.kind === "problem" ? "red" : entry.kind === "unverified" ? "warn" : entry.kind === "ok" ? "ok" : "mute";
-      const icon = { ok: "mdi:check-circle-outline", problem: "mdi:alert-circle-outline", unverified: "mdi:help-circle-outline", created: "mdi:plus-circle-outline", edited: "mdi:pencil-outline", enabled: "mdi:play-circle-outline", disabled: "mdi:pause-circle-outline" }[entry.kind] || "mdi:history";
-      const label = state ? this.t(entry.kind === "ok" ? "monitorOk" : entry.kind === "problem" ? "monitorProblem" : "monitorUnverified") : this.t(`monitorHist_${entry.kind}`);
+    const stateKinds = ["ok", "problem", "unverified"];
+    const stateLabel = kind => this.t(kind === "ok" ? "monitorOk" : kind === "problem" ? "monitorProblem" : "monitorUnverified");
+    const items = cache.entries.map(entry => {
+      const state = stateKinds.includes(entry.kind), flap = entry.kind === "flapping";
+      const tone = entry.kind === "problem" ? "red" : entry.kind === "unverified" || flap ? "warn" : entry.kind === "ok" ? "ok" : "mute";
+      const icon = { ok: "mdi:check-circle-outline", problem: "mdi:alert-circle-outline", unverified: "mdi:help-circle-outline", flapping: "mdi:swap-vertical", created: "mdi:plus-circle-outline", edited: "mdi:pencil-outline", enabled: "mdi:play-circle-outline", disabled: "mdi:pause-circle-outline" }[entry.kind] || "mdi:history";
+      const label = state ? stateLabel(entry.kind) : this.t(`monitorHist_${entry.kind}`);
       const parts = [this.formatDate(entry.at)];
-      if (state) parts.push(...[this.monitorReason(entry.reason), entry.key && name(entry.key)].filter(Boolean));
+      if (flap) parts.push(this.t("monitorHistFlap", { n: entry.count, until: this.formatDate(entry.until), state: stateLabel(entry.state) }));
+      if (state || flap) parts.push(...[this.monitorReason(entry.reason), entry.key && name(entry.key)].filter(Boolean));
       if (entry.kind === "created" && entry.added?.length) parts.push(this.t("monitorHistObjects", { n: entry.added.length }));
-      for (const [list, label] of [["added", "monitorHistAdded"], ["removed", "monitorHistRemoved"], ["changed", "monitorHistChanged"]]) if (entry[list]?.length) parts.push(`${this.t(label)}: ${entry[list].map(name).join(", ")}`);
+      for (const [list, text] of [["added", "monitorHistAdded"], ["removed", "monitorHistRemoved"], ["changed", "monitorHistChanged"]]) if (entry[list]?.length) parts.push(`${this.t(text)}: ${entry[list].map(name).join(", ")}`);
       if (entry.fields?.length) parts.push(`${this.t("monitorHistFields")}: ${entry.fields.map(f => this.t(`monitorHistField_${f}`)).join(", ")}`);
-      const target = (state && entry.key && this.findObject(entry.key)) ? ` data-object="${this.esc(entry.key)}"` : "";
-      return `<div class="row"${target}><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.esc(label)}</strong><small>${this.esc(parts.join(" · "))}</small></span></div>`;
-    }).join("");
-    return `<section class="panel">${head}${rows || `<div class="emptymsg"><ha-icon icon="mdi:history"></ha-icon>${this.t("monitorHistoryEmpty")}</div>`}</section>`;
+      const target = ((state || flap) && entry.key && this.findObject(entry.key)) ? ` data-object="${this.esc(entry.key)}"` : "";
+      return { entry, text: `${label} ${parts.join(" ")}`, html: `<div class="row"${target}><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.esc(label)}</strong><small>${this.esc(parts.join(" · "))}</small></span></div>` };
+    });
+    // The shared list controls: search, a filter by kind and the page size of all lists.
+    const st = this.lvState("monitor-history", "", "asc"), query = st.q.trim().toLowerCase();
+    const inKind = ({ entry }) => !st.f.kind || (st.f.kind === "state" ? [...stateKinds, "flapping"].includes(entry.kind) : st.f.kind === "config" ? ["created", "edited", "enabled", "disabled"].includes(entry.kind) : entry.kind === st.f.kind);
+    const shown = items.filter(item => inKind(item) && (!query || item.text.toLowerCase().includes(query)));
+    const bar = items.length >= 6 || st.q || st.f.kind ? this.listBar("monitor-history", { sorts: [], filters: [{ name: "kind", all: this.t("monitorHistAll"), options: [["state", this.t("monitorHistStates")], ["problem", this.t("monitorProblem")], ["unverified", this.t("monitorUnverified")], ["ok", this.t("monitorOk")], ["flapping", this.t("monitorHist_flapping")], ["config", this.t("monitorHistConfig")]] }] }) : "";
+    const page = this.paginate("monitor-history", shown);
+    const rows = page.rows.map(item => item.html).join("") + page.footer;
+    const none = items.length && !shown.length ? `<div class="emptymsg">${this.t("noMatches")}</div>` : "";
+    return `<section class="panel">${head}${bar}${rows || none || `<div class="emptymsg"><ha-icon icon="mdi:history"></ha-icon>${this.t("monitorHistoryEmpty")}</div>`}</section>`;
   }
 
   async loadMonitorHistory(id, sig) {
@@ -13462,7 +13473,7 @@ class MonitorMixin {
     this._monitorDescriptionObserver = null;
     root.querySelector("[data-monitor-add]")?.addEventListener("click", () => { this.monitorForm = { name: "", description: "", enabled: true, notify: true, members: [] }; this.monitorQuery = ""; this.monitorType = ""; this.monitorPreview = null; this.monitorError = ""; this.render(); });
     root.querySelectorAll("[data-monitor-filter]").forEach(el => el.onclick = () => { this.monitorFilter = el.dataset.monitorFilter; this.render(); });
-    root.querySelectorAll("[data-monitor-open]").forEach(el => el.onclick = () => { this.monitorSelected = el.dataset.monitorOpen; this.render(); });
+    root.querySelectorAll("[data-monitor-open]").forEach(el => el.onclick = () => { this.monitorSelected = el.dataset.monitorOpen; this.pages = {}; this.render(); });
     root.querySelector("[data-monitor-back]")?.addEventListener("click", () => { this.monitorSelected = null; this.render(); });
     root.querySelector("[data-monitor-edit]")?.addEventListener("click", () => { const item = this.monitorFunctions().find(f => f.id === this.monitorSelected); this.monitorForm = { id: item.id, name: item.name, description: item.description, enabled: item.enabled !== false, notify: item.notify, members: item.members.map(m => ({ object_key: m.object_key, required: m.required, rules: m.rules || [] })) }; this.monitorQuery = ""; this.monitorType = ""; this.monitorPreview = null; this.monitorError = ""; this.render(); this.queueMonitorPreview(); });
     root.querySelectorAll("[data-monitor-cancel]").forEach(el => el.onclick = () => { globalThis.clearTimeout?.(this._monitorPreviewTimer); this._monitorPreviewToken = (this._monitorPreviewToken || 0) + 1; this.monitorForm = null; this.monitorError = ""; this.render(); });

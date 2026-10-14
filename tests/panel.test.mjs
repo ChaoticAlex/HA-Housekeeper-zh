@@ -94,6 +94,23 @@ test("Hausmonitor shows a confirmed fault, a scan gap, and escapes function name
   assert.match(el.monitorDetail(), /Letzter Scan/);
 });
 
+test("the Hausmonitor history shows a flapping run as one line and filters by kind", () => {
+  const { el } = panel("de");
+  const at = "2026-10-14T09:00:00+00:00";
+  el.data = { ...DATA, monitor: [{ id: "one", name: "Wasser", description: "", state: "ok", scanned_at: at, members: [], incident_open: false }] };
+  el.monitorSelected = "one";
+  el.monitorHistory = { one: { sig: "ok|" + at + "|undefined", retention_days: 30, entries: [
+    { at, until: at, kind: "flapping", count: 7, state: "ok" }, { at, kind: "edited", added: ["entity:sensor.x"] },
+  ] } };
+  const html = el.monitorDetail();
+  assert.match(html, /Wechselt häufig/);
+  assert.match(html, /7 Wechsel/);
+  el.lvState("monitor-history", "", "asc").f.kind = "config";
+  const filtered = el.monitorDetail();
+  assert.doesNotMatch(filtered, /7 Wechsel/);
+  assert.match(filtered, /Geändert/);
+});
+
 test("a disabled Hausmonitor remains editable but does not appear as an overview alarm", () => {
   const { el } = panel("de");
   el.data = { ...DATA, monitor: [{ id: "paused", name: "Wasseralarm", description: "", enabled: false, state: "disabled", reason: "disabled", members: [], incident_open: false }] };

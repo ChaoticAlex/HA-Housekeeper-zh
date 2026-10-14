@@ -35,7 +35,10 @@ DESCRIPTION_MAX = 240
 MAX_RULES = 3
 MAX_HISTORY = 300
 HISTORY_STATES = frozenset({"ok", "problem", "unverified"})
-HISTORY_KINDS = HISTORY_STATES | {"created", "edited", "enabled", "disabled"}
+HISTORY_KINDS = HISTORY_STATES | {"created", "edited", "enabled", "disabled", "flapping"}
+# This many state changes within this window become one "flapping" entry, which later changes extend.
+FLAP_CHANGES = 4
+FLAP_WINDOW = timedelta(hours=3)
 HISTORY_LISTS = ("added", "removed", "changed", "fields")
 RULE_LIMITS = {"freshness": (1, 720), "min_value": (-1_000_000_000, 1_000_000_000), "unavailable_for": (1, 1440)}
 MEMBER_TYPES = frozenset({"entity", "device", "automation", "config_entry", "scene", "script", "app"})
@@ -310,6 +313,10 @@ class MonitorStore:
         if not isinstance(value, dict) or value.get("kind") not in HISTORY_KINDS or not _time(value.get("at")):
             return None
         entry: dict[str, Any] = {"at": value["at"], "kind": value["kind"]}
+        if value["kind"] == "flapping":
+            if not _time(value.get("until")) or value.get("state") not in HISTORY_STATES or not isinstance(value.get("count"), int):
+                return None
+            entry.update(until=value["until"], state=value["state"], count=max(1, min(value["count"], 100000)))
         for key in ("reason", "key"):
             if isinstance(value.get(key), str):
                 entry[key] = value[key][:200]
@@ -324,8 +331,33 @@ class MonitorStore:
         entries = self.history.setdefault(item_id, [])
         if entries and {k: v for k, v in entries[-1].items() if k != "at"} == {k: v for k, v in entry.items() if k != "at"}:
             return False
+        if kind in HISTORY_STATES and self._flap(entries, entry, now):
+            self._prune(item_id, now)
+            return True
         entries.append(entry)
         self._prune(item_id, now)
+        return True
+
+    @staticmethod
+    def _flap(entries: list[dict[str, Any]], entry: dict[str, Any], now: datetime) -> bool:
+        """Fold a run of quick state changes into one entry, so a wobbling object cannot fill the history."""
+        last = entries[-1] if entries else None
+        latest = {k: entry[k] for k in ("reason", "key") if k in entry}
+        if last and last["kind"] == "flapping" and (until := _time(last["until"])) and now - until <= FLAP_WINDOW:
+            for key in ("reason", "key"):
+                last.pop(key, None)
+            last.update(until=now.isoformat(), count=last["count"] + 1, state=entry["kind"], **latest)
+            return True
+        recent: list[dict[str, Any]] = []
+        for old in reversed(entries):
+            at = _time(old["at"])
+            if old["kind"] not in HISTORY_STATES or at is None or now - at > FLAP_WINDOW:
+                break
+            recent.append(old)
+        if len(recent) + 1 < FLAP_CHANGES:
+            return False
+        del entries[-len(recent):]
+        entries.append({"at": recent[-1]["at"], "until": now.isoformat(), "kind": "flapping", "count": len(recent) + 1, "state": entry["kind"], **latest})
         return True
 
     def _prune(self, item_id: str, now: datetime) -> bool:
@@ -334,7 +366,7 @@ class MonitorStore:
         if not entries:
             return False
         cutoff = now - timedelta(days=self.retention_days)
-        kept = [e for e in entries if (at := _time(e["at"])) is not None and at >= cutoff][-MAX_HISTORY:]
+        kept = [e for e in entries if (at := _time(e.get("until") or e["at"])) is not None and at >= cutoff][-MAX_HISTORY:]
         if len(kept) == len(entries):
             return False
         self.history[item_id] = kept

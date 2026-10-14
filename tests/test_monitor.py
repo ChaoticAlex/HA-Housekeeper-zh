@@ -201,3 +201,16 @@ def test_history_records_changes_and_drops_what_is_older_than_the_retention(monk
     assert store._log("water", "edited", now, added=["entity:sensor.leak"])
     assert [e["kind"] for e in store.history_of("water")] == ["edited"]
     assert MonitorStore._history_entry({"at": "x", "kind": "ok"}) is None
+
+
+def test_quick_state_changes_become_one_flapping_entry_that_later_changes_extend():
+    store = MonitorStore.__new__(MonitorStore)
+    store.history, store.retention_days = {}, 30
+    start = datetime.now(UTC) - timedelta(hours=2)
+    for i, kind in enumerate(("problem", "ok", "problem", "ok", "problem")):
+        store._log("water", kind, start + timedelta(minutes=10 * i), reason="unavailable" if kind == "problem" else None)
+    [entry] = store.history_of("water")
+    assert (entry["kind"], entry["count"], entry["state"], entry["at"]) == ("flapping", 5, "problem", start.isoformat())
+    store._log("water", "ok", start + timedelta(minutes=50))
+    assert store.history["water"][0]["count"] == 6 and "reason" not in store.history["water"][0]
+    assert MonitorStore._history_entry(store.history["water"][0]) == store.history["water"][0]

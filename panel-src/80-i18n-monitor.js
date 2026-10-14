@@ -83,13 +83,13 @@ Object.assign(TEXT.en, {
 });
 Object.assign(TEXT.de, {
   monitorHistory: "Verlauf", monitorHistoryHint: "Zustandswechsel und Änderungen der letzten {days} Tage, neueste zuerst. Die Dauer ist unter Einstellungen einstellbar.", monitorHistoryEmpty: "Noch keine Einträge.", monitorHistoryLoading: "Verlauf wird geladen …",
-  monitorHist_created: "Angelegt", monitorHist_edited: "Geändert", monitorHist_enabled: "Aktiviert", monitorHist_disabled: "Deaktiviert",
+  monitorHist_flapping: "Wechselt häufig", monitorHistFlap: "{n} Wechsel bis {until}, zuletzt {state}", monitorHistAll: "Alle Einträge", monitorHistStates: "Zustandswechsel", monitorHistConfig: "Änderungen", monitorHist_created: "Angelegt", monitorHist_edited: "Geändert", monitorHist_enabled: "Aktiviert", monitorHist_disabled: "Deaktiviert",
   monitorHistObjects: "{n} Objekte", monitorHistAdded: "Hinzugefügt", monitorHistRemoved: "Entfernt", monitorHistChanged: "Geändert (Pflicht oder Regeln)", monitorHistFields: "Angaben",
   monitorHistField_name: "Name", monitorHistField_description: "Beschreibung", monitorHistField_notify: "Benachrichtigung",
 });
 Object.assign(TEXT.en, {
   monitorHistory: "History", monitorHistoryHint: "State changes and edits of the last {days} days, newest first. The period is set in Settings.", monitorHistoryEmpty: "No entries yet.", monitorHistoryLoading: "Loading the history …",
-  monitorHist_created: "Created", monitorHist_edited: "Edited", monitorHist_enabled: "Enabled", monitorHist_disabled: "Disabled",
+  monitorHist_flapping: "Changes often", monitorHistFlap: "{n} changes until {until}, latest {state}", monitorHistAll: "All entries", monitorHistStates: "State changes", monitorHistConfig: "Edits", monitorHist_created: "Created", monitorHist_edited: "Edited", monitorHist_enabled: "Enabled", monitorHist_disabled: "Disabled",
   monitorHistObjects: "{n} objects", monitorHistAdded: "Added", monitorHistRemoved: "Removed", monitorHistChanged: "Changed (required or rules)", monitorHistFields: "Details",
   monitorHistField_name: "Name", monitorHistField_description: "Description", monitorHistField_notify: "Notification",
 });
