@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from homeassistant.const import __version__ as HA_VERSION
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import area_registry as ar
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
@@ -19,6 +19,7 @@ from homeassistant.helpers import floor_registry as fr
 from homeassistant.helpers import label_registry as lr
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.loader import IntegrationNotFound, async_get_integration, async_get_integrations
+from homeassistant.util import dt as dt_util
 
 from . import followup
 from .app_links import app_edges, stopped_app_findings
@@ -84,7 +85,7 @@ from .issues import async_sync_issues, async_sync_scan_issue
 from .load_history import LoadStore
 from .log_facts import log_facts
 from .maintenance import PreflightStore
-from .marks import KINDS, KINDS_OF, MarkStore, apply_marks, mark_key
+from .marks import KINDS, KINDS_OF, MarkStore, apply_marks, mark_key, window_active
 from .monitor import MonitorStore
 from .notes import NoteStore
 from .notify import NotifyStore, async_announce
@@ -689,6 +690,7 @@ class InventoryScanner:
         self.events = EventLog(hass)
         self.watch = WatchStore(hass)
         self.marks = MarkStore(hass)
+        self._window_seen: dict[str, bool] = {}  # which mark windows were open at the last apply
         self.stale = StaleStore(hass)
         self.load = LoadStore(hass)
         self._started = datetime.now(UTC)
@@ -1243,7 +1245,7 @@ class InventoryScanner:
         for finding in findings:
             finding["key"] = finding_key(finding)
             self._mark_ignored(finding, entity_registry_entries)
-        apply_marks(objects, findings, self.marks.items)
+        self._apply_marks(objects, findings)
         blocked = blocked_automation_findings(automations, findings)
         blocked += dead_effect_findings(automations, findings)
         for finding in blocked:
@@ -1479,6 +1481,32 @@ class InventoryScanner:
         snapshot["meta"]["low_batteries"] = len(low_battery_ids(entities, self.low_battery_percent))
         async_dispatcher_send(self.hass, SIGNAL_SCAN_COMPLETE)
 
+    def _sun(self) -> tuple[bool, datetime] | None:
+        """``(below the horizon, since)`` from ``sun.sun``; None when it is missing or unknown."""
+        state = self.hass.states.get("sun.sun")
+        if state is None or state.state not in ("above_horizon", "below_horizon"):
+            return None
+        return state.state == "below_horizon", state.last_changed
+
+    def _window_states(self, sun: tuple[bool, datetime] | None) -> dict[str, bool]:
+        local = dt_util.now()
+        return {
+            key: window_active(mark, local, sun)
+            for key, mark in self.marks.items.items()
+            if mark.get("window")
+        }
+
+    def _apply_marks(self, objects: list[dict[str, Any]], findings: list[dict[str, Any]]) -> None:
+        sun = self._sun()
+        apply_marks(objects, findings, self.marks.items, sun=sun)
+        self._window_seen = self._window_states(sun)
+
+    @callback
+    def refresh_marks_on_window_change(self) -> None:
+        """Bring the findings up to date when a mark window opened or closed; no scan is needed."""
+        if self._snapshot and self._window_states(self._sun()) != self._window_seen:
+            self._refresh_marks()
+
     def _refresh_marks(self) -> None:
         """Bring the objects and findings of the cached snapshot up to date with the marks."""
         snapshot = self._snapshot
@@ -1487,7 +1515,7 @@ class InventoryScanner:
         registry = er.async_get(self.hass)
         for finding in snapshot["findings"]:
             self._mark_ignored(finding, registry)
-        apply_marks(snapshot["objects"], snapshot["findings"], self.marks.items)
+        self._apply_marks(snapshot["objects"], snapshot["findings"])
         snapshot["causes"] = apply_causes(
             snapshot["objects"], snapshot["edges"], snapshot["findings"]
         )

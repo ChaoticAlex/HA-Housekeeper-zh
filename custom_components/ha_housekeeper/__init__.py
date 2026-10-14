@@ -16,7 +16,11 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import CoreState, HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.event import async_call_later, async_track_time_interval
+from homeassistant.helpers.event import (
+    async_call_later,
+    async_track_state_change_event,
+    async_track_time_interval,
+)
 from homeassistant.helpers.start import async_at_started
 from homeassistant.helpers.typing import ConfigType
 
@@ -194,6 +198,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await scanner.async_watch_tick()
 
     entry.async_on_unload(async_track_time_interval(hass, _watch_tick, timedelta(minutes=5)))
+
+    @callback
+    def _mark_windows(_: Any) -> None:
+        scanner.refresh_marks_on_window_change()
+
+    # A mark with a window hides only inside it: look again when the clock or the sun moves it.
+    entry.async_on_unload(async_track_time_interval(hass, _mark_windows, timedelta(minutes=5)))
+    entry.async_on_unload(async_track_state_change_event(hass, ["sun.sun"], _mark_windows))
 
     async def _sample_load(_: Any) -> None:
         # A sample that cannot be taken is a gap in the line, nothing more.
