@@ -4229,7 +4229,7 @@ test("devices, automations and integrations share the layout: the overview reads
   assert.ok(tabs(device).includes("actions"), "a device offers the exchange and an area");
   assert.ok(tabs(auto).includes("actions"), "an automation can get a label");
   assert.ok(tabs(entry).includes("actions"), "a healthy integration can still get a mark (what to expect of it)");
-  assert.ok(el.detailPanel("actions", entry, "config_entry:c1").includes("Expected behavior"));
+  assert.ok(el.detailPanel("actions", entry, "config_entry:c1").includes("Notes"));
   const overview = el.detailPanel("overview", device, "device:d1");
   assert.ok(!overview.includes("data-de-area") && !overview.includes("data-act-exchange"), "no forms on the overview");
   const actions = el.detailPanel("actions", device, "device:d1");
