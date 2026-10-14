@@ -2706,6 +2706,10 @@ test("open previews can be selected and merged into one plan; a ran plan cannot"
   assert.ok(shadow.innerHTML.includes('data-merge-sel="a"') && shadow.innerHTML.includes('data-merge-sel="b"') && !shadow.innerHTML.includes('data-merge-sel="c"'));
   assert.ok(/data-merge disabled/.test(shadow.innerHTML), "needs two");
   assert.ok(shadow.innerHTML.includes('data-merge-page="a,b"') && shadow.innerHTML.includes("<table"), "the journal is a table with a page box for the plans that can be merged");
+  assert.ok(/<tr data-plan-open="a" tabindex="0" role="button"/.test(shadow.innerHTML) && !/<button class="btn" data-plan-open/.test(shadow.innerHTML) && shadow.innerHTML.includes('class="jsum"'), "the row opens the plan, there is no open button, the check column wraps");
+  el.toggleDenseList("journal");
+  assert.ok(!el.journalView().includes('class="jsum"'), "the compact row leaves the check column out");
+  el.toggleDenseList("journal");
   el.mergeSel = new Set(["a", "b"]);
   el.render();
   assert.ok(/data-merge-page="a,b" checked/.test(shadow.innerHTML), "the page box is checked once both are");

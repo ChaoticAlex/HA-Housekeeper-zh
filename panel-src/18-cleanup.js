@@ -744,12 +744,13 @@ class CleanupMixin {
       { key: "sel", label: "mergeSelect", narrow: true, sortable: false, allBox: rows => this.journalHeadBox(rows), cell: plan => (this.mergeable(plan) ? `<input type="checkbox" class="selbox" data-merge-sel="${this.esc(plan.plan_id)}" ${this.mergeSel?.has(plan.plan_id) ? "checked" : ""} aria-label="${this.esc(this.t("mergeSelect"))}">` : "") },
       { key: "date", label: "journalColDate", dir: "desc", cell: plan => `<span class="statcell"><span class="tile mute"><ha-icon icon="mdi:clipboard-text-clock-outline"></ha-icon></span><strong>${this.esc(this.formatDate(plan.created_at))}</strong></span>` },
       { key: "status", label: "sortStatus", dir: "asc", cell: plan => `<span class="pill ${plan.status === "verified" ? "ok" : plan.status === "dry_run" ? "mute" : "warn"}">${this.t(`plan_status_${statusOf(plan)}`)}</span>` },
-      { key: "total", label: "journalColActions", dir: "desc", cell: plan => this.esc(summary(plan)) },
+      ...(this.isDenseList("journal") ? [] : [{ key: "total", label: "journalColActions", dir: "desc", cell: plan => `<span class="jsum">${this.esc(summary(plan))}</span>` }]),
       { key: "follow", label: "journalColFollow", sortable: false, cell: plan => (fuState(plan) ? `<span class="pill ${this.followupTone(fuState(plan))}">${this.t(`fu_${fuState(plan)}`)}</span>` : "–") },
-      { key: "act", label: "journalColAct", sortable: false, cell: plan => `<span class="jbtns"><button class="btn" data-plan-open="${this.esc(plan.plan_id)}">${this.t("openPlan")}</button>${plan.executed || plan.run ? "" : `<button class="btn dangersoft" data-plan-delete="${this.esc(plan.plan_id)}" title="${this.esc(this.t("deletePlan"))}" aria-label="${this.esc(this.t("deletePlan"))}"><ha-icon icon="mdi:delete-outline"></ha-icon></button>`}</span>` },
+      { key: "act", label: "journalColAct", sortable: false, cell: plan => `<span class="jbtns">${plan.executed || plan.run ? "" : `<button class="btn dangersoft" data-plan-delete="${this.esc(plan.plan_id)}" title="${this.esc(this.t("deletePlan"))}" aria-label="${this.esc(this.t("deletePlan"))}"><ha-icon icon="mdi:delete-outline"></ha-icon></button>`}</span>` },
     ];
     const table = plans.length ? this.sysList("journal", plans, {
       sort: "date", dir: "desc", columns, cls: "journal", empty: "journalEmpty",
+      rowAttrs: plan => `data-plan-open="${this.esc(plan.plan_id)}" tabindex="0" role="button" aria-label="${this.esc(`${this.t("openPlan")}: ${this.formatDate(plan.created_at)}`)}"`,
       sorts: [
         { key: "date", label: "journalColDate", dir: "desc", get: p => p.created_at },
         { key: "status", label: "sortStatus", dir: "asc", get: p => this.t(`plan_status_${statusOf(p)}`) },
