@@ -4927,6 +4927,16 @@ test("the settings list every file Housekeeper keeps with size and purpose, grou
   assert.ok(html.includes("Journal") && html.includes("Logbook") && html.includes("Observations") && html.includes("brandnew"));
   assert.ok(html.includes("Audit trail") && html.includes("Your entries and settings") && html.includes("Other"));
   assert.ok(el.storedFiles({ storage: {} }).includes("No data stored yet"));
+  assert.ok(html.includes("<table") && html.includes("Audit trail") && el._exporters.storedfiles.rows()[0].length === 5, "the files are a table with an export");
+});
+
+test("the settings list the hidden findings as a table with a filter by kind, and the event list has no inline style", () => {
+  const { el } = panel("en");
+  el.data = { ...DATA, findings: [{ key: "h1", rule_id: "r", object_id: "sensor.a", ignored: true, ignored_by: "label" }, { key: "h2", rule_id: "r", object_id: "sensor.b", ignored: true }] };
+  const html = el.hiddenCard();
+  assert.ok(html.includes('data-lsort="hidden|name') && html.includes('data-ignore="h2" data-ignore-value="0"') && !html.includes('data-ignore="h1"'), "only a manual decision can be shown again");
+  assert.ok(el._exporters.hidden && html.includes("Hidden findings (2)"));
+  assert.ok(el.eventsCard().includes('class="factnote evlist"') && !el.eventsCard().includes("style="));
 });
 
 test("a long history of scans shows only the newest rows until asked, keeps the chosen base visible and has the choice in its head", () => {

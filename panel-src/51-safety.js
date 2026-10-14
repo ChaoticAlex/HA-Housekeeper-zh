@@ -37,7 +37,7 @@ class SafetyMixin {
 
   eventsCard() {
     const events = ["critical_finding", "backup_overdue", "quarantine_expired", "followup_regression", "integration_down", "reminder_due"].map(e => `<li><code>ha_housekeeper_${e}</code> · ${this.t(`event_${e}`)}</li>`).join("");
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("eventsTitle")}</h2><p>${this.t("eventsHint")}</p></div></div><ul class="factnote" style="margin:0;padding:10px 16px 14px 32px">${events}</ul></section>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("eventsTitle")}</h2><p>${this.t("eventsHint")}</p></div></div><ul class="factnote evlist">${events}</ul></section>`;
   }
 
   async setProtection(mode) {

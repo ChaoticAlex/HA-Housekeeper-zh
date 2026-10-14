@@ -81,13 +81,25 @@ class SettingsMixin {
 
   hiddenCard() {
     const hidden = (this.data?.findings || []).filter(f => f.ignored);
-    const pg = this.paginate("hidden", hidden);
-    const hiddenRow = f => {
-      const object = this.findObject(this.findingKey(f));
-      const action = f.ignored_by === "label" || f.ignored_by === "mark" ? `<span class="pill mute">${this.t(f.ignored_by === "mark" ? "mark_" + f.mark.kind : "ignoredByLabel")}</span>` : `<button class="btn" data-ignore="${this.esc(f.key)}" data-ignore-value="0">${this.t("showFinding")}</button>`;
-      return `<div class="row"><span class="tile mute"><ha-icon icon="mdi:eye-off-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(object?.name || f.object_id)}</strong><small>${this.esc(f.object_id)} · ${this.esc(this.findingTitle(f))}${f.ignore_info ? ` · ${this.esc(this.decisionLabel(f))}` : ""}${f.mark ? ` · ${this.esc(this.markLine(f.mark))}` : ""}</small></span>${action}</div>`;
-    };
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("hiddenFindings")} (${hidden.length})</h2><p>${this.t("hiddenHint")}</p></div></div>${hidden.length ? pg.rows.map(hiddenRow).join("") : `<div class="emptymsg"><ha-icon icon="mdi:eye-check-outline"></ha-icon>${this.t("hiddenNone")}</div>`}${pg.footer}</section>`;
+    const by = f => (f.ignored_by === "label" || f.ignored_by === "mark" ? f.ignored_by : "manual");
+    const objectName = f => this.findObject(this.findingKey(f))?.name || f.object_id;
+    const decision = f => (f.ignore_info ? this.decisionLabel(f) : "") + (f.mark ? ` ${this.markLine(f.mark)}` : "");
+    const action = f => (by(f) === "manual" ? `<button class="btn" data-ignore="${this.esc(f.key)}" data-ignore-value="0">${this.t("showFinding")}</button>` : `<span class="pill mute">${this.t(f.ignored_by === "mark" ? "mark_" + f.mark.kind : "ignoredByLabel")}</span>`);
+    const table = this.sysList("hidden", hidden, {
+      sort: "name", dir: "asc", cls: "hid", tie: f => f.key, empty: "hiddenNone", exportName: "hidden-findings",
+      sorts: [{ key: "name", label: "hidColObject", dir: "asc", get: objectName }, { key: "finding", label: "hidColFinding", dir: "asc", get: f => this.findingTitle(f) }],
+      text: f => [objectName(f), f.object_id, this.findingTitle(f), decision(f)].join(" "),
+      filters: [{ name: "by", all: this.t("hidAllWays"), options: [["manual", this.t("hidByManual")], ["label", this.t("hidByLabel")], ["mark", this.t("hidByMark")]] }],
+      filterFns: { by: (f, v) => by(f) === v },
+      columns: [
+        { key: "name", label: "hidColObject", dir: "asc", cell: f => `<strong>${this.esc(objectName(f))}</strong><small>${this.esc(f.object_id)}</small>` },
+        { key: "finding", label: "hidColFinding", dir: "asc", cell: f => this.esc(this.findingTitle(f)) },
+        { key: "why", label: "hidColDecision", sortable: false, cell: f => this.esc(decision(f).trim() || "–") },
+        { key: "act", label: "hidColAction", sortable: false, cell: action },
+      ],
+      header: [this.t("hidColObject"), "ID", this.t("hidColFinding"), this.t("hidColDecision")], rows: f => [objectName(f), f.object_id, this.findingTitle(f), decision(f).trim()],
+    });
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("hiddenFindings")} (${hidden.length})</h2><p>${this.t("hiddenHint")}</p></div></div>${table}</section>`;
   }
 
   // Numbers only, no names, ids or attributes: safe to attach to an issue on GitHub.
@@ -127,19 +139,26 @@ class SettingsMixin {
     const all = Object.values(files);
     if (!all.length) return `<p class="factnote">${this.t("storeNone")}</p>`;
     const total = all.reduce((sum, item) => sum + (item.bytes || 0), 0);
-    const row = name => {
-      const item = files[name];
-      const title = this.t(`store_${name}`) === `store_${name}` ? this.esc(name) : this.t(`store_${name}`);
-      const text = this.t(`storeText_${name}`) === `storeText_${name}` ? "" : this.t(`storeText_${name}`, { days: m.history_days ?? 30 });
-      const changed = item.changed ? ` · ${this.t("storeChanged")} ${this.formatDate(new Date(item.changed * 1000).toISOString())}` : "";
-      return `<div class="row"><span class="tile mute"><ha-icon icon="mdi:database-outline"></ha-icon></span><span class="row-text"><strong>${title}</strong><small>${text}${changed}</small></span><span class="pill mute">${this.formatBytes(item.bytes || 0)}</span></div>`;
-    };
+    const items = groups.flatMap(([group, names]) => names.map(name => ({ name, group, ...files[name] })));
+    const title = f => (this.t(`store_${f.name}`) === `store_${f.name}` ? f.name : this.t(`store_${f.name}`));
+    const text = f => (this.t(`storeText_${f.name}`) === `storeText_${f.name}` ? "" : this.t(`storeText_${f.name}`, { days: m.history_days ?? 30 }));
+    const groupName = f => this.t(`storeGroup_${f.group}`);
     const facts = `<div class="facts"><div class="fact"><span>${this.t("storeTotal")}</span><b>${this.formatBytes(total)}</b></div><div class="fact"><span>${this.t("storeCount")}</span><b>${this.formatNumber(all.length)}</b></div></div>`;
-    const body = groups.filter(([, names]) => names.length).map(([group, names]) => {
-      const size = names.reduce((sum, name) => sum + (files[name].bytes || 0), 0);
-      return `<details class="storegrp"><summary><strong>${this.t(`storeGroup_${group}`)}</strong> <span class="pill mute">${this.formatBytes(size)}</span></summary>${names.map(row).join("")}</details>`;
-    }).join("");
-    return facts + body;
+    const table = this.sysList("storedfiles", items, {
+      sort: "group", dir: "asc", cls: "sto", tie: f => f.name, exportName: "stored-files",
+      sorts: [{ key: "group", label: "stoColGroup", dir: "asc", get: f => groups.findIndex(([g]) => g === f.group) }, { key: "name", label: "stoColFile", dir: "asc", get: title }, { key: "size", label: "stoColSize", dir: "desc", get: f => f.bytes || 0 }, { key: "changed", label: "stoColChanged", dir: "desc", get: f => f.changed || 0 }],
+      text: f => [title(f), f.name, text(f), groupName(f)].join(" "),
+      filters: [{ name: "group", all: this.t("stoAllGroups"), options: groups.filter(([, n]) => n.length).map(([g]) => [g, this.t(`storeGroup_${g}`)]) }],
+      filterFns: { group: (f, v) => f.group === v },
+      columns: [
+        { key: "name", label: "stoColFile", dir: "asc", cell: f => `<strong>${this.esc(title(f))}</strong>${text(f) ? `<small>${text(f)}</small>` : ""}` },
+        { key: "group", label: "stoColGroup", dir: "asc", cell: f => this.esc(groupName(f)) },
+        { key: "size", label: "stoColSize", dir: "desc", cell: f => this.formatBytes(f.bytes || 0) },
+        { key: "changed", label: "stoColChanged", dir: "desc", cell: f => (f.changed ? this.esc(this.formatDate(new Date(f.changed * 1000).toISOString())) : "–") },
+      ],
+      header: [this.t("stoColFile"), "ID", this.t("stoColGroup"), this.t("stoColSize"), this.t("stoColChanged")], rows: f => [title(f), f.name, groupName(f), f.bytes || 0, f.changed ? new Date(f.changed * 1000).toISOString() : ""],
+    });
+    return facts + table;
   }
 
   housekeeperUpdateCard() {
