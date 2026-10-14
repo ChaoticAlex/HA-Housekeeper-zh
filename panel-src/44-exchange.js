@@ -97,18 +97,44 @@ class ExchangeMixin {
     this.cleanupBusy = false; this.render();
   }
 
-  pairRow(pair) {
+  // The target and the way for one pair: the person's choice is kept in `ex.choices`, whatever the list shows.
+  pairTargetCell(pair) {
     const ex = this.exchangeState(), choice = ex.choices[pair.object_id] || {};
     const candidates = pair.candidates.map((c, i) => {
       const why = c.reasons.map(r => this.t(`exReason_${r}`)).join(", ");
       return `<option value="${this.esc(c.object_id)}" ${choice.target === c.object_id ? "selected" : ""}>${this.esc(c.name)} (${this.esc(c.object_id)})${i === 0 && c.score > 0 ? ` · ${this.t("exSuggested")}` : ""}${why ? ` · ${this.esc(why)}` : ""}</option>`;
     }).join("");
     const locked = !pair.used && !pair.meter;
-    const how = choice.target && pair.meter ? `<select data-ex-how="${this.esc(pair.object_id)}" aria-label="${this.t("exHow")}">${EXCHANGE_HOW.map(h => `<option value="${h}" ${(choice.how || "replace") === h ? "selected" : ""}>${this.t(`exHow_${h}`)}</option>`).join("")}</select>` : "";
     const picked = pair.candidates.find(c => c.object_id === choice.target);
     const tags = picked && picked.reasons.length ? `<span class="exptags">${picked.reasons.map(r => `<span class="tag">${this.esc(this.t(`exReason_${r}`))}</span>`).join("")}</span>` : "";
-    return `<div class="row"><span class="row-text"><strong>${this.esc(pair.name)}</strong>${this.rowId(pair.object_id, pair.used ? this.t("exUsed", { count: pair.used }) : this.t("exUnused"))}${tags}</span>
-      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select data-ex-target="${this.esc(pair.object_id)}" aria-label="${this.esc(pair.name)}" ${locked ? "disabled" : ""}><option value="">${this.t("exNoTarget")}</option>${candidates}</select>${how}</span></div>`;
+    return `<select data-ex-target="${this.esc(pair.object_id)}" aria-label="${this.esc(pair.name)}" ${locked ? "disabled" : ""}><option value="">${this.t("exNoTarget")}</option>${candidates}</select>${tags}`;
+  }
+
+  pairHowCell(pair) {
+    const choice = this.exchangeState().choices[pair.object_id] || {};
+    return choice.target && pair.meter ? `<select data-ex-how="${this.esc(pair.object_id)}" aria-label="${this.t("exHow")}">${EXCHANGE_HOW.map(h => `<option value="${h}" ${(choice.how || "replace") === h ? "selected" : ""}>${this.t(`exHow_${h}`)}</option>`).join("")}</select>` : "–";
+  }
+
+  // The pairs as a list: search, filter, sort and pages like every other list.
+  pairsList(pairs) {
+    const ex = this.exchangeState();
+    const hasHow = pairs.some(p => p.meter);
+    const sorts = [
+      { key: "name", label: "exColEntity", dir: "asc", get: p => p.name },
+      { key: "used", label: "exColUsed", dir: "desc", get: p => p.used || 0 },
+    ];
+    const columns = [
+      { key: "name", label: "exColEntity", dir: "asc", cell: p => this.nameCell(p.name, p.object_id) },
+      { key: "used", label: "exColUsed", dir: "desc", cell: p => this.esc(p.used ? this.t("exUsed", { count: p.used }) : this.t("exUnused")) },
+      { key: "target", label: "exColTarget", sortable: false, cell: p => this.pairTargetCell(p) },
+      ...(hasHow ? [{ key: "how", label: "exColHow", sortable: false, cell: p => this.pairHowCell(p) }] : []),
+    ];
+    return this.sysList("exchangepairs", pairs, {
+      sort: "name", dir: "asc", sorts, columns, cls: "pairs", empty: "exNoPairs",
+      filters: [{ name: "pick", all: this.t("exAllPairs"), options: [["suggest", this.t("exFilterSuggest")], ["none", this.t("exFilterNone")], ["chosen", this.t("exFilterChosen")]] }],
+      filterFns: { pick: (p, v) => (v === "suggest" ? p.candidates[0]?.score > 0 : v === "none" ? !p.used && !p.meter : Boolean(ex.choices[p.object_id]?.target)) },
+      text: p => `${p.name} ${p.object_id}`, tie: p => p.object_id,
+    });
   }
 
   exchangeCard() {
@@ -116,11 +142,11 @@ class ExchangeMixin {
     const planDone = ["executed", "verified"].includes(this.plan?.status) && ex.planned && ex.planned === ex.oldDev;
     const pairs = ex.result?.pairs || [];
     const sum = pairs.length ? `<div class="exsum"><strong>${this.t("exSumPairs", { count: pairs.length })}</strong><span class="pill ok">${this.t("exSumSuggest", { count: pairs.filter(p => p.candidates[0]?.score > 0).length })}</span><span class="pill">${this.t("exSumNone", { count: pairs.filter(p => !p.used && !p.meter).length })}</span><span class="pill">${this.t("exSumUses", { count: pairs.reduce((n, p) => n + (p.used || 0), 0) })}</span></div>` : "";
-    const rows = ex.result ? (ex.result.pairs.length ? sum + ex.result.pairs.map(p => this.pairRow(p)).join("") : `<div class="emptymsg">${this.t("exNoPairs")}</div>`) : "";
+    const rows = ex.result ? (ex.result.pairs.length ? sum + this.pairsList(ex.result.pairs) : `<div class="emptymsg">${this.t("exNoPairs")}</div>`) : "";
     const unmatched = ex.result?.unmatched_new?.length ? `<p class="factnote">${this.t("exUnmatched", { list: this.esc(ex.result.unmatched_new.slice(0, 10).join(", ")) })}</p>` : "";
     const create = ex.result ? `<div class="setrow planfoot"><small class="u-m0">${this.t("exChosen", { count: chosen })} · ${this.t("repairDryRun")}</small><button class="btn primary" data-ex-create ${chosen && !this.cleanupBusy ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("exCreate", { count: chosen })}</button></div>` : "";
     const disable = planDone ? `<div class="setrow planfoot"><small class="u-m0">${this.t("exDisableHint")}</small><button class="btn" data-ex-disable>${this.t("exDisableOld")}</button></div>` : "";
-    return `<div class="panel" style="overflow:visible"><div class="panelhead"><div><h2>${this.t("exTitle")}</h2><p>${this.t("exHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
+    return `<div class="panel ovvis"><div class="panelhead"><div><h2>${this.t("exTitle")}</h2><p>${this.t("exHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
       <div class="setrow"><div><label>${this.t("exOld")}</label></div>${this.pickerBox("exOld", this.t("exPick"))}</div>
       <div class="setrow"><div><label>${this.t("exNew")}</label></div>${this.pickerBox("exNew", this.t("exPick"))}</div>
       <div class="setrow planfoot"><small class="u-m0">${this.esc(ex.error)}</small><button class="btn" data-ex-load ${ex.oldDev && ex.newDev && !ex.loading ? "" : "disabled"}>${ex.loading ? this.t("exLoading") : this.t("exLoad")}</button></div>
@@ -191,7 +217,7 @@ class ExchangeMixin {
   reportBlock(plan, extra = "") {
     const shown = this.report?.plan_id === plan.plan_id ? this.report : null;
     const body = shown ? `<div class="reportbox"><div class="reporthead"><strong><ha-icon icon="mdi:file-document-outline"></ha-icon>${this.t("reportTitle")}</strong><span class="reportbtns"><button class="btn accent" data-report-copy><ha-icon icon="mdi:content-copy"></ha-icon>${this.t("reportCopy")}</button><button class="btn accent" data-report-download><ha-icon icon="mdi:download"></ha-icon>${this.t("reportDownload")}</button></span></div><pre class="reportpre">${this.esc(shown.markdown)}</pre>${shown.anonymized || this.reportMessage ? `<p class="reportnote">${this.esc(shown.anonymized ? this.t("reportAnonymous") : "")} ${this.esc(this.reportMessage || "")}</p>` : ""}</div>` : (this.reportMessage ? `<small class="error">${this.esc(this.reportMessage)}</small>` : "");
-    return `<div class="setrow planfoot"><label class="factnote reportopt"><input type="checkbox" data-report-names ${this.reportClear ? "checked" : ""}><span><strong>${this.t("reportNames")}</strong><small>${this.t("reportNamesHint")}</small></span></label>${extra ? `<span style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">` : ""}<button class="btn accent" data-report="${this.esc(plan.plan_id)}"><ha-icon icon="mdi:${shown ? "chevron-up" : "file-document-outline"}"></ha-icon>${this.t("reportButton")}</button>${extra ? `${extra}</span>` : ""}</div>${body}`;
+    return `<div class="setrow planfoot"><label class="factnote reportopt"><input type="checkbox" data-report-names ${this.reportClear ? "checked" : ""}><span><strong>${this.t("reportNames")}</strong><small>${this.t("reportNamesHint")}</small></span></label>${extra ? `<span class="reportextra">` : ""}<button class="btn accent" data-report="${this.esc(plan.plan_id)}"><ha-icon icon="mdi:${shown ? "chevron-up" : "file-document-outline"}"></ha-icon>${this.t("reportButton")}</button>${extra ? `${extra}</span>` : ""}</div>${body}`;
   }
 
   // -- end state simulation ---------------------------------------------------------------

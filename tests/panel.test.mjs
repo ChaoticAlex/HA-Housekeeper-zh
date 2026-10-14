@@ -3362,6 +3362,11 @@ test("the exchange assistant preselects nothing and turns only confirmed pairs i
   el.ex.choices["sensor.a_power"] = { target: "sensor.b_power" };
   el.ex.choices["sensor.a_total"] = { target: "sensor.b_total", how: "statistics" };
   assert.ok(el.exchangeCard().includes("data-ex-how"));
+  el.lv.exchangepairs.f.pick = "chosen";
+  html = el.exchangeCard();
+  assert.ok(html.includes('data-ex-target="sensor.a_power"') && !html.includes('data-ex-target="switch.a"'), "the pair list filters by what was chosen");
+  el.lv.exchangepairs.f.pick = "";
+  assert.equal(el.exchangeActions().length, 2, "the choices survive the filter");
   await el.createExchangePlan();
   const create = calls.find(c => c.type === "ha_housekeeper/plan_create");
   assert.deepEqual(create.actions, [{ kind: "replace_references", object_id: "sensor.a_power", target: "sensor.b_power" }, { kind: "migrate_meter", object_id: "sensor.a_total", target: "sensor.b_total", mode: "statistics" }]);

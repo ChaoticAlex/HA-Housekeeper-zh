@@ -1414,7 +1414,7 @@ class StylesMixin {
       .sumtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.sumtile{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border:1px solid var(--hk-border);border-left:4px solid var(--hk-gray);border-radius:12px;background:var(--hk-surface);text-align:left;font:inherit;color:inherit}button.sumtile{cursor:pointer}button.sumtile:hover{background:var(--hk-soft)}.sumtile.ok{border-left-color:var(--hk-green)}.sumtile.warn{border-left-color:var(--hk-amber)}.sumtile.red{border-left-color:var(--hk-red)}.sumlabel{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.sumvalue{font-size:calc(22px*var(--hk-fs,1));font-weight:600;line-height:1.2;overflow-wrap:anywhere}.sumtile small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));overflow-wrap:anywhere}.sumtile{position:relative}button.sumtile .sumlabel{padding-right:20px}.sumcue{position:absolute;top:10px;right:10px;--mdc-icon-size:16px;color:var(--hk-muted)}div.sumtile,div.sumtile:hover{box-shadow:none;background:var(--hk-soft)}.sumtile.filter[aria-pressed=true]{border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 9%,var(--hk-surface));box-shadow:0 0 0 1px var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumcue{color:var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumlabel{color:var(--hk-blue-text)}.sumtile.filter[aria-pressed=true] .sumlabel:before{content:"\\2713";margin-right:.4em}.filteron{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 16px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);background:color-mix(in srgb,var(--hk-blue) 7%,var(--hk-surface));border-bottom:1px solid var(--hk-border)}.filteron ha-icon{--mdc-icon-size:16px;color:var(--hk-blue)}.filteron b{color:var(--hk-text);font-weight:600}.filteron .btn{margin-left:auto}.tabdot{display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:50%;background:var(--hk-gray)}.tabdot.warn{background:var(--hk-amber)}.tabdot.red{background:var(--hk-red)}
       .detailgrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:14px;align-items:start}.pad{padding:16px}.todofoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px}.visitline{display:inline-flex;align-items:center;gap:6px;color:var(--hk-muted)}.visitline ha-icon{--mdc-icon-size:16px}
       .facts{display:grid}.fact{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.fact:first-child{border-top:0}.fact span{color:var(--hk-muted)}.fact b{font-weight:600;text-align:right}.fact small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:400}
-      .planchips{padding:6px 0 0;border:0}.planresult{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.planfootbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.panel.ovvis{overflow:visible}.compentry td{padding-left:28px;cursor:pointer}.compentrymeta{display:block;color:var(--hk-muted);font-size:12px}.invsubrow td:first-child{padding-left:28px}.invsubrow .invsub{color:var(--hk-muted)}.hist-bar{margin-top:4px}.hist-hint{margin:10px 16px}.hist-hint0{margin:10px 0 0}.changes-pick{grid-template-columns:auto minmax(220px,360px)}.baselbl{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.u-m0{margin:0!important}.u-block{display:block!important}.u-mb14{margin-bottom:14px!important}.u-pt6{padding:6px 0 0!important}.u-dim{opacity:.8!important}.u-ic14{--mdc-icon-size:14px!important}.u-amber{color:var(--hk-amber)!important}
+      .rangechart{display:block;max-width:640px;margin:6px 0}.rangechart.rc-small{max-width:360px}.lg-red{color:var(--hk-red)}.lg-green{color:var(--hk-green)}.rangesample{width:100%;font-size:12px;border-collapse:collapse;margin:4px 0}.rangeslide{width:100%;max-width:640px;display:block}.rangehead{margin-top:12px}.rangewin{display:flex;gap:8px;flex-wrap:wrap}.w160{max-width:160px}.w260{max-width:260px}.w460{max-width:460px}.reportextra{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.planchips{padding:6px 0 0;border:0}.planresult{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.planfootbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.panel.ovvis{overflow:visible}.compentry td{padding-left:28px;cursor:pointer}.compentrymeta{display:block;color:var(--hk-muted);font-size:12px}.invsubrow td:first-child{padding-left:28px}.invsubrow .invsub{color:var(--hk-muted)}.hist-bar{margin-top:4px}.hist-hint{margin:10px 16px}.hist-hint0{margin:10px 0 0}.changes-pick{grid-template-columns:auto minmax(220px,360px)}.baselbl{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.u-m0{margin:0!important}.u-block{display:block!important}.u-mb14{margin-bottom:14px!important}.u-pt6{padding:6px 0 0!important}.u-dim{opacity:.8!important}.u-ic14{--mdc-icon-size:14px!important}.u-amber{color:var(--hk-amber)!important}
       .factnote{padding:12px 16px;border-top:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));line-height:1.5}:where(:not(.panel))>.factnote{border-top:0;padding:0}.panel>.factnote:first-child{border-top:0}
       .diagcard{display:grid;gap:12px;padding:16px}.checks{display:grid;gap:8px}
       .check{display:grid;grid-template-columns:22px minmax(100px,150px) minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-soft);font-size:calc(13px*var(--hk-fs,1))}.check b{font-weight:600}.check .val{color:var(--hk-muted);overflow-wrap:anywhere}
@@ -1550,10 +1550,10 @@ class StylesMixin {
 
 // Texts of the shared table of objects (objectTable); merged into TEXT.
 Object.assign(TEXT.de, {
-  objColState: "Zustand", objAllStatus: "Alle Zustände", objColEntities: "Entitäten", objColDevices: "Geräte", relColAvail: "Verfügbarkeit", relAvailOk: "Ab 99,5 %", relAvailWarn: "95 bis 99,5 %", cleanupAllClasses: "Alle Einstufungen", cleanupAllReadiness: "Alle Zustände", cleanupColRecorder: "Recorder-Daten", recurringColSince: "Vergessen am", recurringColDomains: "Integrationen", recurringPill: "Kehrt zurück", purgeColWhen: "Zeit", purgeColWhat: "Gelöscht", purgeColDetails: "Einzelheiten", relAvailRed: "Unter 95 %",
+  objColState: "Zustand", objAllStatus: "Alle Zustände", objColEntities: "Entitäten", objColDevices: "Geräte", relColAvail: "Verfügbarkeit", relAvailOk: "Ab 99,5 %", relAvailWarn: "95 bis 99,5 %", cleanupAllClasses: "Alle Einstufungen", cleanupAllReadiness: "Alle Zustände", cleanupColRecorder: "Recorder-Daten", recurringColSince: "Vergessen am", recurringColDomains: "Integrationen", recurringPill: "Kehrt zurück", purgeColWhen: "Zeit", purgeColWhat: "Gelöscht", purgeColDetails: "Einzelheiten", exColEntity: "Entität", exColUsed: "Verwendung", exColTarget: "Ersatz", exColHow: "Art", exAllPairs: "Alle Paare", exFilterSuggest: "Mit Vorschlag", exFilterNone: "Ohne Verwendung", exFilterChosen: "Gewählt", counterColName: "Entität", counterColKind: "Art", counterColFound: "Fund", counterColAction: "Aktion", counterAllKinds: "Alle Arten", counterKindMeasurement: "Messwert", counterKindCounter: "Zähler", relAvailRed: "Unter 95 %",
 });
 Object.assign(TEXT.en, {
-  objColState: "State", objAllStatus: "All states", objColEntities: "Entities", objColDevices: "Devices", relColAvail: "Availability", relAvailOk: "99.5 % and above", relAvailWarn: "95 to 99.5 %", cleanupAllClasses: "All classes", cleanupAllReadiness: "All states", cleanupColRecorder: "Recorder data", recurringColSince: "Forgotten on", recurringColDomains: "Integrations", recurringPill: "Keeps coming back", purgeColWhen: "Time", purgeColWhat: "Deleted", purgeColDetails: "Details", relAvailRed: "Below 95 %",
+  objColState: "State", objAllStatus: "All states", objColEntities: "Entities", objColDevices: "Devices", relColAvail: "Availability", relAvailOk: "99.5 % and above", relAvailWarn: "95 to 99.5 %", cleanupAllClasses: "All classes", cleanupAllReadiness: "All states", cleanupColRecorder: "Recorder data", recurringColSince: "Forgotten on", recurringColDomains: "Integrations", recurringPill: "Keeps coming back", purgeColWhen: "Time", purgeColWhat: "Deleted", purgeColDetails: "Details", exColEntity: "Entity", exColUsed: "Use", exColTarget: "Replacement", exColHow: "How", exAllPairs: "All pairs", exFilterSuggest: "With a proposal", exFilterNone: "Unused", exFilterChosen: "Chosen", counterColName: "Entity", counterColKind: "Kind", counterColFound: "Finding", counterColAction: "Action", counterAllKinds: "All kinds", counterKindMeasurement: "Measurement", counterKindCounter: "Counter", relAvailRed: "Below 95 %",
 });
 
 // Texts for the policies view; merged into TEXT.
@@ -7681,18 +7681,44 @@ class ExchangeMixin {
     this.cleanupBusy = false; this.render();
   }
 
-  pairRow(pair) {
+  // The target and the way for one pair: the person's choice is kept in `ex.choices`, whatever the list shows.
+  pairTargetCell(pair) {
     const ex = this.exchangeState(), choice = ex.choices[pair.object_id] || {};
     const candidates = pair.candidates.map((c, i) => {
       const why = c.reasons.map(r => this.t(`exReason_${r}`)).join(", ");
       return `<option value="${this.esc(c.object_id)}" ${choice.target === c.object_id ? "selected" : ""}>${this.esc(c.name)} (${this.esc(c.object_id)})${i === 0 && c.score > 0 ? ` · ${this.t("exSuggested")}` : ""}${why ? ` · ${this.esc(why)}` : ""}</option>`;
     }).join("");
     const locked = !pair.used && !pair.meter;
-    const how = choice.target && pair.meter ? `<select data-ex-how="${this.esc(pair.object_id)}" aria-label="${this.t("exHow")}">${EXCHANGE_HOW.map(h => `<option value="${h}" ${(choice.how || "replace") === h ? "selected" : ""}>${this.t(`exHow_${h}`)}</option>`).join("")}</select>` : "";
     const picked = pair.candidates.find(c => c.object_id === choice.target);
     const tags = picked && picked.reasons.length ? `<span class="exptags">${picked.reasons.map(r => `<span class="tag">${this.esc(this.t(`exReason_${r}`))}</span>`).join("")}</span>` : "";
-    return `<div class="row"><span class="row-text"><strong>${this.esc(pair.name)}</strong>${this.rowId(pair.object_id, pair.used ? this.t("exUsed", { count: pair.used }) : this.t("exUnused"))}${tags}</span>
-      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><select data-ex-target="${this.esc(pair.object_id)}" aria-label="${this.esc(pair.name)}" ${locked ? "disabled" : ""}><option value="">${this.t("exNoTarget")}</option>${candidates}</select>${how}</span></div>`;
+    return `<select data-ex-target="${this.esc(pair.object_id)}" aria-label="${this.esc(pair.name)}" ${locked ? "disabled" : ""}><option value="">${this.t("exNoTarget")}</option>${candidates}</select>${tags}`;
+  }
+
+  pairHowCell(pair) {
+    const choice = this.exchangeState().choices[pair.object_id] || {};
+    return choice.target && pair.meter ? `<select data-ex-how="${this.esc(pair.object_id)}" aria-label="${this.t("exHow")}">${EXCHANGE_HOW.map(h => `<option value="${h}" ${(choice.how || "replace") === h ? "selected" : ""}>${this.t(`exHow_${h}`)}</option>`).join("")}</select>` : "–";
+  }
+
+  // The pairs as a list: search, filter, sort and pages like every other list.
+  pairsList(pairs) {
+    const ex = this.exchangeState();
+    const hasHow = pairs.some(p => p.meter);
+    const sorts = [
+      { key: "name", label: "exColEntity", dir: "asc", get: p => p.name },
+      { key: "used", label: "exColUsed", dir: "desc", get: p => p.used || 0 },
+    ];
+    const columns = [
+      { key: "name", label: "exColEntity", dir: "asc", cell: p => this.nameCell(p.name, p.object_id) },
+      { key: "used", label: "exColUsed", dir: "desc", cell: p => this.esc(p.used ? this.t("exUsed", { count: p.used }) : this.t("exUnused")) },
+      { key: "target", label: "exColTarget", sortable: false, cell: p => this.pairTargetCell(p) },
+      ...(hasHow ? [{ key: "how", label: "exColHow", sortable: false, cell: p => this.pairHowCell(p) }] : []),
+    ];
+    return this.sysList("exchangepairs", pairs, {
+      sort: "name", dir: "asc", sorts, columns, cls: "pairs", empty: "exNoPairs",
+      filters: [{ name: "pick", all: this.t("exAllPairs"), options: [["suggest", this.t("exFilterSuggest")], ["none", this.t("exFilterNone")], ["chosen", this.t("exFilterChosen")]] }],
+      filterFns: { pick: (p, v) => (v === "suggest" ? p.candidates[0]?.score > 0 : v === "none" ? !p.used && !p.meter : Boolean(ex.choices[p.object_id]?.target)) },
+      text: p => `${p.name} ${p.object_id}`, tie: p => p.object_id,
+    });
   }
 
   exchangeCard() {
@@ -7700,11 +7726,11 @@ class ExchangeMixin {
     const planDone = ["executed", "verified"].includes(this.plan?.status) && ex.planned && ex.planned === ex.oldDev;
     const pairs = ex.result?.pairs || [];
     const sum = pairs.length ? `<div class="exsum"><strong>${this.t("exSumPairs", { count: pairs.length })}</strong><span class="pill ok">${this.t("exSumSuggest", { count: pairs.filter(p => p.candidates[0]?.score > 0).length })}</span><span class="pill">${this.t("exSumNone", { count: pairs.filter(p => !p.used && !p.meter).length })}</span><span class="pill">${this.t("exSumUses", { count: pairs.reduce((n, p) => n + (p.used || 0), 0) })}</span></div>` : "";
-    const rows = ex.result ? (ex.result.pairs.length ? sum + ex.result.pairs.map(p => this.pairRow(p)).join("") : `<div class="emptymsg">${this.t("exNoPairs")}</div>`) : "";
+    const rows = ex.result ? (ex.result.pairs.length ? sum + this.pairsList(ex.result.pairs) : `<div class="emptymsg">${this.t("exNoPairs")}</div>`) : "";
     const unmatched = ex.result?.unmatched_new?.length ? `<p class="factnote">${this.t("exUnmatched", { list: this.esc(ex.result.unmatched_new.slice(0, 10).join(", ")) })}</p>` : "";
     const create = ex.result ? `<div class="setrow planfoot"><small class="u-m0">${this.t("exChosen", { count: chosen })} · ${this.t("repairDryRun")}</small><button class="btn primary" data-ex-create ${chosen && !this.cleanupBusy ? "" : "disabled"}>${this.cleanupBusy ? this.t("planCreating") : this.t("exCreate", { count: chosen })}</button></div>` : "";
     const disable = planDone ? `<div class="setrow planfoot"><small class="u-m0">${this.t("exDisableHint")}</small><button class="btn" data-ex-disable>${this.t("exDisableOld")}</button></div>` : "";
-    return `<div class="panel" style="overflow:visible"><div class="panelhead"><div><h2>${this.t("exTitle")}</h2><p>${this.t("exHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
+    return `<div class="panel ovvis"><div class="panelhead"><div><h2>${this.t("exTitle")}</h2><p>${this.t("exHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>
       <div class="setrow"><div><label>${this.t("exOld")}</label></div>${this.pickerBox("exOld", this.t("exPick"))}</div>
       <div class="setrow"><div><label>${this.t("exNew")}</label></div>${this.pickerBox("exNew", this.t("exPick"))}</div>
       <div class="setrow planfoot"><small class="u-m0">${this.esc(ex.error)}</small><button class="btn" data-ex-load ${ex.oldDev && ex.newDev && !ex.loading ? "" : "disabled"}>${ex.loading ? this.t("exLoading") : this.t("exLoad")}</button></div>
@@ -7775,7 +7801,7 @@ class ExchangeMixin {
   reportBlock(plan, extra = "") {
     const shown = this.report?.plan_id === plan.plan_id ? this.report : null;
     const body = shown ? `<div class="reportbox"><div class="reporthead"><strong><ha-icon icon="mdi:file-document-outline"></ha-icon>${this.t("reportTitle")}</strong><span class="reportbtns"><button class="btn accent" data-report-copy><ha-icon icon="mdi:content-copy"></ha-icon>${this.t("reportCopy")}</button><button class="btn accent" data-report-download><ha-icon icon="mdi:download"></ha-icon>${this.t("reportDownload")}</button></span></div><pre class="reportpre">${this.esc(shown.markdown)}</pre>${shown.anonymized || this.reportMessage ? `<p class="reportnote">${this.esc(shown.anonymized ? this.t("reportAnonymous") : "")} ${this.esc(this.reportMessage || "")}</p>` : ""}</div>` : (this.reportMessage ? `<small class="error">${this.esc(this.reportMessage)}</small>` : "");
-    return `<div class="setrow planfoot"><label class="factnote reportopt"><input type="checkbox" data-report-names ${this.reportClear ? "checked" : ""}><span><strong>${this.t("reportNames")}</strong><small>${this.t("reportNamesHint")}</small></span></label>${extra ? `<span style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">` : ""}<button class="btn accent" data-report="${this.esc(plan.plan_id)}"><ha-icon icon="mdi:${shown ? "chevron-up" : "file-document-outline"}"></ha-icon>${this.t("reportButton")}</button>${extra ? `${extra}</span>` : ""}</div>${body}`;
+    return `<div class="setrow planfoot"><label class="factnote reportopt"><input type="checkbox" data-report-names ${this.reportClear ? "checked" : ""}><span><strong>${this.t("reportNames")}</strong><small>${this.t("reportNamesHint")}</small></span></label>${extra ? `<span class="reportextra">` : ""}<button class="btn accent" data-report="${this.esc(plan.plan_id)}"><ha-icon icon="mdi:${shown ? "chevron-up" : "file-document-outline"}"></ha-icon>${this.t("reportButton")}</button>${extra ? `${extra}</span>` : ""}</div>${body}`;
   }
 
   // -- end state simulation ---------------------------------------------------------------
@@ -8763,8 +8789,8 @@ class CounterMixin {
     const sy = y => h - pad - ((y - y0) / Math.max(1e-9, y1 - y0)) * (h - 2 * pad);
     const line = i => series.map(p => `${sx(p[0]).toFixed(1)},${sy(p[i]).toFixed(1)}`).join(" ");
     const v = y => `${this.formatNumber(Math.round(y * 100) / 100)}${unit ? ` ${unit}` : ""}`;
-    const svg = `<svg class="rangechart" role="img" aria-label="${this.esc(this.t("counterChartLabel"))}" viewBox="0 0 ${w} ${h}" width="100%" style="max-width:${w}px;display:block;margin:6px 0">${[1, 2, 3].map(k => `<line class="grid" x1="${pad}" x2="${w - pad}" y1="${(k * h) / 4}" y2="${(k * h) / 4}"/>`).join("")}<polyline fill="none" stroke="var(--hk-red)" stroke-width="1.5" stroke-dasharray="4 3" points="${line(1)}"/><polyline fill="none" stroke="var(--hk-green)" stroke-width="2" points="${line(2)}"/></svg>`;
-    const legend = `<small class="u-dim u-block"><span style="color:var(--hk-red)">- - -</span> ${this.t("counterOriginal")} · <span style="color:var(--hk-green)">───</span> ${this.t("counterRepaired")}</small>`;
+    const svg = `<svg class="rangechart rc-small" role="img" aria-label="${this.esc(this.t("counterChartLabel"))}" viewBox="0 0 ${w} ${h}" width="100%">${[1, 2, 3].map(k => `<line class="grid" x1="${pad}" x2="${w - pad}" y1="${(k * h) / 4}" y2="${(k * h) / 4}"/>`).join("")}<polyline fill="none" stroke="var(--hk-red)" stroke-width="1.5" stroke-dasharray="4 3" points="${line(1)}"/><polyline fill="none" stroke="var(--hk-green)" stroke-width="2" points="${line(2)}"/></svg>`;
+    const legend = `<small class="u-dim u-block"><span class="lg-red">- - -</span> ${this.t("counterOriginal")} · <span class="lg-green">───</span> ${this.t("counterRepaired")}</small>`;
     // The axes are text around the drawing: highest and lowest value on the left, first and last time below.
     return `<div class="chartaxes"><span class="chartY"><span>${this.esc(v(y1))}</span><span>${this.esc(v(y0))}</span></span>${svg}<span class="chartX"><span>${this.esc(this.formatDate(x0 * 1000))}</span><span>${this.esc(this.formatDate(x1 * 1000))}</span></span></div>${legend}`;
   }
@@ -8794,7 +8820,7 @@ class CounterMixin {
     const head = (cols || []).map(c => this.t(`rangeCol_${c}`)).join(" / ");
     const body = rows.map(r => `<tr><td>${r[0] ? this.esc(this.formatDate(r[0] * 1000)) : "–"}</td><td>${cell(r[1])}</td><td>→</td><td>${cell(r[2])}</td></tr>`).join("");
     const more = count > rows.length ? `<small class="u-block">${this.esc(this.t("rangeMoreRows", { count: this.formatNumber(count - rows.length) }))}</small>` : "";
-    return `<details><summary>${this.esc(this.t(`counterTable_${name}`))} · ${this.formatNumber(count)}${head ? ` · ${this.esc(head)}` : ""}</summary>${count ? `<table style="width:100%;font-size:12px;border-collapse:collapse;margin:4px 0"><tbody>${body}</tbody></table>${more}` : `<small class="u-block">${this.t("rangeNothingHere")}</small>`}${extra}</details>`;
+    return `<details><summary>${this.esc(this.t(`counterTable_${name}`))} · ${this.formatNumber(count)}${head ? ` · ${this.esc(head)}` : ""}</summary>${count ? `<table class="rangesample"><tbody>${body}</tbody></table>${more}` : `<small class="u-block">${this.t("rangeNothingHere")}</small>`}${extra}</details>`;
   }
 
   // What a range cleanup will do: where the data is, what is replaced by what, per table.
@@ -8877,8 +8903,8 @@ class CounterMixin {
     const area = `M${sx(win.from).toFixed(1)},${h - pad} L${sr.points.map(pt).join(" L")} L${sx(win.to).toFixed(1)},${h - pad} Z`;
     const grid = [1, 2, 3].map(k => `<line class="grid" x1="${pad}" x2="${w - pad}" y1="${(k * h) / 4}" y2="${(k * h) / 4}"/>`).join("");
     const bad = has ? sr.points.filter(p => p[0] >= f && p[0] <= t).map(pt).join(" ") : "";
-    const slider = (name, value) => `<input type="range" min="0" max="1000" step="1" value="${Math.round(Math.min(1, Math.max(0, (value - win.from) / span)) * 1000)}" data-range-slide="${name}" aria-label="${this.esc(this.t(name === "from" ? "rangeFrom" : "rangeTo"))}" style="width:100%;max-width:${w}px;display:block">`;
-    return `<svg class="rangechart" role="img" aria-label="${this.esc(this.t("rangeChartLabel"))}" viewBox="0 0 ${w} ${h}" width="100%" style="max-width:${w}px;display:block;margin:6px 0">${grid}<rect data-range-band x="${has ? sx(Math.max(win.from, f)).toFixed(1) : 0}" width="${has ? Math.max(1, sx(Math.min(win.to, t)) - sx(Math.max(win.from, f))).toFixed(1) : 0}" y="0" height="${h}" rx="4" fill="var(--hk-amber)" opacity=".2"/><path d="${area}" fill="var(--hk-blue)" opacity=".08"/><polyline fill="none" stroke="var(--hk-blue)" stroke-width="2" stroke-linejoin="round" points="${line}"/>${bad.includes(" ") ? `<polyline fill="none" stroke="var(--hk-red)" stroke-width="2.4" points="${bad}"/>` : ""}</svg>
+    const slider = (name, value) => `<input type="range" min="0" max="1000" step="1" value="${Math.round(Math.min(1, Math.max(0, (value - win.from) / span)) * 1000)}" class="rangeslide" data-range-slide="${name}" aria-label="${this.esc(this.t(name === "from" ? "rangeFrom" : "rangeTo"))}">`;
+    return `<svg class="rangechart" role="img" aria-label="${this.esc(this.t("rangeChartLabel"))}" viewBox="0 0 ${w} ${h}" width="100%">${grid}<rect data-range-band x="${has ? sx(Math.max(win.from, f)).toFixed(1) : 0}" width="${has ? Math.max(1, sx(Math.min(win.to, t)) - sx(Math.max(win.from, f))).toFixed(1) : 0}" y="0" height="${h}" rx="4" fill="var(--hk-amber)" opacity=".2"/><path d="${area}" fill="var(--hk-blue)" opacity=".08"/><polyline fill="none" stroke="var(--hk-blue)" stroke-width="2" stroke-linejoin="round" points="${line}"/>${bad.includes(" ") ? `<polyline fill="none" stroke="var(--hk-red)" stroke-width="2.4" points="${bad}"/>` : ""}</svg>
       <small class="u-dim u-block">${this.esc(this.formatDate(win.from * 1000))} – ${this.esc(this.formatDate(win.to * 1000))} · ${this.esc(this.t(`rangeTable_${sr.table}`))} · ${this.esc(this.formatNumber(Math.round(y0 * 100) / 100))} … ${this.esc(this.formatNumber(Math.round(y1 * 100) / 100))} ${this.esc(sr.unit || "")}</small>
       ${slider("from", has ? f : win.from)}${slider("to", has ? t : win.to)}`;
   }
@@ -8907,13 +8933,13 @@ class CounterMixin {
   rangeForm() {
     const mode = this.rangeMode || "hold";
     const stamp = value => this.esc(value || "");
-    return `<div class="panelhead" style="margin-top:12px"><div><h2>${this.t("rangeTitle")}</h2><p>${this.t("rangeHint")}</p></div></div>
-      <div class="setrow"><div><label>${this.t("rangeWindow")}</label><small>${this.t("rangeWindowHint")}</small></div><span style="display:flex;gap:8px;flex-wrap:wrap"><select data-range-days>${[1, 7, 30, 90, 365].map(d => `<option value="${d}" ${(this.rangeDays || 7) === d ? "selected" : ""}>${this.t("rangeDays", { days: d })}</option>`).join("")}</select><button class="btn" data-range-load ${this.rangeSeriesLoading ? 'disabled aria-busy="true"' : ""}>${this.t("rangeLoad")}</button></span></div>
+    return `<div class="panelhead rangehead"><div><h2>${this.t("rangeTitle")}</h2><p>${this.t("rangeHint")}</p></div></div>
+      <div class="setrow"><div><label>${this.t("rangeWindow")}</label><small>${this.t("rangeWindowHint")}</small></div><span class="rangewin"><select data-range-days>${[1, 7, 30, 90, 365].map(d => `<option value="${d}" ${(this.rangeDays || 7) === d ? "selected" : ""}>${this.t("rangeDays", { days: d })}</option>`).join("")}</select><button class="btn" data-range-load ${this.rangeSeriesLoading ? 'disabled aria-busy="true"' : ""}>${this.t("rangeLoad")}</button></span></div>
       ${this.rangeChart()}
-      <div class="setrow"><div><label>${this.t("rangeFrom")}</label></div><input type="datetime-local" data-range-from value="${stamp(this.rangeFrom)}" style="max-width:260px"></div>
-      <div class="setrow"><div><label>${this.t("rangeTo")}</label></div><input type="datetime-local" data-range-to value="${stamp(this.rangeTo)}" style="max-width:260px"></div>
-      <div class="setrow"><div><label>${this.t("counterMode")}</label></div><select data-range-mode style="max-width:460px">${["hold", "interpolate", "fixed"].map(m => `<option value="${m}" ${mode === m ? "selected" : ""}>${this.t(`rangeMode_${m}`)}</option>`).join("")}</select></div>
-      ${mode === "fixed" ? `<div class="setrow"><div><label>${this.t("rangeFixed")}</label></div><input type="text" inputmode="decimal" data-range-fixed value="${stamp(this.rangeFixed)}" style="max-width:160px"></div>` : ""}
+      <div class="setrow"><div><label>${this.t("rangeFrom")}</label></div><input type="datetime-local" class="w260" data-range-from value="${stamp(this.rangeFrom)}"></div>
+      <div class="setrow"><div><label>${this.t("rangeTo")}</label></div><input type="datetime-local" class="w260" data-range-to value="${stamp(this.rangeTo)}"></div>
+      <div class="setrow"><div><label>${this.t("counterMode")}</label></div><select class="w460" data-range-mode>${["hold", "interpolate", "fixed"].map(m => `<option value="${m}" ${mode === m ? "selected" : ""}>${this.t(`rangeMode_${m}`)}</option>`).join("")}</select></div>
+      ${mode === "fixed" ? `<div class="setrow"><div><label>${this.t("rangeFixed")}</label></div><input type="text" inputmode="decimal" class="w160" data-range-fixed value="${stamp(this.rangeFixed)}"></div>` : ""}
       <div class="setrow planfoot"><small class="u-m0">${this.t("rangeNote")}</small><button class="btn primary" data-range-pick ${this.cleanupBusy ? 'disabled aria-busy="true"' : ""}>${this.cleanupBusy ? this.t("planCreating") : this.t("rangePreview")}</button></div>`;
   }
 
@@ -8921,24 +8947,35 @@ class CounterMixin {
     const s = this.counterScan, mode = this.counterMode || "hold";
     const head = `<div class="panelhead"><div><h2>${this.t("counterTitle")}</h2><p>${this.t("counterHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>`;
     const controls = `<div class="setrow"><div><label>${this.t("counterEntity")}</label><small>${this.t("counterEntityHint")}</small></div>${this.pickerBox("counter", "sensor.water_meter", "data-counter-id")}</div>
-      <div class="setrow"><div><label>${this.t("counterMode")}</label></div><select data-counter-mode style="max-width:460px">${["hold", "interpolate"].map(m => `<option value="${m}" ${mode === m ? "selected" : ""}>${this.t(`counterMode_${m}`)}</option>`).join("")}</select></div>
+      <div class="setrow"><div><label>${this.t("counterMode")}</label></div><select class="w460" data-counter-mode>${["hold", "interpolate"].map(m => `<option value="${m}" ${mode === m ? "selected" : ""}>${this.t(`counterMode_${m}`)}</option>`).join("")}</select></div>
       <div class="setrow planfoot"><small class="u-m0">${this.t("counterScanNote")}</small><button class="btn primary" data-counter-scan ${this.counterLoading ? 'disabled aria-busy="true"' : ""}>${this.counterLoading ? this.t("counterScanning") : this.t("counterScan")}</button></div>`;
     let body = "";
     if (this.counterError) body = `<div class="error">${this.esc(this.counterError)}</div>`;
     else if (s && !s.available) body = `<div class="emptymsg">${this.t("counterNoRecorder")}</div>`;
     else if (s?.busy) body = `<p class="factnote">${this.t("relBusy")}</p>`;
     else if (s) {
-      const itemRows = s.items.map(item => {
-        const measure = item.kind === "measurement", n3 = v => this.formatNumber(Math.round(v * 1000) / 1000);
-        const lines = item.findings.map(f => {
-          const extreme = Math.abs(f.high - f.good_before) > Math.abs(f.low - f.good_before) ? f.high : f.low;
-          return `<small class="u-block">${this.esc(measure ? this.t("spikeFound", { range: this.counterRange(f), extreme: n3(extreme), good: n3(f.good_before), unit: item.unit || "" }) : this.t("counterFound", { range: this.counterRange(f), low: n3(f.low), good: n3(f.good_before), unit: item.unit || "" }))}</small>`;
-        }).join("");
-        const action = measure ? `<button class="btn primary" data-range-take="${this.esc(item.statistic_id)}" data-take-from="${item.findings[0].suggest.from}" data-take-to="${item.findings[0].suggest.to}">${this.t("rangeTake")}</button>`
-          : `<button class="btn primary" data-counter-pick="${this.esc(item.statistic_id)}" ${this.cleanupBusy ? 'disabled aria-busy="true"' : ""}>${this.cleanupBusy ? this.t("planCreating") : this.t("counterFix")}</button>`;
-        return `<div class="row"><span class="tile warn"><ha-icon icon="mdi:chart-line-variant"></ha-icon></span><span class="row-text"><strong>${this.esc(item.name)}</strong>${this.rowId(item.statistic_id)}${lines}</span>${action}</div>`;
-      });
-      const pg = this.paginate("counterfound", itemRows), items = pg.rows.join("") + pg.footer;
+      const kindOf = item => (item.kind === "measurement" ? "measurement" : "counter");
+      const n3 = v => this.formatNumber(Math.round(v * 1000) / 1000);
+      const found = item => item.findings.map(f => {
+        const extreme = Math.abs(f.high - f.good_before) > Math.abs(f.low - f.good_before) ? f.high : f.low;
+        return `<small class="u-block">${this.esc(kindOf(item) === "measurement" ? this.t("spikeFound", { range: this.counterRange(f), extreme: n3(extreme), good: n3(f.good_before), unit: item.unit || "" }) : this.t("counterFound", { range: this.counterRange(f), low: n3(f.low), good: n3(f.good_before), unit: item.unit || "" }))}</small>`;
+      }).join("");
+      const action = item => (kindOf(item) === "measurement"
+        ? `<button class="btn primary" data-range-take="${this.esc(item.statistic_id)}" data-take-from="${item.findings[0].suggest.from}" data-take-to="${item.findings[0].suggest.to}">${this.t("rangeTake")}</button>`
+        : `<button class="btn primary" data-counter-pick="${this.esc(item.statistic_id)}" ${this.cleanupBusy ? 'disabled aria-busy="true"' : ""}>${this.cleanupBusy ? this.t("planCreating") : this.t("counterFix")}</button>`);
+      const items = s.items.length ? this.sysList("counterfound", s.items, {
+        sort: "name", dir: "asc", empty: "counterNone", cls: "counterfound",
+        sorts: [{ key: "name", label: "counterColName", dir: "asc", get: i => i.name }, { key: "found", label: "counterColFound", dir: "desc", get: i => i.findings.length }],
+        filters: [{ name: "kind", all: this.t("counterAllKinds"), options: [["counter", this.t("counterKindCounter")], ["measurement", this.t("counterKindMeasurement")]] }],
+        filterFns: { kind: (i, v) => kindOf(i) === v },
+        text: i => `${i.name} ${i.statistic_id}`, tie: i => i.statistic_id,
+        columns: [
+          { key: "name", label: "counterColName", dir: "asc", cell: i => `<div class="statcell"><span class="tile warn"><ha-icon icon="mdi:chart-line-variant"></ha-icon></span><div>${this.nameCell(i.name, i.statistic_id)}</div></div>` },
+          { key: "kind", label: "counterColKind", sortable: false, cell: i => this.esc(this.t(`counterKind${kindOf(i) === "measurement" ? "Measurement" : "Counter"}`)) },
+          { key: "found", label: "counterColFound", dir: "desc", cell: found },
+          { key: "action", label: "counterColAction", sortable: false, cell: action },
+        ],
+      }) : "";
       body = `${items || `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon><strong>${this.t("counterNone")}</strong>${this.t("counterNoneSub", { count: this.formatNumber(s.checked) })}</div>`}<p class="factnote">${this.t("counterChecked", { count: this.formatNumber(s.checked) })}</p>`;
     }
     if (!s && !this.counterError && !this.counterLoading) body = `<div class="emptymsg info"><ha-icon icon="mdi:magnify-scan"></ha-icon><strong>${this.t("counterNotChecked")}</strong>${this.t("counterNotCheckedSub")}</div>`;

@@ -19,8 +19,8 @@ class CounterMixin {
     const sy = y => h - pad - ((y - y0) / Math.max(1e-9, y1 - y0)) * (h - 2 * pad);
     const line = i => series.map(p => `${sx(p[0]).toFixed(1)},${sy(p[i]).toFixed(1)}`).join(" ");
     const v = y => `${this.formatNumber(Math.round(y * 100) / 100)}${unit ? ` ${unit}` : ""}`;
-    const svg = `<svg class="rangechart" role="img" aria-label="${this.esc(this.t("counterChartLabel"))}" viewBox="0 0 ${w} ${h}" width="100%" style="max-width:${w}px;display:block;margin:6px 0">${[1, 2, 3].map(k => `<line class="grid" x1="${pad}" x2="${w - pad}" y1="${(k * h) / 4}" y2="${(k * h) / 4}"/>`).join("")}<polyline fill="none" stroke="var(--hk-red)" stroke-width="1.5" stroke-dasharray="4 3" points="${line(1)}"/><polyline fill="none" stroke="var(--hk-green)" stroke-width="2" points="${line(2)}"/></svg>`;
-    const legend = `<small class="u-dim u-block"><span style="color:var(--hk-red)">- - -</span> ${this.t("counterOriginal")} · <span style="color:var(--hk-green)">───</span> ${this.t("counterRepaired")}</small>`;
+    const svg = `<svg class="rangechart rc-small" role="img" aria-label="${this.esc(this.t("counterChartLabel"))}" viewBox="0 0 ${w} ${h}" width="100%">${[1, 2, 3].map(k => `<line class="grid" x1="${pad}" x2="${w - pad}" y1="${(k * h) / 4}" y2="${(k * h) / 4}"/>`).join("")}<polyline fill="none" stroke="var(--hk-red)" stroke-width="1.5" stroke-dasharray="4 3" points="${line(1)}"/><polyline fill="none" stroke="var(--hk-green)" stroke-width="2" points="${line(2)}"/></svg>`;
+    const legend = `<small class="u-dim u-block"><span class="lg-red">- - -</span> ${this.t("counterOriginal")} · <span class="lg-green">───</span> ${this.t("counterRepaired")}</small>`;
     // The axes are text around the drawing: highest and lowest value on the left, first and last time below.
     return `<div class="chartaxes"><span class="chartY"><span>${this.esc(v(y1))}</span><span>${this.esc(v(y0))}</span></span>${svg}<span class="chartX"><span>${this.esc(this.formatDate(x0 * 1000))}</span><span>${this.esc(this.formatDate(x1 * 1000))}</span></span></div>${legend}`;
   }
@@ -50,7 +50,7 @@ class CounterMixin {
     const head = (cols || []).map(c => this.t(`rangeCol_${c}`)).join(" / ");
     const body = rows.map(r => `<tr><td>${r[0] ? this.esc(this.formatDate(r[0] * 1000)) : "–"}</td><td>${cell(r[1])}</td><td>→</td><td>${cell(r[2])}</td></tr>`).join("");
     const more = count > rows.length ? `<small class="u-block">${this.esc(this.t("rangeMoreRows", { count: this.formatNumber(count - rows.length) }))}</small>` : "";
-    return `<details><summary>${this.esc(this.t(`counterTable_${name}`))} · ${this.formatNumber(count)}${head ? ` · ${this.esc(head)}` : ""}</summary>${count ? `<table style="width:100%;font-size:12px;border-collapse:collapse;margin:4px 0"><tbody>${body}</tbody></table>${more}` : `<small class="u-block">${this.t("rangeNothingHere")}</small>`}${extra}</details>`;
+    return `<details><summary>${this.esc(this.t(`counterTable_${name}`))} · ${this.formatNumber(count)}${head ? ` · ${this.esc(head)}` : ""}</summary>${count ? `<table class="rangesample"><tbody>${body}</tbody></table>${more}` : `<small class="u-block">${this.t("rangeNothingHere")}</small>`}${extra}</details>`;
   }
 
   // What a range cleanup will do: where the data is, what is replaced by what, per table.
@@ -133,8 +133,8 @@ class CounterMixin {
     const area = `M${sx(win.from).toFixed(1)},${h - pad} L${sr.points.map(pt).join(" L")} L${sx(win.to).toFixed(1)},${h - pad} Z`;
     const grid = [1, 2, 3].map(k => `<line class="grid" x1="${pad}" x2="${w - pad}" y1="${(k * h) / 4}" y2="${(k * h) / 4}"/>`).join("");
     const bad = has ? sr.points.filter(p => p[0] >= f && p[0] <= t).map(pt).join(" ") : "";
-    const slider = (name, value) => `<input type="range" min="0" max="1000" step="1" value="${Math.round(Math.min(1, Math.max(0, (value - win.from) / span)) * 1000)}" data-range-slide="${name}" aria-label="${this.esc(this.t(name === "from" ? "rangeFrom" : "rangeTo"))}" style="width:100%;max-width:${w}px;display:block">`;
-    return `<svg class="rangechart" role="img" aria-label="${this.esc(this.t("rangeChartLabel"))}" viewBox="0 0 ${w} ${h}" width="100%" style="max-width:${w}px;display:block;margin:6px 0">${grid}<rect data-range-band x="${has ? sx(Math.max(win.from, f)).toFixed(1) : 0}" width="${has ? Math.max(1, sx(Math.min(win.to, t)) - sx(Math.max(win.from, f))).toFixed(1) : 0}" y="0" height="${h}" rx="4" fill="var(--hk-amber)" opacity=".2"/><path d="${area}" fill="var(--hk-blue)" opacity=".08"/><polyline fill="none" stroke="var(--hk-blue)" stroke-width="2" stroke-linejoin="round" points="${line}"/>${bad.includes(" ") ? `<polyline fill="none" stroke="var(--hk-red)" stroke-width="2.4" points="${bad}"/>` : ""}</svg>
+    const slider = (name, value) => `<input type="range" min="0" max="1000" step="1" value="${Math.round(Math.min(1, Math.max(0, (value - win.from) / span)) * 1000)}" class="rangeslide" data-range-slide="${name}" aria-label="${this.esc(this.t(name === "from" ? "rangeFrom" : "rangeTo"))}">`;
+    return `<svg class="rangechart" role="img" aria-label="${this.esc(this.t("rangeChartLabel"))}" viewBox="0 0 ${w} ${h}" width="100%">${grid}<rect data-range-band x="${has ? sx(Math.max(win.from, f)).toFixed(1) : 0}" width="${has ? Math.max(1, sx(Math.min(win.to, t)) - sx(Math.max(win.from, f))).toFixed(1) : 0}" y="0" height="${h}" rx="4" fill="var(--hk-amber)" opacity=".2"/><path d="${area}" fill="var(--hk-blue)" opacity=".08"/><polyline fill="none" stroke="var(--hk-blue)" stroke-width="2" stroke-linejoin="round" points="${line}"/>${bad.includes(" ") ? `<polyline fill="none" stroke="var(--hk-red)" stroke-width="2.4" points="${bad}"/>` : ""}</svg>
       <small class="u-dim u-block">${this.esc(this.formatDate(win.from * 1000))} – ${this.esc(this.formatDate(win.to * 1000))} · ${this.esc(this.t(`rangeTable_${sr.table}`))} · ${this.esc(this.formatNumber(Math.round(y0 * 100) / 100))} … ${this.esc(this.formatNumber(Math.round(y1 * 100) / 100))} ${this.esc(sr.unit || "")}</small>
       ${slider("from", has ? f : win.from)}${slider("to", has ? t : win.to)}`;
   }
@@ -163,13 +163,13 @@ class CounterMixin {
   rangeForm() {
     const mode = this.rangeMode || "hold";
     const stamp = value => this.esc(value || "");
-    return `<div class="panelhead" style="margin-top:12px"><div><h2>${this.t("rangeTitle")}</h2><p>${this.t("rangeHint")}</p></div></div>
-      <div class="setrow"><div><label>${this.t("rangeWindow")}</label><small>${this.t("rangeWindowHint")}</small></div><span style="display:flex;gap:8px;flex-wrap:wrap"><select data-range-days>${[1, 7, 30, 90, 365].map(d => `<option value="${d}" ${(this.rangeDays || 7) === d ? "selected" : ""}>${this.t("rangeDays", { days: d })}</option>`).join("")}</select><button class="btn" data-range-load ${this.rangeSeriesLoading ? 'disabled aria-busy="true"' : ""}>${this.t("rangeLoad")}</button></span></div>
+    return `<div class="panelhead rangehead"><div><h2>${this.t("rangeTitle")}</h2><p>${this.t("rangeHint")}</p></div></div>
+      <div class="setrow"><div><label>${this.t("rangeWindow")}</label><small>${this.t("rangeWindowHint")}</small></div><span class="rangewin"><select data-range-days>${[1, 7, 30, 90, 365].map(d => `<option value="${d}" ${(this.rangeDays || 7) === d ? "selected" : ""}>${this.t("rangeDays", { days: d })}</option>`).join("")}</select><button class="btn" data-range-load ${this.rangeSeriesLoading ? 'disabled aria-busy="true"' : ""}>${this.t("rangeLoad")}</button></span></div>
       ${this.rangeChart()}
-      <div class="setrow"><div><label>${this.t("rangeFrom")}</label></div><input type="datetime-local" data-range-from value="${stamp(this.rangeFrom)}" style="max-width:260px"></div>
-      <div class="setrow"><div><label>${this.t("rangeTo")}</label></div><input type="datetime-local" data-range-to value="${stamp(this.rangeTo)}" style="max-width:260px"></div>
-      <div class="setrow"><div><label>${this.t("counterMode")}</label></div><select data-range-mode style="max-width:460px">${["hold", "interpolate", "fixed"].map(m => `<option value="${m}" ${mode === m ? "selected" : ""}>${this.t(`rangeMode_${m}`)}</option>`).join("")}</select></div>
-      ${mode === "fixed" ? `<div class="setrow"><div><label>${this.t("rangeFixed")}</label></div><input type="text" inputmode="decimal" data-range-fixed value="${stamp(this.rangeFixed)}" style="max-width:160px"></div>` : ""}
+      <div class="setrow"><div><label>${this.t("rangeFrom")}</label></div><input type="datetime-local" class="w260" data-range-from value="${stamp(this.rangeFrom)}"></div>
+      <div class="setrow"><div><label>${this.t("rangeTo")}</label></div><input type="datetime-local" class="w260" data-range-to value="${stamp(this.rangeTo)}"></div>
+      <div class="setrow"><div><label>${this.t("counterMode")}</label></div><select class="w460" data-range-mode>${["hold", "interpolate", "fixed"].map(m => `<option value="${m}" ${mode === m ? "selected" : ""}>${this.t(`rangeMode_${m}`)}</option>`).join("")}</select></div>
+      ${mode === "fixed" ? `<div class="setrow"><div><label>${this.t("rangeFixed")}</label></div><input type="text" inputmode="decimal" class="w160" data-range-fixed value="${stamp(this.rangeFixed)}"></div>` : ""}
       <div class="setrow planfoot"><small class="u-m0">${this.t("rangeNote")}</small><button class="btn primary" data-range-pick ${this.cleanupBusy ? 'disabled aria-busy="true"' : ""}>${this.cleanupBusy ? this.t("planCreating") : this.t("rangePreview")}</button></div>`;
   }
 
@@ -177,24 +177,35 @@ class CounterMixin {
     const s = this.counterScan, mode = this.counterMode || "hold";
     const head = `<div class="panelhead"><div><h2>${this.t("counterTitle")}</h2><p>${this.t("counterHint")}</p></div><div class="actions">${this.kindSelect()}</div></div>`;
     const controls = `<div class="setrow"><div><label>${this.t("counterEntity")}</label><small>${this.t("counterEntityHint")}</small></div>${this.pickerBox("counter", "sensor.water_meter", "data-counter-id")}</div>
-      <div class="setrow"><div><label>${this.t("counterMode")}</label></div><select data-counter-mode style="max-width:460px">${["hold", "interpolate"].map(m => `<option value="${m}" ${mode === m ? "selected" : ""}>${this.t(`counterMode_${m}`)}</option>`).join("")}</select></div>
+      <div class="setrow"><div><label>${this.t("counterMode")}</label></div><select class="w460" data-counter-mode>${["hold", "interpolate"].map(m => `<option value="${m}" ${mode === m ? "selected" : ""}>${this.t(`counterMode_${m}`)}</option>`).join("")}</select></div>
       <div class="setrow planfoot"><small class="u-m0">${this.t("counterScanNote")}</small><button class="btn primary" data-counter-scan ${this.counterLoading ? 'disabled aria-busy="true"' : ""}>${this.counterLoading ? this.t("counterScanning") : this.t("counterScan")}</button></div>`;
     let body = "";
     if (this.counterError) body = `<div class="error">${this.esc(this.counterError)}</div>`;
     else if (s && !s.available) body = `<div class="emptymsg">${this.t("counterNoRecorder")}</div>`;
     else if (s?.busy) body = `<p class="factnote">${this.t("relBusy")}</p>`;
     else if (s) {
-      const itemRows = s.items.map(item => {
-        const measure = item.kind === "measurement", n3 = v => this.formatNumber(Math.round(v * 1000) / 1000);
-        const lines = item.findings.map(f => {
-          const extreme = Math.abs(f.high - f.good_before) > Math.abs(f.low - f.good_before) ? f.high : f.low;
-          return `<small class="u-block">${this.esc(measure ? this.t("spikeFound", { range: this.counterRange(f), extreme: n3(extreme), good: n3(f.good_before), unit: item.unit || "" }) : this.t("counterFound", { range: this.counterRange(f), low: n3(f.low), good: n3(f.good_before), unit: item.unit || "" }))}</small>`;
-        }).join("");
-        const action = measure ? `<button class="btn primary" data-range-take="${this.esc(item.statistic_id)}" data-take-from="${item.findings[0].suggest.from}" data-take-to="${item.findings[0].suggest.to}">${this.t("rangeTake")}</button>`
-          : `<button class="btn primary" data-counter-pick="${this.esc(item.statistic_id)}" ${this.cleanupBusy ? 'disabled aria-busy="true"' : ""}>${this.cleanupBusy ? this.t("planCreating") : this.t("counterFix")}</button>`;
-        return `<div class="row"><span class="tile warn"><ha-icon icon="mdi:chart-line-variant"></ha-icon></span><span class="row-text"><strong>${this.esc(item.name)}</strong>${this.rowId(item.statistic_id)}${lines}</span>${action}</div>`;
-      });
-      const pg = this.paginate("counterfound", itemRows), items = pg.rows.join("") + pg.footer;
+      const kindOf = item => (item.kind === "measurement" ? "measurement" : "counter");
+      const n3 = v => this.formatNumber(Math.round(v * 1000) / 1000);
+      const found = item => item.findings.map(f => {
+        const extreme = Math.abs(f.high - f.good_before) > Math.abs(f.low - f.good_before) ? f.high : f.low;
+        return `<small class="u-block">${this.esc(kindOf(item) === "measurement" ? this.t("spikeFound", { range: this.counterRange(f), extreme: n3(extreme), good: n3(f.good_before), unit: item.unit || "" }) : this.t("counterFound", { range: this.counterRange(f), low: n3(f.low), good: n3(f.good_before), unit: item.unit || "" }))}</small>`;
+      }).join("");
+      const action = item => (kindOf(item) === "measurement"
+        ? `<button class="btn primary" data-range-take="${this.esc(item.statistic_id)}" data-take-from="${item.findings[0].suggest.from}" data-take-to="${item.findings[0].suggest.to}">${this.t("rangeTake")}</button>`
+        : `<button class="btn primary" data-counter-pick="${this.esc(item.statistic_id)}" ${this.cleanupBusy ? 'disabled aria-busy="true"' : ""}>${this.cleanupBusy ? this.t("planCreating") : this.t("counterFix")}</button>`);
+      const items = s.items.length ? this.sysList("counterfound", s.items, {
+        sort: "name", dir: "asc", empty: "counterNone", cls: "counterfound",
+        sorts: [{ key: "name", label: "counterColName", dir: "asc", get: i => i.name }, { key: "found", label: "counterColFound", dir: "desc", get: i => i.findings.length }],
+        filters: [{ name: "kind", all: this.t("counterAllKinds"), options: [["counter", this.t("counterKindCounter")], ["measurement", this.t("counterKindMeasurement")]] }],
+        filterFns: { kind: (i, v) => kindOf(i) === v },
+        text: i => `${i.name} ${i.statistic_id}`, tie: i => i.statistic_id,
+        columns: [
+          { key: "name", label: "counterColName", dir: "asc", cell: i => `<div class="statcell"><span class="tile warn"><ha-icon icon="mdi:chart-line-variant"></ha-icon></span><div>${this.nameCell(i.name, i.statistic_id)}</div></div>` },
+          { key: "kind", label: "counterColKind", sortable: false, cell: i => this.esc(this.t(`counterKind${kindOf(i) === "measurement" ? "Measurement" : "Counter"}`)) },
+          { key: "found", label: "counterColFound", dir: "desc", cell: found },
+          { key: "action", label: "counterColAction", sortable: false, cell: action },
+        ],
+      }) : "";
       body = `${items || `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon><strong>${this.t("counterNone")}</strong>${this.t("counterNoneSub", { count: this.formatNumber(s.checked) })}</div>`}<p class="factnote">${this.t("counterChecked", { count: this.formatNumber(s.checked) })}</p>`;
     }
     if (!s && !this.counterError && !this.counterLoading) body = `<div class="emptymsg info"><ha-icon icon="mdi:magnify-scan"></ha-icon><strong>${this.t("counterNotChecked")}</strong>${this.t("counterNotCheckedSub")}</div>`;
