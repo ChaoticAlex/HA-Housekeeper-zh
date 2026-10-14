@@ -410,7 +410,7 @@ const OPTION_FIELDS = [
   ["scan_interval_hours", "optScanIntervalTitle", "optScanIntervalHint", "unitHours", 24],
   ["low_battery_percent", "optLowBatteryTitle", "optLowBatteryHint", "unitPercent", 20],
   ["stale_hours", "optStaleTitle", "optStaleHint", "unitHours", 48],
-  ["history_days", "optHistoryDaysTitle", "optHistoryDaysHint", "unitDays", 90],
+  ["history_days", "optHistoryDaysTitle", "optHistoryDaysHint", "unitDays", 30],
 ];
 const START_VIEWS = ["overview", "findingsNav", "inventory", "changes", "batteries"];
 const REPO_URL = "https://github.com/bertel2020/HA-Housekeeper";
@@ -2990,7 +2990,7 @@ class SettingsMixin {
     const row = name => {
       const item = files[name];
       const title = this.t(`store_${name}`) === `store_${name}` ? this.esc(name) : this.t(`store_${name}`);
-      const text = this.t(`storeText_${name}`) === `storeText_${name}` ? "" : this.t(`storeText_${name}`, { days: m.history_days ?? 90 });
+      const text = this.t(`storeText_${name}`) === `storeText_${name}` ? "" : this.t(`storeText_${name}`, { days: m.history_days ?? 30 });
       const changed = item.changed ? ` · ${this.t("storeChanged")} ${this.formatDate(new Date(item.changed * 1000).toISOString())}` : "";
       return `<div class="row"><span class="tile mute"><ha-icon icon="mdi:database-outline"></ha-icon></span><span class="row-text"><strong>${title}</strong><small>${text}${changed}</small></span><span class="pill mute">${this.formatBytes(item.bytes || 0)}</span></div>`;
     };

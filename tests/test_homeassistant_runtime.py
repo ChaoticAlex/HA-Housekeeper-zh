@@ -195,7 +195,7 @@ async def test_options_flow_stores_threshold(hass: HomeAssistant) -> None:
     assert entry.options["scan_interval_hours"] == 24
     assert entry.options["unused_automation_days"] == 90
     assert entry.options["low_battery_percent"] == 20
-    assert entry.options["history_days"] == 90
+    assert entry.options["history_days"] == 30
 
 
 async def test_low_battery_threshold_is_configurable(hass: HomeAssistant) -> None:

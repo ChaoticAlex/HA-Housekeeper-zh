@@ -4,7 +4,7 @@
 
 ### Neu
 
-- **Hausmonitor-Verlauf:** Jede Funktion zeigt Zustandswechsel und Änderungen (angelegt, bearbeitet, aktiviert, deaktiviert) mit Datum. Die Aufbewahrung (1 bis 365 Tage, Standard 90) gilt auch für den Scan-Verlauf und steht unter Einstellungen. Zugeordnete Objekte sind anklickbar, auch beim Anlegen und Bearbeiten.
+- **Hausmonitor-Verlauf:** Jede Funktion zeigt Zustandswechsel und Änderungen (angelegt, bearbeitet, aktiviert, deaktiviert) mit Datum. Die Aufbewahrung (1 bis 365 Tage, Standard 30) gilt auch für den Scan-Verlauf und steht unter Einstellungen. Zugeordnete Objekte sind anklickbar, auch beim Anlegen und Bearbeiten.
 
 - **Hausmonitor:** Wichtige Hausfunktionen aus direkt gewählten Entitäten, Geräten, Automationen, Szenen, Skripten, Integrationen und Apps/Add-ons zusammenstellen. Die gemeinsame Objektsuche gruppiert Treffer nach Typ und schlägt bekannte Abhängigkeiten vor; nur ausdrücklich hinzugefügte Objekte werden überwacht. Für Entitäten lassen sich Aktualisierungsfrist, Mindestwert und eine Dauer für „nicht verfügbar“ festlegen. Der kompakte Editor hat eine mitwachsende Beschreibung, zeigt eine Vorschau der letzten Scanbewertung und lässt Monitore vorübergehend deaktivieren. Die Seite unterscheidet belegte Defekte, Prüflücken, unauffällige und deaktivierte Monitore; die Übersicht meldet aktive Probleme. Zustandswechsel stehen als HA-Ereignis und Event-Entität bereit, jede Funktion hat einen Sensor. Dauerhafte HA-Mitteilungen sind pro Monitor einstellbar.
 

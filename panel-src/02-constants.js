@@ -39,7 +39,7 @@ const OPTION_FIELDS = [
   ["scan_interval_hours", "optScanIntervalTitle", "optScanIntervalHint", "unitHours", 24],
   ["low_battery_percent", "optLowBatteryTitle", "optLowBatteryHint", "unitPercent", 20],
   ["stale_hours", "optStaleTitle", "optStaleHint", "unitHours", 48],
-  ["history_days", "optHistoryDaysTitle", "optHistoryDaysHint", "unitDays", 90],
+  ["history_days", "optHistoryDaysTitle", "optHistoryDaysHint", "unitDays", 30],
 ];
 const START_VIEWS = ["overview", "findingsNav", "inventory", "changes", "batteries"];
 const REPO_URL = "https://github.com/bertel2020/HA-Housekeeper";
