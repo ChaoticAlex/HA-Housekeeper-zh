@@ -114,3 +114,27 @@ def test_a_mark_of_an_integration_or_an_app_hides_its_failure_findings() -> None
         "mark",
         None,
     ]
+
+
+def test_a_mark_with_a_window_hides_only_inside_it_and_its_grace() -> None:
+    mark = _mark("expected_offline") | {
+        "window": {"mode": "time", "from": "21:00", "to": "06:00"},
+        "grace": 30,
+    }
+
+    def hidden(hour: int, minute: int = 0) -> bool:
+        objects, findings = _world()
+        local = datetime(2026, 10, 9, hour, minute, tzinfo=UTC)  # a UTC "local" clock is enough
+        apply_marks(objects, findings, {"entity:sensor.b": mark}, local)
+        return findings[1]["ignored"]
+
+    assert hidden(23) and hidden(2) and hidden(6, 20), "over midnight, plus the grace"
+    assert not hidden(6, 40) and not hidden(12), "by day the finding is watched"
+
+    sun = _mark("expected_offline") | {"window": {"mode": "sun"}, "grace": 30}
+    objects, findings = _world()
+    apply_marks(objects, findings, {"entity:sensor.b": sun}, NOW)
+    assert not findings[1]["ignored"] and findings[1]["mark_outside_window"], "no sun.sun: visible"
+    objects, findings = _world()
+    apply_marks(objects, findings, {"entity:sensor.b": sun}, NOW, (True, NOW))
+    assert findings[1]["ignored"]

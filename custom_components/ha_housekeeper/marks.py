@@ -5,15 +5,18 @@ Stored by Housekeeper only; Home Assistant stays untouched. A mark of an object 
 "not loaded" and "app stopped" findings), never a broken reference.
 "Keep" also blocks every cleanup step on the object. A mark with a review date that has passed no
 longer hides anything; the finding comes back as due.
+A mark can carry a time window (fixed hours, or while the sun is below the horizon): it hides only
+inside that window, plus a grace period after it, so a device that is on by day is watched by day.
 """
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, time, timedelta
 from typing import Any
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
+from homeassistant.util import dt as dt_util
 
 from .const import MARKS_STORAGE_KEY, STORAGE_VERSION
 from .ignored import REASON_LIMIT, due
@@ -26,6 +29,9 @@ KINDS_OF = {  # what an integration or an app can be marked as; "keep" and "repl
     "config_entry": ("expected_offline", "seasonal", "spare"),
     "app": ("expected_offline", "seasonal", "spare"),
 }
+WINDOW_MODES = ("time", "sun")
+GRACE_DEFAULT = 30  # minutes a window keeps hiding after it ended: a device needs time to come back
+GRACE_MAX = 120
 ITEM_LIMIT = 2000
 TARGET_LIMIT = 255
 
@@ -38,6 +44,65 @@ def _text(value: dict[str, Any], name: str) -> str | None:
     return value[name] if isinstance(value.get(name), str) else None
 
 
+def _clock(value: Any) -> str | None:
+    """``"HH:MM"`` as is, anything else None."""
+    if not isinstance(value, str):
+        return None
+    try:
+        return time.fromisoformat(value).strftime("%H:%M") if len(value) == 5 else None
+    except ValueError:
+        return None
+
+
+def clean_window(value: Any) -> dict[str, str] | None:
+    """A valid window as stored, or None (no window)."""
+    if not isinstance(value, dict):
+        return None
+    if value.get("mode") == "sun":
+        return {"mode": "sun"}
+    start, end = _clock(value.get("from")), _clock(value.get("to"))
+    if value.get("mode") == "time" and start and end and start != end:
+        return {"mode": "time", "from": start, "to": end}
+    return None
+
+
+def clean_grace(value: Any) -> int:
+    """Minutes of grace, within bounds; the default for anything else."""
+    if isinstance(value, int) and not isinstance(value, bool):
+        return min(max(value, 0), GRACE_MAX)
+    return GRACE_DEFAULT
+
+
+def window_active(
+    mark: dict[str, Any], local_now: datetime, sun: tuple[bool, datetime] | None = None
+) -> bool:
+    """Whether the mark hides right now: always without a window, else inside it or its grace.
+
+    ``local_now`` is the time in the Home Assistant time zone. ``sun`` is ``(below horizon, since)``
+    of ``sun.sun``; without it a sun window is not active, so the finding stays visible.
+    """
+    window = mark.get("window")
+    if not window:
+        return True
+    grace = timedelta(minutes=clean_grace(mark.get("grace")))
+    if window["mode"] == "sun":
+        if sun is None:
+            return False
+        below, since = sun
+        return below or local_now - since < grace
+    start, end = time.fromisoformat(window["from"]), time.fromisoformat(window["to"])
+    day = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
+    # The window of today and of yesterday (it may run past midnight), each plus its grace.
+    for base in (day, day - timedelta(days=1)):
+        opens = base.replace(hour=start.hour, minute=start.minute)
+        closes = base.replace(hour=end.hour, minute=end.minute)
+        if closes <= opens:
+            closes += timedelta(days=1)
+        if opens <= local_now < closes + grace:
+            return True
+    return False
+
+
 def _clean(value: Any) -> dict[str, Any] | None:
     if not isinstance(value, dict) or value.get("kind") not in KINDS:
         return None
@@ -48,6 +113,8 @@ def _clean(value: Any) -> dict[str, Any] | None:
         "until": _text(value, "until"),
         "target": (_text(value, "target") or "")[:TARGET_LIMIT] or None,
         "by": _text(value, "by"),
+        "window": clean_window(value.get("window")),
+        "grace": clean_grace(value.get("grace")),
     }
 
 
@@ -80,8 +147,12 @@ class MarkStore:
         until: datetime | None = None,
         target: str | None = None,
         by: str | None = None,
+        window: dict[str, Any] | None = None,
+        grace: int = GRACE_DEFAULT,
     ) -> bool:
-        """Record a mark; False when the kind is unknown or the store is full."""
+        """Record a mark; False when the kind is unknown, the window is invalid or the store is full."""
+        if window is not None and clean_window(window) is None:
+            return False
         if kind not in KINDS or (key not in self.items and len(self.items) >= ITEM_LIMIT):
             return False
         self.items[key] = {
@@ -91,6 +162,8 @@ class MarkStore:
             "until": until.isoformat() if until else None,
             "target": (target or "")[:TARGET_LIMIT] or None,
             "by": by,
+            "window": clean_window(window),
+            "grace": clean_grace(grace),
         }
         self._save()
         return True
@@ -110,12 +183,16 @@ def apply_marks(
     findings: list[dict[str, Any]],
     marks: dict[str, dict[str, Any]],
     now: datetime | None = None,
+    sun: tuple[bool, datetime] | None = None,
 ) -> None:
     """Put the marks on the objects and let them hide or revive "not available" findings.
 
     Call it after the ignore flags of the findings are set: a finding that is hidden already stays so.
+    A mark with a window hides only inside it (``sun``: see ``window_active``); outside, the finding
+    stays visible and carries ``mark_outside_window``.
     """
     now = now or datetime.now(UTC)
+    local_now = dt_util.as_local(now)
     device_of: dict[str, str | None] = {}
     devices: dict[str, dict[str, Any]] = {}
     for item in objects:
@@ -140,6 +217,7 @@ def apply_marks(
             item["marked_keep"] = True
     for finding in findings:
         finding.pop("mark", None)
+        finding.pop("mark_outside_window", None)
         if finding.get("rule_id") == "config_entry.not_loaded":
             keys = (mark_key("config_entry", finding["object_id"]),)
         elif finding.get("rule_id") == "device.down":
@@ -163,6 +241,8 @@ def apply_marks(
                 continue
             if due(mark, now):
                 finding["resurfaced"] = bool(finding.get("resurfaced")) or not finding["ignored"]
+            elif not window_active(mark, local_now, sun):
+                finding["mark_outside_window"] = True
             elif not finding["ignored"]:
                 finding["ignored_by"], finding["ignored"], finding["mark"] = "mark", True, mark
                 break
