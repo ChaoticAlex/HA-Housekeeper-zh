@@ -4027,8 +4027,14 @@ test("the logbook has its own tab, entries use page editors, an action can sugge
   assert.ok(!shadow.innerHTML.includes("Zigbee stick replaced"), "the scan comparison no longer mixes in the entries");
   el.pickViewTab("changes|logbook");
   let html = shadow.innerHTML;
-  assert.ok(html.includes("Zigbee stick replaced") && html.includes("Concerns: Lamp A") && html.includes("new &lt;b&gt;stick&lt;/b&gt;") && !html.includes("<b>stick</b>"), "an entry shows, escaped");
+  assert.ok(html.includes("Zigbee stick replaced") && html.includes('data-label="Concerns">Lamp A') && html.includes("new &lt;b&gt;stick&lt;/b&gt;") && !html.includes("<b>stick</b>"), "an entry shows, escaped");
   assert.ok(html.includes("data-note-add") && html.includes('data-note-edit="n1"'));
+  assert.ok(/<tr[^>]*data-note-edit="n1"[^>]*role="button"/.test(html) && html.includes('data-lsort="logbook|at'), "the whole row opens the entry in a sortable table");
+  el.lvState("logbook", "at", "desc").f.object = "entity:light.a"; el.lvState("logbook", "at", "desc").f.source = "housekeeper"; el.render();
+  assert.ok(!shadow.innerHTML.includes('data-note-edit="n1"') && shadow.innerHTML.includes('data-lf-set="logbook||"'), "the source and the object filter the list and show the shared note");
+  el.lvState("logbook", "at", "desc").f = { object: "entity:light.a" }; el.render();
+  assert.ok(shadow.innerHTML.includes('data-note-edit="n1"') && el._exporters.logbook.rows().length === 1, "the object filter keeps its entry and the export follows");
+  el.lvState("logbook", "at", "desc").f = {}; el.render();
   // The editor replaces the global logbook list; chips, validation and actions stay available.
   el.noteOpen(); el.render();
   assert.ok(shadow.innerHTML.includes("monitor-editor") && shadow.innerHTML.includes("data-note-form") && shadow.innerHTML.includes("data-note-chip") && !shadow.innerHTML.includes("data-note-modal"));
