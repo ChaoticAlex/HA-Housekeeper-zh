@@ -1223,6 +1223,7 @@ class InventoryScanner:
                 "quarantine_days": QUARANTINE_DAYS,
                 "ha_version": HA_VERSION,
                 "hacs_available": hacs is not None,
+                "hacs_housekeeper": hacs.get(DOMAIN) if hacs is not None else None,
                 "scan_interval_hours": self.scan_interval_hours,
                 "low_battery_percent": self.low_battery_percent,
                 "stale_hours": self.stale_hours,

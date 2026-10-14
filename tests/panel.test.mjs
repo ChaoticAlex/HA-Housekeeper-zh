@@ -4935,6 +4935,28 @@ test("the info page lists the phases of the last scan, longest first, and the re
   assert.equal(el.sysState("storage").at, "2026-10-12T20:00:00+00:00", "the page shows when the sizes were read");
 });
 
+test("the info page explains Housekeeper's own HACS update state and links to its repository", () => {
+  const { el } = panel("en");
+  el.data = { ...DATA, meta: { ...DATA.meta, version: "1.5.1", hacs_available: true, hacs_housekeeper: { id: "123", installed_version: "33ccdad", installed_kind: "commit", available_version: "1.6.0", pending_update: false, last_fetched: "2026-10-14T10:30:00+00:00" } } };
+  let html = el.housekeeperUpdateCard();
+  assert.ok(html.includes("HACS is still tracking a commit") && html.includes("Redownload") && html.includes('data-ha-path="/hacs/repository/123"'));
+  assert.ok(html.includes("33ccdad") && html.includes("1.6.0"));
+
+  el.data.meta.hacs_housekeeper = { id: "123", installed_version: "v1.6.0", installed_kind: "release", available_version: "v1.6.0", pending_update: false };
+  el.data.meta.version = "1.6.0";
+  html = el.housekeeperUpdateCard();
+  assert.ok(html.includes("Up to date") && html.includes('class="tile ok"'));
+
+  el.data.meta.version = "1.5.1";
+  el.data.meta.hacs_housekeeper = { id: "123", installed_version: "1.5.1", installed_kind: "release", available_version: "v1.6.0", pending_update: false };
+  assert.ok(el.housekeeperUpdateCard().includes("Update available"), "the versions reveal an update even when HACS did not set its pending flag");
+
+  el.data.meta.hacs_housekeeper = null;
+  assert.ok(el.housekeeperUpdateCard().includes("Not managed by HACS"));
+  el.data.meta.hacs_available = false;
+  assert.ok(el.housekeeperUpdateCard().includes("HACS not available"));
+});
+
 test("the open menu list of a narrow window scrolls instead of outgrowing the sticky bar", () => {
   const { el } = panel("en");
   assert.match(el.styles(), /\.top\.open \.topnav\{display:flex;max-height:[^}]*overflow-y:auto/);

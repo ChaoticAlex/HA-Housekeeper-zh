@@ -955,6 +955,16 @@ Object.assign(TEXT.de, {
   setKeptTitle: "Was Housekeeper speichert", setKeptHint: "Alles liegt im Speicher von Home Assistant (.storage) und verlässt deine Instanz nicht.",
   setPrivacy: "Housekeeper sendet nichts nach außen. Die Auswertung der Datenbank liest nur und merkt sich keine Zustandswerte.",
   setLinks: "Links",
+  hkUpdateTitle: "Housekeeper-Update", hkUpdateHint: "Die tatsächlich geladene Version und der Stand, den HACS über diese Installation gespeichert hat.",
+  hkUpdateLoaded: "Geladen", hkUpdateHacsInstalled: "Von HACS installiert", hkUpdateLatest: "Bei HACS verfügbar", hkUpdateChecked: "HACS zuletzt geprüft",
+  hkUpdateCurrent: "Aktuell", hkUpdateCurrentHint: "HACS und die geladene Housekeeper-Version stimmen überein.",
+  hkUpdateAvailable: "Update verfügbar", hkUpdateAvailableHint: "HACS kennt eine neuere Housekeeper-Version.",
+  hkUpdateCommit: "HACS verfolgt noch einen Commit", hkUpdateCommitHint: "HACS kann den Wechsel von einer früheren Commit-Installation auf Releases übersehen. Öffne Housekeeper in HACS und lade die aktuelle Version einmal über „Erneut herunterladen“ neu.",
+  hkUpdateMismatch: "Versionsangaben stimmen nicht überein", hkUpdateMismatchHint: "Die geladene Version und die von HACS gespeicherte Installation unterscheiden sich. Nach einem Update kann ein Neustart fehlen; andernfalls Housekeeper einmal in HACS erneut herunterladen.",
+  hkUpdateUntracked: "Nicht von HACS verwaltet", hkUpdateUntrackedHint: "HACS läuft, kennt diese Housekeeper-Installation aber nicht als installiertes Repository.",
+  hkUpdateNoHacs: "HACS nicht verfügbar", hkUpdateNoHacsHint: "Housekeeper kann den Update-Stand nur anzeigen, wenn die Installation von HACS verwaltet wird.",
+  hkUpdateUnknown: "Update-Stand unbekannt", hkUpdateUnknownHint: "HACS hat noch keine verfügbare Version gespeichert. In HACS kann „Informationen aktualisieren“ die Prüfung sofort anstoßen.",
+  hkUpdateBlocked: "Update derzeit nicht installierbar", hkUpdateBlockedHint: "HACS kennt ein Update, kann es aber mit dieser Home-Assistant-Version nicht installieren.",
 });
 Object.assign(TEXT.en, {
   setTabLook: "Appearance", setTabScan: "Scan and thresholds", setTabHidden: "Hidden", setTabInfo: "Info",
@@ -971,6 +981,16 @@ Object.assign(TEXT.en, {
   setKeptTitle: "What Housekeeper stores", setKeptHint: "Everything lives in Home Assistant's storage (.storage) and does not leave your instance.",
   setPrivacy: "Housekeeper sends nothing out. The database evaluation only reads and does not remember state values.",
   setLinks: "Links",
+  hkUpdateTitle: "Housekeeper update", hkUpdateHint: "The version actually loaded and the information HACS has stored about this installation.",
+  hkUpdateLoaded: "Loaded", hkUpdateHacsInstalled: "Installed by HACS", hkUpdateLatest: "Available in HACS", hkUpdateChecked: "Last checked by HACS",
+  hkUpdateCurrent: "Up to date", hkUpdateCurrentHint: "HACS and the loaded Housekeeper version agree.",
+  hkUpdateAvailable: "Update available", hkUpdateAvailableHint: "HACS knows a newer Housekeeper version.",
+  hkUpdateCommit: "HACS is still tracking a commit", hkUpdateCommitHint: "HACS can miss the move from an earlier commit installation to releases. Open Housekeeper in HACS and use “Redownload” once to select the current version.",
+  hkUpdateMismatch: "Version information does not match", hkUpdateMismatchHint: "The loaded version differs from the installation stored by HACS. A restart may still be pending after an update; otherwise redownload Housekeeper once in HACS.",
+  hkUpdateUntracked: "Not managed by HACS", hkUpdateUntrackedHint: "HACS is running but does not know this Housekeeper installation as an installed repository.",
+  hkUpdateNoHacs: "HACS not available", hkUpdateNoHacsHint: "Housekeeper can show the update status only when the installation is managed by HACS.",
+  hkUpdateUnknown: "Update status unknown", hkUpdateUnknownHint: "HACS has not stored an available version yet. “Update information” in HACS starts the check immediately.",
+  hkUpdateBlocked: "Update cannot currently be installed", hkUpdateBlockedHint: "HACS knows an update but cannot install it with this Home Assistant version.",
 });
 
 // Texts for the list of Housekeeper's own files (Settings, Info); merged into TEXT.
@@ -2962,6 +2982,7 @@ class SettingsMixin {
       findings_by_rule: count(this.data?.findings || [], f => f.rule_id), findings_by_classification: count(this.data?.findings || [], f => f.classification),
       policies_on: this.policies ? this.policies.rules.filter(r => r.enabled).map(r => r.id) : null,
       storage: storage || null, database: database || null,
+      hacs_housekeeper: m.hacs_housekeeper || null,
       panel: { language: this.lang, size: this.prefs?.size, mode: this.prefs?.mode, scheme: this.prefs?.scheme, page_size: this.pageSize },
       browser: globalThis.navigator?.userAgent || null, recent_errors: this._recentErrors || [],
     };
@@ -3002,6 +3023,29 @@ class SettingsMixin {
     return facts + body;
   }
 
+  housekeeperUpdateCard() {
+    const m = this.data?.meta || {}, h = m.hacs_housekeeper;
+    const fact = (label, value) => `<div class="fact"><span>${this.t(label)}</span><b>${this.esc(value || "–")}</b></div>`;
+    const sameVersion = (left, right) => Boolean(left && right && String(left).replace(/^v/i, "") === String(right).replace(/^v/i, ""));
+    const newerVersion = (candidate, current) => {
+      const parts = value => /^v?(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/i.exec(String(value || ""))?.slice(1, 4).map(Number);
+      const a = parts(candidate), b = parts(current);
+      if (!a || !b) return false;
+      return a.some((value, index) => value !== b[index] && a.slice(0, index).every((before, at) => before === b[at]) && value > b[index]);
+    };
+    let tone = "mute", title = "hkUpdateUnknown", hint = "hkUpdateUnknownHint";
+    if (!m.hacs_available) [title, hint] = ["hkUpdateNoHacs", "hkUpdateNoHacsHint"];
+    else if (!h) [title, hint] = ["hkUpdateUntracked", "hkUpdateUntrackedHint"];
+    else if (h.installed_kind === "commit" && h.available_version) [tone, title, hint] = ["warn", "hkUpdateCommit", "hkUpdateCommitHint"];
+    else if (h.blocked) [tone, title, hint] = ["warn", "hkUpdateBlocked", "hkUpdateBlockedHint"];
+    else if (h.pending_update || newerVersion(h.available_version, m.version)) [tone, title, hint] = ["warn", "hkUpdateAvailable", "hkUpdateAvailableHint"];
+    else if (m.version && h.installed_version && !sameVersion(m.version, h.installed_version)) [tone, title, hint] = ["warn", "hkUpdateMismatch", "hkUpdateMismatchHint"];
+    else if (sameVersion(m.version, h.available_version)) [tone, title, hint] = ["ok", "hkUpdateCurrent", "hkUpdateCurrentHint"];
+    const facts = [fact("hkUpdateLoaded", m.version), h ? fact("hkUpdateHacsInstalled", h.installed_version) : "", h ? fact("hkUpdateLatest", h.available_version) : "", h?.last_fetched ? fact("hkUpdateChecked", this.formatDate(h.last_fetched)) : ""].join("");
+    const open = h?.id ? `<button class="btn" data-ha-path="${this.esc(`/hacs/repository/${encodeURIComponent(h.id)}`)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("intHacsOpen")}</button>` : "";
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("hkUpdateTitle")}</h2><p>${this.t("hkUpdateHint")}</p></div>${open}</div><div class="facts">${facts}</div><div class="row"><span class="tile ${tone}"><ha-icon icon="${tone === "ok" ? "mdi:check-circle-outline" : tone === "warn" ? "mdi:alert-outline" : "mdi:information-outline"}"></ha-icon></span><span class="row-text"><strong>${this.t(title)}</strong><small>${this.t(hint)}</small></span></div></section>`;
+  }
+
   infoCard() {
     const m = this.data?.meta || {};
     const fact = (k, v) => `<div class="fact"><span>${k}</span><b>${v}</b></div>`;
@@ -3009,7 +3053,7 @@ class SettingsMixin {
       fact(this.t("lastScan"), m.scanned_at ? this.formatDate(m.scanned_at) : "–"), fact(this.t("objects"), this.formatNumber(m.object_count ?? 0))].join("");
     const link = (icon, href, label, hint) => `<a class="row" href="${href}" target="_blank" rel="noopener noreferrer"><span class="tile mute"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${label}</strong>${hint ? `<small>${hint}</small>` : ""}</span><ha-icon icon="mdi:open-in-new"></ha-icon></a>`;
     const kept = this.storedFiles(m);
-    return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("about")}</h2></div><div class="facts">${facts}</div></section>
+    return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("about")}</h2></div><div class="facts">${facts}</div></section>${this.housekeeperUpdateCard()}
       ${this.scanCoverageCard()}${this.scanTimingCard()}
       <section class="panel"><div class="panelhead"><div><h2>${this.t("setKeptTitle")}</h2><p>${this.t("setKeptHint")} ${this.t("storeHintBytes")}</p></div></div>${kept}<p class="factnote">${this.t("setPrivacy")}</p></section>
       <section class="panel"><div class="panelhead"><h2>${this.t("setLinks")}</h2></div>${link("mdi:github", REPO_URL, this.t("repository"), "")}${link("mdi:bug-outline", `${REPO_URL}/issues`, this.t("reportIssue"), "")}${link("mdi:history", `${REPO_URL}/blob/main/CHANGELOG.md`, this.t("changelog"), "")}

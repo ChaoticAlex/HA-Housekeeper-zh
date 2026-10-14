@@ -9,6 +9,7 @@ called that talks to GitHub, and nothing is changed.
 from __future__ import annotations
 
 import re
+from datetime import datetime
 from typing import Any
 
 from homeassistant.core import HomeAssistant
@@ -21,6 +22,11 @@ def _text(value: Any) -> str | None:
     return str(value) if value not in (None, "") else None
 
 
+def _date(value: Any) -> str | None:
+    """Return a JSON-safe timestamp from the HACS repository data."""
+    return value.isoformat() if isinstance(value, datetime) else None
+
+
 def repository_info(repository: Any) -> tuple[str, dict[str, Any]] | None:
     """The domain and the details of one installed integration repository, else ``None``."""
     data = getattr(repository, "data", None)
@@ -29,9 +35,12 @@ def repository_info(repository: Any) -> tuple[str, dict[str, Any]] | None:
     domain = _text(getattr(data, "domain", None))
     if not domain or not getattr(data, "installed", False):
         return None
+    installed_release = _text(getattr(data, "installed_version", None))
+    installed_commit = _text(getattr(data, "installed_commit", None))
     installed = _text(
         getattr(repository, "display_installed_version", None)
-        or getattr(data, "installed_version", None)
+        or installed_release
+        or installed_commit
     )
     available = _text(
         getattr(repository, "display_available_version", None)
@@ -45,8 +54,12 @@ def repository_info(repository: Any) -> tuple[str, dict[str, Any]] | None:
         "id": _text(getattr(data, "id", None)),
         "full_name": full_name if full_name and FULL_NAME.match(full_name) else None,
         "installed_version": installed,
+        "installed_kind": (
+            "release" if installed_release else "commit" if installed_commit else None
+        ),
         "available_version": available,
         "pending_update": pending,
+        "last_fetched": _date(getattr(data, "last_fetched", None)),
         "archived": getattr(data, "archived", None) is True,
         "blocked": getattr(repository, "can_download", True) is False and pending,
     }

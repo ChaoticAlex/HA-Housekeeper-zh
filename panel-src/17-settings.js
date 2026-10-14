@@ -101,6 +101,7 @@ class SettingsMixin {
       findings_by_rule: count(this.data?.findings || [], f => f.rule_id), findings_by_classification: count(this.data?.findings || [], f => f.classification),
       policies_on: this.policies ? this.policies.rules.filter(r => r.enabled).map(r => r.id) : null,
       storage: storage || null, database: database || null,
+      hacs_housekeeper: m.hacs_housekeeper || null,
       panel: { language: this.lang, size: this.prefs?.size, mode: this.prefs?.mode, scheme: this.prefs?.scheme, page_size: this.pageSize },
       browser: globalThis.navigator?.userAgent || null, recent_errors: this._recentErrors || [],
     };
@@ -141,6 +142,29 @@ class SettingsMixin {
     return facts + body;
   }
 
+  housekeeperUpdateCard() {
+    const m = this.data?.meta || {}, h = m.hacs_housekeeper;
+    const fact = (label, value) => `<div class="fact"><span>${this.t(label)}</span><b>${this.esc(value || "–")}</b></div>`;
+    const sameVersion = (left, right) => Boolean(left && right && String(left).replace(/^v/i, "") === String(right).replace(/^v/i, ""));
+    const newerVersion = (candidate, current) => {
+      const parts = value => /^v?(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/i.exec(String(value || ""))?.slice(1, 4).map(Number);
+      const a = parts(candidate), b = parts(current);
+      if (!a || !b) return false;
+      return a.some((value, index) => value !== b[index] && a.slice(0, index).every((before, at) => before === b[at]) && value > b[index]);
+    };
+    let tone = "mute", title = "hkUpdateUnknown", hint = "hkUpdateUnknownHint";
+    if (!m.hacs_available) [title, hint] = ["hkUpdateNoHacs", "hkUpdateNoHacsHint"];
+    else if (!h) [title, hint] = ["hkUpdateUntracked", "hkUpdateUntrackedHint"];
+    else if (h.installed_kind === "commit" && h.available_version) [tone, title, hint] = ["warn", "hkUpdateCommit", "hkUpdateCommitHint"];
+    else if (h.blocked) [tone, title, hint] = ["warn", "hkUpdateBlocked", "hkUpdateBlockedHint"];
+    else if (h.pending_update || newerVersion(h.available_version, m.version)) [tone, title, hint] = ["warn", "hkUpdateAvailable", "hkUpdateAvailableHint"];
+    else if (m.version && h.installed_version && !sameVersion(m.version, h.installed_version)) [tone, title, hint] = ["warn", "hkUpdateMismatch", "hkUpdateMismatchHint"];
+    else if (sameVersion(m.version, h.available_version)) [tone, title, hint] = ["ok", "hkUpdateCurrent", "hkUpdateCurrentHint"];
+    const facts = [fact("hkUpdateLoaded", m.version), h ? fact("hkUpdateHacsInstalled", h.installed_version) : "", h ? fact("hkUpdateLatest", h.available_version) : "", h?.last_fetched ? fact("hkUpdateChecked", this.formatDate(h.last_fetched)) : ""].join("");
+    const open = h?.id ? `<button class="btn" data-ha-path="${this.esc(`/hacs/repository/${encodeURIComponent(h.id)}`)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("intHacsOpen")}</button>` : "";
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("hkUpdateTitle")}</h2><p>${this.t("hkUpdateHint")}</p></div>${open}</div><div class="facts">${facts}</div><div class="row"><span class="tile ${tone}"><ha-icon icon="${tone === "ok" ? "mdi:check-circle-outline" : tone === "warn" ? "mdi:alert-outline" : "mdi:information-outline"}"></ha-icon></span><span class="row-text"><strong>${this.t(title)}</strong><small>${this.t(hint)}</small></span></div></section>`;
+  }
+
   infoCard() {
     const m = this.data?.meta || {};
     const fact = (k, v) => `<div class="fact"><span>${k}</span><b>${v}</b></div>`;
@@ -148,7 +172,7 @@ class SettingsMixin {
       fact(this.t("lastScan"), m.scanned_at ? this.formatDate(m.scanned_at) : "–"), fact(this.t("objects"), this.formatNumber(m.object_count ?? 0))].join("");
     const link = (icon, href, label, hint) => `<a class="row" href="${href}" target="_blank" rel="noopener noreferrer"><span class="tile mute"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${label}</strong>${hint ? `<small>${hint}</small>` : ""}</span><ha-icon icon="mdi:open-in-new"></ha-icon></a>`;
     const kept = this.storedFiles(m);
-    return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("about")}</h2></div><div class="facts">${facts}</div></section>
+    return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("about")}</h2></div><div class="facts">${facts}</div></section>${this.housekeeperUpdateCard()}
       ${this.scanCoverageCard()}${this.scanTimingCard()}
       <section class="panel"><div class="panelhead"><div><h2>${this.t("setKeptTitle")}</h2><p>${this.t("setKeptHint")} ${this.t("storeHintBytes")}</p></div></div>${kept}<p class="factnote">${this.t("setPrivacy")}</p></section>
       <section class="panel"><div class="panelhead"><h2>${this.t("setLinks")}</h2></div>${link("mdi:github", REPO_URL, this.t("repository"), "")}${link("mdi:bug-outline", `${REPO_URL}/issues`, this.t("reportIssue"), "")}${link("mdi:history", `${REPO_URL}/blob/main/CHANGELOG.md`, this.t("changelog"), "")}

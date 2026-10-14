@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from types import SimpleNamespace
 
 import pytest
@@ -49,3 +50,21 @@ def test_an_archived_repository_and_a_blocked_update_are_read_from_the_hacs_data
     found = hacs_by_domain(hass)
     assert found["demo"]["archived"] is True and found["demo"]["blocked"] is True
     assert found["plain"]["archived"] is False and found["plain"]["blocked"] is False
+
+
+def test_a_commit_install_is_distinguished_from_a_release_and_dates_are_json_safe() -> None:
+    commit = repo(
+        installed_commit="33ccdad",
+        last_version="1.6.0",
+        last_fetched=datetime(2026, 10, 14, 10, 30, tzinfo=UTC),
+    )
+    release = repo(domain="released", installed_version="1.5.1", last_version="1.6.0")
+    hass = SimpleNamespace(
+        data={"hacs": SimpleNamespace(repositories=SimpleNamespace(list_all=[commit, release]))}
+    )
+
+    found = hacs_by_domain(hass)
+    assert found["demo"]["installed_version"] == "33ccdad"
+    assert found["demo"]["installed_kind"] == "commit"
+    assert found["demo"]["last_fetched"] == "2026-10-14T10:30:00+00:00"
+    assert found["released"]["installed_kind"] == "release"
