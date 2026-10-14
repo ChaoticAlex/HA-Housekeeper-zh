@@ -14,6 +14,8 @@
 
 - **Oberfläche:** Korrekturen und kleine Verbesserungen an Listen, Tabellen, Dialogen und der Bedienung: einheitlichere Listen und Tabellen mit kompakten Zeilen, Seitenauswahl im Inventar, Pläne in einem Schritt bestätigen oder abbrechen, sauber ausgerichtete Aktionen sowie bessere Tastatur- und Screenreader-Unterstützung.
 
+- **Speicher und System:** Die Messung der Ordner stoppt nach 20 Sekunden (etwa bei einer langsamen Netzfreigabe unter /config); die Seite nennt die Größen dann Mindestwerte.
+
 ### English
 
 #### New
@@ -27,6 +29,8 @@
 #### Fixed
 
 - **Interface:** Corrections and small improvements to lists, tables, dialogs and handling: more consistent lists and tables with compact rows, page selection in the inventory, confirming or cancelling plans in one step, cleanly aligned actions and better keyboard and screen reader support.
+
+- **Storage and system:** The folder measurement stops after 20 seconds (for example on a slow network share under /config); the page then calls the sizes minimums.
 
 ## 1.6.0 - 2026-10-13
 

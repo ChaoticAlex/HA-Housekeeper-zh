@@ -11,7 +11,7 @@ Object.assign(TEXT.de, {
   noteDialogNew: "Neuer Eintrag", noteDialogEdit: "Eintrag bearbeiten", noteChips: "Schnell eintragen",
   noteChipStick: "Stick getauscht", noteChipFirmware: "Firmware aktualisiert", noteChipPaired: "Neu angelernt", noteChipMoved: "Umgezogen",
   noteSeeAll: "Im Logbuch ansehen", logbook: "Logbuch", tabScans: "Scan-Vergleich", logbookHint: "Alle Einträge, neueste zuerst", logbookEmpty: "Das Logbuch ist leer. Trage ein, was du außerhalb von Housekeeper änderst, zum Beispiel einen getauschten Stick.",
-  logbookFiltered: "Kein Eintrag passt zu diesem Filter.", logbookAll: "Alle", logbookObject: "Objekt: {name}",
+  logColWhen: "Wann", logColTitle: "Titel", logColTarget: "Betrifft", logColSource: "Quelle", logAllSources: "Alle Quellen", logAllObjects: "Alle Objekte",
   logSuggestTitle: "Ins Logbuch eintragen?", logSuggestText: "Vorschlag: „{title}“", logSuggestYes: "Eintragen", logSuggestNo: "Nein danke", logSuggestDone: "Eingetragen",
   logTitleReplace: "Verweise ersetzt: {old} → {new}", logTitleRename: "Entität umbenannt: {old} → {new}", logTitleMeter: "Zähler gewechselt: {old} → {new}", logTitleMore: "{title} (+{n} weitere)",
   corr_note: "deinem Logbuch-Eintrag „{title}“",
@@ -27,7 +27,7 @@ Object.assign(TEXT.en, {
   noteDialogNew: "New entry", noteDialogEdit: "Edit entry", noteChips: "Quick entry",
   noteChipStick: "Stick replaced", noteChipFirmware: "Firmware updated", noteChipPaired: "Paired again", noteChipMoved: "Moved",
   noteSeeAll: "See in the logbook", logbook: "Logbook", tabScans: "Scan comparison", logbookHint: "All entries, newest first", logbookEmpty: "The logbook is empty. Note what you change outside Housekeeper, for example a replaced stick.",
-  logbookFiltered: "No entry matches this filter.", logbookAll: "All", logbookObject: "Object: {name}",
+  logColWhen: "When", logColTitle: "Title", logColTarget: "Concerns", logColSource: "Source", logAllSources: "All sources", logAllObjects: "All objects",
   logSuggestTitle: "Add to the logbook?", logSuggestText: "Suggestion: “{title}”", logSuggestYes: "Add", logSuggestNo: "No thanks", logSuggestDone: "Added",
   logTitleReplace: "References replaced: {old} → {new}", logTitleRename: "Entity renamed: {old} → {new}", logTitleMeter: "Meter changed: {old} → {new}", logTitleMore: "{title} (+{n} more)",
   corr_note: "your logbook entry “{title}”",
@@ -100,14 +100,28 @@ class NotesMixin {
   // The logbook under Changes: all entries in one place, filtered by who wrote them and by object.
   logbookView() {
     if (this.noteDraft && !this.noteDraft.detailKey) return `<div class="monitor-editor"><section class="panel u-mb14"><div class="panelhead"><h2>${this.t(this.noteDraft.id ? "noteDialogEdit" : "noteDialogNew")}</h2></div>${this.noteEditor()}</section></div>`;
-    const all = this.notesList(), src = this.logbookSource || "", obj = this.logbookObject || "";
-    const shown = all.filter(n => (!src || (n.source || "me") === src) && (!obj || n.target === obj));
-    const chip = (id, label) => `<button class="chip ${src === id ? "on" : ""}" data-logbook-src="${id}" aria-pressed="${src === id}">${this.esc(label)}</button>`;
-    const filters = `<div class="logfilters">${chip("", this.t("logbookAll"))}${chip("me", this.t("noteMine"))}${chip("housekeeper", this.t("noteSrcHk"))}${obj ? `<button class="chip on" data-logbook-clear>${this.esc(this.t("logbookObject", { name: this.noteTargetName(obj) }))} ✕</button>` : ""}</div>`;
-    const found = this.searchList("logbook", shown, n => [n.title, n.note, n.target].join(" "));
-    const pg = this.paginate("logbook", found.rows.map(n => this.noteRow(n)));
-    const body = !all.length ? `<div class="emptymsg"><ha-icon icon="mdi:notebook-outline"></ha-icon>${this.t("logbookEmpty")}</div>` : shown.length ? found.bar + found.none + pg.rows.join("") + pg.footer : `<div class="emptymsg">${this.t("logbookFiltered")}</div>`;
-    return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("logbook")}</h2><p>${this.t("logbookHint")}</p></div><div class="actions">${this.noteHeadButton()}</div></div>${all.length ? filters : ""}${body}</section>`;
+    const all = this.notesList();
+    const sourceOf = n => n.source || "me";
+    const targets = [...new Set(all.map(n => n.target).filter(Boolean))].sort((x, y) => this.noteTargetName(x).localeCompare(this.noteTargetName(y)));
+    const body = !all.length ? `<div class="emptymsg"><ha-icon icon="mdi:notebook-outline"></ha-icon>${this.t("logbookEmpty")}</div>` : this.sysList("logbook", all, {
+      sort: "at", dir: "desc", cls: "log", tie: n => n.id, empty: "logbookEmpty", exportName: "logbook",
+      sorts: [{ key: "at", label: "logColWhen", dir: "desc", get: n => n.at }, { key: "title", label: "logColTitle", dir: "asc", get: n => n.title }, { key: "target", label: "logColTarget", dir: "asc", get: n => this.noteTargetName(n.target) }, { key: "source", label: "logColSource", dir: "asc", get: sourceOf }],
+      text: n => [n.title, n.note, this.noteTargetName(n.target), n.target].join(" "),
+      filters: [
+        { name: "source", all: this.t("logAllSources"), options: [["me", this.t("noteMine")], ["housekeeper", this.t("noteSrcHk")]] },
+        { name: "object", all: this.t("logAllObjects"), options: targets.map(t => [t, this.noteTargetName(t)]) },
+      ],
+      filterFns: { source: (n, v) => sourceOf(n) === v, object: (n, v) => n.target === v },
+      rowAttrs: n => `data-note-edit="${this.esc(n.id)}" tabindex="0" role="button" aria-label="${this.esc(n.title)}" title="${this.esc(this.t("noteEdit"))}"`,
+      columns: [
+        { key: "at", label: "logColWhen", dir: "desc", cell: n => this.esc(this.formatDate(n.at)) },
+        { key: "title", label: "logColTitle", dir: "asc", cell: n => `<strong>${this.esc(n.title)}</strong>${n.note ? `<small>${this.esc(n.note)}</small>` : ""}` },
+        { key: "target", label: "logColTarget", dir: "asc", cell: n => this.esc(this.noteTargetName(n.target) || "–") },
+        { key: "source", label: "logColSource", dir: "asc", cell: n => `<span class="pill ${n.source === "housekeeper" ? "ok" : "mute"}">${this.t(n.source === "housekeeper" ? "noteSrcHk" : "noteMine")}</span>` },
+      ],
+      header: [this.t("logColWhen"), this.t("logColTitle"), this.t("logColTarget"), this.t("logColSource"), this.t("noteText")], rows: n => [n.at, n.title, this.noteTargetName(n.target), sourceOf(n), n.note || ""],
+    });
+    return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("logbook")}</h2><p>${this.t("logbookHint")}</p></div><div class="actions">${this.noteHeadButton()}</div></div>${body}</section>`;
   }
 
   noteHeadButton() { return `<button class="btn primary" data-note-add><ha-icon icon="mdi:plus"></ha-icon>${this.t("noteAdd")}</button>`; }
@@ -168,17 +182,15 @@ class NotesMixin {
   }
 
   bindNotes(root) {
-    root.querySelectorAll("[data-note-add]").forEach(el => el.onclick = () => { this.noteOpen(null, this.logbookObject || ""); this.render(); });
+    root.querySelectorAll("[data-note-add]").forEach(el => el.onclick = () => { this.noteOpen(null, this.lv?.logbook?.f?.object || ""); this.render(); });
     root.querySelectorAll("[data-note-add-for]").forEach(el => el.onclick = () => { this.noteOpen(null, el.dataset.noteAddFor); this.render(); });
     root.querySelectorAll("[data-note-edit]").forEach(el => el.onclick = () => { const n = this.notesList().find(x => x.id === el.dataset.noteEdit); if (n) { this.noteOpen(n); this.render(); } });
     root.querySelectorAll("[data-logbook-for]").forEach(el => el.onclick = () => {
-      this.logbookObject = el.dataset.logbookFor; this.logbookSource = "";
+      this.lvState("logbook", "at", "desc").f = { object: el.dataset.logbookFor }; this.persistLv("logbook");
       (this.viewTab ||= {}).changes = "logbook";
       this.view = "changes"; this.selected = null; this.trail = []; this.pages = {};
       this.render(); if (!this.compare) this.loadCompare();
     });
-    root.querySelectorAll("[data-logbook-src]").forEach(el => el.onclick = () => { this.logbookSource = el.dataset.logbookSrc; this.pages = {}; this.render(); });
-    root.querySelector("[data-logbook-clear]")?.addEventListener("click", () => { this.logbookObject = ""; this.pages = {}; this.render(); });
     root.querySelector("[data-note-retarget]")?.addEventListener("click", () => { this.noteDraft.changeTarget = true; this.render(); this.shadowRoot?.querySelector?.("[data-note-form] .picker input, [data-note-form] input[data-picker]")?.focus?.(); });
     root.querySelectorAll("[data-note-chip]").forEach(el => el.onclick = () => { this.noteDraft.title = el.dataset.noteChip; this.noteDraft.error = ""; this._noteFocus = true; this.render(); });
     root.querySelector("[data-note-del]")?.addEventListener("click", ev => { const id = ev.currentTarget.dataset.noteDel; this.confirmAsk(this.t("confirmNote", { title: this.noteDraft?.title || "" }), () => this.noteDeleteConfirmed(id)); });

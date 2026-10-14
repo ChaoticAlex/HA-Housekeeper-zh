@@ -172,9 +172,9 @@ async def test_the_folder_walk_is_reused_and_a_refresh_waits_for_the_gap(
     walks = []
     real = module.storage_breakdown
 
-    def counting(config_dir: str) -> dict:
+    def counting(config_dir: str, budget=None) -> dict:
         walks.append(config_dir)
-        return real(config_dir)
+        return real(config_dir, budget)
 
     with (
         patch.dict(os.environ, {}, clear=False),
@@ -194,6 +194,21 @@ async def test_the_folder_walk_is_reused_and_a_refresh_waits_for_the_gap(
         with patch.object(module, "WALK_MAX_AGE", 0), patch.object(module, "WALK_MIN_GAP", 0):
             await system_usage(hass)
         assert len(walks) == 3, "an old walk is not reused"
+
+
+async def test_a_walk_over_its_time_limit_stops_and_says_so(hass: HomeAssistant, tmp_path) -> None:
+    """A slow disk must not hold the page: the sizes are minimums and the result is flagged."""
+    hass.config.config_dir = str(tmp_path)
+    (tmp_path / "www").mkdir()
+    (tmp_path / "www" / "a.js").write_text("x" * 9)
+    with (
+        patch.dict(os.environ, {}, clear=False),
+        patch.object(module, "cpu_percent", return_value=1.0),
+        patch.object(module, "WALK_BUDGET", -1),
+    ):
+        os.environ.pop("SUPERVISOR_TOKEN", None)
+        result = await system_usage(hass)
+    assert result["truncated"] is True and result["breakdown"] == []
 
 
 async def test_apps_become_objects_and_a_stopped_app_is_no_problem(hass: HomeAssistant) -> None:

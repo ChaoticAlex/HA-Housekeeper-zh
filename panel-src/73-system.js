@@ -126,7 +126,8 @@ class SystemMixin {
       const title = key => `<h3 class="syssec">${this.esc(this.t(key))}</h3>`;
       const apps = `<p class="factnote">${this.t("sysAppsHint")} <button type="button" class="link" data-view="components">${this.t("components")}</button></p>`;
       const list = by === "misc" ? this.sysMisc(r) : `${title(by === "category" ? "sysHeadCategory" : "sysHeadFolder")}${by === "category" ? this.sysCategories(cats) : this.sysConsumers(r.breakdown)}${apps}`;
-      return `<div class="stack">${head}${tiles}<div class="panel">${choice}${list}${this.howCounted("sysFootnote")}</div></div>`;
+      const cut = r.truncated ? `<p class="factnote">${this.esc(this.t("sysTruncated"))}</p>` : "";
+      return `<div class="stack">${head}${tiles}<div class="panel">${choice}${cut}${list}${this.howCounted("sysFootnote")}</div></div>`;
     });
   }
 
