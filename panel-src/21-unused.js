@@ -211,7 +211,7 @@ class UnusedMixin {
     const platforms = [...new Set(all.map(o => o.platform).filter(Boolean))].sort();
     const pickCols = ["domain", "device", "area", "platform", "changed", "reported", "since", "stats"].map(k => ({ key: k, label: { domain: "utDomain", device: "utDevice", area: "utArea", platform: "utIntegration", changed: "utChanged", reported: "utReported", since: "utSince", stats: "utStats" }[k] }));
     this.setExporter("unreferenced", "unused-entities", [this.t("utName"), "ID", this.t("utDomain"), this.t("utDevice"), this.t("utArea"), this.t("utIntegration"), this.t("utChanged"), this.t("utReported"), this.t("utSince"), this.t("utStats")], () => rows.map(o => [o.name, o.object_id, domainOf(o), deviceName(o), this.areaName(o), o.platform || "", o.last_changed || "", o.last_reported || o.last_updated || "", o.status_since || "", this.data.meta.recorder_available ? (o.has_statistics ? "yes" : "no") : ""]));
-    const bar = this.listBar("unreferenced", { table: true, columns: pickCols, sorts, filters: [
+    const bar = this.listBar("unreferenced", { table: true, dense: true, columns: pickCols, sorts, filters: [
       { name: "domain", all: this.t("allDomains"), options: domains.map(d => [d, `${d} (${all.filter(o => domainOf(o) === d).length})`]) },
       { name: "area", all: this.t("allAreas"), options: areas.map(a => [a, a]) },
       { name: "platform", all: this.t("allIntegrations"), options: platforms.map(p => [p, p]) },
@@ -261,7 +261,7 @@ class UnusedMixin {
     const areas = [...new Set(all.map(r => this.areaName(r.item)).filter(Boolean))].sort();
     const types = [...new Set(all.map(r => r.type).filter(Boolean))].sort();
     const need = this.data.meta.low_battery_percent ?? 20;
-    const bar = this.listBar("batteries", { table: true, sorts: this.batteryTableSorts(), filters: [
+    const bar = this.listBar("batteries", { table: true, dense: true, sorts: this.batteryTableSorts(), filters: [
       { name: "soon", all: this.t("batteryAll"), options: [["soon", this.t("btFilterSoon")], ["untyped", this.t("btFilterUntyped")]] },
       { name: "type", all: this.t("btAllTypes"), options: types.map(x => [x, x]) },
       { name: "area", all: this.t("allAreas"), options: areas.map(a => [a, a]) },

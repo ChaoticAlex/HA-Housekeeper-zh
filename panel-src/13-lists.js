@@ -1,6 +1,8 @@
 // ListsMixin: methods of the panel element, mixed into the class in 99-register.js.
 const VIEWS_KEY = "ha_housekeeper.views";
 const VIEWS_LIMIT = 10;
+const DENSE_LISTS_KEY = "ha_housekeeper.dense_lists";
+const DENSE_LIST_IDS = ["unreferenced", "batteries", "runs"];
 
 class ListsMixin {
   th(key, label) {
@@ -118,7 +120,7 @@ class ListsMixin {
     requestAnimationFrame(() => this.shadowRoot?.querySelector(".filteron, .listbar")?.scrollIntoView?.({ block: "nearest" }));
   }
 
-  listBar(id, { sorts, filters = [], columns = [], dense = true, table = false }) {
+  listBar(id, { sorts, filters = [], columns = [], dense = false, table = false }) {
     const st = this.lv[id];
     for (const f of filters) if (st.f[f.name] && !f.options.some(([v]) => v === st.f[f.name])) delete st.f[f.name]; // a kept value this list no longer offers
     (this.lvDirs ||= {})[id] = Object.fromEntries(sorts.map(x => [x.key, x.dir]));
@@ -127,7 +129,7 @@ class ListsMixin {
     const sortOptions = sorts.map(x => `<option value="${x.key}" ${st.sort === x.key ? "selected" : ""}>${this.t(x.label)}${st.sort === x.key ? (desc ? " ↓" : " ↑") : ""}</option>`).join("");
     const on = filters.filter(f => st.f[f.name]).map(f => `${f.all}: ${(f.options.find(([v]) => v === st.f[f.name]) || [])[1] ?? st.f[f.name]}`);
     const note = this.filterNote(on, `data-lf-set="${id}||"`);
-    return `${note}<div class="listbar"><input type="search" data-lq="${id}" value="${this.esc(st.q)}" placeholder="${this.t("searchList")}" aria-label="${this.t("searchList")}">${selects}${sorts.length ? `<span class="sortgroup${table ? " table-sort" : ""}"><select data-ls="${id}" aria-label="${this.t("sortBy")}" title="${this.t("sortBy")}">${sortOptions}</select><button class="dirbtn" data-ld="${id}" title="${this.t(desc ? "sortDescending" : "sortAscending")}" aria-label="${this.t(desc ? "sortDescending" : "sortAscending")}"><ha-icon icon="${desc ? "mdi:sort-descending" : "mdi:sort-ascending"}"></ha-icon></button></span>` : ""}${this.viewsControl(id)}${dense ? this.denseButton() : ""}${this.listTools(id, columns)}</div>`;
+    return `${note}<div class="listbar"><input type="search" data-lq="${id}" value="${this.esc(st.q)}" placeholder="${this.t("searchList")}" aria-label="${this.t("searchList")}">${selects}${sorts.length ? `<span class="sortgroup${table ? " table-sort" : ""}"><select data-ls="${id}" aria-label="${this.t("sortBy")}" title="${this.t("sortBy")}">${sortOptions}</select><button class="dirbtn" data-ld="${id}" title="${this.t(desc ? "sortDescending" : "sortAscending")}" aria-label="${this.t(desc ? "sortDescending" : "sortAscending")}"><ha-icon icon="${desc ? "mdi:sort-descending" : "mdi:sort-ascending"}"></ha-icon></button></span>` : ""}${this.viewsControl(id)}${dense ? this.denseButton(id) : ""}${this.listTools(id, columns)}</div>`;
   }
 
   // Column picker and CSV export of a list; both are optional. `columns` are the switchable columns: { key, label }.
@@ -176,11 +178,30 @@ class ListsMixin {
 
   setExporter(id, name, header, rows) { (this._exporters ||= {})[id] = { name, header, rows }; }
 
-  // Compact lists show the first line of every row; one switch for all lists, kept in this browser.
-  denseButton() {
-    if (this.dense === undefined) { try { this.dense = globalThis.localStorage?.getItem("ha_housekeeper.dense") === "1"; } catch (_) { this.dense = false; } }
-    const label = this.t(this.dense ? "denseOff" : "denseOn");
-    return `<button type="button" class="dirbtn" data-dense aria-pressed="${this.dense}" title="${label}" aria-label="${label}"><ha-icon icon="${this.dense ? "mdi:format-line-spacing" : "mdi:view-agenda-outline"}"></ha-icon></button>`;
+  // Only long tables with an optional ID line offer compact rows, saved separately per list.
+  denseLists() {
+    if (this._denseLists) return this._denseLists;
+    let saved = {};
+    try {
+      const raw = globalThis.localStorage?.getItem(DENSE_LISTS_KEY);
+      saved = raw ? JSON.parse(raw) : globalThis.localStorage?.getItem("ha_housekeeper.dense") === "1" ? Object.fromEntries(DENSE_LIST_IDS.map(id => [id, true])) : {};
+    } catch (_) { saved = {}; }
+    return (this._denseLists = saved && typeof saved === "object" && !Array.isArray(saved) ? Object.fromEntries(DENSE_LIST_IDS.map(id => [id, saved[id] === true])) : {});
+  }
+
+  isDenseList(id) { return this.denseLists()[id] === true; }
+
+  toggleDenseList(id) {
+    if (!DENSE_LIST_IDS.includes(id)) return;
+    const lists = this.denseLists();
+    lists[id] = !lists[id];
+    try { globalThis.localStorage?.setItem(DENSE_LISTS_KEY, JSON.stringify(lists)); } catch (_) { /* kept until the page closes */ }
+    this.render();
+  }
+
+  denseButton(id) {
+    const on = this.isDenseList(id), label = this.t(on ? "denseOff" : "denseOn");
+    return `<button type="button" class="dirbtn" data-dense="${this.esc(id)}" aria-pressed="${on}" title="${label}" aria-label="${label}"><ha-icon icon="${on ? "mdi:format-line-spacing" : "mdi:view-agenda-outline"}"></ha-icon></button>`;
   }
 
   // A sortable table for a list built with lvState/refine: header buttons set sort and direction, the phone shows cards.
@@ -197,7 +218,7 @@ class ListsMixin {
       const attrs = rowAttrs(item);
       return `<tr ${attrs}>${columns.map((c, i) => `<td${c.narrow ? ' class="selcol"' : ""}${i ? ` data-label="${this.esc(this.t(c.label))}"` : ""}>${c.cell(item)}</td>`).join("")}</tr>`;
     }).join("");
-    return `<div class="tablewrap lt ${cls}"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+    return `<div class="${["tablewrap", "lt", cls, this.isDenseList(id) ? "dense-list" : ""].filter(Boolean).join(" ")}"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
   }
 
   // Name over id for a table cell: both are cut at the column width and shown in full in the tooltip (see showTip).

@@ -734,6 +734,34 @@ function fakeStorage(initial = {}) {
   return { store, getItem: key => (key in store ? store[key] : null), setItem: (key, value) => { store[key] = String(value); } };
 }
 
+test("compact rows belong to each eligible table and keep their own browser state", () => {
+  const storage = fakeStorage();
+  const { el } = panel("en", { localStorage: storage });
+  const columns = [{ key: "name", label: "utName", cell: item => el.nameCell(item.name, item.id) }];
+  const rows = [{ name: "Sensor", id: "sensor.a" }];
+  for (const id of ["unreferenced", "batteries", "runs", "orphanstats"]) el.lvState(id, "name", "asc");
+  const bar = id => el.listBar(id, { sorts: [], dense: id !== "orphanstats" });
+  assert.match(bar("unreferenced"), /data-dense="unreferenced" aria-pressed="false"/);
+  assert.doesNotMatch(bar("orphanstats"), /data-dense/);
+  el.render = () => {};
+  el.toggleDenseList("unreferenced");
+  assert.match(bar("unreferenced"), /data-dense="unreferenced" aria-pressed="true"/);
+  assert.match(el.listTable("unreferenced", columns, rows), /class="tablewrap lt dense-list"/);
+  assert.doesNotMatch(el.listTable("batteries", columns, rows), /dense-list/);
+  assert.doesNotMatch(el.listTable("orphanstats", columns, rows), /dense-list/);
+  el.toggleDenseList("batteries");
+  assert.equal(JSON.parse(storage.getItem("ha_housekeeper.dense_lists")).runs, false);
+  const { el: reopened } = panel("en", { localStorage: storage });
+  assert.equal(reopened.isDenseList("unreferenced"), true);
+  assert.equal(reopened.isDenseList("batteries"), true);
+  assert.equal(reopened.isDenseList("runs"), false);
+  assert.equal(reopened.isDenseList("orphanstats"), false);
+  const legacy = panel("en", { localStorage: fakeStorage({ "ha_housekeeper.dense": "1" }) }).el;
+  assert.equal(legacy.isDenseList("unreferenced"), true);
+  assert.equal(legacy.isDenseList("runs"), true);
+  assert.equal(legacy.isDenseList("orphanstats"), false);
+});
+
 test("settings are available before data has loaded", () => {
   const { el, shadow } = panel("de");
   el.data = null;
@@ -2505,7 +2533,7 @@ test("the load view, the policies and the exposure view have a search box once t
   el.policies = { available: true, enabled: 1, violations: 12, prefixes: {}, rules: [{ id: "entity_area", enabled: true, count: 12, ignored: 0, items }] };
   el._policiesRequested = true;
   html = el.policiesView();
-  assert.ok(html.includes('data-lq="policies"') && html.includes('data-dense'), "the violations list has search and a useful density control");
+  assert.ok(html.includes('data-lq="policies"') && !html.includes('data-dense'), "the violations list has search but no table density control");
   el.lvState("policies", "", "asc").q = "lampe 11";
   html = el.policiesView();
   assert.ok(html.includes("Lampe 11") && !html.includes("Lampe 3"));
