@@ -536,7 +536,7 @@ const INFO_SUB_VIEWS = ["exposure", "maintenance", "repair", "policies", "record
 
 // Texts for step C of the cleanup (devices, replacing references); merged into TEXT.
 Object.assign(TEXT.de, {
-  changesFiltered: "Der Filter blendet alle {n} Einträge dieses Abschnitts aus.",
+  changesOfTotal: "von {n}", changesShownOf: "{n} von {total}", changesBarHint: "Suche und Filter gelten für alle Abschnitte.", changesCapped: "Es werden die ersten {shown} gezeigt, {count} weitere zählen nur mit.", changesFiltered: "Der Filter blendet alle {n} Einträge dieses Abschnitts aus.",
   lastEntry: "Letzter Eintrag", lastEntryNone: "kein Eintrag gefunden", sortLastEntry: "Letzter Eintrag",
   utName: "Name", utDomain: "Domain", utDevice: "Gerät", utArea: "Bereich", utIntegration: "Integration", utChanged: "Letzte Änderung", utReported: "Letzte Meldung", utSince: "Beobachtet seit", utStats: "Statistik",
   utStatId: "Statistik-ID", utKind: "Art", utUnit: "Einheit", utLast: "Letzter Eintrag", utFirst: "Erster Eintrag", utRows: "Datensätze", sortFirstEntry: "Erster Eintrag", sortRows: "Datensätze", statFirstEntry: "Erster Statistik-Eintrag", statRows: "{count} Stundenwerte", utEnergy: "Energie-Dashboard",
@@ -569,7 +569,7 @@ Object.assign(TEXT.de, {
   recurringTitle: "Wiederkehrende Geräte", recurringHint: "Diese Geräte hat Housekeeper vergessen, doch die Integration hat sie wieder angelegt. Deaktivieren ist hier meist sinnvoller; oft muss das Gerät am Quellsystem (Hub, App, Cloud) entfernt werden.", recurringSince: "vergessen am {date} · Integration: {domains}",
 });
 Object.assign(TEXT.en, {
-  changesFiltered: "The filter hides all {n} entries of this section.",
+  changesOfTotal: "of {n}", changesShownOf: "{n} of {total}", changesBarHint: "Search and filter apply to all sections.", changesCapped: "The first {shown} are shown; {count} more are only counted.", changesFiltered: "The filter hides all {n} entries of this section.",
   lastEntry: "Last entry", lastEntryNone: "no entry found", sortLastEntry: "Last entry",
   utName: "Name", utDomain: "Domain", utDevice: "Device", utArea: "Area", utIntegration: "Integration", utChanged: "Last change", utReported: "Last report", utSince: "Observed since", utStats: "Statistics",
   utStatId: "Statistic ID", utKind: "Kind", utUnit: "Unit", utLast: "Last entry", utFirst: "First entry", utRows: "Records", sortFirstEntry: "First entry", sortRows: "Records", statFirstEntry: "First statistics entry", statRows: "{count} hourly values", utEnergy: "Energy dashboard",
@@ -1414,7 +1414,7 @@ class StylesMixin {
       .sumtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.sumtile{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border:1px solid var(--hk-border);border-left:4px solid var(--hk-gray);border-radius:12px;background:var(--hk-surface);text-align:left;font:inherit;color:inherit}button.sumtile{cursor:pointer}button.sumtile:hover{background:var(--hk-soft)}.sumtile.ok{border-left-color:var(--hk-green)}.sumtile.warn{border-left-color:var(--hk-amber)}.sumtile.red{border-left-color:var(--hk-red)}.sumlabel{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.sumvalue{font-size:calc(22px*var(--hk-fs,1));font-weight:600;line-height:1.2;overflow-wrap:anywhere}.sumtile small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));overflow-wrap:anywhere}.sumtile{position:relative}button.sumtile .sumlabel{padding-right:20px}.sumcue{position:absolute;top:10px;right:10px;--mdc-icon-size:16px;color:var(--hk-muted)}div.sumtile,div.sumtile:hover{box-shadow:none;background:var(--hk-soft)}.sumtile.filter[aria-pressed=true]{border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 9%,var(--hk-surface));box-shadow:0 0 0 1px var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumcue{color:var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumlabel{color:var(--hk-blue-text)}.sumtile.filter[aria-pressed=true] .sumlabel:before{content:"\\2713";margin-right:.4em}.filteron{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 16px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);background:color-mix(in srgb,var(--hk-blue) 7%,var(--hk-surface));border-bottom:1px solid var(--hk-border)}.filteron ha-icon{--mdc-icon-size:16px;color:var(--hk-blue)}.filteron b{color:var(--hk-text);font-weight:600}.filteron .btn{margin-left:auto}.tabdot{display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:50%;background:var(--hk-gray)}.tabdot.warn{background:var(--hk-amber)}.tabdot.red{background:var(--hk-red)}
       .detailgrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:14px;align-items:start}.pad{padding:16px}.todofoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px}.visitline{display:inline-flex;align-items:center;gap:6px;color:var(--hk-muted)}.visitline ha-icon{--mdc-icon-size:16px}
       .facts{display:grid}.fact{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.fact:first-child{border-top:0}.fact span{color:var(--hk-muted)}.fact b{font-weight:600;text-align:right}.fact small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:400}
-      .u-m0{margin:0!important}.u-block{display:block!important}.u-mb14{margin-bottom:14px!important}.u-pt6{padding:6px 0 0!important}.u-dim{opacity:.8!important}.u-ic14{--mdc-icon-size:14px!important}.u-amber{color:var(--hk-amber)!important}
+      .hist-bar{margin-top:4px}.hist-hint{margin:10px 16px}.hist-hint0{margin:10px 0 0}.changes-pick{grid-template-columns:auto minmax(220px,360px)}.baselbl{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.u-m0{margin:0!important}.u-block{display:block!important}.u-mb14{margin-bottom:14px!important}.u-pt6{padding:6px 0 0!important}.u-dim{opacity:.8!important}.u-ic14{--mdc-icon-size:14px!important}.u-amber{color:var(--hk-amber)!important}
       .factnote{padding:12px 16px;border-top:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));line-height:1.5}:where(:not(.panel))>.factnote{border-top:0;padding:0}.panel>.factnote:first-child{border-top:0}
       .diagcard{display:grid;gap:12px;padding:16px}.checks{display:grid;gap:8px}
       .check{display:grid;grid-template-columns:22px minmax(100px,150px) minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-soft);font-size:calc(13px*var(--hk-fs,1))}.check b{font-weight:600}.check .val{color:var(--hk-muted);overflow-wrap:anywhere}
@@ -1821,9 +1821,9 @@ class ListsMixin {
   }
 
   // A table of objects (entities, entries, automations): name with id, type when mixed, state, plus extra columns.
-  // rows: [{ key: "entity:light.a", type, name, sub, tone, state, stateLabel, pill, rank }]; extras: [{ key, label, dir, get, cell(row) }].
+  // rows: [{ key: "entity:light.a", type, name, sub, tone, state, stateLabel, pill, rank, open }]; open: false makes a row that opens nothing; bar: false leaves the bar to the caller (the header still sorts); extras: [{ key, label, dir, get, cell(row) }].
   // The bar shows from `min` rows on; a row opens its object.
-  objectTable(id, rows, { extras = [], min = 6, empty = "", tile = row => this.tile(row.type, row.tone === "ok" ? "" : row.tone) } = {}) {
+  objectTable(id, rows, { extras = [], min = 6, bar: withBar = true, empty = "", tile = row => this.tile(row.type, row.tone === "ok" ? "" : row.tone) } = {}) {
     if (!rows.length) return empty ? `<div class="emptymsg">${empty}</div>` : "";
     this.lvState(id, "name", "asc");
     const types = [...new Set(rows.map(r => r.type))].sort();
@@ -1839,7 +1839,7 @@ class ListsMixin {
       { name: "state", all: this.t("objAllStatus"), options: [...new Map(rows.map(r => [r.state, r.stateLabel])).entries()].sort((a, b) => String(a[1]).localeCompare(String(b[1]), this.lang)) },
     ];
     const st = this.lv[id];
-    const bar = rows.length >= min || st.q ? this.listBar(id, { table: true, sorts, filters }) : "";
+    const bar = withBar && (rows.length >= min || st.q) ? this.listBar(id, { table: true, sorts, filters }) : "";
     const shown = this.refine(id, rows, { text: r => [r.name, r.sub, ...extras.map(x => String(x.get(r) ?? ""))].join(" "), filters: { type: (r, v) => r.type === v, state: (r, v) => r.state === v }, sorts, tie: r => r.key });
     const pg = this.paginate(id, shown);
     const columns = [
@@ -1848,7 +1848,7 @@ class ListsMixin {
       ...extras.map(x => ({ key: x.key, label: x.label, dir: x.dir || "asc", cell: x.cell })),
       { key: "status", label: "sortStatus", dir: "asc", cell: r => r.pill },
     ];
-    const table = shown.length ? this.listTable(id, columns, pg.rows, { cls: "objs", rowAttrs: r => `data-object="${this.esc(r.key)}" tabindex="0" role="button" aria-label="${this.esc(r.name)}"` }) : `<div class="emptymsg">${this.noMatches(id)}</div>`;
+    const table = shown.length ? this.listTable(id, columns, pg.rows, { cls: "objs", rowAttrs: r => (r.open === false ? 'class="static"' : `data-object="${this.esc(r.key)}" tabindex="0" role="button" aria-label="${this.esc(r.name)}"`) }) : `<div class="emptymsg">${this.noMatches(id)}</div>`;
     return `${bar}${table}${pg.footer}`;
   }
 
@@ -2772,7 +2772,7 @@ class ChangesMixin {
       const when = r.pinned ? this.formatDate(r.at) : label;
       const plain = !r.now && !r.pinned && r.id !== "previous";
       const title = plain ? this.esc(this.scanDay(r.at)) : r.now || !r.pinned ? `${label} · ${this.esc(this.formatDate(r.at))}` : `${this.esc(label)}`;
-      const inner = `<span class="tile ${selected ? "" : "mute"}"><ha-icon icon="${r.now ? "mdi:clock-check-outline" : r.pinned ? "mdi:pin-outline" : "mdi:history"}"></ha-icon></span><span class="row-text"><strong>${title}</strong><small>${r.pinned ? `${this.t("storedPin")} · ${this.esc(when)} · ` : plain ? `${this.esc(label)} · ` : ""}${this.t("historyCounts", { objects: this.formatNumber(r.objects || 0), findings: this.formatNumber(r.findings || 0) })}</small><span class="bar" style="margin-top:4px"><i style="width:${Math.round(((r.findings || 0) / max) * 100)}%"></i></span></span>${r.pinned ? this.pinActions(r) : pill}`;
+      const inner = `<span class="tile ${selected ? "" : "mute"}"><ha-icon icon="${r.now ? "mdi:clock-check-outline" : r.pinned ? "mdi:pin-outline" : "mdi:history"}"></ha-icon></span><span class="row-text"><strong>${title}</strong><small>${r.pinned ? `${this.t("storedPin")} · ${this.esc(when)} · ` : plain ? `${this.esc(label)} · ` : ""}${this.t("historyCounts", { objects: this.formatNumber(r.objects || 0), findings: this.formatNumber(r.findings || 0) })}</small><span class="bar hist-bar"><i style="width:${Math.round(((r.findings || 0) / max) * 100)}%"></i></span></span>${r.pinned ? this.pinActions(r) : pill}`;
       if (r.now) return { selected, html: `<div class="row rel">${inner}</div>` };
       if (r.pinned) return { selected, html: `<div class="row rel ${selected ? "sel" : ""}" role="button" tabindex="0" data-baseline="${this.esc(r.id)}">${inner}</div>` };
       return { selected, html: `<button class="row rel ${selected ? "sel" : ""}" data-baseline="${this.esc(r.id)}">${inner}</button>` };
@@ -2782,7 +2782,7 @@ class ChangesMixin {
     const list = collapsed ? scans.filter((e, i) => i < HISTORY_PREVIEW || e.selected) : scans;
     const pg = collapsed ? { rows: list.map(e => e.html), footer: "" } : this.paginate("history", list.map(e => e.html));
     const toggle = scans.length > HISTORY_PREVIEW + 1 ? `<div class="tablefoot"><button class="link" data-history-all>${collapsed ? this.t("historyAll", { n: this.formatNumber(scans.length) }) : this.t("historyLess")}</button></div>` : "";
-    const hint = baselines.length <= 1 ? `<p class="factnote" style="margin:10px 16px">${this.t("historyBuilding", { days: c.retention_days ?? 30 })}</p>` : "";
+    const hint = baselines.length <= 1 ? `<p class="factnote hist-hint">${this.t("historyBuilding", { days: c.retention_days ?? 30 })}</p>` : "";
     return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("historyTitle")}</h2><p>${this.t("historyHint", { days: c.retention_days ?? 30 })}</p></div><div class="actions">${this.baselineSelect(baselines)}${this.pinDraft ? "" : this.pinHeadButton()}</div></div>${this.pinEditor()}${hint}${pg.rows.join("")}${pg.footer}${toggle}</section>`;
   }
 
@@ -2795,7 +2795,7 @@ class ChangesMixin {
   // The label and the choice of the comparison base: the same as a click on a row, for the keyboard and screen readers.
   baselineSelect(baselines) {
     const options = baselines.map(b => `<option value="${this.esc(b.id)}" ${b.id === this.compareBaseline ? "selected" : ""}>${b.id === "previous" ? `${this.t("previousScan")} · ` : b.pinned ? `${this.esc(this.t("storedPin"))}: ${this.esc(b.name || "")} · ` : ""}${this.esc(this.formatDate(b.at))}</option>`).join("");
-    return options ? `<label for="baseline" style="color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))">${this.t("compareWith")}</label><select id="baseline">${options}</select>` : "";
+    return options ? `<label for="baseline" class="baselbl">${this.t("compareWith")}</label><select id="baseline">${options}</select>` : "";
   }
 
   // The report of the changes as Markdown, for the baseline closest to a week back (loaded first when another is set).
@@ -2840,8 +2840,8 @@ class ChangesMixin {
     this.ensureCorrelations();
     const baselines = c.baselines || [];
     const options = this.baselineSelect(baselines);
-    const hint = baselines.length <= 1 ? `<p class="factnote" style="margin:10px 0 0">${this.t("historyBuilding", { days: c.retention_days ?? 30 })}</p>` : "";
-    const picker = options ? `<div class="panel u-mb14"><div class="filters" style="grid-template-columns:auto minmax(220px,360px)">${options}</div>${hint}</div>` : "";
+    const hint = baselines.length <= 1 ? `<p class="factnote hist-hint0">${this.t("historyBuilding", { days: c.retention_days ?? 30 })}</p>` : "";
+    const picker = options ? `<div class="panel u-mb14"><div class="filters changes-pick">${options}</div>${hint}</div>` : "";
     if (!c.available) {
       const meta = this.data?.meta || {};
       const why = meta.preliminary ? this.t("noBaselinePreliminary") : this.t("noBaselineOneScan", { hours: meta.scan_interval_hours || 24 });
@@ -2854,41 +2854,55 @@ class ChangesMixin {
       ["removedObjects", "mdi:minus-circle-outline", c.removed_objects],
     ];
     const total = sections.reduce((n, [, , part]) => n + part.total, 0);
-    const cards = this.sumTiles(sections.map(([label, , part]) => ({ label: this.t(label), value: this.formatNumber(part.total), tone: !part.total ? "mute" : label === "resolvedFindings" ? "ok" : label === "newFindings" ? "warn" : "mute", ...(part.total ? { attr: ["data-changes-cat", label], active: this.changesCat === label } : {}) })));
-    const more = part => part.total > part.items.length ? `<p class="factnote">${this.t("moreItems", { count: part.total - part.items.length })}</p>` : "";
     const st = this.lvState("changes", "", "asc"), query = st.q.trim().toLowerCase();
     const typeOf = it => it.object_type || String(it.rule_id || "").split(".")[0];
     const matches = it => (!query || [it.name, it.object_id, it.rule_id, it.affected_object, typeOf(it)].join(" ").toLowerCase().includes(query)) && (!st.f.type || typeOf(it) === st.f.type);
+    // Under a search or a filter the numbers count what is shown, and say how many there are in all.
+    const filterOn = Boolean(query || st.f.type);
+    const shownOf = part => (filterOn ? part.items.filter(matches).length : part.total);
+    const cards = this.sumTiles(sections.map(([label, , part]) => ({ label: this.t(label), value: this.formatNumber(shownOf(part)), sub: filterOn ? this.t("changesOfTotal", { n: this.formatNumber(part.total) }) : undefined, tone: !part.total ? "mute" : label === "resolvedFindings" ? "ok" : label === "newFindings" ? "warn" : "mute", ...(part.total ? { attr: ["data-changes-cat", label], active: this.changesCat === label } : {}) })));
+    // The server sends the first entries of a section; the rest only counts.
+    const capped = part => part.total > part.items.length ? `<p class="factnote">${this.t("changesCapped", { shown: this.formatNumber(part.items.length), count: this.formatNumber(part.total - part.items.length) })}</p>` : "";
     const allTypes = [...new Set(sections.flatMap(([, , part]) => part.items.map(typeOf)).filter(Boolean))].sort();
-    const bar = total ? this.listBar("changes", { sorts: [], filters: [{ name: "type", all: this.t("allTypes"), options: allTypes.map(x => [x, this.t(x)]) }] }) : "";
+    const bar = total ? `${this.listBar("changes", { sorts: [], filters: [{ name: "type", all: this.t("allTypes"), options: allTypes.map(x => [x, this.t(x)]) }] })}<p class="factnote">${this.t("changesBarHint")}</p>` : "";
     const paged = (id, items, render) => {
       const shown = items.filter(matches);
       if (items.length && !shown.length) return `<div class="emptymsg">${this.t("changesFiltered", { n: items.length })}</div>`;
       const pg = this.paginate(`changes-${id}`, shown);
       return pg.rows.map(render).join("") + pg.footer;
     };
-    const objectRow = (o, note, pillHtml) => {
-      const key = `${o.object_type}:${o.object_id}`, obj = this.findObject(key);
-      const inner = `${this.tile(o.object_type, obj ? (this.tone(obj.status) === "ok" ? "" : this.tone(obj.status)) : "mute")}<span class="row-text"><strong>${this.esc(o.name || obj?.name || o.object_id)}</strong><small>${this.esc(note)}</small></span>${pillHtml}`;
-      return obj ? `<button class="row rel" data-object="${this.esc(key)}">${inner}</button>` : `<div class="row rel">${inner}</div>`;
+    // The other sections are tables of objects: the header sorts, search and filter come from the bar above.
+    const tableOf = (id, items, toRow, sort = "name") => {
+      const shown = items.filter(matches);
+      if (items.length && !shown.length) return `<div class="emptymsg">${this.t("changesFiltered", { n: items.length })}</div>`;
+      this.lvState(`changes-${id}`, sort, "asc");
+      return this.objectTable(`changes-${id}`, shown.map(toRow), { bar: false });
     };
-    const changes = [...c.status_changes.items].sort((a, b) => (this.changeRank(b.to) - this.changeRank(b.from)) - (this.changeRank(a.to) - this.changeRank(a.from)));
+    const objRow = (type, id, over) => {
+      const key = `${type}:${id}`, obj = this.findObject(key);
+      return { key, type, name: obj?.name || id, sub: id, open: Boolean(obj), ...over };
+    };
+    const dir = ch => this.changeRank(ch.to) - this.changeRank(ch.from);
+    const findingRowOf = (f, state, label, tone, pillHtml) => objRow(f.rule_id.split(".")[0], f.object_id, { name: this.findObject(`${f.rule_id.split(".")[0]}:${f.object_id}`)?.name || f.affected_object || f.object_id, sub: this.findingTitle(f), tone, state, stateLabel: label, pill: pillHtml });
     const body = {
-      statusChanges: paged("statusChanges", changes, ch => objectRow(ch, `${this.t(ch.from)} → ${this.t(ch.to)} · ${this.t(ch.object_type)}`, `<span class="pill ${this.changeRank(ch.to) > this.changeRank(ch.from) ? "red" : this.changeRank(ch.to) < this.changeRank(ch.from) ? "ok" : "mute"}">${this.t(this.changeRank(ch.to) > this.changeRank(ch.from) ? "worsened" : this.changeRank(ch.to) < this.changeRank(ch.from) ? "improved" : "changed")}</span>`)),
+      statusChanges: tableOf("statusChanges", c.status_changes.items, ch => {
+        const d = dir(ch), state = d > 0 ? "worsened" : d < 0 ? "improved" : "changed", tone = d > 0 ? "red" : d < 0 ? "ok" : "mute";
+        return objRow(ch.object_type, ch.object_id, { name: ch.name || this.findObject(`${ch.object_type}:${ch.object_id}`)?.name || ch.object_id, sub: `${this.t(ch.from)} → ${this.t(ch.to)}`, tone, state, stateLabel: this.t(state), pill: `<span class="pill ${tone}">${this.t(state)}</span>`, rank: -d });
+      }, "status"),
       newFindings: paged("newFindings", c.new_findings.items, f => this.findingRow(f)),
-      resolvedFindings: paged("resolvedFindings", c.resolved_findings.items, f => {
-        const type = f.rule_id.split(".")[0];
-        return objectRow({ object_type: type, object_id: f.object_id }, `${f.affected_object ? `${f.affected_object} · ` : ""}${this.findingTitle(f)}`, `<span class="pill ok">${this.t("improved")}</span>`);
-      }),
+      resolvedFindings: tableOf("resolvedFindings", c.resolved_findings.items, f => findingRowOf(f, "improved", this.t("improved"), "ok", `<span class="pill ok">${this.t("improved")}</span>`)),
       // Gone, but not repaired: the object left with its findings, or the reason cannot be told.
-      endedFindings: paged("endedFindings", (c.ended_findings || { items: [] }).items, f => objectRow({ object_type: f.rule_id.split(".")[0], object_id: f.object_id }, `${f.affected_object ? `${f.affected_object} · ` : ""}${this.findingTitle(f)}`, `<span class="pill mute">${f.reason === "unchecked" ? this.esc(this.endedSourceLabel(f)) : this.t({ object_removed: "endedObjectRemoved", rules_changed: "endedRules" }[f.reason] || "endedUnknown")}</span>`)),
-      newObjects: paged("newObjects", c.new_objects.items, o => objectRow(o, `${this.t(o.object_type)} · ${o.object_id}`, this.pill(o.status))),
-      removedObjects: paged("removedObjects", c.removed_objects.items, o => objectRow(o, `${this.t(o.object_type)} · ${this.t("gone")}`, "")),
+      endedFindings: tableOf("endedFindings", (c.ended_findings || { items: [] }).items, f => {
+        const label = f.reason === "unchecked" ? this.endedSourceLabel(f) : this.t({ object_removed: "endedObjectRemoved", rules_changed: "endedRules" }[f.reason] || "endedUnknown");
+        return findingRowOf(f, f.reason || "unknown", label, "mute", `<span class="pill mute">${this.esc(label)}</span>`);
+      }),
+      newObjects: tableOf("newObjects", c.new_objects.items, o => objRow(o.object_type, o.object_id, { name: o.name || undefined, tone: this.tone(o.status), state: o.status, stateLabel: this.statusLabel(o.status), pill: this.pill(o.status) })),
+      removedObjects: tableOf("removedObjects", c.removed_objects.items, o => objRow(o.object_type, o.object_id, { name: o.name || o.object_id, open: false, tone: "mute", state: "gone", stateLabel: this.t("gone"), pill: `<span class="pill mute">${this.t("gone")}</span>` })),
     };
     // One section is open at a time: the one a tile picked, else the first with entries; the heading of each carries its number.
     const filled = sections.filter(([, , part]) => part.total), first = filled[0]?.[0];
-    const panels = filled.map(([label, , part]) => `<div class="panel u-mb14">${this.fold(`chg_${label}`, { tone: label === "newFindings" ? "warn" : label === "resolvedFindings" ? "ok" : "mute", title: this.t(label), pill: this.formatNumber(part.total) }, `${body[label]}${more(part)}`, label === first, this.changesCat ? this.changesCat === label : undefined)}</div>`).join("");
-    return `${this.historyTimeline(c, baselines)}<p class="sub" style="margin:0 0 14px">${this.t("comparedWith")} <b>${this.formatDate(c.baseline_at)}</b> <button class="btn quiet" data-weekly title="${this.esc(this.t("weeklyHint"))}">${this.t("weeklyBtn")}</button></p>${c.unread_objects?.total ? `<p class="factnote" style="margin:0 0 14px">${this.t("covUnread", { n: this.formatNumber(c.unread_objects.total) })}</p>` : ""}${cards}${total ? `<div class="panel u-mb14">${bar}</div>${panels}` : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("noChanges")}</div></div>`}`;
+    const panels = filled.map(([label, , part]) => `<div class="panel u-mb14">${this.fold(`chg_${label}`, { tone: label === "newFindings" ? "warn" : label === "resolvedFindings" ? "ok" : "mute", title: this.t(label), pill: filterOn ? this.t("changesShownOf", { n: this.formatNumber(shownOf(part)), total: this.formatNumber(part.total) }) : this.formatNumber(part.total) }, `${body[label]}${capped(part)}`, label === first, this.changesCat ? this.changesCat === label : undefined)}</div>`).join("");
+    return `${this.historyTimeline(c, baselines)}<p class="sub u-mb14">${this.t("comparedWith")} <b>${this.formatDate(c.baseline_at)}</b> <button class="btn quiet" data-weekly title="${this.esc(this.t("weeklyHint"))}">${this.t("weeklyBtn")}</button></p>${c.unread_objects?.total ? `<p class="factnote u-mb14">${this.t("covUnread", { n: this.formatNumber(c.unread_objects.total) })}</p>` : ""}${cards}${total ? `<div class="panel u-mb14">${bar}</div>${panels}` : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("noChanges")}</div></div>`}`;
   }
 }
 

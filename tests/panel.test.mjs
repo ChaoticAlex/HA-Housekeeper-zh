@@ -5091,3 +5091,18 @@ test("object lists share one table: device entities, integration entries, remind
   assert.ok(rem.includes('data-lsort="reminders|due') && rem.includes('data-rem-open="r1"') && rem.includes('data-lf="reminders|state"'));
   assert.ok(el.bhBackups([{ date: "2026-10-01T10:00:00+00:00", size: 1000, agents: ["backup.local"], protected: true }]).includes('data-lsort="bhbackups|size'));
 });
+
+test("the changes page counts what a filter shows, says so, and lists objects as tables", () => {
+  const { el, shadow } = panel("en");
+  el.view = "changes";
+  el.compare = COMPARE;
+  el.render();
+  assert.ok(shadow.innerHTML.includes("Search and filter apply to all sections."));
+  assert.ok(shadow.innerHTML.includes("<table"), "table");
+  assert.ok(!shadow.innerHTML.includes('style="margin'), "inline");
+  el.lvState("changes", "", "asc").q = "gone";
+  el.openFolds = {};
+  el.changesCat = "removedObjects";
+  el.render();
+  assert.ok(shadow.innerHTML.includes("1 of 1") && shadow.innerHTML.includes("of 1"), "the sections show how many of all");
+});

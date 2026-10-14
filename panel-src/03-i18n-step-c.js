@@ -1,6 +1,6 @@
 // Texts for step C of the cleanup (devices, replacing references); merged into TEXT.
 Object.assign(TEXT.de, {
-  changesFiltered: "Der Filter blendet alle {n} Einträge dieses Abschnitts aus.",
+  changesOfTotal: "von {n}", changesShownOf: "{n} von {total}", changesBarHint: "Suche und Filter gelten für alle Abschnitte.", changesCapped: "Es werden die ersten {shown} gezeigt, {count} weitere zählen nur mit.", changesFiltered: "Der Filter blendet alle {n} Einträge dieses Abschnitts aus.",
   lastEntry: "Letzter Eintrag", lastEntryNone: "kein Eintrag gefunden", sortLastEntry: "Letzter Eintrag",
   utName: "Name", utDomain: "Domain", utDevice: "Gerät", utArea: "Bereich", utIntegration: "Integration", utChanged: "Letzte Änderung", utReported: "Letzte Meldung", utSince: "Beobachtet seit", utStats: "Statistik",
   utStatId: "Statistik-ID", utKind: "Art", utUnit: "Einheit", utLast: "Letzter Eintrag", utFirst: "Erster Eintrag", utRows: "Datensätze", sortFirstEntry: "Erster Eintrag", sortRows: "Datensätze", statFirstEntry: "Erster Statistik-Eintrag", statRows: "{count} Stundenwerte", utEnergy: "Energie-Dashboard",
@@ -33,7 +33,7 @@ Object.assign(TEXT.de, {
   recurringTitle: "Wiederkehrende Geräte", recurringHint: "Diese Geräte hat Housekeeper vergessen, doch die Integration hat sie wieder angelegt. Deaktivieren ist hier meist sinnvoller; oft muss das Gerät am Quellsystem (Hub, App, Cloud) entfernt werden.", recurringSince: "vergessen am {date} · Integration: {domains}",
 });
 Object.assign(TEXT.en, {
-  changesFiltered: "The filter hides all {n} entries of this section.",
+  changesOfTotal: "of {n}", changesShownOf: "{n} of {total}", changesBarHint: "Search and filter apply to all sections.", changesCapped: "The first {shown} are shown; {count} more are only counted.", changesFiltered: "The filter hides all {n} entries of this section.",
   lastEntry: "Last entry", lastEntryNone: "no entry found", sortLastEntry: "Last entry",
   utName: "Name", utDomain: "Domain", utDevice: "Device", utArea: "Area", utIntegration: "Integration", utChanged: "Last change", utReported: "Last report", utSince: "Observed since", utStats: "Statistics",
   utStatId: "Statistic ID", utKind: "Kind", utUnit: "Unit", utLast: "Last entry", utFirst: "First entry", utRows: "Records", sortFirstEntry: "First entry", sortRows: "Records", statFirstEntry: "First statistics entry", statRows: "{count} hourly values", utEnergy: "Energy dashboard",

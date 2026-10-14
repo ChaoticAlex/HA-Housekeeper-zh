@@ -223,9 +223,9 @@ class ListsMixin {
   }
 
   // A table of objects (entities, entries, automations): name with id, type when mixed, state, plus extra columns.
-  // rows: [{ key: "entity:light.a", type, name, sub, tone, state, stateLabel, pill, rank }]; extras: [{ key, label, dir, get, cell(row) }].
+  // rows: [{ key: "entity:light.a", type, name, sub, tone, state, stateLabel, pill, rank, open }]; open: false makes a row that opens nothing; bar: false leaves the bar to the caller (the header still sorts); extras: [{ key, label, dir, get, cell(row) }].
   // The bar shows from `min` rows on; a row opens its object.
-  objectTable(id, rows, { extras = [], min = 6, empty = "", tile = row => this.tile(row.type, row.tone === "ok" ? "" : row.tone) } = {}) {
+  objectTable(id, rows, { extras = [], min = 6, bar: withBar = true, empty = "", tile = row => this.tile(row.type, row.tone === "ok" ? "" : row.tone) } = {}) {
     if (!rows.length) return empty ? `<div class="emptymsg">${empty}</div>` : "";
     this.lvState(id, "name", "asc");
     const types = [...new Set(rows.map(r => r.type))].sort();
@@ -241,7 +241,7 @@ class ListsMixin {
       { name: "state", all: this.t("objAllStatus"), options: [...new Map(rows.map(r => [r.state, r.stateLabel])).entries()].sort((a, b) => String(a[1]).localeCompare(String(b[1]), this.lang)) },
     ];
     const st = this.lv[id];
-    const bar = rows.length >= min || st.q ? this.listBar(id, { table: true, sorts, filters }) : "";
+    const bar = withBar && (rows.length >= min || st.q) ? this.listBar(id, { table: true, sorts, filters }) : "";
     const shown = this.refine(id, rows, { text: r => [r.name, r.sub, ...extras.map(x => String(x.get(r) ?? ""))].join(" "), filters: { type: (r, v) => r.type === v, state: (r, v) => r.state === v }, sorts, tie: r => r.key });
     const pg = this.paginate(id, shown);
     const columns = [
@@ -250,7 +250,7 @@ class ListsMixin {
       ...extras.map(x => ({ key: x.key, label: x.label, dir: x.dir || "asc", cell: x.cell })),
       { key: "status", label: "sortStatus", dir: "asc", cell: r => r.pill },
     ];
-    const table = shown.length ? this.listTable(id, columns, pg.rows, { cls: "objs", rowAttrs: r => `data-object="${this.esc(r.key)}" tabindex="0" role="button" aria-label="${this.esc(r.name)}"` }) : `<div class="emptymsg">${this.noMatches(id)}</div>`;
+    const table = shown.length ? this.listTable(id, columns, pg.rows, { cls: "objs", rowAttrs: r => (r.open === false ? 'class="static"' : `data-object="${this.esc(r.key)}" tabindex="0" role="button" aria-label="${this.esc(r.name)}"`) }) : `<div class="emptymsg">${this.noMatches(id)}</div>`;
     return `${bar}${table}${pg.footer}`;
   }
 
