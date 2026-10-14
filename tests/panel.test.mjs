@@ -5136,6 +5136,9 @@ test("object lists share one table: device entities, integration entries, remind
   const rem = el.remindersCard();
   assert.ok(rem.includes('data-lsort="reminders|due') && rem.includes('data-rem-open="r1"') && rem.includes('data-lf="reminders|state"'));
   assert.ok(el.bhBackups([{ date: "2026-10-01T10:00:00+00:00", size: 1000, agents: ["backup.local"], protected: true }]).includes('data-lsort="bhbackups|size'));
+  assert.ok(rem.includes('data-rem-row="r1"') && rem.includes('role="button"'), "the row opens the history");
+  assert.ok(rem.includes('data-lf-set="reminders|state|soon"') && rem.includes('data-lf-set="reminders||"'), "the key figures set the state filter");
+  assert.ok(rem.includes('data-export-list="reminders"') && el._exporters.reminders.rows()[0][0] === "Filter", "the list exports to CSV");
 });
 
 test("the changes page counts what a filter shows, says so, and lists objects as tables", () => {
