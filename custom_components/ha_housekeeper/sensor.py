@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from collections import Counter
 from datetime import datetime
 from typing import Any
@@ -213,6 +214,18 @@ class MonitorSensor(SensorEntity):
                 "reason": result["reason"],
                 "scanned_at": result["scanned_at"],
                 "last_verified_at": result["last_verified_at"],
+                **self._history_attributes(scanner.monitor),
             }
             if result else {}
         )
+
+    def _history_attributes(self, monitor: Any) -> dict[str, Any]:
+        """What the history says about the last 30 days; whole minutes and tenths of a percent keep the recorder quiet."""
+        shares = monitor.availability_of(self.function_id)
+        observed = shares["observed_seconds"]
+        return {
+            "last_problem_at": monitor.last_problem_at(self.function_id),
+            "problems_30d": shares["incidents"],
+            "downtime_30d_minutes": round(shares["problem_seconds"] / 60),
+            "availability_30d": math.floor(shares["ok_seconds"] / observed * 1000) / 10 if observed else None,
+        }

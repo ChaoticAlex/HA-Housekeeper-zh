@@ -452,6 +452,11 @@ class MonitorStore:
         entries = self.history.get(item_id, [])
         return availability(entries, now or datetime.now(UTC), min(AVAILABILITY_DAYS, self.retention_days))
 
+    def last_problem_at(self, item_id: str, now: datetime | None = None) -> str | None:
+        """When the function was last impaired or unstable (now, while it still is), if the history knows."""
+        ends = [end for _, end, state in _segments(self.history.get(item_id, []), now or datetime.now(UTC)) if state in ("problem", "flapping")]
+        return max(ends).isoformat() if ends else None
+
     def history_of(self, item_id: str) -> list[dict[str, Any]]:
         """The entries of one function, newest first."""
         return list(reversed(self.history.get(item_id, ())))

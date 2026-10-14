@@ -231,3 +231,13 @@ def test_availability_counts_known_stretches_and_leaves_out_gaps_and_disabled_ti
     assert (result["incidents"], result["longest_seconds"]) == (1, 2 * 3600)
     assert result["since"] == at(29) and len(result["days"]) == 31 and result["days"][-1]["state"] == "problem"
     assert result["days"][0]["state"] is None
+
+
+def test_last_problem_is_the_end_of_the_latest_impaired_stretch():
+    store = MonitorStore.__new__(MonitorStore)
+    now = datetime(2026, 10, 14, 12, tzinfo=UTC)
+    store.history = {"w": [{"at": (now - timedelta(hours=9)).isoformat(), "kind": "problem"}, {"at": (now - timedelta(hours=8)).isoformat(), "kind": "ok"}]}
+    assert store.last_problem_at("w", now) == (now - timedelta(hours=8)).isoformat()
+    store.history["w"].append({"at": (now - timedelta(hours=1)).isoformat(), "kind": "problem"})
+    assert store.last_problem_at("w", now) == now.isoformat()
+    assert store.last_problem_at("none", now) is None
