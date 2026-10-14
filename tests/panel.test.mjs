@@ -3798,6 +3798,26 @@ test("the overview of an object offers its actions: decide a finding, replace a 
   assert.ok(!rel.includes("style="), "no inline style");
 });
 
+test("the relations of an object are one table: rows open known objects, a missing target is marked, the kind filter and the export follow", () => {
+  const { el } = panel("en");
+  el.data = { ...DATA, objects: [...DATA.objects, { object_type: "entity", object_id: "sensor.rel", name: "Rel", status: "active" }, { object_type: "automation", object_id: "automation.rel", name: "Rel auto", status: "active" }, { object_type: "device", object_id: "drel", name: "Rel device", status: "active" }],
+    edges: [
+      { source: "device:drel", target: "entity:sensor.rel", relation: "PROVIDES", confidence: "certain" },
+      { source: "automation:automation.rel", target: "entity:sensor.rel", relation: "TARGETS", confidence: "certain" },
+      { source: "entity:sensor.rel", target: "entity:sensor.gone", relation: "TARGETS", confidence: "certain", location: "a" },
+      { source: "entity:sensor.rel", target: "entity:sensor.gone", relation: "TARGETS", confidence: "certain", location: "b" }],
+    findings: [{ key: "kg", rule_id: "x", classification: "broken_reference", affected_object: "sensor.gone", object_id: "sensor.rel" }] };
+  const rel = el.relationsCard("entity:sensor.rel");
+  assert.ok(rel.includes("<table") && rel.includes('data-lsort="relations|name'), "a table");
+  assert.ok(rel.includes('data-object="automation:automation.rel"') && rel.includes('data-object="device:drel"'), "a known object opens");
+  assert.ok(!rel.includes('data-object="entity:sensor.gone"') && rel.includes('class="pill red">Missing'), "a missing target is marked and does not open");
+  assert.ok(rel.includes("2 places"), "the same relation at two places is one row");
+  const rows = () => el._exporters.relations.rows();
+  assert.equal(rows().length, 3);
+  el.lvState("relations", "name", "asc").f.group = "origin"; el.relationsCard("entity:sensor.rel");
+  assert.equal(JSON.stringify(rows().map(r => r[1])), '["device:drel"]', "the kind filter keeps only the origin rows");
+});
+
 test("the repair view offers its tasks as tiles; one opens its assistant and the plan is finished there", () => {
   const { el, shadow } = panel("en");
   el.data = stepCData().data; el.journal = []; el.view = "repair"; el.repairTask = null;

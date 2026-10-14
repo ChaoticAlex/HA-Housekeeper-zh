@@ -35,6 +35,10 @@ CPU_SAMPLE_SECONDS = 0.4
 # long, and a real second walk waits at least the gap, however often the page is refreshed.
 WALK_MAX_AGE = 300  # seconds
 WALK_MIN_GAP = 30  # seconds
+# One walk may take this long, all folders together. A slower one stops: the sizes read so far are
+# shown as minimums, and the result is reused only for WALK_TRUNCATED_AGE seconds.
+WALK_BUDGET = 20  # seconds
+WALK_TRUNCATED_AGE = 60  # seconds
 _WALK_KEY = f"{DOMAIN}_folder_walk"
 GIB = 1024**3
 
@@ -57,8 +61,24 @@ STORAGE_TARGETS: tuple[tuple[str, str, str], ...] = (
 # --------------------------------------------------------------------------- sizes
 
 
-def path_size(path: str) -> int:
-    """Size of a file or a folder in bytes; links are not followed, unreadable parts count 0."""
+class _Budget:
+    """The time one folder walk may take; ``cut`` says the walk was stopped before it was done."""
+
+    def __init__(self, seconds: float) -> None:
+        self.deadline = time.monotonic() + seconds
+        self.cut = False
+
+    def spent(self) -> bool:
+        if not self.cut and time.monotonic() > self.deadline:
+            self.cut = True
+        return self.cut
+
+
+def path_size(path: str, budget: _Budget | None = None) -> int:
+    """Size of a file or a folder in bytes; links are not followed, unreadable parts count 0.
+
+    With a spent ``budget`` the walk stops and the size read so far is returned.
+    """
     if not path or not os.path.exists(path):
         return 0
     if os.path.isfile(path):
@@ -68,6 +88,8 @@ def path_size(path: str) -> int:
             return 0
     total = 0
     for root, _dirs, files in os.walk(path, followlinks=False):
+        if budget and budget.spent():
+            break
         for name in files:
             file = os.path.join(root, name)
             try:
@@ -89,7 +111,9 @@ _DB_PREFIX = (
 )
 
 
-def other_entries(config_dir: str) -> tuple[list[dict[str, Any]], dict[str, int]]:
+def other_entries(
+    config_dir: str, budget: _Budget | None = None
+) -> tuple[list[dict[str, Any]], dict[str, int]]:
     """Entries directly under the configuration directory that are not one of the known places.
 
     Returns the largest ones (name, kind, bytes) and the sum and count of the rest.
@@ -100,7 +124,9 @@ def other_entries(config_dir: str) -> tuple[list[dict[str, Any]], dict[str, int]
         for entry in os.scandir(config_dir):
             if entry.name in known or entry.name.startswith(_DB_PREFIX) or entry.is_symlink():
                 continue
-            size = path_size(entry.path)
+            if budget and budget.spent():
+                break
+            size = path_size(entry.path, budget)
             if size > 0:
                 found.append({"name": entry.name, "dir": entry.is_dir(), "bytes": size})
     except OSError as err:
@@ -110,16 +136,16 @@ def other_entries(config_dir: str) -> tuple[list[dict[str, Any]], dict[str, int]
     return found[:OTHER_LIMIT], {"count": len(tail), "bytes": sum(item["bytes"] for item in tail)}
 
 
-def storage_breakdown(config_dir: str) -> dict[str, Any]:
+def storage_breakdown(config_dir: str, budget: _Budget | None = None) -> dict[str, Any]:
     """The known places under the configuration directory and every custom integration."""
     items: list[dict[str, Any]] = []
     for target_id, rel, kind in STORAGE_TARGETS:
         if kind == "db":
             size = sum(
-                path_size(os.path.join(config_dir, rel + suffix)) for suffix in ("", "-wal", "-shm")
+                path_size(os.path.join(config_dir, rel + suffix), budget) for suffix in ("", "-wal", "-shm")
             )
         else:
-            size = path_size(os.path.join(config_dir, rel))
+            size = path_size(os.path.join(config_dir, rel), budget)
         if size > 0:
             items.append({"id": target_id, "path": rel, "bytes": size})
     items.sort(key=lambda item: item["bytes"], reverse=True)
@@ -130,13 +156,13 @@ def storage_breakdown(config_dir: str) -> dict[str, Any]:
         try:
             for entry in os.scandir(folder):
                 if entry.is_dir() and not entry.name.startswith(("__", ".")):
-                    size = path_size(entry.path)
+                    size = path_size(entry.path, budget)
                     if size > 0:
                         custom.append({"domain": entry.name, "bytes": size})
         except OSError as err:
             _LOGGER.debug("custom_components cannot be read: %s", err)
     custom.sort(key=lambda item: item["bytes"], reverse=True)
-    other, rest = other_entries(config_dir)
+    other, rest = other_entries(config_dir, budget)
     return {"breakdown": items, "custom_integrations": custom, "other": other, "other_rest": rest}
 
 
@@ -192,7 +218,9 @@ def card_status(card: dict[str, Any], used: set[str] | None) -> str:
     return "used" if used.intersection(names) else "unused"
 
 
-def card_sizes(config_dir: str, urls: Iterable[str]) -> dict[str, dict[str, Any]]:
+def card_sizes(
+    config_dir: str, urls: Iterable[str], budget: _Budget | None = None
+) -> dict[str, dict[str, Any]]:
     """Size per resource URL: the folder of a card that has one under www (HACS), else the file."""
     www = os.path.realpath(os.path.join(config_dir, "www"))
     result: dict[str, dict[str, Any]] = {}
@@ -215,9 +243,9 @@ def card_sizes(config_dir: str, urls: Iterable[str]) -> dict[str, dict[str, Any]
         }
         parent = os.path.realpath(os.path.dirname(path))
         if os.path.isfile(path) and parent != www and parent.startswith(www + os.sep):
-            result[url] = {"bytes": path_size(parent), "scope": "folder", "path": parent, **extra}
+            result[url] = {"bytes": path_size(parent, budget), "scope": "folder", "path": parent, **extra}
         else:
-            result[url] = {"bytes": path_size(path), "scope": "file", "path": path, **extra}
+            result[url] = {"bytes": path_size(path, budget), "scope": "file", "path": path, **extra}
     return result
 
 
@@ -317,10 +345,10 @@ def _empty_storage() -> dict[str, Any]:
     }
 
 
-def safe_storage_breakdown(config_dir: str) -> dict[str, Any]:
+def safe_storage_breakdown(config_dir: str, budget: _Budget | None = None) -> dict[str, Any]:
     """The folder walk; a failure leaves the lists empty instead of failing the page."""
     try:
-        return storage_breakdown(config_dir)
+        return storage_breakdown(config_dir, budget)
     except Exception as err:
         _LOGGER.warning("Storage breakdown failed: %s", err)
         return _empty_storage()
@@ -606,16 +634,20 @@ async def _folder_walk(
     )
     async with walk.lock:
         age = time.monotonic() - walk.at
+        max_age = WALK_TRUNCATED_AGE if (walk.result or {}).get("truncated") else WALK_MAX_AGE
         if (
             walk.result is not None
             and walk.signature == signature
-            and (age < WALK_MIN_GAP or (not fresh and age < WALK_MAX_AGE))
+            and (age < WALK_MIN_GAP or (not fresh and age < max_age))
         ):
             return {**walk.result, "cached": True}
         began = time.monotonic()
+        budget = _Budget(WALK_BUDGET)
         storage, sizes, bp_sizes = await asyncio.gather(
-            hass.async_add_executor_job(safe_storage_breakdown, config_dir),
-            hass.async_add_executor_job(card_sizes, config_dir, [r["url"] for r in resources]),
+            hass.async_add_executor_job(safe_storage_breakdown, config_dir, budget),
+            hass.async_add_executor_job(
+                card_sizes, config_dir, [r["url"] for r in resources], budget
+            ),
             hass.async_add_executor_job(
                 blueprint_sizes, config_dir, [(b["domain"], b["path"]) for b in blueprints]
             ),
@@ -626,6 +658,7 @@ async def _folder_walk(
             "bp_sizes": bp_sizes,
             "read_at": datetime.now(UTC).isoformat(),
             "read_seconds": round(time.monotonic() - began, 2),
+            "truncated": budget.cut,
         }
         walk.signature, walk.at = signature, time.monotonic()
         return {**walk.result, "cached": False}
@@ -699,6 +732,8 @@ async def system_usage(
         "read_at": walked["read_at"],
         "read_seconds": walked["read_seconds"],
         "cached": walked["cached"],
+        # True when the walk hit its time limit: every size is then a minimum, some may be missing.
+        "truncated": walked["truncated"],
     }
 
 
