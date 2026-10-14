@@ -6,6 +6,7 @@ Object.assign(TEXT.de, {
   compEntries: "{n} Einträge", compNoApps: "Keine Apps (kein Supervisor oder keine installiert).", compNoIntegrations: "Keine Integrationen gefunden.",
   compSumApps: "Apps", compSumRunning: "laufen", compSumCore: "Core-Integrationen", compSumCustomInt: "Custom-Integrationen", compSumProblem: "mit Problem", compSumUpdates: "Updates über HACS", compSumAppUpdates: "App-Updates", compColLatest: "Neueste Version", compFilterHacs: "HACS", compFilterUpdate: "Update verfügbar", compFilterViaHacs: "Über HACS",
   compColVersion: "Version", compColEntries: "Einträge", compColDevices: "Geräte", compColAvail: "Verfügbarkeit", compColOrigin: "Herkunft", compUpdate: "Update", compUpdateHint: "Neuere Version: {v}",
+  compOpenEntries: "Einträge anzeigen", compCloseEntries: "Einträge ausblenden", compFilterState: "Zustand",
   compAvailHint: "Schlechtester Wert der Einträge; erscheint, sobald die Zuverlässigkeit berechnet ist.", compSizeHint: "Ordnergröße; erscheint, sobald „Speicher & System“ geladen ist.",
 });
 Object.assign(TEXT.en, {
@@ -14,6 +15,7 @@ Object.assign(TEXT.en, {
   compEntries: "{n} entries", compNoApps: "No apps (no Supervisor, or none installed).", compNoIntegrations: "No integrations found.",
   compSumApps: "Apps", compSumRunning: "running", compSumCore: "Core integrations", compSumCustomInt: "Custom integrations", compSumProblem: "with a problem", compSumUpdates: "Updates via HACS", compSumAppUpdates: "App updates", compColLatest: "Latest version", compFilterHacs: "HACS", compFilterUpdate: "Update available", compFilterViaHacs: "Via HACS",
   compColVersion: "Version", compColEntries: "Entries", compColDevices: "Devices", compColAvail: "Availability", compColOrigin: "Origin", compUpdate: "Update", compUpdateHint: "Newer version: {v}",
+  compOpenEntries: "Show entries", compCloseEntries: "Hide entries", compFilterState: "State",
   compAvailHint: "Worst value of the entries; appears once reliability is calculated.", compSizeHint: "Folder size; appears once Storage & system is loaded.",
 });
 
@@ -49,7 +51,14 @@ class ComponentsMixin {
 
   compNameCell(g) {
     const sub = [g.domain, g.entries.length > 1 ? this.t("compEntries", { n: g.entries.length }) : ""].filter(Boolean).join(" · ");
-    return this.nameCell(g.name, sub);
+    const open = (this.compOpen || []).includes(g.domain);
+    return `${g.entries.length > 1 ? this.expandBtn("data-comp-open", g.domain, open, this.t(open ? "compCloseEntries" : "compOpenEntries")) : ""}${this.nameCell(g.name, sub)}`;
+  }
+
+  // The entries of an opened integration: one line each, a click opens the entry.
+  compEntryRows(g, span) {
+    if (!(this.compOpen || []).includes(g.domain)) return "";
+    return g.entries.map(o => `<tr data-object="${this.esc(this.objectKey(o))}" tabindex="0" role="button" class="compentry"><td colspan="${span}">${this.nameCell(o.name || g.name, o.title && o.title !== o.name ? o.title : "")}<span class="compentrymeta">${this.pill(o.status)} · ${this.esc(this.formatNumber(o.entity_count || 0))} ${this.t("entities")} · ${this.esc(this.formatNumber(o.device_count || 0))} ${this.t("compColDevices")}</span></td></tr>`).join("");
   }
 
   compIntegrationsList(items, name) {
@@ -72,15 +81,18 @@ class ComponentsMixin {
         { key: "name", label: "sysColIntegration", dir: "asc", get: g => g.name },
         { key: "entities", label: "entities", dir: "desc", get: g => g.entities },
         { key: "version", label: "compColVersion", dir: "asc", get: g => g.version },
+        { key: "state", label: "sysColState", dir: "desc", get: g => COMP_RANK[g.status] ?? 1 },
+        { key: "devices", label: "compColDevices", dir: "desc", get: g => g.devices },
         ...(hasSize ? [{ key: "size", label: "sysColSize", dir: "desc", get: g => g.bytes }] : []),
         ...(hasAvail ? [{ key: "avail", label: "compColAvail", dir: "asc", get: g => g.avail }] : []),
       ],
       filters: [
+        { name: "state", all: this.t("compFilterState"), options: [["problem", this.statusLabel("problem")], ["disabled", this.statusLabel("disabled")], ["active", this.statusLabel("active")]] },
         ...(items.some(g => g.hacs) ? [{ name: "hacs", all: this.t("compFilterHacs"), options: [["update", this.t("compFilterUpdate")], ["hacs", this.t("compFilterViaHacs")]] }] : []),
       ],
-      filterFns: { hacs: (g, v) => (v === "update" ? Boolean(g.hacs?.pending_update) : Boolean(g.hacs)) },
+      filterFns: { state: (g, v) => g.status === v, hacs: (g, v) => (v === "update" ? Boolean(g.hacs?.pending_update) : Boolean(g.hacs)) },
       text: g => `${g.name} ${g.domain}`, tie: g => g.domain, empty: "compNoIntegrations",
-      rowAttrs: g => this.compRowAttrs(g), columns,
+      rowAttrs: g => this.compRowAttrs(g), columns, after: g => this.compEntryRows(g, columns.length),
       exportName: "integrations", header: [this.t("sysColIntegration"), "Domain", this.t("compColOrigin"), this.t("compColVersion"), this.t("sysColState"), this.t("compColEntries"), this.t("entities"), this.t("compColDevices"), this.t("intHacsAvailable"), this.t("compUpdate")],
       rows: g => [g.name, g.domain, origin(g), g.version || "", this.statusLabel(g.status), g.entries.length, g.entities, g.devices, g.hacs ? g.hacs.available_version || "" : "", g.hacs ? (g.hacs.pending_update ? "yes" : "no") : ""],
     });
@@ -96,7 +108,7 @@ class ComponentsMixin {
     const running = a => a.state === "started";
     const columns = [
       { key: "name", label: "sysColApp", cell: a => this.nameCell(a.name, a.object_id) },
-      { key: "state", label: "sysColState", sortable: false, cell: a => `<span class="pill ${running(a) ? "ok" : "mute"}">${this.t(running(a) ? "sysAppRunning" : "sysAppStopped")}</span>` },
+      { key: "state", label: "sysColState", cell: a => `<span class="pill ${running(a) ? "ok" : "mute"}">${this.t(running(a) ? "sysAppRunning" : "sysAppStopped")}</span>` },
       { key: "version", label: "compColVersion", cell: a => `${this.esc(a.version || "–")}${a.update_available ? ` <span class="pill warn" title="${this.esc(this.t("compUpdateHint", { v: a.version_latest || "" }))}">${this.t("compUpdate")}</span>` : ""}` },
       { key: "latest", label: "compColLatest", cell: a => this.esc(a.version_latest || "–") },
       ...(hasLoad ? [
@@ -108,7 +120,7 @@ class ComponentsMixin {
     return this.sysList("compapps", apps, {
       sort: "name", dir: "asc",
       sorts: [
-        { key: "name", label: "sysColApp", dir: "asc", get: a => a.name }, { key: "version", label: "compColVersion", dir: "asc", get: a => a.version }, { key: "latest", label: "compColLatest", dir: "asc", get: a => a.version_latest },
+        { key: "name", label: "sysColApp", dir: "asc", get: a => a.name }, { key: "state", label: "sysColState", dir: "desc", get: a => (running(a) ? 1 : 0) }, { key: "version", label: "compColVersion", dir: "asc", get: a => a.version }, { key: "latest", label: "compColLatest", dir: "asc", get: a => a.version_latest },
         ...(hasLoad ? [{ key: "ram", label: "sysColRam", dir: "desc", get: a => use(a)?.memory_usage ?? null }, { key: "cpu", label: "sysColCpu", dir: "desc", get: a => use(a)?.cpu_percent ?? null }] : []),
         ...(hasSize ? [{ key: "size", label: "sysColData", dir: "desc", get: a => use(a)?.size_bytes ?? null }] : []),
       ],
@@ -149,6 +161,8 @@ class ComponentsMixin {
     const open = this.viewTabOf("components", tabs, "core");
     if (apps.length || custom.length) this.sysEnsure("storage"); // CPU, RAM and data of the apps, folder sizes of custom integrations
     const body = open === "apps" ? this.compAppsList(apps) : this.compIntegrationsList(open === "custom" ? custom : core, open);
-    return `<div class="stack">${this.navTiles("components", tabs, open, this.t("components"), true)}<div class="panel">${body}</div></div>`;
+    const st = this.sysState("storage");
+    const bar = this.pageBar({ at: st.at, loading: st.loading, attr: 'data-sys-refresh="storage"' });
+    return `<div class="stack">${bar}${this.navTiles("components", tabs, open, this.t("components"), true)}<div class="panel">${body}</div></div>`;
   }
 }

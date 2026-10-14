@@ -92,7 +92,7 @@ class SystemMixin {
     const refined = this.refine(id, items, { text: opt.text, filters: opt.filterFns || {}, sorts: opt.sorts, tie: opt.tie });
     const pg = this.paginate(id, refined);
     const table = refined.length
-      ? this.listTable(id, opt.columns, pg.rows, { cls: opt.cls || "", rowAttrs: opt.rowAttrs || (() => 'class="static"') })
+      ? this.listTable(id, opt.columns, pg.rows, { cls: opt.cls || "", rowAttrs: opt.rowAttrs || (() => 'class="static"'), ...(opt.after ? { after: opt.after } : {}) })
       : `<div class="emptymsg">${items.length ? this.noMatches(id) : `<ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t(opt.empty)}`}</div>`;
     return `${bar}${table}${pg.footer}`;
   }
@@ -504,6 +504,11 @@ class SystemMixin {
   // ---------------------------------------------------------------- bindings
 
   bindSystem(root) {
+    root.querySelectorAll("[data-comp-open]").forEach(el => el.addEventListener("click", () => {
+      const open = this.compOpen || [];
+      this.compOpen = open.includes(el.dataset.compOpen) ? open.filter(x => x !== el.dataset.compOpen) : [...open, el.dataset.compOpen];
+      this.render();
+    }));
     root.querySelectorAll("[data-sys-refresh]").forEach(el => el.onclick = () => this.sysLoad(el.dataset.sysRefresh, true));
     // A tap on the (i) shows its text for a few seconds, as touch has no hover.
     root.querySelectorAll(".infotip").forEach(el => el.addEventListener("click", () => {

@@ -4619,6 +4619,14 @@ test("apps and integrations groups config entries by domain and opens the page o
   el.render();
   assert.ok(shadow.innerHTML.includes(el.t("components")));
   assert.ok(!shadow.innerHTML.includes(el.t("renderError")));
+  assert.ok(shadow.innerHTML.includes('data-sys-refresh="storage"'), "the page has the refresh bar");
+  el.viewTab = { components: "custom" };
+  el.render();
+  assert.ok(shadow.innerHTML.includes('data-comp-open="demo"') && !shadow.innerHTML.includes('class="compentry"'), "an integration with two entries folds out; closed it shows none");
+  el.compOpen = ["demo"];
+  el.render();
+  assert.equal((shadow.innerHTML.match(/class="compentry"/g) || []).length, 2, "opened, one row per entry");
+  el.compOpen = [];
   el.data = { ...el.data, objects: [...el.data.objects, { object_type: "app", object_id: "core_ssh", name: "SSH", slug: "core_ssh", state: "started", status: "active", version: "1.0", version_latest: "1.7", update_available: true }] };
   el.viewTab = { components: "apps" };
   el.render();

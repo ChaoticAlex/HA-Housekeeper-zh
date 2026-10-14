@@ -1414,7 +1414,7 @@ class StylesMixin {
       .sumtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.sumtile{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border:1px solid var(--hk-border);border-left:4px solid var(--hk-gray);border-radius:12px;background:var(--hk-surface);text-align:left;font:inherit;color:inherit}button.sumtile{cursor:pointer}button.sumtile:hover{background:var(--hk-soft)}.sumtile.ok{border-left-color:var(--hk-green)}.sumtile.warn{border-left-color:var(--hk-amber)}.sumtile.red{border-left-color:var(--hk-red)}.sumlabel{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.sumvalue{font-size:calc(22px*var(--hk-fs,1));font-weight:600;line-height:1.2;overflow-wrap:anywhere}.sumtile small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));overflow-wrap:anywhere}.sumtile{position:relative}button.sumtile .sumlabel{padding-right:20px}.sumcue{position:absolute;top:10px;right:10px;--mdc-icon-size:16px;color:var(--hk-muted)}div.sumtile,div.sumtile:hover{box-shadow:none;background:var(--hk-soft)}.sumtile.filter[aria-pressed=true]{border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 9%,var(--hk-surface));box-shadow:0 0 0 1px var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumcue{color:var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumlabel{color:var(--hk-blue-text)}.sumtile.filter[aria-pressed=true] .sumlabel:before{content:"\\2713";margin-right:.4em}.filteron{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 16px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);background:color-mix(in srgb,var(--hk-blue) 7%,var(--hk-surface));border-bottom:1px solid var(--hk-border)}.filteron ha-icon{--mdc-icon-size:16px;color:var(--hk-blue)}.filteron b{color:var(--hk-text);font-weight:600}.filteron .btn{margin-left:auto}.tabdot{display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:50%;background:var(--hk-gray)}.tabdot.warn{background:var(--hk-amber)}.tabdot.red{background:var(--hk-red)}
       .detailgrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:14px;align-items:start}.pad{padding:16px}.todofoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px}.visitline{display:inline-flex;align-items:center;gap:6px;color:var(--hk-muted)}.visitline ha-icon{--mdc-icon-size:16px}
       .facts{display:grid}.fact{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.fact:first-child{border-top:0}.fact span{color:var(--hk-muted)}.fact b{font-weight:600;text-align:right}.fact small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:400}
-      .invsubrow td:first-child{padding-left:28px}.invsubrow .invsub{color:var(--hk-muted)}.hist-bar{margin-top:4px}.hist-hint{margin:10px 16px}.hist-hint0{margin:10px 0 0}.changes-pick{grid-template-columns:auto minmax(220px,360px)}.baselbl{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.u-m0{margin:0!important}.u-block{display:block!important}.u-mb14{margin-bottom:14px!important}.u-pt6{padding:6px 0 0!important}.u-dim{opacity:.8!important}.u-ic14{--mdc-icon-size:14px!important}.u-amber{color:var(--hk-amber)!important}
+      .compentry td{padding-left:28px;cursor:pointer}.compentrymeta{display:block;color:var(--hk-muted);font-size:12px}.invsubrow td:first-child{padding-left:28px}.invsubrow .invsub{color:var(--hk-muted)}.hist-bar{margin-top:4px}.hist-hint{margin:10px 16px}.hist-hint0{margin:10px 0 0}.changes-pick{grid-template-columns:auto minmax(220px,360px)}.baselbl{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.u-m0{margin:0!important}.u-block{display:block!important}.u-mb14{margin-bottom:14px!important}.u-pt6{padding:6px 0 0!important}.u-dim{opacity:.8!important}.u-ic14{--mdc-icon-size:14px!important}.u-amber{color:var(--hk-amber)!important}
       .factnote{padding:12px 16px;border-top:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));line-height:1.5}:where(:not(.panel))>.factnote{border-top:0;padding:0}.panel>.factnote:first-child{border-top:0}
       .diagcard{display:grid;gap:12px;padding:16px}.checks{display:grid;gap:8px}
       .check{display:grid;grid-template-columns:22px minmax(100px,150px) minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-soft);font-size:calc(13px*var(--hk-fs,1))}.check b{font-weight:600}.check .val{color:var(--hk-muted);overflow-wrap:anywhere}
@@ -12227,7 +12227,7 @@ class SystemMixin {
     const refined = this.refine(id, items, { text: opt.text, filters: opt.filterFns || {}, sorts: opt.sorts, tie: opt.tie });
     const pg = this.paginate(id, refined);
     const table = refined.length
-      ? this.listTable(id, opt.columns, pg.rows, { cls: opt.cls || "", rowAttrs: opt.rowAttrs || (() => 'class="static"') })
+      ? this.listTable(id, opt.columns, pg.rows, { cls: opt.cls || "", rowAttrs: opt.rowAttrs || (() => 'class="static"'), ...(opt.after ? { after: opt.after } : {}) })
       : `<div class="emptymsg">${items.length ? this.noMatches(id) : `<ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t(opt.empty)}`}</div>`;
     return `${bar}${table}${pg.footer}`;
   }
@@ -12639,6 +12639,11 @@ class SystemMixin {
   // ---------------------------------------------------------------- bindings
 
   bindSystem(root) {
+    root.querySelectorAll("[data-comp-open]").forEach(el => el.addEventListener("click", () => {
+      const open = this.compOpen || [];
+      this.compOpen = open.includes(el.dataset.compOpen) ? open.filter(x => x !== el.dataset.compOpen) : [...open, el.dataset.compOpen];
+      this.render();
+    }));
     root.querySelectorAll("[data-sys-refresh]").forEach(el => el.onclick = () => this.sysLoad(el.dataset.sysRefresh, true));
     // A tap on the (i) shows its text for a few seconds, as touch has no hover.
     root.querySelectorAll(".infotip").forEach(el => el.addEventListener("click", () => {
@@ -12991,6 +12996,7 @@ Object.assign(TEXT.de, {
   compEntries: "{n} Einträge", compNoApps: "Keine Apps (kein Supervisor oder keine installiert).", compNoIntegrations: "Keine Integrationen gefunden.",
   compSumApps: "Apps", compSumRunning: "laufen", compSumCore: "Core-Integrationen", compSumCustomInt: "Custom-Integrationen", compSumProblem: "mit Problem", compSumUpdates: "Updates über HACS", compSumAppUpdates: "App-Updates", compColLatest: "Neueste Version", compFilterHacs: "HACS", compFilterUpdate: "Update verfügbar", compFilterViaHacs: "Über HACS",
   compColVersion: "Version", compColEntries: "Einträge", compColDevices: "Geräte", compColAvail: "Verfügbarkeit", compColOrigin: "Herkunft", compUpdate: "Update", compUpdateHint: "Neuere Version: {v}",
+  compOpenEntries: "Einträge anzeigen", compCloseEntries: "Einträge ausblenden", compFilterState: "Zustand",
   compAvailHint: "Schlechtester Wert der Einträge; erscheint, sobald die Zuverlässigkeit berechnet ist.", compSizeHint: "Ordnergröße; erscheint, sobald „Speicher & System“ geladen ist.",
 });
 Object.assign(TEXT.en, {
@@ -12999,6 +13005,7 @@ Object.assign(TEXT.en, {
   compEntries: "{n} entries", compNoApps: "No apps (no Supervisor, or none installed).", compNoIntegrations: "No integrations found.",
   compSumApps: "Apps", compSumRunning: "running", compSumCore: "Core integrations", compSumCustomInt: "Custom integrations", compSumProblem: "with a problem", compSumUpdates: "Updates via HACS", compSumAppUpdates: "App updates", compColLatest: "Latest version", compFilterHacs: "HACS", compFilterUpdate: "Update available", compFilterViaHacs: "Via HACS",
   compColVersion: "Version", compColEntries: "Entries", compColDevices: "Devices", compColAvail: "Availability", compColOrigin: "Origin", compUpdate: "Update", compUpdateHint: "Newer version: {v}",
+  compOpenEntries: "Show entries", compCloseEntries: "Hide entries", compFilterState: "State",
   compAvailHint: "Worst value of the entries; appears once reliability is calculated.", compSizeHint: "Folder size; appears once Storage & system is loaded.",
 });
 
@@ -13034,7 +13041,14 @@ class ComponentsMixin {
 
   compNameCell(g) {
     const sub = [g.domain, g.entries.length > 1 ? this.t("compEntries", { n: g.entries.length }) : ""].filter(Boolean).join(" · ");
-    return this.nameCell(g.name, sub);
+    const open = (this.compOpen || []).includes(g.domain);
+    return `${g.entries.length > 1 ? this.expandBtn("data-comp-open", g.domain, open, this.t(open ? "compCloseEntries" : "compOpenEntries")) : ""}${this.nameCell(g.name, sub)}`;
+  }
+
+  // The entries of an opened integration: one line each, a click opens the entry.
+  compEntryRows(g, span) {
+    if (!(this.compOpen || []).includes(g.domain)) return "";
+    return g.entries.map(o => `<tr data-object="${this.esc(this.objectKey(o))}" tabindex="0" role="button" class="compentry"><td colspan="${span}">${this.nameCell(o.name || g.name, o.title && o.title !== o.name ? o.title : "")}<span class="compentrymeta">${this.pill(o.status)} · ${this.esc(this.formatNumber(o.entity_count || 0))} ${this.t("entities")} · ${this.esc(this.formatNumber(o.device_count || 0))} ${this.t("compColDevices")}</span></td></tr>`).join("");
   }
 
   compIntegrationsList(items, name) {
@@ -13057,15 +13071,18 @@ class ComponentsMixin {
         { key: "name", label: "sysColIntegration", dir: "asc", get: g => g.name },
         { key: "entities", label: "entities", dir: "desc", get: g => g.entities },
         { key: "version", label: "compColVersion", dir: "asc", get: g => g.version },
+        { key: "state", label: "sysColState", dir: "desc", get: g => COMP_RANK[g.status] ?? 1 },
+        { key: "devices", label: "compColDevices", dir: "desc", get: g => g.devices },
         ...(hasSize ? [{ key: "size", label: "sysColSize", dir: "desc", get: g => g.bytes }] : []),
         ...(hasAvail ? [{ key: "avail", label: "compColAvail", dir: "asc", get: g => g.avail }] : []),
       ],
       filters: [
+        { name: "state", all: this.t("compFilterState"), options: [["problem", this.statusLabel("problem")], ["disabled", this.statusLabel("disabled")], ["active", this.statusLabel("active")]] },
         ...(items.some(g => g.hacs) ? [{ name: "hacs", all: this.t("compFilterHacs"), options: [["update", this.t("compFilterUpdate")], ["hacs", this.t("compFilterViaHacs")]] }] : []),
       ],
-      filterFns: { hacs: (g, v) => (v === "update" ? Boolean(g.hacs?.pending_update) : Boolean(g.hacs)) },
+      filterFns: { state: (g, v) => g.status === v, hacs: (g, v) => (v === "update" ? Boolean(g.hacs?.pending_update) : Boolean(g.hacs)) },
       text: g => `${g.name} ${g.domain}`, tie: g => g.domain, empty: "compNoIntegrations",
-      rowAttrs: g => this.compRowAttrs(g), columns,
+      rowAttrs: g => this.compRowAttrs(g), columns, after: g => this.compEntryRows(g, columns.length),
       exportName: "integrations", header: [this.t("sysColIntegration"), "Domain", this.t("compColOrigin"), this.t("compColVersion"), this.t("sysColState"), this.t("compColEntries"), this.t("entities"), this.t("compColDevices"), this.t("intHacsAvailable"), this.t("compUpdate")],
       rows: g => [g.name, g.domain, origin(g), g.version || "", this.statusLabel(g.status), g.entries.length, g.entities, g.devices, g.hacs ? g.hacs.available_version || "" : "", g.hacs ? (g.hacs.pending_update ? "yes" : "no") : ""],
     });
@@ -13081,7 +13098,7 @@ class ComponentsMixin {
     const running = a => a.state === "started";
     const columns = [
       { key: "name", label: "sysColApp", cell: a => this.nameCell(a.name, a.object_id) },
-      { key: "state", label: "sysColState", sortable: false, cell: a => `<span class="pill ${running(a) ? "ok" : "mute"}">${this.t(running(a) ? "sysAppRunning" : "sysAppStopped")}</span>` },
+      { key: "state", label: "sysColState", cell: a => `<span class="pill ${running(a) ? "ok" : "mute"}">${this.t(running(a) ? "sysAppRunning" : "sysAppStopped")}</span>` },
       { key: "version", label: "compColVersion", cell: a => `${this.esc(a.version || "–")}${a.update_available ? ` <span class="pill warn" title="${this.esc(this.t("compUpdateHint", { v: a.version_latest || "" }))}">${this.t("compUpdate")}</span>` : ""}` },
       { key: "latest", label: "compColLatest", cell: a => this.esc(a.version_latest || "–") },
       ...(hasLoad ? [
@@ -13093,7 +13110,7 @@ class ComponentsMixin {
     return this.sysList("compapps", apps, {
       sort: "name", dir: "asc",
       sorts: [
-        { key: "name", label: "sysColApp", dir: "asc", get: a => a.name }, { key: "version", label: "compColVersion", dir: "asc", get: a => a.version }, { key: "latest", label: "compColLatest", dir: "asc", get: a => a.version_latest },
+        { key: "name", label: "sysColApp", dir: "asc", get: a => a.name }, { key: "state", label: "sysColState", dir: "desc", get: a => (running(a) ? 1 : 0) }, { key: "version", label: "compColVersion", dir: "asc", get: a => a.version }, { key: "latest", label: "compColLatest", dir: "asc", get: a => a.version_latest },
         ...(hasLoad ? [{ key: "ram", label: "sysColRam", dir: "desc", get: a => use(a)?.memory_usage ?? null }, { key: "cpu", label: "sysColCpu", dir: "desc", get: a => use(a)?.cpu_percent ?? null }] : []),
         ...(hasSize ? [{ key: "size", label: "sysColData", dir: "desc", get: a => use(a)?.size_bytes ?? null }] : []),
       ],
@@ -13134,7 +13151,9 @@ class ComponentsMixin {
     const open = this.viewTabOf("components", tabs, "core");
     if (apps.length || custom.length) this.sysEnsure("storage"); // CPU, RAM and data of the apps, folder sizes of custom integrations
     const body = open === "apps" ? this.compAppsList(apps) : this.compIntegrationsList(open === "custom" ? custom : core, open);
-    return `<div class="stack">${this.navTiles("components", tabs, open, this.t("components"), true)}<div class="panel">${body}</div></div>`;
+    const st = this.sysState("storage");
+    const bar = this.pageBar({ at: st.at, loading: st.loading, attr: 'data-sys-refresh="storage"' });
+    return `<div class="stack">${bar}${this.navTiles("components", tabs, open, this.t("components"), true)}<div class="panel">${body}</div></div>`;
   }
 }
 
