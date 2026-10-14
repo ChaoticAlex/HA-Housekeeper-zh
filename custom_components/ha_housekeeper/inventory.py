@@ -86,11 +86,13 @@ from .load_history import LoadStore
 from .log_facts import log_facts
 from .maintenance import PreflightStore
 from .marks import (
+    GRACE_DEFAULT,
     HIDING_KINDS,
     KINDS,
     KINDS_OF,
     MarkStore,
     apply_marks,
+    clean_window,
     counts_from,
     mark_key,
     window_active,
@@ -1453,10 +1455,14 @@ class InventoryScanner:
         days: int | None = None,
         target: str | None = None,
         by: str | None = None,
+        window: dict[str, str] | None = None,
+        grace: int = GRACE_DEFAULT,
     ) -> str | None:
         """Mark an entity, device, integration or app; the reason it failed, or None."""
         if kind not in KINDS_OF.get(object_type, KINDS):
             return "kind_not_allowed"
+        if window is not None and (kind not in HIDING_KINDS or clean_window(window) is None):
+            return "window_invalid"
         snapshot = self._snapshot or {}
         known = {(item["object_type"], item["object_id"]) for item in snapshot.get("objects", [])}
         if (object_type, object_id) not in known:
@@ -1473,6 +1479,8 @@ class InventoryScanner:
             until=until,
             target=target,
             by=by,
+            window=window,
+            grace=grace,
         ):
             return "too_many"
         self._refresh_marks()

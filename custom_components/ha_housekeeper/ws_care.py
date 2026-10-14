@@ -25,6 +25,7 @@ from .ignored import REASON_LIMIT as IGNORE_REASON_LIMIT
 from .inventory import InventoryScanner
 from .lifecycle import removed_devices, timeline
 from .maintenance import preflight_report
+from .marks import GRACE_DEFAULT, GRACE_MAX
 from .marks import KINDS as MARK_KINDS
 from .marks import OBJECT_TYPES as MARK_TYPES
 from .notes import NoteError
@@ -618,6 +619,20 @@ async def websocket_lifecycle(
         vol.Optional("reason", default=""): vol.All(str, vol.Length(max=IGNORE_REASON_LIMIT)),
         vol.Optional("days"): vol.All(int, vol.Range(min=1, max=3650)),
         vol.Optional("target"): vol.All(str, vol.Length(max=255)),
+        vol.Optional("window"): vol.Any(
+            None,
+            vol.Schema({vol.Required("mode"): "sun"}),
+            vol.Schema(
+                {
+                    vol.Required("mode"): "time",
+                    vol.Required("from"): vol.Match(r"^([01]\d|2[0-3]):[0-5]\d$"),
+                    vol.Required("to"): vol.Match(r"^([01]\d|2[0-3]):[0-5]\d$"),
+                }
+            ),
+        ),
+        vol.Optional("grace_minutes", default=GRACE_DEFAULT): vol.All(
+            int, vol.Range(min=0, max=GRACE_MAX)
+        ),
     }
 )
 @callback
@@ -637,6 +652,8 @@ def websocket_mark_set(
         days=msg.get("days"),
         target=msg.get("target"),
         by=connection.user.id if connection.user else None,
+        window=msg.get("window"),
+        grace=msg["grace_minutes"],
     )
     if error:
         connection.send_error(msg["id"], error, f"Mark not set: {error}")
