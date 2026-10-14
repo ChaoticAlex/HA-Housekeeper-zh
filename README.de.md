@@ -62,6 +62,7 @@ Housekeeper verbindet Registry-Daten mit der laufenden Home-Assistant-Instanz un
 - **Abhängigkeiten**: sehen, womit eine Entität, ein Gerät oder eine Automation zusammenhängt und was beim Entfernen kaputtginge.
 - **Geführtes Aufräumen**: Vorschau, ausdrückliche Bestätigung, Backup, Prüfung und Rückgängig, Schritt für Schritt. Nichts läuft von allein.
 - **Wartungsansichten**: Batterien, Zuverlässigkeit der Integrationen, Recorder-Last und Datenbank, Backup-Schutz, Automationsläufe und mehr.
+- **Hausmonitor**: wichtige Hausfunktionen (Heizung, Alarm, Photovoltaik) aus eigenen Objekten zusammenstellen und im Blick behalten, mit Verlauf, Verfügbarkeit und Sensoren. Ein Vermerk wie „Absichtlich offline“ gilt auf Wunsch nur nachts oder zu festen Zeiten.
 - **Änderungen seit dem letzten Scan**, Sensoren, Reparaturhinweise, ein Scan-Knopf und der Dienst `ha_housekeeper.scan` für eigene Dashboards und Automationen sowie die Beobachtung nach Updates: was nach einem Update oder Neustart nicht mehr läuft.
 
 ## Schnellstart
