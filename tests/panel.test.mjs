@@ -4758,9 +4758,9 @@ test("access and data flow show one list at a time, chosen by the tiles, and the
   assert.ok(html.includes("cloud, polls"), "the IoT class is translated");
   el.lvState("accsys", "risk", "asc").f.risk = "high"; el.pickViewTab("dataflow|sys");
   html = shadow.innerHTML;
-  assert.ok(html.includes('data-acc-clear="accsys"'), "the filter shows as a chip");
+  assert.ok(html.includes('data-lf-set="accsys||"') && !html.includes("data-acc-clear"), "the filter shows once, as the shared note of the list");
   el.lvState("accsys", "risk", "asc").f.risk = ""; el.render();
-  assert.ok(!shadow.innerHTML.includes("data-acc-clear"));
+  assert.ok(!shadow.innerHTML.includes('data-lf-set="accsys||"'));
   html = shadow.innerHTML;
   assert.ok(!html.includes("Hue</strong>"), "an integration without access or cloud is not listed");
 });
@@ -4774,9 +4774,9 @@ test("the credential overview shows kind and set or empty, links to Home Assista
   assert.ok(html.includes('data-ha-path="/config/integrations/integration/demo_cloud"'), "a row opens the integration in Home Assistant");
   assert.ok(html.includes("&lt;i&gt;Demo&lt;/i&gt;") && !html.includes("<i>Demo</i>"), "titles are escaped");
   assert.ok(!/reveal|credential_reveal/i.test(html), "nothing to reveal");
-  assert.ok(!html.includes("Hinterlegt: mit leeren Feldern"), "no filter chip by default");
+  assert.ok(!html.includes('class="filteron"'), "no filter note by default");
   el.lvState("seclist", "name", "asc").f.state = "gap"; el.render();
-  assert.ok(shadow.innerHTML.includes("Hinterlegt: mit leeren Feldern ✕"), "the filter shows as a chip");
+  assert.ok(shadow.innerHTML.includes('class="filteron"') && shadow.innerHTML.includes('data-lf-set="seclist||"') && !shadow.innerHTML.includes('class="pill warn" data-sec-show'), "the filter shows once, as the shared note of the list");
 });
 
 test("the rights of the apps show under access and data flow, or why they are missing", () => {
