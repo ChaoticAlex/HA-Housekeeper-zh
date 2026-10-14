@@ -2625,6 +2625,7 @@ test("the load view, the policies and the exposure view have a search box once t
   const exposed = { ...EXPO, exposed_entities: Array.from({ length: 7 }, (_, i) => ({ entity_id: `light.ex${i}`, name: `Light ${i}`, assistants: ["conversation"] })) };
   html = el.expoSourceTab(exposed, { id: "conversation", label: "Assist", status: "ok", count: 7 });
   assert.ok(html.includes('data-lq="expo_conversation"') && !html.includes('data-dense'), "source lists omit the density control too");
+  assert.ok(html.includes("<table") && html.includes('data-lf="expo_conversation|domain"') && html.includes("mdi:lightbulb-outline") && !html.includes("mdi:chevron-right"), "a source is a table with a domain filter and domain symbols, no arrow");
   el.lvState("exposure", "", "asc").q = "küche 2";
   html = el.exposureView();
   assert.ok(html.includes("light.k2") && !html.includes("light.k4") && !html.includes("Door"), "only findings with a matching entity");
