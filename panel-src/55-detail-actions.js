@@ -63,7 +63,9 @@ class DetailActionsMixin {
     const record = [...this.entityTrimRows(item), this.staleRow(item)];
     const group = (title, rows, sub = "") => { const html = rows.filter(Boolean).join(""); return html ? `<div class="actsec">${this.t(title)}${sub ? `<small>${sub}</small>` : ""}</div>${html}` : ""; };
     const preview = this.t("actPreviewOnly");
-    const body = [group("actGroupRecommended", recommended, items.some(it => it.finding) ? preview : ""), group("actGroupNotes", notes), group("moreActions", tools, preview), group("actGroupName", name), group("actGroupRecord", record)].join("");
+    // A tab with nothing but the mark (a healthy integration or app) says what it is for.
+    const onlyMark = notes.length && ![recommended, tools, name, record].some(rows => rows.filter(Boolean).length);
+    const body = [group("actGroupRecommended", recommended, items.some(it => it.finding) ? preview : ""), group("actGroupNotes", notes), group("moreActions", tools, preview), group("actGroupName", name), group("actGroupRecord", record)].join("") + (onlyMark ? `<div class="pad"><p class="factnote">${this.t("actOnlyNotes")}</p></div>` : "");
     return body ? `<section class="panel actpanel">${body}</section>` : `<p class="factnote">${this.t("actNone")}</p>`;
   }
 
@@ -149,14 +151,14 @@ class DetailActionsMixin {
   }
 }
 Object.assign(TEXT.de, {
-  actOpen: "Öffnen", tabActions: "Aktionen", nextStep: "Nächster Schritt", moreActions: "Weitere Aktionen", actGroupRecommended: "Empfohlen", actGroupName: "Benennen und einordnen", actGroupNotes: "Notizen", actMore: "Mehr", actLess: "Weniger", actLabelPreviewShort: "Vorschau", actGroupRecord: "Aufzeichnung und Überwachung", actNone: "Hier gibt es nichts zu tun.",
+  actOpen: "Öffnen", tabActions: "Aktionen", nextStep: "Nächster Schritt", moreActions: "Weitere Aktionen", actGroupRecommended: "Empfohlen", actGroupName: "Benennen und einordnen", actGroupNotes: "Notizen", actOnlyNotes: "Hier legst du fest, was bei diesem Objekt normal ist, zum Beispiel „nachts offline“. Housekeeper meldet es dann nicht mehr als „nicht verfügbar“.", actMore: "Mehr", actLess: "Weniger", actLabelPreviewShort: "Vorschau", actGroupRecord: "Aufzeichnung und Überwachung", actNone: "Hier gibt es nichts zu tun.",
   actionsTitle: "Was möchtest du tun?", actReplace: "Ersetzen:", actReplaceThis: "Durch andere Entität ersetzen", actDisable: "Deaktivieren planen", actDisableAuto: "Automation deaktivieren (Plan)", actHintDisableAuto: "Keiner ihrer Auslöser kann feuern. Der Plan schaltet sie aus, mit Vorschau, Bestätigung und Rückgängig.",
   actLabelTitle: "Label ergänzen", actLabelHint: "Fügt ein vorhandenes Label hinzu, zum Beispiel zum Filtern. Du siehst zuerst eine Vorschau.", actLabelPreview: "Vorschau erstellen",
   actPreviewOnly: "Hier startest du nur eine Vorschau. Geändert wird erst, wenn du sie bestätigst.",
   actEditInHa: "Eine einzelne Referenz entfernt Housekeeper nicht selbst. Öffne die Automation in Home Assistant und bearbeite sie dort.",
 });
 Object.assign(TEXT.en, {
-  actOpen: "Open", tabActions: "Actions", nextStep: "Next step", moreActions: "More actions", actGroupRecommended: "Recommended", actGroupName: "Name and classify", actGroupNotes: "Notes", actMore: "More", actLess: "Less", actLabelPreviewShort: "Preview", actGroupRecord: "Recording and monitoring", actNone: "There is nothing to do here.",
+  actOpen: "Open", tabActions: "Actions", nextStep: "Next step", moreActions: "More actions", actGroupRecommended: "Recommended", actGroupName: "Name and classify", actGroupNotes: "Notes", actOnlyNotes: "Here you say what is normal for this object, for example “offline at night”. Housekeeper then stops reporting it as “not available”.", actMore: "More", actLess: "Less", actLabelPreviewShort: "Preview", actGroupRecord: "Recording and monitoring", actNone: "There is nothing to do here.",
   actionsTitle: "What would you like to do?", actReplace: "Replace:", actReplaceThis: "Replace by another entity", actDisable: "Plan to disable", actDisableAuto: "Disable automation (plan)", actHintDisableAuto: "None of its triggers can fire. The plan switches it off, with preview, confirmation and undo.",
   actLabelTitle: "Add a label", actLabelHint: "Adds an existing label, for example for filtering. You see a preview first.", actLabelPreview: "Create preview",
   actPreviewOnly: "This only starts a preview. Nothing changes until you confirm it.",
