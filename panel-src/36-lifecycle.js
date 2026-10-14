@@ -43,14 +43,25 @@ class LifecycleMixin {
     const head = `<p class="factnote pad">${this.t("lifeRemovedHint")}</p>`;  // the title is on the tile of the tab
     if (!this.removed) return `<div class="panel">${head}${this.skeleton("loading")}</div>`;
     // The logbook entry that was written when the device was removed (or one the person added to it).
-    const found = this.searchList("removed", this.removed, d => [d.name, d.object_id].join(" "));
-    const removedRows = found.rows.map(d => {
-      const n = this.notesList().find(x => x.target === `device:${d.object_id}`);
-      const text = n ? [n.title, this.formatDate(d.at), n.note].filter(Boolean).join(" · ") : `${this.t(d.kind === "forget_device" ? "lifeForgotten" : "life_removed")} · ${this.formatDate(d.at)}`;
-      const body = `<span class="tile red"><ha-icon icon="mdi:delete-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(d.name || d.object_id)}</strong><small>${this.esc(text)}</small></span>`;
-      return n ? `<button class="row rel" data-note-edit="${this.esc(n.id)}" title="${this.esc(this.t("noteEdit"))}">${body}</button>` : `<div class="row rel">${body}</div>`;
-    });
-    const pg = this.paginate("removed", removedRows), rows = pg.rows.join("") + pg.footer;
-    return `<div class="panel">${head}${found.bar}${found.none}${rows || (this.removed.length ? "" : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("lifeRemovedNone")}</div>`)}</div>`;
+    const noteOf = d => this.notesList().find(x => x.target === `device:${d.object_id}`);
+    const kindText = d => this.t(d.kind === "forget_device" ? "lifeForgotten" : "life_removed");
+    const table = this.removed.length ? this.sysList("removed", this.removed, {
+      sort: "when", dir: "desc", empty: "lifeRemovedNone", cls: "removed",
+      sorts: [
+        { key: "when", label: "lifeColWhen", dir: "desc", get: d => d.at },
+        { key: "name", label: "lifeColDevice", dir: "asc", get: d => d.name || d.object_id },
+      ],
+      filters: [{ name: "kind", all: this.t("lifeAllKinds"), options: [["remove_device", this.t("life_removed")], ["forget_device", this.t("lifeForgotten")]] }],
+      filterFns: { kind: (d, v) => (v === "forget_device") === (d.kind === "forget_device") },
+      text: d => [d.name, d.object_id].join(" "), tie: d => d.object_id,
+      rowAttrs: d => { const n = noteOf(d); return n ? `data-note-edit="${this.esc(n.id)}" tabindex="0" role="button" title="${this.esc(this.t("noteEdit"))}"` : 'class="static"'; },
+      columns: [
+        { key: "name", label: "lifeColDevice", dir: "asc", cell: d => `<div class="statcell"><span class="tile red"><ha-icon icon="mdi:delete-outline"></ha-icon></span><div>${this.nameCell(d.name || d.object_id, d.object_id)}</div></div>` },
+        { key: "kind", label: "lifeColKind", sortable: false, cell: kindText },
+        { key: "when", label: "lifeColWhen", dir: "desc", cell: d => this.esc(this.formatDate(d.at)) },
+        { key: "note", label: "lifeColNote", sortable: false, cell: d => { const n = noteOf(d); return n ? `${this.esc(n.title)}${n.note ? `<small class="u-block">${this.esc(n.note)}</small>` : ""}` : "–"; } },
+      ],
+    }) : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("lifeRemovedNone")}</div>`;
+    return `<div class="panel">${head}${table}</div>`;
   }
 }

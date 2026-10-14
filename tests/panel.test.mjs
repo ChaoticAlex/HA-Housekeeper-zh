@@ -4356,6 +4356,7 @@ test("housekeeper backups: the list marks protected ones, the rule picks the res
   assert.ok(html.includes("protected: being watched") && html.includes("41 days old") && html.includes("only way to get back"));
   assert.ok(html.includes('data-bkc-sel="b1"') && /data-bkc-sel="b1"[^>]*disabled/.test(html), "a protected backup cannot be ticked");
   assert.ok(html.includes("Create a plan to delete (1)"));
+  assert.ok(html.includes("<table") && html.includes('data-bkc-page="b2"') && !html.includes('data-bkc-page="b1'), "the backups are a table whose head box covers the ones that can be ticked");
   let sent;
   el._hass.callWS = async msg => { sent = msg; return { plan_id: "p9", status: "dry_run", actions: [], summary: {} }; };
   await el.backupDeletePlan();

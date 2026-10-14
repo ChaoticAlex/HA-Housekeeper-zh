@@ -21,18 +21,34 @@ class BlueprintsMixin {
       const obj = this.findObject(`${u.id.split(".")[0]}:${u.id}`);
       return obj ? `<button class="linklike" data-object="${this.esc(this.objectKey(obj))}">${this.esc(u.name)}</button>` : this.esc(u.name);
     }).join(", ") + (b.count > (b.users || []).length ? ` +${b.count - b.users.length}` : "");
-    const row = (tone, icon, title, sub) => `<div class="row rel"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.esc(title)}</strong><small>${sub}</small></span></div>`;
-    const blocks = this.blueprints.domains.map(d => {
-      const all = [
-        ...d.missing.map(b => row("red", "mdi:file-question-outline", b.path, `${this.t("bpMissing")} · ${users(b)}`)),
-        ...d.broken.map(b => row("red", "mdi:file-alert-outline", b.path, `${this.t("bpBroken")}${b.count ? ` · ${users(b)}` : ""}`)),
-        ...d.unused.map(b => row("mute", "mdi:file-hidden", b.name === b.path ? b.path : b.name, `${this.t("bpUnused")} · ${this.esc(b.path)}`)),
-      ];
-      const pg = this.paginate(`bp-${d.domain}`, all), rows = pg.rows.join("") + pg.footer;
-      // A domain with findings is open; one without only shows its heading with the check mark.
-      const tone = d.missing.length || d.broken.length ? "red" : d.unused.length ? "warn" : "ok";
-      return this.fold(`bp_${d.domain}`, { tone, title: `${this.t(d.domain)} (${this.formatNumber(d.total)} ${this.t("bpFiles")})`, pill: all.length ? this.formatNumber(all.length) : "" }, rows || `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("bpNone")}</div>`, all.length > 0);
-    }).join("");
-    return `<div class="stack">${head}<div class="panel">${blocks}</div></div>`;
+    const items = this.blueprints.domains.flatMap(d => [
+      ...d.missing.map(b => ({ kind: "missing", domain: d.domain, path: b.path, title: b.path, users: users(b) })),
+      ...d.broken.map(b => ({ kind: "broken", domain: d.domain, path: b.path, title: b.path, users: b.count ? users(b) : "" })),
+      ...d.unused.map(b => ({ kind: "unused", domain: d.domain, path: b.path, title: b.name === b.path ? b.path : b.name, users: "" })),
+    ]);
+    const rank = { missing: 0, broken: 1, unused: 2 }, label = { missing: "bpMissing", broken: "bpBroken", unused: "bpUnused" }, tone = { missing: "red", broken: "red", unused: "mute" };
+    const domains = this.blueprints.domains.filter(d => items.some(i => i.domain === d.domain));
+    const files = this.blueprints.domains.map(d => `${this.t(d.domain)}: ${this.formatNumber(d.total)} ${this.t("bpFiles")}`).join(" · ");
+    const table = this.sysList("blueprints", items, {
+      sort: "kind", dir: "asc", empty: "bpNone", cls: "blueprints",
+      sorts: [
+        { key: "name", label: "bpColFile", dir: "asc", get: i => i.title },
+        { key: "kind", label: "bpColKind", dir: "asc", get: i => rank[i.kind] },
+        { key: "domain", label: "bpColDomain", dir: "asc", get: i => this.t(i.domain) },
+      ],
+      filters: [
+        { name: "kind", all: this.t("bpAllKinds"), options: ["missing", "broken", "unused"].filter(k => items.some(i => i.kind === k)).map(k => [k, this.t(label[k])]) },
+        ...(domains.length > 1 ? [{ name: "domain", all: this.t("bpAllDomains"), options: domains.map(d => [d.domain, this.t(d.domain)]) }] : []),
+      ],
+      filterFns: { kind: (i, v) => i.kind === v, domain: (i, v) => i.domain === v },
+      text: i => `${i.title} ${i.path}`, tie: i => `${i.domain}/${i.path}`,
+      columns: [
+        { key: "name", label: "bpColFile", dir: "asc", cell: i => `<div class="statcell"><span class="tile ${tone[i.kind]}"><ha-icon icon="${{ missing: "mdi:file-question-outline", broken: "mdi:file-alert-outline", unused: "mdi:file-hidden" }[i.kind]}"></ha-icon></span><div>${this.nameCell(i.title, i.title === i.path ? "" : i.path)}</div></div>` },
+        { key: "kind", label: "bpColKind", dir: "asc", cell: i => `<span class="pill ${tone[i.kind]}">${this.t(label[i.kind])}</span>` },
+        { key: "domain", label: "bpColDomain", dir: "asc", cell: i => this.esc(this.t(i.domain)) },
+        { key: "users", label: "bpColUsers", sortable: false, cell: i => i.users || "–" },
+      ],
+    });
+    return `<div class="stack">${head}<div class="panel"><p class="factnote pad">${this.esc(files)}</p>${table}</div></div>`;
   }
 }

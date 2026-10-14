@@ -1414,7 +1414,7 @@ class StylesMixin {
       .sumtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.sumtile{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border:1px solid var(--hk-border);border-left:4px solid var(--hk-gray);border-radius:12px;background:var(--hk-surface);text-align:left;font:inherit;color:inherit}button.sumtile{cursor:pointer}button.sumtile:hover{background:var(--hk-soft)}.sumtile.ok{border-left-color:var(--hk-green)}.sumtile.warn{border-left-color:var(--hk-amber)}.sumtile.red{border-left-color:var(--hk-red)}.sumlabel{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.sumvalue{font-size:calc(22px*var(--hk-fs,1));font-weight:600;line-height:1.2;overflow-wrap:anywhere}.sumtile small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));overflow-wrap:anywhere}.sumtile{position:relative}button.sumtile .sumlabel{padding-right:20px}.sumcue{position:absolute;top:10px;right:10px;--mdc-icon-size:16px;color:var(--hk-muted)}div.sumtile,div.sumtile:hover{box-shadow:none;background:var(--hk-soft)}.sumtile.filter[aria-pressed=true]{border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 9%,var(--hk-surface));box-shadow:0 0 0 1px var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumcue{color:var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumlabel{color:var(--hk-blue-text)}.sumtile.filter[aria-pressed=true] .sumlabel:before{content:"\\2713";margin-right:.4em}.filteron{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 16px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);background:color-mix(in srgb,var(--hk-blue) 7%,var(--hk-surface));border-bottom:1px solid var(--hk-border)}.filteron ha-icon{--mdc-icon-size:16px;color:var(--hk-blue)}.filteron b{color:var(--hk-text);font-weight:600}.filteron .btn{margin-left:auto}.tabdot{display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:50%;background:var(--hk-gray)}.tabdot.warn{background:var(--hk-amber)}.tabdot.red{background:var(--hk-red)}
       .detailgrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:14px;align-items:start}.pad{padding:16px}.todofoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px}.visitline{display:inline-flex;align-items:center;gap:6px;color:var(--hk-muted)}.visitline ha-icon{--mdc-icon-size:16px}
       .facts{display:grid}.fact{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.fact:first-child{border-top:0}.fact span{color:var(--hk-muted)}.fact b{font-weight:600;text-align:right}.fact small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:400}
-      .rangechart{display:block;max-width:640px;margin:6px 0}.rangechart.rc-small{max-width:360px}.lg-red{color:var(--hk-red)}.lg-green{color:var(--hk-green)}.rangesample{width:100%;font-size:12px;border-collapse:collapse;margin:4px 0}.rangeslide{width:100%;max-width:640px;display:block}.rangehead{margin-top:12px}.rangewin{display:flex;gap:8px;flex-wrap:wrap}.w160{max-width:160px}.w260{max-width:260px}.w460{max-width:460px}.reportextra{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.planchips{padding:6px 0 0;border:0}.planresult{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.planfootbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.panel.ovvis{overflow:visible}.compentry td{padding-left:28px;cursor:pointer}.compentrymeta{display:block;color:var(--hk-muted);font-size:12px}.invsubrow td:first-child{padding-left:28px}.invsubrow .invsub{color:var(--hk-muted)}.hist-bar{margin-top:4px}.hist-hint{margin:10px 16px}.hist-hint0{margin:10px 0 0}.changes-pick{grid-template-columns:auto minmax(220px,360px)}.baselbl{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.u-m0{margin:0!important}.u-block{display:block!important}.u-mb14{margin-bottom:14px!important}.u-pt6{padding:6px 0 0!important}.u-dim{opacity:.8!important}.u-ic14{--mdc-icon-size:14px!important}.u-amber{color:var(--hk-amber)!important}
+      .rangechart{display:block;max-width:640px;margin:6px 0}.rangechart.rc-small{max-width:360px}.lg-red{color:var(--hk-red)}.lg-green{color:var(--hk-green)}.rangesample{width:100%;font-size:12px;border-collapse:collapse;margin:4px 0}.rangeslide{width:100%;max-width:640px;display:block}.rangehead{margin-top:12px}.rangewin{display:flex;gap:8px;flex-wrap:wrap}.w160{max-width:160px}.w260{max-width:260px}.w460{max-width:460px}.reportextra{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.code.codefull{max-height:none}.panelhead.topline{border-top:1px solid var(--hk-border)}.planchips{padding:6px 0 0;border:0}.planresult{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.planfootbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.panel.ovvis{overflow:visible}.compentry td{padding-left:28px;cursor:pointer}.compentrymeta{display:block;color:var(--hk-muted);font-size:12px}.invsubrow td:first-child{padding-left:28px}.invsubrow .invsub{color:var(--hk-muted)}.hist-bar{margin-top:4px}.hist-hint{margin:10px 16px}.hist-hint0{margin:10px 0 0}.changes-pick{grid-template-columns:auto minmax(220px,360px)}.baselbl{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.u-m0{margin:0!important}.u-block{display:block!important}.u-mb14{margin-bottom:14px!important}.u-pt6{padding:6px 0 0!important}.u-dim{opacity:.8!important}.u-ic14{--mdc-icon-size:14px!important}.u-amber{color:var(--hk-amber)!important}
       .factnote{padding:12px 16px;border-top:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));line-height:1.5}:where(:not(.panel))>.factnote{border-top:0;padding:0}.panel>.factnote:first-child{border-top:0}
       .diagcard{display:grid;gap:12px;padding:16px}.checks{display:grid;gap:8px}
       .check{display:grid;grid-template-columns:22px minmax(100px,150px) minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-soft);font-size:calc(13px*var(--hk-fs,1))}.check b{font-weight:600}.check .val{color:var(--hk-muted);overflow-wrap:anywhere}
@@ -1550,10 +1550,10 @@ class StylesMixin {
 
 // Texts of the shared table of objects (objectTable); merged into TEXT.
 Object.assign(TEXT.de, {
-  objColState: "Zustand", objAllStatus: "Alle Zustände", objColEntities: "Entitäten", objColDevices: "Geräte", relColAvail: "Verfügbarkeit", relAvailOk: "Ab 99,5 %", relAvailWarn: "95 bis 99,5 %", cleanupAllClasses: "Alle Einstufungen", cleanupAllReadiness: "Alle Zustände", cleanupColRecorder: "Recorder-Daten", recurringColSince: "Vergessen am", recurringColDomains: "Integrationen", recurringPill: "Kehrt zurück", purgeColWhen: "Zeit", purgeColWhat: "Gelöscht", purgeColDetails: "Einzelheiten", journalColDate: "Erstellt", journalColActions: "Prüfung", journalColFollow: "Nachkontrolle", journalColAct: "Aktionen", journalAllStatus: "Alle Zustände", journalAllFollow: "Alle Nachkontrollen", exColEntity: "Entität", exColUsed: "Verwendung", exColTarget: "Ersatz", exColHow: "Art", exAllPairs: "Alle Paare", exFilterSuggest: "Mit Vorschlag", exFilterNone: "Ohne Verwendung", exFilterChosen: "Gewählt", counterColName: "Entität", counterColKind: "Art", counterColFound: "Fund", counterColAction: "Aktion", counterAllKinds: "Alle Arten", counterKindMeasurement: "Messwert", counterKindCounter: "Zähler", relAvailRed: "Unter 95 %",
+  objColState: "Zustand", objAllStatus: "Alle Zustände", objColEntities: "Entitäten", objColDevices: "Geräte", relColAvail: "Verfügbarkeit", relAvailOk: "Ab 99,5 %", relAvailWarn: "95 bis 99,5 %", cleanupAllClasses: "Alle Einstufungen", cleanupAllReadiness: "Alle Zustände", cleanupColRecorder: "Recorder-Daten", recurringColSince: "Vergessen am", recurringColDomains: "Integrationen", recurringPill: "Kehrt zurück", purgeColWhen: "Zeit", purgeColWhat: "Gelöscht", purgeColDetails: "Einzelheiten", bkcColName: "Backup", bkcColDb: "Datenbank", bkcColState: "Schutz / Alter", bkcAllStates: "Alle Backups", bkcFilterProtected: "Geschützt", bkcFilterSelected: "Ausgewählt", bpColFile: "Datei", bpColKind: "Art", bpColDomain: "Domain", bpColUsers: "Verwendet von", bpAllKinds: "Alle Arten", bpAllDomains: "Alle Domains", lifeColDevice: "Gerät", lifeColKind: "Art", lifeColWhen: "Wann", lifeColNote: "Notiz", lifeAllKinds: "Alle Arten", journalColDate: "Erstellt", journalColActions: "Prüfung", journalColFollow: "Nachkontrolle", journalColAct: "Aktionen", journalAllStatus: "Alle Zustände", journalAllFollow: "Alle Nachkontrollen", exColEntity: "Entität", exColUsed: "Verwendung", exColTarget: "Ersatz", exColHow: "Art", exAllPairs: "Alle Paare", exFilterSuggest: "Mit Vorschlag", exFilterNone: "Ohne Verwendung", exFilterChosen: "Gewählt", counterColName: "Entität", counterColKind: "Art", counterColFound: "Fund", counterColAction: "Aktion", counterAllKinds: "Alle Arten", counterKindMeasurement: "Messwert", counterKindCounter: "Zähler", relAvailRed: "Unter 95 %",
 });
 Object.assign(TEXT.en, {
-  objColState: "State", objAllStatus: "All states", objColEntities: "Entities", objColDevices: "Devices", relColAvail: "Availability", relAvailOk: "99.5 % and above", relAvailWarn: "95 to 99.5 %", cleanupAllClasses: "All classes", cleanupAllReadiness: "All states", cleanupColRecorder: "Recorder data", recurringColSince: "Forgotten on", recurringColDomains: "Integrations", recurringPill: "Keeps coming back", purgeColWhen: "Time", purgeColWhat: "Deleted", purgeColDetails: "Details", journalColDate: "Created", journalColActions: "Check", journalColFollow: "Follow-up", journalColAct: "Actions", journalAllStatus: "All states", journalAllFollow: "All follow-ups", exColEntity: "Entity", exColUsed: "Use", exColTarget: "Replacement", exColHow: "How", exAllPairs: "All pairs", exFilterSuggest: "With a proposal", exFilterNone: "Unused", exFilterChosen: "Chosen", counterColName: "Entity", counterColKind: "Kind", counterColFound: "Finding", counterColAction: "Action", counterAllKinds: "All kinds", counterKindMeasurement: "Measurement", counterKindCounter: "Counter", relAvailRed: "Below 95 %",
+  objColState: "State", objAllStatus: "All states", objColEntities: "Entities", objColDevices: "Devices", relColAvail: "Availability", relAvailOk: "99.5 % and above", relAvailWarn: "95 to 99.5 %", cleanupAllClasses: "All classes", cleanupAllReadiness: "All states", cleanupColRecorder: "Recorder data", recurringColSince: "Forgotten on", recurringColDomains: "Integrations", recurringPill: "Keeps coming back", purgeColWhen: "Time", purgeColWhat: "Deleted", purgeColDetails: "Details", bkcColName: "Backup", bkcColDb: "Database", bkcColState: "Protection / age", bkcAllStates: "All backups", bkcFilterProtected: "Protected", bkcFilterSelected: "Selected", bpColFile: "File", bpColKind: "Kind", bpColDomain: "Domain", bpColUsers: "Used by", bpAllKinds: "All kinds", bpAllDomains: "All domains", lifeColDevice: "Device", lifeColKind: "Kind", lifeColWhen: "When", lifeColNote: "Note", lifeAllKinds: "All kinds", journalColDate: "Created", journalColActions: "Check", journalColFollow: "Follow-up", journalColAct: "Actions", journalAllStatus: "All states", journalAllFollow: "All follow-ups", exColEntity: "Entity", exColUsed: "Use", exColTarget: "Replacement", exColHow: "How", exAllPairs: "All pairs", exFilterSuggest: "With a proposal", exFilterNone: "Unused", exFilterChosen: "Chosen", counterColName: "Entity", counterColKind: "Kind", counterColFound: "Finding", counterColAction: "Action", counterAllKinds: "All kinds", counterKindMeasurement: "Measurement", counterKindCounter: "Counter", relAvailRed: "Below 95 %",
 });
 
 // Texts for the policies view; merged into TEXT.
@@ -5332,7 +5332,7 @@ class MaintenanceMixin {
     const lists = parts.map(([label, items, text]) => `<div class="row rel"><span class="tile warn"><ha-icon icon="mdi:alert-outline"></ha-icon></span><span class="row-text"><strong>${this.t(label)} (${items.length})</strong><small>${items.slice(0, 8).map(i => this.esc(text(i))).join(" · ")}</small></span></div>`).join("");
     const summary = counts.map(([label, part]) => `<div class="row rel"><span class="tile mute"><ha-icon icon="mdi:compare-horizontal"></ha-icon></span><span class="row-text"><strong>${this.t(label)}</strong></span><span class="pill mute">${this.formatNumber(part.total)}</span></div>`).join("");
     const body = lists + summary || `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("preflightAfterNone")}</div>`;
-    return `<div class="panelhead" style="border-top:1px solid var(--hk-border)"><div><h3>${this.t("preflightAfterTitle", { from: this.esc(after.from_version), to: this.esc(after.to_version) })}</h3></div></div>${body}`;
+    return `<div class="panelhead topline"><div><h3>${this.t("preflightAfterTitle", { from: this.esc(after.from_version), to: this.esc(after.to_version) })}</h3></div></div>${body}`;
   }
 
   preflightCard() {
@@ -7046,15 +7046,26 @@ class LifecycleMixin {
     const head = `<p class="factnote pad">${this.t("lifeRemovedHint")}</p>`;  // the title is on the tile of the tab
     if (!this.removed) return `<div class="panel">${head}${this.skeleton("loading")}</div>`;
     // The logbook entry that was written when the device was removed (or one the person added to it).
-    const found = this.searchList("removed", this.removed, d => [d.name, d.object_id].join(" "));
-    const removedRows = found.rows.map(d => {
-      const n = this.notesList().find(x => x.target === `device:${d.object_id}`);
-      const text = n ? [n.title, this.formatDate(d.at), n.note].filter(Boolean).join(" · ") : `${this.t(d.kind === "forget_device" ? "lifeForgotten" : "life_removed")} · ${this.formatDate(d.at)}`;
-      const body = `<span class="tile red"><ha-icon icon="mdi:delete-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(d.name || d.object_id)}</strong><small>${this.esc(text)}</small></span>`;
-      return n ? `<button class="row rel" data-note-edit="${this.esc(n.id)}" title="${this.esc(this.t("noteEdit"))}">${body}</button>` : `<div class="row rel">${body}</div>`;
-    });
-    const pg = this.paginate("removed", removedRows), rows = pg.rows.join("") + pg.footer;
-    return `<div class="panel">${head}${found.bar}${found.none}${rows || (this.removed.length ? "" : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("lifeRemovedNone")}</div>`)}</div>`;
+    const noteOf = d => this.notesList().find(x => x.target === `device:${d.object_id}`);
+    const kindText = d => this.t(d.kind === "forget_device" ? "lifeForgotten" : "life_removed");
+    const table = this.removed.length ? this.sysList("removed", this.removed, {
+      sort: "when", dir: "desc", empty: "lifeRemovedNone", cls: "removed",
+      sorts: [
+        { key: "when", label: "lifeColWhen", dir: "desc", get: d => d.at },
+        { key: "name", label: "lifeColDevice", dir: "asc", get: d => d.name || d.object_id },
+      ],
+      filters: [{ name: "kind", all: this.t("lifeAllKinds"), options: [["remove_device", this.t("life_removed")], ["forget_device", this.t("lifeForgotten")]] }],
+      filterFns: { kind: (d, v) => (v === "forget_device") === (d.kind === "forget_device") },
+      text: d => [d.name, d.object_id].join(" "), tie: d => d.object_id,
+      rowAttrs: d => { const n = noteOf(d); return n ? `data-note-edit="${this.esc(n.id)}" tabindex="0" role="button" title="${this.esc(this.t("noteEdit"))}"` : 'class="static"'; },
+      columns: [
+        { key: "name", label: "lifeColDevice", dir: "asc", cell: d => `<div class="statcell"><span class="tile red"><ha-icon icon="mdi:delete-outline"></ha-icon></span><div>${this.nameCell(d.name || d.object_id, d.object_id)}</div></div>` },
+        { key: "kind", label: "lifeColKind", sortable: false, cell: kindText },
+        { key: "when", label: "lifeColWhen", dir: "desc", cell: d => this.esc(this.formatDate(d.at)) },
+        { key: "note", label: "lifeColNote", sortable: false, cell: d => { const n = noteOf(d); return n ? `${this.esc(n.title)}${n.note ? `<small class="u-block">${this.esc(n.note)}</small>` : ""}` : "–"; } },
+      ],
+    }) : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("lifeRemovedNone")}</div>`;
+    return `<div class="panel">${head}${table}</div>`;
   }
 }
 
@@ -7196,19 +7207,35 @@ class BlueprintsMixin {
       const obj = this.findObject(`${u.id.split(".")[0]}:${u.id}`);
       return obj ? `<button class="linklike" data-object="${this.esc(this.objectKey(obj))}">${this.esc(u.name)}</button>` : this.esc(u.name);
     }).join(", ") + (b.count > (b.users || []).length ? ` +${b.count - b.users.length}` : "");
-    const row = (tone, icon, title, sub) => `<div class="row rel"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.esc(title)}</strong><small>${sub}</small></span></div>`;
-    const blocks = this.blueprints.domains.map(d => {
-      const all = [
-        ...d.missing.map(b => row("red", "mdi:file-question-outline", b.path, `${this.t("bpMissing")} · ${users(b)}`)),
-        ...d.broken.map(b => row("red", "mdi:file-alert-outline", b.path, `${this.t("bpBroken")}${b.count ? ` · ${users(b)}` : ""}`)),
-        ...d.unused.map(b => row("mute", "mdi:file-hidden", b.name === b.path ? b.path : b.name, `${this.t("bpUnused")} · ${this.esc(b.path)}`)),
-      ];
-      const pg = this.paginate(`bp-${d.domain}`, all), rows = pg.rows.join("") + pg.footer;
-      // A domain with findings is open; one without only shows its heading with the check mark.
-      const tone = d.missing.length || d.broken.length ? "red" : d.unused.length ? "warn" : "ok";
-      return this.fold(`bp_${d.domain}`, { tone, title: `${this.t(d.domain)} (${this.formatNumber(d.total)} ${this.t("bpFiles")})`, pill: all.length ? this.formatNumber(all.length) : "" }, rows || `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("bpNone")}</div>`, all.length > 0);
-    }).join("");
-    return `<div class="stack">${head}<div class="panel">${blocks}</div></div>`;
+    const items = this.blueprints.domains.flatMap(d => [
+      ...d.missing.map(b => ({ kind: "missing", domain: d.domain, path: b.path, title: b.path, users: users(b) })),
+      ...d.broken.map(b => ({ kind: "broken", domain: d.domain, path: b.path, title: b.path, users: b.count ? users(b) : "" })),
+      ...d.unused.map(b => ({ kind: "unused", domain: d.domain, path: b.path, title: b.name === b.path ? b.path : b.name, users: "" })),
+    ]);
+    const rank = { missing: 0, broken: 1, unused: 2 }, label = { missing: "bpMissing", broken: "bpBroken", unused: "bpUnused" }, tone = { missing: "red", broken: "red", unused: "mute" };
+    const domains = this.blueprints.domains.filter(d => items.some(i => i.domain === d.domain));
+    const files = this.blueprints.domains.map(d => `${this.t(d.domain)}: ${this.formatNumber(d.total)} ${this.t("bpFiles")}`).join(" · ");
+    const table = this.sysList("blueprints", items, {
+      sort: "kind", dir: "asc", empty: "bpNone", cls: "blueprints",
+      sorts: [
+        { key: "name", label: "bpColFile", dir: "asc", get: i => i.title },
+        { key: "kind", label: "bpColKind", dir: "asc", get: i => rank[i.kind] },
+        { key: "domain", label: "bpColDomain", dir: "asc", get: i => this.t(i.domain) },
+      ],
+      filters: [
+        { name: "kind", all: this.t("bpAllKinds"), options: ["missing", "broken", "unused"].filter(k => items.some(i => i.kind === k)).map(k => [k, this.t(label[k])]) },
+        ...(domains.length > 1 ? [{ name: "domain", all: this.t("bpAllDomains"), options: domains.map(d => [d.domain, this.t(d.domain)]) }] : []),
+      ],
+      filterFns: { kind: (i, v) => i.kind === v, domain: (i, v) => i.domain === v },
+      text: i => `${i.title} ${i.path}`, tie: i => `${i.domain}/${i.path}`,
+      columns: [
+        { key: "name", label: "bpColFile", dir: "asc", cell: i => `<div class="statcell"><span class="tile ${tone[i.kind]}"><ha-icon icon="${{ missing: "mdi:file-question-outline", broken: "mdi:file-alert-outline", unused: "mdi:file-hidden" }[i.kind]}"></ha-icon></span><div>${this.nameCell(i.title, i.title === i.path ? "" : i.path)}</div></div>` },
+        { key: "kind", label: "bpColKind", dir: "asc", cell: i => `<span class="pill ${tone[i.kind]}">${this.t(label[i.kind])}</span>` },
+        { key: "domain", label: "bpColDomain", dir: "asc", cell: i => this.esc(this.t(i.domain)) },
+        { key: "users", label: "bpColUsers", sortable: false, cell: i => i.users || "–" },
+      ],
+    });
+    return `<div class="stack">${head}<div class="panel"><p class="factnote pad">${this.esc(files)}</p>${table}</div></div>`;
   }
 }
 
@@ -11598,17 +11625,40 @@ class BackupCleanupMixin {
     const suggested = d.rows.filter(r => r.suggested && !r.protected).map(r => r.backup_id);
     const changed = sel.size !== suggested.length || suggested.some(id => !sel.has(id));
     const rule = `<div class="bkcrule"><strong>${this.t("bkcRule")}</strong><div class="line"><label for="hk-bkc-last">${this.t("bkcKeepLast")}</label><input id="hk-bkc-last" type="number" min="0" max="100" value="${this.bkcLast ?? 3}" data-bkc-last><label for="hk-bkc-days">${this.t("bkcKeepDays")}</label><input id="hk-bkc-days" type="number" min="0" max="3650" value="${this.bkcDaysValue ?? 14}" data-bkc-days><span>${this.t("bkcDays")}</span>${changed ? `<button class="btn quiet" data-bkc-pick>${this.t("bkcReset")}</button>` : ""}</div><p>${this.t("bkcProtectNote")}</p></div>`;
-    const rows = d.rows.map(r => {
-      const bits = [r.date ? this.formatDate(r.date).split(",")[0] : "", this.formatBytes(r.size), r.with_database ? this.t("bkcDb") : this.t("bkcNoDb"), r.plan_id ? "" : this.t("bkcNoPlan")].filter(Boolean).join(" · ");
-      const pill = r.protected ? `<span class="pill ok">${this.t(`bkcProtected_${r.protected}`)}</span>` : r.age_days !== null ? `<span class="pill ${r.suggested ? "" : "mute"}">${r.age_days ? this.t("bkcAge", { days: r.age_days }) : this.t("bkcToday")}</span>` : "";
-      const warn = r.only_return ? `<small class="bkcwarn"><ha-icon icon="mdi:alert-outline"></ha-icon>${this.t("bkcOnlyReturn")}</small>` : "";
-      return `<div class="rowwrap"><input type="checkbox" class="selbox" data-bkc-sel="${this.esc(r.backup_id)}" ${sel.has(r.backup_id) ? "checked" : ""} ${r.protected ? "disabled" : ""} aria-label="${this.esc(r.name)}"><div class="row bkcrow"><span class="tile ${r.protected ? "ok" : r.only_return ? "warn" : "mute"}"><ha-icon icon="mdi:backup-restore"></ha-icon></span><span class="row-text"><strong>${this.esc(r.name)}</strong><small>${this.esc(bits)}</small>${warn}</span>${pill}</div></div>`;
+    const age = r => (r.age_days === null || r.age_days === undefined ? -1 : r.age_days);
+    const columns = [
+      { key: "sel", label: "selectPage", narrow: true, sortable: false, allBox: rows => this.bkcHeadBox(rows), cell: r => `<input type="checkbox" class="selbox" data-bkc-sel="${this.esc(r.backup_id)}" ${sel.has(r.backup_id) ? "checked" : ""} ${r.protected ? "disabled" : ""} aria-label="${this.esc(r.name)}">` },
+      { key: "name", label: "bkcColName", dir: "asc", cell: r => `<div class="statcell"><span class="tile ${r.protected ? "ok" : r.only_return ? "warn" : "mute"}"><ha-icon icon="mdi:backup-restore"></ha-icon></span><div>${this.nameCell(r.name, r.plan_id ? "" : this.t("bkcNoPlan"))}${r.only_return ? `<small class="bkcwarn"><ha-icon icon="mdi:alert-outline"></ha-icon>${this.t("bkcOnlyReturn")}</small>` : ""}</div></div>` },
+      { key: "date", label: "bhColDate", dir: "desc", cell: r => (r.date ? this.esc(this.formatDate(r.date).split(",")[0]) : "–") },
+      { key: "size", label: "bhColSize", dir: "desc", cell: r => this.esc(this.formatBytes(r.size)) },
+      { key: "db", label: "bkcColDb", dir: "desc", cell: r => this.t(r.with_database ? "bkcDb" : "bkcNoDb") },
+      { key: "state", label: "bkcColState", dir: "asc", cell: r => (r.protected ? `<span class="pill ok">${this.t(`bkcProtected_${r.protected}`)}</span>` : r.age_days !== null && r.age_days !== undefined ? `<span class="pill ${r.suggested ? "" : "mute"}">${r.age_days ? this.t("bkcAge", { days: r.age_days }) : this.t("bkcToday")}</span>` : "–") },
+    ];
+    const list = this.sysList("bkc", d.rows, {
+      sort: "date", dir: "desc", columns, cls: "bkc", empty: "bkcNone",
+      sorts: [
+        { key: "date", label: "bhColDate", dir: "desc", get: r => r.date },
+        { key: "name", label: "bkcColName", dir: "asc", get: r => r.name },
+        { key: "size", label: "bhColSize", dir: "desc", get: r => r.size },
+        { key: "db", label: "bkcColDb", dir: "desc", get: r => (r.with_database ? 1 : 0) },
+        { key: "state", label: "bkcColState", dir: "asc", get: age },
+      ],
+      filters: [{ name: "state", all: this.t("bkcAllStates"), options: [["suggested", this.t("bkcSuggested")], ["protected", this.t("bkcFilterProtected")], ["selected", this.t("bkcFilterSelected")]] }],
+      filterFns: { state: (r, v) => (v === "suggested" ? r.suggested : v === "protected" ? Boolean(r.protected) : sel.has(r.backup_id)) },
+      text: r => `${r.name} ${r.backup_id}`, tie: r => r.backup_id,
     });
-    const pg = this.paginate("bkc", rows);
     const bytes = d.rows.filter(r => sel.has(r.backup_id)).reduce((n, r) => n + (r.size || 0), 0);
     const error = this.bkcPlanError ? `<p class="bkcerr" role="alert">${this.esc(this.t("bkcFailed", { detail: this.bkcPlanError }))}</p>` : "";
     const action = `<div class="bkcfoot"><div><strong>${this.t("bkcSelSum", { count: this.formatNumber(sel.size), bytes: this.formatBytes(bytes) })}</strong><small>${this.t("bkcFinal")}</small>${error}</div><button class="btn danger" data-bkc-plan ${sel.size && !this.bkcBusy ? "" : "disabled"}>${this.bkcBusy ? this.t("trimBusy") : this.t("bkcPlan", { count: sel.size })}</button></div>`;
-    return `<div class="panel">${head}${sum}${rule}${pg.rows.join("")}${pg.footer || ""}${action}</div>`;
+    return `<div class="panel">${head}${sum}${rule}${list}${action}</div>`;
+  }
+
+  // The box in the table head: every backup of the page that can be ticked.
+  bkcHeadBox(rows) {
+    const ids = (rows || []).filter(r => !r.protected).map(r => r.backup_id);
+    if (!ids.length) return "";
+    const n = ids.filter(id => this.bkcSel?.has(id)).length;
+    return `<input type="checkbox" class="selbox" data-bkc-page="${this.esc(ids.join(","))}" ${n === ids.length ? "checked" : ""} ${n && n < ids.length ? "data-partial" : ""} aria-label="${this.esc(this.t("selectPage"))}">`;
   }
 
   async backupDeletePlan() {
@@ -11631,7 +11681,7 @@ class BackupCleanupMixin {
   // What leaves the file: the whole block of the automation, line by line.
   deleteDiff(a) {
     if (!a.yaml) return "";
-    return `<pre class="code" style="max-height:none">${a.yaml.trimEnd().split("\n").map(line => this.esc(`- ${line}`)).join("\n")}</pre>`;
+    return `<pre class="code codefull">${a.yaml.trimEnd().split("\n").map(line => this.esc(`- ${line}`)).join("\n")}</pre>`;
   }
 
   autoDeleteButton(finding) {
@@ -11640,6 +11690,7 @@ class BackupCleanupMixin {
   }
 
   bindBackupCleanup(root) {
+    root.querySelectorAll("[data-bkc-page]").forEach(el => { el.indeterminate = el.hasAttribute("data-partial"); el.onchange = () => { el.dataset.bkcPage.split(",").forEach(id => (el.checked ? this.bkcSel.add(id) : this.bkcSel.delete(id))); this.render(); }; });
     root.querySelectorAll("[data-bkc-sel]").forEach(el => el.onchange = () => { el.checked ? this.bkcSel.add(el.dataset.bkcSel) : this.bkcSel.delete(el.dataset.bkcSel); this.render(); });
     root.querySelector("[data-bkc-last]")?.addEventListener("change", e => { this.bkcLast = Math.max(0, Math.min(100, Number(e.target.value) || 0)); this.loadBackupCleanup(true); });
     root.querySelector("[data-bkc-days]")?.addEventListener("change", e => { this.bkcDaysValue = Math.max(0, Math.min(3650, Number(e.target.value) || 0)); this.loadBackupCleanup(true); });
