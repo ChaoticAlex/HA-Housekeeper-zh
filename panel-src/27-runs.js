@@ -48,37 +48,49 @@ class RunsMixin {
     return row.findings.map(f => `<small class="fline"><span class="pill ${f.level === "info" ? "mute" : f.level}">${this.t((RUN_FINDINGS[f.kind] || ["rfLabelFailing"])[0])}</span><span class="fnum">${this.runFindingText(f)}</span><span class="fnote">${this.t(`rfHint_${f.kind}`)}</span></small>`).join("");
   }
 
-  runsAttentionRow(row) {
-    const tone = row.findings.some(f => f.level === "red") ? "red" : row.findings.some(f => f.level === "warn") ? "warn" : "mute";
-    const counts = `${this.t("runsColRuns")}: ${this.formatNumber(row.runs)}${row.lower_bound ? ` (${this.t("runsLowerBound")})` : ""}`;
-    return `<button class="row" data-object="${this.esc(`${row.object_type}:${row.entity_id}`)}"><span class="tile ${tone}"><ha-icon icon="${row.object_type === "script" ? "mdi:script-text-outline" : "mdi:robot-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(row.name)}</strong>${this.rowId(row.entity_id, counts)}${this.runsFindingLines(row)}</span></button>`;
-  }
-
   runsTrend(row, days = row.per_day) {
     const max = Math.max(1, ...days);
     const bars = days.map(n => `<i style="height:${Math.round((n / max) * 100)}%"></i>`).join("");
     return `<span class="runspark" role="img" aria-label="${this.esc(this.t("runsTrendLabel", { values: days.join(", ") }))}">${bars}</span>`;
   }
 
-  // Possible conflicts and loops between automations; only shown when the check found something.
-  conflictRow(c) {
+  // The cells of one possible conflict or loop between automations: what it is and how often it was seen.
+  conflictText(c) {
     const names = c.automations.map(a => `<b>${this.esc(a.name)}</b>`);
-    const links = c.automations.map(a => `<button class="link" data-object="${this.esc(`automation:${a.entity_id}`)}">${this.esc(a.name)}</button>`).join(" · ");
-    const text = c.kind === "opposing"
+    return c.kind === "opposing"
       ? this.t("cfOpposing", { first: names[0], second: names[1], entity: `<code>${this.esc(c.entity_id)}</code>`, a: this.esc(c.commands[0]), b: this.esc(c.commands[1]) }) + " " + this.t(`cfWhy_${c.reason}`, { detail: this.esc(c.detail) })
       : this.t("cfLoop", { chain: names.join(", "), path: c.entities.map(e => `<code>${this.esc(e)}</code>`).join(" → ") });
-    const seen = c.stage === "static" ? this.t("cfStatic") : this.t(c.kind === "loop" ? "cfSeenLoop" : "cfSeen", { n: c.days, min: this.runs?.thresholds?.conflicts_loop_min_runs_per_day ?? 20 });
-    const tone = c.stage === "confirmed" ? "warn" : "mute";
-    return `<div class="row"><span class="tile ${tone}"><ha-icon icon="${c.kind === "loop" ? "mdi:sync-alert" : "mdi:swap-horizontal"}"></ha-icon></span><span class="row-text"><small class="fline"><span class="pill ${tone}">${this.t(`cfStage_${c.stage}`)}</span><span class="fnum">${text}</span></small><small>${seen}</small><small>${links}</small><small class="fnote">${this.t(`cfHint_${c.kind}`)}</small></span></div>`;
   }
 
-  // Only a heading with its number while closed; nothing to open when the check found nothing.
+  conflictSeen(c) {
+    return c.stage === "static" ? this.t("cfStatic") : this.t(c.kind === "loop" ? "cfSeenLoop" : "cfSeen", { n: c.days, min: this.runs?.thresholds?.conflicts_loop_min_runs_per_day ?? 20 });
+  }
+
+  // Possible conflicts and loops between automations as a table; only shown when the check found something.
   conflictsPanel(r) {
     const c = r.conflicts;
     if (!c) return "";
     if (!c.items.length) return `<p class="factnote">${this.t("cfNone")}</p>`;
-    const rows = c.items.map(item => this.conflictRow(item)).join("");
-    return `<div class="panel">${this.fold("runs_conflicts", { tone: "warn", title: this.t("cfTitle"), sub: this.t("cfHint"), pill: this.formatNumber(c.items.length) }, rows, false)}</div>`;
+    const rank = { confirmed: 0, observed: 1, static: 2 };
+    const key = item => `${item.kind}|${item.entity_id || (item.entities || []).join(",")}|${item.automations.map(a => a.entity_id).join(",")}`;
+    const tone = item => (item.stage === "confirmed" ? "warn" : "mute");
+    const list = this.sysList("runs_conflicts", c.items, {
+      sort: "stage", dir: "asc", tie: key, empty: "cfNone",
+      sorts: [
+        { key: "stage", label: "cfColStage", dir: "asc", get: item => rank[item.stage] ?? 3 },
+        { key: "kind", label: "cfColKind", dir: "asc", get: item => this.t(`cfKind_${item.kind}`) },
+      ],
+      filters: [{ name: "kind", all: this.t("cfAllKinds"), options: [["opposing", this.t("cfKind_opposing")], ["loop", this.t("cfKind_loop")]] }],
+      filterFns: { kind: (item, v) => item.kind === v },
+      text: item => [...item.automations.map(a => a.name), item.entity_id, ...(item.entities || [])].join(" "),
+      columns: [
+        { key: "stage", label: "cfColStage", dir: "asc", cell: item => `<span class="pill ${tone(item)}">${this.t(`cfStage_${item.stage}`)}</span>` },
+        { key: "kind", label: "cfColKind", dir: "asc", cell: item => this.t(`cfKind_${item.kind}`) },
+        { key: "what", label: "cfColWhat", sortable: false, cell: item => `${this.conflictText(item)}<small>${this.esc(this.conflictSeen(item))}</small><small class="fnote">${this.t(`cfHint_${item.kind}`)}</small>` },
+        { key: "autos", label: "cfColAutomations", sortable: false, cell: item => item.automations.map(a => `<button class="link" data-object="${this.esc(`automation:${a.entity_id}`)}">${this.esc(a.name)}</button>`).join(" · ") },
+      ],
+    });
+    return `<div class="panel">${this.fold("runs_conflicts", { tone: "warn", title: this.t("cfTitle"), sub: this.t("cfHint"), pill: this.formatNumber(c.items.length) }, list, false)}</div>`;
   }
 
   runsSorts() {

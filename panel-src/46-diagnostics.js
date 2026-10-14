@@ -260,14 +260,14 @@ class DiagnosticsMixin {
   criteriaForm() {
     const draft = this.diagState().draft;
     const typeSelect = (c, i) => `<label>${this.t("critType")} <select data-crit-type="${i}"><option value="state" ${c.type === "call" ? "" : "selected"}>${this.t("critTypeState")}</option><option value="call" ${c.type === "call" ? "selected" : ""}>${this.t("critTypeCall")}</option></select></label>`;
-    const callBody = (c, i) => `<div class="setrow"><input type="text" data-crit-service="${i}" value="${this.esc(c.service || "")}" placeholder="notify.mobile_app_phone" aria-label="${this.esc(this.t("critService"))}" style="max-width:300px"></div><small>${this.t("critCallHint")}</small>`;
-    const stateBody = (c, i) => `${c.targets.map((t, j) => `<div class="setrow"><input type="text" data-crit-entity="${i}:${j}" value="${this.esc(t.entity_id)}" placeholder="light.hall" aria-label="${this.esc(this.t("critEntity"))}" style="max-width:260px"><input type="text" data-crit-state="${i}:${j}" value="${this.esc(t.state)}" placeholder="on" aria-label="${this.esc(this.t("critState"))}" style="max-width:140px">${c.targets.length > 1 ? `<button class="btn quiet" data-crit-del-target="${i}:${j}">${this.t("critRemove")}</button>` : ""}</div>`).join("")}
+    const callBody = (c, i) => `<div class="setrow"><input type="text" data-crit-service="${i}" value="${this.esc(c.service || "")}" placeholder="notify.mobile_app_phone" aria-label="${this.esc(this.t("critService"))}" class="w300"></div><small>${this.t("critCallHint")}</small>`;
+    const stateBody = (c, i) => `${c.targets.map((t, j) => `<div class="setrow"><input type="text" data-crit-entity="${i}:${j}" value="${this.esc(t.entity_id)}" placeholder="light.hall" aria-label="${this.esc(this.t("critEntity"))}" class="w260"><input type="text" data-crit-state="${i}:${j}" value="${this.esc(t.state)}" placeholder="on" aria-label="${this.esc(this.t("critState"))}" class="w140">${c.targets.length > 1 ? `<button class="btn quiet" data-crit-del-target="${i}:${j}">${this.t("critRemove")}</button>` : ""}</div>`).join("")}
       <button class="btn quiet" data-crit-add-target="${i}">${this.t("critAddTarget")}</button>
       <label>${this.t("critHold")} <input type="number" min="0" max="300" data-crit-hold="${i}" value="${this.esc(String(c.hold))}"></label>`;
     const crit = draft.map((c, i) => `<div class="pad polform" data-crit="${i}">${typeSelect(c, i)}${c.type === "call" ? callBody(c, i) : stateBody(c, i)}
       <label>${this.t("critWithin")} <input type="number" min="1" max="300" data-crit-within="${i}" value="${this.esc(String(c.within))}"></label>
       <button class="btn quiet" data-crit-del="${i}">${this.t("critRemove")}</button></div>`).join("");
-    return `${crit}<div class="pad" style="display:flex;gap:8px"><button class="btn" data-crit-add>${this.t("critAdd")}</button><button class="btn primary" data-crit-save>${this.t("critSave")}</button><button class="btn quiet" data-crit-cancel>${this.t("critCancel")}</button></div>`;
+    return `${crit}<div class="pad acts"><button class="btn" data-crit-add>${this.t("critAdd")}</button><button class="btn primary" data-crit-save>${this.t("critSave")}</button><button class="btn quiet" data-crit-cancel>${this.t("critCancel")}</button></div>`;
   }
 
   editCriteria(entityId) {

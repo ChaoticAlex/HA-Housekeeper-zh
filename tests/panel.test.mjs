@@ -2487,6 +2487,7 @@ test("conflicts and loops show their stage and escape names", () => {
     { kind: "loop", stage: "static", days: 0, entities: ["sensor.x", "sensor.y"], automations: [{ entity_id: "automation.a", name: "A" }] }] } });
   assert.ok(html.includes("repeated") && html.includes("possible") && html.includes("sensor.x</code> → <code>sensor.y"));
   assert.ok(!html.includes("<i>x</i>") && html.includes('data-object="automation:automation.on"'));
+  assert.ok(html.includes('data-lsort="runs_conflicts|stage|asc"') && html.includes('class="tablewrap lt') && html.includes("Opposing") && html.includes("Loop"), "the conflicts are a table with stage and kind");
   assert.equal(el.conflictsPanel({}), "");
 });
 

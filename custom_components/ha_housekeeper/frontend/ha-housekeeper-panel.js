@@ -904,6 +904,7 @@ Object.assign(TEXT.de, {
   rfAfterUpdate: "Fehlerquote {after} % nach dem Update ({what}) statt {before} % davor. Zeitlich zusammen, nicht als Ursache bewiesen.", rfWhatHa: "Home Assistant {to}", rfWhatEntry: "{domain} {to}",
   rfLongWait: "Enthält eine Wartezeit von {duration}; sie geht bei einem Neustart verloren.", rfWaitNoTimeout: "{n} Warteschritt(e) ohne Timeout; sie gehen bei einem Neustart verloren.",
   rfContinue: "{n} Schritt(e) mit „continue_on_error“; Fehler bleiben dort unsichtbar.",
+  cfColStage: "Stufe", cfColKind: "Art", cfColWhat: "Was", cfColAutomations: "Automationen", cfAllKinds: "Alle Arten", cfKind_opposing: "Gegenläufig", cfKind_loop: "Schleife",
   cfTitle: "Konflikte und Schleifen", cfHint: "Aus den Konfigurationen und den Tageszahlen der Läufe. Das ist eine Vermutung, kein Beweis: Housekeeper führt nichts aus.", cfNone: "Keine möglichen Konflikte oder Schleifen gefunden.",
   cfStage_static: "möglich", cfStage_observed: "beobachtet", cfStage_confirmed: "wiederholt",
   cfOpposing: "{first} und {second} steuern {entity} gegensätzlich ({a} gegen {b}).", cfLoop: "{chain} führen im Kreis über {path} zurück zum Anfang.",
@@ -931,6 +932,7 @@ Object.assign(TEXT.en, {
   rfAfterUpdate: "Error rate {after} % after the update ({what}) instead of {before} % before. Close in time, not proven as the cause.", rfWhatHa: "Home Assistant {to}", rfWhatEntry: "{domain} {to}",
   rfLongWait: "Contains a wait of {duration}; it is lost on a restart.", rfWaitNoTimeout: "{n} wait step(s) without a timeout; they are lost on a restart.",
   rfContinue: "{n} step(s) with “continue_on_error”; errors stay invisible there.",
+  cfColStage: "Stage", cfColKind: "Kind", cfColWhat: "What", cfColAutomations: "Automations", cfAllKinds: "All kinds", cfKind_opposing: "Opposing", cfKind_loop: "Loop",
   cfTitle: "Conflicts and loops", cfHint: "From the configurations and the daily numbers of the runs. This is a guess, not proof: Housekeeper runs nothing.", cfNone: "No possible conflicts or loops found.",
   cfStage_static: "possible", cfStage_observed: "observed", cfStage_confirmed: "repeated",
   cfOpposing: "{first} and {second} control {entity} in opposite ways ({a} against {b}).", cfLoop: "{chain} lead around in a circle via {path} back to the start.",
@@ -1413,7 +1415,9 @@ class StylesMixin {
       .sumtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.sumtile{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border:1px solid var(--hk-border);border-left:4px solid var(--hk-gray);border-radius:12px;background:var(--hk-surface);text-align:left;font:inherit;color:inherit}button.sumtile{cursor:pointer}button.sumtile:hover{background:var(--hk-soft)}.sumtile.ok{border-left-color:var(--hk-green)}.sumtile.warn{border-left-color:var(--hk-amber)}.sumtile.red{border-left-color:var(--hk-red)}.sumlabel{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.sumvalue{font-size:calc(22px*var(--hk-fs,1));font-weight:600;line-height:1.2;overflow-wrap:anywhere}.sumtile small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));overflow-wrap:anywhere}.sumtile{position:relative}button.sumtile .sumlabel{padding-right:20px}.sumcue{position:absolute;top:10px;right:10px;--mdc-icon-size:16px;color:var(--hk-muted)}div.sumtile,div.sumtile:hover{box-shadow:none;background:var(--hk-soft)}.sumtile.filter[aria-pressed=true]{border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 9%,var(--hk-surface));box-shadow:0 0 0 1px var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumcue{color:var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumlabel{color:var(--hk-blue-text)}.sumtile.filter[aria-pressed=true] .sumlabel:before{content:"\\2713";margin-right:.4em}.filteron{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 16px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);background:color-mix(in srgb,var(--hk-blue) 7%,var(--hk-surface));border-bottom:1px solid var(--hk-border)}.filteron ha-icon{--mdc-icon-size:16px;color:var(--hk-blue)}.filteron b{color:var(--hk-text);font-weight:600}.filteron .btn{margin-left:auto}.tabdot{display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:50%;background:var(--hk-gray)}.tabdot.warn{background:var(--hk-amber)}.tabdot.red{background:var(--hk-red)}
       .detailgrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:14px;align-items:start}.pad{padding:16px}.todofoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px}.visitline{display:inline-flex;align-items:center;gap:6px;color:var(--hk-muted)}.visitline ha-icon{--mdc-icon-size:16px}
       .facts{display:grid}.fact{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.fact:first-child{border-top:0}.fact span{color:var(--hk-muted)}.fact b{font-weight:600;text-align:right}.fact small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:400}
-      .rangechart{display:block;max-width:640px;margin:6px 0}.rangechart.rc-small{max-width:360px}.lg-red{color:var(--hk-red)}.lg-green{color:var(--hk-green)}.rangesample{width:100%;font-size:12px;border-collapse:collapse;margin:4px 0}.rangeslide{width:100%;max-width:640px;display:block}.rangehead{margin-top:12px}.rangewin{display:flex;gap:8px;flex-wrap:wrap}.w160{max-width:160px}.w260{max-width:260px}.w460{max-width:460px}.reportextra{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.code.codefull{max-height:none}.panelhead.topline{border-top:1px solid var(--hk-border)}.planchips{padding:6px 0 0;border:0}.planresult{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.planfootbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.panel.ovvis{overflow:visible}.compentry td{padding-left:28px;cursor:pointer}.compentrymeta{display:block;color:var(--hk-muted);font-size:12px}.invsubrow td:first-child{padding-left:28px}.invsubrow .invsub{color:var(--hk-muted)}.hist-bar{margin-top:4px}.hist-hint{margin:10px 16px}.hist-hint0{margin:10px 0 0}.changes-pick{grid-template-columns:auto minmax(220px,360px)}.baselbl{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.u-m0{margin:0!important}.u-block{display:block!important}.u-mb14{margin-bottom:14px!important}.u-pt6{padding:6px 0 0!important}.u-dim{opacity:.8!important}.u-ic14{--mdc-icon-size:14px!important}.u-amber{color:var(--hk-amber)!important}
+      .rangechart{display:block;max-width:640px;margin:6px 0}.rangechart.rc-small{max-width:360px}.lg-red{color:var(--hk-red)}.lg-green{color:var(--hk-green)}.rangesample{width:100%;font-size:12px;border-collapse:collapse;margin:4px 0}.rangeslide{width:100%;max-width:640px;display:block}.rangehead{margin-top:12px}.rangewin{display:flex;gap:8px;flex-wrap:wrap}.w140{max-width:140px}
+.w160{max-width:160px}.w260{max-width:260px}
+.w300{max-width:300px}.w460{max-width:460px}.reportextra{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.code.codefull{max-height:none}.panelhead.topline{border-top:1px solid var(--hk-border)}.planchips{padding:6px 0 0;border:0}.planresult{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.planfootbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.panel.ovvis{overflow:visible}.compentry td{padding-left:28px;cursor:pointer}.compentrymeta{display:block;color:var(--hk-muted);font-size:12px}.invsubrow td:first-child{padding-left:28px}.invsubrow .invsub{color:var(--hk-muted)}.hist-bar{margin-top:4px}.hist-hint{margin:10px 16px}.hist-hint0{margin:10px 0 0}.changes-pick{grid-template-columns:auto minmax(220px,360px)}.baselbl{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.u-m0{margin:0!important}.u-block{display:block!important}.u-mb14{margin-bottom:14px!important}.u-pt6{padding:6px 0 0!important}.u-dim{opacity:.8!important}.u-ic14{--mdc-icon-size:14px!important}.u-amber{color:var(--hk-amber)!important}
       .factnote{padding:12px 16px;border-top:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));line-height:1.5}:where(:not(.panel))>.factnote{border-top:0;padding:0}.panel>.factnote:first-child{border-top:0}
       .diagcard{display:grid;gap:12px;padding:16px}.checks{display:grid;gap:8px}
       .check{display:grid;grid-template-columns:22px minmax(100px,150px) minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-soft);font-size:calc(13px*var(--hk-fs,1))}.check b{font-weight:600}.check .val{color:var(--hk-muted);overflow-wrap:anywhere}
@@ -5798,37 +5802,49 @@ class RunsMixin {
     return row.findings.map(f => `<small class="fline"><span class="pill ${f.level === "info" ? "mute" : f.level}">${this.t((RUN_FINDINGS[f.kind] || ["rfLabelFailing"])[0])}</span><span class="fnum">${this.runFindingText(f)}</span><span class="fnote">${this.t(`rfHint_${f.kind}`)}</span></small>`).join("");
   }
 
-  runsAttentionRow(row) {
-    const tone = row.findings.some(f => f.level === "red") ? "red" : row.findings.some(f => f.level === "warn") ? "warn" : "mute";
-    const counts = `${this.t("runsColRuns")}: ${this.formatNumber(row.runs)}${row.lower_bound ? ` (${this.t("runsLowerBound")})` : ""}`;
-    return `<button class="row" data-object="${this.esc(`${row.object_type}:${row.entity_id}`)}"><span class="tile ${tone}"><ha-icon icon="${row.object_type === "script" ? "mdi:script-text-outline" : "mdi:robot-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(row.name)}</strong>${this.rowId(row.entity_id, counts)}${this.runsFindingLines(row)}</span></button>`;
-  }
-
   runsTrend(row, days = row.per_day) {
     const max = Math.max(1, ...days);
     const bars = days.map(n => `<i style="height:${Math.round((n / max) * 100)}%"></i>`).join("");
     return `<span class="runspark" role="img" aria-label="${this.esc(this.t("runsTrendLabel", { values: days.join(", ") }))}">${bars}</span>`;
   }
 
-  // Possible conflicts and loops between automations; only shown when the check found something.
-  conflictRow(c) {
+  // The cells of one possible conflict or loop between automations: what it is and how often it was seen.
+  conflictText(c) {
     const names = c.automations.map(a => `<b>${this.esc(a.name)}</b>`);
-    const links = c.automations.map(a => `<button class="link" data-object="${this.esc(`automation:${a.entity_id}`)}">${this.esc(a.name)}</button>`).join(" · ");
-    const text = c.kind === "opposing"
+    return c.kind === "opposing"
       ? this.t("cfOpposing", { first: names[0], second: names[1], entity: `<code>${this.esc(c.entity_id)}</code>`, a: this.esc(c.commands[0]), b: this.esc(c.commands[1]) }) + " " + this.t(`cfWhy_${c.reason}`, { detail: this.esc(c.detail) })
       : this.t("cfLoop", { chain: names.join(", "), path: c.entities.map(e => `<code>${this.esc(e)}</code>`).join(" → ") });
-    const seen = c.stage === "static" ? this.t("cfStatic") : this.t(c.kind === "loop" ? "cfSeenLoop" : "cfSeen", { n: c.days, min: this.runs?.thresholds?.conflicts_loop_min_runs_per_day ?? 20 });
-    const tone = c.stage === "confirmed" ? "warn" : "mute";
-    return `<div class="row"><span class="tile ${tone}"><ha-icon icon="${c.kind === "loop" ? "mdi:sync-alert" : "mdi:swap-horizontal"}"></ha-icon></span><span class="row-text"><small class="fline"><span class="pill ${tone}">${this.t(`cfStage_${c.stage}`)}</span><span class="fnum">${text}</span></small><small>${seen}</small><small>${links}</small><small class="fnote">${this.t(`cfHint_${c.kind}`)}</small></span></div>`;
   }
 
-  // Only a heading with its number while closed; nothing to open when the check found nothing.
+  conflictSeen(c) {
+    return c.stage === "static" ? this.t("cfStatic") : this.t(c.kind === "loop" ? "cfSeenLoop" : "cfSeen", { n: c.days, min: this.runs?.thresholds?.conflicts_loop_min_runs_per_day ?? 20 });
+  }
+
+  // Possible conflicts and loops between automations as a table; only shown when the check found something.
   conflictsPanel(r) {
     const c = r.conflicts;
     if (!c) return "";
     if (!c.items.length) return `<p class="factnote">${this.t("cfNone")}</p>`;
-    const rows = c.items.map(item => this.conflictRow(item)).join("");
-    return `<div class="panel">${this.fold("runs_conflicts", { tone: "warn", title: this.t("cfTitle"), sub: this.t("cfHint"), pill: this.formatNumber(c.items.length) }, rows, false)}</div>`;
+    const rank = { confirmed: 0, observed: 1, static: 2 };
+    const key = item => `${item.kind}|${item.entity_id || (item.entities || []).join(",")}|${item.automations.map(a => a.entity_id).join(",")}`;
+    const tone = item => (item.stage === "confirmed" ? "warn" : "mute");
+    const list = this.sysList("runs_conflicts", c.items, {
+      sort: "stage", dir: "asc", tie: key, empty: "cfNone",
+      sorts: [
+        { key: "stage", label: "cfColStage", dir: "asc", get: item => rank[item.stage] ?? 3 },
+        { key: "kind", label: "cfColKind", dir: "asc", get: item => this.t(`cfKind_${item.kind}`) },
+      ],
+      filters: [{ name: "kind", all: this.t("cfAllKinds"), options: [["opposing", this.t("cfKind_opposing")], ["loop", this.t("cfKind_loop")]] }],
+      filterFns: { kind: (item, v) => item.kind === v },
+      text: item => [...item.automations.map(a => a.name), item.entity_id, ...(item.entities || [])].join(" "),
+      columns: [
+        { key: "stage", label: "cfColStage", dir: "asc", cell: item => `<span class="pill ${tone(item)}">${this.t(`cfStage_${item.stage}`)}</span>` },
+        { key: "kind", label: "cfColKind", dir: "asc", cell: item => this.t(`cfKind_${item.kind}`) },
+        { key: "what", label: "cfColWhat", sortable: false, cell: item => `${this.conflictText(item)}<small>${this.esc(this.conflictSeen(item))}</small><small class="fnote">${this.t(`cfHint_${item.kind}`)}</small>` },
+        { key: "autos", label: "cfColAutomations", sortable: false, cell: item => item.automations.map(a => `<button class="link" data-object="${this.esc(`automation:${a.entity_id}`)}">${this.esc(a.name)}</button>`).join(" · ") },
+      ],
+    });
+    return `<div class="panel">${this.fold("runs_conflicts", { tone: "warn", title: this.t("cfTitle"), sub: this.t("cfHint"), pill: this.formatNumber(c.items.length) }, list, false)}</div>`;
   }
 
   runsSorts() {
@@ -8182,14 +8198,14 @@ class DiagnosticsMixin {
   criteriaForm() {
     const draft = this.diagState().draft;
     const typeSelect = (c, i) => `<label>${this.t("critType")} <select data-crit-type="${i}"><option value="state" ${c.type === "call" ? "" : "selected"}>${this.t("critTypeState")}</option><option value="call" ${c.type === "call" ? "selected" : ""}>${this.t("critTypeCall")}</option></select></label>`;
-    const callBody = (c, i) => `<div class="setrow"><input type="text" data-crit-service="${i}" value="${this.esc(c.service || "")}" placeholder="notify.mobile_app_phone" aria-label="${this.esc(this.t("critService"))}" style="max-width:300px"></div><small>${this.t("critCallHint")}</small>`;
-    const stateBody = (c, i) => `${c.targets.map((t, j) => `<div class="setrow"><input type="text" data-crit-entity="${i}:${j}" value="${this.esc(t.entity_id)}" placeholder="light.hall" aria-label="${this.esc(this.t("critEntity"))}" style="max-width:260px"><input type="text" data-crit-state="${i}:${j}" value="${this.esc(t.state)}" placeholder="on" aria-label="${this.esc(this.t("critState"))}" style="max-width:140px">${c.targets.length > 1 ? `<button class="btn quiet" data-crit-del-target="${i}:${j}">${this.t("critRemove")}</button>` : ""}</div>`).join("")}
+    const callBody = (c, i) => `<div class="setrow"><input type="text" data-crit-service="${i}" value="${this.esc(c.service || "")}" placeholder="notify.mobile_app_phone" aria-label="${this.esc(this.t("critService"))}" class="w300"></div><small>${this.t("critCallHint")}</small>`;
+    const stateBody = (c, i) => `${c.targets.map((t, j) => `<div class="setrow"><input type="text" data-crit-entity="${i}:${j}" value="${this.esc(t.entity_id)}" placeholder="light.hall" aria-label="${this.esc(this.t("critEntity"))}" class="w260"><input type="text" data-crit-state="${i}:${j}" value="${this.esc(t.state)}" placeholder="on" aria-label="${this.esc(this.t("critState"))}" class="w140">${c.targets.length > 1 ? `<button class="btn quiet" data-crit-del-target="${i}:${j}">${this.t("critRemove")}</button>` : ""}</div>`).join("")}
       <button class="btn quiet" data-crit-add-target="${i}">${this.t("critAddTarget")}</button>
       <label>${this.t("critHold")} <input type="number" min="0" max="300" data-crit-hold="${i}" value="${this.esc(String(c.hold))}"></label>`;
     const crit = draft.map((c, i) => `<div class="pad polform" data-crit="${i}">${typeSelect(c, i)}${c.type === "call" ? callBody(c, i) : stateBody(c, i)}
       <label>${this.t("critWithin")} <input type="number" min="1" max="300" data-crit-within="${i}" value="${this.esc(String(c.within))}"></label>
       <button class="btn quiet" data-crit-del="${i}">${this.t("critRemove")}</button></div>`).join("");
-    return `${crit}<div class="pad" style="display:flex;gap:8px"><button class="btn" data-crit-add>${this.t("critAdd")}</button><button class="btn primary" data-crit-save>${this.t("critSave")}</button><button class="btn quiet" data-crit-cancel>${this.t("critCancel")}</button></div>`;
+    return `${crit}<div class="pad acts"><button class="btn" data-crit-add>${this.t("critAdd")}</button><button class="btn primary" data-crit-save>${this.t("critSave")}</button><button class="btn quiet" data-crit-cancel>${this.t("critCancel")}</button></div>`;
   }
 
   editCriteria(entityId) {
