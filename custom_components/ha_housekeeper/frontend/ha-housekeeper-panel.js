@@ -1342,6 +1342,7 @@ class StylesMixin {
       .top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:22px;padding:0 clamp(16px,2.4vw,32px);min-height:calc(60px*var(--hk-fs,1));border-bottom:1px solid var(--hk-border);background:var(--hk-surface)}
       .brand{display:flex;align-items:center;gap:10px;flex:none;padding:0;border:0;background:none;color:inherit;text-align:left;cursor:pointer}.brandtext{display:grid;gap:1px}.brand small{font-size:calc(11px*var(--hk-fs,1));line-height:1.1;color:var(--hk-muted);font-weight:500}.brand:hover small{color:var(--hk-text)}.brand.active small{color:var(--hk-blue-text);font-weight:700}.nav.iconly span{display:none}.brandmark{width:34px;height:34px;display:grid;place-items:center;flex:none}.brandmark img{width:34px;height:34px;object-fit:contain}.brandmark ha-icon{display:none}.brandmark.nologo{border-radius:10px;color:#fff;background:linear-gradient(135deg,#0394d5,#087dbb)}.brandmark.nologo ha-icon{display:block}.brand strong{font-weight:600;font-size:calc(17px*var(--hk-fs,1));white-space:nowrap}
       .topnav{flex:1;min-width:0;display:flex;align-items:stretch;align-self:stretch;gap:2px}.navmenu{position:relative;display:flex;align-items:stretch}.navend{margin-left:auto;display:flex;align-items:stretch;gap:8px}.quick{position:relative;display:flex;align-items:center;align-self:center}.quick>ha-icon{position:absolute;left:8px;--mdc-icon-size:18px;color:var(--hk-muted);pointer-events:none}.quick input{width:190px;max-width:100%;min-height:36px;padding:0 10px 0 32px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.quick input:focus{outline:2px solid var(--hk-blue);outline-offset:0}.quicklist{position:absolute;top:calc(100% + 6px);right:0;z-index:30;width:min(380px,90vw);max-height:60vh;overflow:auto;margin:0;padding:6px;list-style:none;border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-surface);box-shadow:0 8px 24px rgba(0,0,0,.14)}.quicklist li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;padding:8px;border-radius:8px;cursor:pointer}.quicklist li.on,.quicklist li:hover{background:color-mix(in srgb,var(--hk-blue) 10%,transparent)}.quicklist li.grp{display:block;padding:8px 8px 2px;font-size:calc(11px*var(--hk-fs,1));letter-spacing:.04em;text-transform:uppercase;color:var(--hk-muted);cursor:default}.quicklist li.grp:hover{background:none}.quicklist li.none{display:block;color:var(--hk-muted);cursor:default}.row.jrow{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap}.jrow .row-text{flex:1 1 220px}.jrow .tile{flex:none}.jrow input[type=checkbox]{flex:none}.jbtns{display:flex;gap:8px;margin-left:auto}.quicklist .row-text{min-width:0}.quicklist small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media(max-width:860px){.quick{display:flex;margin:6px 0}.quick input{width:100%}.navend{flex-direction:column;align-items:stretch}}.navhead{display:none;padding:10px 12px 2px;color:var(--hk-muted);font-size:calc(10.5px*var(--hk-fs,1));font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+      .delbtn{display:inline-flex;align-items:center;justify-content:center;width:36px;min-width:36px;height:36px;min-height:36px;padding:0}.delbtn.small{width:32px;min-width:32px;height:32px;min-height:32px}.delbtn ha-icon{--mdc-icon-size:18px}.delbtn[disabled]{opacity:.5;cursor:not-allowed}
       .nav{min-height:44px;display:inline-flex;align-items:center;gap:8px;padding:0 12px;border:0;border-bottom:3px solid transparent;border-radius:0;color:var(--hk-muted);background:transparent;font-weight:500;white-space:nowrap}.nav:hover{color:var(--hk-text);background:var(--hk-soft)}.nav ha-icon{--mdc-icon-size:20px}.nav .caret{--mdc-icon-size:16px;margin-left:-2px}
       .navpop{display:none;position:absolute;top:100%;left:0;min-width:210px;padding:6px;border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-surface);box-shadow:0 8px 24px rgba(0,0,0,.14)}.navmenu.open .navpop{display:grid;gap:2px}.navpop .nav{min-height:40px;border-bottom:0;border-radius:8px}.navpop .nav.active{box-shadow:none;background-image:linear-gradient(var(--hk-blue),var(--hk-blue));background-size:3px 100%;background-repeat:no-repeat;background-position:left top}
       .nav.active{color:var(--hk-blue-text);border-bottom-color:var(--hk-blue);font-weight:600}.nav em{min-width:22px;padding:2px 6px;border-radius:10px;color:var(--hk-muted);background:var(--hk-soft);font-size:calc(11px*var(--hk-fs,1));font-style:normal;text-align:center}.nav.group-active{color:var(--hk-blue-text);border-bottom-color:var(--hk-blue);font-weight:600}.navtoggle{display:none;margin-left:auto;min-height:40px;align-items:center;gap:6px;padding:0 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit}
@@ -1877,6 +1878,12 @@ class ListsMixin {
   }
 
   // Name over id for a table cell: both are cut at the column width and shown in full in the tooltip (see showTip).
+  // The one delete button of a list row: the bin only, with the name as tooltip and for screen readers. `why` disables it and says why.
+  deleteButton(attr, label, { small = false, why = "" } = {}) {
+    const text = this.esc(why || label);
+    return `<button type="button" class="btn dangersoft delbtn${small ? " small" : ""}" ${why ? "disabled" : attr} title="${text}" aria-label="${this.esc(label)}"><ha-icon icon="mdi:delete-outline"></ha-icon></button>`;
+  }
+
   nameCell(name, id, tag = "div", tipSub = null) {
     const sub = id || "";
     return `<${tag} class="namecell" data-tip="${this.esc(name)}" data-tip-sub="${this.esc(tipSub ?? sub)}"><strong class="cut">${this.esc(name)}</strong>${sub ? `<span class="id cut">${this.esc(sub)}</span>` : ""}</${tag}>`;
@@ -3947,7 +3954,7 @@ class CleanupMixin {
       { key: "status", label: "sortStatus", dir: "asc", cell: plan => `<span class="pill ${plan.status === "verified" ? "ok" : plan.status === "dry_run" ? "mute" : "warn"}">${this.t(`plan_status_${statusOf(plan)}`)}</span>` },
       ...(this.isDenseList("journal") ? [] : [{ key: "total", label: "journalColActions", dir: "desc", cell: plan => `<span class="jsum">${this.esc(summary(plan))}</span>` }]),
       { key: "follow", label: "journalColFollow", sortable: false, cell: plan => (fuState(plan) ? `<span class="pill ${this.followupTone(fuState(plan))}">${this.t(`fu_${fuState(plan)}`)}</span>` : "–") },
-      { key: "act", label: "journalColAct", sortable: false, cell: plan => `<span class="jbtns">${plan.executed || plan.run ? "" : `<button class="btn dangersoft" data-plan-delete="${this.esc(plan.plan_id)}" title="${this.esc(this.t("deletePlan"))}" aria-label="${this.esc(this.t("deletePlan"))}"><ha-icon icon="mdi:delete-outline"></ha-icon></button>`}</span>` },
+      { key: "act", label: "journalColAct", sortable: false, cell: plan => `<span class="jbtns">${plan.executed || plan.run ? "" : this.deleteButton(`data-plan-delete="${this.esc(plan.plan_id)}"`, this.t("deletePlan"))}</span>` },
     ];
     const table = plans.length ? this.sysList("journal", plans, {
       sort: "date", dir: "desc", columns, cls: "journal", empty: "journalEmpty",
@@ -8983,7 +8990,7 @@ class BatteryCareMixin {
   reminderHistory(r) {
     if (!(this.remOpen || []).includes(r.id)) return "";
     const id = this.esc(r.id), hist = r.history || [];
-    const list = hist.length ? `<ul>${hist.map(d => `<li>${this.esc(this.remDay(d))}<button type="button" class="linkbtn" data-rem-hdel="${id}|${this.esc(d)}">${this.t("remDelete")}</button></li>`).join("")}</ul>` : `<p class="muted">${this.t("remNoHistory")}</p>`;
+    const list = hist.length ? `<ul>${hist.map(d => `<li>${this.esc(this.remDay(d))}${this.deleteButton(`data-rem-hdel="${id}|${this.esc(d)}"`, this.t("remDelete"), { small: true })}</li>`).join("")}</ul>` : `<p class="muted">${this.t("remNoHistory")}</p>`;
     return `<tr class="static remhist"><td colspan="5"><h3>${this.t("remHistory", { n: hist.length })}</h3>${list}</td></tr>`;
   }
 
@@ -8994,7 +9001,7 @@ class BatteryCareMixin {
       { key: "every", label: "remColEvery", dir: "asc", cell: r => this.esc(this.t("remEveryN", { n: r.interval_days })) },
       { key: "last", label: "remColLast", dir: "desc", cell: r => r.last_done ? this.esc(this.remDay(r.last_done)) : `<span class="muted">–</span>` },
       { key: "due", label: "remColDue", dir: "asc", cell: r => `<span class="pill ${tone(r)}" title="${this.esc(this.remDay(r.due))}">${this.esc(this.remWhen(r.days_left))}</span>` },
-      { key: "act", label: "remColActions", sortable: false, cell: r => { const id = this.esc(r.id); return `<span class="remact"><button class="btn small" data-rem-done="${id}">${this.t("remDone")}</button><button class="btn small quiet" data-rem-edit="${id}">${this.t("remEdit")}</button><button class="btn small quiet" data-rem-del="${id}">${this.t("remDelete")}</button></span>`; } },
+      { key: "act", label: "remColActions", sortable: false, cell: r => { const id = this.esc(r.id); return `<span class="remact"><button class="btn small" data-rem-done="${id}">${this.t("remDone")}</button><button class="btn small quiet" data-rem-edit="${id}">${this.t("remEdit")}</button>${this.deleteButton(`data-rem-del="${id}"`, this.t("remDelete"), { small: true })}</span>`; } },
     ];
   }
 
@@ -11771,7 +11778,7 @@ class BatteryTypeMixin {
       const n = uses(name);
       if (this.btCtEdit === name) return `<div class="btct"><input type="text" maxlength="30" data-bt-ct-input value="${this.esc(name)}" aria-label="${this.t("btCtRename")}"><button class="btn accent" data-bt-ct-save="${this.esc(name)}">${this.t("btCtSave")}</button><button class="btn quiet" data-bt-ct-cancel>${this.t("cancelRun")}</button></div>`;
       const used = n ? this.t(n === 1 ? "btCtUsed1" : "btCtUsed", { n: this.formatNumber(n) }) : this.t("btCtUnused");
-      const del = n ? `<button class="btn quiet" disabled title="${this.esc(this.t("btCtInUse"))}">${this.t("btCtDelete")}</button>` : `<button class="btn quiet" data-bt-ct-delete="${this.esc(name)}">${this.t("btCtDelete")}</button>`;
+      const del = this.deleteButton(`data-bt-ct-delete="${this.esc(name)}"`, this.t("btCtDelete"), n ? { why: this.t("btCtInUse") } : {});
       return `<div class="btct"><span class="pill">${this.esc(name)}</span><span class="factnote">${this.esc(used)}</span><button class="btn quiet" data-bt-ct-rename="${this.esc(name)}">${this.t("btCtRename")}</button>${del}</div>`;
     }).join("");
     const add = `<div class="btct"><input type="text" maxlength="30" data-bt-ct-new placeholder="${this.esc(this.t("btCtNew"))}" aria-label="${this.esc(this.t("btCtNew"))}"><button class="btn" data-bt-ct-add>${this.t("btCtAdd")}</button></div>`;

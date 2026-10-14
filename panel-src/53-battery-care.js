@@ -49,7 +49,7 @@ class BatteryCareMixin {
   reminderHistory(r) {
     if (!(this.remOpen || []).includes(r.id)) return "";
     const id = this.esc(r.id), hist = r.history || [];
-    const list = hist.length ? `<ul>${hist.map(d => `<li>${this.esc(this.remDay(d))}<button type="button" class="linkbtn" data-rem-hdel="${id}|${this.esc(d)}">${this.t("remDelete")}</button></li>`).join("")}</ul>` : `<p class="muted">${this.t("remNoHistory")}</p>`;
+    const list = hist.length ? `<ul>${hist.map(d => `<li>${this.esc(this.remDay(d))}${this.deleteButton(`data-rem-hdel="${id}|${this.esc(d)}"`, this.t("remDelete"), { small: true })}</li>`).join("")}</ul>` : `<p class="muted">${this.t("remNoHistory")}</p>`;
     return `<tr class="static remhist"><td colspan="5"><h3>${this.t("remHistory", { n: hist.length })}</h3>${list}</td></tr>`;
   }
 
@@ -60,7 +60,7 @@ class BatteryCareMixin {
       { key: "every", label: "remColEvery", dir: "asc", cell: r => this.esc(this.t("remEveryN", { n: r.interval_days })) },
       { key: "last", label: "remColLast", dir: "desc", cell: r => r.last_done ? this.esc(this.remDay(r.last_done)) : `<span class="muted">–</span>` },
       { key: "due", label: "remColDue", dir: "asc", cell: r => `<span class="pill ${tone(r)}" title="${this.esc(this.remDay(r.due))}">${this.esc(this.remWhen(r.days_left))}</span>` },
-      { key: "act", label: "remColActions", sortable: false, cell: r => { const id = this.esc(r.id); return `<span class="remact"><button class="btn small" data-rem-done="${id}">${this.t("remDone")}</button><button class="btn small quiet" data-rem-edit="${id}">${this.t("remEdit")}</button><button class="btn small quiet" data-rem-del="${id}">${this.t("remDelete")}</button></span>`; } },
+      { key: "act", label: "remColActions", sortable: false, cell: r => { const id = this.esc(r.id); return `<span class="remact"><button class="btn small" data-rem-done="${id}">${this.t("remDone")}</button><button class="btn small quiet" data-rem-edit="${id}">${this.t("remEdit")}</button>${this.deleteButton(`data-rem-del="${id}"`, this.t("remDelete"), { small: true })}</span>`; } },
     ];
   }
 

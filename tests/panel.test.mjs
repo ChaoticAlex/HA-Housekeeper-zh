@@ -5301,3 +5301,11 @@ test("the mark form warns when the sun entity is missing", () => {
   assert.ok(form({}).includes("sun.sun"), "no sun.sun: the form says so");
   assert.ok(!form({ "sun.sun": { state: "below_horizon" } }).includes('role="alert"'));
 });
+
+test("the delete button of a list row is the bin only, with the name as tooltip, and says why it is disabled", () => {
+  const { el } = panel("en");
+  const on = el.deleteButton('data-x="1"', "Delete");
+  assert.ok(on.includes('data-x="1"') && on.includes('title="Delete"') && on.includes('aria-label="Delete"') && on.includes("mdi:delete-outline") && !on.includes(">Delete<"));
+  const off = el.deleteButton('data-x="1"', "Delete", { why: "In use" });
+  assert.ok(off.includes("disabled") && off.includes('title="In use"') && !off.includes('data-x="1"'), "no action while disabled");
+});

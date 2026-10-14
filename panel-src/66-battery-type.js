@@ -74,7 +74,7 @@ class BatteryTypeMixin {
       const n = uses(name);
       if (this.btCtEdit === name) return `<div class="btct"><input type="text" maxlength="30" data-bt-ct-input value="${this.esc(name)}" aria-label="${this.t("btCtRename")}"><button class="btn accent" data-bt-ct-save="${this.esc(name)}">${this.t("btCtSave")}</button><button class="btn quiet" data-bt-ct-cancel>${this.t("cancelRun")}</button></div>`;
       const used = n ? this.t(n === 1 ? "btCtUsed1" : "btCtUsed", { n: this.formatNumber(n) }) : this.t("btCtUnused");
-      const del = n ? `<button class="btn quiet" disabled title="${this.esc(this.t("btCtInUse"))}">${this.t("btCtDelete")}</button>` : `<button class="btn quiet" data-bt-ct-delete="${this.esc(name)}">${this.t("btCtDelete")}</button>`;
+      const del = this.deleteButton(`data-bt-ct-delete="${this.esc(name)}"`, this.t("btCtDelete"), n ? { why: this.t("btCtInUse") } : {});
       return `<div class="btct"><span class="pill">${this.esc(name)}</span><span class="factnote">${this.esc(used)}</span><button class="btn quiet" data-bt-ct-rename="${this.esc(name)}">${this.t("btCtRename")}</button>${del}</div>`;
     }).join("");
     const add = `<div class="btct"><input type="text" maxlength="30" data-bt-ct-new placeholder="${this.esc(this.t("btCtNew"))}" aria-label="${this.esc(this.t("btCtNew"))}"><button class="btn" data-bt-ct-add>${this.t("btCtAdd")}</button></div>`;

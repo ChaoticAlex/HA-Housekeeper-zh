@@ -266,6 +266,12 @@ class ListsMixin {
   }
 
   // Name over id for a table cell: both are cut at the column width and shown in full in the tooltip (see showTip).
+  // The one delete button of a list row: the bin only, with the name as tooltip and for screen readers. `why` disables it and says why.
+  deleteButton(attr, label, { small = false, why = "" } = {}) {
+    const text = this.esc(why || label);
+    return `<button type="button" class="btn dangersoft delbtn${small ? " small" : ""}" ${why ? "disabled" : attr} title="${text}" aria-label="${this.esc(label)}"><ha-icon icon="mdi:delete-outline"></ha-icon></button>`;
+  }
+
   nameCell(name, id, tag = "div", tipSub = null) {
     const sub = id || "";
     return `<${tag} class="namecell" data-tip="${this.esc(name)}" data-tip-sub="${this.esc(tipSub ?? sub)}"><strong class="cut">${this.esc(name)}</strong>${sub ? `<span class="id cut">${this.esc(sub)}</span>` : ""}</${tag}>`;
