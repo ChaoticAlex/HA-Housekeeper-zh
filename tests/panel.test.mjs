@@ -3107,6 +3107,9 @@ test("a list can hide columns and offers its rows as CSV", () => {
   assert.ok(el.colHidden("inventory", "type") && !el.colHidden("inventory", "status"));
   const ex = el._exporters.inventory;
   assert.equal(ex.rows().length, el.filtered().length);
+  el._colOpen = "inventory"; el.render();
+  const pop = shadow.innerHTML.match(/class="colpop"[\s\S]*?<\/span><\/span>/)[0];
+  assert.ok((pop.match(/<label><input type="checkbox" data-col="inventory\|/g) || []).length >= 3, "every column has a checkbox row in the open picker");
 });
 
 test("the flow tab shows triggers, conditions and nested actions and marks missing objects", () => {
