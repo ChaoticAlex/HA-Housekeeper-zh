@@ -7,28 +7,24 @@ const BATTERY_FAR_DAYS = 90;
 const BATTERY_GROUP_DAYS = 14;
 
 Object.assign(TEXT.de, {
-  btColName: "Gerät", btColArea: "Bereich", btColType: "Typ", btColLevel: "Stand", btColSlope: "Verbrauch", btColLeft: "Leer in", btColAct: "Aktion", btTypeChange: "Typ ändern", btLevelOk: "in Ordnung",
+  btColName: "Gerät", btColArea: "Bereich", btColType: "Typ", btColLevel: "Stand", btColSlope: "Verbrauch", btColLeft: "Leer in", btColAct: "Aktion", btColDate: "Datum", btTypeChange: "Typ ändern", btLevelOk: "in Ordnung",
   btSlopeDay: "{n} %/Tag", btVoltDay: "{n} V/Tag", btSlopeStable: "stabil", btLeftLow: "unter Grenze", btLeftDays: "{n} Tage", btLeftFar: "> {n} Tage", btLeftStable: "nicht absehbar",
   btFilterSoon: "Bald leer", btFilterUntyped: "Ohne Typ", btAllTypes: "Alle Typen",
-  needTitle: "Benötigte Batterien jetzt und in den nächsten 30 Tagen", needSub: "{n} Geräte sind bereits unter ihrer Grenze oder erreichen sie laut Prognose in 30 Tagen.", needSub1: "1 Gerät ist bereits unter seiner Grenze oder erreicht sie laut Prognose in 30 Tagen.",
-  needLess: "Weniger anzeigen", needNone: "Keine Batterie ist unter ihrer Grenze oder erreicht sie laut Prognose in den nächsten 30 Tagen.", needUntyped: "ohne Typ", needUntypedHint: "Typ in der Tabelle setzen", needNow: "Bereits unter Grenze", needSoon: "In den nächsten 14 Tagen", needLater: "In 15 bis 30 Tagen", needMore: "… {n} weitere in der Tabelle",
-  needNote: "Gezählt werden bereits niedrige Batterien und Geräte, die laut Prognose innerhalb von 30 Tagen ihre Grenze erreichen. Der Typ kommt von dir.",
+  needNone: "Keine Batterie ist unter ihrer Grenze oder erreicht sie laut Prognose in den nächsten 30 Tagen.", needUntyped: "ohne Typ", needUntypedHint: "Typ in der Tabelle setzen", needNow: "Jetzt niedrig",
   btTableNote: "Prognose nur bis 90 Tage, aus den letzten fünf Wochen: eine Schätzung, keine Zusage. Ohne Prognose: {unknown} (zu wenige Tage oder stabil). Nach einem Wechsel zählt nur der Verlauf danach.",
   btFarMore: "{n} halten laut Prognose länger als 90 Tage.",
-  fcTitle: "Prognose", fcHint: "Wann eine Batterie voraussichtlich die Grenze erreicht, bis 90 Tage, aus dem Verlauf der letzten fünf Wochen. Eine Schätzung, keine Zusage.",
-  fcWindow: "In {from} bis {to} Tagen", fcTogether: "Gemeinsam wechseln", fcNow: "Jetzt {n} %", fcOn: "Grenze am {date}", fcIn: "in etwa {n} Tagen", fcOpen: "Alle aufklappen", fcClose: "Alle zuklappen",
+  fcTitle: "Wann welche Batterie leer ist", fcHint: "Was du in den nächsten 30 Tagen brauchst und wann die Batterien voraussichtlich die Grenze erreichen (bis 90 Tage, aus den letzten fünf Wochen). Eine Schätzung, keine Zusage.",
+  fcWindow: "In {from} bis {to} Tagen", fcTogether: "Gemeinsam wechseln", 
 });
 Object.assign(TEXT.en, {
-  btColName: "Device", btColArea: "Area", btColType: "Type", btColLevel: "Level", btColSlope: "Drain", btColLeft: "Empty in", btColAct: "Action", btTypeChange: "Change type", btLevelOk: "ok",
+  btColName: "Device", btColArea: "Area", btColType: "Type", btColLevel: "Level", btColSlope: "Drain", btColLeft: "Empty in", btColAct: "Action", btColDate: "Date", btTypeChange: "Change type", btLevelOk: "ok",
   btSlopeDay: "{n} %/day", btVoltDay: "{n} V/day", btSlopeStable: "stable", btLeftLow: "below limit", btLeftDays: "{n} days", btLeftFar: "> {n} days", btLeftStable: "no forecast",
   btFilterSoon: "Empty soon", btFilterUntyped: "No type", btAllTypes: "All types",
-  needTitle: "Batteries needed now and in the next 30 days", needSub: "{n} devices are already below their limit or are forecast to reach it within 30 days.", needSub1: "1 device is already below its limit or is forecast to reach it within 30 days.",
-  needLess: "Show fewer", needNone: "No battery is below its limit or forecast to reach it within 30 days.", needUntyped: "no type", needUntypedHint: "set the type in the table", needNow: "Already below limit", needSoon: "In the next 14 days", needLater: "In 15 to 30 days", needMore: "… {n} more in the table",
-  needNote: "Counted are batteries already low and devices forecast to reach their limit within 30 days. The type comes from you.",
+  needNone: "No battery is below its limit or forecast to reach it within 30 days.", needUntyped: "no type", needUntypedHint: "set the type in the table", needNow: "Low now",
   btTableNote: "Forecast only up to 90 days, from the last five weeks: an estimate, not a promise. No forecast for {unknown} (too few days or stable). After a change only the time since counts.",
   btFarMore: "{n} last longer than 90 days by the forecast.",
-  fcTitle: "Forecast", fcHint: "When a battery will probably reach the limit, up to 90 days, from the last five weeks. An estimate, not a promise.",
-  fcWindow: "In {from} to {to} days", fcTogether: "Change them together", fcNow: "Now {n} %", fcOn: "limit around {date}", fcIn: "in about {n} days", fcOpen: "Expand all", fcClose: "Collapse all",
+  fcTitle: "When which battery runs out", fcHint: "What you need in the next 30 days and when the batteries will probably reach the limit (up to 90 days, from the last five weeks). An estimate, not a promise.",
+  fcWindow: "In {from} to {to} days", fcTogether: "Change them together", 
 });
 
 class BatteryTableMixin {
@@ -118,33 +114,6 @@ class BatteryTableMixin {
     return `${table}${pg.footer}`;
   }
 
-  // The forecast up to 90 days in folds of a fortnight, the nearest open: batteries that run low together are changed together.
-  batteryForecastCard(rows) {
-    if (!this.batteryTrend?.available || this.batteryTrend.busy) return "";
-    const slots = new Map();
-    for (const r of rows) {
-      if (r.days === null || r.days === undefined || r.days > BATTERY_FAR_DAYS) continue;
-      const slot = Math.floor(r.days / BATTERY_GROUP_DAYS);
-      slots.set(slot, [...(slots.get(slot) || []), r]);
-    }
-    if (!slots.size) return "";
-    const row = r => {
-      const tone = r.low || r.days <= BATTERY_SOON_DAYS ? "red" : r.days <= BATTERY_NEED_DAYS ? "warn" : "ok";
-      const text = r.low ? this.t("btLeftLow") : this.t("fcIn", { n: r.days });
-      const n = this.batteryName(r.item);
-      const when = r.low ? "" : this.formatDate(new Date(Date.now() + r.days * 86400000).toISOString()).split(",")[0];
-      const bits = [this.areaName(r.item), r.type || this.t("btTypeNone"), r.level !== null && r.level !== undefined ? this.t("fcNow", { n: this.formatNumber(Math.round(r.level)) }) : "", when ? this.t("fcOn", { date: when }) : ""].filter(Boolean).join(" · ");
-      return `<div class="rowwrap"><button class="row rel" data-object="${this.esc(this.objectKey(r.item))}"><span class="tile ${tone}"><ha-icon icon="mdi:battery-clock-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(n.title)}</strong><small>${this.esc(bits)}</small></span><span class="pill ${tone}">${this.esc(text)}</span></button></div>`;
-    };
-    const body = [...slots].sort((x, y) => x[0] - y[0]).map(([slot, list], index) => {
-      const from = slot * BATTERY_GROUP_DAYS, to = Math.min(from + BATTERY_GROUP_DAYS - 1, BATTERY_FAR_DAYS);
-      const tone = from <= BATTERY_SOON_DAYS - 1 ? "red" : from <= 41 ? "warn" : "ok";
-      list.sort((x, y) => x.days - y.days || this.batteryName(x.item).title.localeCompare(this.batteryName(y.item).title));
-      return this.fold(`bt_${from}`, { tone, title: this.t("fcWindow", { from, to }), sub: list.length > 1 ? this.t("fcTogether") : "", pill: this.formatNumber(list.length) }, list.map(row).join(""), index === 0);
-    }).join("");
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("fcTitle")}</h2><p>${this.t("fcHint")}</p></div></div>${body}</div>`;
-  }
-
   // Include the current low state even when there is not enough recorder history for a forecast.
   batteryNeedRows() {
     const b = this.batteryTrend;
@@ -158,11 +127,13 @@ class BatteryTableMixin {
       .sort((x, y) => (x.state === "low" ? -1 : x.days_left) - (y.state === "low" ? -1 : y.days_left) || String(x.name || "").localeCompare(String(y.name || "")));
   }
 
-  // The need of the next 30 days: how many of which cell to buy, tiles of one size, and who runs out first.
-  batteryNeed() {
+  // When which battery runs out: how many of which cell to buy in the next 30 days (tiles of one size), then the batteries
+  // in folds, the low ones first and then a fortnight each up to 90 days, the nearest open.
+  batteryNeed(rows = this.batteryTableRows()) {
     const b = this.batteryTrend;
+    const head = `<div class="panelhead"><div><h2>${this.t("fcTitle")}</h2><p>${this.t("fcHint")}</p></div></div>`;
     if (this.batteryTrendError) return `<div class="panel"><div class="error">${this.esc(this.batteryTrendError)}</div></div>`;
-    if (!b) return `<div class="panel"><div class="panelhead"><div><h2>${this.t("needTitle")}</h2></div></div>${this.skeleton("btLoading")}</div>`;
+    if (!b) return `<div class="panel">${head}${this.skeleton("btLoading")}</div>`;
     if (b.busy) return `<div class="panel"><p class="factnote">${this.t("relBusy")}</p></div>`;
     const soon = this.batteryNeedRows();
     const counts = new Map();
@@ -177,21 +148,32 @@ class BatteryTableMixin {
     const tile = (count, name, cls = "") => `<div class="needtile ${cls}"><b>${this.esc(count)}</b><span>${this.esc(name)}</span></div>`;
     const tiles = [...counts].sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0])).map(([name, n]) => tile(`${this.formatNumber(n)}×`, name));
     if (untyped) tiles.push(tile(this.formatNumber(untyped), `${this.t("needUntyped")} · ${this.t("needUntypedHint")}`, "miss"));
-    const name = r => { const item = this.findObject(`entity:${r.entity_id}`); return item ? this.batteryName(item).title : (r.name || r.entity_id); };
-    const line = r => {
-      const item = this.findObject(`entity:${r.entity_id}`);
-      const level = r.level === null || r.level === undefined ? "" : r.type && r.limit !== undefined ? this.voltNum(r.level) : `${Math.round(r.level)} %`;
-      const bits = [item ? this.areaName(item) : "", b.types?.[r.entity_id] || this.t("btTypeNone"), level, r.state === "low" ? this.t("btLeftLow") : this.t("btLeftDays", { n: r.days_left })];
-      return `<li><button class="linkbtn" data-object="entity:${this.esc(r.entity_id)}">${this.esc(name(r))}</button> <span>${this.esc(bits.filter(Boolean).join(" · "))}</span></li>`;
-    };
-    const list = (title, rows) => {
-      if (!rows.length) return "";
-      const all = Boolean(this.needAll?.[title]), shown = all ? rows : rows.slice(0, 5);
-      return `<div><h3>${this.t(title)} · ${this.formatNumber(rows.length)}</h3><ul>${shown.map(line).join("")}${rows.length > 5 ? `<li><button type="button" class="linkbtn" data-need-all="${title}">${all ? this.t("needLess") : this.t("needMore", { n: rows.length - shown.length })}</button></li>` : ""}</ul></div>`;
-    };
-    const now = soon.filter(r => r.state === "low"), near = soon.filter(r => r.state !== "low" && r.days_left <= BATTERY_SOON_DAYS), later = soon.filter(r => r.state !== "low" && r.days_left > BATTERY_SOON_DAYS);
-    const sub = this.t(soon.length === 1 ? "needSub1" : "needSub", { n: this.formatNumber(soon.length) });
-    const body = soon.length ? `<div class="needgrid">${tiles.join("")}</div>${now.length ? `<div class="needsplit">${list("needNow", now)}</div>` : ""}${near.length || later.length ? `<div class="needsplit">${list("needSoon", near)}${list("needLater", later)}</div>` : ""}` : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t("needNone")}</div>`;
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("needTitle")}</h2>${soon.length ? `<p>${this.esc(sub)}</p>` : ""}</div></div>${this.batterySuggestions()}${body}<p class="factnote">${this.t(b.available ? "needNote" : "btNoRecorder")}</p></div>`;
+    const slots = new Map();
+    for (const r of rows) {
+      if (r.low || r.days === null || r.days === undefined || r.days > BATTERY_FAR_DAYS) continue;
+      const slot = Math.floor(r.days / BATTERY_GROUP_DAYS);
+      slots.set(slot, [...(slots.get(slot) || []), r]);
+    }
+    const byDays = (x, y) => x.days - y.days || this.batteryName(x.item).title.localeCompare(this.batteryName(y.item).title);
+    const windows = [];
+    const now = rows.filter(r => r.low).sort(byDays);
+    if (now.length) windows.push({ id: "bt_now", tone: "red", title: this.t("needNow"), list: now });
+    for (const [slot, list] of [...slots].sort((x, y) => x[0] - y[0])) {
+      const from = slot * BATTERY_GROUP_DAYS, to = Math.min(from + BATTERY_GROUP_DAYS - 1, BATTERY_FAR_DAYS);
+      windows.push({ id: `bt_${from}`, tone: from <= BATTERY_SOON_DAYS - 1 ? "red" : from <= 41 ? "warn" : "ok", title: this.t("fcWindow", { from, to }), sub: list.length > 1 ? this.t("fcTogether") : "", list: list.sort(byDays) });
+    }
+    this.lvState("batwin", "left", "asc");
+    const columns = [
+      { key: "name", label: "btColName", sortable: false, cell: r => { const n = this.batteryName(r.item); return this.nameCell(n.title, n.entity || r.item.object_id); } },
+      { key: "area", label: "btColArea", sortable: false, cell: r => this.esc(this.areaName(r.item) || "—") },
+      { key: "type", label: "btColType", sortable: false, cell: r => (r.type ? `<span class="pill">${this.esc(r.type)}</span>` : `<span class="muted">${this.t("btTypeNone")}</span>`) },
+      { key: "level", label: "btColLevel", sortable: false, cell: r => this.batteryLevelCell(r, this.data.meta.low_battery_percent ?? 20) },
+      { key: "date", label: "btColDate", sortable: false, cell: r => (r.low ? "—" : this.esc(this.formatDate(new Date(Date.now() + r.days * 86400000).toISOString()).split(",")[0])) },
+      { key: "left", label: "btColLeft", sortable: false, cell: r => this.batteryLeftCell(r) },
+    ];
+    const rowAttrs = r => `data-object="${this.esc(this.objectKey(r.item))}" tabindex="0" role="button" aria-label="${this.esc(this.batteryName(r.item).title)}"`;
+    const folds = windows.map((w, index) => this.fold(w.id, { tone: w.tone, title: w.title, sub: w.sub || "", pill: this.formatNumber(w.list.length) }, this.listTable("batwin", columns, w.list, { cls: "batt", rowAttrs }), index === 0)).join("");
+    const body = tiles.length || folds ? `${tiles.length ? `<div class="needgrid">${tiles.join("")}</div>` : ""}${folds}` : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t("needNone")}</div>`;
+    return `<div class="panel">${head}${this.batterySuggestions()}${body}${b.available ? "" : `<p class="factnote">${this.t("btNoRecorder")}</p>`}</div>`;
   }
 }

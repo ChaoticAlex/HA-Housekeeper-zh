@@ -3,7 +3,7 @@ class BatteryCareMixin {
   async loadBatteryTrend(refresh = false) {
     this.batteryTrendLoading = true; this.render();
     const epoch = this._btEpoch || 0;
-    try { const reply = await this._hass.callWS({ type: "ha_housekeeper/battery_trend", refresh }); if (epoch === (this._btEpoch || 0)) { this.batteryTrend = reply; this._btRequested = true; } else this._btRequested = false; this.batteryTrendError = ""; }
+    try { const reply = await this._hass.callWS({ type: "ha_housekeeper/battery_trend", refresh }); if (epoch === (this._btEpoch || 0)) { this.batteryTrend = reply; this._btRequested = true; } else this._btRequested = false; this.batteryTrendError = ""; this.markLoaded("batteries"); }
     catch (err) { this.batteryTrendError = err?.message || String(err); }
     this.batteryTrendLoading = false; this.render();
   }
@@ -107,7 +107,6 @@ class BatteryCareMixin {
   bindBatteryCare(root) {
     this.bindBatteryType(root);
     this.bindBatteryKind(root);
-    root.querySelectorAll("[data-need-all]").forEach(el => el.addEventListener("click", () => { this.needAll = { ...this.needAll, [el.dataset.needAll]: !this.needAll?.[el.dataset.needAll] }; this.render(); }));
     root.querySelector("[data-bt-refresh]")?.addEventListener("click", () => this.loadBatteryTrend(true));
     root.querySelector("[data-rem-new]")?.addEventListener("click", () => { this.remDraft = this.remBlank(); this.remError = ""; this._remFocus = true; this.render(); });
     root.querySelector("[data-rem-cancel]")?.addEventListener("click", () => { this.remDraft = null; this.remError = ""; this.render(); });

@@ -1349,7 +1349,6 @@ class StylesMixin {
       .sharebar{display:block;height:6px;border-radius:3px;background:var(--hk-soft);overflow:hidden;margin-top:4px}.sharebar i{display:block;height:100%;background:var(--hk-blue-solid)}
       .recchoice{display:inline-flex;align-items:center;gap:6px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}.recwarn{flex:1 1 100%;color:var(--hk-muted)}
       .selcount{display:inline-flex;align-items:center;min-height:30px;box-sizing:border-box;padding:4px 10px;border:1px solid color-mix(in srgb,var(--hk-blue-solid) 28%,var(--hk-border));border-radius:999px;background:color-mix(in srgb,var(--hk-blue-solid) 10%,var(--hk-surface));color:var(--hk-blue-text);font-size:calc(12px*var(--hk-fs,1));font-weight:700;white-space:nowrap}
-      .needsplit>div:only-child{grid-column:1/-1}
       .rem-editor .remgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:16px}.rem-editor .remfield.wide,.rem-editor .remfield.full{grid-column:1/-1}.rem-editor .remfield input{box-sizing:border-box;width:100%;height:40px;padding:8px 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.rem-editor .remfield:focus-within>span:first-child{color:var(--hk-blue-text)}@media(max-width:700px){.rem-editor .remgrid{grid-template-columns:1fr}}
       .exbar{border-top:1px solid var(--hk-border)}.exblock{margin:0;max-height:none;border-radius:0}.exsteps{padding:10px 16px 12px;border-bottom:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(12.5px*var(--hk-fs,1))}.exsteps ol{margin:4px 0 0;padding-left:20px}.exsteps li{margin:2px 0}.exdone{opacity:.6}.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--hk-border)}.toolgap{flex:1}.btn.quiet{box-shadow:none;border-color:transparent;background:none;color:var(--hk-blue-text);padding:8px 10px}.btn.quiet:hover{background:var(--hk-soft)}.btn.quiet[disabled]{color:var(--hk-muted);opacity:.7;cursor:default}
       .btn.primary{border-color:var(--hk-blue-solid);color:var(--hk-on,#fff);background:var(--hk-blue-solid)}.btn.primary:hover{background:#0a8ccf}.btn[disabled]{opacity:.6;cursor:not-allowed}.btn[aria-busy="true"]{cursor:wait}
@@ -1406,7 +1405,7 @@ class StylesMixin {
       .detailhead{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:16px;padding:18px 20px;margin-bottom:14px}.detailhead .tile{width:48px;height:48px}.detailhead h1{margin:6px 0 2px;font-size:calc(22px*var(--hk-fs,1))}.actions{display:flex;flex-wrap:wrap;gap:8px}
       .sumline{display:flex;flex-wrap:wrap;gap:10px 26px;padding:12px 18px;margin-bottom:14px}.sumline span{display:grid;gap:3px;align-content:start}.sumline small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.sumline b{font-size:calc(13px*var(--hk-fs,1));font-weight:600}
       .tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--hk-border);overflow-x:auto;background:linear-gradient(to right,var(--hk-bg),transparent) left/36px 100% no-repeat local,linear-gradient(to left,var(--hk-bg),transparent) right/36px 100% no-repeat local,linear-gradient(to right,rgba(0,0,0,.16),transparent) left/10px 100% no-repeat scroll,linear-gradient(to left,rgba(0,0,0,.16),transparent) right/10px 100% no-repeat scroll}.tab{flex:none;padding:10px 14px;border:0;border-bottom:2px solid transparent;background:none;color:var(--hk-muted);white-space:nowrap}.tab em{font-style:normal;font-size:calc(11px*var(--hk-fs,1));padding:1px 6px;border-radius:10px;background:var(--hk-soft)}.tab[aria-selected="true"]{color:var(--hk-blue-text);border-bottom-color:var(--hk-blue);font-weight:600}
-      .needgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:16px}.needtile{display:flex;flex-direction:column;justify-content:center;gap:4px;height:92px;padding:0 16px;border:1px solid var(--hk-border);border-radius:14px;background:var(--hk-soft);min-width:0}.needtile b{font-size:calc(28px*var(--hk-fs,1));line-height:1;font-variant-numeric:tabular-nums}.needtile span{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.needtile.miss{border-style:dashed}.needtile.miss b{color:var(--hk-amber)}.needsplit{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--hk-border)}.needsplit>div{padding:12px 16px;min-width:0}.needsplit>div+div{border-left:1px solid var(--hk-border)}.needsplit:empty{display:none}.needsplit h3{margin:0 0 6px;font-size:calc(12px*var(--hk-fs,1));letter-spacing:.04em;text-transform:uppercase;color:var(--hk-muted)}.needsplit ul{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:calc(14px*var(--hk-fs,1))}.needsplit li span,.needsplit li.muted{color:var(--hk-muted)}.needsplit li span::before{content:"· "}.tablewrap.lt.batt .iconbtn{padding:3px 6px;margin-left:4px;--mdc-icon-size:16px}.linkbtn{border:0;background:none;padding:0;font:inherit;color:var(--hk-text);cursor:pointer;text-decoration:underline;text-decoration-color:var(--hk-border)}.linkbtn:hover{text-decoration-color:currentColor}.tablewrap.lt.batt .lvl{display:flex;align-items:center;gap:8px;min-width:130px}.tablewrap.lt.batt .lvl .bar{flex:1;height:7px;border-radius:4px;background:var(--hk-border);overflow:hidden;min-width:48px}.tablewrap.lt.batt .lvl .bar i{display:block;height:100%}.lvl .lvlnum{min-width:4.2em;text-align:right;white-space:nowrap}.lvl .lvlnum small{display:block;color:var(--hk-muted);font-size:calc(11.5px*var(--hk-fs,1))}.tablewrap.lt.batt .red{color:var(--hk-red)}.tablewrap.lt.batt .amber{color:var(--hk-amber)}.tablewrap.lt.batt .green{color:var(--hk-green)}.tablewrap.lt.batt td .btedit{display:flex;flex-wrap:wrap;gap:6px;white-space:normal}.tablewrap.lt.batt .btedit label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.tablewrap.lt.batt .bkedit{padding:0;background:none;border:0}.tablewrap.lt.batt .bkedit .factnote{display:none}.tablewrap.lt.batt .btn.miss{border-style:dashed;color:var(--hk-amber)}.btn.miss ha-icon{--mdc-icon-size:14px;margin-left:6px}.tablewrap.lt.batt td:last-child{text-align:right}@media(max-width:700px){.needsplit{grid-template-columns:1fr}.needsplit>div+div{border-left:0;border-top:1px solid var(--hk-border)}}.bkedit{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 16px 12px 62px;background:var(--hk-soft);border-bottom:1px solid var(--hk-border)}.bkedit select,.bkrow select{padding:5px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit;font-size:calc(13px*var(--hk-fs,1))}.bkcancel{border:0;background:none;padding:4px 2px;font:inherit;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);cursor:pointer;text-decoration:underline}.bkrow{gap:8px;padding-right:12px;flex-wrap:wrap}.bkall,.bkask{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--hk-border)}.bkask{background:var(--hk-soft)}.rowwrap{display:flex;align-items:center;border-bottom:1px solid var(--hk-border)}.rowwrap:last-child{border-bottom:0}.rowwrap .row{border-bottom:0;flex:1;min-width:0}.selbox{margin:0 0 0 16px;flex:none}.selcell{width:34px;padding-right:0}.selcell .selbox{margin:0}.statcell{display:flex;gap:10px;align-items:flex-start}.outcome{display:flex;gap:12px;align-items:center;margin:14px 16px 4px;padding:14px 16px;border-radius:12px;--oc:var(--hk-gray);color:color-mix(in srgb,var(--oc) 55%,var(--hk-text));background:color-mix(in srgb,var(--oc) 13%,transparent);border:1px solid color-mix(in srgb,var(--oc) 30%,transparent)}.outcome ha-icon{--mdc-icon-size:26px;flex:none}.outcome.ok{--oc:var(--hk-green)}.outcome.warn{--oc:var(--hk-amber)}.outcome.red{--oc:var(--hk-red)}.namecell{position:relative}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;padding:10px 16px;border-radius:10px;background:var(--hk-text);color:var(--hk-bg);font-weight:600;box-shadow:var(--hk-sh2);pointer-events:none}.toast.bad{border-left:5px solid var(--hk-red);max-width:min(560px,calc(100vw - 32px))}.modepill{display:inline-flex;align-items:center;gap:5px;--mdc-icon-size:14px}.outcome small{display:block;font-weight:400;margin-top:2px}.visitline{display:flex;gap:8px;align-items:center;margin:0 0 12px}.visitline ha-icon{--mdc-icon-size:16px}.headsel{display:flex;gap:10px;align-items:center}.statcell .selbox{margin:3px 0 0}.statcell>div{min-width:0}.btcart,.btsuggest{margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 10%,transparent);border:1px solid color-mix(in srgb,var(--hk-blue) 30%,transparent)}.btcart strong{display:block;margin-bottom:2px}.btsuggest{background:color-mix(in srgb,var(--hk-green) 11%,transparent);border-color:color-mix(in srgb,var(--hk-green) 30%,transparent)}.btsuggest h3{margin:0 0 4px}.btrepl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}.btrepl .row-text{flex:1;min-width:200px}.btct{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 16px;border-top:1px solid var(--hk-border)}.btct .factnote{flex:1;min-width:120px;margin:0}.btct input{padding:5px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.btctl,.btedit{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 16px 0 8px}.btedit{flex-basis:100%;margin:0;padding:8px 16px 12px}.rowwrap:has(.btedit){flex-wrap:wrap}.chcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;padding:0 16px}.chcols>div{padding:8px 0}.chcols .big{font-size:22px;font-weight:700}.chbars{display:flex;gap:3px;align-items:flex-end;height:54px;padding:8px 16px 4px}.chbars i{flex:1;max-width:14px;min-width:3px;border-radius:3px 3px 0 0;background:var(--hk-green);display:block}.chbars i.m{background:var(--hk-red)}.chaxis{display:flex;justify-content:space-between;padding:0 16px 12px;color:var(--hk-muted);font-size:12px}.trimbox{margin:14px 16px 0;padding-top:14px;border-top:1px solid var(--hk-border)}.trimbox .actions{margin-top:8px}
+      .needgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:16px}.needtile{display:flex;flex-direction:column;justify-content:center;gap:4px;height:92px;padding:0 16px;border:1px solid var(--hk-border);border-radius:14px;background:var(--hk-soft);min-width:0}.needtile b{font-size:calc(28px*var(--hk-fs,1));line-height:1;font-variant-numeric:tabular-nums}.needtile span{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.needtile.miss{border-style:dashed}.needtile.miss b{color:var(--hk-amber)}.tablewrap.lt.batt .iconbtn{padding:3px 6px;margin-left:4px;--mdc-icon-size:16px}.linkbtn{border:0;background:none;padding:0;font:inherit;color:var(--hk-text);cursor:pointer;text-decoration:underline;text-decoration-color:var(--hk-border)}.linkbtn:hover{text-decoration-color:currentColor}.tablewrap.lt.batt .lvl{display:flex;align-items:center;gap:8px;min-width:130px}.tablewrap.lt.batt .lvl .bar{flex:1;height:7px;border-radius:4px;background:var(--hk-border);overflow:hidden;min-width:48px}.tablewrap.lt.batt .lvl .bar i{display:block;height:100%}.lvl .lvlnum{min-width:4.2em;text-align:right;white-space:nowrap}.lvl .lvlnum small{display:block;color:var(--hk-muted);font-size:calc(11.5px*var(--hk-fs,1))}.tablewrap.lt.batt .red{color:var(--hk-red)}.tablewrap.lt.batt .amber{color:var(--hk-amber)}.tablewrap.lt.batt .green{color:var(--hk-green)}.tablewrap.lt.batt td .btedit{display:flex;flex-wrap:wrap;gap:6px;white-space:normal}.tablewrap.lt.batt .btedit label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.tablewrap.lt.batt .bkedit{padding:0;background:none;border:0}.tablewrap.lt.batt .bkedit .factnote{display:none}.tablewrap.lt.batt .btn.miss{border-style:dashed;color:var(--hk-amber)}.btn.miss ha-icon{--mdc-icon-size:14px;margin-left:6px}.tablewrap.lt.batt td:last-child{text-align:right}@media(max-width:700px){}.bkedit{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 16px 12px 62px;background:var(--hk-soft);border-bottom:1px solid var(--hk-border)}.bkedit select,.bkrow select{padding:5px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit;font-size:calc(13px*var(--hk-fs,1))}.bkcancel{border:0;background:none;padding:4px 2px;font:inherit;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);cursor:pointer;text-decoration:underline}.bkrow{gap:8px;padding-right:12px;flex-wrap:wrap}.bkall,.bkask{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--hk-border)}.bkask{background:var(--hk-soft)}.rowwrap{display:flex;align-items:center;border-bottom:1px solid var(--hk-border)}.rowwrap:last-child{border-bottom:0}.rowwrap .row{border-bottom:0;flex:1;min-width:0}.selbox{margin:0 0 0 16px;flex:none}.selcell{width:34px;padding-right:0}.selcell .selbox{margin:0}.statcell{display:flex;gap:10px;align-items:flex-start}.outcome{display:flex;gap:12px;align-items:center;margin:14px 16px 4px;padding:14px 16px;border-radius:12px;--oc:var(--hk-gray);color:color-mix(in srgb,var(--oc) 55%,var(--hk-text));background:color-mix(in srgb,var(--oc) 13%,transparent);border:1px solid color-mix(in srgb,var(--oc) 30%,transparent)}.outcome ha-icon{--mdc-icon-size:26px;flex:none}.outcome.ok{--oc:var(--hk-green)}.outcome.warn{--oc:var(--hk-amber)}.outcome.red{--oc:var(--hk-red)}.namecell{position:relative}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:50;padding:10px 16px;border-radius:10px;background:var(--hk-text);color:var(--hk-bg);font-weight:600;box-shadow:var(--hk-sh2);pointer-events:none}.toast.bad{border-left:5px solid var(--hk-red);max-width:min(560px,calc(100vw - 32px))}.modepill{display:inline-flex;align-items:center;gap:5px;--mdc-icon-size:14px}.outcome small{display:block;font-weight:400;margin-top:2px}.visitline{display:flex;gap:8px;align-items:center;margin:0 0 12px}.visitline ha-icon{--mdc-icon-size:16px}.headsel{display:flex;gap:10px;align-items:center}.statcell .selbox{margin:3px 0 0}.statcell>div{min-width:0}.btcart,.btsuggest{margin:14px 16px 0;padding:12px 14px;border-radius:12px;background:color-mix(in srgb,var(--hk-blue) 10%,transparent);border:1px solid color-mix(in srgb,var(--hk-blue) 30%,transparent)}.btcart strong{display:block;margin-bottom:2px}.btsuggest{background:color-mix(in srgb,var(--hk-green) 11%,transparent);border-color:color-mix(in srgb,var(--hk-green) 30%,transparent)}.btsuggest h3{margin:0 0 4px}.btrepl{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0}.btrepl .row-text{flex:1;min-width:200px}.btct{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 16px;border-top:1px solid var(--hk-border)}.btct .factnote{flex:1;min-width:120px;margin:0}.btct input{padding:5px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.btctl,.btedit{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:0 16px 0 8px}.btedit{flex-basis:100%;margin:0;padding:8px 16px 12px}.rowwrap:has(.btedit){flex-wrap:wrap}.chcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;padding:0 16px}.chcols>div{padding:8px 0}.chcols .big{font-size:22px;font-weight:700}.chbars{display:flex;gap:3px;align-items:flex-end;height:54px;padding:8px 16px 4px}.chbars i{flex:1;max-width:14px;min-width:3px;border-radius:3px 3px 0 0;background:var(--hk-green);display:block}.chbars i.m{background:var(--hk-red)}.chaxis{display:flex;justify-content:space-between;padding:0 16px 12px;color:var(--hk-muted);font-size:12px}.trimbox{margin:14px 16px 0;padding-top:14px;border-top:1px solid var(--hk-border)}.trimbox .actions{margin-top:8px}
       .row.politem[data-pol-row]{cursor:pointer}.poldetail{cursor:auto;display:grid;gap:12px;margin-top:10px}.poldetail h4{margin:0 0 4px;font-size:calc(11px*var(--hk-fs,1));font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--hk-muted)}.poldetail p{margin:0}.poledit{display:grid;gap:6px}.poldetail .inline{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.poldetail .inline input,.poldetail .inline select{height:36px;min-width:0}.poldetail .acts{display:flex;flex-wrap:wrap;gap:8px}.poldetail .btn.on{border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 14%,var(--hk-surface));color:var(--hk-blue-text);font-weight:700}.poldetail .btn small{font-weight:400;color:var(--hk-muted);margin-left:4px}.polcheck{font-size:calc(13px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted)}.polcheck.ok{color:var(--hk-green)}.polcheck.bad{color:var(--hk-red,#b3392f)}.row.politem.open{background:var(--hk-soft)}
       .remform{display:grid;gap:14px;padding:16px;border-top:1px solid var(--hk-border);background:var(--hk-soft)}.remgrid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;align-items:start}.remfield{display:grid;grid-template-rows:auto 40px auto;gap:4px;font-size:calc(12px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted);min-width:0}.remfield input{height:40px;min-width:0}.remfield.full{grid-column:1/-1;grid-template-rows:auto 40px}.remchips{display:flex;gap:6px;flex-wrap:wrap}.remchips .chip{padding:2px 10px;font-size:calc(12px*var(--hk-fs,1))}.remhint{color:var(--hk-blue-text);font-weight:600}.remactions{display:flex;gap:14px;align-items:center;justify-content:flex-end}
       .tablewrap.rem td:first-child{white-space:normal}.chevbtn{display:inline-flex;vertical-align:middle;padding:0;margin-right:4px;border:0;background:none;color:var(--hk-muted);cursor:pointer}.remnote{display:block;margin-left:28px;color:var(--hk-muted)}.remact{text-align:right;white-space:nowrap}.remact .btn{margin-left:6px}.remhist td{padding:10px 16px 14px 44px;background:var(--hk-soft)}.remhist h3{margin:0 0 6px;font-size:calc(11px*var(--hk-fs,1));font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--hk-muted)}.remhist ul{display:grid;gap:4px;margin:0;padding:0;list-style:none}.remhist li{display:flex;gap:12px;align-items:center}.remhist li .linkbtn{margin-left:auto;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.remhist p{margin:0}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -4702,15 +4701,12 @@ class UnusedMixin {
     ]);
     const unknown = this.batteryTrend?.unknown;
     const notes = `${this.batteryTrend?.available && unknown !== undefined ? `<p class="factnote">${this.t("btTableNote", { unknown: this.formatNumber(unknown) })}</p>` : ""}${this.voltNote()}`;
-    const head = `<div class="panelhead"><div><h2>${this.t("btTitle")}</h2><p>${this.t("btHint")}</p></div><div class="actions"><button class="btn" data-bt-refresh ${this.batteryTrendLoading ? 'disabled aria-busy="true"' : ""}>${this.t("backupRefresh")}</button></div></div>`;
+    const head = `<div class="panelhead"><div><h2>${this.t("btTitle")}</h2><p>${this.t("btHint")}</p></div></div>`;
     const body = list.length ? this.batteryTable(list) : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t(all.length ? "noMatches" : "noBatteries")}</div>`;
     this.ensureBatteryTrend();
-    // The list is the page; the forecast and the kinds are other questions and only show as tabs when they have something.
-    const forecast = this.batteryForecastCard(all), kinds = this.batteryKindCard();
-    const tabs = [{ id: "list", label: this.t("tabBatList") }, forecast ? { id: "forecast", label: this.t("tabBatForecast") } : null, kinds ? { id: "kinds", label: this.t("tabBatKinds") } : null].filter(Boolean);
-    const open = this.viewTabOf("batteries", tabs, "list");
-    const listTab = `${this.batteryNeed()}<div class="panel">${head}${this.filterNote(this.batteryFilter === "low" ? [this.t("batteryLow")] : [], 'data-battery-filter="all"')}${bar}${body}${notes}</div>${this.batteryCustomTypes()}`;
-    return `<div class="stack">${chips}${tabs.length > 1 ? this.viewTabBar("batteries", tabs, open) : ""}${open === "forecast" ? forecast : open === "kinds" ? kinds : listTab}</div>`;
+    const bar2 = this.pageBar({ at: this.loadedAt("batteries"), loading: this.batteryTrendLoading, attr: "data-bt-refresh" });
+    // One column: when which battery runs out (need and forecast together), the list, then the kinds that need a look.
+    return `<div class="stack">${bar2}${chips}${this.batteryNeed(all)}<div class="panel">${head}${this.filterNote(this.batteryFilter === "low" ? [this.t("batteryLow")] : [], 'data-battery-filter="all"')}${bar}${body}${notes}</div>${this.batteryCustomTypes()}${this.batteryKindCard()}</div>`;
   }
 }
 
@@ -8595,7 +8591,7 @@ Object.assign(TEXT.en, {
 
 // Texts for the statistics and dashboard policy rules; merged into TEXT.
 Object.assign(TEXT.de, {
-  filterOn: "Filter aktiv", invMore: "Alle {n} Typen anzeigen", invFewer: "Nur die größten {n}", invOthers: "Weitere ({n} Typen)", invColCount: "Anzahl", invColShare: "Anteil", invOfAll: "{n} von {total}", filterReset: "Zurücksetzen", tabBatList: "Liste", tabBatForecast: "Prognose", tabBatKinds: "Arten",
+  filterOn: "Filter aktiv", invMore: "Alle {n} Typen anzeigen", invFewer: "Nur die größten {n}", invOthers: "Weitere ({n} Typen)", invColCount: "Anzahl", invColShare: "Anteil", invOfAll: "{n} von {total}", filterReset: "Zurücksetzen",
   sysTabAppsHint: "CPU, RAM und Daten je App",
   polRule_statistics_unit: "Statistik: Einheit passt nicht mehr", polDesc_statistics_unit: "Die Einheit der Entität weicht von der Einheit der Langzeitstatistik ab, und der Recorder kann sie nicht umrechnen. Neue Werte passen dann nicht zu den alten. Nur Metadaten werden gelesen.", polAlso_statistics_unit: "Statistik → Entität: {ids}",
   polRule_statistics_class: "Statistik: Zustandsklasse passt nicht mehr", polDesc_statistics_class: "Die Zustandsklasse der Entität (Messwert oder Zähler) passt nicht zu den gespeicherten Statistikdaten. Verläufe lassen sich dann nicht zusammen auswerten. Nur Metadaten werden gelesen; Sprünge und Rücksetzer in den Werten prüft Housekeeper nicht.", polAlso_statistics_class: "Statistik → Entität: {ids}",
@@ -8615,7 +8611,7 @@ Object.assign(TEXT.de, {
   polRule_hacs_blocked: "HACS-Update braucht neuere Home-Assistant-Version", polDesc_hacs_blocked: "Für eine über HACS installierte Integration wartet ein Update, das HACS nicht installiert, weil es eine neuere Home-Assistant-Version verlangt als die laufende. Nur ein Hinweis; erst Home Assistant aktualisieren.", polAlso_hacs_blocked: "{ids}",
 });
 Object.assign(TEXT.en, {
-  filterOn: "Filter on", invMore: "Show all {n} types", invFewer: "Only the largest {n}", invOthers: "Others ({n} types)", invColCount: "Count", invColShare: "Share", invOfAll: "{n} of {total}", filterReset: "Reset", tabBatList: "List", tabBatForecast: "Forecast", tabBatKinds: "Kinds",
+  filterOn: "Filter on", invMore: "Show all {n} types", invFewer: "Only the largest {n}", invOthers: "Others ({n} types)", invColCount: "Count", invColShare: "Share", invOfAll: "{n} of {total}", filterReset: "Reset",
   sysTabAppsHint: "CPU, RAM and data per app",
   polRule_statistics_unit: "Statistics: unit no longer fits", polDesc_statistics_unit: "The unit of the entity differs from the unit of its long-term statistics and the recorder cannot convert it. New values then do not fit the old ones. Only metadata is read.", polAlso_statistics_unit: "Statistics → entity: {ids}",
   polRule_statistics_class: "Statistics: state class no longer fits", polDesc_statistics_class: "The state class of the entity (measurement or total) does not match the stored statistics. Histories cannot be read together. Only metadata is read; jumps and resets in the values are not checked.", polAlso_statistics_class: "Statistics → entity: {ids}",
@@ -8640,7 +8636,7 @@ class BatteryCareMixin {
   async loadBatteryTrend(refresh = false) {
     this.batteryTrendLoading = true; this.render();
     const epoch = this._btEpoch || 0;
-    try { const reply = await this._hass.callWS({ type: "ha_housekeeper/battery_trend", refresh }); if (epoch === (this._btEpoch || 0)) { this.batteryTrend = reply; this._btRequested = true; } else this._btRequested = false; this.batteryTrendError = ""; }
+    try { const reply = await this._hass.callWS({ type: "ha_housekeeper/battery_trend", refresh }); if (epoch === (this._btEpoch || 0)) { this.batteryTrend = reply; this._btRequested = true; } else this._btRequested = false; this.batteryTrendError = ""; this.markLoaded("batteries"); }
     catch (err) { this.batteryTrendError = err?.message || String(err); }
     this.batteryTrendLoading = false; this.render();
   }
@@ -8744,7 +8740,6 @@ class BatteryCareMixin {
   bindBatteryCare(root) {
     this.bindBatteryType(root);
     this.bindBatteryKind(root);
-    root.querySelectorAll("[data-need-all]").forEach(el => el.addEventListener("click", () => { this.needAll = { ...this.needAll, [el.dataset.needAll]: !this.needAll?.[el.dataset.needAll] }; this.render(); }));
     root.querySelector("[data-bt-refresh]")?.addEventListener("click", () => this.loadBatteryTrend(true));
     root.querySelector("[data-rem-new]")?.addEventListener("click", () => { this.remDraft = this.remBlank(); this.remError = ""; this._remFocus = true; this.render(); });
     root.querySelector("[data-rem-cancel]")?.addEventListener("click", () => { this.remDraft = null; this.remError = ""; this.render(); });
@@ -11875,7 +11870,7 @@ Object.assign(TEXT.de, {
   bkAll: "Alle bestätigen", bkAsk: "{n} Sensoren als keine Wechselbatterie speichern?", bkYes: "Ja, speichern", bkNo: "Abbrechen",
   bkWhy: "Gerät meldet auch {list}", bkWhyMower: "Gerät ist ein Mähroboter", bkWhyVacuum: "Gerät ist ein Staubsauger",
   bkSig_power: "Leistung", bkSig_energy: "Energie", bkSig_energy_storage: "Speicher", bkSig_current: "Strom", bkSig_battery_charging: "Ladevorgang", bkSig_plug: "Stecker",
-  bkFailed: "Das hat nicht geklappt: {detail}",
+  bkFailed: "Das hat nicht geklappt: {detail}", bkColReason: "Grund", bkColKind: "Art",
 });
 Object.assign(TEXT.en, {
   bkSet: "Not a replaceable battery?", bkLabel: "What is {name}?", bkSave: "Save", bkBack: "It is a battery", bkConfirm: "Correct", bkNote: "Afterwards the sensor no longer counts in lowest level, forecast and the status. Stored only in Housekeeper.",
@@ -11885,7 +11880,7 @@ Object.assign(TEXT.en, {
   bkAll: "Confirm all", bkAsk: "Save {n} sensors as not a replaceable battery?", bkYes: "Yes, save", bkNo: "Cancel",
   bkWhy: "Device also reports {list}", bkWhyMower: "Device is a mowing robot", bkWhyVacuum: "Device is a vacuum",
   bkSig_power: "power", bkSig_energy: "energy", bkSig_energy_storage: "storage", bkSig_current: "current", bkSig_battery_charging: "charging", bkSig_plug: "plug",
-  bkFailed: "That did not work: {detail}",
+  bkFailed: "That did not work: {detail}", bkColReason: "Reason", bkColKind: "Kind",
 });
 
 class BatteryKindMixin {
@@ -11932,13 +11927,27 @@ class BatteryKindMixin {
   batteryKindCard() {
     const { mine, proposed } = this.batteryKindItems();
     if (!mine.length && !proposed.length) return this.bkMessage ? `<p class="factnote" role="status">${this.esc(this.bkMessage)}</p>` : "";
-    const level = o => (o.unit === "%" || !o.unit) && o.state !== null && o.state !== "" && !Number.isNaN(Number(o.state)) ? `${Math.round(Number(o.state))} %` : "";
-    const row = (o, kind, mineRow) => `<div class="rowwrap bkrow"><button class="row rel" data-object="${this.esc(this.objectKey(o))}"><span class="tile mute"><ha-icon icon="mdi:battery-high"></ha-icon></span><span class="row-text"><strong>${this.esc(this.batteryName(o).title)}</strong><small>${this.esc([mineRow ? "" : this.bkWhy(o), this.batteryName(o).entity, o.object_id].filter(Boolean).join(" · "))}</small></span>${level(o) ? `<span class="pill mute">${level(o)}</span>` : ""}</button>${this.bkSelect(o, kind, mineRow ? "data-bk-change" : "data-bk-proposal")}${mineRow ? "" : `<button class="btn small" data-bk-accept="${this.esc(o.object_id)}">${this.t("bkConfirm")}</button>`}<button class="btn quiet" data-bk-back="${this.esc(o.object_id)}">${this.t("bkBack")}</button></div>`;
+    const level = o => ((o.unit === "%" || !o.unit) && o.state !== null && o.state !== "" && !Number.isNaN(Number(o.state)) ? Math.round(Number(o.state)) : null);
+    const sorts = [
+      { key: "name", label: "btColName", dir: "asc", get: o => this.batteryName(o).title },
+      { key: "level", label: "btColLevel", dir: "asc", get: o => level(o) ?? 1e3 },
+    ];
+    const table = (id, items, kindOf, mineRow) => this.sysList(id, items, {
+      sort: "name", sorts, tie: o => o.object_id, text: o => [this.batteryName(o).title, o.object_id, mineRow ? "" : this.bkWhy(o)].join(" "),
+      rowAttrs: o => `data-object="${this.esc(this.objectKey(o))}" tabindex="0" role="button" aria-label="${this.esc(this.batteryName(o).title)}"`,
+      columns: [
+        { key: "name", label: "btColName", dir: "asc", cell: o => this.nameCell(this.batteryName(o).title, o.object_id) },
+        ...(mineRow ? [] : [{ key: "why", label: "bkColReason", sortable: false, cell: o => this.esc(this.bkWhy(o)) }]),
+        { key: "level", label: "btColLevel", dir: "asc", cell: o => (level(o) === null ? "—" : `${level(o)} %`) },
+        { key: "kind", label: "bkColKind", sortable: false, cell: o => this.bkSelect(o, kindOf(o), mineRow ? "data-bk-change" : "data-bk-proposal") },
+        { key: "act", label: "btColAct", sortable: false, cell: o => `${mineRow ? "" : `<button class="btn small" data-bk-accept="${this.esc(o.object_id)}">${this.t("bkConfirm")}</button>`}<button class="btn quiet" data-bk-back="${this.esc(o.object_id)}">${this.t("bkBack")}</button>` },
+      ],
+    });
     const ask = this.bkAsk ? `<div class="bkask" role="alert"><strong>${this.t("bkAsk", { n: this.formatNumber(proposed.length) })}</strong><button class="btn small primary" data-bk-all-yes>${this.t("bkYes")}</button><button class="btn small" data-bk-all-no>${this.t("bkNo")}</button></div>` : "";
     const all = proposed.length > 1 && !this.bkAsk ? `<div class="bkall"><button class="btn small" data-bk-all>${this.t("bkAll")}</button></div>` : "";
     const parts = [];
-    if (proposed.length) parts.push(this.fold("bk_proposed", { tone: "warn", title: this.t("bkProposed"), sub: this.t("bkProposedHint"), pill: this.formatNumber(proposed.length) }, `${all}${ask}${proposed.map(o => row(o, o.battery_suggest?.kind || "other", false)).join("")}`, true));
-    if (mine.length) parts.push(this.fold("bk_mine", { tone: "mute", title: this.t("bkMine"), sub: this.t("bkMineHint"), pill: this.formatNumber(mine.length) }, mine.map(o => row(o, o.battery_kind, true)).join(""), false));
+    if (proposed.length) parts.push(this.fold("bk_proposed", { tone: "warn", title: this.t("bkProposed"), sub: this.t("bkProposedHint"), pill: this.formatNumber(proposed.length) }, `${all}${ask}${table("bk_proposed", proposed, o => o.battery_suggest?.kind || "other", false)}`, true));
+    if (mine.length) parts.push(this.fold("bk_mine", { tone: "mute", title: this.t("bkMine"), sub: this.t("bkMineHint"), pill: this.formatNumber(mine.length) }, table("bk_mine", mine, o => o.battery_kind, true), false));
     return `<div class="panel">${parts.join("")}${this.bkMessage ? `<p class="factnote pad" role="status">${this.esc(this.bkMessage)}</p>` : ""}</div>`;
   }
 
@@ -12097,28 +12106,24 @@ const BATTERY_FAR_DAYS = 90;
 const BATTERY_GROUP_DAYS = 14;
 
 Object.assign(TEXT.de, {
-  btColName: "Gerät", btColArea: "Bereich", btColType: "Typ", btColLevel: "Stand", btColSlope: "Verbrauch", btColLeft: "Leer in", btColAct: "Aktion", btTypeChange: "Typ ändern", btLevelOk: "in Ordnung",
+  btColName: "Gerät", btColArea: "Bereich", btColType: "Typ", btColLevel: "Stand", btColSlope: "Verbrauch", btColLeft: "Leer in", btColAct: "Aktion", btColDate: "Datum", btTypeChange: "Typ ändern", btLevelOk: "in Ordnung",
   btSlopeDay: "{n} %/Tag", btVoltDay: "{n} V/Tag", btSlopeStable: "stabil", btLeftLow: "unter Grenze", btLeftDays: "{n} Tage", btLeftFar: "> {n} Tage", btLeftStable: "nicht absehbar",
   btFilterSoon: "Bald leer", btFilterUntyped: "Ohne Typ", btAllTypes: "Alle Typen",
-  needTitle: "Benötigte Batterien jetzt und in den nächsten 30 Tagen", needSub: "{n} Geräte sind bereits unter ihrer Grenze oder erreichen sie laut Prognose in 30 Tagen.", needSub1: "1 Gerät ist bereits unter seiner Grenze oder erreicht sie laut Prognose in 30 Tagen.",
-  needLess: "Weniger anzeigen", needNone: "Keine Batterie ist unter ihrer Grenze oder erreicht sie laut Prognose in den nächsten 30 Tagen.", needUntyped: "ohne Typ", needUntypedHint: "Typ in der Tabelle setzen", needNow: "Bereits unter Grenze", needSoon: "In den nächsten 14 Tagen", needLater: "In 15 bis 30 Tagen", needMore: "… {n} weitere in der Tabelle",
-  needNote: "Gezählt werden bereits niedrige Batterien und Geräte, die laut Prognose innerhalb von 30 Tagen ihre Grenze erreichen. Der Typ kommt von dir.",
+  needNone: "Keine Batterie ist unter ihrer Grenze oder erreicht sie laut Prognose in den nächsten 30 Tagen.", needUntyped: "ohne Typ", needUntypedHint: "Typ in der Tabelle setzen", needNow: "Jetzt niedrig",
   btTableNote: "Prognose nur bis 90 Tage, aus den letzten fünf Wochen: eine Schätzung, keine Zusage. Ohne Prognose: {unknown} (zu wenige Tage oder stabil). Nach einem Wechsel zählt nur der Verlauf danach.",
   btFarMore: "{n} halten laut Prognose länger als 90 Tage.",
-  fcTitle: "Prognose", fcHint: "Wann eine Batterie voraussichtlich die Grenze erreicht, bis 90 Tage, aus dem Verlauf der letzten fünf Wochen. Eine Schätzung, keine Zusage.",
-  fcWindow: "In {from} bis {to} Tagen", fcTogether: "Gemeinsam wechseln", fcNow: "Jetzt {n} %", fcOn: "Grenze am {date}", fcIn: "in etwa {n} Tagen", fcOpen: "Alle aufklappen", fcClose: "Alle zuklappen",
+  fcTitle: "Wann welche Batterie leer ist", fcHint: "Was du in den nächsten 30 Tagen brauchst und wann die Batterien voraussichtlich die Grenze erreichen (bis 90 Tage, aus den letzten fünf Wochen). Eine Schätzung, keine Zusage.",
+  fcWindow: "In {from} bis {to} Tagen", fcTogether: "Gemeinsam wechseln", 
 });
 Object.assign(TEXT.en, {
-  btColName: "Device", btColArea: "Area", btColType: "Type", btColLevel: "Level", btColSlope: "Drain", btColLeft: "Empty in", btColAct: "Action", btTypeChange: "Change type", btLevelOk: "ok",
+  btColName: "Device", btColArea: "Area", btColType: "Type", btColLevel: "Level", btColSlope: "Drain", btColLeft: "Empty in", btColAct: "Action", btColDate: "Date", btTypeChange: "Change type", btLevelOk: "ok",
   btSlopeDay: "{n} %/day", btVoltDay: "{n} V/day", btSlopeStable: "stable", btLeftLow: "below limit", btLeftDays: "{n} days", btLeftFar: "> {n} days", btLeftStable: "no forecast",
   btFilterSoon: "Empty soon", btFilterUntyped: "No type", btAllTypes: "All types",
-  needTitle: "Batteries needed now and in the next 30 days", needSub: "{n} devices are already below their limit or are forecast to reach it within 30 days.", needSub1: "1 device is already below its limit or is forecast to reach it within 30 days.",
-  needLess: "Show fewer", needNone: "No battery is below its limit or forecast to reach it within 30 days.", needUntyped: "no type", needUntypedHint: "set the type in the table", needNow: "Already below limit", needSoon: "In the next 14 days", needLater: "In 15 to 30 days", needMore: "… {n} more in the table",
-  needNote: "Counted are batteries already low and devices forecast to reach their limit within 30 days. The type comes from you.",
+  needNone: "No battery is below its limit or forecast to reach it within 30 days.", needUntyped: "no type", needUntypedHint: "set the type in the table", needNow: "Low now",
   btTableNote: "Forecast only up to 90 days, from the last five weeks: an estimate, not a promise. No forecast for {unknown} (too few days or stable). After a change only the time since counts.",
   btFarMore: "{n} last longer than 90 days by the forecast.",
-  fcTitle: "Forecast", fcHint: "When a battery will probably reach the limit, up to 90 days, from the last five weeks. An estimate, not a promise.",
-  fcWindow: "In {from} to {to} days", fcTogether: "Change them together", fcNow: "Now {n} %", fcOn: "limit around {date}", fcIn: "in about {n} days", fcOpen: "Expand all", fcClose: "Collapse all",
+  fcTitle: "When which battery runs out", fcHint: "What you need in the next 30 days and when the batteries will probably reach the limit (up to 90 days, from the last five weeks). An estimate, not a promise.",
+  fcWindow: "In {from} to {to} days", fcTogether: "Change them together", 
 });
 
 class BatteryTableMixin {
@@ -12208,33 +12213,6 @@ class BatteryTableMixin {
     return `${table}${pg.footer}`;
   }
 
-  // The forecast up to 90 days in folds of a fortnight, the nearest open: batteries that run low together are changed together.
-  batteryForecastCard(rows) {
-    if (!this.batteryTrend?.available || this.batteryTrend.busy) return "";
-    const slots = new Map();
-    for (const r of rows) {
-      if (r.days === null || r.days === undefined || r.days > BATTERY_FAR_DAYS) continue;
-      const slot = Math.floor(r.days / BATTERY_GROUP_DAYS);
-      slots.set(slot, [...(slots.get(slot) || []), r]);
-    }
-    if (!slots.size) return "";
-    const row = r => {
-      const tone = r.low || r.days <= BATTERY_SOON_DAYS ? "red" : r.days <= BATTERY_NEED_DAYS ? "warn" : "ok";
-      const text = r.low ? this.t("btLeftLow") : this.t("fcIn", { n: r.days });
-      const n = this.batteryName(r.item);
-      const when = r.low ? "" : this.formatDate(new Date(Date.now() + r.days * 86400000).toISOString()).split(",")[0];
-      const bits = [this.areaName(r.item), r.type || this.t("btTypeNone"), r.level !== null && r.level !== undefined ? this.t("fcNow", { n: this.formatNumber(Math.round(r.level)) }) : "", when ? this.t("fcOn", { date: when }) : ""].filter(Boolean).join(" · ");
-      return `<div class="rowwrap"><button class="row rel" data-object="${this.esc(this.objectKey(r.item))}"><span class="tile ${tone}"><ha-icon icon="mdi:battery-clock-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(n.title)}</strong><small>${this.esc(bits)}</small></span><span class="pill ${tone}">${this.esc(text)}</span></button></div>`;
-    };
-    const body = [...slots].sort((x, y) => x[0] - y[0]).map(([slot, list], index) => {
-      const from = slot * BATTERY_GROUP_DAYS, to = Math.min(from + BATTERY_GROUP_DAYS - 1, BATTERY_FAR_DAYS);
-      const tone = from <= BATTERY_SOON_DAYS - 1 ? "red" : from <= 41 ? "warn" : "ok";
-      list.sort((x, y) => x.days - y.days || this.batteryName(x.item).title.localeCompare(this.batteryName(y.item).title));
-      return this.fold(`bt_${from}`, { tone, title: this.t("fcWindow", { from, to }), sub: list.length > 1 ? this.t("fcTogether") : "", pill: this.formatNumber(list.length) }, list.map(row).join(""), index === 0);
-    }).join("");
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("fcTitle")}</h2><p>${this.t("fcHint")}</p></div></div>${body}</div>`;
-  }
-
   // Include the current low state even when there is not enough recorder history for a forecast.
   batteryNeedRows() {
     const b = this.batteryTrend;
@@ -12248,11 +12226,13 @@ class BatteryTableMixin {
       .sort((x, y) => (x.state === "low" ? -1 : x.days_left) - (y.state === "low" ? -1 : y.days_left) || String(x.name || "").localeCompare(String(y.name || "")));
   }
 
-  // The need of the next 30 days: how many of which cell to buy, tiles of one size, and who runs out first.
-  batteryNeed() {
+  // When which battery runs out: how many of which cell to buy in the next 30 days (tiles of one size), then the batteries
+  // in folds, the low ones first and then a fortnight each up to 90 days, the nearest open.
+  batteryNeed(rows = this.batteryTableRows()) {
     const b = this.batteryTrend;
+    const head = `<div class="panelhead"><div><h2>${this.t("fcTitle")}</h2><p>${this.t("fcHint")}</p></div></div>`;
     if (this.batteryTrendError) return `<div class="panel"><div class="error">${this.esc(this.batteryTrendError)}</div></div>`;
-    if (!b) return `<div class="panel"><div class="panelhead"><div><h2>${this.t("needTitle")}</h2></div></div>${this.skeleton("btLoading")}</div>`;
+    if (!b) return `<div class="panel">${head}${this.skeleton("btLoading")}</div>`;
     if (b.busy) return `<div class="panel"><p class="factnote">${this.t("relBusy")}</p></div>`;
     const soon = this.batteryNeedRows();
     const counts = new Map();
@@ -12267,22 +12247,33 @@ class BatteryTableMixin {
     const tile = (count, name, cls = "") => `<div class="needtile ${cls}"><b>${this.esc(count)}</b><span>${this.esc(name)}</span></div>`;
     const tiles = [...counts].sort((x, y) => y[1] - x[1] || x[0].localeCompare(y[0])).map(([name, n]) => tile(`${this.formatNumber(n)}×`, name));
     if (untyped) tiles.push(tile(this.formatNumber(untyped), `${this.t("needUntyped")} · ${this.t("needUntypedHint")}`, "miss"));
-    const name = r => { const item = this.findObject(`entity:${r.entity_id}`); return item ? this.batteryName(item).title : (r.name || r.entity_id); };
-    const line = r => {
-      const item = this.findObject(`entity:${r.entity_id}`);
-      const level = r.level === null || r.level === undefined ? "" : r.type && r.limit !== undefined ? this.voltNum(r.level) : `${Math.round(r.level)} %`;
-      const bits = [item ? this.areaName(item) : "", b.types?.[r.entity_id] || this.t("btTypeNone"), level, r.state === "low" ? this.t("btLeftLow") : this.t("btLeftDays", { n: r.days_left })];
-      return `<li><button class="linkbtn" data-object="entity:${this.esc(r.entity_id)}">${this.esc(name(r))}</button> <span>${this.esc(bits.filter(Boolean).join(" · "))}</span></li>`;
-    };
-    const list = (title, rows) => {
-      if (!rows.length) return "";
-      const all = Boolean(this.needAll?.[title]), shown = all ? rows : rows.slice(0, 5);
-      return `<div><h3>${this.t(title)} · ${this.formatNumber(rows.length)}</h3><ul>${shown.map(line).join("")}${rows.length > 5 ? `<li><button type="button" class="linkbtn" data-need-all="${title}">${all ? this.t("needLess") : this.t("needMore", { n: rows.length - shown.length })}</button></li>` : ""}</ul></div>`;
-    };
-    const now = soon.filter(r => r.state === "low"), near = soon.filter(r => r.state !== "low" && r.days_left <= BATTERY_SOON_DAYS), later = soon.filter(r => r.state !== "low" && r.days_left > BATTERY_SOON_DAYS);
-    const sub = this.t(soon.length === 1 ? "needSub1" : "needSub", { n: this.formatNumber(soon.length) });
-    const body = soon.length ? `<div class="needgrid">${tiles.join("")}</div>${now.length ? `<div class="needsplit">${list("needNow", now)}</div>` : ""}${near.length || later.length ? `<div class="needsplit">${list("needSoon", near)}${list("needLater", later)}</div>` : ""}` : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t("needNone")}</div>`;
-    return `<div class="panel"><div class="panelhead"><div><h2>${this.t("needTitle")}</h2>${soon.length ? `<p>${this.esc(sub)}</p>` : ""}</div></div>${this.batterySuggestions()}${body}<p class="factnote">${this.t(b.available ? "needNote" : "btNoRecorder")}</p></div>`;
+    const slots = new Map();
+    for (const r of rows) {
+      if (r.low || r.days === null || r.days === undefined || r.days > BATTERY_FAR_DAYS) continue;
+      const slot = Math.floor(r.days / BATTERY_GROUP_DAYS);
+      slots.set(slot, [...(slots.get(slot) || []), r]);
+    }
+    const byDays = (x, y) => x.days - y.days || this.batteryName(x.item).title.localeCompare(this.batteryName(y.item).title);
+    const windows = [];
+    const now = rows.filter(r => r.low).sort(byDays);
+    if (now.length) windows.push({ id: "bt_now", tone: "red", title: this.t("needNow"), list: now });
+    for (const [slot, list] of [...slots].sort((x, y) => x[0] - y[0])) {
+      const from = slot * BATTERY_GROUP_DAYS, to = Math.min(from + BATTERY_GROUP_DAYS - 1, BATTERY_FAR_DAYS);
+      windows.push({ id: `bt_${from}`, tone: from <= BATTERY_SOON_DAYS - 1 ? "red" : from <= 41 ? "warn" : "ok", title: this.t("fcWindow", { from, to }), sub: list.length > 1 ? this.t("fcTogether") : "", list: list.sort(byDays) });
+    }
+    this.lvState("batwin", "left", "asc");
+    const columns = [
+      { key: "name", label: "btColName", sortable: false, cell: r => { const n = this.batteryName(r.item); return this.nameCell(n.title, n.entity || r.item.object_id); } },
+      { key: "area", label: "btColArea", sortable: false, cell: r => this.esc(this.areaName(r.item) || "—") },
+      { key: "type", label: "btColType", sortable: false, cell: r => (r.type ? `<span class="pill">${this.esc(r.type)}</span>` : `<span class="muted">${this.t("btTypeNone")}</span>`) },
+      { key: "level", label: "btColLevel", sortable: false, cell: r => this.batteryLevelCell(r, this.data.meta.low_battery_percent ?? 20) },
+      { key: "date", label: "btColDate", sortable: false, cell: r => (r.low ? "—" : this.esc(this.formatDate(new Date(Date.now() + r.days * 86400000).toISOString()).split(",")[0])) },
+      { key: "left", label: "btColLeft", sortable: false, cell: r => this.batteryLeftCell(r) },
+    ];
+    const rowAttrs = r => `data-object="${this.esc(this.objectKey(r.item))}" tabindex="0" role="button" aria-label="${this.esc(this.batteryName(r.item).title)}"`;
+    const folds = windows.map((w, index) => this.fold(w.id, { tone: w.tone, title: w.title, sub: w.sub || "", pill: this.formatNumber(w.list.length) }, this.listTable("batwin", columns, w.list, { cls: "batt", rowAttrs }), index === 0)).join("");
+    const body = tiles.length || folds ? `${tiles.length ? `<div class="needgrid">${tiles.join("")}</div>` : ""}${folds}` : `<div class="emptymsg"><ha-icon icon="mdi:battery-check-outline"></ha-icon>${this.t("needNone")}</div>`;
+    return `<div class="panel">${head}${this.batterySuggestions()}${body}${b.available ? "" : `<p class="factnote">${this.t("btNoRecorder")}</p>`}</div>`;
   }
 }
 

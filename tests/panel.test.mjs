@@ -3582,7 +3582,7 @@ test("the batteries view shows the forecast with groups and the reminders, which
   el._btRequested = true; el._sysLightFor = el.data;
   el._hass = { language: "en", callWS: async msg => { calls.push(msg); return { reminders: [] }; } };
   const forecast = el.batteryNeed();
-  assert.ok(forecast.includes("Batteries needed now and in the next 30 days") && forecast.includes("20 days"));
+  assert.ok(forecast.includes("When which battery runs out") && forecast.includes("no type"));
   const reminders = el.remindersCard();
   assert.ok(reminders.includes("Water filter") && reminders.includes("10 days overdue"));
   assert.ok(el.todoItems().some(i => i.key === "reminders"));
@@ -4332,7 +4332,7 @@ test("battery shopping list includes current low levels without a forecast and l
   assert.equal(rows.length, 3);
   assert.equal(rows.filter(r => r.state === "low").map(r => r.entity_id).join(), "sensor.empty,sensor.volt");
   const html = el.batteryNeed();
-  assert.ok(html.includes("Already below limit · 2") && html.includes("In the next 14 days · 1"));
+  assert.ok(html.includes("Low now") && html.includes("In 0 to 13 days") && html.includes("data-fold=\"bt_now\""));
   assert.ok(html.includes("2×") && html.includes("AAA") && html.includes("CR2450"));
   assert.ok(html.includes("0 %") && html.includes("2.37 V"));
   el.batteryTrend = { available: false, busy: false, rows: [], types: {} };

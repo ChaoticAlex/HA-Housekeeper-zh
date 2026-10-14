@@ -11,7 +11,7 @@ Object.assign(TEXT.de, {
   bkAll: "Alle bestätigen", bkAsk: "{n} Sensoren als keine Wechselbatterie speichern?", bkYes: "Ja, speichern", bkNo: "Abbrechen",
   bkWhy: "Gerät meldet auch {list}", bkWhyMower: "Gerät ist ein Mähroboter", bkWhyVacuum: "Gerät ist ein Staubsauger",
   bkSig_power: "Leistung", bkSig_energy: "Energie", bkSig_energy_storage: "Speicher", bkSig_current: "Strom", bkSig_battery_charging: "Ladevorgang", bkSig_plug: "Stecker",
-  bkFailed: "Das hat nicht geklappt: {detail}",
+  bkFailed: "Das hat nicht geklappt: {detail}", bkColReason: "Grund", bkColKind: "Art",
 });
 Object.assign(TEXT.en, {
   bkSet: "Not a replaceable battery?", bkLabel: "What is {name}?", bkSave: "Save", bkBack: "It is a battery", bkConfirm: "Correct", bkNote: "Afterwards the sensor no longer counts in lowest level, forecast and the status. Stored only in Housekeeper.",
@@ -21,7 +21,7 @@ Object.assign(TEXT.en, {
   bkAll: "Confirm all", bkAsk: "Save {n} sensors as not a replaceable battery?", bkYes: "Yes, save", bkNo: "Cancel",
   bkWhy: "Device also reports {list}", bkWhyMower: "Device is a mowing robot", bkWhyVacuum: "Device is a vacuum",
   bkSig_power: "power", bkSig_energy: "energy", bkSig_energy_storage: "storage", bkSig_current: "current", bkSig_battery_charging: "charging", bkSig_plug: "plug",
-  bkFailed: "That did not work: {detail}",
+  bkFailed: "That did not work: {detail}", bkColReason: "Reason", bkColKind: "Kind",
 });
 
 class BatteryKindMixin {
@@ -68,13 +68,27 @@ class BatteryKindMixin {
   batteryKindCard() {
     const { mine, proposed } = this.batteryKindItems();
     if (!mine.length && !proposed.length) return this.bkMessage ? `<p class="factnote" role="status">${this.esc(this.bkMessage)}</p>` : "";
-    const level = o => (o.unit === "%" || !o.unit) && o.state !== null && o.state !== "" && !Number.isNaN(Number(o.state)) ? `${Math.round(Number(o.state))} %` : "";
-    const row = (o, kind, mineRow) => `<div class="rowwrap bkrow"><button class="row rel" data-object="${this.esc(this.objectKey(o))}"><span class="tile mute"><ha-icon icon="mdi:battery-high"></ha-icon></span><span class="row-text"><strong>${this.esc(this.batteryName(o).title)}</strong><small>${this.esc([mineRow ? "" : this.bkWhy(o), this.batteryName(o).entity, o.object_id].filter(Boolean).join(" · "))}</small></span>${level(o) ? `<span class="pill mute">${level(o)}</span>` : ""}</button>${this.bkSelect(o, kind, mineRow ? "data-bk-change" : "data-bk-proposal")}${mineRow ? "" : `<button class="btn small" data-bk-accept="${this.esc(o.object_id)}">${this.t("bkConfirm")}</button>`}<button class="btn quiet" data-bk-back="${this.esc(o.object_id)}">${this.t("bkBack")}</button></div>`;
+    const level = o => ((o.unit === "%" || !o.unit) && o.state !== null && o.state !== "" && !Number.isNaN(Number(o.state)) ? Math.round(Number(o.state)) : null);
+    const sorts = [
+      { key: "name", label: "btColName", dir: "asc", get: o => this.batteryName(o).title },
+      { key: "level", label: "btColLevel", dir: "asc", get: o => level(o) ?? 1e3 },
+    ];
+    const table = (id, items, kindOf, mineRow) => this.sysList(id, items, {
+      sort: "name", sorts, tie: o => o.object_id, text: o => [this.batteryName(o).title, o.object_id, mineRow ? "" : this.bkWhy(o)].join(" "),
+      rowAttrs: o => `data-object="${this.esc(this.objectKey(o))}" tabindex="0" role="button" aria-label="${this.esc(this.batteryName(o).title)}"`,
+      columns: [
+        { key: "name", label: "btColName", dir: "asc", cell: o => this.nameCell(this.batteryName(o).title, o.object_id) },
+        ...(mineRow ? [] : [{ key: "why", label: "bkColReason", sortable: false, cell: o => this.esc(this.bkWhy(o)) }]),
+        { key: "level", label: "btColLevel", dir: "asc", cell: o => (level(o) === null ? "—" : `${level(o)} %`) },
+        { key: "kind", label: "bkColKind", sortable: false, cell: o => this.bkSelect(o, kindOf(o), mineRow ? "data-bk-change" : "data-bk-proposal") },
+        { key: "act", label: "btColAct", sortable: false, cell: o => `${mineRow ? "" : `<button class="btn small" data-bk-accept="${this.esc(o.object_id)}">${this.t("bkConfirm")}</button>`}<button class="btn quiet" data-bk-back="${this.esc(o.object_id)}">${this.t("bkBack")}</button>` },
+      ],
+    });
     const ask = this.bkAsk ? `<div class="bkask" role="alert"><strong>${this.t("bkAsk", { n: this.formatNumber(proposed.length) })}</strong><button class="btn small primary" data-bk-all-yes>${this.t("bkYes")}</button><button class="btn small" data-bk-all-no>${this.t("bkNo")}</button></div>` : "";
     const all = proposed.length > 1 && !this.bkAsk ? `<div class="bkall"><button class="btn small" data-bk-all>${this.t("bkAll")}</button></div>` : "";
     const parts = [];
-    if (proposed.length) parts.push(this.fold("bk_proposed", { tone: "warn", title: this.t("bkProposed"), sub: this.t("bkProposedHint"), pill: this.formatNumber(proposed.length) }, `${all}${ask}${proposed.map(o => row(o, o.battery_suggest?.kind || "other", false)).join("")}`, true));
-    if (mine.length) parts.push(this.fold("bk_mine", { tone: "mute", title: this.t("bkMine"), sub: this.t("bkMineHint"), pill: this.formatNumber(mine.length) }, mine.map(o => row(o, o.battery_kind, true)).join(""), false));
+    if (proposed.length) parts.push(this.fold("bk_proposed", { tone: "warn", title: this.t("bkProposed"), sub: this.t("bkProposedHint"), pill: this.formatNumber(proposed.length) }, `${all}${ask}${table("bk_proposed", proposed, o => o.battery_suggest?.kind || "other", false)}`, true));
+    if (mine.length) parts.push(this.fold("bk_mine", { tone: "mute", title: this.t("bkMine"), sub: this.t("bkMineHint"), pill: this.formatNumber(mine.length) }, table("bk_mine", mine, o => o.battery_kind, true), false));
     return `<div class="panel">${parts.join("")}${this.bkMessage ? `<p class="factnote pad" role="status">${this.esc(this.bkMessage)}</p>` : ""}</div>`;
   }
 
