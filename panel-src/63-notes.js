@@ -104,8 +104,9 @@ class NotesMixin {
     const shown = all.filter(n => (!src || (n.source || "me") === src) && (!obj || n.target === obj));
     const chip = (id, label) => `<button class="chip ${src === id ? "on" : ""}" data-logbook-src="${id}" aria-pressed="${src === id}">${this.esc(label)}</button>`;
     const filters = `<div class="logfilters">${chip("", this.t("logbookAll"))}${chip("me", this.t("noteMine"))}${chip("housekeeper", this.t("noteSrcHk"))}${obj ? `<button class="chip on" data-logbook-clear>${this.esc(this.t("logbookObject", { name: this.noteTargetName(obj) }))} ✕</button>` : ""}</div>`;
-    const pg = this.paginate("logbook", shown.map(n => this.noteRow(n)));
-    const body = !all.length ? `<div class="emptymsg"><ha-icon icon="mdi:notebook-outline"></ha-icon>${this.t("logbookEmpty")}</div>` : shown.length ? pg.rows.join("") + pg.footer : `<div class="emptymsg">${this.t("logbookFiltered")}</div>`;
+    const found = this.searchList("logbook", shown, n => [n.title, n.note, n.target].join(" "));
+    const pg = this.paginate("logbook", found.rows.map(n => this.noteRow(n)));
+    const body = !all.length ? `<div class="emptymsg"><ha-icon icon="mdi:notebook-outline"></ha-icon>${this.t("logbookEmpty")}</div>` : shown.length ? found.bar + found.none + pg.rows.join("") + pg.footer : `<div class="emptymsg">${this.t("logbookFiltered")}</div>`;
     return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("logbook")}</h2><p>${this.t("logbookHint")}</p></div><div class="actions">${this.noteHeadButton()}</div></div>${all.length ? filters : ""}${body}</section>`;
   }
 

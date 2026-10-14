@@ -45,16 +45,23 @@ class BatteryCareMixin {
 
   remBlank() { return { id: "", name: "", interval_days: 90, due: this.remAddDays(this.remToday(), 90), dueTouched: false, note: "" }; }
 
-  reminderRow(r) {
-    const tone = { due: "red", soon: "warn", ok: "ok" }[r.state];
-    const open = (this.remOpen || []).includes(r.id);
-    const id = this.esc(r.id);
-    const hist = r.history || [];
-    const label = this.esc(this.t(open ? "remHistoryClose" : "remHistoryOpen"));
-    const main = `<tr class="static"><td><button type="button" class="chevbtn" data-rem-open="${id}" aria-expanded="${open}" aria-label="${label}" title="${label}"><ha-icon icon="mdi:chevron-${open ? "down" : "right"}"></ha-icon></button><strong>${this.esc(r.name)}</strong>${r.note ? `<small class="remnote">${this.esc(r.note)}</small>` : ""}</td><td data-label="${this.esc(this.t("remColEvery"))}">${this.esc(this.t("remEveryN", { n: r.interval_days }))}</td><td data-label="${this.esc(this.t("remColLast"))}">${r.last_done ? this.esc(this.remDay(r.last_done)) : `<span class="muted">–</span>`}</td><td data-label="${this.esc(this.t("remColDue"))}"><span class="pill ${tone}" title="${this.esc(this.remDay(r.due))}">${this.esc(this.remWhen(r.days_left))}</span></td><td class="remact"><button class="btn small" data-rem-done="${id}">${this.t("remDone")}</button><button class="btn small quiet" data-rem-edit="${id}">${this.t("remEdit")}</button><button class="btn small quiet" data-rem-del="${id}">${this.t("remDelete")}</button></td></tr>`;
-    if (!open) return main;
+  // The row under a reminder that is open: the days it was done, each with a delete button.
+  reminderHistory(r) {
+    if (!(this.remOpen || []).includes(r.id)) return "";
+    const id = this.esc(r.id), hist = r.history || [];
     const list = hist.length ? `<ul>${hist.map(d => `<li>${this.esc(this.remDay(d))}<button type="button" class="linkbtn" data-rem-hdel="${id}|${this.esc(d)}">${this.t("remDelete")}</button></li>`).join("")}</ul>` : `<p class="muted">${this.t("remNoHistory")}</p>`;
-    return `${main}<tr class="static remhist"><td colspan="5"><h3>${this.t("remHistory", { n: hist.length })}</h3>${list}</td></tr>`;
+    return `<tr class="static remhist"><td colspan="5"><h3>${this.t("remHistory", { n: hist.length })}</h3>${list}</td></tr>`;
+  }
+
+  reminderColumns() {
+    const tone = r => ({ due: "red", soon: "warn", ok: "ok" }[r.state]);
+    return [
+      { key: "name", label: "remColName", dir: "asc", cell: r => `${this.expandBtn("data-rem-open", r.id, (this.remOpen || []).includes(r.id), this.t((this.remOpen || []).includes(r.id) ? "remHistoryClose" : "remHistoryOpen"))}<strong>${this.esc(r.name)}</strong>${r.note ? `<small class="remnote">${this.esc(r.note)}</small>` : ""}` },
+      { key: "every", label: "remColEvery", dir: "asc", cell: r => this.esc(this.t("remEveryN", { n: r.interval_days })) },
+      { key: "last", label: "remColLast", dir: "desc", cell: r => r.last_done ? this.esc(this.remDay(r.last_done)) : `<span class="muted">–</span>` },
+      { key: "due", label: "remColDue", dir: "asc", cell: r => `<span class="pill ${tone(r)}" title="${this.esc(this.remDay(r.due))}">${this.esc(this.remWhen(r.days_left))}</span>` },
+      { key: "act", label: "remColActions", sortable: false, cell: r => { const id = this.esc(r.id); return `<span class="remact"><button class="btn small" data-rem-done="${id}">${this.t("remDone")}</button><button class="btn small quiet" data-rem-edit="${id}">${this.t("remEdit")}</button><button class="btn small quiet" data-rem-del="${id}">${this.t("remDelete")}</button></span>`; } },
+    ];
   }
 
   // The page editor for a new or an edited reminder; "due" follows the interval until it is set by hand.
@@ -75,8 +82,19 @@ class BatteryCareMixin {
     const items = this.data.reminders || [];
     const overdue = items.filter(r => r.state === "due").length;
     const head = `<div class="panelhead"><div><h2>${this.t("remTitle")}</h2><p>${items.length ? this.t("remSummary", { n: items.length, due: overdue }) : this.t("remHint")}</p></div><div class="actions"><button class="btn primary" data-rem-new>${this.t("remNew")}</button></div></div>`;
-    const table = items.length ? `<div class="tablewrap lt rem"><table><thead><tr><th scope="col">${this.t("remColName")}</th><th scope="col">${this.t("remColEvery")}</th><th scope="col">${this.t("remColLast")}</th><th scope="col">${this.t("remColDue")}</th><th scope="col"><span class="sr">${this.t("remColActions")}</span></th></tr></thead><tbody>${items.map(r => this.reminderRow(r)).join("")}</tbody></table></div>` : `<div class="emptymsg"><ha-icon icon="mdi:calendar-clock-outline"></ha-icon>${this.t("remEmpty")}</div>`;
-    return `<div class="panel">${head}${table}</div>`;
+    this.lvState("reminders", "due", "asc");
+    const sorts = [
+      { key: "name", label: "remColName", dir: "asc", get: r => r.name },
+      { key: "every", label: "remColEvery", dir: "asc", get: r => r.interval_days },
+      { key: "last", label: "remColLast", dir: "desc", get: r => r.last_done || "" },
+      { key: "due", label: "remColDue", dir: "asc", get: r => r.days_left },
+    ];
+    const bar = items.length ? this.listBar("reminders", { table: true, sorts, filters: [{ name: "state", all: this.t("remAllStates"), options: [["due", this.t("remStateDue")], ["soon", this.t("remStateSoon")], ["ok", this.t("remStateOk")]] }] }) : "";
+    const rows = this.refine("reminders", items, { text: r => [r.name, r.note].join(" "), filters: { state: (r, v) => r.state === v }, sorts, tie: r => r.id });
+    const pg = this.paginate("reminders", rows);
+    const table = !items.length ? `<div class="emptymsg"><ha-icon icon="mdi:calendar-clock-outline"></ha-icon>${this.t("remEmpty")}</div>`
+      : rows.length ? this.listTable("reminders", this.reminderColumns(), pg.rows, { cls: "rem", rowAttrs: () => 'class="static"', after: r => this.reminderHistory(r) }) : `<div class="emptymsg">${this.noMatches("reminders")}</div>`;
+    return `<div class="panel">${head}${bar}${table}${pg.footer}</div>`;
   }
 
   async reminderCall(msg) {
@@ -89,6 +107,7 @@ class BatteryCareMixin {
   bindBatteryCare(root) {
     this.bindBatteryType(root);
     this.bindBatteryKind(root);
+    root.querySelectorAll("[data-need-all]").forEach(el => el.addEventListener("click", () => { this.needAll = { ...this.needAll, [el.dataset.needAll]: !this.needAll?.[el.dataset.needAll] }; this.render(); }));
     root.querySelector("[data-bt-refresh]")?.addEventListener("click", () => this.loadBatteryTrend(true));
     root.querySelector("[data-rem-new]")?.addEventListener("click", () => { this.remDraft = this.remBlank(); this.remError = ""; this._remFocus = true; this.render(); });
     root.querySelector("[data-rem-cancel]")?.addEventListener("click", () => { this.remDraft = null; this.remError = ""; this.render(); });
@@ -151,7 +170,7 @@ Object.assign(TEXT.de, {
   btTitle: "Alle Batterien", btHint: "Stand, Verbrauch und die Prognose, wann eine Batterie die Grenze erreicht (bis 90 Tage).", btLoading: "Prognose wird berechnet …", btNoRecorder: "Ohne Recorder gibt es keine Prognose.",
   remTitle: "Wartungserinnerungen", remHint: "Filter, Entkalken, Batteriewechsel: du trägst Name, Abstand und Fälligkeit ein, Housekeeper sagt, wann es dran ist, und merkt sich, wann du es erledigt hast. Es ändert nichts in Home Assistant.", remEmpty: "Noch keine Erinnerung. Lege zum Beispiel den Wasserfilter oder den Rauchmelder-Test an.",
   remName: "z. B. Wasserfilter", remNote: "z. B. Batterietyp CR2032", remAdd: "Hinzufügen", remSave: "Speichern", remCancel: "Abbrechen", remDone: "Erledigt", remDelete: "Löschen", remEdit: "Ändern", remNew: "+ Erinnerung hinzufügen",
-  remFName: "Name", remFEvery: "Abstand in Tagen", remFDue: "Fällig am", remFNote: "Notiz (optional)", remColName: "Name", remColEvery: "Abstand", remColLast: "Zuletzt erledigt", remColDue: "Fällig", remColActions: "Aktionen",
+  remFName: "Name", remFEvery: "Abstand in Tagen", remFDue: "Fällig am", remFNote: "Notiz (optional)", remAllStates: "Alle Zustände", remStateDue: "Überfällig", remStateSoon: "Bald fällig", remStateOk: "In Ordnung", remColName: "Name", remColEvery: "Abstand", remColLast: "Zuletzt erledigt", remColDue: "Fällig", remColActions: "Aktionen",
   remDialogNew: "Neue Erinnerung", remDialogEdit: "Erinnerung bearbeiten", remEveryN: "alle {n} Tage", remSummary: "{n} Erinnerungen, {due} überfällig.", remHistory: "Historie · {n}× erledigt", remNoHistory: "Noch nie erledigt.", remHistoryOpen: "Historie aufklappen", remHistoryClose: "Historie zuklappen", remToday: "heute", remOverdue: "{n} Tage überfällig", remIn: "in {n} Tagen", remInvalid: "Nicht gespeichert, bitte prüfen: {field}",
   reminders: "Erinnerungen", remindersSubtitle: "Eigene Wartungstermine: Filter, Entkalken, Batteriewechsel.", actReminders: "Wartung fällig", actRemindersHint: "Eine eigene Erinnerung ist erreicht",
   relSetup: "Einrichtungsfehler: {n} in {days} Tagen, zuletzt {last}", relSetupNow: "Gerade im Zustand {state}", relSetupNote: "Aus den Scans gezählt, so fein wie das Scan-Intervall.",
@@ -164,7 +183,7 @@ Object.assign(TEXT.en, {
   btTitle: "All batteries", btHint: "Level, drain and the forecast of when a battery reaches the limit (up to 90 days).", btLoading: "Calculating the forecast …", btNoRecorder: "There is no forecast without a recorder.",
   remTitle: "Maintenance reminders", remHint: "Filter, descaling, battery change: you enter a name, an interval and the due date, Housekeeper tells you when it is due and keeps when you did it. It changes nothing in Home Assistant.", remEmpty: "No reminder yet. Add the water filter or the smoke detector test, for example.",
   remName: "e.g. water filter", remNote: "e.g. battery type CR2032", remAdd: "Add", remSave: "Save", remCancel: "Cancel", remDone: "Done", remDelete: "Delete", remEdit: "Edit", remNew: "+ Add reminder",
-  remFName: "Name", remFEvery: "Interval in days", remFDue: "Due on", remFNote: "Note (optional)", remColName: "Name", remColEvery: "Interval", remColLast: "Last done", remColDue: "Due", remColActions: "Actions",
+  remFName: "Name", remFEvery: "Interval in days", remFDue: "Due on", remFNote: "Note (optional)", remAllStates: "All states", remStateDue: "Overdue", remStateSoon: "Due soon", remStateOk: "On track", remColName: "Name", remColEvery: "Interval", remColLast: "Last done", remColDue: "Due", remColActions: "Actions",
   remDialogNew: "New reminder", remDialogEdit: "Edit reminder", remEveryN: "every {n} days", remSummary: "{n} reminders, {due} overdue.", remHistory: "History · done {n}×", remNoHistory: "Never done yet.", remHistoryOpen: "Show history", remHistoryClose: "Hide history", remToday: "today", remOverdue: "{n} days overdue", remIn: "in {n} days", remInvalid: "Not saved, please check: {field}",
   reminders: "Reminders", remindersSubtitle: "Your own maintenance dates: filter, descaling, changing batteries.", actReminders: "Maintenance due", actRemindersHint: "One of your own reminders is reached",
   relSetup: "Setup failures: {n} in {days} days, last {last}", relSetupNow: "Currently in state {state}", relSetupNote: "Counted from the scans, as fine as the scan interval.",

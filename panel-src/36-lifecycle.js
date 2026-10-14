@@ -43,13 +43,14 @@ class LifecycleMixin {
     const head = `<p class="factnote pad">${this.t("lifeRemovedHint")}</p>`;  // the title is on the tile of the tab
     if (!this.removed) return `<div class="panel">${head}${this.skeleton("loading")}</div>`;
     // The logbook entry that was written when the device was removed (or one the person added to it).
-    const removedRows = this.removed.map(d => {
+    const found = this.searchList("removed", this.removed, d => [d.name, d.object_id].join(" "));
+    const removedRows = found.rows.map(d => {
       const n = this.notesList().find(x => x.target === `device:${d.object_id}`);
       const text = n ? [n.title, this.formatDate(d.at), n.note].filter(Boolean).join(" · ") : `${this.t(d.kind === "forget_device" ? "lifeForgotten" : "life_removed")} · ${this.formatDate(d.at)}`;
       const body = `<span class="tile red"><ha-icon icon="mdi:delete-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(d.name || d.object_id)}</strong><small>${this.esc(text)}</small></span>`;
       return n ? `<button class="row rel" data-note-edit="${this.esc(n.id)}" title="${this.esc(this.t("noteEdit"))}">${body}</button>` : `<div class="row rel">${body}</div>`;
     });
     const pg = this.paginate("removed", removedRows), rows = pg.rows.join("") + pg.footer;
-    return `<div class="panel">${head}${rows || `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("lifeRemovedNone")}</div>`}</div>`;
+    return `<div class="panel">${head}${found.bar}${found.none}${rows || (this.removed.length ? "" : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("lifeRemovedNone")}</div>`)}</div>`;
   }
 }

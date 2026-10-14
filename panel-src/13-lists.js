@@ -207,7 +207,7 @@ class ListsMixin {
 
   // A sortable table for a list built with lvState/refine: header buttons set sort and direction, the phone shows cards.
   // columns: [{ key, label, cell(item) -> html, sortable, dir, narrow, allBox(rows) }]; narrow is a checkbox column with a fixed small width; allBox puts a box that ticks the page in its head; rowAttrs(item) adds attributes to the row.
-  listTable(id, columns, rows, { rowAttrs = () => "", cls = "" } = {}) {
+  listTable(id, columns, rows, { rowAttrs = () => "", cls = "", after = () => "" } = {}) {
     const st = this.lv[id];
     columns = columns.filter((c, i) => !i || !this.colHidden(id, c.key));
     const head = columns.map(c => {
@@ -217,9 +217,47 @@ class ListsMixin {
     }).join("");
     const body = rows.map(item => {
       const attrs = rowAttrs(item);
-      return `<tr ${attrs}>${columns.map((c, i) => `<td${c.narrow ? ' class="selcol"' : ""}${i ? ` data-label="${this.esc(this.t(c.label))}"` : ""}>${c.cell(item)}</td>`).join("")}</tr>`;
+      return `<tr ${attrs}>${columns.map((c, i) => `<td${c.narrow ? ' class="selcol"' : ""}${i ? ` data-label="${this.esc(this.t(c.label))}"` : ""}>${c.cell(item)}</td>`).join("")}</tr>${after(item)}`;
     }).join("");
     return `<div class="${["tablewrap", "lt", cls, this.isDenseList(id) ? "dense-list" : ""].filter(Boolean).join(" ")}"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+  }
+
+  // A table of objects (entities, entries, automations): name with id, type when mixed, state, plus extra columns.
+  // rows: [{ key: "entity:light.a", type, name, sub, tone, state, stateLabel, pill, rank }]; extras: [{ key, label, dir, get, cell(row) }].
+  // The bar shows from `min` rows on; a row opens its object.
+  objectTable(id, rows, { extras = [], min = 6, empty = "", tile = row => this.tile(row.type, row.tone === "ok" ? "" : row.tone) } = {}) {
+    if (!rows.length) return empty ? `<div class="emptymsg">${empty}</div>` : "";
+    this.lvState(id, "name", "asc");
+    const types = [...new Set(rows.map(r => r.type))].sort();
+    const tones = ["red", "warn", "violet", "blue", "mute", "ok"], rank = r => (r.rank ?? tones.indexOf(r.tone));
+    const sorts = [
+      { key: "name", label: "sortName", dir: "asc", get: r => r.name },
+      ...(types.length > 1 ? [{ key: "type", label: "sortType", dir: "asc", get: r => this.t(r.type) }] : []),
+      { key: "status", label: "sortStatus", dir: "asc", get: rank },
+      ...extras.map(x => ({ key: x.key, label: x.label, dir: x.dir || "asc", get: x.get })),
+    ];
+    const filters = [
+      ...(types.length > 1 ? [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }] : []),
+      { name: "state", all: this.t("objAllStatus"), options: [...new Map(rows.map(r => [r.state, r.stateLabel])).entries()].sort((a, b) => String(a[1]).localeCompare(String(b[1]), this.lang)) },
+    ];
+    const st = this.lv[id];
+    const bar = rows.length >= min || st.q ? this.listBar(id, { table: true, sorts, filters }) : "";
+    const shown = this.refine(id, rows, { text: r => [r.name, r.sub, ...extras.map(x => String(x.get(r) ?? ""))].join(" "), filters: { type: (r, v) => r.type === v, state: (r, v) => r.state === v }, sorts, tie: r => r.key });
+    const pg = this.paginate(id, shown);
+    const columns = [
+      { key: "name", label: "sortName", dir: "asc", cell: r => `<div class="statcell">${tile(r)}<div>${this.nameCell(r.name, r.sub)}</div></div>` },
+      ...(types.length > 1 ? [{ key: "type", label: "sortType", dir: "asc", cell: r => this.esc(this.t(r.type)) }] : []),
+      ...extras.map(x => ({ key: x.key, label: x.label, dir: x.dir || "asc", cell: x.cell })),
+      { key: "status", label: "sortStatus", dir: "asc", cell: r => r.pill },
+    ];
+    const table = shown.length ? this.listTable(id, columns, pg.rows, { cls: "objs", rowAttrs: r => `data-object="${this.esc(r.key)}" tabindex="0" role="button" aria-label="${this.esc(r.name)}"` }) : `<div class="emptymsg">${this.noMatches(id)}</div>`;
+    return `${bar}${table}${pg.footer}`;
+  }
+
+  // The arrow of a row that unfolds in place (a history, a detail): the look of a fold's arrow, as a button of its own; attr is the data attribute the click handler listens to.
+  expandBtn(attr, key, open, label) {
+    const text = this.esc(label);
+    return `<span class="tile mute"><button type="button" class="chevbtn" ${attr}="${this.esc(key)}" aria-expanded="${open}" aria-label="${text}" title="${text}"><ha-icon icon="mdi:chevron-${open ? "down" : "right"}"></ha-icon></button></span>`;
   }
 
   // Name over id for a table cell: both are cut at the column width and shown in full in the tooltip (see showTip).

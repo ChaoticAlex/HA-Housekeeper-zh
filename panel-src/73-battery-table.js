@@ -11,7 +11,7 @@ Object.assign(TEXT.de, {
   btSlopeDay: "{n} %/Tag", btVoltDay: "{n} V/Tag", btSlopeStable: "stabil", btLeftLow: "unter Grenze", btLeftDays: "{n} Tage", btLeftFar: "> {n} Tage", btLeftStable: "nicht absehbar",
   btFilterSoon: "Bald leer", btFilterUntyped: "Ohne Typ", btAllTypes: "Alle Typen",
   needTitle: "Benötigte Batterien jetzt und in den nächsten 30 Tagen", needSub: "{n} Geräte sind bereits unter ihrer Grenze oder erreichen sie laut Prognose in 30 Tagen.", needSub1: "1 Gerät ist bereits unter seiner Grenze oder erreicht sie laut Prognose in 30 Tagen.",
-  needNone: "Keine Batterie ist unter ihrer Grenze oder erreicht sie laut Prognose in den nächsten 30 Tagen.", needUntyped: "ohne Typ", needUntypedHint: "Typ in der Tabelle setzen", needNow: "Bereits unter Grenze", needSoon: "In den nächsten 14 Tagen", needLater: "In 15 bis 30 Tagen", needMore: "… {n} weitere in der Tabelle",
+  needLess: "Weniger anzeigen", needNone: "Keine Batterie ist unter ihrer Grenze oder erreicht sie laut Prognose in den nächsten 30 Tagen.", needUntyped: "ohne Typ", needUntypedHint: "Typ in der Tabelle setzen", needNow: "Bereits unter Grenze", needSoon: "In den nächsten 14 Tagen", needLater: "In 15 bis 30 Tagen", needMore: "… {n} weitere in der Tabelle",
   needNote: "Gezählt werden bereits niedrige Batterien und Geräte, die laut Prognose innerhalb von 30 Tagen ihre Grenze erreichen. Der Typ kommt von dir.",
   btTableNote: "Prognose nur bis 90 Tage, aus den letzten fünf Wochen: eine Schätzung, keine Zusage. Ohne Prognose: {unknown} (zu wenige Tage oder stabil). Nach einem Wechsel zählt nur der Verlauf danach.",
   btFarMore: "{n} halten laut Prognose länger als 90 Tage.",
@@ -23,7 +23,7 @@ Object.assign(TEXT.en, {
   btSlopeDay: "{n} %/day", btVoltDay: "{n} V/day", btSlopeStable: "stable", btLeftLow: "below limit", btLeftDays: "{n} days", btLeftFar: "> {n} days", btLeftStable: "no forecast",
   btFilterSoon: "Empty soon", btFilterUntyped: "No type", btAllTypes: "All types",
   needTitle: "Batteries needed now and in the next 30 days", needSub: "{n} devices are already below their limit or are forecast to reach it within 30 days.", needSub1: "1 device is already below its limit or is forecast to reach it within 30 days.",
-  needNone: "No battery is below its limit or forecast to reach it within 30 days.", needUntyped: "no type", needUntypedHint: "set the type in the table", needNow: "Already below limit", needSoon: "In the next 14 days", needLater: "In 15 to 30 days", needMore: "… {n} more in the table",
+  needLess: "Show fewer", needNone: "No battery is below its limit or forecast to reach it within 30 days.", needUntyped: "no type", needUntypedHint: "set the type in the table", needNow: "Already below limit", needSoon: "In the next 14 days", needLater: "In 15 to 30 days", needMore: "… {n} more in the table",
   needNote: "Counted are batteries already low and devices forecast to reach their limit within 30 days. The type comes from you.",
   btTableNote: "Forecast only up to 90 days, from the last five weeks: an estimate, not a promise. No forecast for {unknown} (too few days or stable). After a change only the time since counts.",
   btFarMore: "{n} last longer than 90 days by the forecast.",
@@ -186,8 +186,8 @@ class BatteryTableMixin {
     };
     const list = (title, rows) => {
       if (!rows.length) return "";
-      const shown = rows.slice(0, 5);
-      return `<div><h3>${this.t(title)} · ${this.formatNumber(rows.length)}</h3><ul>${shown.map(line).join("")}${rows.length > shown.length ? `<li class="muted">${this.t("needMore", { n: rows.length - shown.length })}</li>` : ""}</ul></div>`;
+      const all = Boolean(this.needAll?.[title]), shown = all ? rows : rows.slice(0, 5);
+      return `<div><h3>${this.t(title)} · ${this.formatNumber(rows.length)}</h3><ul>${shown.map(line).join("")}${rows.length > 5 ? `<li><button type="button" class="linkbtn" data-need-all="${title}">${all ? this.t("needLess") : this.t("needMore", { n: rows.length - shown.length })}</button></li>` : ""}</ul></div>`;
     };
     const now = soon.filter(r => r.state === "low"), near = soon.filter(r => r.state !== "low" && r.days_left <= BATTERY_SOON_DAYS), later = soon.filter(r => r.state !== "low" && r.days_left > BATTERY_SOON_DAYS);
     const sub = this.t(soon.length === 1 ? "needSub1" : "needSub", { n: this.formatNumber(soon.length) });

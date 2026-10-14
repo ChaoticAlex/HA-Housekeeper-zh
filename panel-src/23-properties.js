@@ -96,9 +96,10 @@ class PropertiesMixin {
       [t("propConfigUrl"), /^https?:\/\//i.test(item.configuration_url || "") ? `<a href="${this.esc(item.configuration_url)}" target="_blank" rel="noopener noreferrer">${this.esc(item.configuration_url)}</a>` : this.esc(item.configuration_url || "")],
     ]);
     const members = this.data.objects.filter(o => o.object_type === "entity" && o.device_id === item.object_id).sort((a, b) => a.name.localeCompare(b.name));
-    const memberList = members.map(m => `<button class="row rel" data-object="entity:${this.esc(m.object_id)}">${this.tile("entity", this.tone(m.status) === "ok" ? "" : this.tone(m.status))}<span class="row-text"><strong>${this.esc(m.name)}</strong>${this.rowId(m.object_id, m.state !== null && m.state !== undefined ? `${m.state}${m.unit ? ` ${m.unit}` : ""}` : "")}</span>${this.pill(m.status)}</button>`);
-    const memberPage = this.paginate(`members-${item.object_id}`, memberList), memberRows = memberPage.rows.join("") + memberPage.footer;
-    const entities = `<section class="panel wide"><div class="panelhead"><h2><ha-icon icon="mdi:shape-outline" style="--mdc-icon-size:18px;vertical-align:-3px;margin-right:6px;color:var(--hk-muted)"></ha-icon>${t("propEntities")} (${members.length})</h2></div>${memberRows || `<div class="emptymsg">${t("propNoEntities")}</div>`}</section>`;
+    const memberRows = this.objectTable(`members-${item.object_id}`, members.map(m => ({ key: `entity:${m.object_id}`, type: "entity", name: m.name, sub: m.object_id, tone: this.tone(m.status), state: m.status, stateLabel: this.statusLabel(m.status), pill: this.pill(m.status), value: m.state === null || m.state === undefined ? "" : `${m.state}${m.unit ? ` ${m.unit}` : ""}` })), {
+      extras: [{ key: "value", label: "objColState", get: r => r.value, cell: r => r.value ? this.esc(r.value) : `<span class="muted">—</span>` }], empty: t("propNoEntities"),
+    });
+    const entities = `<section class="panel wide"><div class="panelhead"><h2><ha-icon icon="mdi:shape-outline" style="--mdc-icon-size:18px;vertical-align:-3px;margin-right:6px;color:var(--hk-muted)"></ha-icon>${t("propEntities")} (${members.length})</h2></div>${memberRows}</section>`;
     const technical = this.propCard(t("propTechnical"), "mdi:identifier", [
       [t("propDeviceId"), this.propCode(item.object_id)],
       [t("propIdentifiers"), (item.identifiers || []).map(v => this.propCode(v)).join("<br>")],

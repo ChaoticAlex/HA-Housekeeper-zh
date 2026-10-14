@@ -85,9 +85,24 @@ class BackupMixin {
 
   bhBackups(list) {
     if (!list?.length) return "";
-    const backupRows = list.map(b => `<tr><td>${this.formatDate(b.date)}</td><td data-label="${this.t("bhColSize")}">${this.formatBytes(b.size)}</td><td data-label="${this.t("bhColTargets")}">${this.bhList(b.agents)}</td><td data-label="${this.t("bhColProtected")}">${this.t(b.protected ? "bhYes" : "bhNo")}</td></tr>`);
-    const pg = this.paginate("bhbackups", backupRows), rows = pg.rows.join("");
-    return `<div class="panel"><div class="sectionlabel">${this.t("bhListTitle")}</div><div class="tablewrap"><table><thead><tr><th>${this.t("bhColDate")}</th><th>${this.t("bhColSize")}</th><th>${this.t("bhColTargets")}</th><th>${this.t("bhColProtected")}</th></tr></thead><tbody>${rows}</tbody></table></div>${pg.footer}</div>`;
+    const id = "bhbackups";
+    this.lvState(id, "date", "desc");
+    const sorts = [
+      { key: "date", label: "bhColDate", dir: "desc", get: b => b.date },
+      { key: "size", label: "bhColSize", dir: "desc", get: b => b.size },
+      { key: "protected", label: "bhColProtected", dir: "desc", get: b => (b.protected ? 1 : 0) },
+    ];
+    const bar = this.listBar(id, { table: true, sorts, filters: [{ name: "protected", all: this.t("bhAllProtected"), options: [["yes", this.t("bhYes")], ["no", this.t("bhNo")]] }] });
+    const rows = this.refine(id, list, { text: b => [this.formatDate(b.date), ...(b.agents || [])].join(" "), filters: { protected: (b, v) => Boolean(b.protected) === (v === "yes") }, sorts, tie: b => b.date });
+    const pg = this.paginate(id, rows);
+    const columns = [
+      { key: "date", label: "bhColDate", dir: "desc", cell: b => this.esc(this.formatDate(b.date)) },
+      { key: "size", label: "bhColSize", dir: "desc", cell: b => this.esc(this.formatBytes(b.size)) },
+      { key: "targets", label: "bhColTargets", sortable: false, cell: b => this.bhList(b.agents) },
+      { key: "protected", label: "bhColProtected", dir: "desc", cell: b => this.t(b.protected ? "bhYes" : "bhNo") },
+    ];
+    const table = rows.length ? this.listTable(id, columns, pg.rows, { cls: "bh", rowAttrs: () => 'class="static"' }) : `<div class="emptymsg">${this.noMatches(id)}</div>`;
+    return `<div class="panel"><div class="sectionlabel">${this.t("bhListTitle")}</div>${bar}${table}${pg.footer}</div>`;
   }
 
   backupCard() {

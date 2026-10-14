@@ -70,8 +70,7 @@ class PoliciesMixin {
     const form = this.decide?.key === item.key ? this.decideForm(item) : "";
     const box = compact ? "" : this.polSelBox(item);
     const open = this.polIsOpen(item), main = this.polMainAction(item);
-    const label = this.esc(this.t(open ? "polCloseRow" : "polOpenRow"));
-    const chev = `<span class="tile mute"><button type="button" class="chevbtn" data-pol-open="${this.esc(item.key)}" aria-expanded="${open}" aria-label="${label}" title="${label}"><ha-icon icon="mdi:chevron-${open ? "down" : "right"}"></ha-icon></button></span>`;
+    const chev = this.expandBtn("data-pol-open", item.key, open, this.t(open ? "polCloseRow" : "polOpenRow"));
     // A row with a fix offers it as its button (it folds the row open); the other rows keep their hide button; an opened row has it next to "open object".
     const act = open ? "" : main ? `<button class="btn" data-pol-open="${this.esc(item.key)}">${this.t(main)}</button>` : button;
     const detail = open ? this.polDetail(item, button) : "";

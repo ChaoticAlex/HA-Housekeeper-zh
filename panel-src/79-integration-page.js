@@ -113,10 +113,12 @@ class IntegrationPageMixin {
     const docs = /^https:\/\//.test(item.documentation || "") ? `<a class="btn" href="${this.esc(item.documentation)}" target="_blank" rel="noopener noreferrer"><ha-icon icon="mdi:book-open-variant"></ha-icon>${this.t("intDocs")}</a>` : "";
     const folder = item.custom ? `<section class="panel"><div class="panelhead"><h2>${this.t("intFolder")}</h2></div><div class="facts">${fact("intFolder", this.esc(item.integration_dir || `custom_components/${item.domain}`))}${size ? fact("intFolderSize", this.esc(this.formatBytes(size.bytes))) : ""}</div></section>` : "";
     const hacs = item.hacs ? this.intHacsCard(item.hacs) : "";
-    const rows = this.intEntries(item).map(e => {
-      const tone = this.tone(e.status) === "ok" ? "" : this.tone(e.status);
-      return `<button class="row rel" data-object="${this.esc(`config_entry:${e.object_id}`)}">${this.tile("config_entry", tone)}<span class="row-text"><strong>${this.esc(e.name || e.object_id)}</strong><small>${this.esc(this.t("intEntityCount", { e: this.formatNumber(e.entity_count || 0), d: this.formatNumber(e.device_count || 0) }))}</small></span>${this.pill(e.status)}</button>`;
-    }).join("");
+    const rows = this.objectTable(`intentries-${item.object_id}`, this.intEntries(item).map(e => ({ key: `config_entry:${e.object_id}`, type: "config_entry", name: e.name || e.object_id, sub: "", tone: this.tone(e.status), state: e.status, stateLabel: this.statusLabel(e.status), pill: this.pill(e.status), entities: e.entity_count || 0, devices: e.device_count || 0 })), {
+      min: 8, extras: [
+        { key: "entities", label: "objColEntities", dir: "desc", get: r => r.entities, cell: r => this.formatNumber(r.entities) },
+        { key: "devices", label: "objColDevices", dir: "desc", get: r => r.devices, cell: r => this.formatNumber(r.devices) },
+      ],
+    });
     return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("intEntriesTitle")}</h2>${docs ? `<div class="actions">${docs}</div>` : ""}</div>${rows}</section>${hacs}${folder}</div>`;
   }
 
@@ -146,8 +148,8 @@ class IntegrationPageMixin {
 
   intUsedCard(item) {
     const used = this.intUsedBy(item);
-    const rows = used.map(o => `<button class="row rel" data-object="${this.esc(this.objectKey(o))}">${this.tile(o.object_type, this.tone(o.status) === "ok" ? "" : this.tone(o.status))}<span class="row-text"><strong>${this.esc(o.name || o.object_id)}</strong><small>${this.esc(this.t(o.object_type))}</small></span>${this.pill(o.status)}</button>`).join("");
-    return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("intUsedTitle")}</h2></div>${rows || `<div class="emptymsg">${this.t("intNoUsed")}</div>`}</section></div>`;
+    const rows = this.objectTable(`intused-${item.object_id}`, used.map(o => ({ key: this.objectKey(o), type: o.object_type, name: o.name || o.object_id, sub: o.object_id, tone: this.tone(o.status), state: o.status, stateLabel: this.statusLabel(o.status), pill: this.pill(o.status) })), { empty: this.t("intNoUsed") });
+    return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("intUsedTitle")}</h2></div>${rows}</section></div>`;
   }
 
   intTechnicalCard(item) {

@@ -77,10 +77,10 @@ class ReliabilityMixin {
   reliabilityDetailCard(row) {
     const r = this.reliability;
     const items = row.affected || [];
-    const list = items.map(m => {
+    const list = this.objectTable(`relaffected-${row.entry_id || row.domain || ""}`, items.map(m => {
       const tone = m.availability >= 99.5 ? "ok" : m.availability >= 95 ? "warn" : "red";
-      return `<button class="row rel" data-object="entity:${this.esc(m.entity_id)}">${this.tile("entity", tone)}<span class="row-text"><strong>${this.esc(m.name)}</strong>${this.rowId(m.entity_id)}</span><span class="pill ${tone}">${this.formatNumber(m.availability)} %</span></button>`;
-    }).join("");
+      return { key: `entity:${m.entity_id}`, type: "entity", name: m.name, sub: m.entity_id, tone, state: tone, stateLabel: this.t({ ok: "relAvailOk", warn: "relAvailWarn", red: "relAvailRed" }[tone]), avail: m.availability, pill: `<span class="pill ${tone}">${this.formatNumber(m.availability)} %</span>`, rank: m.availability };
+    }), { extras: [{ key: "avail", label: "relColAvail", get: r => r.avail, cell: r => `${this.formatNumber(r.avail)} %` }], empty: "" });
     const more = row.affected_total > items.length ? `<p class="factnote">${this.t("relAffectedMore", { shown: items.length, total: row.affected_total })}</p>` : "";
     const hintKey = this.relSetupHint(row);
     const hint = hintKey ? `<div class="factnote"><strong>${this.t("relHintTitle")}</strong> ${this.t(hintKey, { n: row.setup.count, days: row.setup.days })}</div>` : "";

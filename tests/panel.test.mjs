@@ -3577,7 +3577,7 @@ test("the batteries view shows the forecast with groups and the reminders, which
   assert.equal(calls[0].type, "ha_housekeeper/reminder_set");
   assert.equal(el.remDraft, null);
   el.remOpen = ["r1"];
-  assert.ok(el.reminderRow({ id: "r1", name: "Water filter", interval_days: 90, last_done: "2026-07-01", history: ["2026-07-01"], due: "2026-09-29", days_left: -10, state: "due", note: "" }).includes("data-rem-hdel=\"r1|2026-07-01\""));
+  assert.ok(el.reminderHistory({ id: "r1", name: "Water filter", interval_days: 90, last_done: "2026-07-01", history: ["2026-07-01"], due: "2026-09-29", days_left: -10, state: "due", note: "" }).includes("data-rem-hdel=\"r1|2026-07-01\""));
   el.view = "reminders";
   el.remDraft = el.remBlank();
   const editor = el.remindersView();
@@ -5071,4 +5071,17 @@ test("the finding of an outage is a row of its own as soon as a status or a filt
   assert.equal((el.findingsView().match(/data-fsel="config_entry.not_loaded\|e1"/g) || []).length, 1, "once in the grouped list");
   el.findingFilter = "outage";
   assert.equal((el.findingsView().match(/data-fsel="config_entry.not_loaded\|e1"/g) || []).length, 1, "and once under a filter");
+});
+
+test("object lists share one table: device entities, integration entries, reminders and backups sort, filter and show the state", () => {
+  const { el } = panel("en");
+  el.data = { ...DATA, reminders: [{ id: "r1", name: "Filter", interval_days: 30, last_done: "", history: [], due: "2026-11-01", days_left: 5, state: "soon", note: "" }] };
+  const html = el.objectTable("t-objs", [
+    { key: "entity:light.a", type: "entity", name: "A", sub: "light.a", tone: "ok", state: "active", stateLabel: "Active", pill: "<b>ok</b>", value: "on" },
+    { key: "entity:light.b", type: "entity", name: "B", sub: "light.b", tone: "red", state: "unavailable", stateLabel: "Unavailable", pill: "<b>bad</b>", value: "" },
+  ], { min: 1, extras: [{ key: "value", label: "objColState", get: r => r.value, cell: r => r.value }] });
+  assert.ok(html.includes('data-object="entity:light.a"') && html.includes('data-lf="t-objs|state"') && html.includes("<table") && !html.includes("mdi:chevron-right"));
+  const rem = el.remindersCard();
+  assert.ok(rem.includes('data-lsort="reminders|due') && rem.includes('data-rem-open="r1"') && rem.includes('data-lf="reminders|state"'));
+  assert.ok(el.bhBackups([{ date: "2026-10-01T10:00:00+00:00", size: 1000, agents: ["backup.local"], protected: true }]).includes('data-lsort="bhbackups|size'));
 });

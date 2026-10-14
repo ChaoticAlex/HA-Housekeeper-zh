@@ -793,7 +793,7 @@ Object.assign(TEXT.de, {
   bhRestoreNone: "Noch nie dokumentiert. Ein Backup gilt erst als sicher, wenn eine Wiederherstellung einmal geklappt hat.", bhRestoreOk: "Zuletzt am {date} (vor {days} Tagen).", bhRestoreOld: "Zuletzt am {date}, das ist {days} Tage her (empfohlen: höchstens {limit}).",
   bhPlansOk: "Für die {checked} zuletzt ausgeführten Pläne ist das Backup noch vorhanden.", bhPlansNote: "Für {missing} von {checked} zuletzt ausgeführten Plänen wurde das Backup nicht mehr gefunden (vermutlich durch die Aufbewahrung gelöscht).",
   bhAttestDate: "Datum", bhAttestSave: "Speichern", bhAttestClear: "Bestätigung zurücknehmen", bhAttestMark: "Als erledigt markieren", bhAttestTargets: "Externen Ablageort bestätigen", bhAttestAgain: "Erneut bestätigen", bhAttestCancel: "Abbrechen",
-  bhListTitle: "Letzte Backups", bhColDate: "Datum", bhColSize: "Größe", bhColTargets: "Ziele", bhColProtected: "Verschlüsselt", bhYes: "Ja", bhNo: "Nein",
+  bhListTitle: "Letzte Backups", bhAllProtected: "Alle (geschützt oder nicht)", bhColDate: "Datum", bhColSize: "Größe", bhColTargets: "Ziele", bhColProtected: "Verschlüsselt", bhYes: "Ja", bhNo: "Nein",
   bhGuideTitle: "So testest du eine Wiederherstellung", bhGuideSteps: "1. Eine Test-Instanz oder eine zweite Installation bereitstellen (nie zuerst die Hauptinstanz). 2. Dort ein aktuelles Backup einspielen: Einstellungen → System → Backups → Backup hochladen oder bei der Einrichtung wiederherstellen. 3. Prüfen, ob Integrationen, Automationen und Dashboards da sind. 4. Hier das Datum des Tests speichern. Housekeeper führt selbst nie eine Wiederherstellung aus.",
   todoBackupProblem: "Backup-Schutz: Problem",
   mtProblems: "{n} Problem(e)", mtNotes: "{n} Hinweis(e)", mtChecks: "{n} Prüfungen", mtPreflight: "Preflight", mtOpen: "{n} offen", mtRecord: "Gespeicherter Stand", mtNoRecord: "keiner",
@@ -819,7 +819,7 @@ Object.assign(TEXT.en, {
   bhRestoreNone: "Never documented. A backup counts as safe only once a restore has worked.", bhRestoreOk: "Last on {date} ({days} days ago).", bhRestoreOld: "Last on {date}, {days} days ago (recommended: at most {limit}).",
   bhPlansOk: "The backup of the {checked} most recently executed plans still exists.", bhPlansNote: "The backup of {missing} of the {checked} most recently executed plans was not found any more (probably deleted by the retention).",
   bhAttestDate: "Date", bhAttestSave: "Save", bhAttestClear: "Take back confirmation", bhAttestMark: "Mark as done", bhAttestTargets: "Confirm remote storage", bhAttestAgain: "Confirm again", bhAttestCancel: "Cancel",
-  bhListTitle: "Latest backups", bhColDate: "Date", bhColSize: "Size", bhColTargets: "Targets", bhColProtected: "Encrypted", bhYes: "Yes", bhNo: "No",
+  bhListTitle: "Latest backups", bhAllProtected: "All (protected or not)", bhColDate: "Date", bhColSize: "Size", bhColTargets: "Targets", bhColProtected: "Encrypted", bhYes: "Yes", bhNo: "No",
   bhGuideTitle: "How to test a restore", bhGuideSteps: "1. Set up a test instance or a second installation (never the main instance first). 2. Restore a recent backup there: Settings → System → Backups → upload a backup, or restore during setup. 3. Check that integrations, automations and dashboards are there. 4. Save the date of the test here. Housekeeper never performs a restore itself.",
   todoBackupProblem: "Backup protection: problem",
   mtProblems: "{n} problem(s)", mtNotes: "{n} note(s)", mtChecks: "{n} checks", mtPreflight: "Preflight", mtOpen: "{n} open", mtRecord: "Saved state", mtNoRecord: "none",
@@ -1548,6 +1548,14 @@ class StylesMixin {
   }
 }
 
+// Texts of the shared table of objects (objectTable); merged into TEXT.
+Object.assign(TEXT.de, {
+  objColState: "Zustand", objAllStatus: "Alle Zustände", objColEntities: "Entitäten", objColDevices: "Geräte", relColAvail: "Verfügbarkeit", relAvailOk: "Ab 99,5 %", relAvailWarn: "95 bis 99,5 %", relAvailRed: "Unter 95 %",
+});
+Object.assign(TEXT.en, {
+  objColState: "State", objAllStatus: "All states", objColEntities: "Entities", objColDevices: "Devices", relColAvail: "Availability", relAvailOk: "99.5 % and above", relAvailWarn: "95 to 99.5 %", relAvailRed: "Below 95 %",
+});
+
 // Texts for the policies view; merged into TEXT.
 Object.assign(TEXT.de, {
   polAllRules: "Alle Regeln", polNoViolations: "Keine Verstöße.", polSumRules: "Regeln an", polSumViolations: "Verstöße", polSumHidden: "Ausgeblendet", polTabViolations: "Verstöße", polTabRules: "Regeln",
@@ -1797,7 +1805,7 @@ class ListsMixin {
 
   // A sortable table for a list built with lvState/refine: header buttons set sort and direction, the phone shows cards.
   // columns: [{ key, label, cell(item) -> html, sortable, dir, narrow, allBox(rows) }]; narrow is a checkbox column with a fixed small width; allBox puts a box that ticks the page in its head; rowAttrs(item) adds attributes to the row.
-  listTable(id, columns, rows, { rowAttrs = () => "", cls = "" } = {}) {
+  listTable(id, columns, rows, { rowAttrs = () => "", cls = "", after = () => "" } = {}) {
     const st = this.lv[id];
     columns = columns.filter((c, i) => !i || !this.colHidden(id, c.key));
     const head = columns.map(c => {
@@ -1807,9 +1815,47 @@ class ListsMixin {
     }).join("");
     const body = rows.map(item => {
       const attrs = rowAttrs(item);
-      return `<tr ${attrs}>${columns.map((c, i) => `<td${c.narrow ? ' class="selcol"' : ""}${i ? ` data-label="${this.esc(this.t(c.label))}"` : ""}>${c.cell(item)}</td>`).join("")}</tr>`;
+      return `<tr ${attrs}>${columns.map((c, i) => `<td${c.narrow ? ' class="selcol"' : ""}${i ? ` data-label="${this.esc(this.t(c.label))}"` : ""}>${c.cell(item)}</td>`).join("")}</tr>${after(item)}`;
     }).join("");
     return `<div class="${["tablewrap", "lt", cls, this.isDenseList(id) ? "dense-list" : ""].filter(Boolean).join(" ")}"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+  }
+
+  // A table of objects (entities, entries, automations): name with id, type when mixed, state, plus extra columns.
+  // rows: [{ key: "entity:light.a", type, name, sub, tone, state, stateLabel, pill, rank }]; extras: [{ key, label, dir, get, cell(row) }].
+  // The bar shows from `min` rows on; a row opens its object.
+  objectTable(id, rows, { extras = [], min = 6, empty = "", tile = row => this.tile(row.type, row.tone === "ok" ? "" : row.tone) } = {}) {
+    if (!rows.length) return empty ? `<div class="emptymsg">${empty}</div>` : "";
+    this.lvState(id, "name", "asc");
+    const types = [...new Set(rows.map(r => r.type))].sort();
+    const tones = ["red", "warn", "violet", "blue", "mute", "ok"], rank = r => (r.rank ?? tones.indexOf(r.tone));
+    const sorts = [
+      { key: "name", label: "sortName", dir: "asc", get: r => r.name },
+      ...(types.length > 1 ? [{ key: "type", label: "sortType", dir: "asc", get: r => this.t(r.type) }] : []),
+      { key: "status", label: "sortStatus", dir: "asc", get: rank },
+      ...extras.map(x => ({ key: x.key, label: x.label, dir: x.dir || "asc", get: x.get })),
+    ];
+    const filters = [
+      ...(types.length > 1 ? [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }] : []),
+      { name: "state", all: this.t("objAllStatus"), options: [...new Map(rows.map(r => [r.state, r.stateLabel])).entries()].sort((a, b) => String(a[1]).localeCompare(String(b[1]), this.lang)) },
+    ];
+    const st = this.lv[id];
+    const bar = rows.length >= min || st.q ? this.listBar(id, { table: true, sorts, filters }) : "";
+    const shown = this.refine(id, rows, { text: r => [r.name, r.sub, ...extras.map(x => String(x.get(r) ?? ""))].join(" "), filters: { type: (r, v) => r.type === v, state: (r, v) => r.state === v }, sorts, tie: r => r.key });
+    const pg = this.paginate(id, shown);
+    const columns = [
+      { key: "name", label: "sortName", dir: "asc", cell: r => `<div class="statcell">${tile(r)}<div>${this.nameCell(r.name, r.sub)}</div></div>` },
+      ...(types.length > 1 ? [{ key: "type", label: "sortType", dir: "asc", cell: r => this.esc(this.t(r.type)) }] : []),
+      ...extras.map(x => ({ key: x.key, label: x.label, dir: x.dir || "asc", cell: x.cell })),
+      { key: "status", label: "sortStatus", dir: "asc", cell: r => r.pill },
+    ];
+    const table = shown.length ? this.listTable(id, columns, pg.rows, { cls: "objs", rowAttrs: r => `data-object="${this.esc(r.key)}" tabindex="0" role="button" aria-label="${this.esc(r.name)}"` }) : `<div class="emptymsg">${this.noMatches(id)}</div>`;
+    return `${bar}${table}${pg.footer}`;
+  }
+
+  // The arrow of a row that unfolds in place (a history, a detail): the look of a fold's arrow, as a button of its own; attr is the data attribute the click handler listens to.
+  expandBtn(attr, key, open, label) {
+    const text = this.esc(label);
+    return `<span class="tile mute"><button type="button" class="chevbtn" ${attr}="${this.esc(key)}" aria-expanded="${open}" aria-label="${text}" title="${text}"><ha-icon icon="mdi:chevron-${open ? "down" : "right"}"></ha-icon></button></span>`;
   }
 
   // Name over id for a table cell: both are cut at the column width and shown in full in the tooltip (see showTip).
@@ -5031,9 +5077,10 @@ class PropertiesMixin {
       [t("propConfigUrl"), /^https?:\/\//i.test(item.configuration_url || "") ? `<a href="${this.esc(item.configuration_url)}" target="_blank" rel="noopener noreferrer">${this.esc(item.configuration_url)}</a>` : this.esc(item.configuration_url || "")],
     ]);
     const members = this.data.objects.filter(o => o.object_type === "entity" && o.device_id === item.object_id).sort((a, b) => a.name.localeCompare(b.name));
-    const memberList = members.map(m => `<button class="row rel" data-object="entity:${this.esc(m.object_id)}">${this.tile("entity", this.tone(m.status) === "ok" ? "" : this.tone(m.status))}<span class="row-text"><strong>${this.esc(m.name)}</strong>${this.rowId(m.object_id, m.state !== null && m.state !== undefined ? `${m.state}${m.unit ? ` ${m.unit}` : ""}` : "")}</span>${this.pill(m.status)}</button>`);
-    const memberPage = this.paginate(`members-${item.object_id}`, memberList), memberRows = memberPage.rows.join("") + memberPage.footer;
-    const entities = `<section class="panel wide"><div class="panelhead"><h2><ha-icon icon="mdi:shape-outline" style="--mdc-icon-size:18px;vertical-align:-3px;margin-right:6px;color:var(--hk-muted)"></ha-icon>${t("propEntities")} (${members.length})</h2></div>${memberRows || `<div class="emptymsg">${t("propNoEntities")}</div>`}</section>`;
+    const memberRows = this.objectTable(`members-${item.object_id}`, members.map(m => ({ key: `entity:${m.object_id}`, type: "entity", name: m.name, sub: m.object_id, tone: this.tone(m.status), state: m.status, stateLabel: this.statusLabel(m.status), pill: this.pill(m.status), value: m.state === null || m.state === undefined ? "" : `${m.state}${m.unit ? ` ${m.unit}` : ""}` })), {
+      extras: [{ key: "value", label: "objColState", get: r => r.value, cell: r => r.value ? this.esc(r.value) : `<span class="muted">—</span>` }], empty: t("propNoEntities"),
+    });
+    const entities = `<section class="panel wide"><div class="panelhead"><h2><ha-icon icon="mdi:shape-outline" style="--mdc-icon-size:18px;vertical-align:-3px;margin-right:6px;color:var(--hk-muted)"></ha-icon>${t("propEntities")} (${members.length})</h2></div>${memberRows}</section>`;
     const technical = this.propCard(t("propTechnical"), "mdi:identifier", [
       [t("propDeviceId"), this.propCode(item.object_id)],
       [t("propIdentifiers"), (item.identifiers || []).map(v => this.propCode(v)).join("<br>")],
@@ -5135,9 +5182,10 @@ class MaintenanceMixin {
       { label: this.t("recorderSumExcluded"), value: this.formatNumber(all.filter(e => e.excluded).length), tone: "mute", lf: ["costlist", "state", "excluded"] },
       { label: this.t("recorderSumUnused"), value: this.formatNumber(all.filter(e => !e.used).length), tone: "mute", lf: ["costlist", "state", "unused"] },
     ]) : "";
-    const statRows = (c.statistics || []).slice(0, 10).map(s => `<div class="row rel"><span class="tile mute"><ha-icon icon="mdi:chart-line"></ha-icon></span><span class="row-text"><strong>${this.esc(s.statistic_id)}</strong><small>${this.formatNumber(s.rows)}</small></span></div>`).join("");
+    const statPage = this.paginate("recorder_stats", c.statistics || []);
+    const statRows = statPage.rows.map(s => `<div class="row rel"><span class="tile mute"><ha-icon icon="mdi:chart-line"></ha-icon></span><span class="row-text"><strong>${this.esc(s.statistic_id)}</strong><small>${this.formatNumber(s.rows)}</small></span></div>`).join("") + statPage.footer;
     const snippet = this.excludeCard(this.suggestedExclusions(), { only: false });
-    return `<div class="stack">${head("", "data-costs-load data-refresh")}${tiles}<p class="factnote">${this.esc(summary)}</p>${snippet}${list}${statRows ? this.fold("recorder_stats", { title: this.t("recorderStats"), pill: this.formatNumber((c.statistics || []).slice(0, 10).length) }, statRows, false) : ""}</div></div>`;
+    return `<div class="stack">${head("", "data-costs-load data-refresh")}${tiles}<p class="factnote">${this.esc(summary)}</p>${snippet}${list}${statRows ? this.fold("recorder_stats", { title: this.t("recorderStats"), pill: this.formatNumber((c.statistics || []).length) }, statRows, false) : ""}</div></div>`;
   }
 
   // One line per check; `level` decides the colour.
@@ -5305,9 +5353,24 @@ class BackupMixin {
 
   bhBackups(list) {
     if (!list?.length) return "";
-    const backupRows = list.map(b => `<tr><td>${this.formatDate(b.date)}</td><td data-label="${this.t("bhColSize")}">${this.formatBytes(b.size)}</td><td data-label="${this.t("bhColTargets")}">${this.bhList(b.agents)}</td><td data-label="${this.t("bhColProtected")}">${this.t(b.protected ? "bhYes" : "bhNo")}</td></tr>`);
-    const pg = this.paginate("bhbackups", backupRows), rows = pg.rows.join("");
-    return `<div class="panel"><div class="sectionlabel">${this.t("bhListTitle")}</div><div class="tablewrap"><table><thead><tr><th>${this.t("bhColDate")}</th><th>${this.t("bhColSize")}</th><th>${this.t("bhColTargets")}</th><th>${this.t("bhColProtected")}</th></tr></thead><tbody>${rows}</tbody></table></div>${pg.footer}</div>`;
+    const id = "bhbackups";
+    this.lvState(id, "date", "desc");
+    const sorts = [
+      { key: "date", label: "bhColDate", dir: "desc", get: b => b.date },
+      { key: "size", label: "bhColSize", dir: "desc", get: b => b.size },
+      { key: "protected", label: "bhColProtected", dir: "desc", get: b => (b.protected ? 1 : 0) },
+    ];
+    const bar = this.listBar(id, { table: true, sorts, filters: [{ name: "protected", all: this.t("bhAllProtected"), options: [["yes", this.t("bhYes")], ["no", this.t("bhNo")]] }] });
+    const rows = this.refine(id, list, { text: b => [this.formatDate(b.date), ...(b.agents || [])].join(" "), filters: { protected: (b, v) => Boolean(b.protected) === (v === "yes") }, sorts, tie: b => b.date });
+    const pg = this.paginate(id, rows);
+    const columns = [
+      { key: "date", label: "bhColDate", dir: "desc", cell: b => this.esc(this.formatDate(b.date)) },
+      { key: "size", label: "bhColSize", dir: "desc", cell: b => this.esc(this.formatBytes(b.size)) },
+      { key: "targets", label: "bhColTargets", sortable: false, cell: b => this.bhList(b.agents) },
+      { key: "protected", label: "bhColProtected", dir: "desc", cell: b => this.t(b.protected ? "bhYes" : "bhNo") },
+    ];
+    const table = rows.length ? this.listTable(id, columns, pg.rows, { cls: "bh", rowAttrs: () => 'class="static"' }) : `<div class="emptymsg">${this.noMatches(id)}</div>`;
+    return `<div class="panel"><div class="sectionlabel">${this.t("bhListTitle")}</div>${bar}${table}${pg.footer}</div>`;
   }
 
   backupCard() {
@@ -5400,10 +5463,10 @@ class ReliabilityMixin {
   reliabilityDetailCard(row) {
     const r = this.reliability;
     const items = row.affected || [];
-    const list = items.map(m => {
+    const list = this.objectTable(`relaffected-${row.entry_id || row.domain || ""}`, items.map(m => {
       const tone = m.availability >= 99.5 ? "ok" : m.availability >= 95 ? "warn" : "red";
-      return `<button class="row rel" data-object="entity:${this.esc(m.entity_id)}">${this.tile("entity", tone)}<span class="row-text"><strong>${this.esc(m.name)}</strong>${this.rowId(m.entity_id)}</span><span class="pill ${tone}">${this.formatNumber(m.availability)} %</span></button>`;
-    }).join("");
+      return { key: `entity:${m.entity_id}`, type: "entity", name: m.name, sub: m.entity_id, tone, state: tone, stateLabel: this.t({ ok: "relAvailOk", warn: "relAvailWarn", red: "relAvailRed" }[tone]), avail: m.availability, pill: `<span class="pill ${tone}">${this.formatNumber(m.availability)} %</span>`, rank: m.availability };
+    }), { extras: [{ key: "avail", label: "relColAvail", get: r => r.avail, cell: r => `${this.formatNumber(r.avail)} %` }], empty: "" });
     const more = row.affected_total > items.length ? `<p class="factnote">${this.t("relAffectedMore", { shown: items.length, total: row.affected_total })}</p>` : "";
     const hintKey = this.relSetupHint(row);
     const hint = hintKey ? `<div class="factnote"><strong>${this.t("relHintTitle")}</strong> ${this.t(hintKey, { n: row.setup.count, days: row.setup.days })}</div>` : "";
@@ -6482,8 +6545,7 @@ class PoliciesMixin {
     const form = this.decide?.key === item.key ? this.decideForm(item) : "";
     const box = compact ? "" : this.polSelBox(item);
     const open = this.polIsOpen(item), main = this.polMainAction(item);
-    const label = this.esc(this.t(open ? "polCloseRow" : "polOpenRow"));
-    const chev = `<span class="tile mute"><button type="button" class="chevbtn" data-pol-open="${this.esc(item.key)}" aria-expanded="${open}" aria-label="${label}" title="${label}"><ha-icon icon="mdi:chevron-${open ? "down" : "right"}"></ha-icon></button></span>`;
+    const chev = this.expandBtn("data-pol-open", item.key, open, this.t(open ? "polCloseRow" : "polOpenRow"));
     // A row with a fix offers it as its button (it folds the row open); the other rows keep their hide button; an opened row has it next to "open object".
     const act = open ? "" : main ? `<button class="btn" data-pol-open="${this.esc(item.key)}">${this.t(main)}</button>` : button;
     const detail = open ? this.polDetail(item, button) : "";
@@ -6867,14 +6929,15 @@ class LifecycleMixin {
     const head = `<p class="factnote pad">${this.t("lifeRemovedHint")}</p>`;  // the title is on the tile of the tab
     if (!this.removed) return `<div class="panel">${head}${this.skeleton("loading")}</div>`;
     // The logbook entry that was written when the device was removed (or one the person added to it).
-    const removedRows = this.removed.map(d => {
+    const found = this.searchList("removed", this.removed, d => [d.name, d.object_id].join(" "));
+    const removedRows = found.rows.map(d => {
       const n = this.notesList().find(x => x.target === `device:${d.object_id}`);
       const text = n ? [n.title, this.formatDate(d.at), n.note].filter(Boolean).join(" · ") : `${this.t(d.kind === "forget_device" ? "lifeForgotten" : "life_removed")} · ${this.formatDate(d.at)}`;
       const body = `<span class="tile red"><ha-icon icon="mdi:delete-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(d.name || d.object_id)}</strong><small>${this.esc(text)}</small></span>`;
       return n ? `<button class="row rel" data-note-edit="${this.esc(n.id)}" title="${this.esc(this.t("noteEdit"))}">${body}</button>` : `<div class="row rel">${body}</div>`;
     });
     const pg = this.paginate("removed", removedRows), rows = pg.rows.join("") + pg.footer;
-    return `<div class="panel">${head}${rows || `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("lifeRemovedNone")}</div>`}</div>`;
+    return `<div class="panel">${head}${found.bar}${found.none}${rows || (this.removed.length ? "" : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("lifeRemovedNone")}</div>`)}</div>`;
   }
 }
 
@@ -8443,16 +8506,23 @@ class BatteryCareMixin {
 
   remBlank() { return { id: "", name: "", interval_days: 90, due: this.remAddDays(this.remToday(), 90), dueTouched: false, note: "" }; }
 
-  reminderRow(r) {
-    const tone = { due: "red", soon: "warn", ok: "ok" }[r.state];
-    const open = (this.remOpen || []).includes(r.id);
-    const id = this.esc(r.id);
-    const hist = r.history || [];
-    const label = this.esc(this.t(open ? "remHistoryClose" : "remHistoryOpen"));
-    const main = `<tr class="static"><td><button type="button" class="chevbtn" data-rem-open="${id}" aria-expanded="${open}" aria-label="${label}" title="${label}"><ha-icon icon="mdi:chevron-${open ? "down" : "right"}"></ha-icon></button><strong>${this.esc(r.name)}</strong>${r.note ? `<small class="remnote">${this.esc(r.note)}</small>` : ""}</td><td data-label="${this.esc(this.t("remColEvery"))}">${this.esc(this.t("remEveryN", { n: r.interval_days }))}</td><td data-label="${this.esc(this.t("remColLast"))}">${r.last_done ? this.esc(this.remDay(r.last_done)) : `<span class="muted">–</span>`}</td><td data-label="${this.esc(this.t("remColDue"))}"><span class="pill ${tone}" title="${this.esc(this.remDay(r.due))}">${this.esc(this.remWhen(r.days_left))}</span></td><td class="remact"><button class="btn small" data-rem-done="${id}">${this.t("remDone")}</button><button class="btn small quiet" data-rem-edit="${id}">${this.t("remEdit")}</button><button class="btn small quiet" data-rem-del="${id}">${this.t("remDelete")}</button></td></tr>`;
-    if (!open) return main;
+  // The row under a reminder that is open: the days it was done, each with a delete button.
+  reminderHistory(r) {
+    if (!(this.remOpen || []).includes(r.id)) return "";
+    const id = this.esc(r.id), hist = r.history || [];
     const list = hist.length ? `<ul>${hist.map(d => `<li>${this.esc(this.remDay(d))}<button type="button" class="linkbtn" data-rem-hdel="${id}|${this.esc(d)}">${this.t("remDelete")}</button></li>`).join("")}</ul>` : `<p class="muted">${this.t("remNoHistory")}</p>`;
-    return `${main}<tr class="static remhist"><td colspan="5"><h3>${this.t("remHistory", { n: hist.length })}</h3>${list}</td></tr>`;
+    return `<tr class="static remhist"><td colspan="5"><h3>${this.t("remHistory", { n: hist.length })}</h3>${list}</td></tr>`;
+  }
+
+  reminderColumns() {
+    const tone = r => ({ due: "red", soon: "warn", ok: "ok" }[r.state]);
+    return [
+      { key: "name", label: "remColName", dir: "asc", cell: r => `${this.expandBtn("data-rem-open", r.id, (this.remOpen || []).includes(r.id), this.t((this.remOpen || []).includes(r.id) ? "remHistoryClose" : "remHistoryOpen"))}<strong>${this.esc(r.name)}</strong>${r.note ? `<small class="remnote">${this.esc(r.note)}</small>` : ""}` },
+      { key: "every", label: "remColEvery", dir: "asc", cell: r => this.esc(this.t("remEveryN", { n: r.interval_days })) },
+      { key: "last", label: "remColLast", dir: "desc", cell: r => r.last_done ? this.esc(this.remDay(r.last_done)) : `<span class="muted">–</span>` },
+      { key: "due", label: "remColDue", dir: "asc", cell: r => `<span class="pill ${tone(r)}" title="${this.esc(this.remDay(r.due))}">${this.esc(this.remWhen(r.days_left))}</span>` },
+      { key: "act", label: "remColActions", sortable: false, cell: r => { const id = this.esc(r.id); return `<span class="remact"><button class="btn small" data-rem-done="${id}">${this.t("remDone")}</button><button class="btn small quiet" data-rem-edit="${id}">${this.t("remEdit")}</button><button class="btn small quiet" data-rem-del="${id}">${this.t("remDelete")}</button></span>`; } },
+    ];
   }
 
   // The page editor for a new or an edited reminder; "due" follows the interval until it is set by hand.
@@ -8473,8 +8543,19 @@ class BatteryCareMixin {
     const items = this.data.reminders || [];
     const overdue = items.filter(r => r.state === "due").length;
     const head = `<div class="panelhead"><div><h2>${this.t("remTitle")}</h2><p>${items.length ? this.t("remSummary", { n: items.length, due: overdue }) : this.t("remHint")}</p></div><div class="actions"><button class="btn primary" data-rem-new>${this.t("remNew")}</button></div></div>`;
-    const table = items.length ? `<div class="tablewrap lt rem"><table><thead><tr><th scope="col">${this.t("remColName")}</th><th scope="col">${this.t("remColEvery")}</th><th scope="col">${this.t("remColLast")}</th><th scope="col">${this.t("remColDue")}</th><th scope="col"><span class="sr">${this.t("remColActions")}</span></th></tr></thead><tbody>${items.map(r => this.reminderRow(r)).join("")}</tbody></table></div>` : `<div class="emptymsg"><ha-icon icon="mdi:calendar-clock-outline"></ha-icon>${this.t("remEmpty")}</div>`;
-    return `<div class="panel">${head}${table}</div>`;
+    this.lvState("reminders", "due", "asc");
+    const sorts = [
+      { key: "name", label: "remColName", dir: "asc", get: r => r.name },
+      { key: "every", label: "remColEvery", dir: "asc", get: r => r.interval_days },
+      { key: "last", label: "remColLast", dir: "desc", get: r => r.last_done || "" },
+      { key: "due", label: "remColDue", dir: "asc", get: r => r.days_left },
+    ];
+    const bar = items.length ? this.listBar("reminders", { table: true, sorts, filters: [{ name: "state", all: this.t("remAllStates"), options: [["due", this.t("remStateDue")], ["soon", this.t("remStateSoon")], ["ok", this.t("remStateOk")]] }] }) : "";
+    const rows = this.refine("reminders", items, { text: r => [r.name, r.note].join(" "), filters: { state: (r, v) => r.state === v }, sorts, tie: r => r.id });
+    const pg = this.paginate("reminders", rows);
+    const table = !items.length ? `<div class="emptymsg"><ha-icon icon="mdi:calendar-clock-outline"></ha-icon>${this.t("remEmpty")}</div>`
+      : rows.length ? this.listTable("reminders", this.reminderColumns(), pg.rows, { cls: "rem", rowAttrs: () => 'class="static"', after: r => this.reminderHistory(r) }) : `<div class="emptymsg">${this.noMatches("reminders")}</div>`;
+    return `<div class="panel">${head}${bar}${table}${pg.footer}</div>`;
   }
 
   async reminderCall(msg) {
@@ -8487,6 +8568,7 @@ class BatteryCareMixin {
   bindBatteryCare(root) {
     this.bindBatteryType(root);
     this.bindBatteryKind(root);
+    root.querySelectorAll("[data-need-all]").forEach(el => el.addEventListener("click", () => { this.needAll = { ...this.needAll, [el.dataset.needAll]: !this.needAll?.[el.dataset.needAll] }; this.render(); }));
     root.querySelector("[data-bt-refresh]")?.addEventListener("click", () => this.loadBatteryTrend(true));
     root.querySelector("[data-rem-new]")?.addEventListener("click", () => { this.remDraft = this.remBlank(); this.remError = ""; this._remFocus = true; this.render(); });
     root.querySelector("[data-rem-cancel]")?.addEventListener("click", () => { this.remDraft = null; this.remError = ""; this.render(); });
@@ -8549,7 +8631,7 @@ Object.assign(TEXT.de, {
   btTitle: "Alle Batterien", btHint: "Stand, Verbrauch und die Prognose, wann eine Batterie die Grenze erreicht (bis 90 Tage).", btLoading: "Prognose wird berechnet …", btNoRecorder: "Ohne Recorder gibt es keine Prognose.",
   remTitle: "Wartungserinnerungen", remHint: "Filter, Entkalken, Batteriewechsel: du trägst Name, Abstand und Fälligkeit ein, Housekeeper sagt, wann es dran ist, und merkt sich, wann du es erledigt hast. Es ändert nichts in Home Assistant.", remEmpty: "Noch keine Erinnerung. Lege zum Beispiel den Wasserfilter oder den Rauchmelder-Test an.",
   remName: "z. B. Wasserfilter", remNote: "z. B. Batterietyp CR2032", remAdd: "Hinzufügen", remSave: "Speichern", remCancel: "Abbrechen", remDone: "Erledigt", remDelete: "Löschen", remEdit: "Ändern", remNew: "+ Erinnerung hinzufügen",
-  remFName: "Name", remFEvery: "Abstand in Tagen", remFDue: "Fällig am", remFNote: "Notiz (optional)", remColName: "Name", remColEvery: "Abstand", remColLast: "Zuletzt erledigt", remColDue: "Fällig", remColActions: "Aktionen",
+  remFName: "Name", remFEvery: "Abstand in Tagen", remFDue: "Fällig am", remFNote: "Notiz (optional)", remAllStates: "Alle Zustände", remStateDue: "Überfällig", remStateSoon: "Bald fällig", remStateOk: "In Ordnung", remColName: "Name", remColEvery: "Abstand", remColLast: "Zuletzt erledigt", remColDue: "Fällig", remColActions: "Aktionen",
   remDialogNew: "Neue Erinnerung", remDialogEdit: "Erinnerung bearbeiten", remEveryN: "alle {n} Tage", remSummary: "{n} Erinnerungen, {due} überfällig.", remHistory: "Historie · {n}× erledigt", remNoHistory: "Noch nie erledigt.", remHistoryOpen: "Historie aufklappen", remHistoryClose: "Historie zuklappen", remToday: "heute", remOverdue: "{n} Tage überfällig", remIn: "in {n} Tagen", remInvalid: "Nicht gespeichert, bitte prüfen: {field}",
   reminders: "Erinnerungen", remindersSubtitle: "Eigene Wartungstermine: Filter, Entkalken, Batteriewechsel.", actReminders: "Wartung fällig", actRemindersHint: "Eine eigene Erinnerung ist erreicht",
   relSetup: "Einrichtungsfehler: {n} in {days} Tagen, zuletzt {last}", relSetupNow: "Gerade im Zustand {state}", relSetupNote: "Aus den Scans gezählt, so fein wie das Scan-Intervall.",
@@ -8562,7 +8644,7 @@ Object.assign(TEXT.en, {
   btTitle: "All batteries", btHint: "Level, drain and the forecast of when a battery reaches the limit (up to 90 days).", btLoading: "Calculating the forecast …", btNoRecorder: "There is no forecast without a recorder.",
   remTitle: "Maintenance reminders", remHint: "Filter, descaling, battery change: you enter a name, an interval and the due date, Housekeeper tells you when it is due and keeps when you did it. It changes nothing in Home Assistant.", remEmpty: "No reminder yet. Add the water filter or the smoke detector test, for example.",
   remName: "e.g. water filter", remNote: "e.g. battery type CR2032", remAdd: "Add", remSave: "Save", remCancel: "Cancel", remDone: "Done", remDelete: "Delete", remEdit: "Edit", remNew: "+ Add reminder",
-  remFName: "Name", remFEvery: "Interval in days", remFDue: "Due on", remFNote: "Note (optional)", remColName: "Name", remColEvery: "Interval", remColLast: "Last done", remColDue: "Due", remColActions: "Actions",
+  remFName: "Name", remFEvery: "Interval in days", remFDue: "Due on", remFNote: "Note (optional)", remAllStates: "All states", remStateDue: "Overdue", remStateSoon: "Due soon", remStateOk: "On track", remColName: "Name", remColEvery: "Interval", remColLast: "Last done", remColDue: "Due", remColActions: "Actions",
   remDialogNew: "New reminder", remDialogEdit: "Edit reminder", remEveryN: "every {n} days", remSummary: "{n} reminders, {due} overdue.", remHistory: "History · done {n}×", remNoHistory: "Never done yet.", remHistoryOpen: "Show history", remHistoryClose: "Hide history", remToday: "today", remOverdue: "{n} days overdue", remIn: "in {n} days", remInvalid: "Not saved, please check: {field}",
   reminders: "Reminders", remindersSubtitle: "Your own maintenance dates: filter, descaling, changing batteries.", actReminders: "Maintenance due", actRemindersHint: "One of your own reminders is reached",
   relSetup: "Setup failures: {n} in {days} days, last {last}", relSetupNow: "Currently in state {state}", relSetupNote: "Counted from the scans, as fine as the scan interval.",
@@ -10946,8 +11028,9 @@ class NotesMixin {
     const shown = all.filter(n => (!src || (n.source || "me") === src) && (!obj || n.target === obj));
     const chip = (id, label) => `<button class="chip ${src === id ? "on" : ""}" data-logbook-src="${id}" aria-pressed="${src === id}">${this.esc(label)}</button>`;
     const filters = `<div class="logfilters">${chip("", this.t("logbookAll"))}${chip("me", this.t("noteMine"))}${chip("housekeeper", this.t("noteSrcHk"))}${obj ? `<button class="chip on" data-logbook-clear>${this.esc(this.t("logbookObject", { name: this.noteTargetName(obj) }))} ✕</button>` : ""}</div>`;
-    const pg = this.paginate("logbook", shown.map(n => this.noteRow(n)));
-    const body = !all.length ? `<div class="emptymsg"><ha-icon icon="mdi:notebook-outline"></ha-icon>${this.t("logbookEmpty")}</div>` : shown.length ? pg.rows.join("") + pg.footer : `<div class="emptymsg">${this.t("logbookFiltered")}</div>`;
+    const found = this.searchList("logbook", shown, n => [n.title, n.note, n.target].join(" "));
+    const pg = this.paginate("logbook", found.rows.map(n => this.noteRow(n)));
+    const body = !all.length ? `<div class="emptymsg"><ha-icon icon="mdi:notebook-outline"></ha-icon>${this.t("logbookEmpty")}</div>` : shown.length ? found.bar + found.none + pg.rows.join("") + pg.footer : `<div class="emptymsg">${this.t("logbookFiltered")}</div>`;
     return `<section class="panel u-mb14"><div class="panelhead"><div><h2>${this.t("logbook")}</h2><p>${this.t("logbookHint")}</p></div><div class="actions">${this.noteHeadButton()}</div></div>${all.length ? filters : ""}${body}</section>`;
   }
 
@@ -11799,7 +11882,7 @@ Object.assign(TEXT.de, {
   btSlopeDay: "{n} %/Tag", btVoltDay: "{n} V/Tag", btSlopeStable: "stabil", btLeftLow: "unter Grenze", btLeftDays: "{n} Tage", btLeftFar: "> {n} Tage", btLeftStable: "nicht absehbar",
   btFilterSoon: "Bald leer", btFilterUntyped: "Ohne Typ", btAllTypes: "Alle Typen",
   needTitle: "Benötigte Batterien jetzt und in den nächsten 30 Tagen", needSub: "{n} Geräte sind bereits unter ihrer Grenze oder erreichen sie laut Prognose in 30 Tagen.", needSub1: "1 Gerät ist bereits unter seiner Grenze oder erreicht sie laut Prognose in 30 Tagen.",
-  needNone: "Keine Batterie ist unter ihrer Grenze oder erreicht sie laut Prognose in den nächsten 30 Tagen.", needUntyped: "ohne Typ", needUntypedHint: "Typ in der Tabelle setzen", needNow: "Bereits unter Grenze", needSoon: "In den nächsten 14 Tagen", needLater: "In 15 bis 30 Tagen", needMore: "… {n} weitere in der Tabelle",
+  needLess: "Weniger anzeigen", needNone: "Keine Batterie ist unter ihrer Grenze oder erreicht sie laut Prognose in den nächsten 30 Tagen.", needUntyped: "ohne Typ", needUntypedHint: "Typ in der Tabelle setzen", needNow: "Bereits unter Grenze", needSoon: "In den nächsten 14 Tagen", needLater: "In 15 bis 30 Tagen", needMore: "… {n} weitere in der Tabelle",
   needNote: "Gezählt werden bereits niedrige Batterien und Geräte, die laut Prognose innerhalb von 30 Tagen ihre Grenze erreichen. Der Typ kommt von dir.",
   btTableNote: "Prognose nur bis 90 Tage, aus den letzten fünf Wochen: eine Schätzung, keine Zusage. Ohne Prognose: {unknown} (zu wenige Tage oder stabil). Nach einem Wechsel zählt nur der Verlauf danach.",
   btFarMore: "{n} halten laut Prognose länger als 90 Tage.",
@@ -11811,7 +11894,7 @@ Object.assign(TEXT.en, {
   btSlopeDay: "{n} %/day", btVoltDay: "{n} V/day", btSlopeStable: "stable", btLeftLow: "below limit", btLeftDays: "{n} days", btLeftFar: "> {n} days", btLeftStable: "no forecast",
   btFilterSoon: "Empty soon", btFilterUntyped: "No type", btAllTypes: "All types",
   needTitle: "Batteries needed now and in the next 30 days", needSub: "{n} devices are already below their limit or are forecast to reach it within 30 days.", needSub1: "1 device is already below its limit or is forecast to reach it within 30 days.",
-  needNone: "No battery is below its limit or forecast to reach it within 30 days.", needUntyped: "no type", needUntypedHint: "set the type in the table", needNow: "Already below limit", needSoon: "In the next 14 days", needLater: "In 15 to 30 days", needMore: "… {n} more in the table",
+  needLess: "Show fewer", needNone: "No battery is below its limit or forecast to reach it within 30 days.", needUntyped: "no type", needUntypedHint: "set the type in the table", needNow: "Already below limit", needSoon: "In the next 14 days", needLater: "In 15 to 30 days", needMore: "… {n} more in the table",
   needNote: "Counted are batteries already low and devices forecast to reach their limit within 30 days. The type comes from you.",
   btTableNote: "Forecast only up to 90 days, from the last five weeks: an estimate, not a promise. No forecast for {unknown} (too few days or stable). After a change only the time since counts.",
   btFarMore: "{n} last longer than 90 days by the forecast.",
@@ -11974,8 +12057,8 @@ class BatteryTableMixin {
     };
     const list = (title, rows) => {
       if (!rows.length) return "";
-      const shown = rows.slice(0, 5);
-      return `<div><h3>${this.t(title)} · ${this.formatNumber(rows.length)}</h3><ul>${shown.map(line).join("")}${rows.length > shown.length ? `<li class="muted">${this.t("needMore", { n: rows.length - shown.length })}</li>` : ""}</ul></div>`;
+      const all = Boolean(this.needAll?.[title]), shown = all ? rows : rows.slice(0, 5);
+      return `<div><h3>${this.t(title)} · ${this.formatNumber(rows.length)}</h3><ul>${shown.map(line).join("")}${rows.length > 5 ? `<li><button type="button" class="linkbtn" data-need-all="${title}">${all ? this.t("needLess") : this.t("needMore", { n: rows.length - shown.length })}</button></li>` : ""}</ul></div>`;
     };
     const now = soon.filter(r => r.state === "low"), near = soon.filter(r => r.state !== "low" && r.days_left <= BATTERY_SOON_DAYS), later = soon.filter(r => r.state !== "low" && r.days_left > BATTERY_SOON_DAYS);
     const sub = this.t(soon.length === 1 ? "needSub1" : "needSub", { n: this.formatNumber(soon.length) });
@@ -13104,10 +13187,12 @@ class IntegrationPageMixin {
     const docs = /^https:\/\//.test(item.documentation || "") ? `<a class="btn" href="${this.esc(item.documentation)}" target="_blank" rel="noopener noreferrer"><ha-icon icon="mdi:book-open-variant"></ha-icon>${this.t("intDocs")}</a>` : "";
     const folder = item.custom ? `<section class="panel"><div class="panelhead"><h2>${this.t("intFolder")}</h2></div><div class="facts">${fact("intFolder", this.esc(item.integration_dir || `custom_components/${item.domain}`))}${size ? fact("intFolderSize", this.esc(this.formatBytes(size.bytes))) : ""}</div></section>` : "";
     const hacs = item.hacs ? this.intHacsCard(item.hacs) : "";
-    const rows = this.intEntries(item).map(e => {
-      const tone = this.tone(e.status) === "ok" ? "" : this.tone(e.status);
-      return `<button class="row rel" data-object="${this.esc(`config_entry:${e.object_id}`)}">${this.tile("config_entry", tone)}<span class="row-text"><strong>${this.esc(e.name || e.object_id)}</strong><small>${this.esc(this.t("intEntityCount", { e: this.formatNumber(e.entity_count || 0), d: this.formatNumber(e.device_count || 0) }))}</small></span>${this.pill(e.status)}</button>`;
-    }).join("");
+    const rows = this.objectTable(`intentries-${item.object_id}`, this.intEntries(item).map(e => ({ key: `config_entry:${e.object_id}`, type: "config_entry", name: e.name || e.object_id, sub: "", tone: this.tone(e.status), state: e.status, stateLabel: this.statusLabel(e.status), pill: this.pill(e.status), entities: e.entity_count || 0, devices: e.device_count || 0 })), {
+      min: 8, extras: [
+        { key: "entities", label: "objColEntities", dir: "desc", get: r => r.entities, cell: r => this.formatNumber(r.entities) },
+        { key: "devices", label: "objColDevices", dir: "desc", get: r => r.devices, cell: r => this.formatNumber(r.devices) },
+      ],
+    });
     return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("intEntriesTitle")}</h2>${docs ? `<div class="actions">${docs}</div>` : ""}</div>${rows}</section>${hacs}${folder}</div>`;
   }
 
@@ -13137,8 +13222,8 @@ class IntegrationPageMixin {
 
   intUsedCard(item) {
     const used = this.intUsedBy(item);
-    const rows = used.map(o => `<button class="row rel" data-object="${this.esc(this.objectKey(o))}">${this.tile(o.object_type, this.tone(o.status) === "ok" ? "" : this.tone(o.status))}<span class="row-text"><strong>${this.esc(o.name || o.object_id)}</strong><small>${this.esc(this.t(o.object_type))}</small></span>${this.pill(o.status)}</button>`).join("");
-    return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("intUsedTitle")}</h2></div>${rows || `<div class="emptymsg">${this.t("intNoUsed")}</div>`}</section></div>`;
+    const rows = this.objectTable(`intused-${item.object_id}`, used.map(o => ({ key: this.objectKey(o), type: o.object_type, name: o.name || o.object_id, sub: o.object_id, tone: this.tone(o.status), state: o.status, stateLabel: this.statusLabel(o.status), pill: this.pill(o.status) })), { empty: this.t("intNoUsed") });
+    return `<div class="stack"><section class="panel"><div class="panelhead"><h2>${this.t("intUsedTitle")}</h2></div>${rows}</section></div>`;
   }
 
   intTechnicalCard(item) {
