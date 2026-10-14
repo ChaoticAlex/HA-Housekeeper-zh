@@ -66,7 +66,13 @@ class UnusedMixin {
     const successors = this.statSuccessors(orphan);
     if (!successors.length) return "";
     const links = successors.map(s => `<button class="linklike" data-object="entity:${this.esc(s.object_id)}">${this.esc(s.object_id)}</button>`).join(", ");
-    return `<small>${this.t("statSuccessors")} ${links}</small>`;
+    return `<small class="statsucc">${this.t("statSuccessors")} ${links}</small>`;
+  }
+
+  // The same as plain text, for the tooltip of the name while the rows are compact.
+  statSuccessorText(orphan) {
+    const successors = this.statSuccessors(orphan);
+    return successors.length ? `${this.t("statSuccessors")} ${successors.map(s => s.object_id).join(", ")}` : null;
   }
 
   // When the statistic last received a value: read on the first visit of the list, never during a scan.
@@ -133,7 +139,7 @@ class UnusedMixin {
     };
     const rowsCell = o => { const n = rowsOf(o); return typeof n === "number" ? this.formatNumber(n) : `<span class="muted">${this.t("loadingShort")}</span>`; };
     const columns = [
-      { key: "id", label: "utStatId", dir: "asc", headPrefix: () => this.purgeHeadBox(), cell: o => `<div class="statcell">${this.purgeBox(o)}<div>${this.nameCell(o.statistic_id, "")}${this.statSuccessorLine(o)}</div></div>` },
+      { key: "id", label: "utStatId", dir: "asc", headPrefix: () => this.purgeHeadBox(), cell: o => `<div class="statcell">${this.purgeBox(o)}<div>${this.nameCell(o.statistic_id, "", "div", this.statSuccessorText(o))}${this.statSuccessorLine(o)}</div></div>` },
       { key: "kind", label: "utKind", cell: o => this.esc(this.t(kind(o))) },
       { key: "unit", label: "utUnit", cell: o => this.esc(o.unit || "–") },
       { key: "first", label: "utFirst", dir: "asc", cell: firstCell },

@@ -266,9 +266,9 @@ class ListsMixin {
   }
 
   // Name over id for a table cell: both are cut at the column width and shown in full in the tooltip (see showTip).
-  nameCell(name, id, tag = "div") {
+  nameCell(name, id, tag = "div", tipSub = null) {
     const sub = id || "";
-    return `<${tag} class="namecell" data-tip="${this.esc(name)}" data-tip-sub="${this.esc(sub)}"><strong class="cut">${this.esc(name)}</strong>${sub ? `<span class="id cut">${this.esc(sub)}</span>` : ""}</${tag}>`;
+    return `<${tag} class="namecell" data-tip="${this.esc(name)}" data-tip-sub="${this.esc(tipSub ?? sub)}"><strong class="cut">${this.esc(name)}</strong>${sub ? `<span class="id cut">${this.esc(sub)}</span>` : ""}</${tag}>`;
   }
 
   // The id line of a list row: the id in mono under the name, extra facts in a line of their own below it.
