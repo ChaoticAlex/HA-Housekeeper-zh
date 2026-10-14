@@ -35,8 +35,18 @@ class DbHealthMixin {
   // What lies behind a finding: the periods all series lack, and the series with their own and their shared hours.
   dbFindingExtra(f) {
     if (f.kind !== "missing_hours" || !(f.gaps?.length || f.series?.length)) return "";
-    const gapRows = (f.gaps || []).map(g => `<div class="row rel"><span class="tile ${g.cause === "restart" ? "mute" : "warn"}"><ha-icon icon="${g.cause === "restart" ? "mdi:restart" : "mdi:database-clock-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(this.formatDate(new Date(g.start * 1000).toISOString()))} – ${this.esc(this.formatDate(new Date(g.end * 1000).toISOString()))}</strong><small>${this.t("dbMissingHours", { n: this.formatNumber(g.hours) })} · ${this.t(`dbGapCause_${g.cause}`)}</small></span></div>`);
-    const gapPage = this.paginate("dbgaps", gapRows), gaps = gapPage.rows.join("") + gapPage.footer;
+    const day = seconds => this.formatDate(new Date(seconds * 1000).toISOString());
+    const gaps = f.gaps?.length ? this.sysList("dbgaps", f.gaps, {
+      sort: "start", dir: "desc", tie: g => g.start, empty: "dbSeriesNone",
+      sorts: [{ key: "start", label: "dbColFrom", dir: "desc", get: g => g.start }, { key: "hours", label: "dbColHours", dir: "desc", get: g => g.hours ?? 0 }],
+      text: g => `${day(g.start)} ${day(g.end)} ${this.t(`dbGapCause_${g.cause}`)}`,
+      columns: [
+        { key: "start", label: "dbColFrom", dir: "desc", cell: g => this.esc(day(g.start)) },
+        { key: "end", label: "dbColTo", sortable: false, cell: g => this.esc(day(g.end)) },
+        { key: "hours", label: "dbColHours", dir: "desc", cell: g => this.esc(this.t("dbMissingHours", { n: this.formatNumber(g.hours) })) },
+        { key: "cause", label: "dbColCause", sortable: false, cell: g => `<span class="pill ${g.cause === "restart" ? "mute" : "warn"}">${this.t(`dbGapCause_${g.cause}`)}</span>` },
+      ],
+    }) : "";
     const shared = Boolean(f.gap_hours);
     const sorts = [
       { key: "name", label: "utName", dir: "asc", get: x => x.name || x.statistic_id },
@@ -56,7 +66,7 @@ class DbHealthMixin {
       ],
     });
     const more = f.series_total > f.series.length ? `<p class="factnote">${this.t("relUnstableMore", { shown: f.series.length, total: f.series_total })}</p>` : "";
-    return `<div class="dbextra">${f.gaps?.length ? `<div class="sectionlabel">${this.t("dbGapsTitle")}</div>${gaps}` : ""}<div class="sectionlabel">${this.t("dbSeriesTitle", { n: this.formatNumber(f.series_total) })}</div>${table}${more}</div>`;
+    return `<div class="dbextra">${gaps ? `<div class="sectionlabel">${this.t("dbGapsTitle")}</div>${gaps}` : ""}<div class="sectionlabel">${this.t("dbSeriesTitle", { n: this.formatNumber(f.series_total) })}</div>${table}${more}</div>`;
   }
 
   dbFindingRow(f) {

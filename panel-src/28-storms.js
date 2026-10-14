@@ -131,10 +131,50 @@ class StormsMixin {
     });
   }
 
-  // A bar needs a text next to it: the percentage stands in the row, the bar is decoration.
-  stormShareRow(item) {
-    const share = Math.max(0, Math.min(100, item.load_share));
-    return `<div class="row"><span class="tile mute"><ha-icon icon="mdi:lan"></ha-icon></span><span class="row-text"><strong>${this.esc(item.title)}</strong><small>${this.esc(item.domain || "")} · ${this.t("stormShareLine", { entities: this.formatNumber(item.entities), rows: this.formatNumber(item.per_day), rowShare: this.formatNumber(item.row_share) })}</small><span class="sharebar" aria-hidden="true"><i style="width:${share}%"></i></span>${item.entry_id ? `<span class="stormactions">${this.stormEntryButton(item.entry_id)}</span>` : ""}</span><span class="pill mute">${this.formatNumber(item.load_share)} %</span></div>`;
+  // The shares of the integrations as a table; a bar needs a text next to it, so the percentage stands in the cell.
+  stormSharesList(items) {
+    const bar = v => `<span class="sharebar" aria-hidden="true"><i style="width:${Math.max(0, Math.min(100, v))}%"></i></span>`;
+    return this.sysList("stormshares", items, {
+      sort: "load", dir: "desc",
+      sorts: [
+        { key: "load", label: "stormColLoad", dir: "desc", get: item => item.load_share ?? 0 },
+        { key: "rowShare", label: "stormColRowShare", dir: "desc", get: item => item.row_share ?? 0 },
+        { key: "perDay", label: "stormColPerDay", dir: "desc", get: item => item.per_day ?? 0 },
+        { key: "entities", label: "stormColEntities", dir: "desc", get: item => item.entities ?? 0 },
+        { key: "name", label: "utName", dir: "asc", get: item => item.title },
+      ],
+      text: item => [item.title, item.domain].join(" "), tie: item => item.title, empty: "stormNone",
+      rowAttrs: item => (item.entry_id && this.findObject(`config_entry:${item.entry_id}`) ? `data-object="${this.esc(`config_entry:${item.entry_id}`)}" tabindex="0" role="button" aria-label="${this.esc(item.title)}"` : 'class="static"'),
+      columns: [
+        { key: "name", label: "utName", dir: "asc", cell: item => this.nameCell(item.title, item.domain || "") },
+        { key: "entities", label: "stormColEntities", dir: "desc", cell: item => this.esc(this.formatNumber(item.entities)) },
+        { key: "perDay", label: "stormColPerDay", dir: "desc", cell: item => this.esc(this.formatNumber(item.per_day)) },
+        { key: "rowShare", label: "stormColRowShare", dir: "desc", cell: item => `${this.esc(this.formatNumber(item.row_share))} %` },
+        { key: "load", label: "stormColLoad", dir: "desc", cell: item => `${this.esc(this.formatNumber(item.load_share))} %${bar(item.load_share)}` },
+        { key: "act", label: "stormColAction", sortable: false, cell: item => (item.entry_id ? this.stormEntryButton(item.entry_id) : "") },
+      ],
+    });
+  }
+
+  // The events by type as a table: count, share with a bar, and the rate per day; state_changed is the normal bulk and never "far ahead".
+  stormEventsList(r) {
+    const top = Math.max(...r.events.map(e => e.count), 1), total = r.event_total || r.events.reduce((sum, e) => sum + e.count, 0) || 1, days = r.window_days || 1;
+    const pct = e => (e.count / total) * 100;
+    const ahead = e => r.events.length > 1 && pct(e) > 50 && e.type !== "state_changed";
+    return this.sysList("stormevents", r.events, {
+      sort: "count", dir: "desc",
+      sorts: [
+        { key: "count", label: "stormColCount", dir: "desc", get: e => e.count },
+        { key: "name", label: "stormColEvent", dir: "asc", get: e => e.type },
+      ],
+      text: e => `${e.type} ${this.t(`evt_${e.type}`)}`, tie: e => e.type, empty: "stormNone",
+      columns: [
+        { key: "name", label: "stormColEvent", dir: "asc", cell: e => { const key = `evt_${e.type}`, what = this.t(key); return `<strong class="mono">${this.esc(e.type)}</strong>${ahead(e) ? ` <span class="pill warn">${this.t("evAhead")}</span>` : ""}${what !== key ? `<small class="exwhy">${this.esc(what)}</small>` : ""}`; } },
+        { key: "count", label: "stormColCount", dir: "desc", cell: e => `<strong>${this.esc(this.formatNumber(e.count))}</strong><span class="bar evbar"><i style="width:${Math.max(1, Math.round((e.count / top) * 100))}%"></i></span>` },
+        { key: "share", label: "stormColShare", sortable: false, cell: e => this.esc(pct(e) < 1 ? this.t("evLessThanOne") : `${Math.round(pct(e))} %`) },
+        { key: "perDay", label: "stormColPerDay", sortable: false, cell: e => this.esc(this.formatNumber(Math.round(e.count / days))) },
+      ],
+    });
   }
 
   // Operation > Recorder: what writes the most, what fills the database, and how healthy it is.
@@ -200,16 +240,8 @@ class StormsMixin {
     const shownEntities = this.exOnlySug ? ofEntry.filter(item => this.excludeInfo(item.entity_id, item.per_day, item.excluded).suggest) : ofEntry;
     const entryBar = entry ? `<div class="toolbar exbar"><span class="date">${this.t("stormOnlyEntry", { title: this.esc(entry.title), shown: this.formatNumber(ofEntry.length), total: this.formatNumber(entry.entities) })}</span><button class="btn quiet" data-storm-entry-clear>${this.t("stormEntryClear")}</button></div>` : "";
     const table = r.entities.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormLoudest")}</h2><p>${this.t("stormLoudestHint")}</p></div></div>${this.excludeCard(r.entities.filter(item => this.excludeInfo(item.entity_id, item.per_day, item.excluded).suggest).map(item => item.entity_id))}${entryBar}${this.stormEntitiesList(shownEntities)}</div>` : "";
-    const foundShares = this.searchList("stormshares", r.integrations, item => [item.title, item.domain].join(" "));
-    const shares = r.integrations.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormShares")}</h2><p>${this.t("stormSharesHint")}</p></div></div>${foundShares.bar}${foundShares.none}${foundShares.rows.map(item => this.stormShareRow(item)).join("")}</div>` : "";
-    const topEvent = Math.max(...r.events.map(e => e.count), 1), eventTotal = r.event_total || r.events.reduce((sum, e) => sum + e.count, 0) || 1, eventDays = r.window_days || 1;
-    // state_changed is the normal bulk of the events, so it is never "far ahead".
-    const eventRow = e => {
-      const pct = (e.count / eventTotal) * 100, ahead = r.events.length > 1 && pct > 50 && e.type !== "state_changed", key = `evt_${e.type}`, what = this.t(key);
-      const share = pct < 1 ? this.t("evLessThanOne") : `${Math.round(pct)} %`;
-      return `<div class="row evrow"><span class="tile ${ahead ? "warn" : "mute"}"><ha-icon icon="mdi:flash-outline"></ha-icon></span><span class="row-text"><strong class="mono">${this.esc(e.type)}</strong>${ahead ? ` <span class="pill warn">${this.t("evAhead")}</span>` : ""}${what !== key ? `<small class="exwhy">${this.esc(what)}</small>` : ""}<span class="bar" style="margin-top:6px"><i style="width:${Math.max(1, Math.round((e.count / topEvent) * 100))}%"></i></span></span><span class="evnum"><strong>${this.formatNumber(e.count)}</strong><small>${this.t("evShare", { share, perDay: this.formatNumber(Math.round(e.count / eventDays)) })}</small></span></div>`;
-    };
-    const events = r.events.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormEvents")}</h2><p>${this.t("stormEventsHint")}</p></div></div>${r.events.map(eventRow).join("")}<details class="howto"><summary>${this.t("evWhenTitle")}</summary><p class="factnote">${this.t("evWhen")}</p></details><p class="factnote">${this.t("evFoot")}</p>${this.howCounted("stormFootnote")}</div>` : "";
+    const shares = r.integrations.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormShares")}</h2><p>${this.t("stormSharesHint")}</p></div></div>${this.stormSharesList(r.integrations)}</div>` : "";
+    const events = r.events.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormEvents")}</h2><p>${this.t("stormEventsHint")}</p></div></div>${this.stormEventsList(r)}<details class="howto"><summary>${this.t("evWhenTitle")}</summary><p class="factnote">${this.t("evWhen")}</p></details><p class="factnote">${this.t("evFoot")}</p>${this.howCounted("stormFootnote")}</div>` : "";
     const ex = r.excluded || {};
     const chips = [["ignored", "exclIgnored", "mdi:eye-off-outline"], ["disabled", "exclDisabled", "mdi:power-plug-off-outline"], ["permanent", "exclPermanent", "mdi:link-off"]].filter(([k]) => ex[k]).map(([k, key, icon]) => `<span class="exchip"><ha-icon icon="${icon}"></ha-icon>${this.esc(this.t(key, { n: this.formatNumber(ex[k]) }))}</span>`).join("");
     const left = chips ? `<div class="exchips">${chips}${this.infoTip(this.t("stormExclTip"))}</div>` : "";

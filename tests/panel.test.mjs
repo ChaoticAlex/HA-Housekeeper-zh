@@ -1268,6 +1268,10 @@ test("the recorder load header shows rows, entities and events as figures and na
   assert.ok(html.includes("2 hidden") && html.includes("1 down all the time") && !html.includes("0 disabled"));
   el.storms = { ...STORMS, excluded: {} };
   assert.ok(el.stormsView().includes("in the last 24 hours") && !el.stormsView().includes('class="exchips"'));
+  el.viewTab = { recload: "shares" };
+  assert.ok(el.stormsView().includes('data-lsort="stormshares|load|desc"') && el.stormsView().includes("41.5 %"), "the integration shares are a table with the load share");
+  el.viewTab = { recload: "events" };
+  assert.ok(el.stormsView().includes('data-lsort="stormevents|count|desc"') && el.stormsView().includes("state_changed"), "the events are a table with count and share");
 });
 
 test("a dry-run plan is confirmed, typed, executed with progress, and can be undone", async () => {
@@ -3151,6 +3155,7 @@ test("missing statistics hours say what all series lack, name the periods and li
   assert.ok(text.includes("20 hours are missing from all series at once") && text.includes("single sensors have gaps of their own"));
   const extra = el.dbFindingExtra(f);
   assert.ok(extra.includes("The recorder was not running") && extra.includes("B &lt;i&gt;") && !extra.includes("<i>"));
+  assert.ok(extra.includes('data-lsort="dbgaps|start|desc"'), "the gaps are a table");
   assert.ok(el.dbFindingExtra({ kind: "growth" }) === "");
 });
 

@@ -680,7 +680,7 @@ Object.assign(TEXT.de, {
   recorderTitle: "Recorder-Kosten", 
   recorderLoad: "Analyse starten", recorderReload: "Neu berechnen", recorderLoading: "Datenbank wird ausgewertet …", recorderUnavailable: "Der Recorder läuft nicht, daher gibt es nichts auszuwerten.",
   recorderSummary: "{states} gespeicherte Zustände · {size} · Aufbewahrung {days} Tage · {stats} Statistikwerte", recorderSizeUnknown: "Größe unbekannt", recorderPerDay: "{count} pro Tag", recorderTook: "berechnet in {ms} ms", recorderCached: "Ergebnis von vor wenigen Minuten ({ms} ms)", recorderShare: "{share} % aller Zustände",
-  recorderColShare: "Anteil", recorderColTotal: "Gesamt", recorderCol24h: "24 h", recorderCol7d: "7 Tage", recorderColAvg: "Ø pro Tag", recorderColMark: "Markierung", recorderSumAll: "Alle", recorderSumSuggest: "Vorschläge", recorderSumExcluded: "Ausgeschlossen", recorderSumUnused: "Nicht verwendet", recorderFilterAll: "Alle Einträge", recorderNone: "Keine Einträge.",
+  recorderColStat: "Statistik", recorderColRows: "Zeilen", recorderColShare: "Anteil", recorderColTotal: "Gesamt", recorderCol24h: "24 h", recorderCol7d: "7 Tage", recorderColAvg: "Ø pro Tag", recorderColMark: "Markierung", recorderSumAll: "Alle", recorderSumSuggest: "Vorschläge", recorderSumExcluded: "Ausgeschlossen", recorderSumUnused: "Nicht verwendet", recorderFilterAll: "Alle Einträge", recorderNone: "Keine Einträge.",
   recorderUsed: "{count} Verwendungen", recorderUnused: "nicht verwendet", recorderExcluded: "bereits ausgeschlossen", recorderSuggest: "Empfohlen", recorderStats: "Statistikwerte nach Entität",
   recorderSnippetTitle: "Vorschlag für die configuration.yaml", recorderSnippetHint: "Entitäten, die nichts verwendet, keine Statistik haben und sehr oft schreiben. Prüfe die Liste, bevor du sie übernimmst.", recorderCopy: "Kopieren", recorderCopied: "Kopiert",
   preflightTitle: "Update-Preflight", 
@@ -720,7 +720,7 @@ Object.assign(TEXT.en, {
   recorderTitle: "Recorder costs", 
   recorderLoad: "Start analysis", recorderReload: "Recalculate", recorderLoading: "Evaluating the database …", recorderUnavailable: "The recorder is not running, so there is nothing to evaluate.",
   recorderSummary: "{states} stored states · {size} · kept {days} days · {stats} statistics values", recorderSizeUnknown: "size unknown", recorderPerDay: "{count} per day", recorderTook: "calculated in {ms} ms", recorderCached: "result from a few minutes ago ({ms} ms)", recorderShare: "{share} % of all states",
-  recorderColShare: "Share", recorderColTotal: "Total", recorderCol24h: "24 h", recorderCol7d: "7 days", recorderColAvg: "Avg per day", recorderColMark: "Mark", recorderSumAll: "All", recorderSumSuggest: "Suggestions", recorderSumExcluded: "Excluded", recorderSumUnused: "Not used", recorderFilterAll: "All entries", recorderNone: "No entries.",
+  recorderColStat: "Statistic", recorderColRows: "Rows", recorderColShare: "Share", recorderColTotal: "Total", recorderCol24h: "24 h", recorderCol7d: "7 days", recorderColAvg: "Avg per day", recorderColMark: "Mark", recorderSumAll: "All", recorderSumSuggest: "Suggestions", recorderSumExcluded: "Excluded", recorderSumUnused: "Not used", recorderFilterAll: "All entries", recorderNone: "No entries.",
   recorderUsed: "{count} uses", recorderUnused: "not used", recorderExcluded: "already excluded", recorderSuggest: "Recommended", recorderStats: "Statistics values by entity",
   recorderSnippetTitle: "Suggestion for configuration.yaml", recorderSnippetHint: "Entities that nothing uses, that have no statistics and that write very often. Review the list before you adopt it.", recorderCopy: "Copy", recorderCopied: "Copied",
   preflightTitle: "Update preflight", 
@@ -1098,8 +1098,8 @@ Object.assign(TEXT.de, {
   stormEvent: "{count} Ereignisse vom Typ {type} im Zeitraum.", stormFollowers: "Daran hängen: {list}.",
   stormRows: "{rows} Zeilen ({perDay} pro Tag)", stormNoNewShort: "{share} % ohne neuen Zustand", stormAttr: "Attribute im Mittel {kb} KB", stormPeak: "lauteste Stunde {n} Zeilen", stormPerDay: "pro Tag",
   stormLoudest: "Lauteste Entitäten", stormLoudestHint: "Nach geschriebenen Zeilen. Klick öffnet die Detailseite.",
+  stormColEntities: "Entitäten", stormColRowShare: "Anteil Zeilen", stormColLoad: "Anteil Last", stormColEvent: "Ereignis", stormColCount: "Anzahl", stormColShare: "Anteil",
   stormShares: "Anteile der Integrationen", stormSharesHint: "Geschätzter Anteil an der Last, gewichtet mit der Größe der Zeilen. Die Prozentwerte sind eine Hochrechnung, keine Messung in Byte.",
-  stormShareLine: "{entities} Entitäten, {rows} Zeilen pro Tag, {rowShare} % der Zeilen",
   stormEvents: "Ereignisse nach Typ", stormEventsHint: "Meldungen, die Home Assistant intern verschickt und der Recorder mitschreibt. Gezeigt werden die häufigsten im Zeitraum.", evAhead: "weit vorn", evShare: "{share} · {perDay} pro Tag", evLessThanOne: "< 1 %",
   evWhenTitle: "Wann ist ein Typ auffällig?", evWhen: "Steht ein Typ weit vor allen anderen (mehr als die Hälfte aller Ereignisse), lohnt ein Blick auf die Quelle. Bei call_service sind das oft Automationen oder Dashboards, die sehr oft schalten, bei automation_triggered eine Automation mit sehr kurzem Auslöser. Housekeeper ändert dafür nichts, die Liste ist nur zur Ansicht.", evFoot: "Ereignisse lassen sich hier nicht ausschließen. Ein Ausschluss wirkt für Entitäten unter „Lauteste Entitäten“.",
   evt_call_service: "Ein Dienst wurde aufgerufen, zum Beispiel „Licht einschalten“.", evt_automation_triggered: "Eine Automation hat ausgelöst.", evt_script_started: "Ein Skript wurde gestartet.", evt_state_changed: "Eine Entität hat Zustand oder Attribute geändert.",
@@ -1125,8 +1125,8 @@ Object.assign(TEXT.en, {
   stormEvent: "{count} events of type {type} in the period.", stormFollowers: "Depending on it: {list}.",
   stormRows: "{rows} rows ({perDay} a day)", stormNoNewShort: "{share} % without a new state", stormAttr: "attributes {kb} KB on average", stormPeak: "busiest hour {n} rows", stormPerDay: "a day",
   stormLoudest: "Loudest entities", stormLoudestHint: "By rows written. A click opens the detail page.",
+  stormColEntities: "Entities", stormColRowShare: "Row share", stormColLoad: "Load share", stormColEvent: "Event", stormColCount: "Count", stormColShare: "Share",
   stormShares: "Integration shares", stormSharesHint: "Estimated share of the load, weighted by the size of the rows. The percentages are an extrapolation, not a measurement in bytes.",
-  stormShareLine: "{entities} entities, {rows} rows a day, {rowShare} % of the rows",
   stormEvents: "Events by type", stormEventsHint: "Messages Home Assistant sends internally and the recorder writes along. The most frequent ones in the period are shown.", evAhead: "far ahead", evShare: "{share} · {perDay} a day", evLessThanOne: "< 1 %",
   evWhenTitle: "When is a type striking?", evWhen: "If one type is far ahead of all others (more than half of all events), take a look at its source. For call_service this is often automations or dashboards that switch very often, for automation_triggered an automation with a very short trigger. Housekeeper changes nothing for this, the list is for viewing only.", evFoot: "Events cannot be excluded here. An exclusion works for entities under “Loudest entities”.",
   evt_call_service: "A service was called, for example “turn on the light”.", evt_automation_triggered: "An automation triggered.", evt_script_started: "A script was started.", evt_state_changed: "An entity changed its state or attributes.",
@@ -1154,6 +1154,7 @@ Object.assign(TEXT.de, {
   dbAdvice_recorder_gap: "Prüfe das Protokoll auf Recorder-Fehler (Datenbank gesperrt, Platte voll) und sichere die Datenbank.",
   dbFootnote: "Gemessen wird nur lesend. Die Größe der Datenbank wird jeden Tag notiert (nur die Zahl), daraus entsteht das Wachstum. Eine Lücke ist ein Zeitraum von mindestens {gap} Minuten ohne einen einzigen Eintrag in den Zuständen der letzten {gapDays} Tage; endet sie, wo Home Assistant nach seinem eigenen Protokoll stand, gilt sie als Neustart. Fehlende Stunden zählen ab {missing} in den letzten {missingDays} Tagen. Housekeeper repariert nichts und löscht nichts.",
   todoDbProblem: "Datenbank: Problem",
+  dbColFrom: "Von", dbColTo: "Bis", dbColHours: "Dauer", dbColCause: "Ursache",
   stormTabFindings: "Auffälligkeiten", stormTabEntities: "Lauteste Entitäten", stormTabIntegrations: "Integrationen", stormTabEvents: "Ereignisse", dbMissingShared: "{n} Reihen haben Lücken im Stundenverlauf. Bei allen Reihen zugleich fehlen {hours} Stunden in {count} Zeiträumen; dort wurde keine Statistik berechnet.", dbMissingOwn: "Dazu kommen eigene Lücken einzelner Sensoren (Liste unten).", dbMissingOnlyShared: "Alle Lücken fallen in diese gemeinsamen Zeiträume.", dbMissingOwnOnly: "{n} Sensoren haben Lücken im Stundenverlauf, alle bei den Sensoren selbst. Es gibt keine gemeinsamen Ausfälle.", dbSeriesNone: "Keine Sensoren mit Lücken.", dbGapCause_restart: "Home Assistant stand (Neustart)", dbGapCause_recorder: "Recorder lief nicht oder die Statistik wurde nicht berechnet", dbDetails: "Details: {gaps} gemeinsame Zeiträume, {series} Reihen", dbGapsTitle: "Gemeinsame Lücken (bei allen Reihen)", dbSeriesTitle: "Sensoren mit den meisten Lücken ({n})", dbColSeries: "Sensor", dbColOwn: "Eigene", dbColShared: "Gemeinsame", dbColMissing: "Gesamt",
 });
 Object.assign(TEXT.en, {
@@ -1174,6 +1175,7 @@ Object.assign(TEXT.en, {
   dbAdvice_recorder_gap: "Check the log for recorder errors (database locked, disk full) and back up the database.",
   dbFootnote: "Only reads. The size of the database is noted once a day (just the number); the growth comes from that. A gap is a stretch of at least {gap} minutes without a single entry in the states of the last {gapDays} days; if it ends where Home Assistant was down according to its own log, it counts as a restart. Missing hours count from {missing} in the last {missingDays} days. Housekeeper repairs nothing and deletes nothing.",
   todoDbProblem: "Database: problem",
+  dbColFrom: "From", dbColTo: "To", dbColHours: "Length", dbColCause: "Cause",
   stormTabFindings: "Findings", stormTabEntities: "Loudest entities", stormTabIntegrations: "Integrations", stormTabEvents: "Events", dbMissingShared: "{n} series have gaps in their hourly record. {hours} hours are missing from all series at once, in {count} periods; no statistics were compiled then.", dbMissingOwn: "On top of that, single sensors have gaps of their own (list below).", dbMissingOnlyShared: "All gaps fall into these shared periods.", dbMissingOwnOnly: "{n} sensors have gaps in their hourly record, all in the sensors themselves. There are no shared outages.", dbSeriesNone: "No sensors with gaps.", dbGapCause_restart: "Home Assistant was down (restart)", dbGapCause_recorder: "The recorder was not running or the statistics were not compiled", dbDetails: "Details: {gaps} shared periods, {series} series", dbGapsTitle: "Shared gaps (all series)", dbSeriesTitle: "Sensors with the most gaps ({n})", dbColSeries: "Sensor", dbColOwn: "Own", dbColShared: "Shared", dbColMissing: "Total",
 });
 
@@ -1431,7 +1433,7 @@ class StylesMixin {
       .deform{display:grid;grid-template-columns:6rem minmax(0,1fr) 13rem;gap:6px 14px;align-items:center}.deform+.deform{margin-top:18px;padding-top:18px;border-top:1px solid var(--hk-border)}.deform .factnote{grid-column:2/-1;margin:0;padding:0;border:0}.deform select,.deform .deid{min-height:40px;box-sizing:border-box;width:100%;min-width:0;padding:0 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit;font:inherit}.deform .deid{display:flex;align-items:center;gap:2px}.deform .deid .mono{color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1))}.deform .deid input{flex:1;min-width:0;padding:0;border:0;outline:0;background:transparent;color:inherit;font:inherit}.deform .deid:focus-within{border-color:var(--hk-blue)}.deform label{display:grid;gap:2px}.deform .denow{color:var(--hk-muted);font-weight:400}.deform .denow.none{opacity:.8;font-style:italic}.deform .btn{min-height:40px;box-sizing:border-box;justify-content:center;width:100%}.deform .btn:disabled{background:var(--hk-soft);border-color:var(--hk-border);color:var(--hk-muted);box-shadow:none;opacity:1}@media(max-width:600px){.deform{grid-template-columns:1fr}.deform .factnote{grid-column:1}}
       .chartaxes{display:grid;width:100%;grid-template-columns:auto minmax(0,1fr);gap:2px 8px;max-width:420px;margin:6px 0;align-items:stretch}.chartaxes .rangechart{margin:0!important;max-width:none!important}.chartY{display:flex;flex-direction:column;justify-content:space-between;text-align:right;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));white-space:nowrap}.chartX{grid-column:2;display:flex;justify-content:space-between;gap:8px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}
       .stormactions{display:flex;gap:8px;flex-wrap:wrap}.stormlegend{display:grid;gap:8px;padding:8px 0}.stormlegend>div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:baseline;font-size:calc(13px*var(--hk-fs,1))}.pill.blue{color:var(--hk-blue-text);background:color-mix(in srgb,var(--hk-blue) 14%,transparent)}@media(max-width:600px){.stormlegend>div{grid-template-columns:1fr}}
-      .evrow .bar{max-width:420px}.evnum{text-align:right;white-space:nowrap}.evnum strong{display:block}.evnum small{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}
+      .evbar{max-width:240px;margin-top:4px}
       .trimbox{display:grid;gap:14px}.trimhead{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}.trimhead .factnote,.trimfoot .factnote{padding:0;border:0;margin:4px 0 0}.trimsentence{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.trimseg{display:inline-flex;border:1px solid var(--hk-border);border-radius:10px;overflow:hidden;background:var(--hk-surface)}.trimseg button{font:inherit;font-weight:600;padding:8px 16px;border:0;border-left:1px solid var(--hk-border);background:none;color:var(--hk-muted);cursor:pointer}.trimseg button:first-child{border-left:0}.trimseg button.on{background:var(--hk-blue-solid);color:var(--hk-on,#fff)}.trimline{display:grid;grid-template-columns:2fr 1fr;border:1px solid var(--hk-border);border-radius:10px;overflow:hidden}.trimline>div{padding:10px 14px}.trimline strong,.trimfacts strong{display:block}.trimline small,.trimfacts small{color:var(--hk-muted)}.trimline .gone{background:color-mix(in srgb,var(--hk-red) 11%,transparent)}.trimline .stay{background:color-mix(in srgb,var(--hk-green) 12%,transparent);border-left:2px solid var(--hk-surface)}.trimaxis{display:flex;justify-content:space-between;margin-top:4px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.trimfacts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}.trimfacts>div{padding:10px 12px;border-radius:10px;background:var(--hk-soft);border:1px solid var(--hk-border)}.trimfoot{display:flex;gap:16px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:12px 14px;border-radius:10px;background:var(--hk-soft)}.trimfoot .factnote{max-width:520px;margin:0}
       .btn.quiet.on{background:var(--hk-soft);border-color:var(--hk-blue)}.extags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;align-items:center;flex:0 0 15rem}.rowwrap .bar{max-width:420px}.rowwrap.exsug{box-shadow:inset 3px 0 0 var(--hk-amber)}tr.exsug{box-shadow:none}tr.exsug td:first-child{box-shadow:inset 3px 0 0 var(--hk-amber)}.costshare{display:flex;align-items:center;gap:8px}.costshare .sysshare{flex:1;min-width:40px}.costshare>span:last-child{min-width:44px;text-align:right}@media(max-width:600px){.costshare .sysshare{display:none}}.exwhy{display:block;margin-top:2px;color:var(--hk-muted)}.exrule{padding:6px 16px 10px;border:0}@media(max-width:860px){.extags{flex:1 1 100%;justify-content:flex-start}}
       .labelbox{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(160px,220px) auto;gap:12px 14px;align-items:center;margin-top:12px;padding:14px 16px;border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-soft)}.labelbox .labeltext strong{display:block;font-weight:600}.labelbox .labeltext small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.labelbox select{min-height:40px;box-sizing:border-box}@media(max-width:860px){.labelbox{grid-template-columns:auto minmax(0,1fr)}.labelbox select,.labelbox .btn{grid-column:1/-1}}
@@ -5295,10 +5297,18 @@ class MaintenanceMixin {
       { label: this.t("recorderSumExcluded"), value: this.formatNumber(all.filter(e => e.excluded).length), tone: "mute", lf: ["costlist", "state", "excluded"] },
       { label: this.t("recorderSumUnused"), value: this.formatNumber(all.filter(e => !e.used).length), tone: "mute", lf: ["costlist", "state", "unused"] },
     ]) : "";
-    const statPage = this.paginate("recorder_stats", c.statistics || []);
-    const statRows = statPage.rows.map(s => `<div class="row rel"><span class="tile mute"><ha-icon icon="mdi:chart-line"></ha-icon></span><span class="row-text"><strong>${this.esc(s.statistic_id)}</strong><small>${this.formatNumber(s.rows)}</small></span></div>`).join("") + statPage.footer;
+    const stats = (c.statistics || []).length ? this.sysList("recorder_stats", c.statistics, {
+      sort: "rows", dir: "desc", tie: x => x.statistic_id, empty: "recorderNone",
+      sorts: [{ key: "rows", label: "recorderColRows", dir: "desc", get: x => x.rows ?? 0 }, { key: "id", label: "recorderColStat", dir: "asc", get: x => x.statistic_id }],
+      text: x => x.statistic_id,
+      rowAttrs: x => (this.findObject(`entity:${x.statistic_id}`) ? `data-object="${this.esc(`entity:${x.statistic_id}`)}" tabindex="0" role="button" aria-label="${this.esc(x.statistic_id)}"` : 'class="static"'),
+      columns: [
+        { key: "id", label: "recorderColStat", dir: "asc", cell: x => this.nameCell(x.statistic_id, "") },
+        { key: "rows", label: "recorderColRows", dir: "desc", cell: x => this.esc(this.formatNumber(x.rows)) },
+      ],
+    }) : "";
     const snippet = this.excludeCard(this.suggestedExclusions(), { only: false });
-    return `<div class="stack">${head("", "data-costs-load data-refresh")}${tiles}<p class="factnote">${this.esc(summary)}</p>${snippet}${list}${statRows ? this.fold("recorder_stats", { title: this.t("recorderStats"), pill: this.formatNumber((c.statistics || []).length) }, statRows, false) : ""}</div></div>`;
+    return `<div class="stack">${head("", "data-costs-load data-refresh")}${tiles}<p class="factnote">${this.esc(summary)}</p>${snippet}${list}${stats ? this.fold("recorder_stats", { title: this.t("recorderStats"), pill: this.formatNumber((c.statistics || []).length) }, stats, false) : ""}</div></div>`;
   }
 
   // One line per check; `level` decides the colour.
@@ -6082,10 +6092,50 @@ class StormsMixin {
     });
   }
 
-  // A bar needs a text next to it: the percentage stands in the row, the bar is decoration.
-  stormShareRow(item) {
-    const share = Math.max(0, Math.min(100, item.load_share));
-    return `<div class="row"><span class="tile mute"><ha-icon icon="mdi:lan"></ha-icon></span><span class="row-text"><strong>${this.esc(item.title)}</strong><small>${this.esc(item.domain || "")} · ${this.t("stormShareLine", { entities: this.formatNumber(item.entities), rows: this.formatNumber(item.per_day), rowShare: this.formatNumber(item.row_share) })}</small><span class="sharebar" aria-hidden="true"><i style="width:${share}%"></i></span>${item.entry_id ? `<span class="stormactions">${this.stormEntryButton(item.entry_id)}</span>` : ""}</span><span class="pill mute">${this.formatNumber(item.load_share)} %</span></div>`;
+  // The shares of the integrations as a table; a bar needs a text next to it, so the percentage stands in the cell.
+  stormSharesList(items) {
+    const bar = v => `<span class="sharebar" aria-hidden="true"><i style="width:${Math.max(0, Math.min(100, v))}%"></i></span>`;
+    return this.sysList("stormshares", items, {
+      sort: "load", dir: "desc",
+      sorts: [
+        { key: "load", label: "stormColLoad", dir: "desc", get: item => item.load_share ?? 0 },
+        { key: "rowShare", label: "stormColRowShare", dir: "desc", get: item => item.row_share ?? 0 },
+        { key: "perDay", label: "stormColPerDay", dir: "desc", get: item => item.per_day ?? 0 },
+        { key: "entities", label: "stormColEntities", dir: "desc", get: item => item.entities ?? 0 },
+        { key: "name", label: "utName", dir: "asc", get: item => item.title },
+      ],
+      text: item => [item.title, item.domain].join(" "), tie: item => item.title, empty: "stormNone",
+      rowAttrs: item => (item.entry_id && this.findObject(`config_entry:${item.entry_id}`) ? `data-object="${this.esc(`config_entry:${item.entry_id}`)}" tabindex="0" role="button" aria-label="${this.esc(item.title)}"` : 'class="static"'),
+      columns: [
+        { key: "name", label: "utName", dir: "asc", cell: item => this.nameCell(item.title, item.domain || "") },
+        { key: "entities", label: "stormColEntities", dir: "desc", cell: item => this.esc(this.formatNumber(item.entities)) },
+        { key: "perDay", label: "stormColPerDay", dir: "desc", cell: item => this.esc(this.formatNumber(item.per_day)) },
+        { key: "rowShare", label: "stormColRowShare", dir: "desc", cell: item => `${this.esc(this.formatNumber(item.row_share))} %` },
+        { key: "load", label: "stormColLoad", dir: "desc", cell: item => `${this.esc(this.formatNumber(item.load_share))} %${bar(item.load_share)}` },
+        { key: "act", label: "stormColAction", sortable: false, cell: item => (item.entry_id ? this.stormEntryButton(item.entry_id) : "") },
+      ],
+    });
+  }
+
+  // The events by type as a table: count, share with a bar, and the rate per day; state_changed is the normal bulk and never "far ahead".
+  stormEventsList(r) {
+    const top = Math.max(...r.events.map(e => e.count), 1), total = r.event_total || r.events.reduce((sum, e) => sum + e.count, 0) || 1, days = r.window_days || 1;
+    const pct = e => (e.count / total) * 100;
+    const ahead = e => r.events.length > 1 && pct(e) > 50 && e.type !== "state_changed";
+    return this.sysList("stormevents", r.events, {
+      sort: "count", dir: "desc",
+      sorts: [
+        { key: "count", label: "stormColCount", dir: "desc", get: e => e.count },
+        { key: "name", label: "stormColEvent", dir: "asc", get: e => e.type },
+      ],
+      text: e => `${e.type} ${this.t(`evt_${e.type}`)}`, tie: e => e.type, empty: "stormNone",
+      columns: [
+        { key: "name", label: "stormColEvent", dir: "asc", cell: e => { const key = `evt_${e.type}`, what = this.t(key); return `<strong class="mono">${this.esc(e.type)}</strong>${ahead(e) ? ` <span class="pill warn">${this.t("evAhead")}</span>` : ""}${what !== key ? `<small class="exwhy">${this.esc(what)}</small>` : ""}`; } },
+        { key: "count", label: "stormColCount", dir: "desc", cell: e => `<strong>${this.esc(this.formatNumber(e.count))}</strong><span class="bar evbar"><i style="width:${Math.max(1, Math.round((e.count / top) * 100))}%"></i></span>` },
+        { key: "share", label: "stormColShare", sortable: false, cell: e => this.esc(pct(e) < 1 ? this.t("evLessThanOne") : `${Math.round(pct(e))} %`) },
+        { key: "perDay", label: "stormColPerDay", sortable: false, cell: e => this.esc(this.formatNumber(Math.round(e.count / days))) },
+      ],
+    });
   }
 
   // Operation > Recorder: what writes the most, what fills the database, and how healthy it is.
@@ -6151,16 +6201,8 @@ class StormsMixin {
     const shownEntities = this.exOnlySug ? ofEntry.filter(item => this.excludeInfo(item.entity_id, item.per_day, item.excluded).suggest) : ofEntry;
     const entryBar = entry ? `<div class="toolbar exbar"><span class="date">${this.t("stormOnlyEntry", { title: this.esc(entry.title), shown: this.formatNumber(ofEntry.length), total: this.formatNumber(entry.entities) })}</span><button class="btn quiet" data-storm-entry-clear>${this.t("stormEntryClear")}</button></div>` : "";
     const table = r.entities.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormLoudest")}</h2><p>${this.t("stormLoudestHint")}</p></div></div>${this.excludeCard(r.entities.filter(item => this.excludeInfo(item.entity_id, item.per_day, item.excluded).suggest).map(item => item.entity_id))}${entryBar}${this.stormEntitiesList(shownEntities)}</div>` : "";
-    const foundShares = this.searchList("stormshares", r.integrations, item => [item.title, item.domain].join(" "));
-    const shares = r.integrations.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormShares")}</h2><p>${this.t("stormSharesHint")}</p></div></div>${foundShares.bar}${foundShares.none}${foundShares.rows.map(item => this.stormShareRow(item)).join("")}</div>` : "";
-    const topEvent = Math.max(...r.events.map(e => e.count), 1), eventTotal = r.event_total || r.events.reduce((sum, e) => sum + e.count, 0) || 1, eventDays = r.window_days || 1;
-    // state_changed is the normal bulk of the events, so it is never "far ahead".
-    const eventRow = e => {
-      const pct = (e.count / eventTotal) * 100, ahead = r.events.length > 1 && pct > 50 && e.type !== "state_changed", key = `evt_${e.type}`, what = this.t(key);
-      const share = pct < 1 ? this.t("evLessThanOne") : `${Math.round(pct)} %`;
-      return `<div class="row evrow"><span class="tile ${ahead ? "warn" : "mute"}"><ha-icon icon="mdi:flash-outline"></ha-icon></span><span class="row-text"><strong class="mono">${this.esc(e.type)}</strong>${ahead ? ` <span class="pill warn">${this.t("evAhead")}</span>` : ""}${what !== key ? `<small class="exwhy">${this.esc(what)}</small>` : ""}<span class="bar" style="margin-top:6px"><i style="width:${Math.max(1, Math.round((e.count / topEvent) * 100))}%"></i></span></span><span class="evnum"><strong>${this.formatNumber(e.count)}</strong><small>${this.t("evShare", { share, perDay: this.formatNumber(Math.round(e.count / eventDays)) })}</small></span></div>`;
-    };
-    const events = r.events.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormEvents")}</h2><p>${this.t("stormEventsHint")}</p></div></div>${r.events.map(eventRow).join("")}<details class="howto"><summary>${this.t("evWhenTitle")}</summary><p class="factnote">${this.t("evWhen")}</p></details><p class="factnote">${this.t("evFoot")}</p>${this.howCounted("stormFootnote")}</div>` : "";
+    const shares = r.integrations.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormShares")}</h2><p>${this.t("stormSharesHint")}</p></div></div>${this.stormSharesList(r.integrations)}</div>` : "";
+    const events = r.events.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormEvents")}</h2><p>${this.t("stormEventsHint")}</p></div></div>${this.stormEventsList(r)}<details class="howto"><summary>${this.t("evWhenTitle")}</summary><p class="factnote">${this.t("evWhen")}</p></details><p class="factnote">${this.t("evFoot")}</p>${this.howCounted("stormFootnote")}</div>` : "";
     const ex = r.excluded || {};
     const chips = [["ignored", "exclIgnored", "mdi:eye-off-outline"], ["disabled", "exclDisabled", "mdi:power-plug-off-outline"], ["permanent", "exclPermanent", "mdi:link-off"]].filter(([k]) => ex[k]).map(([k, key, icon]) => `<span class="exchip"><ha-icon icon="${icon}"></ha-icon>${this.esc(this.t(key, { n: this.formatNumber(ex[k]) }))}</span>`).join("");
     const left = chips ? `<div class="exchips">${chips}${this.infoTip(this.t("stormExclTip"))}</div>` : "";
@@ -6215,8 +6257,18 @@ class DbHealthMixin {
   // What lies behind a finding: the periods all series lack, and the series with their own and their shared hours.
   dbFindingExtra(f) {
     if (f.kind !== "missing_hours" || !(f.gaps?.length || f.series?.length)) return "";
-    const gapRows = (f.gaps || []).map(g => `<div class="row rel"><span class="tile ${g.cause === "restart" ? "mute" : "warn"}"><ha-icon icon="${g.cause === "restart" ? "mdi:restart" : "mdi:database-clock-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(this.formatDate(new Date(g.start * 1000).toISOString()))} – ${this.esc(this.formatDate(new Date(g.end * 1000).toISOString()))}</strong><small>${this.t("dbMissingHours", { n: this.formatNumber(g.hours) })} · ${this.t(`dbGapCause_${g.cause}`)}</small></span></div>`);
-    const gapPage = this.paginate("dbgaps", gapRows), gaps = gapPage.rows.join("") + gapPage.footer;
+    const day = seconds => this.formatDate(new Date(seconds * 1000).toISOString());
+    const gaps = f.gaps?.length ? this.sysList("dbgaps", f.gaps, {
+      sort: "start", dir: "desc", tie: g => g.start, empty: "dbSeriesNone",
+      sorts: [{ key: "start", label: "dbColFrom", dir: "desc", get: g => g.start }, { key: "hours", label: "dbColHours", dir: "desc", get: g => g.hours ?? 0 }],
+      text: g => `${day(g.start)} ${day(g.end)} ${this.t(`dbGapCause_${g.cause}`)}`,
+      columns: [
+        { key: "start", label: "dbColFrom", dir: "desc", cell: g => this.esc(day(g.start)) },
+        { key: "end", label: "dbColTo", sortable: false, cell: g => this.esc(day(g.end)) },
+        { key: "hours", label: "dbColHours", dir: "desc", cell: g => this.esc(this.t("dbMissingHours", { n: this.formatNumber(g.hours) })) },
+        { key: "cause", label: "dbColCause", sortable: false, cell: g => `<span class="pill ${g.cause === "restart" ? "mute" : "warn"}">${this.t(`dbGapCause_${g.cause}`)}</span>` },
+      ],
+    }) : "";
     const shared = Boolean(f.gap_hours);
     const sorts = [
       { key: "name", label: "utName", dir: "asc", get: x => x.name || x.statistic_id },
@@ -6236,7 +6288,7 @@ class DbHealthMixin {
       ],
     });
     const more = f.series_total > f.series.length ? `<p class="factnote">${this.t("relUnstableMore", { shown: f.series.length, total: f.series_total })}</p>` : "";
-    return `<div class="dbextra">${f.gaps?.length ? `<div class="sectionlabel">${this.t("dbGapsTitle")}</div>${gaps}` : ""}<div class="sectionlabel">${this.t("dbSeriesTitle", { n: this.formatNumber(f.series_total) })}</div>${table}${more}</div>`;
+    return `<div class="dbextra">${gaps ? `<div class="sectionlabel">${this.t("dbGapsTitle")}</div>${gaps}` : ""}<div class="sectionlabel">${this.t("dbSeriesTitle", { n: this.formatNumber(f.series_total) })}</div>${table}${more}</div>`;
   }
 
   dbFindingRow(f) {

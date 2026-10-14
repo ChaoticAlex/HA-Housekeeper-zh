@@ -82,10 +82,18 @@ class MaintenanceMixin {
       { label: this.t("recorderSumExcluded"), value: this.formatNumber(all.filter(e => e.excluded).length), tone: "mute", lf: ["costlist", "state", "excluded"] },
       { label: this.t("recorderSumUnused"), value: this.formatNumber(all.filter(e => !e.used).length), tone: "mute", lf: ["costlist", "state", "unused"] },
     ]) : "";
-    const statPage = this.paginate("recorder_stats", c.statistics || []);
-    const statRows = statPage.rows.map(s => `<div class="row rel"><span class="tile mute"><ha-icon icon="mdi:chart-line"></ha-icon></span><span class="row-text"><strong>${this.esc(s.statistic_id)}</strong><small>${this.formatNumber(s.rows)}</small></span></div>`).join("") + statPage.footer;
+    const stats = (c.statistics || []).length ? this.sysList("recorder_stats", c.statistics, {
+      sort: "rows", dir: "desc", tie: x => x.statistic_id, empty: "recorderNone",
+      sorts: [{ key: "rows", label: "recorderColRows", dir: "desc", get: x => x.rows ?? 0 }, { key: "id", label: "recorderColStat", dir: "asc", get: x => x.statistic_id }],
+      text: x => x.statistic_id,
+      rowAttrs: x => (this.findObject(`entity:${x.statistic_id}`) ? `data-object="${this.esc(`entity:${x.statistic_id}`)}" tabindex="0" role="button" aria-label="${this.esc(x.statistic_id)}"` : 'class="static"'),
+      columns: [
+        { key: "id", label: "recorderColStat", dir: "asc", cell: x => this.nameCell(x.statistic_id, "") },
+        { key: "rows", label: "recorderColRows", dir: "desc", cell: x => this.esc(this.formatNumber(x.rows)) },
+      ],
+    }) : "";
     const snippet = this.excludeCard(this.suggestedExclusions(), { only: false });
-    return `<div class="stack">${head("", "data-costs-load data-refresh")}${tiles}<p class="factnote">${this.esc(summary)}</p>${snippet}${list}${statRows ? this.fold("recorder_stats", { title: this.t("recorderStats"), pill: this.formatNumber((c.statistics || []).length) }, statRows, false) : ""}</div></div>`;
+    return `<div class="stack">${head("", "data-costs-load data-refresh")}${tiles}<p class="factnote">${this.esc(summary)}</p>${snippet}${list}${stats ? this.fold("recorder_stats", { title: this.t("recorderStats"), pill: this.formatNumber((c.statistics || []).length) }, stats, false) : ""}</div></div>`;
   }
 
   // One line per check; `level` decides the colour.
