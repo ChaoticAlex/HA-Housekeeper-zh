@@ -157,7 +157,7 @@ const TEXT = {
     automationOff: "Automation ist ausgeschaltet", refsResolved: "Alle Referenzen aufgelöst", entities: "Entitäten",
     cs_loaded: "Geladen", cs_setup_error: "Fehler beim Einrichten", cs_setup_retry: "Einrichtung wird wiederholt", cs_not_loaded: "Nicht geladen",
     cs_migration_error: "Fehler bei der Migration", cs_failed_unload: "Entladen fehlgeschlagen", cs_setup_in_progress: "Wird eingerichtet",
-    missing_entity: "Entität", missing_service: "Dienst", missing_device: "Gerät", missing_area: "Bereich", missing_floor: "Etage", missing_label: "Label", missing_tag: "Tag",
+    missing_entity: "Entität", missing_service: "Dienst", missing_blueprint: "Blueprint", missing_device: "Gerät", missing_area: "Bereich", missing_floor: "Etage", missing_label: "Label", missing_tag: "Tag",
     cause_ok: "Integration, Gerät und Zustand sind in Ordnung. Hier ist nichts zu tun.",
     cause_entity_disabled: "Die Entität wurde deaktiviert und besitzt deshalb keinen Zustand. Das ist kein Fehler.",
     cause_device_disabled: "Das zugehörige Gerät ist deaktiviert, daher liefert die Entität keinen Zustand. Das ist kein Fehler.",
@@ -340,7 +340,7 @@ const TEXT = {
     automationOff: "Automation is turned off", refsResolved: "All references resolved", entities: "Entities",
     cs_loaded: "Loaded", cs_setup_error: "Setup error", cs_setup_retry: "Retrying setup", cs_not_loaded: "Not loaded",
     cs_migration_error: "Migration error", cs_failed_unload: "Unload failed", cs_setup_in_progress: "Setting up",
-    missing_entity: "Entity", missing_service: "Service", missing_device: "Device", missing_area: "Area", missing_floor: "Floor", missing_label: "Label", missing_tag: "Tag",
+    missing_entity: "Entity", missing_service: "Service", missing_blueprint: "Blueprint", missing_device: "Device", missing_area: "Area", missing_floor: "Floor", missing_label: "Label", missing_tag: "Tag",
     cause_ok: "Integration, device and state are fine. Nothing to do here.",
     cause_entity_disabled: "The entity was disabled and therefore has no state. This is not an error.",
     cause_device_disabled: "The related device is disabled, so the entity provides no state. This is not an error.",
@@ -7650,7 +7650,7 @@ Object.assign(TEXT.de, {
   causeNone: "keine Entität betroffen", outageIntegrations: "{n} Integrationen", outageDevices: "{n} Geräte",
   logTitle: "Im HA-Log", logLine: "Im HA-Log: {what}, zuletzt {when}", logLevel_warning: "{n}× Warnung", logLevel_error: "{n}× Fehler", logLevel_critical: "{n}× kritischer Fehler",
   cause_integration_down: "Integration {name} ist nicht geladen", cause_device_down: "Gerät {name} ist ganz ausgefallen",
-  causeFollowers: "{n} Folgen", causeExplains: "erklärt {n} weitere Befunde", causeFollowOf: "Folge von {name}", withFollowers: "Mit Folgen", flatList: "Flache Liste", cause_app_down: "App {name} ist gestoppt", cause_entity_missing: "Entität {name} existiert nicht", cause_device_missing: "Gerät {name} existiert nicht", cause_area_missing: "Bereich {name} existiert nicht", causeUsers: "{n} Automationen, Skripte oder Dashboards verweisen darauf", causeBelow: "{n} Integrationen hängen vermutlich daran", outageApps: "{n} Apps", outageTargets: "{n} fehlende Ziele", cause_service_missing: "Dienst {name} existiert nicht", causeCallers: "{n} Automationen und Skripte rufen ihn auf", outageServices: "{n} fehlende Dienste", causeState: "Zustand: {state}", causeUses_automation: "{n} Automationen betroffen", causeUses_script: "{n} Skripte betroffen", causeUses_dashboard: "{n} Dashboards betroffen",
+  causeFollowers: "{n} Folgen", causeExplains: "erklärt {n} weitere Befunde", causeFollowOf: "Folge von {name}", withFollowers: "Mit Folgen", flatList: "Flache Liste", cause_app_down: "App {name} ist gestoppt", cause_entity_missing: "Entität {name} existiert nicht", cause_device_missing: "Gerät {name} existiert nicht", cause_area_missing: "Bereich {name} existiert nicht", causeUsers: "{n} Automationen, Skripte oder Dashboards verweisen darauf", causeBelow: "{n} Integrationen hängen vermutlich daran", outageApps: "{n} Apps", outageTargets: "{n} fehlende Ziele", cause_service_missing: "Dienst {name} existiert nicht", cause_blueprint_missing: "Blueprint {name} existiert nicht", causeCallers: "{n} Automationen und Skripte rufen ihn auf", outageServices: "{n} fehlende Dienste", causeState: "Zustand: {state}", causeUses_automation: "{n} Automationen betroffen", causeUses_script: "{n} Skripte betroffen", causeUses_dashboard: "{n} Dashboards betroffen",
   findingsFollowSub: "dazu {n} Folgen der Ausfälle", actOutages: "Ausfälle",
 });
 Object.assign(TEXT.en, {
@@ -7658,7 +7658,7 @@ Object.assign(TEXT.en, {
   causeNone: "no entity affected", outageIntegrations: "{n} integrations", outageDevices: "{n} devices",
   logTitle: "In the HA log", logLine: "In the HA log: {what}, last {when}", logLevel_warning: "{n}× warning", logLevel_error: "{n}× error", logLevel_critical: "{n}× critical error",
   cause_integration_down: "Integration {name} is not loaded", cause_device_down: "Device {name} is down completely",
-  causeFollowers: "{n} follow-ups", causeExplains: "explains {n} more findings", causeFollowOf: "Follow-up of {name}", withFollowers: "With follow-ups", flatList: "Flat list", cause_app_down: "App {name} is stopped", cause_entity_missing: "Entity {name} does not exist", cause_device_missing: "Device {name} does not exist", cause_area_missing: "Area {name} does not exist", causeUsers: "{n} automations, scripts or dashboards point to it", causeBelow: "{n} integrations probably depend on it", outageApps: "{n} apps", outageTargets: "{n} missing targets", cause_service_missing: "Service {name} does not exist", causeCallers: "{n} automations and scripts call it", outageServices: "{n} missing services", causeState: "State: {state}", causeUses_automation: "{n} automations affected", causeUses_script: "{n} scripts affected", causeUses_dashboard: "{n} dashboards affected",
+  causeFollowers: "{n} follow-ups", causeExplains: "explains {n} more findings", causeFollowOf: "Follow-up of {name}", withFollowers: "With follow-ups", flatList: "Flat list", cause_app_down: "App {name} is stopped", cause_entity_missing: "Entity {name} does not exist", cause_device_missing: "Device {name} does not exist", cause_area_missing: "Area {name} does not exist", causeUsers: "{n} automations, scripts or dashboards point to it", causeBelow: "{n} integrations probably depend on it", outageApps: "{n} apps", outageTargets: "{n} missing targets", cause_service_missing: "Service {name} does not exist", cause_blueprint_missing: "Blueprint {name} does not exist", causeCallers: "{n} automations and scripts call it", outageServices: "{n} missing services", causeState: "State: {state}", causeUses_automation: "{n} automations affected", causeUses_script: "{n} scripts affected", causeUses_dashboard: "{n} dashboards affected",
   findingsFollowSub: "plus {n} follow-ups of the outages", actOutages: "Outages",
 });
 
@@ -10141,6 +10141,7 @@ Object.assign(TEXT.de, {
   covUnread: "{n} Objekte aus nicht gelesenen Quellen zählen weder als neu noch als entfernt.",
   covSrc_registry: "Register (Entitäten, Geräte, Bereiche)",
   covSrc_automations: "Automationen, Skripte und Szenen",
+  covSrc_blueprints: "Blueprint-Dateien",
   covSrc_dashboards: "Dashboards",
   covSrc_energy: "Energie-Dashboard",
   covSrc_apps: "Apps",
@@ -10178,6 +10179,7 @@ Object.assign(TEXT.en, {
   covUnread: "{n} objects of sources that were not read count neither as new nor as removed.",
   covSrc_registry: "Registry (entities, devices, areas)",
   covSrc_automations: "Automations, scripts and scenes",
+  covSrc_blueprints: "Blueprint files",
   covSrc_dashboards: "Dashboards",
   covSrc_energy: "Energy dashboard",
   covSrc_apps: "Apps",

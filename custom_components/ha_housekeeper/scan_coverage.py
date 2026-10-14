@@ -13,6 +13,7 @@ from typing import Any
 SOURCES = (
     "registry",
     "automations",
+    "blueprints",
     "dashboards",
     "energy",
     "apps",

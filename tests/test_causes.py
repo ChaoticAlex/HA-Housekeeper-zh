@@ -128,9 +128,12 @@ def test_a_missing_target_is_a_cause_only_when_several_point_to_it() -> None:
         broken("script", "service", "script.s", "x.y"),
         broken("automation", "service", "automation.b", "x.y"),
         broken("automation", "area", "automation.c", "gone_area"),
+        broken("automation", "blueprint", "automation.d", "a/gone.yaml"),
+        broken("script", "blueprint", "script.t", "a/gone.yaml"),
     ]
     causes = apply_causes([], [], findings)
     assert sorted((c["kind"], c["object_id"], c["follower_count"]) for c in causes) == [
+        ("blueprint_missing", "a/gone.yaml", 2),
         ("entity_missing", "sensor.gone", 2),
         ("service_missing", "x.y", 2),
     ]

@@ -95,6 +95,7 @@ from .reminders import ReminderStore
 from .runs import RunStore
 from .scan_coverage import RETRY_LIMIT, RETRY_MINUTES, ScanCoverage, retryable_gaps
 from .scan_health import ScanHealth
+from .blueprints import async_available, blueprint_path, missing_blueprint_findings
 from .service_check import missing_service_findings
 from .signals import SignalStore, situations
 from .signals import fire as signal_fire
@@ -1004,6 +1005,7 @@ class InventoryScanner:
         dashboard_count = len(dashboards)
         energy, energy_edges = await self._energy_inventory(existing_objects)
         self.scan_coverage.checked("automations")
+        blueprint_files = await self._blueprint_files()
         dashboards.extend(energy)
         dashboard_edges.extend(energy_edges)
         lap("dashboards")
@@ -1099,6 +1101,7 @@ class InventoryScanner:
             + helper_findings
             + group_findings
             + stopped_app_findings(apps, integrations, app_links)
+            + ([] if preliminary else missing_blueprint_findings(automations, blueprint_files))
             + (
                 []
                 if preliminary
@@ -1413,6 +1416,20 @@ class InventoryScanner:
             existing["tag"] = {str(tag_id) for tag_id in tags}
         return existing
 
+    async def _blueprint_files(self) -> dict[str, set[str]] | None:
+        """The paths of every blueprint file, or None where they cannot be read (a gap, not "gone")."""
+        if "blueprint" not in self.hass.config.components:
+            self.scan_coverage.absent("blueprints", "not_set_up")
+            return None
+        try:
+            available = await async_available(self.hass)
+        except Exception as err:
+            _LOGGER.debug("The blueprint files could not be read: %s", type(err).__name__)
+            self.scan_coverage.skipped("blueprints", "unreadable")
+            return None
+        self.scan_coverage.checked("blueprints")
+        return {domain: set(files) for domain, files in available.items()}
+
     def _runtime_component(self, domain: str) -> Any | None:
         """Return a loaded entity component such as automation or script."""
         try:
@@ -1483,7 +1500,7 @@ class InventoryScanner:
             self._created_scenes |= runtime_scene_ids(getattr(entity, "raw_config", None))
 
             attrs = state.attributes if state else {}
-            blueprint = getattr(entity, "referenced_blueprint", None)
+            blueprint = blueprint_path(entity)
             item = {
                 "object_type": domain,
                 "object_id": entity_id,

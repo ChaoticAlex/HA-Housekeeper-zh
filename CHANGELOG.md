@@ -18,6 +18,8 @@
 
 - **Ausfälle:** Die Detailseite einer ausgefallenen Integration nennt, wie lange der Ausfall dauert und wann er schwerer wiegt.
 
+- **Fehlender Blueprint:** Eine Automation oder ein Skript, dessen Blueprint nicht mehr existiert, wird als Befund gemeldet; fehlt er für mehrere, steht er als gemeinsame Ursache in der Liste. Die Blueprint-Seite zählt solche Pfade jetzt auch.
+
 ### English
 
 #### New
@@ -35,6 +37,8 @@
 - **Storage and system:** The folder measurement stops after 20 seconds (for example on a slow network share under /config); the page then calls the sizes minimums.
 
 - **Outages:** The detail page of a failed integration says how long the outage has lasted and when it becomes more serious.
+
+- **Missing blueprint:** An automation or script whose blueprint no longer exists is reported as a finding; when several lack it, it shows as a shared cause in the list. The blueprints page now counts such paths too.
 
 ## 1.6.0 - 2026-10-13
 

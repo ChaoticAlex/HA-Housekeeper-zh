@@ -34,6 +34,7 @@ MISSING_TARGETS = {
     "entity": "entity_missing",
     "device": "device_missing",
     "area": "area_missing",
+    "blueprint": "blueprint_missing",
 }
 OUTAGE_RULE = "config_entry.not_loaded"
 DEVICE_RULE = "device.down"
