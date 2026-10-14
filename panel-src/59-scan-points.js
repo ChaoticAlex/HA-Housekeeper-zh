@@ -25,8 +25,8 @@ class ScanPointsMixin {
     return `<form class="pin-editor" data-pin-form>
       <div class="pin-fields"><h3>${this.t("pinDialogTitle")}</h3><p>${this.t("pinDialogHint")}</p>
         <div><label for="hk-pin-name">${this.t("pinName")}</label><input id="hk-pin-name" type="text" maxlength="60" data-pin-name value="${this.esc(d.name)}" placeholder="${this.esc(this.t("pinNamePh"))}" autocomplete="off" ${d.busy ? "disabled" : ""}><div class="notechips">${chips}</div></div>
-        <small>${this.t("pinNote")}</small>${d.error ? `<div class="error" role="alert">${this.esc(d.error)}</div>` : ""}
-      </div><div class="toolbar savebar pin-actions"><span role="status">${d.busy ? d.phase === "save" ? this.t("pinSaving") : `${this.t("scanning")}${this.scanStatus?.running ? ` ${this.scanStatus.progress}%` : ""}` : ""}</span><span class="toolgap"></span><button type="button" class="btn" data-pin-cancel ${d.busy ? "disabled" : ""}>${this.t("pinCancel")}</button><button type="submit" class="btn primary" ${d.busy ? 'disabled aria-busy="true"' : ""}>${this.t("pinGo")}</button></div></form>`;
+        <small>${this.t("pinNote")}</small>
+      </div><div class="toolbar savebar pin-actions"><span role="status">${d.busy ? d.phase === "save" ? this.t("pinSaving") : `${this.t("scanning")}${this.scanStatus?.running ? ` ${this.scanStatus.progress}%` : ""}` : ""}</span><span class="error" role="alert">${this.esc(d.error || "")}</span><span class="toolgap"></span><button type="button" class="btn" data-pin-cancel ${d.busy ? "disabled" : ""}>${this.t("pinCancel")}</button><button type="submit" class="btn primary" ${d.busy ? 'disabled aria-busy="true"' : ""}>${this.t("pinGo")}</button></div></form>`;
   }
 
   pinHeadButton() {

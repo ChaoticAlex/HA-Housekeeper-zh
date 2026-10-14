@@ -27,9 +27,12 @@ class PlanWizardMixin {
   }
 
   // The rows of a plan come in pages like every other long list.
-  planRowsShown(plan, rowList) {
-    const pg = this.paginate(`planrows-${plan.plan_id}`, rowList);
-    return pg.rows.join("") + pg.footer;
+  planRowsShown(plan, rowList, texts = []) {
+    // One search box for the plan on screen: its text is dropped when another plan opens.
+    if (this._planqFor !== plan.plan_id) { this._planqFor = plan.plan_id; this.lvState("planrows", "", "asc").q = ""; }
+    const found = this.searchList("planrows", rowList.map((html, i) => ({ html, text: texts[i] || "" })), r => r.text);
+    const pg = this.paginate(`planrows-${plan.plan_id}`, found.rows.map(r => r.html));
+    return found.bar + found.none + pg.rows.join("") + pg.footer;
   }
 
   planProgressBar() {

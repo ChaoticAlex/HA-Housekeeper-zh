@@ -73,7 +73,7 @@ class NotesMixin {
     const d = this.noteDraft;
     if (!d) return "";
     const chips = d.id ? "" : `<div class="notechips" role="group" aria-label="${this.esc(this.t("noteChips"))}">${["Stick", "Firmware", "Paired", "Moved"].map(k => `<button type="button" class="chip" data-note-chip="${this.esc(this.t(`noteChip${k}`))}">${this.t(`noteChip${k}`)}</button>`).join("")}</div>`;
-    const foot = `<div class="toolbar savebar note-actions">${d.id ? `<button type="button" class="btn quiet danger-t" data-note-del="${this.esc(d.id)}">${this.t("noteDelete")}</button>` : ""}<span class="toolgap"></span><button type="button" class="btn" data-note-cancel>${this.t("noteCancel")}</button><button type="submit" class="btn primary">${this.t("noteSave")}</button></div>`;
+    const foot = `<div class="toolbar savebar note-actions">${d.id ? `<button type="button" class="btn quiet danger-t" data-note-del="${this.esc(d.id)}">${this.t("noteDelete")}</button>` : ""}<span class="error" role="alert">${this.esc(d.error || "")}</span><span class="toolgap"></span><button type="button" class="btn" data-note-cancel>${this.t("noteCancel")}</button><button type="submit" class="btn primary">${this.t("noteSave")}</button></div>`;
     return `<form class="note-editor${inline ? " inline" : ""}" data-note-form>
       <div class="note-fields">
         ${inline ? `<h3>${this.t(d.id ? "noteDialogEdit" : "noteDialogNew")}</h3>` : ""}
@@ -82,7 +82,6 @@ class NotesMixin {
         ${d.target && !d.changeTarget ? `<div class="notemeta"><span>${this.t("noteConcernsNow")} <strong>${this.esc(d.targetText || this.noteTargetName(d.target))}</strong></span><button type="button" class="linkbtn" data-note-retarget>${this.t("noteChange")}</button></div>` : `<div><label>${this.t("noteTarget")}</label>${this.pickerBox("note", this.t("noteTargetPh"))}</div>`}</div>
         <div><label for="hk-note-text">${this.t("noteText")}</label><textarea id="hk-note-text" rows="3" maxlength="500" data-note-text placeholder="${this.esc(this.t("noteTextPh"))}">${this.esc(d.note)}</textarea></div>
         <small class="notehint2">${this.t("noteHint")}</small>
-        ${d.error ? `<div class="error" role="alert">${this.esc(d.error)}</div>` : ""}
       </div>${foot}</form>`;
   }
 
@@ -99,7 +98,7 @@ class NotesMixin {
 
   // The logbook under Changes: all entries in one place, filtered by who wrote them and by object.
   logbookView() {
-    if (this.noteDraft && !this.noteDraft.detailKey) return `<div class="monitor-editor"><section class="panel u-mb14"><div class="panelhead"><h2>${this.t(this.noteDraft.id ? "noteDialogEdit" : "noteDialogNew")}</h2></div>${this.noteEditor()}</section></div>`;
+    if (this.noteDraft && !this.noteDraft.detailKey) return `<div class="page-editor"><section class="panel u-mb14"><div class="panelhead"><h2>${this.t(this.noteDraft.id ? "noteDialogEdit" : "noteDialogNew")}</h2></div>${this.noteEditor()}</section></div>`;
     const all = this.notesList();
     const sourceOf = n => n.source || "me";
     const targets = [...new Set(all.map(n => n.target).filter(Boolean))].sort((x, y) => this.noteTargetName(x).localeCompare(this.noteTargetName(y)));

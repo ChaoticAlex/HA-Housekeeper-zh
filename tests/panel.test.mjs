@@ -1969,6 +1969,27 @@ const stepStates = steps => steps.map(s => `${s.id.replace("step", "")}:${s.stat
 const act = (kind, extra = {}) => ({ kind, object_id: `sensor.${kind}`, name: kind, verdict: "ok", executable: true, reasons: [], used_by: [], ...extra });
 const planOf = (status, actions, extra = {}) => ({ plan_id: "p1", created_at: "2026-10-07T10:00:00+00:00", status, executed: false, summary: { total: actions.length, ok: actions.length, review: 0, blocked: 0 }, actions, ...extra });
 
+test("a plan with many rows has a search box for its rows, and the editors share the delete style and the place of the error", () => {
+  const { el } = panel("en");
+  el.data = { ...DATA, objects: [], edges: [], findings: [], quarantine: [] };
+  const many = Array.from({ length: 8 }, (_, i) => act("disable_entity", { object_id: `sensor.row_${i}`, name: `Row ${i}` }));
+  let html = el.planCard(planOf("dry_run", many));
+  assert.ok(html.includes('data-lq="planrows"') && (html.match(/class="row planrow/g) || []).length === 8, "the box shows from six rows on");
+  el.lvState("planrows", "", "asc").q = "row 3"; el._planqFor = "p1";
+  html = el.planCard(planOf("dry_run", many));
+  assert.equal((html.match(/class="row planrow/g) || []).length, 1, "the search narrows the rows");
+  html = el.planCard(planOf("dry_run", many, { plan_id: "p2" }));
+  assert.equal((html.match(/class="row planrow/g) || []).length, 8, "another plan starts without the old search text");
+  assert.ok(!el.planCard(planOf("dry_run", many.slice(0, 2))).includes('data-lq="planrows"'), "a short plan has no box");
+  el.noteOpen(null, ""); el.noteDraft.error = "Give the entry a title.";
+  const note = el.noteEditor();
+  assert.ok(note.indexOf('role="alert"') > note.indexOf("note-actions") && !note.includes('<div class="error" role="alert">'), "the error stands in the bottom bar");
+  el.noteOpen({ id: "n1", title: "t", at: "2026-10-08T18:05:00+00:00", target: "", note: "", source: "me", ref: "" });
+  assert.ok(el.noteEditor().includes("btn quiet danger-t"), "delete is the quiet red button");
+  el.monitorForm = { id: "f1", name: "x", description: "", enabled: true, notify: true, members: [] };
+  assert.ok(el.monitorEditor().includes("btn quiet danger-t") && !el.monitorEditor().includes("btn danger"), "the same in the home monitor editor");
+});
+
 test("the plan card shows the steps with text, marks undo kinds and folds the details", () => {
   const { el } = panel("en");
   el.data = { ...DATA, objects: [], edges: [], findings: [], quarantine: [] };
@@ -3613,7 +3634,7 @@ test("the batteries view shows the forecast with groups and the reminders, which
   el.view = "reminders";
   el.remDraft = el.remBlank();
   const editor = el.remindersView();
-  assert.ok(editor.includes("data-rem-form") && editor.includes("New reminder") && editor.includes("monitor-editor") && !editor.includes('role="dialog"'), "the reminder uses a page editor");
+  assert.ok(editor.includes("data-rem-form") && editor.includes("New reminder") && editor.includes("page-editor") && !editor.includes('role="dialog"'), "the reminder uses a page editor");
   assert.ok(!editor.includes("data-rem-new") && !el.remindersCard().includes("data-rem-save"));
   el.remDraft = { ...el.remDraft, id: "r1" };
   assert.ok(el.remindersView().includes("Edit reminder"));
@@ -4037,7 +4058,7 @@ test("the logbook has its own tab, entries use page editors, an action can sugge
   el.lvState("logbook", "at", "desc").f = {}; el.render();
   // The editor replaces the global logbook list; chips, validation and actions stay available.
   el.noteOpen(); el.render();
-  assert.ok(shadow.innerHTML.includes("monitor-editor") && shadow.innerHTML.includes("data-note-form") && shadow.innerHTML.includes("data-note-chip") && !shadow.innerHTML.includes("data-note-modal"));
+  assert.ok(shadow.innerHTML.includes("page-editor") && shadow.innerHTML.includes("data-note-form") && shadow.innerHTML.includes("data-note-chip") && !shadow.innerHTML.includes("data-note-modal"));
   assert.ok(shadow.innerHTML.indexOf("data-note-cancel") < shadow.innerHTML.indexOf('type="submit"'), "Cancel sits left of Save");
   await el.noteSave();
   assert.ok(el.noteDraft.error.includes("title") && sent.length === 0);

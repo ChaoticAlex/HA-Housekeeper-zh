@@ -499,7 +499,8 @@ class CleanupMixin {
       return `<section class="panel" data-plan-card data-plan-idle><div class="panelhead"><div><h2>${this.t("plan_status_dry_run")}</h2><p>${this.esc(this.formatDate(plan.created_at))}</p></div></div>
         <div class="outcome ${nothing ? "ok" : "warn"}" role="status"><ha-icon icon="${nothing ? "mdi:check-circle-outline" : "mdi:information-outline"}"></ha-icon><span><strong>${this.t(nothing ? "wzIdleNothingTitle" : "wzIdleTitle")}</strong><small>${this.esc(why)}</small></span></div>${rowList.join("")}${this.reportBlock(plan, `<button class="btn primary" data-plan-close>${this.t("planClose")}</button>`)}</section>`;
     }
-    const rows = this.planRowsShown(plan, rowList);
+    const rowTexts = plan.actions.map(a => [a.name, a.object_id, a.target, a.label_name, a.area_name, ...(a.reasons || []).map(r => this.t(`reason_${r}`))].filter(Boolean).join(" "));
+    const rows = this.planRowsShown(plan, rowList, rowTexts);
     const summary = this.exchangeSummary(plan) + `<p class="factnote">${this.t("planSummary", { total: sm.total ?? 0, ok: sm.ok ?? 0, review: sm.review ?? 0, blocked: sm.blocked ?? 0 })}${extra ? ` ${this.esc(extra)}` : ""}</p>${this.recorderSummary(plan)}`;
     const flow = `<details class="rowdetails wzflow"><summary>${this.t("wzFlow")}</summary>${this.planStepper(plan, Boolean(conf))}</details>`;
     const body = stage === 0 ? `${summary}${this.simulationBlock(plan)}${rows}${control}`
