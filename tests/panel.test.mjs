@@ -2638,20 +2638,21 @@ test("the load view, the policies and the exposure view have a search box once t
   html = el.policiesView();
   assert.ok(html.includes("Lampe 11") && !html.includes("Lampe 3"));
   el.exposure = { ...EXPO, findings: [{ kind: "alias_duplicate", level: "warn", assistant: "conversation", alias: "Küche", count: 6, items: Array.from({ length: 6 }, (_, i) => ({ entity_id: `light.k${i}`, name: `Küche ${i}` })) }, EXPO.findings[0]] };
+  el.folds = { expo_alias_duplicate: true };
   html = el.exposureView();
-  assert.ok(html.includes('data-lq="exposure"') && !html.includes('data-dense'), "exposure findings have search but no ineffective density control");
+  assert.ok(html.includes('data-lq="expofind_alias_duplicate"') && html.includes('data-lsort="expofind_alias_duplicate|name|asc"') && !html.includes('data-lq="exposure"'), "an open finding lists its entities as a table with search and sorting; no search over the page");
   const exposed = { ...EXPO, exposed_entities: Array.from({ length: 7 }, (_, i) => ({ entity_id: `light.ex${i}`, name: `Light ${i}`, assistants: ["conversation"] })) };
   html = el.expoSourceTab(exposed, { id: "conversation", label: "Assist", status: "ok", count: 7 });
   assert.ok(html.includes('data-lq="expo_conversation"') && html.includes('data-dense="expo_conversation"'), "a table of a source offers compact rows");
   assert.ok(html.includes("<table") && html.includes('data-lf="expo_conversation|domain"') && html.includes("mdi:lightbulb-outline") && !html.includes("mdi:chevron-right"), "a source is a table with a domain filter and domain symbols, no arrow");
-  el.lvState("exposure", "", "asc").q = "küche 2";
+  el.lvState("expofind_alias_duplicate", "", "asc").q = "küche 2";
   html = el.exposureView();
-  assert.ok(html.includes("light.k2") && !html.includes("light.k4") && !html.includes("Door"), "only findings with a matching entity");
-  el.lv.exposure.q = "nothing like this";
+  assert.ok(html.includes("light.k2") && !html.includes("light.k4"), "the search of a finding cuts its table");
+  el.lv.expofind_alias_duplicate.q = "nothing like this";
   assert.ok(el.exposureView().includes("No matches for these filters."));
 });
 
-test("exposure findings fold: all closed at first, the head toggles and a click shows all", () => {
+test("exposure findings fold: all closed at first, the head toggles and the open one lists its entities in a table", () => {
   const { el } = panel("en");
   el.data = { ...DATA }; el._exposureRequested = true;
   const items = n => Array.from({ length: n }, (_, i) => ({ entity_id: `light.x${i}`, name: `X ${i}` }));
@@ -2665,8 +2666,8 @@ test("exposure findings fold: all closed at first, the head toggles and a click 
   assert.ok(html.includes('aria-expanded="false"'));
   el.folds = { expo_stale_exposed: true };
   html = el.exposureView();
-  assert.ok(html.includes("light.x9") && !html.includes("light.x10") && html.includes('data-expo-all="stale_exposed"'), "ten entities");
-  el.expoAll = { stale_exposed: true }; el.folds = { expo_stale_exposed: true, expo_diagnostic_exposed: true };
+  assert.ok(html.includes("light.x9") && html.includes("light.x13") && !html.includes("data-expo-all") && html.includes('data-lq="expofind_stale_exposed"'), "all entities of an open finding sit in its table, no show-all link");
+  el.folds = { expo_stale_exposed: true, expo_diagnostic_exposed: true };
   html = el.exposureView();
   assert.ok(html.includes("light.x13") && html.includes("sensor.diag"));
 });

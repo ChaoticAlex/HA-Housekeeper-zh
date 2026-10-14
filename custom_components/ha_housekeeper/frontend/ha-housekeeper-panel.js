@@ -1253,7 +1253,7 @@ class ThemeMixin {
 
 // Texts for the exposure view; merged into TEXT.
 Object.assign(TEXT.de, {
-  expoSumEntities: "Entitäten freigegeben", expoColName: "Name", expoColDomain: "Art", expoColArea: "Bereich", expoColAlso: "Auch freigegeben für", expoAllDomains: "Alle Arten", expoAllAlso: "Alle Dienste", expoSumFindings: "Auffälligkeiten", expoTabFindings: "Auffälligkeiten", expoSourceHint: "{n} Entitäten sind für {name} freigegeben.", expoAlso: "auch: {list}", expoCapped: "Gezeigt werden die ersten {n}.", expoNoneFor: "Für diese Quelle ist nichts freigegeben.", expoInactiveText: "Nicht eingerichtet: es ist nichts freigegeben.",
+  expoSumEntities: "Entitäten freigegeben", expoColName: "Name", expoColDomain: "Art", expoColArea: "Bereich", expoColAlso: "Auch freigegeben für", expoColAssistants: "Freigegeben für", expoAllDomains: "Alle Arten", expoAllAlso: "Alle Dienste", expoSumFindings: "Auffälligkeiten", expoTabFindings: "Auffälligkeiten", expoSourceHint: "{n} Entitäten sind für {name} freigegeben.", expoAlso: "auch: {list}", expoCapped: "Gezeigt werden die ersten {n}.", expoNoneFor: "Für diese Quelle ist nichts freigegeben.", expoInactiveText: "Nicht eingerichtet: es ist nichts freigegeben.",
   exposure: "Freigaben", exposureSubtitle: "Welche Entitäten Sprachassistenten und Bridges erreichen können. Liest nur; es wird nichts geändert und nichts gespeichert.",
   expoHint: "Assist, Alexa, Google Assistant und HomeKit", expoLoading: "Die Freigaben werden gelesen …",
   expoNone: "Nichts Auffälliges bei den Freigaben.", expoHint2: "Hinweis", expoWarn: "Prüfen",
@@ -1271,11 +1271,11 @@ Object.assign(TEXT.de, {
   expoAdvice_stale_exposed: "Entität aufräumen oder die Freigabe zurücknehmen.",
   expoAdvice_alias_duplicate: "Einen der Namen ändern, damit die Sprachbefehle eindeutig sind.",
   expoAdvice_webhook_orphan: "Die Integration neu einrichten oder die Reste entfernen, falls sie nicht mehr gebraucht werden.",
-  expoMore: "und {n} weitere", expoShowAll: "Alle {n} zeigen", expoToCheck: "Zu prüfen", expoToNote: "Zur Kenntnis",
+  expoMore: "und {n} weitere", expoToCheck: "Zu prüfen", expoToNote: "Zur Kenntnis",
   expoFootnote: "Housekeeper liest je Assistent, welche Entitäten Home Assistant freigibt, bei HomeKit nur den gespeicherten Entitäts-Filter der Bridge. Passwörter, Tokens, Ports und Webhook-IDs werden nie gelesen oder angezeigt. Wenn eine Quelle nicht antwortet, steht „nicht prüfbar“, nie „nicht freigegeben“. Sprachnamen gelten als gleich, wenn sie sich nur in Groß- und Kleinschreibung, Leerzeichen oder Umlauten unterscheiden.",
 });
 Object.assign(TEXT.en, {
-  expoSumEntities: "entities exposed", expoColName: "Name", expoColDomain: "Type", expoColArea: "Area", expoColAlso: "Also exposed to", expoAllDomains: "All types", expoAllAlso: "All services", expoSumFindings: "Findings", expoTabFindings: "Findings", expoSourceHint: "{n} entities are exposed to {name}.", expoAlso: "also: {list}", expoCapped: "The first {n} are shown.", expoNoneFor: "Nothing is exposed to this source.", expoInactiveText: "Not set up: nothing is exposed.",
+  expoSumEntities: "entities exposed", expoColName: "Name", expoColDomain: "Type", expoColArea: "Area", expoColAlso: "Also exposed to", expoColAssistants: "Exposed to", expoAllDomains: "All types", expoAllAlso: "All services", expoSumFindings: "Findings", expoTabFindings: "Findings", expoSourceHint: "{n} entities are exposed to {name}.", expoAlso: "also: {list}", expoCapped: "The first {n} are shown.", expoNoneFor: "Nothing is exposed to this source.", expoInactiveText: "Not set up: nothing is exposed.",
   exposure: "Exposure", exposureSubtitle: "Which entities voice assistants and bridges can reach. Only reads; nothing is changed and nothing is stored.",
   expoHint: "Assist, Alexa, Google Assistant and HomeKit", expoLoading: "Reading the exposure …",
   expoNone: "Nothing unusual in the exposure.", expoHint2: "Note", expoWarn: "Check",
@@ -1293,7 +1293,7 @@ Object.assign(TEXT.en, {
   expoAdvice_stale_exposed: "Clean up the entity or take the exposure back.",
   expoAdvice_alias_duplicate: "Rename one of them so voice commands are unambiguous.",
   expoAdvice_webhook_orphan: "Set the integration up again or remove the leftovers if they are no longer needed.",
-  expoMore: "and {n} more", expoShowAll: "Show all {n}", expoToCheck: "To check", expoToNote: "For your information",
+  expoMore: "and {n} more", expoToCheck: "To check", expoToNote: "For your information",
   expoFootnote: "Housekeeper reads, per assistant, which entities Home Assistant exposes; for HomeKit only the stored entity filter of the bridge. Passwords, tokens, ports and webhook ids are never read or shown. If a source does not answer, it says \"cannot be checked\", never \"not exposed\". Voice names count as equal when they differ only in case, spaces or umlauts.",
 });
 
@@ -6361,19 +6361,33 @@ class ExposureMixin {
     return this.t(`expoText_${f.kind}`, { n: this.formatNumber(f.count), alias: f.alias || "", assistant: f.assistant ? this.expoAssistantName(f.assistant) : "", domain: f.domain || "" });
   }
 
-  // One finding as a fold: the head always shows, the entities and the advice only when open.
+  // One finding as a fold: the head always shows, the entities (a table of their own, with search, sorting and pages) and the advice only when open.
   expoFindingRows(f) {
     const tone = f.level === "warn" ? "warn" : "mute";
-    const q = (this.lv.exposure?.q || "").trim().toLowerCase();
-    const matching = (f.items || []).filter(item => !q || [item.name, item.entity_id, ...(item.assistants || [])].join(" ").toLowerCase().includes(q));
-    const all = !!this.expoAll?.[f.kind];
-    const shown = all || q ? matching : matching.slice(0, 10);
-    const rows = shown.map(item => `<button class="row" data-object="entity:${this.esc(item.entity_id)}">${this.expoTile(item.entity_id)}<span class="row-text"><strong>${this.esc(item.name || item.entity_id)}</strong>${this.rowId(item.entity_id, item.assistants?.length ? this.expoAssistantList(item.assistants) : "")}</span></button>`).join("");
-    const total = q ? matching.length : f.count;
-    const more = total > shown.length ? `<p class="factnote"><button class="link" data-expo-all="${this.esc(f.kind)}">${this.t("expoShowAll", { n: this.formatNumber(total) })}</button></p>` : "";
-    const body = `<p class="factnote foldadvice">${this.t(`expoAdvice_${f.kind}`)}</p>${rows}${more}`;
+    const items = (f.items || []).map(item => {
+      const obj = this.findObject(`entity:${item.entity_id}`);
+      return { ...item, domain: item.entity_id.split(".")[0], area: obj ? this.areaName(obj) : "" };
+    });
+    const table = items.length ? this.sysList(`expofind_${f.kind}`, items, {
+      sort: "name", tie: item => item.entity_id, empty: "expoNone",
+      sorts: [
+        { key: "name", label: "expoColName", dir: "asc", get: item => item.name || item.entity_id },
+        { key: "domain", label: "expoColDomain", dir: "asc", get: item => item.domain },
+        { key: "area", label: "expoColArea", dir: "asc", get: item => item.area },
+      ],
+      text: item => [item.name, item.entity_id, item.area, ...(item.assistants || [])].join(" "),
+      rowAttrs: item => `data-object="entity:${this.esc(item.entity_id)}" tabindex="0" role="button" aria-label="${this.esc(item.name || item.entity_id)}"`,
+      columns: [
+        { key: "name", label: "expoColName", dir: "asc", cell: item => `<div class="statcell">${this.expoTile(item.entity_id)}<div>${this.nameCell(item.name || item.entity_id, item.entity_id)}</div></div>` },
+        { key: "domain", label: "expoColDomain", dir: "asc", cell: item => this.esc(item.domain) },
+        { key: "area", label: "expoColArea", dir: "asc", cell: item => (item.area ? this.esc(item.area) : `<span class="muted">—</span>`) },
+        { key: "assistants", label: "expoColAssistants", sortable: false, cell: item => (item.assistants?.length ? this.esc(this.expoAssistantList(item.assistants)) : `<span class="muted">—</span>`) },
+      ],
+    }) : "";
+    const more = f.count > items.length ? `<p class="factnote">${this.t("expoMore", { n: this.formatNumber(f.count - items.length) })}</p>` : "";
+    const body = `<p class="factnote foldadvice">${this.t(`expoAdvice_${f.kind}`)}</p>${table}${more}`;
     const head = { tone, title: this.t(`expoKind_${f.kind}`), sub: this.expoFindingText(f), pill: this.t(f.level === "warn" ? "expoWarn" : "expoHint2") };
-    return this.fold(`expo_${f.kind}`, head, body, false, q ? matching.length > 0 : undefined);
+    return this.fold(`expo_${f.kind}`, head, body, false);
   }
 
   expoSection(titleKey, list) {
@@ -6445,13 +6459,8 @@ class ExposureMixin {
     const open = this.viewTabOf("exposure", tabs.filter(x => !x.disabled), r.findings.length || !live.length ? "findings" : live[0].id);
     let body;
     if (open === "findings") {
-      this.lvState("exposure", "", "asc");
-      const q = this.lv.exposure.q.trim().toLowerCase();
-      const itemCount = r.findings.reduce((n, f) => n + (f.items || []).length, 0);
-      const bar = itemCount >= 6 || q ? this.listBar("exposure", { sorts: [], dense: false }) : "";
-      const shown = q ? r.findings.filter(f => (f.items || []).some(item => [item.name, item.entity_id, ...(item.assistants || [])].join(" ").toLowerCase().includes(q))) : r.findings;
-      const rows = shown.length ? this.expoSection("expoToCheck", shown.filter(f => f.level === "warn")) + this.expoSection("expoToNote", shown.filter(f => f.level !== "warn")) : q ? `<div class="emptymsg">${this.t("noMatches")}</div>` : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("expoNone")}</div>`;
-      body = `<div class="panel">${bar}${rows}${this.howCounted("expoFootnote")}</div>`;
+      const rows = r.findings.length ? this.expoSection("expoToCheck", r.findings.filter(f => f.level === "warn")) + this.expoSection("expoToNote", r.findings.filter(f => f.level !== "warn")) : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("expoNone")}</div>`;
+      body = `<div class="panel">${rows}${this.howCounted("expoFootnote")}</div>`;
     } else body = this.expoSourceTab(r, sources.find(x => x.id === open));
     return `<div class="stack">${head}${this.navTiles("exposure", tabs, open, this.t("exposure"), true)}${body}</div>`;
   }
@@ -15156,7 +15165,6 @@ class HAHousekeeperPanel extends HTMLElement {
       this.loadBackup({ type: "ha_housekeeper/backup_attest", kind, ...(date ? { date } : {}) });
     });
     root.querySelectorAll("[data-fold]").forEach(el => el.onclick = () => { if (el.dataset.fold.startsWith("chg_")) this.changesCat = ""; this.folds = { ...this.folds, [el.dataset.fold]: el.getAttribute("aria-expanded") !== "true" }; this.render(); });
-    root.querySelectorAll("[data-expo-all]").forEach(el => el.onclick = () => { this.expoAll = { ...this.expoAll, [el.dataset.expoAll]: true }; this.render(); });
     root.querySelectorAll("[data-bh-clear]").forEach(el => el.onclick = () => this.loadBackup({ type: "ha_housekeeper/backup_attest", kind: el.dataset.bhClear, clear: true }));
     root.querySelector("[data-pf-refresh]")?.addEventListener("click", () => this.loadPreflight());
     root.querySelector("[data-pf-save]")?.addEventListener("click", () => this.loadPreflight("save"));
