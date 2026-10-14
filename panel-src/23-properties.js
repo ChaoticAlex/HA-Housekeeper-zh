@@ -6,7 +6,7 @@ class PropertiesMixin {
     return `<button class="link" data-object="${this.esc(key)}">${this.esc(text)}</button>${sub ? ` <small>${this.esc(sub)}</small>` : ""}`;
   }
 
-  propChips(names) { return names.length ? `<span class="chips" style="padding:0;border:0">${names.map(n => `<span class="chip">${this.esc(n)}</span>`).join("")}</span>` : ""; }
+  propChips(names) { return names.length ? `<span class="chips bare">${names.map(n => `<span class="chip">${this.esc(n)}</span>`).join("")}</span>` : ""; }
 
   // The registry gives 1970 for objects created before it recorded the time; that is "unknown", not a date.
   realTime(value) { return value && Date.parse(value) >= Date.UTC(2000, 0, 1) ? value : ""; }
@@ -99,7 +99,7 @@ class PropertiesMixin {
     const memberRows = this.objectTable(`members-${item.object_id}`, members.map(m => ({ key: `entity:${m.object_id}`, type: "entity", name: m.name, sub: m.object_id, tone: this.tone(m.status), state: m.status, stateLabel: this.statusLabel(m.status), pill: this.pill(m.status), value: m.state === null || m.state === undefined ? "" : `${m.state}${m.unit ? ` ${m.unit}` : ""}` })), {
       extras: [{ key: "value", label: "objColState", get: r => r.value, cell: r => r.value ? this.esc(r.value) : `<span class="muted">—</span>` }], empty: t("propNoEntities"),
     });
-    const entities = `<section class="panel wide"><div class="panelhead"><h2><ha-icon icon="mdi:shape-outline" style="--mdc-icon-size:18px;vertical-align:-3px;margin-right:6px;color:var(--hk-muted)"></ha-icon>${t("propEntities")} (${members.length})</h2></div>${memberRows}</section>`;
+    const entities = `<section class="panel wide"><div class="panelhead"><h2><ha-icon icon="mdi:shape-outline" class="propicon"></ha-icon>${t("propEntities")} (${members.length})</h2></div>${memberRows}</section>`;
     const technical = this.propCard(t("propTechnical"), "mdi:identifier", [
       [t("propDeviceId"), this.propCode(item.object_id)],
       [t("propIdentifiers"), (item.identifiers || []).map(v => this.propCode(v)).join("<br>")],

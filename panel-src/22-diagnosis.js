@@ -230,24 +230,31 @@ class DiagnosisMixin {
         ...outgoing.map(e => ({ other: e.target, label: this.t(e.relation), edge: e })),
       ]],
     ].map(([title, list]) => [title, this.mergePlaces(list)]).filter(([, list]) => list.length);
-    const LIMIT = 25;
     // A target without an inventory object is missing only where a finding says so; helpers and
     // built-in entities such as sun.sun exist without a registry entry.
     const gone = new Set((this.data.findings || []).filter(f => f.classification === "broken_reference").map(f => f.affected_object));
-    const row = ({ other, label, edge, places }) => {
-      const obj = this.findObject(other), [type, ...rest] = other.split(":");
-      const note = places.length > 1 ? `${label} · ${this.t("relPlaces", { n: places.length })}` : `${label}${places[0] ? ` · ${places[0]}` : ""}`;
-      const text = `${this.tile(obj?.object_type || type, obj ? (this.tone(obj.status) === "ok" ? "" : this.tone(obj.status)) : gone.has(rest.join(":")) ? "red" : "")}<span class="row-text"><strong>${this.esc(obj?.name || rest.join(":"))}</strong><small>${this.esc(note)}</small></span>${obj ? this.pill(obj.status) : gone.has(rest.join(":")) ? `<span class="pill red">${this.t("missing")}</span>` : `<span class="pill">${this.t("notInInventory")}</span>`}`;
-      const title = places.length > 1 ? ` title="${this.esc(places.filter(Boolean).join("\n"))}"` : "";
-      return obj ? `<button class="row rel" data-object="${this.esc(other)}"${title}>${text}</button>` : `<div class="row rel"${title}>${text}</div>`;
-    };
-    // From 26 entries on a group gets a search box; the entries come in pages.
-    const body = groups.map(([title, list], i) => {
-      const found = this.searchList(`rel-${i}`, list, x => `${this.findObject(x.other)?.name || ""} ${x.other} ${x.label}`, LIMIT + 1);
-      const page = this.paginate(`relp-${key}-${i}`, found.rows);
-      return `<div class="sectionlabel">${title} (${list.length})</div>${found.bar}${found.none}${page.rows.map(row).join("")}${page.footer}`
-    }).join("");
-    return `<section class="panel"><div class="panelhead"><h2>${this.t("relations")} (${incoming.length + outgoing.length})</h2></div>${body || `<p class="factnote">${this.t("noRelations")}</p>`}</section>`;
+    const items = groups.flatMap(([title, list], i) => list.map(x => ({ ...x, group: i ? "usage" : "origin", groupName: title })));
+    const nameOf = x => this.findObject(x.other)?.name || x.other.split(":").slice(1).join(":");
+    const typeOf = x => this.findObject(x.other)?.object_type || x.other.split(":")[0];
+    const note = x => (x.places.length > 1 ? `${x.label} · ${this.t("relPlaces", { n: x.places.length })}` : `${x.label}${x.places[0] ? ` · ${x.places[0]}` : ""}`);
+    const goneLabel = x => (gone.has(x.other.split(":").slice(1).join(":")) ? this.t("missing") : this.t("notInInventory"));
+    const table = items.length ? this.sysList("relations", items, {
+      sort: "name", dir: "asc", cls: "rel", tie: x => `${x.other}|${x.label}`, exportName: "relations",
+      sorts: [{ key: "name", label: "relColObject", dir: "asc", get: nameOf }, { key: "type", label: "relColType", dir: "asc", get: typeOf }, { key: "relation", label: "relColRelation", dir: "asc", get: x => x.label }],
+      text: x => `${nameOf(x)} ${x.other} ${x.label}`,
+      filters: [{ name: "group", all: this.t("relAllGroups"), options: [["origin", this.t("origin")], ["usage", this.t("usage")]] }],
+      filterFns: { group: (x, v) => x.group === v },
+      rowAttrs: x => (this.findObject(x.other) ? `data-object="${this.esc(x.other)}" tabindex="0" role="button" aria-label="${this.esc(nameOf(x))}"${x.places.length > 1 ? ` title="${this.esc(x.places.filter(Boolean).join("\n"))}"` : ""}` : 'class="static"'),
+      columns: [
+        { key: "name", label: "relColObject", dir: "asc", cell: x => { const obj = this.findObject(x.other); return `<div class="statcell">${this.tile(typeOf(x), obj ? (this.tone(obj.status) === "ok" ? "" : this.tone(obj.status)) : gone.has(x.other.split(":").slice(1).join(":")) ? "red" : "")}<div>${this.nameCell(nameOf(x), x.other)}</div></div>`; } },
+        { key: "type", label: "relColType", dir: "asc", cell: x => this.esc(this.t(typeOf(x))) },
+        { key: "relation", label: "relColRelation", dir: "asc", cell: x => this.esc(note(x)) },
+        { key: "group", label: "relColKind", sortable: false, cell: x => this.esc(x.groupName) },
+        { key: "status", label: "relColStatus", sortable: false, cell: x => { const obj = this.findObject(x.other); return obj ? this.pill(obj.status) : `<span class="pill ${gone.has(x.other.split(":").slice(1).join(":")) ? "red" : ""}">${this.esc(goneLabel(x))}</span>`; } },
+      ],
+      header: [this.t("relColObject"), "ID", this.t("relColType"), this.t("relColRelation"), this.t("relColKind")], rows: x => [nameOf(x), x.other, this.t(typeOf(x)), note(x), x.groupName],
+    }) : "";
+    return `<section class="panel"><div class="panelhead"><h2>${this.t("relations")} (${incoming.length + outgoing.length})</h2></div>${table || `<p class="factnote">${this.t("noRelations")}</p>`}</section>`;
   }
 
   entrySourceLabel(source) {

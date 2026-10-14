@@ -71,8 +71,8 @@ class RefactorMixin {
     const overlap = this.diagState().quality?.items.find(i => i.entity_id === entityId)?.dimensions.reliability.reasons.some(x => x.key === "overlap");
     const rows = view.proposals.map(p => {
       let input = "", hint = this.t(`refactorFixHint_${p.fix}`, { count: p.count || 0, paths: (p.paths || []).join(", "), mode: p.mode || "", limit: p.max ? ` (max ${p.max})` : "", entities: (p.entities || []).join(", "), longest: this.delayText(p.longest) });
-      if (p.fix.startsWith("hint_")) return `<div class="pad polform"><strong>${this.t(`refactorFix_${p.fix}`)}</strong><small class="u-block">${this.esc(hint)}</small><small style="display:block;opacity:.7">${this.t("refactorHintOnly")}</small></div>`;
-      if (p.fix === "add_description") input = `<textarea data-refactor-text="add_description" maxlength="300" rows="2" aria-label="${this.esc(this.t("refactorDescription"))}" style="width:100%;max-width:520px">${this.esc(r.text.add_description || "")}</textarea>`;
+      if (p.fix.startsWith("hint_")) return `<div class="pad polform"><strong>${this.t(`refactorFix_${p.fix}`)}</strong><small class="u-block">${this.esc(hint)}</small><small class="dim7">${this.t("refactorHintOnly")}</small></div>`;
+      if (p.fix === "add_description") input = `<textarea data-refactor-text="add_description" maxlength="300" rows="2" aria-label="${this.esc(this.t("refactorDescription"))}" class="refactext">${this.esc(r.text.add_description || "")}</textarea>`;
       if (p.fix === "set_timeout") input = `<div class="setrow"><label>${this.t("refactorTimeout")} <input type="number" min="1" max="86400" data-refactor-timeout value="${this.esc(String(r.timeout || 60))}"></label><label><input type="checkbox" data-refactor-keep ${r.keep === false ? "" : "checked"}> ${this.t("refactorKeepGoing")}</label></div>`;
       if (p.fix === "set_mode") {
         const mode = r.mode || p.mode;

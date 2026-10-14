@@ -3793,6 +3793,9 @@ test("the overview of an object offers its actions: decide a finding, replace a 
   assert.equal(el.repairTask, "replace_references");
   assert.equal(el.replOld, "sensor.gone");
   assert.ok(!el.detailPanel("relations", el.findObject("entity:sensor.a"), "entity:sensor.a").includes("data-decide-open"), "findings moved off the dependencies tab");
+  const rel = el.relationsCard("entity:sensor.a");
+  assert.ok(rel.includes("<table") || rel.includes("noRelations") || rel.includes("factnote"), "the relations are a table or the empty note");
+  assert.ok(!rel.includes("style="), "no inline style");
 });
 
 test("the repair view offers its tasks as tiles; one opens its assistant and the plan is finished there", () => {

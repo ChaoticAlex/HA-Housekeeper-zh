@@ -19,7 +19,7 @@ class ScanTimingMixin {
     const seconds = value => `${this.formatNumber(Math.round(value * 10) / 10)} s`;
     const rows = phases.map(([phase, value]) => {
       const label = this.t(`timingPhase_${phase}`);
-      return `<div class="row" data-scan-phase="${this.esc(phase)}"><span class="tile mute"><ha-icon icon="mdi:timer-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(label === `timingPhase_${phase}` ? phase : label)}</strong><span class="bar" style="margin-top:4px"><i style="width:${Math.round((value / longest) * 100)}%"></i></span></span><span class="pill mute">${seconds(value)}</span></div>`;
+      return `<div class="row" data-scan-phase="${this.esc(phase)}"><span class="tile mute"><ha-icon icon="mdi:timer-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(label === `timingPhase_${phase}` ? phase : label)}</strong><span class="bar mt4"><i style="width:${Math.round((value / longest) * 100)}%"></i></span></span><span class="pill mute">${seconds(value)}</span></div>`;
     }).join("");
     return `<section class="panel"><div class="panelhead"><div><h2>${this.t("timingTitle")}</h2><p>${this.t("timingHint", { total: this.formatNumber(Math.round(total * 10) / 10) })}</p></div></div>${rows}</section>`;
   }
