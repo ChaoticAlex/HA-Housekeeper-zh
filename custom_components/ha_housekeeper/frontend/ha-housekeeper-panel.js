@@ -1550,10 +1550,10 @@ class StylesMixin {
 
 // Texts of the shared table of objects (objectTable); merged into TEXT.
 Object.assign(TEXT.de, {
-  objColState: "Zustand", objAllStatus: "Alle Zustände", objColEntities: "Entitäten", objColDevices: "Geräte", relColAvail: "Verfügbarkeit", relAvailOk: "Ab 99,5 %", relAvailWarn: "95 bis 99,5 %", cleanupAllClasses: "Alle Einstufungen", cleanupAllReadiness: "Alle Zustände", cleanupColRecorder: "Recorder-Daten", recurringColSince: "Vergessen am", recurringColDomains: "Integrationen", recurringPill: "Kehrt zurück", purgeColWhen: "Zeit", purgeColWhat: "Gelöscht", purgeColDetails: "Einzelheiten", exColEntity: "Entität", exColUsed: "Verwendung", exColTarget: "Ersatz", exColHow: "Art", exAllPairs: "Alle Paare", exFilterSuggest: "Mit Vorschlag", exFilterNone: "Ohne Verwendung", exFilterChosen: "Gewählt", counterColName: "Entität", counterColKind: "Art", counterColFound: "Fund", counterColAction: "Aktion", counterAllKinds: "Alle Arten", counterKindMeasurement: "Messwert", counterKindCounter: "Zähler", relAvailRed: "Unter 95 %",
+  objColState: "Zustand", objAllStatus: "Alle Zustände", objColEntities: "Entitäten", objColDevices: "Geräte", relColAvail: "Verfügbarkeit", relAvailOk: "Ab 99,5 %", relAvailWarn: "95 bis 99,5 %", cleanupAllClasses: "Alle Einstufungen", cleanupAllReadiness: "Alle Zustände", cleanupColRecorder: "Recorder-Daten", recurringColSince: "Vergessen am", recurringColDomains: "Integrationen", recurringPill: "Kehrt zurück", purgeColWhen: "Zeit", purgeColWhat: "Gelöscht", purgeColDetails: "Einzelheiten", journalColDate: "Erstellt", journalColActions: "Prüfung", journalColFollow: "Nachkontrolle", journalColAct: "Aktionen", journalAllStatus: "Alle Zustände", journalAllFollow: "Alle Nachkontrollen", exColEntity: "Entität", exColUsed: "Verwendung", exColTarget: "Ersatz", exColHow: "Art", exAllPairs: "Alle Paare", exFilterSuggest: "Mit Vorschlag", exFilterNone: "Ohne Verwendung", exFilterChosen: "Gewählt", counterColName: "Entität", counterColKind: "Art", counterColFound: "Fund", counterColAction: "Aktion", counterAllKinds: "Alle Arten", counterKindMeasurement: "Messwert", counterKindCounter: "Zähler", relAvailRed: "Unter 95 %",
 });
 Object.assign(TEXT.en, {
-  objColState: "State", objAllStatus: "All states", objColEntities: "Entities", objColDevices: "Devices", relColAvail: "Availability", relAvailOk: "99.5 % and above", relAvailWarn: "95 to 99.5 %", cleanupAllClasses: "All classes", cleanupAllReadiness: "All states", cleanupColRecorder: "Recorder data", recurringColSince: "Forgotten on", recurringColDomains: "Integrations", recurringPill: "Keeps coming back", purgeColWhen: "Time", purgeColWhat: "Deleted", purgeColDetails: "Details", exColEntity: "Entity", exColUsed: "Use", exColTarget: "Replacement", exColHow: "How", exAllPairs: "All pairs", exFilterSuggest: "With a proposal", exFilterNone: "Unused", exFilterChosen: "Chosen", counterColName: "Entity", counterColKind: "Kind", counterColFound: "Finding", counterColAction: "Action", counterAllKinds: "All kinds", counterKindMeasurement: "Measurement", counterKindCounter: "Counter", relAvailRed: "Below 95 %",
+  objColState: "State", objAllStatus: "All states", objColEntities: "Entities", objColDevices: "Devices", relColAvail: "Availability", relAvailOk: "99.5 % and above", relAvailWarn: "95 to 99.5 %", cleanupAllClasses: "All classes", cleanupAllReadiness: "All states", cleanupColRecorder: "Recorder data", recurringColSince: "Forgotten on", recurringColDomains: "Integrations", recurringPill: "Keeps coming back", purgeColWhen: "Time", purgeColWhat: "Deleted", purgeColDetails: "Details", journalColDate: "Created", journalColActions: "Check", journalColFollow: "Follow-up", journalColAct: "Actions", journalAllStatus: "All states", journalAllFollow: "All follow-ups", exColEntity: "Entity", exColUsed: "Use", exColTarget: "Replacement", exColHow: "How", exAllPairs: "All pairs", exFilterSuggest: "With a proposal", exFilterNone: "Unused", exFilterChosen: "Chosen", counterColName: "Entity", counterColKind: "Kind", counterColFound: "Finding", counterColAction: "Action", counterAllKinds: "All kinds", counterKindMeasurement: "Measurement", counterKindCounter: "Counter", relAvailRed: "Below 95 %",
 });
 
 // Texts for the policies view; merged into TEXT.
@@ -3503,6 +3503,14 @@ class CleanupMixin {
   // Open previews can be merged into one plan: the backend rebuilds it from the requests and reports conflicts.
   mergeable(plan) { return !plan.executed && !plan.run; }
 
+  // The box in the table head: every plan of the page that can be merged.
+  journalHeadBox(rows) {
+    const ids = (rows || []).filter(p => this.mergeable(p)).map(p => p.plan_id);
+    if (!ids.length) return "";
+    const n = ids.filter(id => this.mergeSel?.has(id)).length;
+    return `<input type="checkbox" class="selbox" data-merge-page="${this.esc(ids.join(","))}" ${n === ids.length ? "checked" : ""} ${n && n < ids.length ? "data-partial" : ""} aria-label="${this.esc(this.t("selectPage"))}">`;
+  }
+
   async mergePlans() {
     const ids = [...(this.mergeSel || [])].filter(id => (this.journal || []).some(p => p.plan_id === id && this.mergeable(p)));
     if (ids.length < 2 || this.cleanupBusy) return;
@@ -3886,12 +3894,36 @@ class CleanupMixin {
   // Every plan from Cleanup and Repair: what changed, what was checked, and what can be undone.
   journalView() {
     this.ensureJournal();
-    const journalFound = this.searchList("journal", this.journal || [], plan => `${this.formatDate(plan.created_at)} ${this.t(`plan_status_${plan.status || "dry_run"}`)}`);
-    const journalPage = this.paginate("journal", journalFound.rows);
-    const journal = journalPage.rows.map(plan => `<div class="row jrow">${this.mergeable(plan) ? `<input type="checkbox" data-merge-sel="${this.esc(plan.plan_id)}" ${this.mergeSel?.has(plan.plan_id) ? "checked" : ""} aria-label="${this.esc(this.t("mergeSelect"))}">` : ""}<span class="tile mute"><ha-icon icon="mdi:clipboard-text-clock-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(this.formatDate(plan.created_at))}</strong><small>${this.t("planSummary", { total: plan.summary?.total ?? 0, ok: plan.summary?.ok ?? 0, review: plan.summary?.review ?? 0, blocked: plan.summary?.blocked ?? 0 })}${plan.file_snapshot_dropped ? ` · ${this.esc(this.t("snapshotDropped"))}` : ""}${plan.followup === "watching" && plan.followup_until ? ` · ${this.esc(this.t("fuWatching", { date: this.formatDate(plan.followup_until) }))}` : ""}</small></span>
-      <span class="pill ${plan.status === "verified" ? "ok" : plan.status === "dry_run" ? "mute" : "warn"}">${this.t(`plan_status_${plan.status || "dry_run"}`)}</span>${plan.followup ? `<span class="pill ${this.followupTone(plan.followup?.state ?? plan.followup)}">${this.t(`fu_${plan.followup?.state ?? plan.followup}`)}</span>` : ""}
-      <span class="jbtns"><button class="btn" data-plan-open="${this.esc(plan.plan_id)}">${this.t("openPlan")}</button>${plan.executed || plan.run ? "" : `<button class="btn dangersoft" data-plan-delete="${this.esc(plan.plan_id)}"><ha-icon icon="mdi:delete-outline"></ha-icon>${this.t("deletePlan")}</button>`}</span></div>`).join("");
-    const journalCard = `<div class="panel"><div class="panelhead"><div><h2>${this.t("journal")} (${(this.journal || []).length})</h2><p>${this.t("journalHint")}</p></div><div class="actions"><button class="btn" data-merge ${(this.mergeSel?.size || 0) >= 2 && !this.cleanupBusy ? "" : "disabled"}>${this.t("mergeButton", { count: this.mergeSel?.size || 0 })}</button></div></div>${this.mergeNote ? `<div class="pad"><small role="status">${this.esc(this.mergeNote)}</small></div>` : ""}${journalFound.bar}${journal || journalFound.none || `<div class="emptymsg mute"><ha-icon icon="mdi:clipboard-text-outline"></ha-icon><strong>${this.t("journalEmpty")}</strong>${this.t("journalEmptyNext")}<button class="btn" data-jump="repair">${this.t("repair")}</button></div>`}${journalPage.footer}</div>`;
+    const plans = this.journal || [];
+    const fuState = plan => plan.followup?.state ?? plan.followup ?? "";
+    const statusOf = plan => plan.status || "dry_run";
+    const statuses = [...new Set(plans.map(statusOf))], follows = [...new Set(plans.map(fuState).filter(Boolean))];
+    const summary = plan => `${this.t("planSummary", { total: plan.summary?.total ?? 0, ok: plan.summary?.ok ?? 0, review: plan.summary?.review ?? 0, blocked: plan.summary?.blocked ?? 0 })}${plan.file_snapshot_dropped ? ` · ${this.t("snapshotDropped")}` : ""}${plan.followup === "watching" && plan.followup_until ? ` · ${this.t("fuWatching", { date: this.formatDate(plan.followup_until) })}` : ""}`;
+    const columns = [
+      { key: "sel", label: "mergeSelect", narrow: true, sortable: false, allBox: rows => this.journalHeadBox(rows), cell: plan => (this.mergeable(plan) ? `<input type="checkbox" class="selbox" data-merge-sel="${this.esc(plan.plan_id)}" ${this.mergeSel?.has(plan.plan_id) ? "checked" : ""} aria-label="${this.esc(this.t("mergeSelect"))}">` : "") },
+      { key: "date", label: "journalColDate", dir: "desc", cell: plan => `<span class="statcell"><span class="tile mute"><ha-icon icon="mdi:clipboard-text-clock-outline"></ha-icon></span><strong>${this.esc(this.formatDate(plan.created_at))}</strong></span>` },
+      { key: "status", label: "sortStatus", dir: "asc", cell: plan => `<span class="pill ${plan.status === "verified" ? "ok" : plan.status === "dry_run" ? "mute" : "warn"}">${this.t(`plan_status_${statusOf(plan)}`)}</span>` },
+      { key: "total", label: "journalColActions", dir: "desc", cell: plan => this.esc(summary(plan)) },
+      { key: "follow", label: "journalColFollow", sortable: false, cell: plan => (fuState(plan) ? `<span class="pill ${this.followupTone(fuState(plan))}">${this.t(`fu_${fuState(plan)}`)}</span>` : "–") },
+      { key: "act", label: "journalColAct", sortable: false, cell: plan => `<span class="jbtns"><button class="btn" data-plan-open="${this.esc(plan.plan_id)}">${this.t("openPlan")}</button>${plan.executed || plan.run ? "" : `<button class="btn dangersoft" data-plan-delete="${this.esc(plan.plan_id)}" title="${this.esc(this.t("deletePlan"))}" aria-label="${this.esc(this.t("deletePlan"))}"><ha-icon icon="mdi:delete-outline"></ha-icon></button>`}</span>` },
+    ];
+    const table = plans.length ? this.sysList("journal", plans, {
+      sort: "date", dir: "desc", columns, cls: "journal", empty: "journalEmpty",
+      sorts: [
+        { key: "date", label: "journalColDate", dir: "desc", get: p => p.created_at },
+        { key: "status", label: "sortStatus", dir: "asc", get: p => this.t(`plan_status_${statusOf(p)}`) },
+        { key: "total", label: "journalColActions", dir: "desc", get: p => p.summary?.total ?? 0 },
+      ],
+      filters: [
+        { name: "status", all: this.t("journalAllStatus"), options: statuses.map(x => [x, this.t(`plan_status_${x}`)]) },
+        ...(follows.length ? [{ name: "follow", all: this.t("journalAllFollow"), options: follows.map(x => [x, this.t(`fu_${x}`)]) }] : []),
+      ],
+      filterFns: { status: (p, v) => statusOf(p) === v, follow: (p, v) => fuState(p) === v },
+      text: p => `${this.formatDate(p.created_at)} ${this.t(`plan_status_${statusOf(p)}`)}`, tie: p => p.created_at,
+    }) : `<div class="emptymsg mute"><ha-icon icon="mdi:clipboard-text-outline"></ha-icon><strong>${this.t("journalEmpty")}</strong>${this.t("journalEmptyNext")}<button class="btn" data-jump="repair">${this.t("repair")}</button></div>`;
+    const picked = this.mergeSel?.size || 0;
+    const tools = plans.some(p => this.mergeable(p)) ? `<div class="toolbar${picked ? "" : " nosel"}"><button class="btn" data-merge ${picked >= 2 && !this.cleanupBusy ? "" : "disabled"}>${this.t("mergeButton", { count: picked })}</button><span class="selcount" aria-live="polite">${this.t("selectedCount", { count: picked })}</span></div>` : "";
+    const journalCard = `<div class="panel"><div class="panelhead"><div><h2>${this.t("journal")} (${plans.length})</h2><p>${this.t("journalHint")}</p></div></div>${this.mergeNote ? `<div class="pad"><small role="status">${this.esc(this.mergeNote)}</small></div>` : ""}${tools}${table}</div>`;
     return `<div class="stack">${this.planHeader()}${journalCard}</div>`;
   }
 
@@ -14928,6 +14960,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-plan-open]").forEach(el => el.onclick = () => this.openPlan(el.dataset.planOpen));
     root.querySelectorAll("[data-merge-sel]").forEach(el => el.onchange = () => { this.mergeSel = new Set(this.mergeSel || []); el.checked ? this.mergeSel.add(el.dataset.mergeSel) : this.mergeSel.delete(el.dataset.mergeSel); this.render(); });
     root.querySelector("[data-merge]")?.addEventListener("click", () => this.mergePlans());
+    root.querySelectorAll("[data-merge-page]").forEach(el => { el.indeterminate = el.hasAttribute("data-partial"); el.onchange = () => { this.mergeSel = new Set(this.mergeSel || []); el.dataset.mergePage.split(",").forEach(id => (el.checked ? this.mergeSel.add(id) : this.mergeSel.delete(id))); this.render(); }; });
     root.querySelectorAll("[data-plan-delete]").forEach(el => el.onclick = () => { const id = el.dataset.planDelete, plan = (this.journal || []).find(p => p.plan_id === id) || this.plan; this.confirmAsk(this.t("confirmPlanDelete", { date: this.formatDate(plan?.created_at) }), () => this.deletePlan(id)); });
     root.querySelector("[data-opts-save]")?.addEventListener("click", () => this.saveOptions());
     // Saving stays off until a threshold differs from the saved one; typing must not rebuild the page.
