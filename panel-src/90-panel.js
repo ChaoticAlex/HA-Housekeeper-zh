@@ -960,7 +960,8 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-fsel-unhide]")?.addEventListener("click", () => this.unhideSelectedFindings());
     root.querySelector("[data-fsel-hide]")?.addEventListener("click", () => this.hideSelectedFindings());
     root.querySelectorAll("[data-sel]").forEach(el => el.onchange = () => { this.pickRows("sel", el.dataset.sel, el.checked, this.cleanupSel, this._cleanupVisible); this.render(); });
-    root.querySelector("[data-sel-page]")?.addEventListener("click", () => { (this._cleanupVisible || []).forEach(id => this.cleanupSel.add(id)); this.render(); });
+    root.querySelector("[data-sel-page]")?.addEventListener("change", ev => { (this._cleanupVisible || []).forEach(id => (ev.target.checked ? this.cleanupSel.add(id) : this.cleanupSel.delete(id))); this.render(); });
+    const pageBox = root.querySelector("[data-sel-page]"); if (pageBox) pageBox.indeterminate = pageBox.hasAttribute("data-partial");
     root.querySelector("[data-sel-clear]")?.addEventListener("click", () => { this.cleanupSel.clear(); this.render(); });
     root.querySelector("[data-recorder-choice]")?.addEventListener("change", ev => { this.cleanupRecorder = ev.target.value; this.render(); });
     root.querySelectorAll("[data-rec-own]").forEach(el => el.addEventListener("click", () => { const [id, value] = el.dataset.recOwn.split("|"); this.cleanupRecorderOwn = { ...(this.cleanupRecorderOwn || {}), [id]: value }; this.render(); }));

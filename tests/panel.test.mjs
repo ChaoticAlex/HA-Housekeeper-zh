@@ -1349,6 +1349,11 @@ test("removal candidates are the quarantined entities and wait for the quarantin
   assert.ok(html.includes("Candidates (2)") && html.includes("Ready") && html.includes("12 days to go") && html.includes("Removal is possible only after 14 days"));
   assert.ok(/data-sel="sensor.new"[^>]*disabled/.test(html) && !/data-sel="sensor.old"[^>]*disabled/.test(html));
   assert.equal(JSON.stringify(el._cleanupVisible), JSON.stringify(["sensor.old"]));
+  assert.ok(html.includes('<input type="checkbox" class="selbox" data-sel-page') && html.includes("<table") && html.includes('data-lsort="cleanup|status|asc"'), "candidates are a table with a page box in its head");
+  el.cleanupSel.add("sensor.old");
+  el.render();
+  assert.ok(/data-sel-page checked/.test(shadow.innerHTML), "the page box is checked once every pickable row is");
+  el.cleanupSel.clear();
   el.lv.cleanup.f.readiness = "waiting";
   el.render();
   assert.ok(shadow.innerHTML.includes("sensor.new") && !shadow.innerHTML.includes('data-sel="sensor.old"'));
