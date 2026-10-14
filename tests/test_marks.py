@@ -151,3 +151,31 @@ def test_an_outage_with_a_window_counts_from_the_end_of_the_window() -> None:
     assert counts_from(mark, morning) == datetime(2026, 10, 9, 6, 30, tzinfo=UTC)
     assert counts_from(mark, datetime(2026, 10, 9, 2, 0, tzinfo=UTC)) is None, "still hidden"
     assert counts_from(_mark("expected_offline"), morning) is None, "no window"
+
+
+def test_the_scanner_looks_again_when_the_window_of_an_integration_closes() -> None:
+    from types import SimpleNamespace
+
+    from custom_components.ha_housekeeper.inventory import InventoryScanner  # noqa: E402
+
+    sun = {"state": "below_horizon"}
+    scanner = InventoryScanner.__new__(InventoryScanner)
+    scanner.marks = SimpleNamespace(
+        items={"config_entry:abc": _mark("expected_offline") | {"window": {"mode": "sun"}, "grace": 30}}
+    )
+    scanner._snapshot = {"findings": []}
+    scanner._window_seen = {}
+    scanner.hass = SimpleNamespace(
+        states=SimpleNamespace(get=lambda _: SimpleNamespace(state=sun["state"], last_changed=NOW))
+    )
+    calls = []
+
+    def refresh() -> None:
+        calls.append(1)
+        scanner._window_seen = scanner._window_states(scanner._sun())
+
+    scanner._refresh_marks = refresh
+    assert scanner.refresh_marks_on_window_change() is False and calls == [1], "opened: no scan"
+    assert scanner.refresh_marks_on_window_change() is False and calls == [1], "nothing moved"
+    sun["state"] = "above_horizon"  # long past the grace period
+    assert scanner.refresh_marks_on_window_change() is True and calls == [1, 1], "closed: scan"

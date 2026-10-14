@@ -5279,3 +5279,10 @@ test("the mark form offers a time window and the mark line says when it applies"
   assert.ok(!form({ wmode: "sun" }).includes("data-mark-from") && form({ wmode: "sun" }).includes("data-mark-grace"));
   assert.ok(!form({ kind: "keep", wmode: "sun" }).includes("data-mark-wmode"), "keep has no window");
 });
+
+test("the mark form warns when the sun entity is missing", () => {
+  const { el } = panel("en");
+  const form = states => { el._hass = { states }; return el.markFormHtml({ kind: "expected_offline", reason: "", target: "", days: 0, wmode: "sun", from: "21:00", to: "06:00", grace: 30 }, "config_entry:x"); };
+  assert.ok(form({}).includes("sun.sun"), "no sun.sun: the form says so");
+  assert.ok(!form({ "sun.sun": { state: "below_horizon" } }).includes('role="alert"'));
+});
