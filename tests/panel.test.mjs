@@ -2596,7 +2596,7 @@ test("reliability and the unstable entities can be searched and filtered", () =>
   let html = el.reliabilityView();
   assert.ok(html.includes('data-lq="relentries"') && !html.includes('data-lq="relunstable"'), "the open tab holds its list");
   el.viewTab = { reliability: "unstable" };
-  assert.ok(el.reliabilityView().includes('data-lq="relunstable"'));
+  assert.ok(el.reliabilityView().includes('data-lq="relunstable"') && el.reliabilityView().includes('data-lf-set="relunstable|level|unstable"'), "the unstable tab has tiles that set the level filter");
   el.viewTab = {};
   assert.ok(html.indexOf("Box 6") < html.indexOf("Box 0"), "worst availability first");
   el.lvState("relentries", "avail", "asc").f = { state: "outages" };

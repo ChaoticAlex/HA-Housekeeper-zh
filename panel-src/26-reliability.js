@@ -243,6 +243,12 @@ class ReliabilityMixin {
       ],
       exportName: "reliability-unstable", header: [this.t("utName"), "ID", this.t("relSortEpisodes"), this.t("relSortRate"), this.t("relSortDuration")], rows: item => [item.name, item.entity_id, item.episodes, item.per_day, item.total_seconds],
     });
-    return `<div class="panel">${head}${list}${more}${this.howCounted("relUnstableFootnote", { episodes: th.unstable_min_episodes ?? 3, rate: this.formatNumber(th.unstable_per_day ?? 0.5), flap: this.formatNumber(th.flapping_per_day ?? 1.5) })}</div>`;
+    const count = level => u.items.filter(item => item.level === level).length;
+    const tiles = this.sumTiles([
+      { label: this.t("relSumAll"), value: this.formatNumber(u.items.length), tone: "mute", lf: ["relunstable", "", ""] },
+      { label: this.t("relOnlyFlapping"), value: this.formatNumber(count("flapping")), tone: count("flapping") ? "red" : "ok", lf: ["relunstable", "level", "flapping"] },
+      { label: this.t("relOnlyUnstable"), value: this.formatNumber(count("unstable")), tone: count("unstable") ? "warn" : "ok", lf: ["relunstable", "level", "unstable"] },
+    ]);
+    return `${tiles}<div class="panel">${head}${list}${more}${this.howCounted("relUnstableFootnote", { episodes: th.unstable_min_episodes ?? 3, rate: this.formatNumber(th.unstable_per_day ?? 0.5), flap: this.formatNumber(th.flapping_per_day ?? 1.5) })}</div>`;
   }
 }
