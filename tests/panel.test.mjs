@@ -4234,6 +4234,9 @@ test("devices, automations and integrations share the layout: the overview reads
   assert.ok(!overview.includes("data-de-area") && !overview.includes("data-act-exchange"), "no forms on the overview");
   const actions = el.detailPanel("actions", device, "device:d1");
   assert.ok(actions.includes("data-act-exchange") && actions.includes("data-de-area") && actions.includes("Name and classify"));
+  const at = text => actions.indexOf(`>${text}<`);
+  assert.ok(!actions.includes(">Recommended<"), "the exchange is no answer to a finding, so nothing is recommended");
+  assert.ok(at("Notes") > 0 && at("Notes") < at("More actions") && at("More actions") < at("Name and classify"), "fixed order: notes, more actions, name");
   assert.ok(el.detailPanel("actions", auto, "automation:a1").includes("data-act-label-plan"));
 });
 

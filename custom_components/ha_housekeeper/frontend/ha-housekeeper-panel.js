@@ -9794,16 +9794,18 @@ class DetailActionsMixin {
   actionsTab(item, key) {
     const findings = this.findingRows(key);
     const { items, broken } = this.fixItems(item, key);
-    const recommended = [];
+    // What answers an open finding is recommended; the tools that are always there (exchange, repair, meter) are "more actions".
+    const recommended = [], tools = [];
     if (findings) recommended.push(`<div class="actblock">${findings}</div>`);
-    for (const it of items) recommended.push(this.actRow(it.label, this.t(it.hint), `<button class="btn${it.finding ? " primary" : ""}" ${it.attr}>${this.t("actOpen")}</button>`));
+    for (const it of items) (it.finding ? recommended : tools).push(this.actRow(it.label, this.t(it.hint), `<button class="btn${it.finding ? " primary" : ""}" ${it.attr}>${this.t("actOpen")}</button>`));
     if (broken) recommended.push(`<div class="actblock"><small class="factnote">${this.t("actEditInHa")}</small></div>`);
     const labelControls = broken ? null : this.labelParts(item, true);
     const name = [...this.detailEditRows(item), labelControls ? this.actRow(this.t("actLabelTitle"), this.t("actLabelHint"), labelControls) : ""];
     const notes = this.markRows(item);
     const record = [...this.entityTrimRows(item), this.staleRow(item)];
     const group = (title, rows, sub = "") => { const html = rows.filter(Boolean).join(""); return html ? `<div class="actsec">${this.t(title)}${sub ? `<small>${sub}</small>` : ""}</div>${html}` : ""; };
-    const body = [group("actGroupRecommended", recommended, items.length ? this.t("actPreviewOnly") : ""), group("actGroupName", name), group("actGroupNotes", notes), group("actGroupRecord", record)].join("");
+    const preview = this.t("actPreviewOnly");
+    const body = [group("actGroupRecommended", recommended, items.some(it => it.finding) ? preview : ""), group("actGroupNotes", notes), group("moreActions", tools, preview), group("actGroupName", name), group("actGroupRecord", record)].join("");
     return body ? `<section class="panel actpanel">${body}</section>` : `<p class="factnote">${this.t("actNone")}</p>`;
   }
 
