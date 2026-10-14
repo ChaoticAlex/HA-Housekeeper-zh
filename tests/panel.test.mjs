@@ -1599,7 +1599,7 @@ test("backup confirmations are inline, saved with a date, and can be taken back"
   el.render();
   assert.ok(shadow.innerHTML.includes('data-bh-open="emergency_kit"') && !shadow.innerHTML.includes("data-bh-save"), "the form opens only on a click");
   assert.ok(shadow.innerHTML.includes('data-bh-open="targets"'), "storage locations can be confirmed");
-  assert.match(shadow.innerHTML, /<span class="bhactions"><span class="pill warn">Note<\/span><button class="bhopen" data-bh-open="targets"/, "the confirmation sits beside the badge");
+  assert.match(shadow.innerHTML, /<span class="bhactions"><button class="bhopen" data-bh-open="targets"[^>]*>[^<]+<\/button><span class="pill warn">Note<\/span>/, "the confirmation sits before the badge, which stays the right-hand status column");
   assert.match(shadow.innerHTML, /<\/div><div class="panel"><div class="sectionlabel">Latest backups<\/div>/, "recent backups have their own card");
   el.bhForm = "emergency_kit"; el.render();
   assert.ok(shadow.innerHTML.includes('data-bh-save="emergency_kit"') && !shadow.innerHTML.includes('data-bh-clear="emergency_kit"'), "only a recorded one can be taken back");
