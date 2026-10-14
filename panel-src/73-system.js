@@ -386,7 +386,7 @@ class SystemMixin {
       item.stage && item.stage !== "stable" ? fact("appStage", this.esc(item.stage)) : "",
     ].join("");
     const text = item.description ? `<div class="pad"><p class="factnote">${this.esc(item.description)}</p></div>` : "";
-    return `<div class="stack"><section class="panel"><div class="panelhead"><div><h2>${this.t("app")}</h2><p>${this.t("appHint")}</p></div></div><div class="facts">${rows}</div>${text}</section>${item.mark || item.status === "stopped" ? this.markCard(item) : ""}</div>`;
+    return `<div class="stack"><section class="panel"><div class="panelhead"><div><h2>${this.t("app")}</h2><p>${this.t("appHint")}</p></div></div><div class="facts">${rows}</div>${text}</section>${this.markCard(item)}</div>`;
   }
 
   appAccessCard(item) {
