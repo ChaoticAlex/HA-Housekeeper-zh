@@ -128,7 +128,16 @@ class OverviewMixin {
   todoFoot() {
     const r = this.goals, visit = this.sinceVisitLine();
     const goals = r?.goals?.length ? `<small>${this.t("goalsLine", { met: r.met, total: r.met + r.missed })} · <button class="link" data-goals-settings>${this.t("goalsAdjust")}</button></small>` : "";
-    return goals || visit ? `<div class="pad todofoot">${goals}${visit}</div>` : "";
+    const last = this.monitorLastProblemLine();
+    return goals || visit || last ? `<div class="pad todofoot">${goals}${last}${visit}</div>` : "";
+  }
+
+  // Not a to-do: which monitored function was impaired last, while none is now. It does not count for the health ring.
+  monitorLastProblemLine() {
+    const items = (this.monitorFunctions?.() || []).filter(item => item.enabled !== false);
+    if (items.some(item => item.state === "problem" || item.incident_open)) return "";
+    const last = items.filter(item => item.last_problem_at).sort((a, b) => b.last_problem_at.localeCompare(a.last_problem_at))[0];
+    return last ? `<small>${this.t("monitorLastProblemLine")}: <button class="link" data-monitor-last="${this.esc(last.id)}">${this.esc(last.name)}</button> · ${this.agoText(last.last_problem_at)}</small>` : "";
   }
 
   // "1 topic urgent, 4 more open": what the headline counts are topics (rows of the list), not objects.

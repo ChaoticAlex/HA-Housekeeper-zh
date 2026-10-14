@@ -745,9 +745,11 @@ class MonitorStore:
             result["last_problem_reason"] = runtime.get("last_problem_reason")
             result["last_problem_key"] = runtime.get("last_problem_key")
             results.append(result)
-        self.results = results
         for item in self.items:
             changed = self._prune(item["id"], now) or changed
+        for result in results:
+            result["last_problem_at"] = self.last_problem_at(result["id"], now)
+        self.results = results
         if changed:
             self._save()
         async_dispatcher_send(self.hass, SIGNAL_MONITOR_DEFINITIONS)

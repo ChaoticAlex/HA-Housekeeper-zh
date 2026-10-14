@@ -2086,7 +2086,16 @@ class OverviewMixin {
   todoFoot() {
     const r = this.goals, visit = this.sinceVisitLine();
     const goals = r?.goals?.length ? `<small>${this.t("goalsLine", { met: r.met, total: r.met + r.missed })} · <button class="link" data-goals-settings>${this.t("goalsAdjust")}</button></small>` : "";
-    return goals || visit ? `<div class="pad todofoot">${goals}${visit}</div>` : "";
+    const last = this.monitorLastProblemLine();
+    return goals || visit || last ? `<div class="pad todofoot">${goals}${last}${visit}</div>` : "";
+  }
+
+  // Not a to-do: which monitored function was impaired last, while none is now. It does not count for the health ring.
+  monitorLastProblemLine() {
+    const items = (this.monitorFunctions?.() || []).filter(item => item.enabled !== false);
+    if (items.some(item => item.state === "problem" || item.incident_open)) return "";
+    const last = items.filter(item => item.last_problem_at).sort((a, b) => b.last_problem_at.localeCompare(a.last_problem_at))[0];
+    return last ? `<small>${this.t("monitorLastProblemLine")}: <button class="link" data-monitor-last="${this.esc(last.id)}">${this.esc(last.name)}</button> · ${this.agoText(last.last_problem_at)}</small>` : "";
   }
 
   // "1 topic urgent, 4 more open": what the headline counts are topics (rows of the list), not objects.
@@ -13253,6 +13262,7 @@ Object.assign(TEXT.de, {
   monitorAvail: "Verfügbarkeit", monitorAvailHint: "Letzte {days} Tage, soweit beobachtet. Zeiten ohne Bewertung (deaktiviert, nach Änderungen an den Objekten, vor der ersten Prüfung) zählen nicht. Jedes Feld ist ein Tag mit dem schlechtesten Zustand.", monitorAvailNone: "Noch keine Bewertung in diesem Zeitraum.",
   monitorAvailOk: "Unauffällig: {pct} %", monitorAvailProblem: "Beeinträchtigt: {time} · {n} Vorfälle · längster {longest}", monitorAvailNoProblem: "Kein Defekt belegt", monitorAvailUnknown: "Unbekannt: {time}", monitorAvailUnstable: "Instabil: {time}", monitorAvailSince: "Beobachtet seit {date}", monitorAvailNoData: "keine Bewertung",
   monitorDurLess: "unter 1 Min.", monitorDurMinutes: "{n} Min.", monitorDurHours: "{h} Std. {m} Min.", monitorDurDays: "{d} T. {h} Std.",
+  monitorLastProblem: "zuletzt beeinträchtigt {when}", monitorLastProblemLine: "Zuletzt beeinträchtigt",
   monitorHistory: "Verlauf", monitorHistoryHint: "Zustandswechsel und Änderungen der letzten {days} Tage, neueste zuerst. Die Dauer ist unter Einstellungen einstellbar.", monitorHistoryEmpty: "Noch keine Einträge.", monitorHistoryLoading: "Verlauf wird geladen …",
   monitorHist_flapping: "Wechselt häufig", monitorHistFlap: "{n} Wechsel bis {until}, zuletzt {state}", monitorHistAll: "Alle Einträge", monitorHistStates: "Zustandswechsel", monitorHistConfig: "Änderungen", monitorHist_created: "Angelegt", monitorHist_edited: "Geändert", monitorHist_enabled: "Aktiviert", monitorHist_disabled: "Deaktiviert",
   monitorHistObjects: "{n} Objekte", monitorHistAdded: "Hinzugefügt", monitorHistRemoved: "Entfernt", monitorHistChanged: "Geändert (Pflicht oder Regeln)", monitorHistFields: "Angaben",
@@ -13262,6 +13272,7 @@ Object.assign(TEXT.en, {
   monitorAvail: "Availability", monitorAvailHint: "Last {days} days, as far as observed. Times without an evaluation (disabled, after edits to the objects, before the first check) do not count. Each square is one day with its worst state.", monitorAvailNone: "No evaluation in this period yet.",
   monitorAvailOk: "No known fault: {pct} %", monitorAvailProblem: "Impaired: {time} · {n} incidents · longest {longest}", monitorAvailNoProblem: "No fault confirmed", monitorAvailUnknown: "Unknown: {time}", monitorAvailUnstable: "Unstable: {time}", monitorAvailSince: "Observed since {date}", monitorAvailNoData: "no evaluation",
   monitorDurLess: "under 1 min", monitorDurMinutes: "{n} min", monitorDurHours: "{h} h {m} min", monitorDurDays: "{d} d {h} h",
+  monitorLastProblem: "last impaired {when}", monitorLastProblemLine: "Last impaired",
   monitorHistory: "History", monitorHistoryHint: "State changes and edits of the last {days} days, newest first. The period is set in Settings.", monitorHistoryEmpty: "No entries yet.", monitorHistoryLoading: "Loading the history …",
   monitorHist_flapping: "Changes often", monitorHistFlap: "{n} changes until {until}, latest {state}", monitorHistAll: "All entries", monitorHistStates: "State changes", monitorHistConfig: "Edits", monitorHist_created: "Created", monitorHist_edited: "Edited", monitorHist_enabled: "Enabled", monitorHist_disabled: "Disabled",
   monitorHistObjects: "{n} objects", monitorHistAdded: "Added", monitorHistRemoved: "Removed", monitorHistChanged: "Changed (required or rules)", monitorHistFields: "Details",
@@ -13372,7 +13383,8 @@ class MonitorMixin {
       const key = item.incident_open && item.state === "unverified" ? item.last_problem_key : item.reason_key;
       const reason = key ? this.findObject(key)?.name || key : "";
       const detail = item.incident_open && item.state === "unverified" ? `${this.t("monitorUnresolved")}: ${this.monitorReason(item.last_problem_reason)}` : this.monitorReason(item.reason);
-      return `<button class="row" data-monitor-open="${this.esc(item.id)}"><span class="tile ${tone}"><ha-icon icon="mdi:home-heart"></ha-icon></span><span class="row-text"><strong>${this.esc(item.name)}</strong><small>${this.esc([reason, detail, this.t("monitorLastScan", { date: this.formatDate(item.scanned_at) })].filter(Boolean).join(" · "))}</small></span><span class="pill ${tone}">${this.monitorState(item)}</span></button>`;
+      const earlier = item.last_problem_at && item.state !== "problem" && !item.incident_open ? this.t("monitorLastProblem", { when: this.agoText(item.last_problem_at) }) : "";
+      return `<button class="row" data-monitor-open="${this.esc(item.id)}"><span class="tile ${tone}"><ha-icon icon="mdi:home-heart"></ha-icon></span><span class="row-text"><strong>${this.esc(item.name)}</strong><small>${this.esc([reason, detail, earlier, this.t("monitorLastScan", { date: this.formatDate(item.scanned_at) })].filter(Boolean).join(" · "))}</small></span><span class="pill ${tone}">${this.monitorState(item)}</span></button>`;
     }).join("");
     return `<section class="panel"><div class="panelhead"><div><h2>${this.t("monitor")}</h2><p>${this.t("monitorSubtitle")}</p></div><button class="btn primary" data-monitor-add><ha-icon icon="mdi:plus"></ha-icon>${this.t("monitorAdd")}</button></div>${this.monitorFunctions().length ? `<div class="toolbar">${filters}</div>${rows || `<div class="emptymsg">${this.t("monitorEmptyFiltered")}</div>`}` : `<div class="emptymsg"><ha-icon icon="mdi:home-heart"></ha-icon>${this.t("monitorEmpty")}</div>`}</section>`;
   }
@@ -13505,6 +13517,7 @@ class MonitorMixin {
     this._monitorDescriptionObserver = null;
     root.querySelector("[data-monitor-add]")?.addEventListener("click", () => { this.monitorForm = { name: "", description: "", enabled: true, notify: true, members: [] }; this.monitorQuery = ""; this.monitorType = ""; this.monitorPreview = null; this.monitorError = ""; this.render(); });
     root.querySelectorAll("[data-monitor-filter]").forEach(el => el.onclick = () => { this.monitorFilter = el.dataset.monitorFilter; this.render(); });
+    root.querySelectorAll("[data-monitor-last]").forEach(el => el.onclick = () => { this.noteJump?.("monitor"); this.view = "monitor"; this.selected = null; this.trail = []; this.pages = {}; this.monitorForm = null; this.monitorSelected = el.dataset.monitorLast; this.render(); });
     root.querySelectorAll("[data-monitor-open]").forEach(el => el.onclick = () => { this.monitorSelected = el.dataset.monitorOpen; this.pages = {}; this.render(); });
     root.querySelector("[data-monitor-back]")?.addEventListener("click", () => { this.monitorSelected = null; this.render(); });
     root.querySelector("[data-monitor-edit]")?.addEventListener("click", () => { const item = this.monitorFunctions().find(f => f.id === this.monitorSelected); this.monitorForm = { id: item.id, name: item.name, description: item.description, enabled: item.enabled !== false, notify: item.notify, members: item.members.map(m => ({ object_key: m.object_key, required: m.required, rules: m.rules || [] })) }; this.monitorQuery = ""; this.monitorType = ""; this.monitorPreview = null; this.monitorError = ""; this.render(); this.queueMonitorPreview(); });
