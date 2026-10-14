@@ -3145,6 +3145,29 @@ test("findings that began with an update get a line, a tile and a filter", () =>
   assert.ok(card.includes("Update of hue 1 → 2") && card.includes("1× ") && card.includes('data-object="entity:light.a"'));
 });
 
+test("the watch after an update shows a band while it runs and a card with what failed since", () => {
+  const { el } = panel("en");
+  el.data = { ...DATA, objects: [{ object_type: "entity", object_id: "light.a", name: "Hall lamp", status: "unavailable" }], edges: [], findings: [] };
+  el._watchRequested = true; el._watchKey = el.data.meta.scanned_at || "";
+  const result = { verdict: "worse", new: ["entity:light.a"], fixed: [], transient: [], new_findings: [] };
+  const trigger = [{ kind: "ha_version", from: "2026.10.1", to: "2026.10.2" }];
+  const running = { id: "w1", started_at: "2026-10-14T03:00:00+00:00", until: new Date(Date.now() + 5 * 3600000).toISOString(), triggers: trigger, before: { at: "2026-10-13T20:00:00+00:00" }, samples: [{}], closed_at: null, result };
+  el.watch = { hours: 24, watches: [running] };
+  const meta = { started_at: running.started_at, until: running.until, triggers: trigger, samples: 1, new: 1 };
+  el.data = { ...el.data, meta: { ...el.data.meta, watch: meta } };
+  assert.ok(el.watchBand().includes("Home Assistant update 2026.10.1 → 2026.10.2") && el.watchBand().includes("1 objects affected"));
+  el.data = { ...el.data, meta: { ...el.data.meta, watch: { ...meta, samples: 0, new: 0 } } };
+  assert.ok(el.watchBand().includes("first check comes 30 minutes"));
+  el.data = { ...el.data, meta: { ...el.data.meta, watch: null } };
+  assert.equal(el.watchBand(), "");
+  el.watch = { hours: 24, watches: [{ ...running, closed_at: "2026-10-15T03:00:00+00:00", result }] };
+  el.folds = { watch: true, watch_w1: true };
+  const card = el.watchCard();
+  assert.ok(card.includes("Worse") && card.includes("Failed since (1)") && card.includes("Hall lamp") && card.includes('data-object="entity:light.a"'));
+  el.watch = { hours: 24, watches: [] };
+  assert.equal(el.watchCard(), "");
+});
+
 test("a device has a history tab with its steps and no note; removed devices show their logbook entry in Maintenance", () => {
   const { el } = panel("en");
   el.data = DATA;

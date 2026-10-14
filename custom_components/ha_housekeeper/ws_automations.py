@@ -369,6 +369,22 @@ async def websocket_blueprints(
 
 
 @websocket_api.require_admin
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/watches"})
+@websocket_api.async_response
+@with_scanner
+async def websocket_watches(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """The watches after updates, newest first. Reads stored samples only."""
+    connection.send_result(
+        msg["id"], _versioned({"hours": scanner.watch_hours, "watches": scanner.watch.report()})
+    )
+
+
+@websocket_api.require_admin
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/correlations"})
 @websocket_api.async_response
 @with_scanner
@@ -388,6 +404,7 @@ def async_register(hass: HomeAssistant) -> None:
     """Register the commands of this part."""
     websocket_api.async_register_command(hass, websocket_blueprints)
     websocket_api.async_register_command(hass, websocket_correlations)
+    websocket_api.async_register_command(hass, websocket_watches)
     websocket_api.async_register_command(hass, websocket_automation_runs)
     websocket_api.async_register_command(hass, websocket_automation_quality)
     websocket_api.async_register_command(hass, websocket_criteria)

@@ -22,7 +22,8 @@
           "low_battery_percent": "Batterie als schwach melden ab (Prozent)",
           "scan_interval_hours": "Automatisch scannen alle (Stunden, 0 = aus)",
           "stale_hours": "Sensoren ohne neue Werte melden nach (Stunden, 0 = aus)",
-          "history_days": "Verläufe aufbewahren (Tage)"
+          "history_days": "Verläufe aufbewahren (Tage)",
+          "watch_hours": "Nach Updates beobachten (Stunden, 0 = aus)"
         }
       }
     },

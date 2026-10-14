@@ -108,7 +108,7 @@ class SettingsMixin {
     const { storage, database } = m;
     return {
       housekeeper: m.version, home_assistant: m.ha_version, scanned_at: m.scanned_at, preliminary: Boolean(m.preliminary),
-      scan_interval_hours: m.scan_interval_hours, history_days: m.history_days, recorder_available: m.recorder_available,
+      scan_interval_hours: m.scan_interval_hours, history_days: m.history_days, watch_hours: m.watch_hours, recorder_available: m.recorder_available,
       object_count: m.object_count, type_counts: m.type_counts, status_counts: m.status_counts, edge_count: (this.data?.edges || []).length,
       findings_by_rule: count(this.data?.findings || [], f => f.rule_id), findings_by_classification: count(this.data?.findings || [], f => f.classification),
       policies_on: this.policies ? this.policies.rules.filter(r => r.enabled).map(r => r.id) : null,

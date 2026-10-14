@@ -38,6 +38,7 @@ STALE_STORAGE_KEY: Final = f"{DOMAIN}.stale"
 SCAN_HEALTH_STORAGE_KEY: Final = f"{DOMAIN}.scan_health"
 MONITOR_STORAGE_KEY: Final = f"{DOMAIN}.monitor"
 LOAD_STORAGE_KEY: Final = f"{DOMAIN}.load"
+WATCH_STORAGE_KEY: Final = f"{DOMAIN}.watch"
 STORAGE_VERSION: Final = 1
 
 CONF_MIN_UNAVAILABLE_DAYS: Final = "min_unavailable_days"
@@ -52,6 +53,8 @@ CONF_STALE_HOURS: Final = "stale_hours"
 DEFAULT_STALE_HOURS: Final = 48
 CONF_HISTORY_DAYS: Final = "history_days"
 DEFAULT_HISTORY_DAYS: Final = 30
+CONF_WATCH_HOURS: Final = "watch_hours"
+DEFAULT_WATCH_HOURS: Final = 24
 JOURNAL_STORAGE_KEY: Final = f"{DOMAIN}.journal"
 # Earliest point at which a quarantined entity may be removed (a later step, preview only today).
 QUARANTINE_DAYS: Final = 14
@@ -65,6 +68,7 @@ OPTION_LIMITS: Final = {
     CONF_LOW_BATTERY_PERCENT: (1, 100),
     CONF_STALE_HOURS: (0, 8760),
     CONF_HISTORY_DAYS: (1, 365),
+    CONF_WATCH_HOURS: (0, 168),
 }
 # While Home Assistant is still starting, entities of slow integrations have no state yet.
 # Scans in this window are preliminary: they change no stored observations, issues or history.

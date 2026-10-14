@@ -8,7 +8,7 @@ variables, payloads or error texts.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from homeassistant.core import HomeAssistant
@@ -140,13 +140,24 @@ class EventLog:
         self.heartbeat = now.isoformat()
         self._save()
 
-    def observe(self, ha_version: str, custom_versions: dict[str, str], now: datetime) -> None:
-        """Compare the installed versions with the last observation and log changes."""
-        for event in detect(self.versions, ha_version, custom_versions, now):
-            self.events.append(event)
+    def observe(
+        self, ha_version: str, custom_versions: dict[str, str], now: datetime
+    ) -> list[dict[str, Any]]:
+        """Compare the installed versions with the last observation, log and return the changes."""
+        found = detect(self.versions, ha_version, custom_versions, now)
+        self.events.extend(found)
         del self.events[:-MAX_EVENTS]
         self.versions = {"ha": ha_version, "entries": dict(custom_versions)}
         self._save()
+        return found
+
+    def last_start(self, before: datetime, within: timedelta) -> datetime | None:
+        """The latest logged restart not after ``before`` and at most ``within`` earlier."""
+        for event in reversed(self.events):
+            moment = _parse(event.get("at"))
+            if event["kind"] == "start" and moment is not None and moment <= before:
+                return moment if before - moment <= within else None
+        return None
 
     def recent(self, limit: int = LIST_LIMIT) -> list[dict[str, Any]]:
         return list(reversed(self.events[-limit:]))

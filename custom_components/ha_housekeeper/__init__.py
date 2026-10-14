@@ -31,12 +31,14 @@ from .const import (
     CONF_SCAN_INTERVAL_HOURS,
     CONF_STALE_HOURS,
     CONF_UNUSED_AUTOMATION_DAYS,
+    CONF_WATCH_HOURS,
     DEFAULT_HISTORY_DAYS,
     DEFAULT_LOW_BATTERY_PERCENT,
     DEFAULT_MIN_UNAVAILABLE_DAYS,
     DEFAULT_SCAN_INTERVAL_HOURS,
     DEFAULT_STALE_HOURS,
     DEFAULT_UNUSED_AUTOMATION_DAYS,
+    DEFAULT_WATCH_HOURS,
     DOMAIN,
     FONTS_URL,
     FRONTEND_URL,
@@ -101,6 +103,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         CONF_SCAN_INTERVAL_HOURS, DEFAULT_SCAN_INTERVAL_HOURS
     )
     scanner.history.retention_days = entry.options.get(CONF_HISTORY_DAYS, DEFAULT_HISTORY_DAYS)
+    scanner.watch_hours = entry.options.get(CONF_WATCH_HOURS, DEFAULT_WATCH_HOURS)
     scanner.monitor.retention_days = scanner.history.retention_days
     await scanner.async_initialize()
     hass.data[DOMAIN]["scanner"] = scanner
@@ -186,6 +189,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         scanner.events.beat(datetime.now(UTC))
 
     entry.async_on_unload(async_track_time_interval(hass, _heartbeat, timedelta(minutes=5)))
+
+    async def _watch_tick(_: Any) -> None:
+        await scanner.async_watch_tick()
+
+    entry.async_on_unload(async_track_time_interval(hass, _watch_tick, timedelta(minutes=5)))
 
     async def _sample_load(_: Any) -> None:
         # A sample that cannot be taken is a gap in the line, nothing more.

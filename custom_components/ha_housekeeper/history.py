@@ -249,6 +249,11 @@ class ScanHistory:
             if _valid_checkpoint(cp)
         ][:PIN_LIMIT]
 
+    @property
+    def previous(self) -> dict[str, Any] | None:
+        """The scan before the latest one."""
+        return self._previous
+
     def record(self, snapshot: dict[str, Any]) -> None:
         """Remember a finished scan; the last one becomes the 'previous' baseline."""
         checkpoint = make_checkpoint(snapshot)

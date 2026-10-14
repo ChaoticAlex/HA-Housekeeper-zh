@@ -32,6 +32,7 @@ from .automation_blocked import blocked_automation_findings, dead_effect_finding
 from .backup_health import AttestStore, backup_health
 from .battery_care import BatteryStore
 from .battery_kind import apply_battery_kinds
+from .blueprints import async_available, blueprint_path, missing_blueprint_findings
 from .causes import apply_causes, device_down_findings
 from .cleanup import JournalStore, is_child_device, quarantine_entries, recurring_devices
 from .cleanup_exec import CleanupRunner
@@ -42,6 +43,7 @@ from .const import (
     DEFAULT_SCAN_INTERVAL_HOURS,
     DEFAULT_STALE_HOURS,
     DEFAULT_UNUSED_AUTOMATION_DAYS,
+    DEFAULT_WATCH_HOURS,
     DOMAIN,
     IGNORE_LABEL,
     QUARANTINE_DAYS,
@@ -96,13 +98,13 @@ from .reminders import ReminderStore
 from .runs import RunStore
 from .scan_coverage import RETRY_LIMIT, RETRY_MINUTES, ScanCoverage, retryable_gaps
 from .scan_health import ScanHealth
-from .scan_trigger import scan_request
-from .blueprints import async_available, blueprint_path, missing_blueprint_findings
+from .scan_trigger import ScanRefused, scan_request
 from .service_check import missing_service_findings
 from .signals import SignalStore, situations
 from .signals import fire as signal_fire
 from .stale import StaleStore
 from .system_usage import supervisor_get, supervisor_token
+from .watch import WatchStore, evaluate, make_before, next_due
 from .window import WindowStore
 
 _LOGGER = logging.getLogger(__name__)
@@ -685,6 +687,7 @@ class InventoryScanner:
         self.preflight = PreflightStore(hass)
         self.attest = AttestStore(hass)
         self.events = EventLog(hass)
+        self.watch = WatchStore(hass)
         self.marks = MarkStore(hass)
         self.stale = StaleStore(hass)
         self.load = LoadStore(hass)
@@ -724,6 +727,7 @@ class InventoryScanner:
         self.low_battery_percent = DEFAULT_LOW_BATTERY_PERCENT
         self.stale_hours = DEFAULT_STALE_HOURS
         self.scan_interval_hours = DEFAULT_SCAN_INTERVAL_HOURS
+        self.watch_hours = DEFAULT_WATCH_HOURS
         self.version: str | None = None
         self.status: dict[str, Any] = {
             "running": False,
@@ -747,6 +751,7 @@ class InventoryScanner:
         await self.preflight.async_load()
         await self.attest.async_load()
         await self.events.async_load()
+        await self.watch.async_load()
         await self.marks.async_load()
         await self.stale.async_load()
         await self.load.async_load()
@@ -821,6 +826,7 @@ class InventoryScanner:
                         datetime.now(UTC),
                     )
                     self._observe_versions(snapshot)
+                    self._observe_watch(snapshot)
                     if followup.check(
                         self.journal.plans, snapshot, datetime.now(UTC), self.runs.errors_since
                     ):
@@ -934,7 +940,47 @@ class InventoryScanner:
             for item in snapshot["objects"]
             if item["object_type"] == "config_entry" and item.get("integration_version")
         }
-        self.events.observe(HA_VERSION, custom, datetime.now(UTC))
+        now = datetime.now(UTC)
+        found = self.events.observe(HA_VERSION, custom, now)
+        if found and self.watch_hours > 0:
+            # The restart is the moment of the update; the scan that notices it comes minutes later.
+            started = self.events.last_start(now, timedelta(hours=24)) or now
+            triggers = [{k: v for k, v in e.items() if k != "at"} for e in found]
+            self.watch.start(
+                started, now, self.watch_hours, triggers, make_before(self.history.previous)
+            )
+
+    def _observe_watch(self, snapshot: dict[str, Any]) -> None:
+        """A scan after an update is a sample of the watch, once the restart has calmed down."""
+        self.watch.sample(snapshot, datetime.now(UTC))
+        snapshot["meta"]["watch"] = self.watch_summary()
+
+    def watch_summary(self) -> dict[str, Any] | None:
+        """The open watch in short, for the band in the panel header; None when none is open."""
+        watch = self.watch.active()
+        if watch is None:
+            return None
+        result = evaluate(watch)
+        return {
+            "started_at": watch["started_at"],
+            "until": watch["until"],
+            "triggers": watch["triggers"],
+            "samples": len(watch["samples"]),
+            "new": len(result["new"]) + len(result["new_findings"]),
+        }
+
+    async def async_watch_tick(self) -> None:
+        """Ask for the next scan of an open watch when it is due; it is judged at its end."""
+        watch = self.watch.active()
+        if watch is None or self.watch.expire(datetime.now(UTC)):
+            return
+        due = next_due(watch)
+        if due is None or due > datetime.now(UTC) or self.watch_hours <= 0:
+            return
+        try:
+            await self.async_request_scan()
+        except ScanRefused:  # a plan or the start is in the way: the next tick asks again
+            return
 
     @property
     def snapshot(self) -> dict[str, Any] | None:
@@ -1285,6 +1331,8 @@ class InventoryScanner:
                 "low_battery_percent": self.low_battery_percent,
                 "stale_hours": self.stale_hours,
                 "history_days": self.history.retention_days,
+                "watch_hours": self.watch_hours,
+                "watch": self.watch_summary(),
                 "low_batteries": len(low_battery_ids(entities, self.low_battery_percent)),
                 "object_count": len(objects),
                 "status_counts": dict(Counter(item["status"] for item in objects)),
