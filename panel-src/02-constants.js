@@ -90,6 +90,10 @@ const SCHEMES = {
     light: { accent: "#0b4f9c", bg: "#f2f6fb", surface: "#ffffff", soft: "#e4ecf6", text: "#0c1a2e", muted: "#485a74", border: "#d2deec", positive: "#1f8a54", warning: "#9a6200", danger: "#c23b3b" },
     dark: { accent: "#5aa9ff", on: "#060c18", bg: "#060c18", surface: "#0d1626", soft: "#15233a", text: "#e9f1fc", muted: "#9db2cf", border: "#1f3250", positive: "#62d19a", warning: "#f0b35c", danger: "#ff8a8a" },
   },
+  olive: {
+    light: { accent: "#5f6b1f", bg: "#f7f7ee", surface: "#ffffff", soft: "#ecedd9", text: "#1c1f0c", muted: "#5a5e3a", border: "#dee0c4", positive: "#2f7d46", warning: "#9a6200", danger: "#b3261e" },
+    dark: { accent: "#c4cf5a", on: "#12140a", bg: "#12140a", surface: "#1b1e10", soft: "#272b17", text: "#f3f5e2", muted: "#b8bd90", border: "#353a1f", positive: "#7fd68f", warning: "#f0b35c", danger: "#ff8f87" },
+  },
 };
 // Earlier builds saved other scheme names.
 const SCHEME_ALIASES = { teal: "housekeeper", amber: "housekeeper", sage: "housekeeper", zeitarchiv: "housekeeper", indigo: "modern" };
