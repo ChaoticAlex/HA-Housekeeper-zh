@@ -247,8 +247,8 @@ class FindingsMixin {
     const sorted2 = [...classes].sort((a, b) => rank(a) - rank(b));
     const tidy = sorted2.filter(c => FINDING_TIDY.includes(c)), urgent = sorted2.filter(c => !FINDING_TIDY.includes(c));
     const total = { label: this.t("allFindings"), value: this.formatNumber(this.findingTotal()), sub: this.followerCount() ? this.esc(this.t("findingsFollowSub", { n: this.formatNumber(this.followerCount()) })) : undefined, tone: this.findingTotal() ? "warn" : "ok", filter: "", active: !this.findingFilter, spark: spark("lead", "bad") };
-    const group = (title, list, make) => list.length ? `<div class="sumgroup" style="flex:${list.length} 1 ${list.length * 150}px"><div class="sumgrouphead">${this.t(title)}</div>${this.sumTiles(list.map(make))}</div>` : "";
-    const tiles = `<div class="sumgroups">${group("sumGroupAll", [total], x => x)}${group("sumGroupUrgent", urgent, tile)}${group("sumGroupTidy", tidy, tile)}</div>`;
+    const group = (title, list, make, row) => list.length ? `<div class="sumgroup${row ? ` row${row}` : ""}" style="--n:${list.length};flex:${list.length} 1 ${list.length * 150}px"><div class="sumgrouphead">${this.t(title)}</div>${this.sumTiles(list.map(make))}</div>` : "";
+    const tiles = `<div class="sumgroups" style="--cols:${Math.max(1 + urgent.length, tidy.length)}">${group("sumGroupAll", [total], x => x, 1)}${group("sumGroupUrgent", urgent, tile, 1)}${group("sumGroupTidy", tidy, tile, 2)}</div>`;
     const dueCount = this.data.findings.filter(f => f.resurfaced).length;
     const followers = this.followerCount();
     const fixedView = this.findingStatus === "fixed";

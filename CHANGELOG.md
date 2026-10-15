@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Kacheln auf zwei Zeilen:** Auf breiten Fenstern stehen „Gesamt“ und „Dringend“ oben und „Aufräumen“ darunter. Alle Kacheln sind gleich breit, lange Namen brechen nicht mehr um.
+
 - **Kurven der Kacheln zählen wie die Zahl:** Die Kurve in den Kacheln der Befundseite zählt wie die Zahl ohne Folgen. Sie beginnt neu und füllt sich über die nächsten Tage.
 
 - **Klarere Filter der Befundliste:** „Alle einzeln (n)“ zeigt jeden Befund für sich, „Ursachen mit Folgen (n)“ nur die Ursachen, an denen Folgen hängen. Beide nennen ihre Anzahl, die Hilfekarte erklärt den Unterschied.
