@@ -1,0 +1,8 @@
+# Local test environment, the same versions as the pinned run in .github/workflows/validate.yml:
+#   uv venv --python 3.14 && uv pip install --python .venv/bin/python -r requirements-dev.txt
+#   .venv/bin/python -m pytest -q --asyncio-mode=auto
+homeassistant==2026.8.3
+pytest-homeassistant-custom-component==0.13.357
+home-assistant-frontend
+ruff
+mypy
