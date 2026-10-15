@@ -7578,6 +7578,7 @@ Object.assign(TEXT.de, {
   watchV_worse: "Verschlechtert", watchV_stable: "Stabil", watchV_transient: "Vorübergehend", watchV_unknown: "Unbekannt", watchV_pending: "Läuft",
   watchBefore: "Stand davor: Scan vom {when}", watchNoBefore: "Vor dem Neustart gab es keinen Scan, ein Vergleich ist nicht möglich.",
   watchUnread: "Eine Quelle konnte nicht gelesen werden. Was dort fehlt, gilt als unbekannt, nicht als in Ordnung.",
+  repairSeverity_critical: "kritisch", repairSeverity_error: "Fehler", repairSeverity_warning: "Warnung", repairFixable: "lässt sich in Home Assistant beheben", repairMore: "Mehr erfahren",
   watchNew: "Seitdem ausgefallen ({n})", watchRepairs: "Seitdem neue Reparaturen ({n})", watchSilent: "Seitdem ohne Wert ({n})", watchMarked: "Mit Vermerk, nicht gezählt ({n})", watchFixed: "Wieder in Ordnung ({n})", watchTransient: "Kurz gestört, jetzt wieder in Ordnung ({n})", watchNewFindings: "Neue Befunde seit dem Update: {n}",
   watchNone: "Keine Auffälligkeiten.", watchSamples: "{n} Messungen", watchEnded: "beendet {when}", watchMore: "{n} weitere sind hier nicht aufgeführt.",
   optWatchTitle: "Beobachtung nach System-Update", optWatchHint: "Wie viele Stunden nach einem Update von Home Assistant, Betriebssystem oder Supervisor zusätzlich gescannt und mit dem Stand davor verglichen wird. 0 schaltet die Beobachtung aus.",
@@ -7588,6 +7589,7 @@ Object.assign(TEXT.en, {
   watchV_worse: "Worse", watchV_stable: "Stable", watchV_transient: "Temporary", watchV_unknown: "Unknown", watchV_pending: "Running",
   watchBefore: "State before: scan of {when}", watchNoBefore: "There was no scan before the restart, so there is nothing to compare with.",
   watchUnread: "A source could not be read. What is missing there counts as unknown, not as fine.",
+  repairSeverity_critical: "critical", repairSeverity_error: "error", repairSeverity_warning: "warning", repairFixable: "can be fixed in Home Assistant", repairMore: "Learn more",
   watchNew: "Failed since ({n})", watchRepairs: "New repairs since ({n})", watchSilent: "Without a value since ({n})", watchMarked: "Marked, not counted ({n})", watchFixed: "Working again ({n})", watchTransient: "Briefly disturbed, fine now ({n})", watchNewFindings: "New findings since the update: {n}",
   watchNone: "Nothing unusual.", watchSamples: "{n} checks", watchEnded: "ended {when}", watchMore: "{n} more are not listed here.",
   optWatchTitle: "Watch after a system update", optWatchHint: "For how many hours after an update of Home Assistant, the operating system or the Supervisor Housekeeper scans extra and compares with the state before. 0 switches the watch off.",
@@ -7726,7 +7728,14 @@ class WatchMixin {
     if (r.reason === "unread") parts.push(`<p class="factnote">${this.t("watchUnread")}</p>`);
     const section = (id, keys, tone) => keys.length ? `<h3>${this.t(id, { n: this.formatNumber(keys.length) })}</h3>${this.watchRows(keys, tone)}` : "";
     parts.push(section("watchNew", r.new, "warn"), section("watchSilent", r.silent, "mute"), section("watchMarked", r.marked, "mute"), section("watchTransient", r.transient, "mute"), section("watchFixed", r.fixed, "ok"));
-    if (r.new_repairs?.length) parts.push(`<h3>${this.t("watchRepairs", { n: this.formatNumber(r.new_repairs.length) })}</h3>${r.new_repairs.slice(0, WATCH_LIST).map(key => `<div class="row"><span class="tile warn"><ha-icon icon="mdi:wrench-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(key.split(":").slice(1).join(":"))}</strong><small>${this.esc(key.split(":")[0])}</small></span></div>`).join("")}`);
+    if (r.new_repairs?.length) {
+      const info = this.watch?.repairs || {};
+      parts.push(`<h3>${this.t("watchRepairs", { n: this.formatNumber(r.new_repairs.length) })}</h3>${r.new_repairs.slice(0, WATCH_LIST).map(key => {
+        const i = info[key], domain = key.split(":")[0], id = key.split(":").slice(1).join(":");
+        const sub = [this.esc(domain), ["critical", "error", "warning"].includes(i?.severity) ? this.t(`repairSeverity_${i.severity}`) : "", i?.fixable ? this.t("repairFixable") : ""].filter(Boolean).join(" · ");
+        return `<div class="row"><span class="tile warn"><ha-icon icon="mdi:wrench-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(i?.title || id)}</strong><small>${sub}</small></span>${i?.url ? `<a class="btn quiet" href="${this.esc(i.url)}" target="_blank" rel="noopener noreferrer">${this.t("repairMore")}</a>` : ""}</div>`;
+      }).join("")}`);
+    }
     if (r.new_findings.length) parts.push(`<p class="sub">${this.t("watchNewFindings", { n: this.formatNumber(r.new_findings.length) })}</p>`);
     if (!r.new.length && !r.silent.length && !r.marked.length && !r.transient.length && !r.fixed.length && !r.new_findings.length && !r.new_repairs?.length && w.before) parts.push(`<p class="sub">${this.t("watchNone")}</p>`);
     return parts.join("");

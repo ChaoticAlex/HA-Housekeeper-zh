@@ -289,6 +289,46 @@ def repair_keys(hass: HomeAssistant) -> list[str]:
     return [f"{item['domain']}:{item['issue_id']}" for item in _repairs(hass)][:REPAIRS_KEPT]
 
 
+async def repair_details(hass: HomeAssistant) -> dict[str, dict[str, Any]]:
+    """What the person can read about each open repair, by its ``domain:issue_id``.
+
+    Home Assistant keeps no title in the issue itself, only a translation key and placeholders; the
+    title is looked up in the translations of the integration in the language of Home Assistant. Without
+    one the entry has no title and the panel shows the id.
+    """
+    from homeassistant.helpers.translation import async_get_translations
+
+    registry = ir.async_get(hass)
+    out: dict[str, dict[str, Any]] = {}
+    texts: dict[str, dict[str, str]] = {}
+    for issue in registry.issues.values():
+        if not issue.active or issue.dismissed_version or issue.domain == "ha_housekeeper":
+            continue
+        if issue.domain not in texts:
+            try:
+                texts[issue.domain] = await async_get_translations(
+                    hass, hass.config.language, "issues", [issue.domain]
+                )
+            except Exception:
+                texts[issue.domain] = {}
+        title = None
+        if issue.translation_key:
+            raw = texts[issue.domain].get(
+                f"component.{issue.domain}.issues.{issue.translation_key}.title"
+            )
+            if raw:
+                title = raw
+                for name, value in (issue.translation_placeholders or {}).items():
+                    title = title.replace("{" + str(name) + "}", str(value))
+        out[f"{issue.domain}:{issue.issue_id}"] = {
+            "title": title,
+            "fixable": bool(issue.is_fixable),
+            "severity": str(getattr(issue.severity, "value", issue.severity)),
+            "url": issue.learn_more_url,
+        }
+    return out
+
+
 def _failed_entries(hass: HomeAssistant) -> list[dict[str, Any]]:
     return sorted(
         (

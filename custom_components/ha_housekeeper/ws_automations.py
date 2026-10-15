@@ -20,6 +20,7 @@ from .criteria import THRESHOLDS as CRITERIA_LIMITS
 from .dry_run import Context as DryRunContext
 from .dry_run import dry_run as run_dry
 from .inventory import InventoryScanner
+from .maintenance import repair_details
 from .quality import build as build_quality
 from .run_health import report as runs_report
 from .runs import run_key
@@ -382,7 +383,11 @@ async def websocket_watches(
     connection.send_result(
         msg["id"],
         _versioned(
-            {"hours": scanner.watch_hours, "watches": scanner.watch.report(scanner.watch_marked())}
+            {
+                "hours": scanner.watch_hours,
+                "watches": scanner.watch.report(scanner.watch_marked()),
+                "repairs": await repair_details(hass),
+            }
         ),
     )
 

@@ -161,6 +161,29 @@ async def test_preflight_ignores_persisted_issues_that_are_not_active(hass: Home
     assert [r["issue_id"] for r in maintenance._repairs(hass)] == ["active_issue"]
 
 
+async def test_repair_details_name_a_repair_by_its_key_and_survive_a_missing_title(
+    hass: HomeAssistant,
+) -> None:
+    from custom_components.ha_housekeeper import maintenance
+
+    ir.async_create_issue(
+        hass,
+        "demo",
+        "some_id",
+        is_fixable=True,
+        severity=ir.IssueSeverity.ERROR,
+        translation_key="unknown_key",
+        learn_more_url="https://example.org/help",
+    )
+    details = await maintenance.repair_details(hass)
+    assert details["demo:some_id"] == {
+        "title": None,
+        "fixable": True,
+        "severity": "error",
+        "url": "https://example.org/help",
+    }
+
+
 def _raw(states, recent=None, **extra):
     raw = {
         "total_states": sum(count for _, count, _, _ in states),
