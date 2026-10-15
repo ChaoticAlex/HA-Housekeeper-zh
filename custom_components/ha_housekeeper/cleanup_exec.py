@@ -715,6 +715,7 @@ class CleanupRunner:
             self._backup_failed(plan, "backup_unverified", problem=problem)
             return
         plan["backup"] = {
+            "name": name,  # how to find it in Home Assistant's backup list when a restore is needed
             "job_id": getattr(created, "backup_job_id", None),
             "at": _now().isoformat(),
             "scope": scope,

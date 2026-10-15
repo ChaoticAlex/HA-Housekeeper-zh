@@ -354,6 +354,7 @@ async def test_removal_waits_for_a_backup_removes_and_can_be_restored(hass: Home
     assert plan["backup"]["scope"] == "config"
     assert registry.async_get(entry.entity_id) is None
     assert plan["status"] == "verified" and plan["backup"]["job_id"] == "job-1"
+    assert plan["backup"]["name"] == f"Housekeeper {plan['plan_id'][:8]}"
     types = [e["type"] for e in plan["events"]]
     assert types.index("backup_started") < types.index("backup_done") < types.index("removed")
     assert {"check": "removed", "object_id": entry.entity_id, "ok": True} in plan["verification"][
