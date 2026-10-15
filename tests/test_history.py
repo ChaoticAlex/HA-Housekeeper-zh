@@ -296,3 +296,18 @@ def test_the_day_of_a_scan_is_counted_in_the_local_time_zone(hass) -> None:
         assert [cp["at"] for cp in history._daily] == ["2026-10-10T19:54:00+00:00"]
     finally:
         dt_util.set_default_time_zone(previous)
+
+
+def test_a_checkpoint_from_before_the_levels_by_duration_ends_findings_as_a_new_rating() -> None:
+    dash = {"rule_id": "entity.state_unavailable", "object_id": "sensor.a", "classification": "unavailable"}
+    objects = [("entity", "sensor.a", "active")]
+    old_snap = _snapshot("2026-10-06T10:00:00+00:00", objects, [dash])
+    old = make_checkpoint(old_snap)
+    old["rules"] = {"min_unavailable_days": 7}  # what a checkpoint of the old version holds
+    new = _snapshot("2026-10-07T10:00:00+00:00", objects)
+    new["meta"] |= {"outage_info_minutes": 15, "outage_high_hours": 168}
+    diff = diff_checkpoints(old, new)
+    assert diff["new_rating"] is True and diff["resolved_findings"]["total"] == 0
+    assert [f["reason"] for f in diff["ended_findings"]["items"]] == ["rules_changed"]
+    again = make_checkpoint(new)
+    assert diff_checkpoints(again, new)["new_rating"] is False

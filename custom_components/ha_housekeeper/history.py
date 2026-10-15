@@ -156,10 +156,14 @@ def diff_checkpoints(base: dict[str, Any], snapshot: dict[str, Any]) -> dict[str
         f for f in snapshot["findings"] if _finding_key(f) not in base_findings and not is_quiet(f)
     ]
     # Rules that read differently now than at the baseline: what vanished under them was not repaired.
+    base_rules = base.get("rules") or {}
+    # A checkpoint from before the levels by duration still holds the old setting: every outage reads differently now.
+    legacy = "min_unavailable_days" in base_rules and "outage_info_minutes" not in base_rules
     changed = {
         name
         for name in SETTING_RULES
-        if name in (base.get("rules") or {}) and base["rules"][name] != current["rules"].get(name)
+        if (name in base_rules and base_rules[name] != current["rules"].get(name))
+        or (legacy and name.startswith("outage_"))
     }
     reworded = set().union(*(SETTING_RULES[name] for name in changed)) if changed else set()
     resolved_findings = []
@@ -195,6 +199,7 @@ def diff_checkpoints(base: dict[str, Any], snapshot: dict[str, Any]) -> dict[str
         "new_findings": cut(new_findings),
         "resolved_findings": cut(resolved_findings),
         "ended_findings": cut(ended_findings),
+        "new_rating": legacy,
     }
 
 

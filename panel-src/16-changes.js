@@ -120,7 +120,8 @@ class ChangesMixin {
     // The server sends the first entries of a section; the rest only counts.
     const capped = part => part.total > part.items.length ? `<p class="factnote">${this.t("changesCapped", { shown: this.formatNumber(part.items.length), count: this.formatNumber(part.total - part.items.length) })}</p>` : "";
     const allTypes = [...new Set(sections.flatMap(([, , part]) => part.items.map(typeOf)).filter(Boolean))].sort();
-    const bar = total ? `${this.listBar("changes", { sorts: [], filters: [{ name: "type", all: this.t("allTypes"), options: allTypes.map(x => [x, this.t(x)]) }] })}<p class="factnote">${this.t("changesBarHint")}</p>` : "";
+    const rating = c.new_rating ? `<p class="factnote">${this.t("changesNewRating")}</p>` : "";
+    const bar = rating + (total ? `${this.listBar("changes", { sorts: [], filters: [{ name: "type", all: this.t("allTypes"), options: allTypes.map(x => [x, this.t(x)]) }] })}<p class="factnote">${this.t("changesBarHint")}</p>` : "");
     const paged = (id, items, render) => {
       const shown = items.filter(matches);
       if (items.length && !shown.length) return `<div class="emptymsg">${this.t("changesFiltered", { n: items.length })}</div>`;

@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Ausfälle nach Dauer für alle Objekte:** Nicht verfügbare Entitäten, Geräte, Integrationen und Apps werden nach der Info-Schwelle (Standard 15 Minuten) zum Befund und steigen mit der Dauer: Info, ab 1 Stunde niedrig, ab 1 Tag mittel, ab 7 Tagen hoch. Info und niedrig stehen auf der Befundseite; Übersicht, Sensoren, Reparaturhinweise und „neue Befunde“ zählen ab mittel. Integrationen, die nicht starten können, sind sofort mindestens mittel. Eine Entität mit `unknown` ist ein Befund, wenn sie vorher einen Wert hatte. Bei einem Ausfall folgen zusätzliche Scans zu den Schwellen, ohne den Verlauf zu verändern. **Geändert:** Die Einstellung „Nicht verfügbar nach Tagen“ (`min_unavailable_days`) ist durch vier Schwellen ersetzt (Info in Minuten, niedrig, mittel und hoch in Stunden); ein gesetzter alter Wert wird übernommen, bis du die neuen speicherst. Entitäten werden dadurch viel früher gemeldet als bisher nach 7 Tagen.
+
 - **Beobachtung: ohne Wert und Vermerke:** Objekte, die nach dem Update erreichbar sind, aber keinen Wert mehr haben (`unknown`), stehen in einer eigenen Gruppe „Seitdem ohne Wert". Objekte mit einem Vermerk (absichtlich offline, saisonal, Reserve, ersetzt) zählen nicht als neu ausgefallen und stehen getrennt; ein Vermerk lässt sich direkt in der Zeile setzen.
 
 - **Beobachtung nur nach System-Updates:** Die Beobachtung nach Updates startet nur noch bei einem Update von Home Assistant, Betriebssystem oder Supervisor. Updates einzelner Integrationen laufen über die üblichen Befunde und den zeitlichen Zusammenhang. Das Band im Seitenkopf führt jetzt zur Auswertung auf der Befundseite.
@@ -39,6 +41,8 @@
 ### English
 
 #### New
+
+- **Outages by duration for all objects:** Unavailable entities, devices, integrations and apps become a finding after the info threshold (default 15 minutes) and rise with their duration: info, low from 1 hour, medium from 1 day, high from 7 days. Info and low are on the findings page; the overview, the sensors, the repair hints and “new findings” count from medium on. Integrations that cannot start are at least medium at once. An entity with `unknown` is a finding if it had a value before. An outage is followed by extra scans at the thresholds that do not change the history. **Changed:** the setting “Unavailable after days” (`min_unavailable_days`) is replaced by four thresholds (info in minutes, low, medium and high in hours); an old value that was set is kept until you save the new ones. Entities are now reported much earlier than the former 7 days.
 
 - **Watch: without a value, and marks:** Objects that answer after the update but have no value any more (`unknown`) are listed in a group of their own, “Without a value since”. Objects with a mark (offline on purpose, seasonal, spare, replaced) no longer count as newly failed and are listed apart; a mark can be set right in the row.
 
