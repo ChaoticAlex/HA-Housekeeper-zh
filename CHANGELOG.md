@@ -24,7 +24,7 @@
 
 ### Geändert
 
-- **Oberfläche:** Korrekturen und kleine Verbesserungen an Listen, Dialogen, Beschriftungen und Bedienung, darunter die Kacheln der Befundseite (auf breiten Fenstern in zwei Zeilen, alle gleich hoch und breit), die Spaltenauswahl der Listen (Kästchen in einer Reihe am rechten Rand) und die Lesbarkeit der Vorfälle.
+- **Oberfläche:** Korrekturen und kleine Verbesserungen an Listen, Dialogen, Beschriftungen und Bedienung, darunter die Kacheln der Befundseite (auf breiten Fenstern in zwei Zeilen, alle gleich hoch und breit), die Spaltenauswahl der Listen (Kästchen in einer Reihe am rechten Rand), die Karten der Schwellen unter Einstellungen (gruppiert, einheitlich aufgebaut, mit Link „Standard“) und die Lesbarkeit der Vorfälle.
 
 ### English
 
@@ -50,7 +50,7 @@
 
 #### Changed
 
-- **Interface:** Fixes and small improvements to lists, dialogs, labels and handling, among them the tiles of the findings page (in two rows on wide windows, all equally high and wide), the column picker of the lists (boxes in one line at the right edge) and the readability of incidents.
+- **Interface:** Fixes and small improvements to lists, dialogs, labels and handling, among them the tiles of the findings page (in two rows on wide windows, all equally high and wide), the column picker of the lists (boxes in one line at the right edge), the threshold cards in Settings (grouped, uniformly built, with a “Default” link) and the readability of incidents.
 
 ## 1.7.0 - 2026-10-14
 

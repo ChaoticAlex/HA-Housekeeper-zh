@@ -1062,8 +1062,14 @@ class HAHousekeeperPanel extends HTMLElement {
     optInputs.forEach(el => el.oninput = () => {
       const conv = root.querySelector(`[data-conv="${el.dataset.opt}"]`), field = OPTION_FIELDS.find(f => f[0] === el.dataset.opt);
       if (conv && field) conv.textContent = this.optConversion(field[3], el.value);
+      const reset = root.querySelector(`[data-opt-reset="${el.dataset.opt}"]`);
+      if (reset && field) reset.hidden = String(el.value) === String(field[4]);
       const save = root.querySelector("[data-opts-save]");
       if (save) save.disabled = !optInputs.some(input => input.value !== input.dataset.saved);
+    });
+    root.querySelectorAll("[data-opt-reset]").forEach(el => el.onclick = () => {
+      const input = root.querySelector(`[data-opt="${el.dataset.optReset}"]`), field = OPTION_FIELDS.find(f => f[0] === el.dataset.optReset);
+      if (input && field) { input.value = field[4]; input.dispatchEvent(new Event("input")); }
     });
     root.querySelectorAll("[data-set-tab]").forEach(el => {
       el.onclick = () => { this.settingsTab = el.dataset.setTab; this.optionsMessage = ""; this.render(); };
