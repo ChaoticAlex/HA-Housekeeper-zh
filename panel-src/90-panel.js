@@ -1084,6 +1084,11 @@ class HAHousekeeperPanel extends HTMLElement {
       };
     });
     root.querySelector("[data-pref-reset]")?.addEventListener("click", () => { this.prefs = { ...DEFAULT_PREFS }; this.pageSize = DEFAULT_PREFS.pageSize; this.pages = {}; this.savePrefs(); this.render(); });
+    root.querySelectorAll("[data-copy-event]").forEach(el => el.onclick = async () => {
+      try { await globalThis.navigator?.clipboard?.writeText(el.dataset.copyEvent); this.copiedEvent = el.dataset.copyEvent.replace("ha_housekeeper_", ""); } catch (_) { this.copiedEvent = ""; }
+      this.render();
+      setTimeout(() => { this.copiedEvent = ""; this.render(); }, 1500);
+    });
     root.querySelector("[data-copy-info]")?.addEventListener("click", async () => {
       try { await globalThis.navigator?.clipboard?.writeText(this.infoText()); this.copied = true; } catch (_) { this.copied = false; }
       this.render();

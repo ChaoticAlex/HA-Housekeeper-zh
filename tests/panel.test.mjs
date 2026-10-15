@@ -5177,7 +5177,7 @@ test("the settings list the hidden findings as a table with a filter by kind, an
   const html = el.hiddenCard();
   assert.ok(html.includes('data-lsort="hidden|name') && html.includes('data-ignore="h2" data-ignore-value="0"') && !html.includes('data-ignore="h1"'), "only a manual decision can be shown again");
   assert.ok(el._exporters.hidden && html.includes("Hidden findings (2)"));
-  assert.ok(el.eventsCard().includes('class="factnote evlist"') && !el.eventsCard().includes("style="));
+  assert.ok(el.eventsCard().includes('class="evtable"') && !el.eventsCard().includes("style="));
 });
 
 test("a long history of scans shows only the newest rows until asked, keeps the chosen base visible and has the choice in its head", () => {

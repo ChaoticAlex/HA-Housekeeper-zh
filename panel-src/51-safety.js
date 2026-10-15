@@ -36,8 +36,8 @@ class SafetyMixin {
   }
 
   eventsCard() {
-    const events = ["critical_finding", "backup_overdue", "quarantine_expired", "followup_regression", "integration_down", "reminder_due"].map(e => `<li><code>ha_housekeeper_${e}</code> · ${this.t(`event_${e}`)}</li>`).join("");
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("eventsTitle")}</h2><p>${this.t("eventsHint")}</p></div></div><ul class="factnote evlist">${events}</ul></section>`;
+    const rows = ["critical_finding", "backup_overdue", "quarantine_expired", "followup_regression", "integration_down", "reminder_due"].map(e => `<tr><td><code>ha_housekeeper_${e}</code></td><td>${this.t(`event_${e}`)}</td><td class="evcopy"><button class="iconbtn" data-copy-event="ha_housekeeper_${e}" title="${this.esc(this.t("eventCopy"))}" aria-label="${this.esc(this.t("eventCopy"))}"><ha-icon icon="${this.copiedEvent === e ? "mdi:check" : "mdi:content-copy"}"></ha-icon></button></td></tr>`).join("");
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("eventsTitle")}</h2><p>${this.t("eventsHint")}</p></div></div><div class="tablewrap"><table class="evtable"><thead><tr><th>${this.t("eventColName")}</th><th>${this.t("eventColWhen")}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></section>`;
   }
 
   async setProtection(mode) {
@@ -75,7 +75,7 @@ Object.assign(TEXT.de, {
   mode_read_only: "1 · Nur lesen", mode_quarantine: "2 · Quarantäne erlaubt", mode_confirmed: "3 · Bestätigte Änderungen mit Backup", mode_full: "4 · Voller Wartungsmodus",
   modeText_read_only: "Nichts wird geändert, auch kein Rückgängig.", modeText_quarantine: "Nur Deaktivieren (und dessen Rückgängig) ist erlaubt.", modeText_confirmed: "Alles mit Einzelbestätigung und Backup außer unumkehrbarem Löschen von Recorder-Daten.", modeText_full: "Alles, wie bisher.",
   err_protection_mode: "Der Schutzmodus erlaubt das nicht. Ändere ihn unter Einstellungen → Scan.",
-  eventsTitle: "Ereignisse für eigene Automationen", eventsHint: "Housekeeper löst nach einem Scan für jede neue Lage ein Ereignis auf dem Home-Assistant-Bus aus (einmal je Lage, beim ersten Mal still). Es verlässt nichts Home Assistant.",
+  eventsTitle: "Ereignisse für eigene Automationen", eventsHint: "Nach jedem Scan löst Housekeeper für jede neue Lage ein Ereignis aus, einmal je Lage, beim ersten Mal still. Nichts verlässt Home Assistant.", eventColName: "Ereignis", eventColWhen: "Wann", eventCopy: "Namen kopieren",
   event_critical_finding: "neuer Befund mit hoher Auswirkung", event_backup_overdue: "Backup überfällig", event_quarantine_expired: "Quarantäne abgelaufen", event_followup_regression: "Nachkontrolle: Rückfall", event_integration_down: "Integration nicht geladen",
 });
 Object.assign(TEXT.en, {
@@ -84,6 +84,6 @@ Object.assign(TEXT.en, {
   mode_read_only: "1 · Read only", mode_quarantine: "2 · Quarantine allowed", mode_confirmed: "3 · Confirmed changes with backup", mode_full: "4 · Full maintenance",
   modeText_read_only: "Nothing is changed, not even an undo.", modeText_quarantine: "Only disabling (and undoing it) is allowed.", modeText_confirmed: "Everything with one-by-one confirmation and backup except irreversible deletion of recorder data.", modeText_full: "Everything, as before.",
   err_protection_mode: "The protection mode does not allow this. Change it under Settings → Scan.",
-  eventsTitle: "Events for your own automations", eventsHint: "After a scan Housekeeper fires an event on the Home Assistant bus for each new situation (once per situation, silent the first time). Nothing leaves Home Assistant.",
+  eventsTitle: "Events for your own automations", eventsHint: "After each scan Housekeeper fires an event for each new situation, once per situation, silent the first time. Nothing leaves Home Assistant.", eventColName: "Event", eventColWhen: "When", eventCopy: "Copy name",
   event_critical_finding: "new finding with high impact", event_backup_overdue: "backup overdue", event_quarantine_expired: "quarantine expired", event_followup_regression: "follow-up: regression", event_integration_down: "integration not loaded",
 });
