@@ -544,7 +544,7 @@ class CleanupRunner:
             journal.save()
 
     async def _database_intact(self, plan: dict[str, Any]) -> bool:
-        """Check the SQLite file before anything is deleted; a damaged one stops the plan.
+        """Check the SQLite file (full integrity check) before anything is deleted; a damaged one stops the plan.
 
         A check that cannot run (no recorder, another database, timeout) does not stop it.
         """

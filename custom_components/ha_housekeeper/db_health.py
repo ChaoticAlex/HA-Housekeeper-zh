@@ -19,6 +19,7 @@ from .payloads import DbHealthResult
 from .queries import ReplyStore, cached_query, kept_reply
 
 DAY = 86400
+INTEGRITY_LINES = 5  # complaints of the full check that are kept
 CACHE_SECONDS = 600
 WAL_SHARE = 0.25
 WAL_BYTES = 1024**3
@@ -82,20 +83,34 @@ def database_files(hass: HomeAssistant) -> dict[str, Any]:
     return result
 
 
-def integrity_problem(hass: HomeAssistant) -> str | None:
-    """Blocking: the first complaint of SQLite's quick check, ``None`` when it is fine or not SQLite.
+def integrity_lines(hass: HomeAssistant, limit: int = INTEGRITY_LINES) -> list[str]:
+    """Blocking: the first complaints of SQLite's full check, empty when it is fine or not SQLite.
 
-    Reads only. Run before rows are deleted: a damaged index shows up as "database disk image is
-    malformed" in the middle of a purge, long after the cause.
+    Reads only. The full ``integrity_check`` is used on purpose: the quick one does not compare
+    the indexes with the tables, which is where a damaged recorder usually shows first. It takes
+    minutes on a large database.
     """
     from homeassistant.components.recorder.util import session_scope
     from sqlalchemy import text
 
     if database_files(hass)["dialect"] != "sqlite":
-        return None
+        return []
     with session_scope(hass=hass, read_only=True) as session:
-        lines = [str(line) for line in session.execute(text("PRAGMA quick_check(1)")).scalars()]
-    return None if not lines or lines[0] == "ok" else lines[0]
+        lines = [
+            str(line)
+            for line in session.execute(text(f"PRAGMA integrity_check({int(limit)})")).scalars()
+        ]
+    return [] if not lines or lines == ["ok"] else lines
+
+
+def integrity_problem(hass: HomeAssistant) -> str | None:
+    """Blocking: the first complaint of the full check, ``None`` when it is fine or not SQLite.
+
+    Run before rows are deleted: a damaged index shows up as "database disk image is malformed"
+    in the middle of a purge, long after the cause.
+    """
+    lines = integrity_lines(hass, 1)
+    return lines[0] if lines else None
 
 
 def is_corruption_error(err: BaseException) -> bool:
