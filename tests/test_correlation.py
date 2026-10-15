@@ -58,3 +58,15 @@ def test_updates_close_in_time_and_the_restart_beside_them_are_one_incident() ->
     assert update["total"] == 3 and [a["domain"] for a in update["also"]] == ["b"]
     assert len(result["groups"]) == 2, "the lone restart stays its own group"
     assert set(result["by_key"]) == {"x", "y", "z"}
+
+
+def test_purge_events_that_follow_each_other_are_one_entry_with_their_count() -> None:
+    events = [event("purge", f"2026-10-01T10:0{i}:00+00:00") for i in range(3)]
+    events.append(event("purge", "2026-10-01T12:00:00+00:00"))
+    found = [
+        finding("a", "2026-10-01T10:01:00+00:00"),
+        finding("b", "2026-10-01T10:02:00+00:00"),
+        finding("c", "2026-10-01T12:01:00+00:00"),
+    ]
+    groups = correlate(found, events)["groups"]
+    assert sorted((g.get("events", 1), g["total"]) for g in groups) == [(1, 1), (3, 2)]
