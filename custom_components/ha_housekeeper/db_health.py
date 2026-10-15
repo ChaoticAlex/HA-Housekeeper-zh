@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import shutil
 import time
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
@@ -23,6 +24,9 @@ from .queries import ReplyStore, cached_query, kept_reply
 
 _LOGGER = logging.getLogger(__name__)
 DAY = 86400
+DISK_LOW_BYTES = 1024**3  # free space under this is a finding
+DISK_LOW_SHARE = 0.05
+DISK_STOP_BYTES = 512 * 1024**2  # free space under this stops a plan that writes into the recorder
 INTEGRITY_LINES = 5  # complaints of the full check that are kept
 INTEGRITY_FRESH_DAYS = 3  # a clean check this recent lets a plan skip its own
 INTEGRITY_TIMEOUT = 60 * 60  # seconds the check on demand may run
@@ -92,6 +96,11 @@ def database_files(hass: HomeAssistant) -> dict[str, Any]:
         except OSError:
             result[key] = 0 if suffix else None
     result["corrupt"] = corrupt_copies(path)
+    try:
+        usage = shutil.disk_usage(os.path.dirname(path) or ".")
+        result["disk_free"], result["disk_total"] = usage.free, usage.total
+    except OSError:
+        pass
     return result
 
 
@@ -406,6 +415,11 @@ def evaluate(
                 "recent_bytes": grown["recent_bytes"],
                 "base_bytes": grown["base_bytes"],
             }
+        )
+    free, total = raw.get("disk_free"), raw.get("disk_total")
+    if free is not None and total and (free < DISK_LOW_BYTES or free < DISK_LOW_SHARE * total):
+        findings.append(
+            {"kind": "disk_low", "level": "problem", "free_bytes": free, "total_bytes": total}
         )
     corrupt = raw.get("corrupt", [])
     if corrupt:

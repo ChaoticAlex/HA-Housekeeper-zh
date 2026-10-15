@@ -10,6 +10,8 @@
 
 - **Beiseitegelegte Datenbanken:** Hat Home Assistant eine beschädigte Datenbank schon einmal ersetzt, nennt die Recorder-Seite die übrig gebliebenen Dateien `….db.corrupt.…` mit ihrer Größe. Gelöscht wird nichts.
 
+- **Speicherplatz:** Die Recorder-Seite meldet wenig freien Platz auf dem Datenträger der Datenbank (unter 1 GB oder 5 %). Unter 512 MB stoppt ein Plan, der in den Recorder schreibt, ohne etwas zu ändern.
+
 ### English
 
 #### New
@@ -19,6 +21,8 @@
 - **Check the database on request:** On the Recorder page a “Check database” button starts the full check in the background (minutes on a large database). The result is kept; a damaged database shows up as a problem with the hint to `REINDEX` and the backup. A clean check from the last three days replaces the check before a plan.
 
 - **Databases set aside:** If Home Assistant has replaced a damaged database before, the Recorder page names the leftover `….db.corrupt.…` files with their size. Nothing is deleted.
+
+- **Disk space:** The Recorder page reports little free space on the database’s disk (under 1 GB or 5 %). Below 512 MB a plan that writes into the recorder stops without changing anything.
 
 ## 1.7.0 - 2026-10-14
 

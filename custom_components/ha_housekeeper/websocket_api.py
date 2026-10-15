@@ -971,6 +971,7 @@ async def websocket_purge_statistics(
             "backup_failed",
             "recorder_busy",
             "database_corrupt",
+            "disk_low",
         }
         result["error"] = next(
             (r["reason"] for r in results.values() if r.get("reason") in failures), None

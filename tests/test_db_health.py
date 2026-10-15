@@ -428,3 +428,10 @@ def test_files_the_recorder_set_aside_as_damaged_are_a_hint_and_found_next_to_th
     found = corrupt_copies(str(tmp_path / "home-assistant_v2.db"))
     assert found == [{"name": "home-assistant_v2.db.corrupt.2026-10-01", "bytes": 5}]
     assert kinds(run(raw(corrupt=found))) == ["corrupt_files"]
+
+
+def test_little_free_disk_space_is_a_problem_from_a_gigabyte_or_five_percent() -> None:
+    assert kinds(run(raw(disk_free=2 * GB, disk_total=100 * GB))) == ["disk_low"]
+    assert kinds(run(raw(disk_free=10 * GB, disk_total=100 * GB))) == []
+    assert kinds(run(raw(disk_free=4 * GB, disk_total=100 * GB))) == ["disk_low"]
+    assert kinds(run(raw())) == []

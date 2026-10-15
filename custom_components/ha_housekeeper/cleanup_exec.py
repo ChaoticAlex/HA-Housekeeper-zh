@@ -96,7 +96,13 @@ from .cleanup import (
     trim_is_plain,
 )
 from .const import DOMAIN, MAX_FILE_BACKUP, MAX_PLAN_SNAPSHOTS
-from .db_health import integrity_fresh, integrity_problem, is_corruption_error
+from .db_health import (
+    DISK_STOP_BYTES,
+    database_files,
+    integrity_fresh,
+    integrity_problem,
+    is_corruption_error,
+)
 from .meter import analyse, prepare_meter, read_series, recorder_ready
 from .notes import NoteError
 from .protection import allows, allows_undo
@@ -504,7 +510,9 @@ class CleanupRunner:
                 writes_recorder = bool(kinds & DATABASE_KINDS) or any(
                     action.get("recorder") for action in selected
                 )
-                if writes_recorder and not await self._database_intact(plan):
+                if writes_recorder and not (
+                    await self._disk_has_room(plan) and await self._database_intact(plan)
+                ):
                     return
                 await self._backup(plan, with_database=writes_recorder)
             if plan["status"] == "running":
@@ -542,6 +550,24 @@ class CleanupRunner:
                 "total": 0,
             }
             journal.save()
+
+    async def _disk_has_room(self, plan: dict[str, Any]) -> bool:
+        """SQLite needs room for its journal and the backup for a copy: a nearly full disk stops the plan.
+
+        A disk that cannot be measured (no recorder, another database) does not stop it.
+        """
+        if not recorder_ready(self.hass):
+            return True
+        try:
+            files = await self.hass.async_add_executor_job(database_files, self.hass)
+        except Exception:
+            return True
+        free = files.get("disk_free")
+        if free is None or free >= DISK_STOP_BYTES:
+            return True
+        _LOGGER.warning("Too little free space for the recorder database (%s bytes)", free)
+        self._backup_failed(plan, "disk_low", free_bytes=free)
+        return False
 
     async def _database_intact(self, plan: dict[str, Any]) -> bool:
         """Check the SQLite file (full integrity check) before anything is deleted; a damaged one stops the plan.

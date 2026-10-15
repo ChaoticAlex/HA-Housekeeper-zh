@@ -903,3 +903,22 @@ async def test_a_damaged_database_stops_a_plan_before_anything_is_deleted(
         assert await scanner.cleanup._database_intact(plan) is False
     assert plan["status"] == "aborted"
     assert plan["actions"][0]["result"]["reason"] == "database_corrupt"
+
+
+async def test_a_nearly_full_disk_stops_a_plan_that_writes_into_the_recorder(
+    hass: HomeAssistant,
+) -> None:
+    from unittest.mock import patch
+
+    scanner = await make_scanner(hass)
+    plan = {"status": "running", "events": [], "actions": [{"object_id": "sensor.a"}]}
+    with (
+        patch("custom_components.ha_housekeeper.cleanup_exec.recorder_ready", return_value=True),
+        patch(
+            "custom_components.ha_housekeeper.cleanup_exec.database_files",
+            return_value={"disk_free": 100 * 1024**2},
+        ),
+    ):
+        assert await scanner.cleanup._disk_has_room(plan) is False
+    assert plan["status"] == "aborted"
+    assert plan["actions"][0]["result"]["reason"] == "disk_low"

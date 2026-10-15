@@ -43,6 +43,8 @@ Object.assign(TEXT.en, {
 });
 
 Object.assign(TEXT.de, {
+  dbKind_disk_low: "Wenig freier Speicherplatz", dbDiskLow: "Auf dem Datenträger der Datenbank sind nur noch {free} von {total} frei.",
+  dbAdvice_disk_low: "Ein voller Datenträger beschädigt Datenbanken und lässt Backups scheitern. Schaffe Platz (alte Backups, große Dateien unter Speicher). Unter 512 MB stoppt Housekeeper Pläne, die in den Recorder schreiben.",
   dbKind_corrupt_files: "Beschädigte Datenbank beiseitegelegt", dbCorruptFiles: "{n} Datei(en) mit {size}: {list}. Home Assistant hat die Datenbank schon einmal als beschädigt ersetzt.",
   dbAdvice_corrupt_files: "Die Dateien liegen im Konfigurationsordner und werden nicht mehr benutzt. Lösche sie von Hand, wenn du sie nicht mehr brauchst; Housekeeper löscht sie nicht. Prüfe die Ursache (Datenträger, unsauberes Herunterfahren).",
   dbKind_integrity: "Datenbank beschädigt", dbIntegrity: "Die Prüfung vom {at} meldete: {lines}.",
@@ -52,6 +54,8 @@ Object.assign(TEXT.de, {
   dbCheckOk: "Zuletzt geprüft am {at}: in Ordnung.", dbCheckFailed: "Die Prüfung vom {at} ist nicht fertig geworden.", dbCheckNever: "Noch nie geprüft.",
 });
 Object.assign(TEXT.en, {
+  dbKind_disk_low: "Little free disk space", dbDiskLow: "Only {free} of {total} are free on the database's disk.",
+  dbAdvice_disk_low: "A full disk damages databases and makes backups fail. Free some space (old backups, large files under Storage). Below 512 MB Housekeeper stops plans that write into the recorder.",
   dbKind_corrupt_files: "Damaged database set aside", dbCorruptFiles: "{n} file(s) with {size}: {list}. Home Assistant has replaced the database as damaged before.",
   dbAdvice_corrupt_files: "The files lie in the configuration folder and are no longer used. Delete them by hand when you no longer need them; Housekeeper does not delete them. Look for the cause (storage, unclean shutdown).",
   dbKind_integrity: "Database damaged", dbIntegrity: "The check of {at} reported: {lines}.",
