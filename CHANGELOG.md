@@ -28,7 +28,7 @@
 
 ### Behoben
 
-- **Benutzerhandbuch:** Neuer Abschnitt „Begriffe und Zahlen“: Objekt, Befund, Ursache, Vorfall, Beobachtung, die Berechnung des Zustands mit Beispiel und Farbschwellen, Ablauf eines Plans, die wichtigsten Einstellungen und was Housekeeper speichert. Veraltete Sätze zur Zahl und zu Ursachen korrigiert.
+- **Benutzerhandbuch:** Neuer Abschnitt „Begriffe und Zahlen“: Objekt, Befund, Ursache, Vorfall, Beobachtung, die Berechnung des Zustands mit Beispiel und Farbschwellen, Ablauf eines Plans, die wichtigsten Einstellungen und was Housekeeper speichert. Das Handbuch ist nach den Menüs gegliedert (Übersicht und Befunde, Inventar, Automationen, Aufräumen, Pflegen, Betrieb, Sicherheit, Bedienung) und hat ein Inhaltsverzeichnis. Veraltete Sätze zur Zahl und zu Ursachen korrigiert.
 - **Backup-Prüfung:** Backups einzelner Apps, etwa vor einem App-Update, zählen nicht mehr als Backups von Home Assistant.
 
 ### English
@@ -59,7 +59,7 @@
 
 #### Fixed
 
-- **User guide:** New section "Terms and numbers": object, finding, cause, incident, watch, how the state is calculated with an example and colour thresholds, how a plan runs, the most important settings and what Housekeeper stores. Outdated sentences about the number and about causes corrected.
+- **User guide:** New section "Terms and numbers": object, finding, cause, incident, watch, how the state is calculated with an example and colour thresholds, how a plan runs, the most important settings and what Housekeeper stores. The guide is organised by the menus (overview and findings, inventory, automations, tidying up, maintaining, operation, security, interface) and has a table of contents. Outdated sentences about the number and about causes corrected.
 - **Backup check:** Backups of single apps, such as those made before an app update, no longer count as backups of Home Assistant.
 
 ## 1.7.0 - 2026-10-14
