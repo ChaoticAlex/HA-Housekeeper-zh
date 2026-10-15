@@ -126,7 +126,7 @@ from .signals import SignalStore, situations
 from .signals import fire as signal_fire
 from .stale import StaleStore
 from .system_usage import supervisor_get, supervisor_token
-from .watch import WATCH_KINDS, WatchStore, evaluate, make_before, next_due
+from .watch import UPDATE_ENTITIES, WATCH_KINDS, WatchStore, evaluate, make_before, next_due
 
 _LOGGER = logging.getLogger(__name__)
 SUGGEST_LIMIT = 200
@@ -1097,6 +1097,24 @@ class InventoryScanner:
         if ended and self._snapshot is not None:
             self._snapshot["meta"]["watch"] = None
         return ended
+
+    async def async_update_changed(self, old: Any, new: Any) -> None:
+        """An install of Home Assistant, the OS or the Supervisor began: scan now, so that the watch
+        after it compares with the state of this moment and not with the last scheduled scan.
+
+        When the scan is refused (a plan runs, the start is on) or comes too late, the last stored scan stays
+        the state before the restart.
+        """
+
+        def installing(state: Any) -> bool:
+            return state is not None and bool(state.attributes.get("in_progress"))
+
+        if self.watch_hours <= 0 or not installing(new) or installing(old):
+            return
+        try:
+            await self.async_request_scan()
+        except ScanRefused:
+            return
 
     async def async_watch_tick(self) -> None:
         """Ask for the next scan of an open watch when it is due; it is judged at its end."""

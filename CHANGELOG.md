@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Stand beim Start eines Updates:** Beginnt ein Update von Home Assistant, Betriebssystem oder Supervisor, scannt Housekeeper sofort. Die Beobachtung danach vergleicht mit diesem Stand statt mit dem letzten planmäßigen Scan.
+
 - **Reparaturen nach Updates:** Die Beobachtung nach einem Update meldet auch Reparaturen, die seitdem neu aufgetaucht sind, und zählt sie als Verschlechterung.
 
 - **Backup-Liste mit Details:** Die Liste zeigt bis zu 20 Backups (10 pro Seite, wählbar) mit Art (automatisch, manuell, von Housekeeper) und Inhalt. Eine Zeile klappt auf: Name, HA-Version, Datenbank, Apps, Ordner, Größe je Ziel und fehlgeschlagene Teile.
@@ -41,6 +43,8 @@
 ### English
 
 #### New
+
+- **State when an update starts:** When an update of Home Assistant, the operating system or the Supervisor begins, Housekeeper scans at once. The watch afterwards compares with that state instead of the last scheduled scan.
 
 - **Repairs after updates:** The watch after an update also reports repairs that have appeared since, and counts them as worse.
 

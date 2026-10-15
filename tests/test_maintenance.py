@@ -282,3 +282,23 @@ async def test_the_last_costs_reply_is_kept_and_handed_out_while_the_recorder_is
     finally:
         lock.release()
     assert held["stale"] is True and not held.get("busy")
+
+
+async def test_the_start_of_a_system_update_takes_the_state_of_that_moment(
+    hass: HomeAssistant,
+) -> None:
+    from types import SimpleNamespace
+    from unittest.mock import AsyncMock
+
+    scanner = await make_scanner(hass)
+    state = lambda busy: SimpleNamespace(attributes={"in_progress": busy})  # noqa: E731
+    with patch.object(scanner, "async_request_scan", AsyncMock()) as scan:
+        await scanner.async_update_changed(state(False), state(True))
+        assert scan.await_count == 1
+        await scanner.async_update_changed(state(True), state(True))  # still the same install
+        await scanner.async_update_changed(state(True), state(False))  # it ended
+        await scanner.async_update_changed(None, None)
+        assert scan.await_count == 1
+        scanner.watch_hours = 0  # the watch is off: nothing to compare with
+        await scanner.async_update_changed(state(False), state(True))
+        assert scan.await_count == 1

@@ -19,6 +19,12 @@ from .hygiene import finding_key
 
 SAVE_DELAY = 10
 WATCH_KINDS = ("ha_version", "os_version", "supervisor_version")  # updates that start a watch
+# The update entities of the Supervisor for exactly those updates; an install on them starts the stand-keeping scan.
+UPDATE_ENTITIES = (
+    "update.home_assistant_core_update",
+    "update.home_assistant_operating_system_update",
+    "update.home_assistant_supervisor_update",
+)
 KEEP = 3  # watches kept, the open one included
 BAD = frozenset({"unavailable", "problem", "stopped"})
 SILENT = frozenset({"unknown"})  # reachable but without a value: its own group, never "worse" by itself

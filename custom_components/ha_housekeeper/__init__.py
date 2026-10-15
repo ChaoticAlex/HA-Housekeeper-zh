@@ -61,6 +61,7 @@ from .runs import run_key
 from .scan_coverage import RETRY_LIMIT, RETRY_MINUTES, retryable_gaps
 from .outage_levels import thresholds_from_options
 from .scan_trigger import ScanRefused
+from .watch import UPDATE_ENTITIES
 from .services import async_register_services
 from .system_usage import system_light
 from .websocket_api import async_register as async_register_websocket
@@ -223,6 +224,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # A mark with a window hides only inside it: look again when the clock or the sun moves it.
     entry.async_on_unload(async_track_time_interval(hass, _mark_windows, timedelta(minutes=5)))
     entry.async_on_unload(async_track_state_change_event(hass, ["sun.sun"], _mark_windows))
+
+    async def _update_changed(event: Any) -> None:
+        await scanner.async_update_changed(event.data.get("old_state"), event.data.get("new_state"))
+
+    # An install of a system update takes the state of that moment for the watch after it.
+    entry.async_on_unload(async_track_state_change_event(hass, list(UPDATE_ENTITIES), _update_changed))
 
     async def _sample_load(_: Any) -> None:
         # A sample that cannot be taken is a gap in the line, nothing more.
