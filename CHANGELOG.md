@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Größe der Ansicht in der Auswahlzeile:** In der Zeile mit „Seite auswählen“ steht rechts, wie viele Einträge die aktuelle Ansicht nach Suche und Filtern hat („478 in dieser Ansicht“). Das gilt für Befunde, ungenutzte Statistiken, Aufräum-Kandidaten und Richtlinien.
+
 - **Erklärung auf der Befundseite:** Hinter der Überschrift „Befunde“ steht ein Info-Knopf. Er öffnet eine Karte, die Befund, Folgen, Beobachtung nach Updates und „Zeitlich zusammen“ unterscheidet und für jede Zahl der Seite sagt, was sie zählt.
 
 - **Kacheln zählen wie die Liste:** Die Kacheln der Befundseite zählen ohne die Folgen von Ausfällen, so wie „Alle Befunde“ und die Liste darunter. Wo es Folgen gibt, stehen sie klein in der Kachel („dazu 296 Folgen der Ausfälle“). Vorher zeigte „Nicht verfügbar“ 774 und die Liste 478.

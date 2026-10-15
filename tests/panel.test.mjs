@@ -3176,6 +3176,16 @@ test("the findings page has an info button that opens the help with every number
   assert.ok(help.includes("helpcard") && help.includes("Certainty") && help.includes("n incidents"));
 });
 
+test("the selection row of the findings list names the size of the view at its right end", () => {
+  const { el } = panel("en");
+  const f = key => ({ key, rule_id: "entity.stale", object_id: key, classification: "unused", confidence: 0.7, ignored: false, impact: "info", impact_facts: [] });
+  el.data = { ...DATA, objects: [], edges: [], causes: [], findings: [f("a"), f("b"), f("c")] };
+  el._corrRequested = true; el._corrKey = el.data.meta.scanned_at || ""; el.series = null; el._seriesFor = el.data;
+  assert.ok(/viewcount" role="status">3 in this view/.test(el.findingsView()));
+  el.findSel = new Set(["a"]);
+  assert.ok(/1 selected.*viewcount" role="status">3 in this view/s.test(el.findingsView()));
+});
+
 test("a reason tile counts what the list shows and names the follow-ups beside it", () => {
   const { el } = panel("en");
   const f = (key, cause) => ({ key, rule_id: "entity.state_unavailable", object_id: key, classification: "unavailable", confidence: 0.9, ignored: false, impact: "low", cause_id: cause });

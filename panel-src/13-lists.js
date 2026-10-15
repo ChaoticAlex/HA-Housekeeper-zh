@@ -389,6 +389,9 @@ class ListsMixin {
   // head: { tone, title, sub, pill }; the state lives in this.folds and survives a render.
   foldOpen(id, def) { return this.folds?.[id] ?? def; }
 
+  // The size of the current view at the right end of a selection row: what the filters and search leave over.
+  viewCount(n) { return `<span class="viewcount" role="status">${this.t("viewCount", { n: this.formatNumber(n) })}</span>`; }
+
   fold(id, head, body, def, force) {
     const open = force ?? this.foldOpen(id, def);
     const pill = head.pill ? `<span class="pill ${head.tone || "mute"}">${this.esc(head.pill)}</span>` : "";
