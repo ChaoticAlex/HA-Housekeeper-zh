@@ -767,6 +767,7 @@ test("cause and dashboard groups use the findings table columns in both densitie
   let html = el.findingsView();
   assert.match(html, /class="finding-data finding-cause"/);
   assert.match(html, /data-fold="cause_outage-z"/);
+  assert.match(html, /<button[^>]*class="finding-fold"[^>]*data-fold="cause_outage-z"[^>]*><ha-icon[^>]*><\/ha-icon><\/button><button[^>]*class="finding-link"[^>]*data-object="config_entry:z"/, "the arrow folds while the cause name opens its details");
   assert.doesNotMatch(html, /class="finding-group"/);
   el.folds = { "cause_outage-z": true };
   el.denseLists().findings = true;
@@ -779,6 +780,7 @@ test("cause and dashboard groups use the findings table columns in both densitie
   html = el.findingsView();
   assert.match(html, /class="finding-data finding-cause"/);
   assert.match(html, /data-fsel-group="dash\|views\/0\/cards\/0"/);
+  assert.match(html, /class="finding-fold"[^>]*data-fold="bg:dash\|views\/0\/cards\/0"[^>]*><ha-icon[^>]*><\/ha-icon><\/button><button[^>]*class="finding-link"[^>]*data-object="dashboard:dash"/, "dashboard groups also keep separate fold and detail buttons");
 });
 
 test("grouped causes and single findings obey the same table sort", () => {
