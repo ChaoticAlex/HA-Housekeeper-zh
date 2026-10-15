@@ -22,6 +22,8 @@
 
 - **Export überall:** Die Recorder-Seite hat einen Export-Knopf (CSV, Markdown, JSON) für alles, was ein Reiter zeigt. Alle Listen nutzen jetzt dasselbe Export-Menü statt des Download-Symbols.
 
+### Geändert
+
 - **Oberfläche:** Korrekturen und kleine Verbesserungen an Listen, Dialogen, Beschriftungen und Bedienung, darunter die Kacheln der Befundseite (auf breiten Fenstern in zwei Zeilen, alle gleich hoch und breit), die Spaltenauswahl der Listen (Kästchen in einer Reihe am rechten Rand) und die Lesbarkeit der Vorfälle.
 
 ### English
@@ -45,6 +47,8 @@
 - **Safer plans:** The backup before a plan is verified and named. Outdated previews are marked and can be renewed, large removals show a clear note, and too many Housekeeper backups are reported. An unreadable saved file only makes its own part start empty.
 
 - **Export everywhere:** The recorder page has an export button (CSV, Markdown, JSON) for everything a tab shows. All lists now use the same export menu instead of the download icon.
+
+#### Changed
 
 - **Interface:** Fixes and small improvements to lists, dialogs, labels and handling, among them the tiles of the findings page (in two rows on wide windows, all equally high and wide), the column picker of the lists (boxes in one line at the right edge) and the readability of incidents.
 
