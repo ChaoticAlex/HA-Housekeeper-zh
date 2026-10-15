@@ -26,6 +26,10 @@
 
 - **Oberfläche:** Korrekturen und kleine Verbesserungen an Listen, Dialogen, Beschriftungen und Bedienung, darunter die Kacheln der Befundseite (auf breiten Fenstern in zwei Zeilen, alle gleich hoch und breit), die Spaltenauswahl der Listen (Kästchen in einer Reihe am rechten Rand), die Karten der Schwellen unter Einstellungen (gruppiert, einheitlich aufgebaut, mit Link „Standard“), die Ereignisse für eigene Automationen als Tabelle mit Kopier-Knopf; Speichern der Schwellen lässt die Seite offen, statt zum Home-Assistant-Dashboard zu springen und die Lesbarkeit der Vorfälle.
 
+### Behoben
+
+- **Backup-Prüfung:** Backups einzelner Apps, etwa vor einem App-Update, zählen nicht mehr als Backups von Home Assistant.
+
 ### English
 
 #### New
@@ -51,6 +55,10 @@
 #### Changed
 
 - **Interface:** Fixes and small improvements to lists, dialogs, labels and handling, among them the tiles of the findings page (in two rows on wide windows, all equally high and wide), the column picker of the lists (boxes in one line at the right edge), the threshold cards in Settings (grouped, uniformly built, with a “Default” link), the events for your own automations as a table with a copy button; saving the thresholds keeps the page open instead of jumping to the Home Assistant dashboard and the readability of incidents.
+
+#### Fixed
+
+- **Backup check:** Backups of single apps, such as those made before an app update, no longer count as backups of Home Assistant.
 
 ## 1.7.0 - 2026-10-14
 
