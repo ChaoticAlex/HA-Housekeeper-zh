@@ -69,7 +69,7 @@ class FindingsMixin {
         : finding.affected_object
           ? [this.esc(finding.affected_object), this.esc(this.placeText(finding, inGroup)), this.esc(this.suggestText(finding))].filter(Boolean).join(" · ")
           : this.esc(object?.reason ? this.t(object.reason) : this.findingTitle(finding));
-    return { key, object, title, subtitle: `${subtitle}${finding.ignored ? ` · ${this.esc(finding.mark ? this.markLine(finding.mark) : this.decisionLabel(finding))}` : ""}${finding.resurfaced ? ` · ${this.t("dueLabel")}` : ""}${finding.mark_outside_window ? ` · ${this.t("markOutside")}` : ""}<span class="fextra">${this.statusTags(finding)}${this.followOf(finding)}</span>` };
+    return { key, object, title, subtitle: `${subtitle}${finding.ignored ? ` · ${this.esc(finding.mark ? this.markLine(finding.mark) : this.decisionLabel(finding))}` : ""}${finding.resurfaced ? ` · ${this.t("dueLabel")}` : ""}${finding.mark_outside_window ? ` · ${this.t("markOutside")}` : ""}<span class="fextra">${this.statusTags(finding)}${this.followOf(finding)}${this.oftenChip(finding)}</span>` };
   }
 
   findingRow(finding, inGroup = false) {
@@ -237,7 +237,7 @@ class FindingsMixin {
     if (this.findingWithFollowers) items = grouped ? items.filter(i => i.cause && this.causeTotal(i.cause)) : items.filter(i => i.cause_id);
     const pg = this.paginate("findings", items);
     const body = fixedView ? this.fixedList() : `${this.findSelBar(pg.rows)}${items.length ? this.findingsTable(pg.rows) : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${all.length ? this.noMatches("findings") : this.t("noFindings")}</div>`}${pg.footer}`;
-    return `<div class="stack">${tiles}${fixedView ? "" : this.watchCard()}${fixedView ? "" : this.corrGroupsCard()}<div class="panel"><div class="chips">${this.statusChips()}${followers ? `<button class="chip ${this.showFollowers ? "active" : ""}" data-toggle-followers>${this.t("flatList")}</button>` : ""}${followers ? `<button class="chip ${this.findingWithFollowers ? "active" : ""}" data-with-followers>${this.t("withFollowers")} (${withFollowers.length})</button>` : ""}${dueCount ? `<button class="chip ${this.findingDue ? "active" : ""}" data-finding-due>${this.t("dueFilter")} (${dueCount})</button>` : ""}<span class="spacer"></span><button class="chip" data-export="csv" title="${this.t("exportTitle")}">${this.t("exportCsv")}</button><button class="chip" data-export="json" title="${this.t("exportTitle")}">${this.t("exportJson")}</button></div>
+    return `<div class="stack">${tiles}${fixedView ? "" : this.watchCard()}${fixedView ? "" : this.oftenNote()}${fixedView ? "" : this.corrGroupsCard()}<div class="panel"><div class="chips">${this.statusChips()}${followers ? `<button class="chip ${this.showFollowers ? "active" : ""}" data-toggle-followers>${this.t("flatList")}</button>` : ""}${followers ? `<button class="chip ${this.findingWithFollowers ? "active" : ""}" data-with-followers>${this.t("withFollowers")} (${withFollowers.length})</button>` : ""}${dueCount ? `<button class="chip ${this.findingDue ? "active" : ""}" data-finding-due>${this.t("dueFilter")} (${dueCount})</button>` : ""}<span class="spacer"></span><button class="chip" data-export="csv" title="${this.t("exportTitle")}">${this.t("exportCsv")}</button><button class="chip" data-export="json" title="${this.t("exportTitle")}">${this.t("exportJson")}</button></div>
       ${this.findingNote()}${fixedView ? "" : bar}${body}</div></div>`;
   }
 

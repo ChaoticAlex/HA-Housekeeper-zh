@@ -5363,3 +5363,24 @@ test("the watch lists an object that is a finding like the findings list does, a
   assert.ok(html.includes("data-fsel=") && html.includes('data-watch-mark="entity:light.b"'));
   assert.equal(html.includes('data-watch-mark="entity:light.a"'), false);
 });
+
+test("an entity that fails regularly gets a hint with a mark prepared for the time it falls out; a dismissed one stays quiet", () => {
+  const { el } = panel("en");
+  const object = { object_type: "entity", object_id: "sensor.inverter", name: "Inverter", status: "unavailable" };
+  const finding = { rule_id: "entity.state_unavailable", classification: "unavailable", key: "entity.state_unavailable|sensor.inverter|", object_id: "sensor.inverter", confidence: 0.75, impact: "low" };
+  el.data = { ...DATA, objects: [object], edges: [], findings: [finding] };
+  el.reliability = { available: true, window_days: 7, unstable: { entities: { "sensor.inverter": { level: "unstable", episodes: 9, per_day: 1.3, total_seconds: 5400, mean_seconds: 600, pattern_hour: 22 } } } };
+  assert.ok(el.oftenChip(finding).includes("between 22:00 and 00:00"), el.oftenChip(finding));
+  assert.equal(el.oftenRows(object).length, 1);
+  const window = el.oftenWindow({ pattern_hour: 22 });
+  assert.equal(`${window.from}-${window.to}`, "22:00-00:00");
+  el.openOftenMark("entity:sensor.inverter");
+  assert.equal(el.markForm.kind, "expected_offline");
+  assert.equal(el.markForm.wmode, "time");
+  assert.equal(el.markForm.days, 90);
+  assert.equal(el.markForm.from, "22:00");
+  el.markForm = null;
+  el.skipOften("entity:sensor.inverter");
+  assert.equal(el.oftenChip(finding), "");
+  assert.equal(el.oftenRows(object).length, 0);
+});

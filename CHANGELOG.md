@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Hinweis bei Objekten, die oft ausfallen:** Fällt eine Entität oder ein Gerät regelmäßig aus (instabil, flatternd oder immer zur selben Tageszeit), steht beim Befund „Fällt meist zwischen 22 und 00 Uhr aus“ und im Reiter „Aktionen“ die Frage „Absichtlich?“ mit einem vorbereiteten Vermerk samt Zeitfenster. Es wird nichts automatisch gesetzt; „Nicht mehr fragen“ gilt 180 Tage in diesem Browser.
+
 - **Ausfälle nach Dauer für alle Objekte:** Nicht verfügbare Entitäten, Geräte, Integrationen und Apps werden nach der Info-Schwelle (Standard 15 Minuten) zum Befund und steigen mit der Dauer: Info, ab 1 Stunde niedrig, ab 1 Tag mittel, ab 7 Tagen hoch. Info und niedrig stehen auf der Befundseite; Übersicht, Sensoren, Reparaturhinweise und „neue Befunde“ zählen ab mittel. Integrationen, die nicht starten können, sind sofort mindestens mittel. Eine Entität mit `unknown` ist ein Befund, wenn sie vorher einen Wert hatte. Bei einem Ausfall folgen zusätzliche Scans zu den Schwellen, ohne den Verlauf zu verändern. **Geändert:** Die Einstellung „Nicht verfügbar nach Tagen“ (`min_unavailable_days`) ist durch vier Schwellen ersetzt (Info in Minuten, niedrig, mittel und hoch in Stunden); ein gesetzter alter Wert wird übernommen, bis du die neuen speicherst. Entitäten werden dadurch viel früher gemeldet als bisher nach 7 Tagen.
 
 - **Beobachtung: ohne Wert und Vermerke:** Objekte, die nach dem Update erreichbar sind, aber keinen Wert mehr haben (`unknown`), stehen in einer eigenen Gruppe „Seitdem ohne Wert". Objekte mit einem Vermerk (absichtlich offline, saisonal, Reserve, ersetzt) zählen nicht als neu ausgefallen und stehen getrennt; ein Vermerk lässt sich direkt in der Zeile setzen.
@@ -41,6 +43,8 @@
 ### English
 
 #### New
+
+- **Hint for objects that fail often:** If an entity or device fails regularly (unstable, flapping or always at the same time of day), the finding says “Usually fails between 22:00 and 00:00” and the tab “Actions” asks “On purpose?” with a mark prepared, time window included. Nothing is set automatically; “Do not ask again” holds for 180 days in this browser.
 
 - **Outages by duration for all objects:** Unavailable entities, devices, integrations and apps become a finding after the info threshold (default 15 minutes) and rise with their duration: info, low from 1 hour, medium from 1 day, high from 7 days. Info and low are on the findings page; the overview, the sensors, the repair hints and “new findings” count from medium on. Integrations that cannot start are at least medium at once. An entity with `unknown` is a finding if it had a value before. An outage is followed by extra scans at the thresholds that do not change the history. **Changed:** the setting “Unavailable after days” (`min_unavailable_days`) is replaced by four thresholds (info in minutes, low, medium and high in hours); an old value that was set is kept until you save the new ones. Entities are now reported much earlier than the former 7 days.
 

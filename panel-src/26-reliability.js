@@ -196,7 +196,7 @@ class ReliabilityMixin {
     this._stabRequested = this.relWindow;
     setTimeout(async () => {
       try { this.stability = await this._hass.callWS({ type: "ha_housekeeper/reliability", window_days: this.relWindow, cached_only: true }); } catch (_) { return; }
-      if (this.selected?.object_type === "entity") this.render();
+      if (this.selected?.object_type === "entity" || this.view === "findingsNav") this.render();
     }, 0);
   }
 
