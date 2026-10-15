@@ -46,6 +46,11 @@ class WatchMixin {
     return pg + more;
   }
 
+  // Ends the open watch only after the person has said yes: what it measured so far is judged and no more scans follow.
+  askEndWatch() {
+    this.confirmAsk(this.t("endWatchText"), () => this.endWatch(), { title: this.t("endWatchTitle"), yes: this.t("watchEnd"), danger: false });
+  }
+
   async endWatch() {
     try { await this._hass.callWS({ type: "ha_housekeeper/watch_end" }); } catch (_) { return; }
     if (this.data?.meta) this.data.meta.watch = null;
@@ -54,7 +59,6 @@ class WatchMixin {
 
   watchBody(w) {
     const r = { silent: [], marked: [], ...w.result }, parts = [];
-    if (!w.closed_at) parts.push(`<div class="toolbar u-mb14"><button class="btn quiet" data-watch-end><ha-icon icon="mdi:eye-off-outline"></ha-icon>${this.t("watchEnd")}</button></div>`);
     parts.push(`<p class="sub u-mb14">${w.before ? this.t("watchBefore", { when: this.formatDate(w.before.at) }) : this.t("watchNoBefore")} · ${this.t("watchSamples", { n: w.samples.length })}</p>`);
     if (r.reason === "unread") parts.push(`<p class="factnote">${this.t("watchUnread")}</p>`);
     const section = (id, keys, tone) => keys.length ? `<h3>${this.t(id, { n: this.formatNumber(keys.length) })}</h3>${this.watchRows(keys, tone)}` : "";
@@ -62,20 +66,5 @@ class WatchMixin {
     if (r.new_findings.length) parts.push(`<p class="sub">${this.t("watchNewFindings", { n: this.formatNumber(r.new_findings.length) })}</p>`);
     if (!r.new.length && !r.silent.length && !r.marked.length && !r.transient.length && !r.fixed.length && !r.new_findings.length && w.before) parts.push(`<p class="sub">${this.t("watchNone")}</p>`);
     return parts.join("");
-  }
-
-  // On the findings page next to the card for findings that began with an update.
-  watchCard() {
-    this.ensureWatches();
-    const list = this.watch?.watches || [];
-    if (!list.length) return "";
-    const tones = { worse: "warn", stable: "ok", transient: "mute", unknown: "mute", pending: "mute" };
-    const rows = list.map(w => {
-      const verdict = w.result.verdict;
-      const sub = w.closed_at ? this.t("watchEnded", { when: this.formatDate(w.closed_at) }) : this.formatDate(w.started_at);
-      const open = this.foldOpen(`watch_${w.id}`, false);
-      return this.fold(`watch_${w.id}`, { tone: tones[verdict] || "mute", title: this.watchWhat(w), sub, pill: this.t(`watchV_${verdict}`) }, open ? this.watchBody(w) : "", false);
-    }).join("");
-    return `<div class="panel">${this.fold("watch", { tone: "mute", title: this.t("watchTitle"), sub: this.t("watchHint"), pill: this.formatNumber(list.length) }, rows, false)}</div>`;
   }
 }

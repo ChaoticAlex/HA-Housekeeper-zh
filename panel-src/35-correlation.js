@@ -52,17 +52,68 @@ class CorrelationMixin {
     return `${this.corrAlso(group)}${this.corrSummary(group, findings)}${pg.rows.map(f => this.findingRow(f)).join("")}${pg.footer}`;
   }
 
-  // Closed by default; one fold per group inside. Sits on the findings page next to the tile that filters by it.
+  // The incidents of the findings page: every update or restart that has findings, and every watch after a system
+  // update. A watch belongs to the incident that holds the same update (kind, from, to); one without findings stands alone.
+  incidents() {
+    const groups = this.corr?.groups || [], watches = this.watch?.watches || [];
+    const system = ["ha_version", "os_version", "supervisor_version"];
+    const same = t => `${t.kind}|${t.from ?? ""}|${t.to ?? ""}`;
+    const used = new Set();
+    const items = groups.map(group => {
+      const mine = new Set([group, ...(group.also || [])].filter(e => system.includes(e.kind)).map(same));
+      const watch = watches.find(w => !used.has(w.id) && w.triggers.some(t => mine.has(same(t)))) || null;
+      if (watch) used.add(watch.id);
+      return { group, watch, at: group.at };
+    });
+    watches.filter(w => !used.has(w.id)).forEach(watch => items.push({ group: null, watch, at: watch.started_at }));
+    const running = it => (it.watch && !it.watch.closed_at ? 1 : 0);
+    return items.sort((a, b) => running(b) - running(a) || (Date.parse(b.at) || 0) - (Date.parse(a.at) || 0));
+  }
+
+  incidentId(item) { return item.group ? `corr_${item.group.id}` : `corr_w_${item.watch.id}`; }
+
+  // The fold of the incident that holds a watch, so the band in the page head can open it.
+  incidentFoldId(watchId) {
+    const item = this.incidents().find(it => it.watch && it.watch.id === watchId);
+    return item ? this.incidentId(item) : `corr_w_${watchId}`;
+  }
+
+  incidentBody(item) {
+    const parts = [];
+    if (item.watch) parts.push(`<div class="incsec obs"><h4>${this.t("incObs")}</h4>${this.watchBody(item.watch)}</div>`);
+    if (item.group) parts.push(`<div class="incsec"><h4>${this.t("incFindings", { n: this.formatNumber(item.group.total) })}</h4>${this.corrGroupBody(item.group)}</div>`);
+    return parts.join("");
+  }
+
+  incidentRow(item) {
+    const { group, watch } = item, id = this.incidentId(item), open = this.foldOpen(id, false);
+    const running = watch && !watch.closed_at;
+    const icon = !group ? "mdi:package-up" : group.kind === "start" ? "mdi:restart" : group.kind === "plan" ? "mdi:broom" : group.kind === "purge" ? "mdi:database-remove" : group.kind === "note" ? "mdi:pin-outline" : "mdi:package-up";
+    const title = group ? this.corrText(group) + (group.also?.length ? ` <span class="pill warn alsopill" title="${this.esc(this.t("corrAlsoLabel"))}">+${group.also.length}</span>` : "") : this.watchWhat(watch);
+    const when = [this.formatDate(item.at)];
+    if (running) when.push(this.t("incLeft", { hours: Math.max(0, Math.ceil((Date.parse(watch.until) - Date.now()) / 3600000)) }));
+    else if (watch?.closed_at) when.push(this.t("watchEnded", { when: this.formatDate(watch.closed_at) }));
+    const tones = { worse: "red", stable: "ok", transient: "mute", unknown: "mute", pending: "warn" };
+    const pills = [group ? `<span class="pill ${group.only_group ? "mute" : "warn"}">${this.esc(this.t("corrCount", { n: this.formatNumber(group.total) }))}</span>` : (watch ? `<span class="pill mute">${this.esc(this.t("incNoFindings"))}</span>` : ""),
+      watch ? `<span class="pill ${tones[watch.result?.verdict] || "mute"}">${this.esc(this.t(`watchV_${watch.result?.verdict || "unknown"}`))}</span>` : ""].join("");
+    const endBtn = running ? `<button class="btn quiet" data-watch-end><ha-icon icon="mdi:eye-off-outline"></ha-icon>${this.t("watchEnd")}</button>` : "";
+    const tile = group && group.only_group ? "mute" : "warn";
+    const head = `<div class="incidenthead"><button class="row foldhead" data-fold="${this.esc(id)}" aria-expanded="${open}"><span class="tile ${tile}"><ha-icon icon="${open ? "mdi:chevron-down" : icon}"></ha-icon></span><span class="row-text"><strong>${title}</strong><small>${this.esc(when.join(" · "))}</small></span>${pills}</button>${endBtn}</div>`;
+    return `<div class="fold${open ? " open" : ""}">${head}${open ? `<div class="foldbody">${this.incidentBody(item)}</div>` : ""}</div>`;
+  }
+
+  // One card for what began or stopped after an update or restart. Closed by default; the filter line stays in view.
   corrGroupsCard(afterCount = 0, follows = 0) {
-    const groups = this.corr?.groups || [];
-    if (!groups.length) return "";
-    const pg = this.paginate("corr", groups);
-    const rows = pg.rows.map(g => {
-      const icon = g.kind === "start" ? "mdi:restart" : g.kind === "plan" ? "mdi:broom" : g.kind === "purge" ? "mdi:database-remove" : g.kind === "note" ? "mdi:pin-outline" : "mdi:package-up";
-      const head = { tone: g.only_group ? "mute" : "warn", title: this.corrText(g) + (g.also?.length ? ` <span class="pill warn alsopill" title="${this.esc(this.t("corrAlsoLabel"))}">+${g.also.length}</span>` : ""), sub: this.formatDate(g.at), pill: this.t("corrCount", { n: this.formatNumber(g.total) }) };
-      const open = this.foldOpen(`corr_${g.id}`, false);
-      return this.fold(`corr_${g.id}`, head, open ? this.corrGroupBody(g) : "", false).replace(/<ha-icon icon="mdi:chevron-(?:down|right)"><\/ha-icon>/, `<ha-icon icon="${open ? "mdi:chevron-down" : icon}"></ha-icon>`);
-    }).join("");
-    return `<div class="panel">${this.fold("corr", { tone: "warn", title: this.t("corrTitle"), sub: this.t("corrHint"), pill: this.t("corrIncidents", { n: this.formatNumber(groups.length) }) }, rows + pg.footer, false)}${afterCount ? `<div class="pad"><button class="btn" data-finding-after="1" aria-pressed="${Boolean(this.findingAfter)}"><ha-icon icon="mdi:filter-variant"></ha-icon>${this.t("corrShow", { n: this.formatNumber(afterCount) })}</button> <small class="factnote">${this.t("corrTileSub")}${follows ? ` · ${this.esc(this.t("findingsFollowSub", { n: this.formatNumber(follows) }))}` : ""}</small></div>` : ""}</div>`;
+    this.ensureWatches?.();
+    const items = this.incidents();
+    if (!items.length) return "";
+    const pg = this.paginate("corr", items);
+    const open = this.foldOpen("corr", false);
+    const rows = pg.rows.map(it => this.incidentRow(it)).join("");
+    const pill = `<span class="pill warn">${this.esc(this.t("corrIncidents", { n: this.formatNumber(items.length) }))}</span>`;
+    const top = `<button class="row foldhead" data-fold="corr" aria-expanded="${open}"><span class="tile warn"><ha-icon icon="mdi:${open ? "chevron-down" : "chevron-right"}"></ha-icon></span><span class="row-text"><strong>${this.t("corrTitle")}</strong><small>${this.esc(this.t("corrHint"))}</small></span>${pill}</button>`;
+    const on = Boolean(this.findingAfter);
+    const strip = afterCount ? `<div class="incfilter${on ? " on" : ""}"><span><b>${this.esc(this.t("corrStrip", { n: this.formatNumber(afterCount) }))}</b>${follows ? ` <span class="muted">· ${this.esc(this.t("findingsFollowSub", { n: this.formatNumber(follows) }))}</span>` : ""}</span><button class="chip" data-finding-after="1" aria-pressed="${on}"><ha-icon icon="mdi:${on ? "close" : "filter-variant"}"></ha-icon>${this.t(on ? "corrFilterOff" : "corrFilterOn")}</button></div>` : "";
+    return `<div class="panel"><div class="fold${open ? " open" : ""}">${top}${strip}${open ? `<div class="foldbody">${rows}${pg.footer}</div>` : ""}</div></div>`;
   }
 }

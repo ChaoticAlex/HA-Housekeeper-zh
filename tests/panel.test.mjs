@@ -3256,7 +3256,7 @@ test("the button for findings after an update counts what the list shows and nam
   el._corrRequested = true; el._corrKey = el.data.meta.scanned_at || ""; el.series = null; el._seriesFor = el.data;
   el.findingAfter = true;
   const html = el.findingsView();
-  assert.ok(html.includes("Show 2 findings") && html.includes("plus 1 follow-ups") && html.includes("2 in this view"));
+  assert.ok(html.includes("2 findings began together with an update") && html.includes("plus 1 follow-ups") && html.includes("2 in this view"));
 });
 
 test("the detail page rates a finding: level with reasons, certainty, and what the next level takes", () => {
@@ -3289,12 +3289,33 @@ test("the watch after an update shows a band while it runs and a card with what 
   assert.ok(el.watchBand().includes("first check comes 30 minutes"));
   el.data = { ...el.data, meta: { ...el.data.meta, watch: null } };
   assert.equal(el.watchBand(), "");
+  el.corr = { groups: [], by_key: {} }; el._corrRequested = true; el._corrKey = el.data.meta.scanned_at || "";
+  el.folds = { corr: true, corr_w_w1: true };
+  const live = el.corrGroupsCard();
+  assert.ok(live.includes("data-watch-end"), "a running watch can be ended from its row");
   el.watch = { hours: 24, watches: [{ ...running, closed_at: "2026-10-15T03:00:00+00:00", result }] };
-  el.folds = { watch: true, watch_w1: true };
-  const card = el.watchCard();
-  assert.ok(card.includes("Worse") && card.includes("Failed since (1)") && card.includes("Hall lamp") && card.includes('data-object="entity:light.a"'));
+  const card = el.corrGroupsCard();
+  assert.ok(card.includes("Worse") && card.includes("Failed since (1)") && card.includes("Hall lamp") && card.includes('data-object="entity:light.a"') && !card.includes("data-watch-end"));
   el.watch = { hours: 24, watches: [] };
-  assert.equal(el.watchCard(), "");
+  assert.equal(el.corrGroupsCard(), "");
+});
+
+test("a watch joins the incident that holds the same update, and ending it asks first", () => {
+  const { el } = panel("en");
+  const trigger = { kind: "ha_version", from: "2026.10.1", to: "2026.10.2" };
+  el.data = { ...DATA, objects: [], edges: [], findings: [] };
+  el._watchRequested = true; el._watchKey = el.data.meta.scanned_at || ""; el._corrRequested = true; el._corrKey = el.data.meta.scanned_at || "";
+  el.corr = { groups: [{ id: "g1", kind: "entry_version", at: "2026-10-14T19:30:00+00:00", domain: "hue", from: "1", to: "2", total: 3, keys: [], only_group: false, also: [trigger] }], by_key: {} };
+  el.watch = { hours: 24, watches: [{ id: "w1", started_at: "2026-10-14T19:25:00+00:00", until: new Date(Date.now() + 3600000).toISOString(), triggers: [trigger], before: null, samples: [], closed_at: null, result: { verdict: "pending", new: [], fixed: [], transient: [], new_findings: [] } }] };
+  const items = el.incidents();
+  assert.equal(items.length, 1);
+  assert.ok(items[0].group && items[0].watch);
+  assert.equal(el.incidentFoldId("w1"), "corr_g1");
+  el.folds = { corr: true, corr_g1: true };
+  const card = el.corrGroupsCard();
+  assert.ok(card.includes("3 findings") && card.includes("Running") && card.includes("data-watch-end") && card.includes("incsec obs"));
+  el.askEndWatch();
+  assert.ok(el.confirmState && el.confirmState.text.includes("judged now"));
 });
 
 test("a device has a history tab with its steps and no note; removed devices show their logbook entry in Maintenance", () => {
