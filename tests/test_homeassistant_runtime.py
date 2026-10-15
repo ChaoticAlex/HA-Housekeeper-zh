@@ -1225,7 +1225,7 @@ async def test_report_and_device_pairs_are_served_to_admins(
 async def test_only_one_write_runs_at_a_time_across_purge_and_plans(
     hass: HomeAssistant, hass_ws_client
 ) -> None:
-    """A purge sits in its backup: a second purge and a plan execution both see busy."""
+    """A purge plan sits in its backup: a second purge plan and another plan both see busy."""
     import asyncio
     from unittest.mock import patch
 
@@ -1251,13 +1251,25 @@ async def test_only_one_write_runs_at_a_time_across_purge_and_plans(
     async def nothing_left(hass_, ids):
         return set()
 
-    purge = {
-        "type": "ha_housekeeper/purge_statistics",
-        "statistic_ids": ["sensor.gone"],
-        "states": False,
-        "confirmed": True,
-    }
     module = "custom_components.ha_housekeeper.cleanup_exec"
+
+    async def make(kind: str, object_id: str) -> tuple[str, str]:
+        action = {"kind": kind, "object_id": object_id}
+        if kind == "purge_statistics":
+            action["states"] = False
+        await client.send_json_auto_id({"type": "ha_housekeeper/plan_create", "actions": [action]})
+        plan_id = (await client.receive_json())["result"]["plan_id"]
+        await client.send_json_auto_id(
+            {"type": "ha_housekeeper/plan_confirm", "plan_id": plan_id, "acknowledged": [object_id]}
+        )
+        return plan_id, (await client.receive_json())["result"]["token"]
+
+    async def execute(plan_id: str, token: str) -> dict:
+        await client.send_json_auto_id(
+            {"type": "ha_housekeeper/plan_execute", "plan_id": plan_id, "token": token}
+        )
+        return await client.receive_json()
+
     with (
         patch.object(scanner.cleanup, "_backup", slow_backup),
         patch(f"{module}.delete_statistics", deleted),
@@ -1268,35 +1280,21 @@ async def test_only_one_write_runs_at_a_time_across_purge_and_plans(
             lambda *args: {"verdict": "review", "reasons": []},
         ),
     ):
-        await client.send_json_auto_id(purge)
+        first = await make("purge_statistics", "sensor.gone")
+        second = await make("purge_statistics", "sensor.gone")
+        disable = await make("disable_entity", orphan.entity_id)
+        assert (await execute(*first))["success"]
         await asyncio.sleep(0.1)
-        await client.send_json_auto_id(purge)
-        refused = await client.receive_json()
-        assert refused["error"]["code"] == "busy"
+        assert (await execute(*second))["error"]["code"] == "busy"
         await client.send_json_auto_id({"type": "ha_housekeeper/status"})
         assert (await client.receive_json())["result"]["writing"] == "plan"
-        await client.send_json_auto_id(
-            {
-                "type": "ha_housekeeper/plan_create",
-                "actions": [{"kind": "disable_entity", "object_id": orphan.entity_id}],
-            }
-        )
-        plan = (await client.receive_json())["result"]
-        await client.send_json_auto_id(
-            {"type": "ha_housekeeper/plan_confirm", "plan_id": plan["plan_id"]}
-        )
-        token = (await client.receive_json())["result"]["token"]
-        await client.send_json_auto_id(
-            {"type": "ha_housekeeper/plan_execute", "plan_id": plan["plan_id"], "token": token}
-        )
-        assert (await client.receive_json())["error"]["code"] == "busy"
+        assert (await execute(*disable))["error"]["code"] == "busy"
         gate.set()
-        done = await client.receive_json()
-        assert done["id"] == 1 and done["success"]
-        assert done["result"]["removed"] == ["sensor.gone"] and done["result"]["backup"]
+        await scanner.cleanup.wait()
     assert registry.async_get(orphan.entity_id).disabled_by is None
-    stored = scanner.journal.get(done["result"]["plan_id"])
+    stored = scanner.journal.get(first[0])
     assert stored["actions"][0]["kind"] == "purge_statistics" and stored["followup"]
+    assert stored["actions"][0]["result"]["state"] == "done" and stored["backup"]
 
 
 async def test_diagnostics_commands_answer_for_known_and_unknown_automations(

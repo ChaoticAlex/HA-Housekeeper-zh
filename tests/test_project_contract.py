@@ -120,8 +120,8 @@ def test_every_fixed_refusal_text_has_a_panel_translation() -> None:
 
 def test_every_websocket_command_uses_current_admin_decorator() -> None:
     source = _websocket_source()
-    assert source.count("@websocket_api.websocket_command") == 81
-    assert source.count("@websocket_api.require_admin") == 81
+    assert source.count("@websocket_api.websocket_command") == 80
+    assert source.count("@websocket_api.require_admin") == 80
     assert "connection.require_admin" not in source
 
 

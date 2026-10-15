@@ -66,7 +66,6 @@ from .inventory import InventoryScanner
 from .meter import prepare_meter
 from .monitor import MonitorError, MonitorStore, evaluate
 from .protection import MODES as PROTECTION_MODES
-from .recorder_purge import MAX_IDS as PURGE_MAX_IDS
 from .recorder_purge import TRIM_MAX_DAYS, TRIM_TABLES, count_history, count_older, count_trim
 from .references import preview_replacement
 from .writelock import WriteBusy, acquire_write, release_write, write_holder
@@ -977,92 +976,6 @@ async def websocket_backup_cleanup(
 
 
 @websocket_api.require_admin
-@websocket_api.websocket_command(
-    {
-        vol.Required("type"): f"{DOMAIN}/purge_statistics",
-        vol.Required("statistic_ids"): vol.All([str], vol.Length(min=1, max=PURGE_MAX_IDS)),
-        vol.Required("states"): bool,
-        vol.Required("confirmed"): True,
-    }
-)
-@websocket_api.async_response
-@with_scanner
-async def websocket_purge_statistics(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-    scanner: InventoryScanner,
-) -> None:
-    """Delete the recorder statistics of orphaned entities after a backup. Not undoable."""
-    if scanner.warming_up or scanner.cleanup.running or write_holder(hass):
-        connection.send_error(
-            msg["id"], "busy", "Home Assistant is starting or a plan or purge is running"
-        )
-        return
-    if not scanner.snapshot or not scanner.snapshot["meta"].get("recorder_available"):
-        connection.send_error(msg["id"], "no_recorder", "The recorder is not available")
-        return
-    by = connection.user.id if connection.user else None
-    registry = er.async_get(hass)
-    ids = list(dict.fromkeys(msg["statistic_ids"]))
-    plan = build_plan(
-        scanner.snapshot,
-        [{"kind": "purge_statistics", "object_id": i, "states": msg["states"]} for i in ids],
-        datetime.now(UTC),
-        statistic_exists=lambda sid: (
-            registry.async_get(sid) is not None or hass.states.get(sid) is not None
-        ),
-    )
-    await _add_history(hass, scanner.snapshot, plan)
-    scanner.journal.add(plan)
-    legacy = {"entity_exists": "exists"}
-    result: dict[str, Any] = {
-        "removed": [],
-        "skipped": [
-            {"id": a["object_id"], "reason": legacy.get(a["reasons"][0], a["reasons"][0])}
-            for a in plan["actions"]
-            if not a["executable"]
-        ],
-        "backup": False,
-        "states": msg["states"],
-        "plan_id": plan["plan_id"],
-    }
-    runnable = [a["object_id"] for a in plan["actions"] if a["executable"]]
-    if runnable:
-        try:
-            confirmation = scanner.cleanup.confirm(plan["plan_id"], runnable, by)
-            scanner.cleanup.start(plan["plan_id"], confirmation["token"], by)
-        except CleanupError as err:
-            _cleanup_error(connection, msg, err)
-            return
-        await scanner.cleanup.wait()
-        results = {a["object_id"]: a.get("result") or {} for a in plan["actions"]}
-        result["removed"] = [i for i in runnable if results[i].get("state") == "done"]
-        result["skipped"] += [
-            {"id": i, "reason": results[i].get("reason", "not_run")}
-            for i in runnable
-            if i not in result["removed"]
-        ]
-        result["backup"] = bool(plan.get("backup"))
-        failures = {
-            "backup_unavailable",
-            "no_backup_agent",
-            "backup_failed",
-            "recorder_busy",
-            "database_corrupt",
-            "disk_low",
-            "backup_unverified",
-            "backup_running",
-            "recorder_migrating",
-            "recorder_backlog",
-        }
-        result["error"] = next(
-            (r["reason"] for r in results.values() if r.get("reason") in failures), None
-        )
-    connection.send_result(msg["id"], _versioned(result))
-
-
-@websocket_api.require_admin
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/events"})
 @callback
 @with_scanner
@@ -1274,7 +1187,6 @@ def async_register(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_plan_cancel)
     websocket_api.async_register_command(hass, websocket_plan_status)
     websocket_api.async_register_command(hass, websocket_plan_undo)
-    websocket_api.async_register_command(hass, websocket_purge_statistics)
     websocket_api.async_register_command(hass, websocket_backup_cleanup)
     websocket_api.async_register_command(hass, websocket_events)
     websocket_api.async_register_command(hass, websocket_monitor_list)

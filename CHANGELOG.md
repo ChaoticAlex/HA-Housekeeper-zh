@@ -4,8 +4,6 @@
 
 ### Neu
 
-- **Sieben neue Farbschemata:** Aurora, Honig, Lagune, Smaragd, Frost, Mitternacht und Olive, jeweils in Hell und Dunkel. Die Kacheln der Auswahl sind kleiner, „Lesbarkeit“ steht jetzt rechts.
-
 - **Stand beim Start eines Updates:** Beginnt ein Update von Home Assistant, Betriebssystem oder Supervisor, scannt Housekeeper sofort. Die Beobachtung danach vergleicht mit diesem Stand statt mit dem letzten planmäßigen Scan.
 
 - **Reparaturen nach Updates:** Die Beobachtung nach einem Update meldet auch Reparaturen, die seitdem neu aufgetaucht sind, und zählt sie als Verschlechterung.
@@ -30,6 +28,8 @@
 
 - **Export überall:** Die Recorder-Seite hat einen Export-Knopf (CSV, Markdown, JSON) für alles, was ein Reiter zeigt. Alle Listen nutzen jetzt dasselbe Export-Menü statt des Download-Symbols.
 
+- **Sieben neue Farbschemata:** Aurora, Honig, Lagune, Smaragd, Frost, Mitternacht und Olive, jeweils in Hell und Dunkel. Die Kacheln der Auswahl sind kleiner, „Lesbarkeit“ steht jetzt rechts.
+
 ### Geändert
 
 - **Update-Preflight nur noch für vorher:** Der manuell gespeicherte Ausgangszustand und der Vergleich danach entfallen. Die Karte prüft den Zustand vor einem Update und sagt unten, was danach geschieht: Die Beobachtung nach Updates übernimmt das Nachher.
@@ -40,13 +40,13 @@
 
 ### Behoben
 
+- **Löschen von Statistiken nur noch über einen Plan:** Ein alter Befehl löschte verwaiste Statistiken ohne Vorschau und Bestätigung. Das Panel nutzte ihn nicht mehr; er ist entfernt (Issue 16).
+
 - **Backup-Prüfung:** Backups einzelner Apps, etwa vor einem App-Update, zählen nicht mehr als Backups von Home Assistant.
 
 ### English
 
 #### New
-
-- **Seven new color schemes:** Aurora, Honey, Lagoon, Emerald, Frost, Midnight and Olive, each in light and dark. The scheme tiles are smaller and "Readability" now sits on the right.
 
 - **State when an update starts:** When an update of Home Assistant, the operating system or the Supervisor begins, Housekeeper scans at once. The watch afterwards compares with that state instead of the last scheduled scan.
 
@@ -72,6 +72,8 @@
 
 - **Export everywhere:** The recorder page has an export button (CSV, Markdown, JSON) for everything a tab shows. All lists now use the same export menu instead of the download icon.
 
+- **Seven new color schemes:** Aurora, Honey, Lagoon, Emerald, Frost, Midnight and Olive, each in light and dark. The scheme tiles are smaller and "Readability" now sits on the right.
+
 #### Changed
 
 - **Update preflight only for before:** The manually saved starting state and the comparison afterwards are gone. The card checks the state before an update and says below what happens afterwards: the watch after updates takes over the time after.
@@ -81,6 +83,8 @@
 - **Interface:** Fixes and small improvements to lists, dialogs, labels and handling, an open panel that picks up scans from the background by itself (the overview used to show old numbers afterwards), among them the tiles of the findings page (in two rows on wide windows, all equally high and wide), the column picker of the lists (boxes in one line at the right edge), the threshold cards in Settings (grouped, uniformly built, with a “Default” link), the events for your own automations as a table with a copy button, the maintenance goals (only under Maintenance, no longer duplicated in Settings), the list of the latest backups (arrow next to the date, details aligned), the settings with four tabs instead of seven (Appearance, Scan and messages, Protection and exceptions, Info); saving the thresholds keeps the page open instead of jumping to the Home Assistant dashboard and the readability of incidents.
 
 #### Fixed
+
+- **Deleting statistics only through a plan:** An old command deleted orphaned statistics without a preview or confirmation. The panel no longer used it; it is removed (issue 16).
 
 - **Backup check:** Backups of single apps, such as those made before an app update, no longer count as backups of Home Assistant.
 
