@@ -63,6 +63,8 @@ class BackupMixin {
       case "restore_test":
         if (!v.at) return t("bhRestoreNone");
         return t(c.level === "ok" ? "bhRestoreOk" : "bhRestoreOld", { date: this.bhDay(v.at), days: v.age_days, limit: 180 });
+      case "own_backups":
+        return t("bhOwnNote", { count: v.count, size: this.formatBytes(v.size) });
       case "plan_backups":
         return c.level === "ok" ? t("bhPlansOk", v) : t("bhPlansNote", v);
       default:

@@ -1608,6 +1608,7 @@ const BACKUP_REPORT = {
     { id: "emergency_kit", level: "note", values: { at: null, age_days: null } },
     { id: "restore_test", level: "ok", values: { at: "2026-09-01T00:00:00+00:00", age_days: 37 } },
     { id: "plan_backups", level: "note", values: { checked: 4, missing: 1 } },
+    { id: "own_backups", level: "note", values: { count: 12, size: 3145728000 } },
   ],
   backups: [{ date: "2026-10-05T10:00:00+00:00", size: 524288000, agents: ["hassio.local"], protected: false, automatic: true, failed_agents: [] }],
   attest: { emergency_kit: null, restore_test: "2026-09-01T00:00:00+00:00" },

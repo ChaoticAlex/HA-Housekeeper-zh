@@ -29,6 +29,8 @@ SIZE_LOW, SIZE_HIGH = 0.5, 2.0
 RESTORE_TEST_DAYS = 180
 LOCAL_SUFFIX = ".local"  # agent ids such as backup.local or hassio.local; anything else is remote
 MAX_PLANS_CHECKED = 5
+OWN_BACKUPS_NOTE = 10  # Housekeeper's own backups: this many ...
+OWN_BACKUPS_BYTES = 5 * 1024**3  # ... or this much space in total is a hint to clean up
 PLAN_BACKUP_WINDOW_SECONDS = 2 * 3600  # the backup started up to this long before it was recorded
 ATTEST_KINDS = ("targets", "emergency_kit", "restore_test")
 _SEVERITY = {"ok": 0, "unknown": 1, "note": 2, "problem": 3}
@@ -99,6 +101,8 @@ async def collect(hass: HomeAssistant) -> dict[str, Any]:
                     ),
                     "automatic": getattr(backup, "with_automatic_settings", None),
                     # Housekeeper's own safety copy before a plan: configuration only, no regular backup.
+                    "own": (getattr(backup, "extra_metadata", None) or {}).get("housekeeper")
+                    is True,
                     "partial": (getattr(backup, "extra_metadata", None) or {}).get(
                         "housekeeper_scope"
                     )
@@ -269,6 +273,15 @@ def _plans_check(
     return _check("plan_backups", "ok" if not missing else "note", checked=checked, missing=missing)
 
 
+def _own_check(backups: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Housekeeper's safety copies pile up: Home Assistant's retention does not remove them."""
+    own = [item for item in backups if item.get("own")]
+    size = sum(item["size"] for item in own if isinstance(item.get("size"), int))
+    if len(own) < OWN_BACKUPS_NOTE and size < OWN_BACKUPS_BYTES:
+        return None
+    return _check("own_backups", "note", count=len(own), size=size)
+
+
 def evaluate(
     state: dict[str, Any], now: datetime, attest: dict[str, Any], plans: list[dict[str, Any]]
 ) -> dict[str, Any]:
@@ -303,6 +316,8 @@ def evaluate(
     checks.append(_attest_check("restore_test", attest.get("restore_test"), now, RESTORE_TEST_DAYS))
     if selected is not None and (plan_check := _plans_check(plans, everything)):
         checks.append(plan_check)
+    if selected is not None and (own_check := _own_check(everything)):
+        checks.append(own_check)
     overall = max((item["level"] for item in checks), key=_SEVERITY.__getitem__, default="unknown")
     counts = {level: sum(1 for item in checks if item["level"] == level) for level in _SEVERITY}
     return {

@@ -252,6 +252,15 @@ def test_backups_before_risky_plans_are_matched_by_time() -> None:
     assert judge(state([created]), plans=many)[1]["plan_backups"]["values"]["checked"] == 5
 
 
+def test_many_or_large_housekeeper_backups_are_a_hint_to_clean_up() -> None:
+    few = [backup(i + 1, own=True) for i in range(9)]
+    assert "own_backups" not in judge(state(few))[1]
+    assert judge(state(few + [backup(30, own=True)]))[1]["own_backups"]["values"]["count"] == 10
+    big = [backup(1, size=6 * 1024**3, own=True), backup(2)]
+    check = judge(state(big))[1]["own_backups"]
+    assert check["level"] == "note" and check["values"] == {"count": 1, "size": 6 * 1024**3}
+
+
 def test_only_executed_plans_with_a_recorded_backup_count() -> None:
     plans = [
         {"plan_id": "a", "executed": True, "backup": {"at": "2026-10-08T10:00:00+00:00"}},
@@ -325,6 +334,7 @@ async def test_the_collector_reads_the_manager_without_leaking_names_or_secrets(
         "failed_agents",
         "protected",
         "automatic",
+        "own",
         "partial",
     }
     report = evaluate(collected, NOW, ATTEST, [])
