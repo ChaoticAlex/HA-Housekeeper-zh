@@ -86,7 +86,7 @@ const KNOWN_TYPES = ["entity", "device", "config_entry", "automation", "script"]
 // The ring of the status: points off for each urgent topic, and the most that can come off.
 // The status is a score from 100: each entry of the findings list takes points off by its impact (points each, at most),
 // each urgent topic of the state area takes 10 off (at most 30). Green from 90, yellow from 70.
-const HEALTH_POINTS = { high: [5, 30], medium: [3, 20], low: [2, 10], info: [1, 5] };
+const HEALTH_POINTS = { high: [5, 30], medium: [3, 20], low: [2, 10] };
 const HEALTH_STATE_POINTS = 10;
 const HEALTH_STATE_MAX = 30;
 const HEALTH_GREEN = 90;

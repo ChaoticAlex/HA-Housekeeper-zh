@@ -43,7 +43,7 @@ def test_critical_things_rank_above_unused_ones() -> None:
         _auto("automation.a"),
     ]
     edges = [_edge("automation:automation.a", "entity:sensor.read")]
-    assert _impact(objects, edges, _unavailable("sensor.unused")) == ("none", [])
+    assert _impact(objects, edges, _unavailable("sensor.unused")) == ("info", [])
     assert _impact(objects, edges, _unavailable("sensor.read")) == ("medium", ["used_by_active"])
     assert _impact(objects, edges, _unavailable("lock.front")) == ("high", ["critical"])
     assert _impact(objects, edges, _unavailable("binary_sensor.leak"))[0] == "high"

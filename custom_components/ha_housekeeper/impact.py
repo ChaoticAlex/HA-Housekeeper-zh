@@ -1,6 +1,6 @@
 """How much a finding matters, from what depends on the object and whether it is critical.
 
-Only reads the objects and edges of the last scan. The answer is a level (high, medium, low, none)
+Only reads the objects and edges of the last scan. The answer is a level (high, medium, low, info)
 with the facts behind it (an outage that has lasted under an hour is "info"), never a score: "used by 3 automations", "critical area". A missing target
 of a lock automation ranks above an orphaned temperature sensor nobody uses.
 
@@ -133,4 +133,4 @@ def _judge(
         return "medium", facts
     if sources or kind in CONSUMERS:
         return "low", facts
-    return "none", facts
+    return "info", facts

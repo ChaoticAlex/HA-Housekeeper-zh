@@ -4,6 +4,10 @@
 
 ### Neu
 
+- **Jeder Befund hat einen Schweregrad:** Befunde auf Objekten, die nichts nutzt und die nicht kritisch sind (mögliches Duplikat, ungenutzt), standen bisher ohne Schweregrad („–“, Filter „Keine“). Sie sind jetzt „Info“; der Filterwert „Keine“ entfällt.
+
+- **Info zieht keine Punkte ab:** Befunde der Stufe „Info“ (kurze Ausfälle unter der Niedrig-Schwelle) kosteten im Punktestand der Seite bisher einen Punkt (höchstens 5), im Verlauf aber nichts. Jetzt zählen sie nirgends.
+
 - **Beobachtung vorzeitig beenden:** Eine laufende Beobachtung nach Updates hat in ihrer aufgeklappten Zeile den Knopf „Beobachtung beenden“. Sie wird mit dem Stand bis dahin ausgewertet und das Band im Seitenkopf verschwindet.
 
 - **Hinweis bei Objekten, die oft ausfallen:** Fällt eine Entität oder ein Gerät regelmäßig aus (instabil, flatternd oder immer zur selben Tageszeit), steht beim Befund „Fällt meist zwischen 22 und 00 Uhr aus“ und im Reiter „Aktionen“ die Frage „Absichtlich?“ mit einem vorbereiteten Vermerk samt Zeitfenster. Es wird nichts automatisch gesetzt; „Nicht mehr fragen“ gilt 180 Tage in diesem Browser.

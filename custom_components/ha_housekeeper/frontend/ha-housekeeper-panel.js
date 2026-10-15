@@ -465,7 +465,7 @@ const KNOWN_TYPES = ["entity", "device", "config_entry", "automation", "script"]
 // The ring of the status: points off for each urgent topic, and the most that can come off.
 // The status is a score from 100: each entry of the findings list takes points off by its impact (points each, at most),
 // each urgent topic of the state area takes 10 off (at most 30). Green from 90, yellow from 70.
-const HEALTH_POINTS = { high: [5, 30], medium: [3, 20], low: [2, 10], info: [1, 5] };
+const HEALTH_POINTS = { high: [5, 30], medium: [3, 20], low: [2, 10] };
 const HEALTH_STATE_POINTS = 10;
 const HEALTH_STATE_MAX = 30;
 const HEALTH_GREEN = 90;
@@ -2690,7 +2690,7 @@ class FindingsMixin {
     const grouped = open && !this.showFollowers;
     const list = this.groupBroken(this.collapseFollowers(sorted, !grouped));
     const types = [...new Set(all.map(f => this.findingType(f)))].sort();
-    const bar = this.listBar("findings", { table: true, dense: true, sorts: this.findingSorts(), filters: [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }, this.freshFilter(), { name: "impact", all: this.t("allSeverities"), options: ["high", "medium", "low", "info", "none"].map(x => [x, this.t(`chip_${x}`)]) }] });
+    const bar = this.listBar("findings", { table: true, dense: true, sorts: this.findingSorts(), filters: [{ name: "type", all: this.t("allTypes"), options: types.map(x => [x, this.t(x)]) }, this.freshFilter(), { name: "impact", all: this.t("allSeverities"), options: ["high", "medium", "low", "info"].map(x => [x, this.t(`chip_${x}`)]) }] });
     this.ensureSeries();
     const spark = (key, rising) => this.series ? this.sparkline(key, rising) : "";
     const classTone = c => { const tone = this.tone(c); return tone === "red" ? "red" : tone === "warn" ? "warn" : "mute"; };
