@@ -5353,3 +5353,13 @@ test("a quiet outage (info, low) stays off the overview counts and the line name
   const line = el.outageLineOf(quiet);
   assert.ok(line.includes("Medium") || line.includes("medium"), line);
 });
+
+test("the watch lists an object that is a finding like the findings list does, and the others with a mark button", () => {
+  const { el } = panel("en");
+  const object = { object_type: "entity", object_id: "light.a", name: "Hall lamp", status: "unavailable" };
+  const finding = { rule_id: "entity.state_unavailable", classification: "unavailable", key: "entity.state_unavailable|light.a|", object_id: "light.a", confidence: 0.75, impact: "medium" };
+  el.data = { ...DATA, objects: [object, { object_type: "entity", object_id: "light.b", name: "Porch", status: "unknown" }], edges: [], findings: [finding] };
+  const html = el.watchRows(["entity:light.a", "entity:light.b"], "warn");
+  assert.ok(html.includes("data-fsel=") && html.includes('data-watch-mark="entity:light.b"'));
+  assert.equal(html.includes('data-watch-mark="entity:light.a"'), false);
+});
