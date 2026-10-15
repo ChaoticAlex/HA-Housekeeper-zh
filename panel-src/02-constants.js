@@ -49,6 +49,7 @@ const OPTION_FIELDS = [
 ];
 const OUTAGE_OPTION_KEYS = ["outage_info_minutes", "outage_low_hours", "outage_medium_hours", "outage_high_hours"];
 const START_VIEWS = ["overview", "findingsNav", "inventory", "changes", "batteries"];
+const SCAN_WATCH_MS = 60000;
 const REPO_URL = "https://github.com/bertel2020/HA-Housekeeper";
 // Palettes for explicit light/dark; taken from the Zeitarchiv app's design system (app.css).
 // "standard" keeps the Home Assistant accent and, in automatic mode, the Home Assistant theme itself.

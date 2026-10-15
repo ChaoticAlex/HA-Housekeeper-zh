@@ -5501,3 +5501,19 @@ test("an entity that fails regularly gets a hint with a mark prepared for the ti
   assert.equal(el.oftenChip(finding), "");
   assert.equal(el.oftenRows(object).length, 0);
 });
+
+test("a newer scan found in the background reloads the panel; the same scan or a running one does not", async () => {
+  let status = { running: false, scanned_at: DATA.meta.scanned_at };
+  const { el } = panel("en");
+  el._hass = { language: "en", callWS: async () => status };
+  let loads = 0;
+  el.load = async () => { loads += 1; };
+  await el.checkNewScan();
+  assert.equal(loads, 0, "same scan");
+  status = { running: true, scanned_at: "2026-10-07T16:00:00+00:00" };
+  await el.checkNewScan();
+  assert.equal(loads, 0, "a scan that is still running");
+  status = { running: false, scanned_at: "2026-10-07T16:00:00+00:00" };
+  await el.checkNewScan();
+  assert.equal(loads, 1, "a newer scan");
+});

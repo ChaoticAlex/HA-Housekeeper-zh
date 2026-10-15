@@ -150,6 +150,7 @@ def websocket_status(
         _versioned(
             {
                 **scanner.status,
+                "scanned_at": ((scanner.snapshot or {}).get("meta") or {}).get("scanned_at"),
                 "writing": write_holder(hass),
                 "warmup": warmup,
                 "health": scanner.health_report(),

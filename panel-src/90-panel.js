@@ -92,13 +92,39 @@ class HAHousekeeperPanel extends HTMLElement {
     this._onResize = () => { globalThis.cancelAnimationFrame?.(this._fitFrame); this._fitFrame = globalThis.requestAnimationFrame?.(() => this.fitNav(this.shadowRoot)); };
     window.addEventListener?.("resize", this._onResize);
     this.installFonts();
+    this.startScanWatch();
     this.render();
+  }
+
+  // Scans also run in the background (every few hours); an open panel would keep showing the old one.
+  // Once a minute, and when the tab is shown again, the time of the last scan is asked for; a newer one reloads like after a scan of its own.
+  startScanWatch() {
+    this._onVisible = () => { if (!globalThis.document?.hidden) this.checkNewScan(); };
+    globalThis.document?.addEventListener?.("visibilitychange", this._onVisible);
+    this._scanWatch = globalThis.setInterval?.(() => this.checkNewScan(), SCAN_WATCH_MS);
+  }
+
+  stopScanWatch() {
+    globalThis.document?.removeEventListener?.("visibilitychange", this._onVisible);
+    if (this._scanWatch) globalThis.clearInterval?.(this._scanWatch);
+    this._scanWatch = null;
+  }
+
+  async checkNewScan() {
+    const shown = this.data?.meta?.scanned_at;
+    if (this._gone || this.busy || this._scanChecking || !this._hass?.callWS || !shown || this.data.meta.preliminary) return;
+    this._scanChecking = true;
+    try {
+      const s = await this._hass.callWS({ type: "ha_housekeeper/status" });
+      if (!s?.running && s?.scanned_at && s.scanned_at !== shown && !this.busy && !this._gone) await this.load(false);
+    } catch (_) { /* the next check asks again */ } finally { this._scanChecking = false; }
   }
 
   // Timers and late answers must not touch a panel that HA has taken out of the page.
   disconnectedCallback() {
     this._gone = true;
     this.stopWarmupTicker?.();
+    this.stopScanWatch();
     window.removeEventListener?.("popstate", this._onPop);
     window.removeEventListener?.("resize", this._onResize);
     for (const name of ["_warmupTimer", "_searchTimer", "_tipTimer", "_monitorTimer", "_monitorPreviewTimer"]) {
