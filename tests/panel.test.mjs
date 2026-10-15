@@ -572,19 +572,19 @@ test("the status counts affected objects once, only of the base types, and not h
   const finding = (rule, id, extra = {}) => ({ rule_id: rule, object_id: id, classification: "orphaned", confidence: 0.9, evidence: [], impact: "medium", ...extra });
   const base = { ...DATA, objects };
   el.data = { ...base, findings: [finding("entity.state_missing", "sensor.s0"), finding("entity.duplicate", "sensor.s0"), finding("entity.unavailable", "sensor.s0")] };
-  assert.deepEqual([el.health().affected, el.health().base, el.health().percent], [1, 8, 91]); // one object, three entries of three points each
+  assert.deepEqual([el.health().affected, el.health().base, el.health().percent, el.health().load], [1, 8, 93.7, 0.5]); // one object counts once, with its worst level: medium weighs a half
   el.data = { ...base, findings: [finding("entity.state_missing", "sensor.s0"), finding("entity.state_missing", "sensor.s1", { ignored: true })] };
   assert.equal(el.health().affected, 1); // hidden findings do not count
   el.data = { ...base, findings: [finding("dashboard.missing_entity", "dash")] };
   assert.equal(el.health().affected, 0); // other object types are listed but not part of the ring
   el.data = { ...DATA, objects: [], findings: [finding("entity.state_missing", "sensor.s0")] };
-  assert.equal(el.health().percent, 97); // the score does not depend on the number of objects
+  assert.equal(el.health().percent, 100); // no rated object, nothing to take off
   const many = Array.from({ length: 1000 }, (_, i) => entity(`sensor.m${i}`));
   el.data = { ...DATA, objects: many, findings: [finding("entity.state_missing", "sensor.m0")] };
-  assert.equal(el.health().percent, 97, "one entry takes its points, however many objects there are");
+  assert.equal(el.health().percent, 99.9, "one object takes its weight off the number of all objects");
   el.dbHealth = { available: true, findings: [{ level: "problem", kind: "gaps" }] };
-  assert.equal(el.health().percent, 97, "the database check only runs in Maintenance, so it never moves the number");
-  assert.ok(el.t("healthTip", { affected: 2, base: 8 }).includes("2") && el.t("healthHint").includes("findings list"));
+  assert.equal(el.health().percent, 99.9, "the database check only runs in Maintenance, so it never moves the number");
+  assert.ok(el.t("healthTip", { affected: 2, base: 8 }).includes("2") && el.t("healthHint").includes("objects in order"));
 });
 
 test("hidden findings are excluded from counts, lists and export unless shown", () => {
@@ -4451,33 +4451,32 @@ test("the mark is a row of the Actions tab and a line of what is known, no longe
   assert.ok(el.markRows({ object_type: "automation", object_id: "automation.x" }).length === 0);
 });
 
-test("the status is a score: entries by impact, urgent state topics, followers not extra; the ring explains it", () => {
+test("the status is the share of objects in order: each object once by its worst level, urgent state topics keep the ring from green; the ring explains it", () => {
   const { el, shadow } = panel("en");
   const f = (id, impact, extra = {}) => ({ rule_id: "entity.state_missing", object_id: id, classification: "orphaned", confidence: 0.9, evidence: [], impact, key: id, ...extra });
-  el.data = { ...DATA, objects: [], causes: [{ id: "a", parent_id: null, impact: "high" }, { id: "b", parent_id: "a", impact: "high" }], findings: [f("x.1", "high", { cause_id: "a" }), f("x.2", "medium"), f("x.3", "low"), f("x.4", "low", { ignored: true })] };
+  const objects = Array.from({ length: 20 }, (_, i) => ({ object_type: "entity", object_id: `x.${i}`, name: `x.${i}`, status: "active" }));
+  const cause = (id, parent, impact) => ({ id, parent_id: parent, impact, object_type: "entity", object_id: "x.1" });
+  el.data = { ...DATA, objects, causes: [cause("a", null, "high"), cause("b", "a", "high")], findings: [f("x.1", "high", { cause_id: "a" }), f("x.2", "medium"), f("x.2", "low", { rule_id: "entity.unused" }), f("x.3", "low"), f("x.4", "low", { ignored: true }), f("x.5", "info")] };
   const items = [{ tone: "warn", key: "quarantine", area: "care", count: 2 }];
   el.todoItems = () => items;
   let h = el.health();
-  assert.equal(h.percent, 100 - 5 - 3 - 2, "the chain counts once at its top, the follower and the hidden finding not at all");
-  assert.equal(h.tone, "warn", "a high entry is at least yellow");
+  assert.equal(h.load, 1.7, "the chain counts once at its cause, an object with two findings once, the follower, the hidden finding and info not at all");
+  assert.equal(h.percent, 91.5);
+  assert.equal(h.tone, "warn", "a high object is at least yellow");
   assert.equal(el.statusHeadline(h), "1 topic open");
   el.data = { ...el.data, causes: [], findings: Array.from({ length: 9 }, (_, i) => f(`x.${i}`, "high")) };
-  h = el.health();
-  assert.equal(h.percent, 100 - 30, "high impact takes off at most 30");
-  assert.equal(h.tone, "warn", "70 is yellow");
   items.push({ tone: "red", key: "disk", area: "state" }, { tone: "red", key: "backup", area: "state" });
   h = el.health();
-  assert.equal(h.percent, 100 - 30 - 20); assert.equal(h.tone, "red");
-  assert.equal(h.red, 2);
+  assert.equal([h.percent, h.tone, h.red].join(), "55,red,2");
   el.data = { ...el.data, findings: [] };
   items.splice(0, 3, { tone: "red", key: "disk", area: "state" });
   h = el.health();
-  assert.equal([h.percent, h.tone].join(), "90,warn", "an urgent state topic is never green");
+  assert.equal([h.percent, h.tone].join(), "100,warn", "an urgent state topic is never green, and takes nothing off");
   // the calculation opens from the ring
   el.view = "overview"; el.render();
   assert.ok(shadow.innerHTML.includes("data-health-why") && !shadow.innerHTML.includes('class="healthwhy"'));
   el.healthWhy = true; el.render();
-  assert.ok(shadow.innerHTML.includes('class="healthwhy"') && shadow.innerHTML.includes("− 10"));
+  assert.ok(shadow.innerHTML.includes('class="healthwhy"') && shadow.innerHTML.includes("In order"));
   // the rows say what they count
   assert.equal(el.todoCount({ key: "outages", count: 8 }), "8 outages"); assert.equal(el.todoCount({ key: "quarantine", count: 1 }), "1 object");
 });

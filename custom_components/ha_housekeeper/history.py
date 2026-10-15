@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -58,22 +59,42 @@ SETTING_RULES = {
 }
 
 
-# The score from 100, as the panel reads it: points off for each entry of the findings list by its
-# impact (points each, at most), counted once for a chain of outages and not for its followers.
-# "info" (an outage under an hour) counts on the page but not here, so a restart leaves no dent in the curve.
-SCORE_POINTS = {"high": (5, 30), "medium": (3, 20), "low": (2, 10)}
+# The state of the house, as the panel reads it: the number of rated objects, minus the weight of each object
+# that has a finding. An object counts once, with its worst level; a chain of outages stands for its cause and
+# its followers do not count. "info" (an outage under an hour) weighs nothing, so a restart leaves no dent.
+HEALTH_TYPES = frozenset({"entity", "automation", "script", "scene", "config_entry", "device"})
+HEALTH_WEIGHTS = {"high": 1.0, "medium": 0.5, "low": 0.2}
 
 
-def _score(snapshot: dict[str, Any]) -> int:
-    levels = [
-        c.get("impact", "none") for c in snapshot.get("causes", []) if not c.get("parent_id")
-    ] + [
-        f.get("impact", "none")
-        for f in snapshot["findings"]
-        if not f.get("ignored") and not f.get("cause_id")
-    ]
-    off = sum(min(most, each * levels.count(level)) for level, (each, most) in SCORE_POINTS.items())
-    return max(0, 100 - off)
+def _health(snapshot: dict[str, Any]) -> tuple[int, float]:
+    """The rated objects and the weight the objects with a finding take off."""
+    known = {
+        f"{o['object_type']}:{o['object_id']}"
+        for o in snapshot["objects"]
+        if o["object_type"] in HEALTH_TYPES
+    }
+    worst: dict[str, float] = {}
+
+    def note(key: str, level: str) -> None:
+        if key in known:
+            worst[key] = max(worst.get(key, 0.0), HEALTH_WEIGHTS.get(level, 0.0))
+
+    for cause in snapshot.get("causes", []):
+        if not cause.get("parent_id"):
+            note(f"{cause['object_type']}:{cause['object_id']}", cause.get("impact", "none"))
+    for finding in snapshot["findings"]:
+        if not finding.get("ignored") and not finding.get("cause_id"):
+            key = f"{finding['rule_id'].split('.')[0]}:{finding['object_id']}"
+            note(key, finding.get("impact", "none"))
+    return len(known), round(sum(worst.values()), 1)
+
+
+def health_percent(base: int | None, load: float | None) -> float | None:
+    """The share of the rated objects that is in order, with one decimal."""
+    if not base or load is None:
+        return None
+    # Rounded down, so that a house with a finding never reads 100.
+    return math.floor(round(1000 * (1 - load / base), 6)) / 10
 
 
 # The rules whose finding is a cause itself; any other finding with a cause_id is a follow-up.
@@ -100,17 +121,19 @@ def make_checkpoint(snapshot: dict[str, Any]) -> dict[str, Any]:
         if not _is_follower(finding):
             name = str(finding.get("classification") or "")
             lead_classes[name] = lead_classes.get(name, 0) + 1
+    health_base, health_load = _health(snapshot)
     return {
         "at": snapshot["meta"]["scanned_at"],
         "objects": objects,
         # A quiet outage (info, low) is not a change: it enters the list once it is medium.
         "findings": sorted({_finding_key(f) for f in snapshot["findings"] if not is_quiet(f)}),
-        # For the sparklines: open findings, per class, and the score.
+        # For the sparklines: open findings, per class, and the state of the house.
         "open": len(open_findings),
         "classes": classes,
         "lead": sum(lead_classes.values()),
         "lead_classes": lead_classes,
-        "share": _score(snapshot),
+        "health_base": health_base,
+        "health_load": health_load,
         # The settings that decide whether some findings exist at all.
         "rules": {
             name: snapshot["meta"][name] for name in SETTING_RULES if name in snapshot["meta"]
@@ -373,7 +396,7 @@ class ScanHistory:
                     "classes": cp.get("classes"),
                     "lead": cp.get("lead"),
                     "lead_classes": cp.get("lead_classes"),
-                    "share": cp.get("share"),
+                    "health": health_percent(cp.get("health_base"), cp.get("health_load")),
                     "unavailable": sum(
                         1
                         for objs in cp["objects"].values()

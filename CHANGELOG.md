@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Zustand als Anteil der Objekte in Ordnung:** Der Status zählt jetzt Objekte statt Punkte: Ausgangswert ist die Zahl der geprüften Objekte, jedes Objekt mit Befund nimmt nach seiner schlimmsten Stufe ab (hoch voll, mittel halb, niedrig ein Fünftel, Info nichts), Folgen einer Ursache zählen nicht extra. Es gibt keine Obergrenzen mehr, jede Behebung zählt. Die Karte „Wie entsteht die Zahl?“ zeigt „1575 von 2000 in Ordnung“, der Ring und die Kurve zeigen den Anteil, der Ring ist etwas dicker. Der Verlauf des Zustands beginnt neu.
+
 - **Kacheln auf zwei Zeilen:** Auf breiten Fenstern stehen „Gesamt“ und „Dringend“ oben und „Aufräumen“ darunter. Alle Kacheln sind gleich breit, lange Namen brechen nicht mehr um.
 
 - **Kurven der Kacheln zählen wie die Zahl:** Die Kurve in den Kacheln der Befundseite zählt wie die Zahl ohne Folgen. Sie beginnt neu und füllt sich über die nächsten Tage.
@@ -41,6 +43,8 @@
 ### English
 
 #### New
+
+- **State as the share of objects in order:** The status now counts objects instead of points: the starting value is the number of rated objects, each object with a finding takes off by its worst level (high fully, medium half, low a fifth, info nothing), follow-ups of a cause do not count extra. There are no caps any more, every fix counts. The card “How is this number made?” shows “1575 of 2000 in order”, the ring and the curve show the share, and the ring is a little thicker. The history of the state starts afresh.
 
 - **Outages by duration:** Unavailable entities, devices, integrations and apps become a finding after 15 minutes and rise with their duration (info, low, medium, high). Info and low appear only on the findings page; the overview, the sensors and the repair hints count from medium on. The setting “Unavailable after days” is replaced by four adjustable thresholds (an old value is kept until you save the new ones). During an outage Housekeeper scans additionally at the thresholds without changing the history. Entities are therefore reported much earlier than the former 7 days.
 

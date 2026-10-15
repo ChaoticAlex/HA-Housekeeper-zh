@@ -89,11 +89,9 @@ const KNOWN_TYPES = ["entity", "device", "config_entry", "automation", "script"]
 // The reasons on the findings page: what needs a look first, and what is tidying up. Anything else counts as urgent.
 const FINDING_URGENT = ["problem", "unavailable", "outage", "broken_reference", "run_error", "recurring"];
 const FINDING_TIDY = ["unknown", "unused", "stale", "possible_duplicate"];
-const HEALTH_POINTS = { high: [5, 30], medium: [3, 20], low: [2, 10] };
-const HEALTH_STATE_POINTS = 10;
-const HEALTH_STATE_MAX = 30;
-const HEALTH_GREEN = 90;
-const HEALTH_YELLOW = 70;
+const HEALTH_WEIGHTS = { high: 1, medium: 0.5, low: 0.2, info: 0 };
+const HEALTH_GREEN = 95;
+const HEALTH_YELLOW = 85;
 const LABEL_TYPES = ["entity", "automation", "script", "scene"];
 
 const NAV = [
