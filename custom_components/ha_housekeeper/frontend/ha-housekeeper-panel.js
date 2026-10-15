@@ -967,7 +967,7 @@ Object.assign(TEXT.en, {
 
 // Texts for the settings page; merged into TEXT.
 Object.assign(TEXT.de, {
-  setTabLook: "Darstellung", setTabScan: "Scan und Schwellen", setTabHidden: "Ausgeblendet", setTabInfo: "Info",
+  setTabLook: "Darstellung", setTabScan: "Scan und Meldungen", setTabInfo: "Info",
   setReadability: "Lesbarkeit",
   unitDays: "Tage", unitHours: "Std.", unitPercent: "%", optDefault: "Standard {n} · {min}–{max}", optToDefault: "Standard", optGroupOutage: "Ausfälle", optGroupOutageHint: "Ab welcher Dauer ein Ausfall welche Stufe hat. Die Schwellen müssen aufsteigen; bei Ausfällen scannt Housekeeper zusätzlich, damit sie zur Zeit greifen.", optGroupOther: "Weitere Schwellen", optConvDay: "= 1 Tag",
   optOutageInfoTitle: "Info", optOutageInfoHint: "Ab so vielen Minuten ohne Zustand gilt ein Ausfall als Info. Davor ist er kein Befund.",
@@ -997,7 +997,7 @@ Object.assign(TEXT.de, {
   hkUpdateBlocked: "Update derzeit nicht installierbar", hkUpdateBlockedHint: "HACS kennt ein Update, kann es aber mit dieser Home-Assistant-Version nicht installieren.",
 });
 Object.assign(TEXT.en, {
-  setTabLook: "Appearance", setTabScan: "Scan and thresholds", setTabHidden: "Hidden", setTabInfo: "Info",
+  setTabLook: "Appearance", setTabScan: "Scan and messages", setTabInfo: "Info",
   setReadability: "Readability",
   unitDays: "days", unitHours: "h", unitPercent: "%", optDefault: "Default {n} · {min}–{max}", optToDefault: "Default", optGroupOutage: "Outages", optGroupOutageHint: "From which duration an outage has which level. The thresholds must rise; during outages Housekeeper scans extra so that they apply on time.", optGroupOther: "Further thresholds", optConvDay: "= 1 day",
   optOutageInfoTitle: "Info", optOutageInfoHint: "After so many minutes without a state an outage counts as info. Before that it is no finding.",
@@ -3170,14 +3170,11 @@ class SettingsMixin {
   // The tab ids of the settings page, in display order.
   // Each group has a tile with its state; the tile opens only that group's settings.
   settingsTabs() {
-    const hidden = (this.data?.findings || []).filter(f => f.ignored).length;
     const m = this.data?.meta || {};
     return [
       ["look", "mdi:palette-outline", "setTabLook", "setHintLook", ""],
       ["protection", "mdi:shield-lock-outline", "setTabProtection", "setHintProtection", this.t(`safeMode_${m.protection || "full"}`), (m.protection || "full") === "full" ? "ok" : "warn"],
       ["scan", "mdi:radar", "setTabScan", "setHintScan", m.scan_interval_hours ? this.t("setEveryHours", { n: m.scan_interval_hours }) : this.t("setManual"), "mute"],
-      ["notify", "mdi:bell-outline", "setTabNotify", "setHintNotify", this.t(m.notify ? "setOn" : "setOff"), m.notify ? "ok" : "mute"],
-      ["hidden", "mdi:eye-off-outline", "setTabHidden", "setHintHidden", hidden ? this.formatNumber(hidden) : "", "mute"],
       ["info", "mdi:information-outline", "setTabInfo", "setHintInfo", ""],
     ];
   }
@@ -3368,7 +3365,7 @@ class SettingsMixin {
     const tabs = this.settingsTabs();
     const tab = tabs.some(([id]) => id === this.settingsTab) ? this.settingsTab : "look";
     const tiles = tabs.map(([id, icon, label, hint, pill, tone]) => `<button class="taskcard t-${pill ? tone || "mute" : "ac"}${id === tab ? " on" : ""}" id="hk-set-${id}" aria-pressed="${id === tab}" aria-controls="hk-setpanel" data-set-tab="${id}"><ha-icon icon="${icon}"></ha-icon><strong>${this.t(label)}</strong><span class="setpill">${pill ? `<span class="pill ${tone || "mute"}">${this.esc(pill)}</span>` : ""}</span><small>${this.t(hint)}</small></button>`).join("");
-    const body = { look: () => `<div class="grid2">${this.lookCard()}${this.behaviorCard()}</div>`, protection: () => this.protectionCard(), scan: () => `${this.scanCard()}${this.eventsCard()}`, notify: () => this.notifyCard(), hidden: () => this.hiddenCard(), info: () => this.infoCard() }[tab]();
+    const body = { look: () => `<div class="grid2">${this.lookCard()}${this.behaviorCard()}</div>`, protection: () => `${this.protectionCard()}${this.hiddenCard()}`, scan: () => `${this.scanCard()}${this.notifyCard()}${this.eventsCard()}`, info: () => this.infoCard() }[tab]();
     return `${this.settingsBand()}<div class="taskgrid compactgrid setgrid" role="group" aria-label="${this.esc(this.t("settings"))}">${tiles}</div><div id="hk-setpanel">${body}</div>`;
   }
 
@@ -6900,11 +6897,9 @@ const SEARCH_WORDS = {
   changes: "änderungen vergleich scan-vergleich logbuch changes compare logbook",
   settings: "einstellungen optionen konfiguration settings options preferences",
   look: "darstellung theme dunkel hell schrift farbe appearance dark light font",
-  protection: "schutz schutzmodus sicherheit protection mode",
-  scan: "scan schwellen intervall tage threshold interval",
-  notify: "benachrichtigung meldung notification message",
+  protection: "schutz schutzmodus sicherheit ausgeblendet ignoriert ausnahmen protection mode hidden ignored exceptions",
+  scan: "scan schwellen intervall tage benachrichtigung meldung ereignisse threshold interval notification message events",
   goals: "ziele goals",
-  hidden: "ausgeblendet ignoriert hidden ignored",
   info: "info version speichert daten diagnose prüfung quellen dauer about stored diagnostics coverage timing",
   compare: "scan-vergleich verlauf vergleich scans history compare",
   logbook: "logbuch notizen logbook notes",
@@ -10607,7 +10602,7 @@ Object.assign(TEXT.de, {
   counterNoneSub: "{count} Sensoren sehen unauffällig aus.", counterNotChecked: "Noch nicht geprüft", counterNotCheckedSub: "Housekeeper sucht falsche Werte in Zählern und Messwerten. Starte die Prüfung mit „Sensoren prüfen“.",
   stepChoose: "Auswahl", stepSetup: "Einstellen", stepPreview: "Vorschau",
   setLanguage: "Sprache", setLanguageHint: "Gilt für dieses Panel und wird in deinem Benutzerprofil gespeichert. Automatisch folgt der Sprache von Home Assistant.", langAuto: "Automatisch",
-  setTabProtection: "Sicherheit", setTabNotify: "Benachrichtigungen", setHintLook: "Sprache, Dichte und Darstellung.", setHintProtection: "Schutzmodus: was Housekeeper ändern darf.", setHintScan: "Wann und wie oft geprüft wird, und Grenzwerte.", setHintNotify: "Meldung bei neuen kaputten Referenzen.", setHintHidden: "Befunde, die du ausgeblendet hast.", setHintInfo: "Version, Diagnose und Support.",
+  setTabProtection: "Schutz und Ausnahmen", setHintLook: "Sprache, Dichte und Darstellung.", setHintProtection: "Schutzmodus und ausgeblendete Befunde.", setHintScan: "Wann geprüft wird, Grenzwerte und Meldungen.", setHintInfo: "Version, Diagnose und Support.",
   setEveryHours: "alle {n} h", setManual: "von Hand", setOn: "an", setOff: "aus",
   maintHintBackup: "Backups prüfen und schützen.", maintHintPreflight: "Vor einem Update auf Probleme prüfen.", maintHintBlueprints: "Blueprints, die fehlen oder defekt sind.", maintHintDevices: "Entfernte Geräte ansehen.", maintHintWindow: "Zeitraum für Wartung und Neustarts.", maintHintGoals: "Eigene Grenzen für „in Ordnung“.",
   actRepairValues: "Werte reparieren", actHintRepair: "Falsche Werte im Verlauf und in der Statistik ersetzen.", actMeter: "Zähler wechseln", actHintMeter: "Die Statistik bei einem neuen Zähler fortführen.", actExchange: "Gerät austauschen", actHintExchange: "Durch ein neues Gerät ersetzen und alles übernehmen.",
@@ -10650,7 +10645,7 @@ Object.assign(TEXT.en, {
   counterNoneSub: "{count} sensors look fine.", counterNotChecked: "Not checked yet", counterNotCheckedSub: "Housekeeper looks for wrong values in counters and measurements. Start the check with “Check sensors”.",
   stepChoose: "Choose", stepSetup: "Set up", stepPreview: "Preview",
   setLanguage: "Language", setLanguageHint: "Applies to this panel and is saved in your user profile. Automatic follows the language of Home Assistant.", langAuto: "Automatic",
-  setTabProtection: "Safety", setTabNotify: "Notifications", setHintLook: "Language, density and appearance.", setHintProtection: "Protection mode: what Housekeeper may change.", setHintScan: "When and how often it checks, and limits.", setHintNotify: "A message for new broken references.", setHintHidden: "Findings you have hidden.", setHintInfo: "Version, diagnostics and support.",
+  setTabProtection: "Protection and exceptions", setHintLook: "Language, density and appearance.", setHintProtection: "Protection mode and hidden findings.", setHintScan: "When it checks, limits and messages.", setHintInfo: "Version, diagnostics and support.",
   setEveryHours: "every {n} h", setManual: "manual", setOn: "on", setOff: "off",
   maintHintBackup: "Check and protect backups.", maintHintPreflight: "Check for problems before an update.", maintHintBlueprints: "Blueprints that are missing or broken.", maintHintDevices: "Look at removed devices.", maintHintWindow: "A period for maintenance and restarts.", maintHintGoals: "Your own limits for what in order means.",
   actRepairValues: "Repair values", actHintRepair: "Replace wrong values in the history and the statistics.", actMeter: "Replace the meter", actHintMeter: "Carry the statistics on with a new meter.", actExchange: "Exchange the device", actHintExchange: "Replace it with a new device and carry everything over.",

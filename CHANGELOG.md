@@ -26,7 +26,7 @@
 
 ### Geändert
 
-- **Oberfläche:** Korrekturen und kleine Verbesserungen an Listen, Dialogen, Beschriftungen und Bedienung, darunter die Kacheln der Befundseite (auf breiten Fenstern in zwei Zeilen, alle gleich hoch und breit), die Spaltenauswahl der Listen (Kästchen in einer Reihe am rechten Rand), die Karten der Schwellen unter Einstellungen (gruppiert, einheitlich aufgebaut, mit Link „Standard“), die Ereignisse für eigene Automationen als Tabelle mit Kopier-Knopf, die Wartungsziele (nur noch unter Wartung, nicht mehr doppelt in den Einstellungen); Speichern der Schwellen lässt die Seite offen, statt zum Home-Assistant-Dashboard zu springen und die Lesbarkeit der Vorfälle.
+- **Oberfläche:** Korrekturen und kleine Verbesserungen an Listen, Dialogen, Beschriftungen und Bedienung, darunter die Kacheln der Befundseite (auf breiten Fenstern in zwei Zeilen, alle gleich hoch und breit), die Spaltenauswahl der Listen (Kästchen in einer Reihe am rechten Rand), die Karten der Schwellen unter Einstellungen (gruppiert, einheitlich aufgebaut, mit Link „Standard“), die Ereignisse für eigene Automationen als Tabelle mit Kopier-Knopf, die Wartungsziele (nur noch unter Wartung, nicht mehr doppelt in den Einstellungen), die Einstellungen mit vier statt sieben Reitern (Darstellung, Scan und Meldungen, Schutz und Ausnahmen, Info); Speichern der Schwellen lässt die Seite offen, statt zum Home-Assistant-Dashboard zu springen und die Lesbarkeit der Vorfälle.
 
 ### Behoben
 
@@ -58,7 +58,7 @@
 
 #### Changed
 
-- **Interface:** Fixes and small improvements to lists, dialogs, labels and handling, among them the tiles of the findings page (in two rows on wide windows, all equally high and wide), the column picker of the lists (boxes in one line at the right edge), the threshold cards in Settings (grouped, uniformly built, with a “Default” link), the events for your own automations as a table with a copy button, the maintenance goals (only under Maintenance, no longer duplicated in Settings); saving the thresholds keeps the page open instead of jumping to the Home Assistant dashboard and the readability of incidents.
+- **Interface:** Fixes and small improvements to lists, dialogs, labels and handling, among them the tiles of the findings page (in two rows on wide windows, all equally high and wide), the column picker of the lists (boxes in one line at the right edge), the threshold cards in Settings (grouped, uniformly built, with a “Default” link), the events for your own automations as a table with a copy button, the maintenance goals (only under Maintenance, no longer duplicated in Settings), the settings with four tabs instead of seven (Appearance, Scan and messages, Protection and exceptions, Info); saving the thresholds keeps the page open instead of jumping to the Home Assistant dashboard and the readability of incidents.
 
 #### Fixed
 

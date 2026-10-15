@@ -77,7 +77,7 @@ Housekeeper combines registry data and the live Home Assistant runtime to provid
 3. Open **Housekeeper** in the sidebar as an administrator. The first scan runs automatically; **Scan now** refreshes it.
 4. Start with **Findings** and open a finding to see the cause and what depends on it. Under **Clean up** you build a plan, which only shows a preview until you confirm it.
 
-> New installs start in protection mode **read only**. To let Housekeeper change something, raise it under **Settings → Safety**.
+> New installs start in protection mode **read only**. To let Housekeeper change something, raise it under **Settings → Protection and exceptions**.
 
 More on installation (manual, custom repository), every view and all settings is in the **[User Guide](docs/USER-GUIDE.md)**.
 

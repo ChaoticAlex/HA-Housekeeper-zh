@@ -2172,7 +2172,7 @@ test("blueprints tab, notification switch, diagnostics without names and the wee
   el._blueprintsRequested = true;
   el.render();
   assert.ok(shadow.innerHTML.includes("a/gone.yaml") && shadow.innerHTML.includes("Idle") && shadow.innerHTML.includes("data-bp-refresh"));
-  el.view = "settings"; el.settingsTab = "notify";
+  el.view = "settings"; el.settingsTab = "scan";
   el.data = { ...DATA, meta: { ...DATA.meta, notify: true } };
   el.render();
   assert.ok(/data-notify checked/.test(shadow.innerHTML));
@@ -4063,7 +4063,7 @@ test("detail, maintenance and settings offer their options as tiles that open on
   el.view = "maintenance"; el.render();
   for (const id of ["backup", "preflight", "blueprints", "devices", "window", "goals"]) assert.ok(shadow.innerHTML.includes(`data-view-tab="maintenance|${id}"`), id);
   el.view = "settings"; el.settingsTab = "protection"; el.render();
-  for (const id of ["look", "protection", "scan", "notify", "hidden", "info"]) assert.ok(shadow.innerHTML.includes(`data-set-tab="${id}"`), id);
+  for (const id of ["look", "protection", "scan", "info"]) assert.ok(shadow.innerHTML.includes(`data-set-tab="${id}"`), id);
   assert.ok(shadow.innerHTML.includes("data-protection") && !shadow.innerHTML.includes("data-notify"));
 });
 

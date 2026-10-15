@@ -1,6 +1,6 @@
 // Texts for the settings page; merged into TEXT.
 Object.assign(TEXT.de, {
-  setTabLook: "Darstellung", setTabScan: "Scan und Schwellen", setTabHidden: "Ausgeblendet", setTabInfo: "Info",
+  setTabLook: "Darstellung", setTabScan: "Scan und Meldungen", setTabInfo: "Info",
   setReadability: "Lesbarkeit",
   unitDays: "Tage", unitHours: "Std.", unitPercent: "%", optDefault: "Standard {n} · {min}–{max}", optToDefault: "Standard", optGroupOutage: "Ausfälle", optGroupOutageHint: "Ab welcher Dauer ein Ausfall welche Stufe hat. Die Schwellen müssen aufsteigen; bei Ausfällen scannt Housekeeper zusätzlich, damit sie zur Zeit greifen.", optGroupOther: "Weitere Schwellen", optConvDay: "= 1 Tag",
   optOutageInfoTitle: "Info", optOutageInfoHint: "Ab so vielen Minuten ohne Zustand gilt ein Ausfall als Info. Davor ist er kein Befund.",
@@ -30,7 +30,7 @@ Object.assign(TEXT.de, {
   hkUpdateBlocked: "Update derzeit nicht installierbar", hkUpdateBlockedHint: "HACS kennt ein Update, kann es aber mit dieser Home-Assistant-Version nicht installieren.",
 });
 Object.assign(TEXT.en, {
-  setTabLook: "Appearance", setTabScan: "Scan and thresholds", setTabHidden: "Hidden", setTabInfo: "Info",
+  setTabLook: "Appearance", setTabScan: "Scan and messages", setTabInfo: "Info",
   setReadability: "Readability",
   unitDays: "days", unitHours: "h", unitPercent: "%", optDefault: "Default {n} · {min}–{max}", optToDefault: "Default", optGroupOutage: "Outages", optGroupOutageHint: "From which duration an outage has which level. The thresholds must rise; during outages Housekeeper scans extra so that they apply on time.", optGroupOther: "Further thresholds", optConvDay: "= 1 day",
   optOutageInfoTitle: "Info", optOutageInfoHint: "After so many minutes without a state an outage counts as info. Before that it is no finding.",
