@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Geändert
+
+- **Oberfläche:** Im Menü „⋯“ eines Befunds gibt es „Vermerk setzen“: öffnet im Logbuch einen neuen Eintrag zum Objekt des Befunds.
+
+### English
+
+#### Changed
+
+- **Interface:** The “⋯” menu of a finding has “Add a note”: it opens a new logbook entry for the finding's object.
+
 ## 1.8.0 - 2026-10-15
 
 ### Neu
