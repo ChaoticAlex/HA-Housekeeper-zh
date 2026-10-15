@@ -41,7 +41,7 @@ const OPTION_FIELDS = [
   ["outage_medium_hours", "optOutageMediumTitle", "optOutageMediumHint", "unitHours", 24],
   ["outage_high_hours", "optOutageHighTitle", "optOutageHighHint", "unitHours", 168],
   ["unused_automation_days", "optUnusedAutomationTitle", "optUnusedAutomationHint", "unitDays", 90],
-  ["scan_interval_hours", "optScanIntervalTitle", "optScanIntervalHint", "unitHours", 24],
+  ["scan_interval_hours", "optScanIntervalTitle", "optScanIntervalHint", "unitHours", 6],
   ["low_battery_percent", "optLowBatteryTitle", "optLowBatteryHint", "unitPercent", 20],
   ["stale_hours", "optStaleTitle", "optStaleHint", "unitHours", 48],
   ["history_days", "optHistoryDaysTitle", "optHistoryDaysHint", "unitDays", 30],

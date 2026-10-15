@@ -193,7 +193,7 @@ async def test_options_flow_stores_threshold(hass: HomeAssistant) -> None:
     assert result["type"] == FlowResultType.CREATE_ENTRY
     assert entry.options["outage_high_hours"] == 168
     assert entry.options["outage_info_minutes"] == 15
-    assert entry.options["scan_interval_hours"] == 24
+    assert entry.options["scan_interval_hours"] == 6
     assert entry.options["unused_automation_days"] == 90
     assert entry.options["low_battery_percent"] == 20
     assert entry.options["history_days"] == 30
@@ -213,7 +213,7 @@ async def test_low_battery_threshold_is_configurable(hass: HomeAssistant) -> Non
     assert snapshot["meta"]["low_battery_percent"] == 20
     assert snapshot["meta"]["low_batteries"] == 0
     assert snapshot["meta"]["ha_version"]
-    assert snapshot["meta"]["scan_interval_hours"] == 24
+    assert snapshot["meta"]["scan_interval_hours"] == 6
 
     scanner.low_battery_percent = 50
     snapshot = await scanner.async_scan()

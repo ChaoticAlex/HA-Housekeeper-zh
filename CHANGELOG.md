@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Scan alle 6 Stunden:** Der Standard für den automatischen Scan ist jetzt 6 statt 24 Stunden (einstellbar; wer das Intervall selbst gesetzt hat, behält seinen Wert). Der Verlauf behält weiter einen Punkt pro Tag.
+
 - **Labels immer sichtbar:** Auf dem Reiter „Technisch“ steht die Zeile „Labels“ bei allen Objekten, die Labels tragen können (Entitäten, Geräte, Bereiche, Automationen, Skripte, Szenen). Hat das Objekt keins, steht dort „Keine Labels vergeben“. Automationen, Skripte und Szenen zeigen jetzt auch ihre Labels.
 
 - **Ursachen und ihre Folgen übersichtlicher:** Aufklappbare Zeilen der Befundliste haben vorn einen Pfeil. Die Folgen stehen eingerückt in einem Block mit einer Linie links und leichtem Hintergrund, auch bei den Gruppen fehlender Referenzen. „Alle aufklappen“ und „Alle zuklappen“ öffnen oder schließen alle Ursachen und Gruppen auf einmal.
@@ -65,6 +67,8 @@
 ### English
 
 #### New
+
+- **Scan every 6 hours:** The default for the automatic scan is now 6 instead of 24 hours (adjustable; an interval you set yourself stays). The history still keeps one point per day.
 
 - **Hint for objects that fail often:** If an entity or device fails regularly (unstable, flapping or always at the same time of day), the finding says “Usually fails between 22:00 and 00:00” and the tab “Actions” asks “On purpose?” with a mark prepared, time window included. Nothing is set automatically; “Do not ask again” holds for 180 days in this browser.
 
