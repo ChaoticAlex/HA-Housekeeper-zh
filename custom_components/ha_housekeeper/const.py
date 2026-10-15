@@ -14,7 +14,9 @@ FONTS_URL: Final = "/ha_housekeeper/fonts"
 STORAGE_KEY: Final = f"{DOMAIN}.observations"
 IGNORED_STORAGE_KEY: Final = f"{DOMAIN}.ignored"
 HISTORY_STORAGE_KEY: Final = f"{DOMAIN}.history"
-PREFLIGHT_STORAGE_KEY: Final = f"{DOMAIN}.preflight"  # removed feature: the file is deleted on start
+PREFLIGHT_STORAGE_KEY: Final = (
+    f"{DOMAIN}.preflight"  # removed feature: the file is deleted on start
+)
 POLICIES_STORAGE_KEY: Final = f"{DOMAIN}.policies"
 REPLIES_STORAGE_KEY: Final = f"{DOMAIN}.replies"
 ATTEST_STORAGE_KEY: Final = f"{DOMAIN}.attest"
@@ -41,7 +43,9 @@ LOAD_STORAGE_KEY: Final = f"{DOMAIN}.load"
 WATCH_STORAGE_KEY: Final = f"{DOMAIN}.watch"
 STORAGE_VERSION: Final = 1
 
-CONF_MIN_UNAVAILABLE_DAYS: Final = "min_unavailable_days"  # replaced by the four below, read as a fallback
+CONF_MIN_UNAVAILABLE_DAYS: Final = (
+    "min_unavailable_days"  # replaced by the four below, read as a fallback
+)
 CONF_OUTAGE_INFO_MINUTES: Final = "outage_info_minutes"
 CONF_OUTAGE_LOW_HOURS: Final = "outage_low_hours"
 CONF_OUTAGE_MEDIUM_HOURS: Final = "outage_medium_hours"

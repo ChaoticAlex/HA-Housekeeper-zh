@@ -11,7 +11,6 @@ pytest.importorskip("pytest_homeassistant_custom_component")
 
 from homeassistant.config_entries import ConfigEntryState  # noqa: E402
 from homeassistant.core import HomeAssistant  # noqa: E402
-from homeassistant.helpers import entity_registry as er  # noqa: E402
 from homeassistant.helpers import issue_registry as ir  # noqa: E402
 from pytest_homeassistant_custom_component.common import MockConfigEntry  # noqa: E402
 from pytest_homeassistant_custom_component.components.recorder.common import (  # noqa: E402
@@ -127,7 +126,9 @@ async def test_preflight_reads_the_state_and_judges_it(hass: HomeAssistant) -> N
         severity=ir.IssueSeverity.WARNING,
         translation_key="x",
     )
-    MockConfigEntry(domain="demo", title="Hub", state=ConfigEntryState.SETUP_RETRY).add_to_hass(hass)
+    MockConfigEntry(domain="demo", title="Hub", state=ConfigEntryState.SETUP_RETRY).add_to_hass(
+        hass
+    )
     scanner = await make_scanner(hass)
     snapshot = await scanner.async_scan()
 

@@ -207,7 +207,9 @@ def test_series_lists_the_days_and_the_latest_scan_with_unavailable(hass) -> Non
     ]
 
 
-def test_series_carries_open_findings_classes_and_the_state_of_the_house_for_the_sparklines(hass) -> None:
+def test_series_carries_open_findings_classes_and_the_state_of_the_house_for_the_sparklines(
+    hass,
+) -> None:
     def snap(at: str, findings: list[dict]) -> dict:
         base = _snapshot(at, [("entity", "x.a", "active"), ("entity", "x.b", "active")])
         base["findings"] = findings
@@ -235,7 +237,9 @@ def test_series_carries_open_findings_classes_and_the_state_of_the_house_for_the
         )
     )
     points = history.series()["points"]
-    assert [(p["open"], p["health"]) for p in points] == [(0, 100.0), (2, 75.0)], "an object counts once, with its weight"
+    assert [(p["open"], p["health"]) for p in points] == [(0, 100.0), (2, 75.0)], (
+        "an object counts once, with its weight"
+    )
     assert points[0]["classes"] == {} and points[1]["classes"] == {
         "unused": 1,
         "broken_reference": 1,
@@ -322,7 +326,11 @@ def test_the_day_of_a_scan_is_counted_in_the_local_time_zone(hass) -> None:
 
 
 def test_a_checkpoint_from_before_the_levels_by_duration_ends_findings_as_a_new_rating() -> None:
-    dash = {"rule_id": "entity.state_unavailable", "object_id": "sensor.a", "classification": "unavailable"}
+    dash = {
+        "rule_id": "entity.state_unavailable",
+        "object_id": "sensor.a",
+        "classification": "unavailable",
+    }
     objects = [("entity", "sensor.a", "active")]
     old_snap = _snapshot("2026-10-06T10:00:00+00:00", objects, [dash])
     old = make_checkpoint(old_snap)

@@ -20,7 +20,10 @@ NOW = datetime(2026, 10, 15, 12, 0, tzinfo=UTC)
 
 
 def _change(old, new):
-    return {"old_state": NS(state=old) if old else None, "new_state": NS(state=new) if new else None}
+    return {
+        "old_state": NS(state=old) if old else None,
+        "new_state": NS(state=new) if new else None,
+    }
 
 
 def test_only_a_change_into_or_out_of_a_bad_state_is_looked_at() -> None:
@@ -111,7 +114,12 @@ def test_a_device_and_a_stopped_app_wait_for_the_first_level_too() -> None:
     levels = (15, 1, 24, 168)
     began = (NOW - timedelta(minutes=40)).isoformat()
     entities = [
-        {"object_id": f"sensor.{n}", "device_id": "d1", "status": "unavailable", "status_since": began}
+        {
+            "object_id": f"sensor.{n}",
+            "device_id": "d1",
+            "status": "unavailable",
+            "status_since": began,
+        }
         for n in "abc"
     ]
     flagged = [{"object_id": "sensor.a", "classification": "unavailable"}]
@@ -137,7 +145,9 @@ async def test_an_entity_that_lost_its_value_is_a_finding_but_one_that_never_had
 
     store = ObservationStore(hass)
     await store.async_update({"entity:a": "active", "entity:b": "unknown"}, NOW)
-    await store.async_update({"entity:a": "unknown", "entity:b": "unknown"}, NOW + timedelta(hours=1))
+    await store.async_update(
+        {"entity:a": "unknown", "entity:b": "unknown"}, NOW + timedelta(hours=1)
+    )
     assert store.had_value("entity:a") and not store.had_value("entity:b")
     await store.async_update({"entity:a": "unavailable"}, NOW + timedelta(hours=2))
     assert store.had_value("entity:a"), "unavailable after unknown is still the same loss"

@@ -57,7 +57,6 @@ from .cleanup import (
 )
 from .cleanup_exec import CleanupError, backup_is_local_only, entity_restorable
 from .const import DOMAIN, OPTION_LIMITS
-from .outage_levels import OUTAGE_KEYS, thresholds_from_options, thresholds_rise
 from .device_pairs import pair_devices
 from .history import PinError
 from .ignored import KINDS as IGNORE_KINDS
@@ -65,10 +64,10 @@ from .ignored import REASON_LIMIT as IGNORE_REASON_LIMIT
 from .inventory import InventoryScanner
 from .meter import prepare_meter
 from .monitor import MonitorError, MonitorStore, evaluate
-from .protection import MODES as PROTECTION_MODES
+from .outage_levels import OUTAGE_KEYS, thresholds_from_options, thresholds_rise
 from .recorder_purge import TRIM_MAX_DAYS, TRIM_TABLES, count_history, count_older, count_trim
 from .references import preview_replacement
-from .writelock import WriteBusy, acquire_write, release_write, write_holder
+from .writelock import write_holder
 from .ws_common import (
     _scanner,
     _versioned,

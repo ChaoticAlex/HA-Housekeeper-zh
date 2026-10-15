@@ -380,7 +380,10 @@ async def websocket_watches(
 ) -> None:
     """The watches after updates, newest first. Reads stored samples only."""
     connection.send_result(
-        msg["id"], _versioned({"hours": scanner.watch_hours, "watches": scanner.watch.report(scanner.watch_marked())})
+        msg["id"],
+        _versioned(
+            {"hours": scanner.watch_hours, "watches": scanner.watch.report(scanner.watch_marked())}
+        ),
     )
 
 

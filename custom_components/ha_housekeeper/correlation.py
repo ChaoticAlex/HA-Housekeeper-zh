@@ -15,7 +15,9 @@ from typing import Any
 WINDOW_BEFORE = timedelta(minutes=30)  # an event this long before the finding began still counts
 WINDOW_AFTER = timedelta(minutes=10)  # the event may be logged shortly after the finding began
 GROUP_ONLY = ("start", "plan", "purge")  # too common to name as a reason on a single finding
-MERGE_WINDOW = timedelta(minutes=10)  # updates this close are one incident; so is the restart beside them
+MERGE_WINDOW = timedelta(
+    minutes=10
+)  # updates this close are one incident; so is the restart beside them
 GROUP_LIMIT = 50
 KEYS_PER_GROUP = 500
 BY_KEY_LIMIT = 2000
@@ -78,7 +80,9 @@ def _merge_incidents(
     groups: dict[str, dict[str, Any]], members: dict[str, list[str]], when: dict[str, datetime]
 ) -> list[dict[str, Any]]:
     """Join updates that are close in time, with the restart beside them; the rest stays as it is."""
-    updates = sorted((g for g in groups.values() if not g["only_group"]), key=lambda g: when[g["id"]])
+    updates = sorted(
+        (g for g in groups.values() if not g["only_group"]), key=lambda g: when[g["id"]]
+    )
     clusters: list[list[dict[str, Any]]] = []
     for group in updates:
         if clusters and when[group["id"]] - when[clusters[-1][-1]["id"]] <= MERGE_WINDOW:
@@ -92,7 +96,9 @@ def _merge_incidents(
             near = [
                 i
                 for i, c in enumerate(clusters)
-                if when[c[0]["id"]] - MERGE_WINDOW <= when[group["id"]] <= when[c[-1]["id"]] + MERGE_WINDOW
+                if when[c[0]["id"]] - MERGE_WINDOW
+                <= when[group["id"]]
+                <= when[c[-1]["id"]] + MERGE_WINDOW
             ]
             if near:
                 restarts[near[0]].append(group)

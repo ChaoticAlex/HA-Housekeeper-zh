@@ -112,7 +112,9 @@ def test_every_fixed_refusal_text_has_a_panel_translation() -> None:
     """The panel shows a refusal in its own language: by its sentence (56-i18n-errors.js) or by its code."""
     panel = "".join(path.read_text(encoding="utf-8") for path in (ROOT / "panel-src").glob("*.js"))
     sentences = (ROOT / "panel-src" / "56-i18n-errors.js").read_text(encoding="utf-8")
-    sent = re.findall(r'send_error\(\s*msg\["id"\],\s*"([a-z_]+)",\s*"([^"]+)"', _websocket_source())
+    sent = re.findall(
+        r'send_error\(\s*msg\["id"\],\s*"([a-z_]+)",\s*"([^"]+)"', _websocket_source()
+    )
     assert sent
     for code, text in sent:
         assert f'"{text}":' in sentences or f"err_{code}:" in panel, f"{code}: {text}"

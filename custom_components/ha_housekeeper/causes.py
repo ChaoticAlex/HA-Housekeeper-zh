@@ -72,7 +72,9 @@ def device_down_findings(
         if levels is not None and now is not None:
             if not since:
                 continue
-            level = outage_level(max(now - datetime.fromisoformat(max(since)), timedelta(0)), levels)
+            level = outage_level(
+                max(now - datetime.fromisoformat(max(since)), timedelta(0)), levels
+            )
             if level is None:
                 continue  # younger than the first threshold
         found = {

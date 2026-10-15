@@ -57,13 +57,13 @@ from .db_health import sample_size
 from .inventory import InventoryScanner
 from .issues import async_clear_issues
 from .maintenance import recorder_costs
+from .outage_levels import thresholds_from_options
 from .runs import run_key
 from .scan_coverage import RETRY_LIMIT, RETRY_MINUTES, retryable_gaps
-from .outage_levels import thresholds_from_options
 from .scan_trigger import ScanRefused
-from .watch import UPDATE_ENTITIES
 from .services import async_register_services
 from .system_usage import system_light
+from .watch import UPDATE_ENTITIES
 from .websocket_api import async_register as async_register_websocket
 
 _LOGGER = logging.getLogger(__name__)
@@ -229,7 +229,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await scanner.async_update_changed(event.data.get("old_state"), event.data.get("new_state"))
 
     # An install of a system update takes the state of that moment for the watch after it.
-    entry.async_on_unload(async_track_state_change_event(hass, list(UPDATE_ENTITIES), _update_changed))
+    entry.async_on_unload(
+        async_track_state_change_event(hass, list(UPDATE_ENTITIES), _update_changed)
+    )
 
     async def _sample_load(_: Any) -> None:
         # A sample that cannot be taken is a gap in the line, nothing more.

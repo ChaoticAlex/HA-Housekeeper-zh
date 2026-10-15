@@ -52,10 +52,10 @@ from .const import (
     DEFAULT_WATCH_HOURS,
     DOMAIN,
     IGNORE_LABEL,
+    PREFLIGHT_STORAGE_KEY,
     QUARANTINE_DAYS,
     SIGNAL_SCAN_COMPLETE,
     SIGNAL_SCAN_STARTED,
-    PREFLIGHT_STORAGE_KEY,
     STORAGE_VERSION,
     WARMUP_SECONDS,
     WINDOW_STORAGE_KEY,
@@ -109,6 +109,8 @@ from .monitor import MonitorStore
 from .notes import NoteStore
 from .notify import NotifyStore, async_announce
 from .observations import ObservationStore
+from .outage_levels import DIRECT_ENTRY_STATES, Levels, outage_level
+from .outage_scan import OutageScans, outage_start
 from .policies import KEY_PREFIX as POLICY_KEY_PREFIX
 from .policies import PolicyStore
 from .protection import ProtectionStore
@@ -118,15 +120,13 @@ from .reminders import ReminderStore
 from .runs import RunStore
 from .scan_coverage import RETRY_LIMIT, RETRY_MINUTES, ScanCoverage, retryable_gaps
 from .scan_health import ScanHealth
-from .outage_levels import DIRECT_ENTRY_STATES, Levels, outage_level
-from .outage_scan import OutageScans, outage_start
 from .scan_trigger import ScanRefused, scan_request
 from .service_check import missing_service_findings
 from .signals import SignalStore, situations
 from .signals import fire as signal_fire
 from .stale import StaleStore
 from .system_usage import supervisor_get, supervisor_token
-from .watch import UPDATE_ENTITIES, WATCH_KINDS, WatchStore, evaluate, make_before, next_due
+from .watch import WATCH_KINDS, WatchStore, evaluate, make_before, next_due
 
 _LOGGER = logging.getLogger(__name__)
 SUGGEST_LIMIT = 200
@@ -1046,7 +1046,9 @@ class InventoryScanner:
         }
         now = datetime.now(UTC)
         found = self.events.observe(HA_VERSION, custom, now, await self._system_versions())
-        found = [e for e in found if e["kind"] in WATCH_KINDS]  # integrations run on the usual findings
+        found = [
+            e for e in found if e["kind"] in WATCH_KINDS
+        ]  # integrations run on the usual findings
         if found and self.watch_hours > 0:
             # The restart is the moment of the update; the scan that notices it comes minutes later.
             started = self.events.last_start(now, timedelta(hours=24)) or now
@@ -1334,7 +1336,9 @@ class InventoryScanner:
             + dashboards
         )
         registry = er.async_get(self.hass)
-        for item in automations:  # automations, scripts and scenes carry their labels on their entity
+        for (
+            item
+        ) in automations:  # automations, scripts and scenes carry their labels on their entity
             if item["object_type"] in ("automation", "script", "scene") and "labels" not in item:
                 entry = registry.async_get(item["object_id"])
                 item["labels"] = sorted(entry.labels) if entry is not None else []
@@ -1378,7 +1382,9 @@ class InventoryScanner:
                 integrations, observed_at, self.outage_levels, self._counts_from()
             )
         )
-        findings += device_down_findings(entities, devices, findings, observed_at, self.outage_levels)
+        findings += device_down_findings(
+            entities, devices, findings, observed_at, self.outage_levels
+        )
 
         quarantine = quarantine_entries(self.journal.plans, [*entities, *devices])
         recurring = recurring_devices(

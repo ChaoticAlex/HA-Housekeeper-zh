@@ -47,7 +47,10 @@ class HAHousekeeperOptionsFlow(OptionsFlow):
             if thresholds_rise(thresholds_from_options(user_input)):
                 return self.async_create_entry(data=user_input)
             errors["base"] = "thresholds_order"
-        options = {**self.config_entry.options, **thresholds_from_options(self.config_entry.options)}
+        options = {
+            **self.config_entry.options,
+            **thresholds_from_options(self.config_entry.options),
+        }
         if user_input is not None:
             options = {**options, **user_input}
 

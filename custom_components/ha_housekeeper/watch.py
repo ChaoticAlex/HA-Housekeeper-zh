@@ -27,7 +27,9 @@ UPDATE_ENTITIES = (
 )
 KEEP = 3  # watches kept, the open one included
 BAD = frozenset({"unavailable", "problem", "stopped"})
-SILENT = frozenset({"unknown"})  # reachable but without a value: its own group, never "worse" by itself
+SILENT = frozenset(
+    {"unknown"}
+)  # reachable but without a value: its own group, never "worse" by itself
 # Integrations load late after a restart: nothing is judged before this has passed.
 CALM = timedelta(minutes=30)
 SAMPLE_DELAYS = (timedelta(minutes=30), timedelta(hours=2), timedelta(hours=6))

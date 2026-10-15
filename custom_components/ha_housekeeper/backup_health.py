@@ -65,7 +65,9 @@ def _names(items: Any) -> list[str]:
         value = (
             item
             if isinstance(item, str)
-            else getattr(item, "name", None) or getattr(item, "value", None) or getattr(item, "slug", None)
+            else getattr(item, "name", None)
+            or getattr(item, "value", None)
+            or getattr(item, "slug", None)
         )
         if value:
             names.append(str(value))

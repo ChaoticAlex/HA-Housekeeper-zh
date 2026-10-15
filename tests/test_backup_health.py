@@ -176,9 +176,7 @@ def test_an_unusual_size_is_a_note_against_the_median_of_the_backups_before() ->
 
 
 def test_only_automatic_and_manual_backups_affect_the_report() -> None:
-    app_update = backup(
-        1, size=5, agents=("hassio.local",), automatic=False, ha_included=False
-    )
+    app_update = backup(1, size=5, agents=("hassio.local",), automatic=False, ha_included=False)
     automatic = backup(10, size=1000)
     manual = backup(30, size=1100, automatic=False)
     report, checks = judge(state([app_update, automatic, manual]))

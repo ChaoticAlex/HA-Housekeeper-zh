@@ -44,7 +44,9 @@ def test_a_new_repair_makes_it_worse_and_a_watch_without_repairs_compares_none()
     after = {**_state(), "repairs": ["a:1", "b:2"]}
     result = evaluate(_watch(before, [after]))
     assert (result["verdict"], result["new_repairs"]) == ("worse", ["b:2"])
-    assert evaluate(_watch(_state(), [after]))["new_repairs"] == []  # stored before repairs were kept
+    assert (
+        evaluate(_watch(_state(), [after]))["new_repairs"] == []
+    )  # stored before repairs were kept
 
 
 def test_the_verdict_names_what_changed_and_never_guesses() -> None:

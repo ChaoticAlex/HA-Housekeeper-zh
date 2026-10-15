@@ -19,7 +19,15 @@ from .const import EVENTS_STORAGE_KEY, STORAGE_VERSION
 SAVE_DELAY = 300  # seconds; coalesces writes, Home Assistant flushes the store when it stops
 SIZE_DAYS = 120  # daily database sizes kept for the growth hint
 MAX_EVENTS = 5000
-EVENT_KINDS = ("ha_version", "os_version", "supervisor_version", "entry_version", "start", "plan", "purge")
+EVENT_KINDS = (
+    "ha_version",
+    "os_version",
+    "supervisor_version",
+    "entry_version",
+    "start",
+    "plan",
+    "purge",
+)
 SYSTEM_KINDS = (("os", "os_version"), ("supervisor", "supervisor_version"))
 INTEGRITY_STATES = ("ok", "damaged", "failed")
 LIST_LIMIT = 200  # events sent to the panel
