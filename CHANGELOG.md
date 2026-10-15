@@ -4,13 +4,13 @@
 
 ### Geändert
 
-- **Oberfläche:** Im Menü „⋯“ eines Befunds gibt es „Vermerk setzen“: öffnet im Logbuch einen neuen Eintrag zum Objekt des Befunds. Die Kachel „Nicht verfügbar“ der Übersicht öffnet die Befunde gefiltert nach diesem Grund; die Kacheln der Befundseite zählen alles samt Folgen und nennen die Folgen daneben („davon 12 Folgen“).
+- **Oberfläche:** Im Menü „⋯“ eines Befunds gibt es „Vermerk setzen“: öffnet im Logbuch einen neuen Eintrag zum Objekt des Befunds. Die Kachel „Nicht verfügbar“ der Übersicht öffnet die Befunde gefiltert nach diesem Grund; die Kacheln der Befundseite zählen alles samt Folgen und nennen die Folgen daneben („davon 12 Folgen“). Auf der Befundseite ersetzen die Chips „Gruppiert | Einzeln“ den alten Chip „Alle einzeln“ (gesperrt bei aktivem Filter, weil die Liste dann ohnehin einzeln ist), „Nur Ursachen mit Folgen“ bedeutet in beiden Ansichten dasselbe, Aufklappen und Zuklappen erscheinen nur in der gruppierten Ansicht, und „Offen“ zählt wie die Kachel.
 
 ### English
 
 #### Changed
 
-- **Interface:** The “⋯” menu of a finding has “Add a note”: it opens a new logbook entry for the finding's object. The tile “Unavailable” of the overview opens the findings filtered by this reason; the tiles of the findings page count everything including follow-ups and name the follow-ups beside it (“of which 12 follow-ups”).
+- **Interface:** The “⋯” menu of a finding has “Add a note”: it opens a new logbook entry for the finding's object. The tile “Unavailable” of the overview opens the findings filtered by this reason; the tiles of the findings page count everything including follow-ups and name the follow-ups beside it (“of which 12 follow-ups”). On the findings page two chips “Grouped | One by one” replace the old chip “All one by one” (locked while a filter is active, because the list is one by one then), “Only causes with follow-ups” means the same in both views, the open/close buttons show only in the grouped view, and “Open” counts like the tile.
 
 ## 1.8.0 - 2026-10-15
 
