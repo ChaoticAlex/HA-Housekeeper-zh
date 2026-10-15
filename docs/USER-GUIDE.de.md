@@ -56,6 +56,94 @@ config/
         └── ...
 ```
 
+## Begriffe und Zahlen
+
+Dieser Abschnitt erklärt, wie Housekeeper denkt und rechnet. Wer ihn kennt, versteht jede Zahl im Panel.
+
+### Von klein nach groß
+
+| Begriff | Bedeutung |
+| --- | --- |
+| **Objekt** | Alles, was Housekeeper prüft: Entität, Gerät, Integration, App, Automation, Skript, Szene. |
+| **Befund** | Ein einzelner Fund an einem Objekt, zum Beispiel „Entität ist verwaist“ oder „Automation verweist auf eine fehlende Entität“. Jeder Befund hat einen **Schweregrad** (in der Oberfläche auch *Auswirkung*): **hoch**, **mittel**, **niedrig** oder **Info**. Der Schweregrad sagt, wie viel am Objekt hängt (Automationen, kritische Objekte) und wie lange ein Ausfall dauert. |
+| **Ursache und Folge** | Fallen viele Objekte aus demselben Grund aus (eine Integration ist nicht geladen, ein Gerät ist ausgefallen), fasst Housekeeper sie zu einer **Ursache** zusammen. Die betroffenen Entitäten, Automationen und Dashboards sind ihre **Folgen**. Die Folgen zählen nicht extra. |
+| **Status eines Befunds** | Du entscheidest, wie mit einem Befund umgegangen wird: **Bekannt** (mit Begründung), **Zurückgestellt** (mit Frist), **Ausgeblendet**. Housekeeper setzt von selbst **Neu**, **In Arbeit** (ein Plan läuft oder liegt vor) und **Erledigt**. Bekannte, zurückgestellte und ausgeblendete Befunde zählen nicht in den Zustand. |
+| **Vermerk** | Eine Aussage zu einem Objekt, zum Beispiel „absichtlich offline“, auch mit Zeitfenster. Ein Vermerk gehört zum Objekt, nicht zu einem einzelnen Befund. Objekte mit Vermerk zählen nicht als neu ausgefallen. |
+| **Vorfall** | Ein zeitlicher Zusammenhang: Befunde, die zur selben Zeit begannen wie ein Update oder Neustart, stehen zusammen auf einer Zeile. Das ist ein Hinweis, kein Beweis für die Ursache. |
+| **Beobachtung** | Nach einem Update von Home Assistant, Betriebssystem oder Supervisor scannt Housekeeper einen Tag lang zusätzlich (nach 30 Minuten, 2 und 6 Stunden und am Ende) und vergleicht mit dem Stand vor dem Neustart. Ergebnis ist ein Urteil über das, was seitdem ausfiel, kurz gestört war oder wieder läuft. |
+
+**Beobachtung und Befund im Unterschied:** Ein Befund bewertet den Zustand eines Objekts zu einem Zeitpunkt („das ist jetzt ein Problem, in dieser Stufe“). Eine Beobachtung ist ein Vorher-nachher-Vergleich über einen Zeitraum („was hat sich seit dem Update verändert?“). Sie fügt dem Zustand nichts hinzu, sie erklärt nur, ob und wann Befunde mit einem Update begannen. Ein Befund kann ohne Beobachtung existieren, eine Beobachtung ist nur ein Blick auf Befunde, die schon da sind.
+
+### Wie ein Ausfall zum Befund wird
+
+Eine nicht verfügbare Entität, ein Gerät, eine Integration oder eine App wird nach **15 Minuten** zum Befund und steigt mit der Dauer:
+
+| Dauer | Stufe |
+| --- | --- |
+| ab 15 Minuten | Info (zählt nicht ab, damit ein Neustart keine Delle hinterlässt) |
+| ab 1 Stunde | niedrig |
+| ab 24 Stunden | mittel |
+| ab 7 Tagen, oder wenn Automationen betroffen sind | hoch |
+
+Die vier Schwellen stellst du unter **Einstellungen → Scan und Schwellen** ein. Die Stufe richtet sich nach der Dauer und, bei der Auswirkung, danach, was am Objekt hängt.
+
+### Der Zustand und seine Berechnung
+
+Die Zahl im Kopf des Panels („Zustand 98,4 %“) ist der **Anteil der Objekte in Ordnung**. Sie zählt Objekte, nicht Befunde.
+
+1. **Ausgangswert** ist die Zahl der geprüften Objekte (Entitäten, Geräte, Integrationen, Automationen, Skripte, Szenen).
+2. Jedes Objekt mit Befund nimmt nach seiner **schlimmsten** Stufe ab: **hoch 1**, **mittel 0,5**, **niedrig 0,2**, **Info 0**.
+3. Ein Objekt zählt **einmal**, auch mit mehreren Befunden. Folgen einer Ursache zählen nicht, die Ursache steht für sie.
+4. Bekannte, zurückgestellte und ausgeblendete Befunde zählen nicht.
+5. **Zustand = (Ausgangswert − Summe der Abzüge) ÷ Ausgangswert**, auf eine Dezimalstelle abgerundet, damit ein Haus mit Befund nie „100 %“ zeigt.
+
+Beispiel: 2000 geprüfte Objekte, 100 mit niedrigen (je 0,2 = 20), 160 mit mittleren (je 0,5 = 80) und 100 mit hohen Befunden (je 1 = 100). Abzug 200, in Ordnung 1800, Zustand **90 %**. Die Karte **Wie entsteht die Zahl?** (Klick auf den Ring) zeigt diese Rechnung mit deinen Zahlen; ein Klick auf eine Zeile öffnet die zugehörigen Objekte.
+
+Der Ring ist **grün ab 95 %**, **gelb ab 85 %**, darunter **rot**. Ein Objekt mit hoher Auswirkung oder ein dringendes Zustandsthema (Backup, Datenträger) macht ihn mindestens gelb, nimmt aber nichts ab.
+
+### Warum Zahlen verschieden aussehen können
+
+- Die **Befundseite** zählt Befunde, die **Zustandskarte** zählt Objekte. Zwei Befunde an einem Objekt sind zwei Befunde, aber ein Objekt.
+- Die **Kacheln** der Befundseite zählen ohne Folgen einer Ursache. Mit dem Filter „Alle einzeln“ siehst du jeden Befund, auch die Folgen.
+- Die **Kurven** unter den Kacheln zählen wie die Kacheln. Der Verlauf des Zustands begann neu, als die Berechnung von Punkten auf Objekte umgestellt wurde.
+- Der **Export** enthält Folgen immer.
+
+### Was zählt als Backup
+
+Für den Backup-Schutz in der Wartung zählen nur Backups, die **Home Assistant enthalten**: die automatischen Backups von Home Assistant und manuelle Backups, auch die von Housekeeper vor einem Plan. Backups, die nur eine App sichern (zum Beispiel die, die vor einem App-Update entstehen), zählen nicht: Sie sichern deine Konfiguration nicht und sagen nichts über deine Backup-Strategie.
+
+### Ablauf eines Plans
+
+Jede Änderung läuft als Plan, nie von selbst:
+
+1. **Vorschau:** Housekeeper zeigt genau, was geändert würde, samt erwartetem Endzustand. Bis hier ändert sich nichts.
+2. **Bestätigen:** Du bestätigst im Dialog; bei kritischen Objekten extra.
+3. **Backup:** Je nach Aktion legt Housekeeper vorher ein Sicherheits-Backup an (nur Konfiguration oder voll).
+4. **Ausführen:** Die Schritte laufen einzeln, jeder mit Ergebnis. Der Plan steht währenddessen auf **In Arbeit**.
+5. **Nachkontrolle:** 24 Stunden lang prüft Housekeeper, ob etwas zurückkommt (**sauber** oder **Rückfall**).
+6. **Rückgängig:** Im Journal, solange nichts verändert wurde. Gelöschte Recorder-Daten und gelöschte Backups sind endgültig; ein vollständiger Restore ist Sache von Home Assistant.
+
+Wie viel ein Plan darf, legt der **Schutzmodus** fest (Einstellungen → Sicherheit). Neue Installationen starten auf **nur lesen**.
+
+### Die wichtigsten Einstellungen
+
+| Einstellung | Standard | Wirkung |
+| --- | --- | --- |
+| Scan-Intervall | 6 Stunden | wie oft Housekeeper von allein scannt (0 schaltet aus) |
+| Ausfall-Schwellen | 15 Min. / 1 Std. / 24 Std. / 7 Tage | ab wann ein Ausfall Info, niedrig, mittel, hoch ist |
+| Beobachtung nach Updates (`watch_hours`) | 24 Stunden | wie lange nach einem Update zusätzlich gescannt wird (0 schaltet aus) |
+| Schutzmodus | nur lesen | was Pläne ändern dürfen |
+
+Alles unter **Einstellungen** im Panel, die Schwellen auch unter **Einstellungen → Geräte & Dienste → HA Housekeeper → Konfigurieren**.
+
+### Was Housekeeper speichert
+
+Alles liegt im Speicher von Home Assistant (`.storage`, Dateien `ha_housekeeper.*`) und verlässt deine Instanz nicht. Das sind Beobachtungszeitpunkte, Entscheidungen, Vermerke, der Verlauf des Zustands, das Journal der Pläne und die gespeicherten Scans. Die Liste mit Größe und Zweck steht unter **Einstellungen → Info → Was Housekeeper speichert**. Zugangsdaten zeigt Housekeeper nie als Wert, nur ihre Art und ob einer hinterlegt ist.
+
+### Die ersten Schritte
+
+Installation und erster Scan stehen in der [README](../README.de.md). Danach: **Befunde** öffnen und mit den hohen und mittleren beginnen, einen Befund öffnen (Ursache und Abhängigkeiten stehen oben), absichtlich Ausgefallenes mit einem Vermerk versehen und erst dann unter **Aufräumen** einen Plan bauen.
+
 ## Funktionen
 
 ### Installationsübersicht
@@ -104,15 +192,15 @@ Die Ansicht **Änderungen** vergleicht den aktuellen Stand mit dem Scan davor od
 - **Vermerke**: Auf der Detailseite (Reiter Aktionen, Abschnitt „Notizen“) eines Geräts, einer Entität, einer Integration oder einer App sagst du Housekeeper, was zu erwarten ist (auch bei Objekten ohne Befund, zum Beispiel vorab, solange das Gerät noch läuft): **Absichtlich offline**, **Saisonal**, **Reservegerät**, **Wird ersetzt** (mit Ziel) oder **Nicht entfernen**, mit Begründung und optional einem Prüfdatum (30, 90, 180 oder 365 Tage). Ein Vermerk blendet „nicht verfügbar“ bei diesem Objekt aus (bei einem Gerät: bei seinen Entitäten), nie eine kaputte Referenz. **Nicht entfernen** sperrt alle Bereinigungsschritte für das Objekt. Nach dem Prüfdatum erscheinen die Befunde wieder, markiert als fällig. Vermerke liegen nur in Housekeeper. In den Befunden kannst du an mehreren angekreuzten Objekten gleichzeitig einen Vermerk setzen (**Vermerk setzen**). Ein Vermerk (außer „Nicht entfernen“) kann ein **Zeitfenster** haben: zu festen Zeiten (zum Beispiel 21:00 bis 06:00 Uhr, auch über Mitternacht) oder bei Dunkelheit (Sonnenstand von `sun.sun`), dazu eine Anlaufzeit nach dem Ende (Standard 30 Minuten). Nur im Fenster blendet der Vermerk aus; außerhalb meldet Housekeeper den Befund wieder, und der Ausfall einer Integration zählt erst ab dem Ende des Fensters plus Anlaufzeit. So lässt sich zum Beispiel ein solarbetriebener Gartensensor nachts erwartet offline und tagsüber überwachen. Fehlt `sun.sun`, gilt „Bei Dunkelheit“ als nicht aktiv. Bei mehreren angekreuzten Objekten gibt es das Fenster nicht, nur am einzelnen Vermerk.
 - **Was du tun kannst**: Auf der Detailseite fasst eine Karte zusammen, was zum Objekt möglich ist: Befunde entscheiden, ersetzen, Deaktivieren planen, ein Label ergänzen. Alles öffnet nur eine Vorschau unter Aufräumen.
 - **Refactoring-Hinweise** (nur lesen) für Automationen: Geräte-Trigger, lange Verzögerungen und Zweige, die nie zutreffen können. Ein Refactoring-Assistent, der Automationen mit Vorschau und Rückgängig umbaut, ist experimentell und standardmäßig aus.
-- **Auswirkung**: Jeder Befund hat eine Auswirkung (**hoch**, **mittel**, **gering**, **Info**, **keine**) mit den Gründen dahinter, zum Beispiel „von 3 aktiven Automationen genutzt“ oder „steuert 1 kritisches Objekt“. Kritisch sind Objekte mit dem Label `housekeeper_critical` (an Entität, Gerät oder Bereich) sowie Schlösser, Alarmanlagen, Ventile, Sirenen, Garagentore und Tore und Sensoren für Rauch, Gas, Kohlenmonoxid, Wasser und Sicherheit. Die Befundliste sortiert standardmäßig nach Auswirkung, dann nach Sicherheit der Diagnose, und lässt sich danach filtern. Es gibt keinen Zahlenwert.
+- **Auswirkung**: Jeder Befund hat eine Auswirkung (**hoch**, **mittel**, **gering**, **Info**, **keine**) mit den Gründen dahinter, zum Beispiel „von 3 aktiven Automationen genutzt“ oder „steuert 1 kritisches Objekt“. Kritisch sind Objekte mit dem Label `housekeeper_critical` (an Entität, Gerät oder Bereich) sowie Schlösser, Alarmanlagen, Ventile, Sirenen, Garagentore und Tore und Sensoren für Rauch, Gas, Kohlenmonoxid, Wasser und Sicherheit. Die Befundliste sortiert standardmäßig nach Auswirkung, dann nach Sicherheit der Diagnose, und lässt sich danach filtern. Aus der Auswirkung allein ergibt sich keine Zahl; sie geht über die schlimmste Stufe je Objekt in den Zustand ein (siehe „Begriffe und Zahlen“).
 - **Kritische Objekte bereinigen**: Aktionen im Aufräumen auf kritischen Objekten (siehe Auswirkung) verlangen eine eigene Bestätigung pro Objekt, auch wenn sonst nichts dagegen spricht. Richtlinien-Verstöße lassen sich wie Befunde ausblenden, behalten (mit Begründung) oder auf Wiedervorlage legen.
 - **Protokoll gelöschter Statistiken**: Jedes Löschen verwaister Recorder-Statistiken wird im Aufräumen vermerkt (Zeit, wer, Backup, was gelöscht und übersprungen wurde). Es lässt sich nicht umkehren, deshalb steht es nur im Protokoll.
 - **Gerät austauschen**: Unter Aufräumen wählst du das alte und das neue Gerät. Housekeeper schlägt zu jeder alten Entität passende neue vor (Geräteklasse, Einheit, Bereich, Name) und nimmt nichts vorweg: Jedes Paar bestätigst du einzeln, bei Zählern wählst du, ob Referenzen ersetzt oder der Zählerverlauf übernommen wird. Daraus entsteht eine normale Vorschau mit Backup, Prüfung und Rückgängig. Das alte Gerät deaktivierst du danach über „Gerät deaktivieren“.
 - **Nachkontrolle, Endzustand und Prüfbericht**: Nach einem ausgeführten Plan beobachtet Housekeeper 24 Stunden lang, ob neue defekte Referenzen, nicht verfügbare Entitäten oder wiederkehrende Geräte auftauchen (**sauber** oder **Rückfall**, Rückfälle stehen unter „Was muss ich jetzt tun?“). Die Vorschau zeigt vorab den erwarteten Endzustand, und zu jedem Plan gibt es einen Prüfbericht als Markdown, mit echten Namen und IDs, auf Wunsch mit Platzhaltern statt IDs und Namen (zum Teilen). Optional und experimentell (Standard aus) schlägt Housekeeper kleine mechanische Verbesserungen einer Automation vor (Beschreibung ergänzen, völlig gleiche Trigger entfernen, Timeout bei Warteschritten ergänzen, Modus und Limit ändern; danach beobachtet Housekeeper 24 Stunden lang, ob die Automation Fehlerläufe bekommt), jeweils als Plan mit Diff, Prüfung durch Home Assistant, Backup und Rückgängig; Blueprint-Automationen werden nicht angefasst. Mehrere offene Vorschau-Pläne lassen sich im Journal zu einem Plan zusammenführen; er wird neu bewertet, Widersprüche (dasselbe Objekt, verschieden angefragt) werden genannt und nicht still entschieden.
 - **Automations-Diagnose** (Reiter „Qualität“ in der Lauf-Ansicht): Sieben getrennte Blickwinkel je Automation, bewusst ohne Gesamtnote: Integrität, Zuverlässigkeit, Wirksamkeit, Wartbarkeit, Restart-Festigkeit, Effizienz und Konflikte; „unbekannt“ heißt, dass es noch nichts zu beurteilen gibt. Pro Automation lassen sich **Erfolgskriterien** festlegen (Zielentitäten, Sollzustand, Frist, optional Mindestdauer, oder: ein Dienst wie eine Benachrichtigung oder ein Skript wird vom selben Lauf aufgerufen, zugeordnet über den Kontext des Laufs); danach führt Housekeeper je Auslösung einen Verlauf erreichter und verfehlter Kriterien. Wiederholt verfehlte Ziele werden zu einem Befund und stehen unter „Was muss ich jetzt tun?“. Auf Wunsch zählt die **Abdeckung**, welcher Trigger und welcher Zweig gelaufen ist und welche nie (Standard aus; der Trace wird dafür kurz im Arbeitsspeicher gelesen, gespeichert werden nur Zähler). Zwei Läufe lassen sich **vergleichen** (anderer Trigger, Zweig, Ende, Laufzeit, Updates dazwischen). Der **Testlauf** erklärt, was eine Automation mit den aktuellen und eigenen Testzuständen tun würde; er führt nie etwas aus und markiert kritische Ziele wie Schlösser und Garagentore.
 - **Wartungsziele**: Auf der Übersicht steht eine Karte mit sieben Zielen, die du selbst einstellst: höchstens 0 defekte Referenzen, höchstens 10 nicht verfügbare Entitäten, Backup nicht älter als 36 Stunden, Wiederherstellungstest nicht älter als 90 Tage, Datenbankwachstum höchstens 50 MB pro Tag, keine schwache Batterie, höchstens 5 Geräte ohne Bereich. Jedes Ziel zeigt den Ist-Wert, die Grenze und ob es **erfüllt**, **verfehlt** oder **unbekannt** ist (zum Beispiel wenn es noch zu wenige Größenmessungen gibt); „nie bestätigt“ zählt als verfehlt. Jedes Ziel lässt sich anpassen oder abschalten. Es ändert sich nichts an Home Assistant und nichts an der Gesundheitszahl.
-- **Gemeinsame Ursachen**: Ist eine Integration nicht geladen, erscheinen ihre Entitäten alle als „nicht verfügbar“. Housekeeper fasst das zu einer Ursache zusammen („Integration X ist nicht geladen“, mit Zustand, Fehlertext und den betroffenen Automationen, Skripten und Dashboards). Dasselbe gilt für ein Gerät mit mindestens drei Entitäten, die alle ausgefallen sind. Der Block steht über der Befundliste und in „Was muss ich jetzt tun?“; die Folgebefunde sind eingeklappt, bis du **Folgebefunde anzeigen** wählst (der Export enthält sie immer). Ausgeblendete und mit einem Vermerk versehene Befunde zählen nicht mit. Die Gesundheitszahl bleibt unverändert; es ist ein Hinweis, kein Beweis. Jede nicht geladene Integration ist ab der ersten Minute ein Befund; die Dauer bestimmt den Schweregrad: unter 1 Stunde Info, ab 1 Stunde Niedrig, ab 1 Tag Mittel, ab der eingestellten Zahl Tage oder mit betroffenen Automationen Hoch. Die Detailseite nennt, wie lange der Ausfall dauert und wann er schwerer wiegt.
-- **Sicherheitsstatus**: Unter der Navigation steht auf jeder Ansicht eine schmale Zeile mit letztem Backup, letzter Änderung durch Housekeeper, ob Rückgängig noch möglich ist oder nur ein Backup-Restore, laufender Operation und laufender Nachbeobachtung. Ein Klick öffnet die passende Ansicht. Die Gesundheitskarte zeigt „N / 100 gesund“ und wie viele Objekte betroffen sind; jede gemeinsame Ursache ist eine Falte mit Zahlen je Objektart und den Folgebefunden darin.
+- **Gemeinsame Ursachen**: Ist eine Integration nicht geladen, erscheinen ihre Entitäten alle als „nicht verfügbar“. Housekeeper fasst das zu einer Ursache zusammen („Integration X ist nicht geladen“, mit Zustand, Fehlertext und den betroffenen Automationen, Skripten und Dashboards). Dasselbe gilt für ein Gerät mit mindestens drei Entitäten, die alle ausgefallen sind. Der Block steht über der Befundliste und in „Was muss ich jetzt tun?“; die Folgebefunde sind eingeklappt, bis du **Folgebefunde anzeigen** wählst (der Export enthält sie immer). Ausgeblendete und mit einem Vermerk versehene Befunde zählen nicht mit. Die Ursache zählt im Zustand einmal für alle ihre Folgen; die Zuordnung ist ein Hinweis, kein Beweis. Jede nicht geladene Integration ist ab der ersten Minute ein Befund; die Dauer bestimmt den Schweregrad: unter 1 Stunde Info, ab 1 Stunde Niedrig, ab 1 Tag Mittel, ab der eingestellten Zahl Tage oder mit betroffenen Automationen Hoch. Die Detailseite nennt, wie lange der Ausfall dauert und wann er schwerer wiegt.
+- **Sicherheitsstatus**: Unter der Navigation steht auf jeder Ansicht eine schmale Zeile mit letztem Backup, letzter Änderung durch Housekeeper, ob Rückgängig noch möglich ist oder nur ein Backup-Restore, laufender Operation und laufender Nachbeobachtung. Ein Klick öffnet die passende Ansicht. Die Zustandskarte zeigt „Zustand N %“ und wie viele Objekte betroffen sind; jede gemeinsame Ursache ist eine Falte mit Zahlen je Objektart und den Folgebefunden darin.
 - **Recorder-Daten beim Entfernen**: Beim Entfernen von Entitäten oder Geräten wählst du in der Werkzeugleiste, was mit den Recorder-Daten geschieht: **Behalten** (Standard), **Statistik löschen** oder **Statistik und Verlauf löschen**. Die Wahl gilt für den ganzen Plan. Sie ist nicht umkehrbar (nur mit dem Backup), deshalb bestätigst du jede Entfernung einzeln; sie ist gesperrt, wenn das Energie-Dashboard die Entität nutzt oder kein Recorder da ist. Die Vorschau nennt die genauen Zeilenzahlen.
 - **Schutzmodus** (Einstellungen → Sicherheit): legt auf dem Server fest, was Pläne ändern dürfen: 1 nur lesen, 2 Quarantäne (nur Deaktivieren), 3 bestätigte Änderungen mit Backup (ohne unumkehrbares Löschen von Recorder-Daten), 4 voller Wartungsmodus. Neue Installationen starten mit 1 (nur lesen) und schalten Änderungen bewusst frei; bestehende Installationen behalten 4. Die Grenze gilt beim Bestätigen, Starten und Rückgängigmachen, nicht nur für Knöpfe im Panel; Pläne anlegen und alle Ansichten bleiben immer erlaubt. Ist der Modus nicht „voll“, steht das in der Sicherheitszeile.
 - **Batterieprognose** (Menü Pflegen → Batterien) **und Wartungserinnerungen** (Pflegen → Erinnerungen): Die Prognose schätzt aus dem Verlauf der letzten fünf Wochen, wann eine Batterie die Grenze erreicht, und fasst Batterien zusammen, die in denselben zwei Wochen fällig werden. Sie verspricht nichts bei zu wenigen Tagen, flachem oder steigendem Verlauf. Du kannst je Gerät den Batterietyp hinterlegen; die Einkaufsliste für 30 Tage gruppiert den erwarteten Bedarf nach Typ, und einen erkannten Batteriewechsel kannst du in den Verlauf übernehmen. Darunter pflegst du eigene Erinnerungen (Filter, Entkalken, Batteriewechsel) mit Name, Abstand in Tagen und letztem Datum; fällige stehen in „Was muss ich jetzt tun?“ und lösen das Ereignis `ha_housekeeper_reminder_due` aus. Housekeeper ändert dabei nichts in Home Assistant. In der Zuverlässigkeit zeigt jeder Eintrag zusätzlich, wie oft seine Einrichtung zuletzt fehlschlug (aus den Scans gezählt).

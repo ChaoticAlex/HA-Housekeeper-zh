@@ -58,6 +58,94 @@ config/
         └── ...
 ```
 
+## Terms and numbers
+
+This section explains how Housekeeper thinks and counts. Once you know it, every number in the panel makes sense.
+
+### From small to large
+
+| Term | Meaning |
+| --- | --- |
+| **Object** | Anything Housekeeper checks: entity, device, integration, app, automation, script, scene. |
+| **Finding** | A single discovery on an object, for example "entity is orphaned" or "automation refers to a missing entity". Every finding has a **severity** (called *impact* in the interface): **high**, **medium**, **low** or **info**. The severity says how much hangs off the object (automations, critical objects) and how long an outage lasts. |
+| **Cause and follow-up** | When many objects fail for the same reason (an integration is not loaded, a device is down), Housekeeper folds them into one **cause**. The affected entities, automations and dashboards are its **follow-ups**. Follow-ups do not count extra. |
+| **Status of a finding** | You decide how a finding is handled: **Known** (with a reason), **Snoozed** (with a deadline), **Hidden**. Housekeeper sets **New**, **In progress** (a plan is running or waiting) and **Done** by itself. Known, snoozed and hidden findings do not count towards the state. |
+| **Note** | A statement about an object, for example "offline on purpose", also with a time window. A note belongs to the object, not to a single finding. Objects with a note do not count as newly failed. |
+| **Incident** | A temporal link: findings that began at the same time as an update or restart are shown together on one row. It is a hint, not proof of the cause. |
+| **Watch** | After an update of Home Assistant, the operating system or the Supervisor, Housekeeper scans additionally for a day (after 30 minutes, 2 and 6 hours and at the end) and compares with the state before the restart. The result is a verdict on what has failed since, was briefly disturbed or runs again. |
+
+**Watch versus finding:** A finding rates the state of an object at one point in time ("this is a problem now, at this level"). A watch is a before-and-after comparison over a period ("what changed since the update?"). It adds nothing to the state; it only explains whether and when findings began with an update. A finding can exist without a watch; a watch is only a look at findings that are already there.
+
+### How an outage becomes a finding
+
+An unavailable entity, device, integration or app becomes a finding after **15 minutes** and rises with its duration:
+
+| Duration | Level |
+| --- | --- |
+| from 15 minutes | info (takes nothing off, so a restart leaves no dent) |
+| from 1 hour | low |
+| from 24 hours | medium |
+| from 7 days, or when automations are affected | high |
+
+You set the four thresholds under **Settings → Scan and thresholds**. The level follows the duration and, for the impact, what hangs off the object.
+
+### The state and how it is calculated
+
+The number in the header of the panel ("State 98.4 %") is the **share of objects in order**. It counts objects, not findings.
+
+1. The **starting value** is the number of rated objects (entities, devices, integrations, automations, scripts, scenes).
+2. Every object with a finding takes off by its **worst** level: **high 1**, **medium 0.5**, **low 0.2**, **info 0**.
+3. An object counts **once**, even with several findings. Follow-ups of a cause do not count; the cause stands for them.
+4. Known, snoozed and hidden findings do not count.
+5. **State = (starting value − sum of the deductions) ÷ starting value**, rounded down to one decimal, so a house with a finding never reads "100 %".
+
+Example: 2000 rated objects, 100 with low findings (0.2 each = 20), 160 with medium findings (0.5 each = 80) and 100 with high findings (1 each = 100). Deduction 200, in order 1800, state **90 %**. The card **How is this number made?** (click the ring) shows this calculation with your numbers; a click on a row opens the matching objects.
+
+The ring is **green from 95 %**, **yellow from 85 %**, **red** below. An object with high impact or an urgent state topic (backup, disk) makes it at least yellow but takes nothing off.
+
+### Why numbers can look different
+
+- The **findings page** counts findings, the **state card** counts objects. Two findings on one object are two findings but one object.
+- The **tiles** of the findings page count without the follow-ups of a cause. With the filter "All individually" you see every finding, follow-ups included.
+- The **curves** under the tiles count like the tiles. The history of the state began anew when the calculation changed from points to objects.
+- The **export** always contains follow-ups.
+
+### What counts as a backup
+
+For the backup protection in Maintenance only backups that **contain Home Assistant** count: Home Assistant's automatic backups and manual backups, including the ones Housekeeper makes before a plan. Backups of a single app (for example those made before an app update) do not count: they do not secure your configuration and say nothing about your backup strategy.
+
+### How a plan runs
+
+Every change runs as a plan, never by itself:
+
+1. **Preview:** Housekeeper shows exactly what would change, with the expected end state. Nothing changes up to here.
+2. **Confirm:** You confirm in a dialog; for critical objects separately.
+3. **Backup:** Depending on the action, Housekeeper first creates a safety backup (configuration only or full).
+4. **Execute:** The steps run one by one, each with a result. The plan is **In progress** meanwhile.
+5. **Follow-up check:** For 24 hours Housekeeper checks whether anything comes back (**clean** or **relapse**).
+6. **Undo:** In the journal, as long as nothing was changed. Deleted recorder data and deleted backups are final; a full restore is up to Home Assistant.
+
+What a plan may do is set by the **protection mode** (Settings → Safety). New installations start at **read only**.
+
+### The most important settings
+
+| Setting | Default | Effect |
+| --- | --- | --- |
+| Scan interval | 6 hours | how often Housekeeper scans by itself (0 turns it off) |
+| Outage thresholds | 15 min / 1 h / 24 h / 7 days | when an outage is info, low, medium, high |
+| Watch after updates (`watch_hours`) | 24 hours | how long extra scans run after an update (0 turns it off) |
+| Protection mode | read only | what plans may change |
+
+All under **Settings** in the panel; the thresholds also under **Settings → Devices & services → HA Housekeeper → Configure**.
+
+### What Housekeeper stores
+
+Everything lives in Home Assistant's own storage (`.storage`, files `ha_housekeeper.*`) and never leaves your instance. That is observation times, decisions, notes, the history of the state, the journal of plans and the saved scans. The list with size and purpose is under **Settings → Info → What Housekeeper stores**. Housekeeper never shows credentials as a value, only their kind and whether one is stored.
+
+### First steps
+
+Installation and the first scan are in the [README](../README.md). After that: open **Findings** and start with the high and medium ones, open a finding (cause and dependencies are at the top), mark what is down on purpose with a note, and only then build a plan under **Tidy up**.
+
 ## Features
 
 ### Installation overview
@@ -106,15 +194,15 @@ The **Changes** view compares the current state with the previous scan or with t
 - **Finding status**: Known (with a reason), Snoozed (with a date) and Hidden; New, In work (a plan is running or open) and Fixed lately are added automatically. The list filters by it, and the selection marks several findings as known or snoozes them at once. A possible duplicate offers “Not a duplicate”.
 - **What you can do**: On the detail page a card sums up what is possible for the object: decide findings, replace, plan a disable, add a label. Everything only opens a preview under Cleanup.
 - **Refactoring hints** (read only) for automations: device triggers, long delays and branches that can never apply. A refactoring assistant that rebuilds automations with a preview and an undo is experimental and off by default.
-- **Impact**: Every finding has an impact (**high**, **medium**, **low**, **info**, **none**) with the reasons behind it, for example “used by 3 active automations” or “controls 1 critical object”. Objects are critical when they carry the label `housekeeper_critical` (on an entity, device or area), or are locks, alarm panels, valves, sirens, garage doors and gates, or sensors for smoke, gas, carbon monoxide, water and safety. The findings list sorts by impact by default, then by certainty of the diagnosis, and can be filtered by it. There is no numeric score.
+- **Impact**: Every finding has an impact (**high**, **medium**, **low**, **info**, **none**) with the reasons behind it, for example “used by 3 active automations” or “controls 1 critical object”. Objects are critical when they carry the label `housekeeper_critical` (on an entity, device or area), or are locks, alarm panels, valves, sirens, garage doors and gates, or sensors for smoke, gas, carbon monoxide, water and safety. The findings list sorts by impact by default, then by certainty of the diagnosis, and can be filtered by it. The impact alone gives no number; it enters the state through the worst level per object (see "Terms and numbers").
 - **Cleaning critical objects**: cleanup actions on critical objects (see Impact) ask for a separate confirmation per object, even when nothing else speaks against them. Policy violations can be hidden, kept (with a reason) or put off for later, like findings.
 - **Log of deleted statistics**: every deletion of orphaned recorder statistics is noted under Cleanup (time, who, backup, what was deleted and skipped). It cannot be undone, so it is only logged.
 - **Exchange device**: Under Cleanup you pick the old and the new device. Housekeeper proposes matching new entities for each old one (device class, unit, area, name) and decides nothing for you: you confirm every pair one by one, and for meters you choose whether references are replaced or the meter history is carried over. The result is an ordinary preview with backup, verification and undo. You disable the old device afterwards with "Disable device".
 - **Follow-up, end state and audit report**: After a plan has run, Housekeeper watches for 24 hours whether new broken references, unavailable entities or returning devices appear (**clean** or **regression**; regressions show under "What should I do now?"). The preview shows the expected end state beforehand, and every plan has an audit report as Markdown, with real names and IDs by default, or with placeholders instead (for sharing). Optionally and experimentally (off by default) Housekeeper suggests small mechanical improvements of an automation (add a description, remove exactly identical triggers, add a timeout to wait steps, change mode and limit; afterwards Housekeeper watches for 24 hours whether the automation gets error runs), each as a plan with a diff, a check by Home Assistant, a backup and undo; blueprint automations are never touched. Several open preview plans can be merged into one in the journal; it is judged afresh, and conflicts (the same object asked for in different ways) are named, not decided silently.
 - **Automation diagnostics** (tab "Quality" in the runs view): Seven separate views of each automation, deliberately without an overall grade: integrity, reliability, effectiveness, maintainability, restart safety, efficiency and conflicts; "unknown" means there is nothing to judge by yet. Each automation can get **success criteria** (target entities, expected state, time limit, optional hold time, or: a service such as a notification or a script is called by the same run, matched by the run context); Housekeeper then keeps a history of reached and missed criteria per trigger. Criteria missed again and again become a finding and show under "What should I do now?". On request, **coverage** counts which trigger and which branch ran and which never did (off by default; the trace is read briefly in memory, only counters are kept). Two runs can be **compared** (different trigger, branch, end, run time, updates in between). The **test run** explains what an automation would do with the current and your own test states; it never executes anything and marks critical targets such as locks and garage doors.
 - **Maintenance goals**: the overview has a card with seven goals you set yourself: at most 0 broken references, at most 10 unavailable entities, backup no older than 36 hours, restore test no older than 90 days, database growth at most 50 MB a day, no weak battery, at most 5 devices without an area. Each goal shows the current value, the limit and whether it is **met**, **missed** or **unknown** (for example while there are too few size samples); "never confirmed" counts as missed. Every goal can be adjusted or switched off. Nothing changes in Home Assistant and the health figure is untouched.
-- **Common causes**: when an integration is not loaded, all its entities show as "unavailable". Housekeeper folds that into one cause ("Integration X is not loaded", with state, error text and the affected automations, scripts and dashboards). The same goes for a device with at least three entities that are all down. The block sits above the findings list and in "What should I do now?"; the follow-up findings stay folded until you choose **Show follow-up findings** (the export always includes them). Hidden and marked findings do not count. The health figure is unchanged; this is a hint, not proof. Every integration that is not loaded is a finding from the first minute; the duration sets the severity: under 1 hour Info, from 1 hour Low, from 1 day Medium, from the configured number of days or with affected automations High. The detail page says how long the outage has lasted and when it becomes more serious.
-- **Safety status**: A thin line under the navigation, on every view, shows the last backup, the last change by Housekeeper, whether undo is still possible or only a backup restore, a running operation and a running follow-up. A click opens the matching view. The health card shows "N / 100 healthy" and how many objects are affected; each common cause is a fold with counts per object type and its follow-up findings inside.
+- **Common causes**: when an integration is not loaded, all its entities show as "unavailable". Housekeeper folds that into one cause ("Integration X is not loaded", with state, error text and the affected automations, scripts and dashboards). The same goes for a device with at least three entities that are all down. The block sits above the findings list and in "What should I do now?"; the follow-up findings stay folded until you choose **Show follow-up findings** (the export always includes them). Hidden and marked findings do not count. The cause counts once in the state for all its follow-ups; the grouping is a hint, not proof. Every integration that is not loaded is a finding from the first minute; the duration sets the severity: under 1 hour Info, from 1 hour Low, from 1 day Medium, from the configured number of days or with affected automations High. The detail page says how long the outage has lasted and when it becomes more serious.
+- **Safety status**: A thin line under the navigation, on every view, shows the last backup, the last change by Housekeeper, whether undo is still possible or only a backup restore, a running operation and a running follow-up. A click opens the matching view. The state card shows "State N %" and how many objects are affected; each common cause is a fold with counts per object type and its follow-up findings inside.
 - **Recorder data on removal**: When removing entities or devices you choose in the toolbar what happens to their recorder data: **Keep** (default), **Delete statistics** or **Delete statistics and history**. The choice holds for the whole plan. It cannot be undone (only from the backup), so you confirm each removal one by one; it is blocked when the Energy dashboard uses the entity or there is no recorder. The preview names the exact row counts.
 - **Protection mode** (Settings → Safety): sets on the server what plans may change: 1 read only, 2 quarantine (disabling only), 3 confirmed changes with backup (no irreversible deletion of recorder data), 4 full maintenance. New installs start at 1 (read only) and release changes on purpose; existing installs keep 4. The limit holds for confirming, starting and undoing, not only for buttons in the panel; making plans and every view stay allowed. When the mode is not "full" the safety line says so.
 - **Battery forecast** (menu Maintain → Batteries) **and maintenance reminders** (Maintain → Reminders): The forecast estimates from the last five weeks when a battery reaches the limit and groups batteries that fall due in the same two weeks. It promises nothing with too few days or a flat or rising curve. You can record the battery type per device; the 30-day shopping list groups the expected replacements by type, and a detected battery change can be entered in the history. Below it you keep your own reminders (filter, descaling, battery change) with a name, an interval in days and the last date; due ones show in "What do I need to do now?" and fire the event `ha_housekeeper_reminder_due`. Housekeeper changes nothing in Home Assistant for this. In Reliability each entry also shows how often its setup failed lately (counted from the scans).
@@ -136,7 +224,7 @@ The **Changes** view compares the current state with the previous scan or with t
   **Clean up a range yourself** also works for an error you spotted yourself, in a counter or a measurement (temperature, power …): choose the sensor and a period (at most 31 days), plus the last good value, a straight line or a fixed value. The preview shows which data still exists for the period (raw history, 5-minute rows, hourly rows) and, per table, row by row the value before and after. For measurements the hourly rows are recalculated from the corrected 5-minute rows; where those are already gone, the hourly row gets the replacement value and counts as an estimate. A counter must not fall, and without a good value before and after nothing is written. You pick the period in the date fields or with two sliders under the sensor's readings (last 1 to 365 days). The check also finds spikes of measurements far outside the usual (for example 85 °C in a room temperature that is normal again afterwards) and fills the period into the form with one click; values within what the sensor reports at other times (power peaks, rain) are never reported. Safety, backup, verification and undo as above; if someone changed single rows after the cleanup, undo puts back all other rows and leaves the changed ones.
 - **Guided plans and additional maintenance actions**: Plans lead through selection, setup, preview, confirmation, execution and result. Housekeeper can trim stored states older than 7 to 90 days (statistics stay), delete eligible Housekeeper backups according to a retention rule, and remove an unused automation from `automations.yaml`. These actions show their exact scope first; irreversible deletions are clearly marked. Backup cleanup protects backups of watched plans and the newest backup still needed for undo.
 - **Rename and assign**: An entity ID can be renamed together with exact references in automations, scripts, scenes and storage-mode dashboards; the original ID and files remain available for undo while unchanged. Entities and devices without an area can receive one through a plan, with a suggestion from their device or integration.
-- **Maintenance**: the **Maintenance** view starts with **Backup protection**: Housekeeper judges whether the backup strategy is sound (age of the latest backup against the schedule, failed runs and targets, local and remote storage, unusual size, retention, encryption, backup before cleanups). Home Assistant cannot detect the emergency kit and a restore test, so you confirm them with a date, and Housekeeper reminds you of the restore test after 180 days. Housekeeper only reads, starts no backup and never restores by itself. Below is the **update preflight**: backup age, open repairs, failed integrations, missing references and pending updates. If you save the starting state before an update, Housekeeper shows after the update (version change) new repairs, newly failed integrations, new missing references and new and removed objects. Both only read; the only thing stored is the starting state.
+- **Maintenance**: the **Maintenance** view starts with **Backup protection**: Housekeeper judges whether the backup strategy is sound (age of the latest backup against the schedule, failed runs and targets, local and remote storage, unusual size, retention, encryption, backup before cleanups). Home Assistant cannot detect the emergency kit and a restore test, so you confirm them with a date, and Housekeeper reminds you of the restore test after 180 days. For the check and the card "Latest backups" only automatic and manual Home Assistant backups count, not app-update backups. Housekeeper only reads, starts no backup and never restores by itself. Below is the **update preflight**: backup age, open repairs, failed integrations, missing references and pending updates. If you save the starting state before an update, Housekeeper shows after the update (version change) new repairs, newly failed integrations, new missing references and new and removed objects. Both only read; the only thing stored is the starting state.
 - **Reliability**: the **Reliability** view (Operation menu) shows for each config entry how available its entities were over the last 24 hours or 7 days, when at least 80 % of them (at least three, for at least 5 minutes) failed together, and whether that looks more like the cloud or like the device and network (named as a guess). Entities that were down all the time are counted apart. Housekeeper only reads the recorder for this, in the background, and remembers the last result (also across a restart, and likewise for load and database in the Recorder view): the view opens at once with the last numbers ("As of …") and recalculates in the background; for windows that were opened once it recalculates every 30 minutes. Every row opens the integration; its detail page has a **Reliability** tab with the entities that were down. Below, **Unstable entities** lists entities that keep failing and coming back (unstable from 3 failures and 0.5 a day, flapping from 1.5 a day), with duration, time-of-day pattern and the number of automations that depend on them. Failures during a shared outage of the integration count for the integration. On an entity's detail page “flapping” or “unstable” appears with the same numbers in the diagnosis and the key facts (from the last calculated result; the detail page never starts the recorder query).
 - **Load**: The **Recorder** view (Operation menu) starts with the **load**; it shows which entities, integrations and events write the most to the recorder: rows per day and entity, the busiest hour, “updates without a new state” (the value stayed the same, only attributes changed; truly identical updates are not written by Home Assistant), the mean attribute size of the last 24 hours, the estimated load share of each integration (an extrapolation in percent, not a measurement in bytes) and the most frequent event types. Anything unusual comes first with its numbers and the objects that depend on it (automations, template sensors). Housekeeper only reads the recorder for this, in the background, remembers the last result like reliability does (the view opens at once with “As of …” and recalculates in the background) and changes no recorder setting; recommendations are text. If another recorder query is running, the panel asks again by itself.
 - **Recorder costs**: Below the load, the **Recorder** view (Operation menu) shows the **recorder costs**: which entities fill the database, with share, write frequency, use and a suggested recorder exclusion to copy into `configuration.yaml`; Housekeeper does not change the recorder configuration.
