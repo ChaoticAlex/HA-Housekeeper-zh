@@ -417,8 +417,15 @@ class CleanupRunner:
         journal = self.scanner.journal
         await journal.store.async_save(journal.data())
 
+    def _drop_expired_tokens(self) -> None:
+        """Forget confirmations nobody redeemed in time, so abandoned ones do not pile up."""
+        now = _now()
+        for plan_id in [key for key, saved in self._tokens.items() if saved[1] < now]:
+            del self._tokens[plan_id]
+
     def confirm(self, plan_id: str, acknowledged: list[str], user_id: str | None) -> dict[str, Any]:
         """Select the actions that may run and hand out a short-lived confirmation token."""
+        self._drop_expired_tokens()
         plan = self._plan(plan_id)
         if self.scanner.warming_up:
             raise CleanupError("warming_up")
@@ -471,6 +478,7 @@ class CleanupRunner:
 
     def start(self, plan_id: str, token: str, user_id: str | None) -> None:
         """Validate the token and run the plan in the background."""
+        self._drop_expired_tokens()
         if self.running or write_holder(self.hass):
             raise CleanupError("busy")
         plan = self._plan(plan_id)

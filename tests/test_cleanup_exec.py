@@ -182,6 +182,22 @@ async def test_a_token_only_works_for_the_administrator_who_confirmed(
     assert scanner.journal.get(plan["plan_id"])["run"]["user_id"] == "admin-a"
 
 
+async def test_unredeemed_tokens_are_dropped_once_they_expire(hass: HomeAssistant) -> None:
+    from datetime import timedelta
+
+    first, second = orphan(hass, "stale"), orphan(hass, "fresh")
+    scanner = await make_scanner(hass)
+    old = await make_plan(scanner, hass, first.entity_id)
+    token = scanner.cleanup.confirm(old["plan_id"], [], None)["token"]
+    saved = scanner.cleanup._tokens[old["plan_id"]]
+    scanner.cleanup._tokens[old["plan_id"]] = (saved[0], saved[1] - timedelta(hours=1), *saved[2:])
+    other = await make_plan(scanner, hass, second.entity_id)
+    scanner.cleanup.confirm(other["plan_id"], [], None)
+    assert list(scanner.cleanup._tokens) == [other["plan_id"]]
+    with pytest.raises(CleanupError, match="bad_token"):
+        scanner.cleanup.start(old["plan_id"], token, None)
+
+
 async def test_tokens_are_single_use_and_plans_run_once(hass: HomeAssistant) -> None:
     entry = orphan(hass, "once")
     scanner = await make_scanner(hass)
