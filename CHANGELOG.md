@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Beobachtung: ohne Wert und Vermerke:** Objekte, die nach dem Update erreichbar sind, aber keinen Wert mehr haben (`unknown`), stehen in einer eigenen Gruppe „Seitdem ohne Wert". Objekte mit einem Vermerk (absichtlich offline, saisonal, Reserve, ersetzt) zählen nicht als neu ausgefallen und stehen getrennt; ein Vermerk lässt sich direkt in der Zeile setzen.
+
 - **Beobachtung nur nach System-Updates:** Die Beobachtung nach Updates startet nur noch bei einem Update von Home Assistant, Betriebssystem oder Supervisor. Updates einzelner Integrationen laufen über die üblichen Befunde und den zeitlichen Zusammenhang. Das Band im Seitenkopf führt jetzt zur Auswertung auf der Befundseite.
 
 - **Datenbank vor dem Löschen prüfen:** Bevor ein Plan Zeilen im Recorder löscht oder ändert, führt Housekeeper bei SQLite die vollständige Integritätsprüfung (`integrity_check`, prüft auch die Indizes) aus. Ist die Datenbank beschädigt, bricht der Plan ab, nichts wird geändert, und die Meldung nennt die Prüfung mit `PRAGMA integrity_check` und die Reparatur mit `REINDEX` (Issue 12). Ein „database disk image is malformed“ mitten im Lauf wird ebenso erklärt.
@@ -37,6 +39,8 @@
 ### English
 
 #### New
+
+- **Watch: without a value, and marks:** Objects that answer after the update but have no value any more (`unknown`) are listed in a group of their own, “Without a value since”. Objects with a mark (offline on purpose, seasonal, spare, replaced) no longer count as newly failed and are listed apart; a mark can be set right in the row.
 
 - **Watch only after system updates:** The watch after updates now starts only for an update of Home Assistant, the operating system or the Supervisor. Updates of single integrations are covered by the usual findings and the link in time. The band in the page header now leads to the results on the findings page.
 

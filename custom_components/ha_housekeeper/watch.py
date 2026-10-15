@@ -21,6 +21,7 @@ SAVE_DELAY = 10
 WATCH_KINDS = ("ha_version", "os_version", "supervisor_version")  # updates that start a watch
 KEEP = 3  # watches kept, the open one included
 BAD = frozenset({"unavailable", "problem", "stopped"})
+SILENT = frozenset({"unknown"})  # reachable but without a value: its own group, never "worse" by itself
 # Integrations load late after a restart: nothing is judged before this has passed.
 CALM = timedelta(minutes=30)
 SAMPLE_DELAYS = (timedelta(minutes=30), timedelta(hours=2), timedelta(hours=6))
@@ -41,7 +42,13 @@ def _parse(value: Any) -> datetime | None:
 
 def _bad(statuses: dict[str, str]) -> dict[str, Any]:
     keys = sorted(key for key, status in statuses.items() if status in BAD)
-    return {"bad": {key: statuses[key] for key in keys[:BAD_KEPT]}, "bad_total": len(keys)}
+    quiet = sorted(key for key, status in statuses.items() if status in SILENT)
+    return {
+        "bad": {key: statuses[key] for key in keys[:BAD_KEPT]},
+        "bad_total": len(keys),
+        "silent": {key: statuses[key] for key in quiet[:BAD_KEPT]},
+        "silent_total": len(quiet),
+    }
 
 
 def make_before(checkpoint: dict[str, Any] | None) -> dict[str, Any] | None:
@@ -88,14 +95,16 @@ def _unread(kinds: set[str], key: str) -> bool:
     return key.split(":", 1)[0] in kinds or key in kinds
 
 
-def evaluate(watch: dict[str, Any]) -> dict[str, Any]:
+def evaluate(watch: dict[str, Any], marked: frozenset[str] = frozenset()) -> dict[str, Any]:
     """Judge a watch: ``stable``, ``worse``, ``transient``, ``unknown`` or ``pending``.
 
     Bad objects of a source that one of the two scans could not read are not counted either way;
-    when something is unread and nothing worse is known, the answer is ``unknown``.
+    when something is unread and nothing worse is known, the answer is ``unknown``. An object in
+    ``marked`` (offline on purpose and the like) is listed apart and makes nothing worse. Objects that
+    answer without a value (``silent``) are a group of their own and do not change the verdict.
     """
     before, samples = watch.get("before"), watch["samples"]
-    empty = {"new": [], "fixed": [], "transient": [], "new_findings": []}
+    empty = {"new": [], "silent": [], "marked": [], "fixed": [], "transient": [], "new_findings": []}
     if not samples:
         return {"verdict": "pending", **empty}
     if before is None:
@@ -104,7 +113,12 @@ def evaluate(watch: dict[str, Any]) -> dict[str, Any]:
     unread = set(before.get("unchecked") or []) | set(last.get("unchecked") or [])
     was, now = set(before["bad"]), set(last["bad"])
     seen = set().union(*(set(s["bad"]) for s in samples))
-    new = sorted(k for k in now - was if not _unread(unread, k))
+    new_all = sorted(k for k in now - was if not _unread(unread, k))
+    new = [k for k in new_all if k not in marked]
+    was_quiet, now_quiet = set(before.get("silent") or {}), set(last.get("silent") or {})
+    quiet_all = sorted(k for k in now_quiet - was_quiet - was if not _unread(unread, k))
+    quiet = [k for k in quiet_all if k not in marked]
+    kept = sorted(set(new_all + quiet_all) & marked)
     fixed = sorted(k for k in was - now if not _unread(unread, k))
     transient = sorted(k for k in seen - now - was if not _unread(unread, k))
     new_findings = sorted(set(last["findings"]) - set(before["findings"]))
@@ -119,6 +133,8 @@ def evaluate(watch: dict[str, Any]) -> dict[str, Any]:
     result: dict[str, Any] = {
         "verdict": verdict,
         "new": new,
+        "silent": quiet,
+        "marked": kept,
         "fixed": fixed,
         "transient": transient,
         "new_findings": new_findings,
@@ -193,7 +209,9 @@ class WatchStore:
             del self.watches[:-KEEP]
         self._save()
 
-    def sample(self, snapshot: dict[str, Any], now: datetime) -> None:
+    def sample(
+        self, snapshot: dict[str, Any], now: datetime, marked: frozenset[str] = frozenset()
+    ) -> None:
         """Add this scan to the open watch once the restart has calmed down."""
         watch = self.active()
         started = _parse(watch["started_at"]) if watch else None
@@ -203,7 +221,7 @@ class WatchStore:
             older["findings"] = None  # only the last sample is judged on findings
         watch["samples"].append(make_sample(snapshot))
         del watch["samples"][1 : -SAMPLES_KEPT + 1]
-        self._finish(watch, now)
+        self._finish(watch, now, marked=marked)
         self._save()
 
     def expire(self, now: datetime) -> bool:
@@ -216,17 +234,23 @@ class WatchStore:
         self._save()
         return True
 
-    def _finish(self, watch: dict[str, Any], now: datetime, force: bool = False) -> None:
+    def _finish(
+        self,
+        watch: dict[str, Any],
+        now: datetime,
+        force: bool = False,
+        marked: frozenset[str] = frozenset(),
+    ) -> None:
         until = _parse(watch["until"])
         if force or (until is not None and now >= until):
             watch["closed_at"] = now.isoformat()
-            watch["verdict"] = evaluate(watch)["verdict"] if watch["samples"] else "unknown"
+            watch["verdict"] = evaluate(watch, marked)["verdict"] if watch["samples"] else "unknown"
 
-    def report(self) -> list[dict[str, Any]]:
+    def report(self, marked: frozenset[str] = frozenset()) -> list[dict[str, Any]]:
         """Newest first, each with its judgement; ids, statuses and times only."""
         out = []
         for w in reversed(self.watches):
-            result = evaluate(w)
+            result = evaluate(w, marked)
             if w.get("closed_at") and w.get("verdict"):
                 result["verdict"] = w["verdict"]
             out.append({**w, "result": result})

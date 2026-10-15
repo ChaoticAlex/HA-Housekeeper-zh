@@ -7303,7 +7303,7 @@ Object.assign(TEXT.de, {
   watchV_worse: "Verschlechtert", watchV_stable: "Stabil", watchV_transient: "Vorübergehend", watchV_unknown: "Unbekannt", watchV_pending: "Läuft",
   watchBefore: "Stand davor: Scan vom {when}", watchNoBefore: "Vor dem Neustart gab es keinen Scan, ein Vergleich ist nicht möglich.",
   watchUnread: "Eine Quelle konnte nicht gelesen werden. Was dort fehlt, gilt als unbekannt, nicht als in Ordnung.",
-  watchNew: "Seitdem ausgefallen ({n})", watchFixed: "Wieder in Ordnung ({n})", watchTransient: "Kurz gestört, jetzt wieder in Ordnung ({n})", watchNewFindings: "Neue Befunde seit dem Update: {n}",
+  watchNew: "Seitdem ausgefallen ({n})", watchSilent: "Seitdem ohne Wert ({n})", watchMarked: "Mit Vermerk, nicht gezählt ({n})", watchFixed: "Wieder in Ordnung ({n})", watchTransient: "Kurz gestört, jetzt wieder in Ordnung ({n})", watchNewFindings: "Neue Befunde seit dem Update: {n}",
   watchNone: "Keine Auffälligkeiten.", watchSamples: "{n} Messungen", watchEnded: "beendet {when}", watchMore: "{n} weitere sind hier nicht aufgeführt.",
   optWatchTitle: "Beobachtung nach Updates", optWatchHint: "Wie viele Stunden nach einem Update von Home Assistant, Betriebssystem oder Supervisor zusätzlich gescannt und mit dem Stand davor verglichen wird. 0 schaltet die Beobachtung aus.",
 });
@@ -7313,7 +7313,7 @@ Object.assign(TEXT.en, {
   watchV_worse: "Worse", watchV_stable: "Stable", watchV_transient: "Temporary", watchV_unknown: "Unknown", watchV_pending: "Running",
   watchBefore: "State before: scan of {when}", watchNoBefore: "There was no scan before the restart, so there is nothing to compare with.",
   watchUnread: "A source could not be read. What is missing there counts as unknown, not as fine.",
-  watchNew: "Failed since ({n})", watchFixed: "Working again ({n})", watchTransient: "Briefly disturbed, fine now ({n})", watchNewFindings: "New findings since the update: {n}",
+  watchNew: "Failed since ({n})", watchSilent: "Without a value since ({n})", watchMarked: "Marked, not counted ({n})", watchFixed: "Working again ({n})", watchTransient: "Briefly disturbed, fine now ({n})", watchNewFindings: "New findings since the update: {n}",
   watchNone: "Nothing unusual.", watchSamples: "{n} checks", watchEnded: "ended {when}", watchMore: "{n} more are not listed here.",
   optWatchTitle: "Watch after updates", optWatchHint: "For how many hours after an update of Home Assistant, the operating system or the Supervisor Housekeeper scans extra and compares with the state before. 0 switches the watch off.",
 });
@@ -7423,20 +7423,22 @@ class WatchMixin {
     const pg = keys.slice(0, WATCH_LIST).map(key => {
       const item = this.findObject(key);
       const name = item?.name || key.split(":").slice(1).join(":");
-      return `<button class="row" data-object="${this.esc(key)}">${this.tile(item?.object_type || key.split(":")[0], tone)}<span class="row-text"><strong>${this.esc(name)}</strong><small>${this.esc(key)}</small></span></button>`;
+      const mark = item?.mark;
+      const act = mark ? `<span class="pill mute">${this.esc(this.t(`mark_${mark.kind}`))}</span>` : item ? `<button class="btn quiet" data-watch-mark="${this.esc(key)}"><ha-icon icon="mdi:bookmark-plus-outline"></ha-icon>${this.t("markSet")}</button>` : "";
+      return `<div class="row" role="button" tabindex="0" data-object="${this.esc(key)}">${this.tile(item?.object_type || key.split(":")[0], tone)}<span class="row-text"><strong>${this.esc(name)}</strong><small>${this.esc(key)}${item?.status ? ` · ${this.esc(item.status)}` : ""}</small></span>${act}</div>`;
     }).join("");
     const more = keys.length > WATCH_LIST ? `<p class="sub">${this.t("watchMore", { n: this.formatNumber(keys.length - WATCH_LIST) })}</p>` : "";
     return pg + more;
   }
 
   watchBody(w) {
-    const r = w.result, parts = [];
+    const r = { silent: [], marked: [], ...w.result }, parts = [];
     parts.push(`<p class="sub u-mb14">${w.before ? this.t("watchBefore", { when: this.formatDate(w.before.at) }) : this.t("watchNoBefore")} · ${this.t("watchSamples", { n: w.samples.length })}</p>`);
     if (r.reason === "unread") parts.push(`<p class="factnote">${this.t("watchUnread")}</p>`);
     const section = (id, keys, tone) => keys.length ? `<h3>${this.t(id, { n: this.formatNumber(keys.length) })}</h3>${this.watchRows(keys, tone)}` : "";
-    parts.push(section("watchNew", r.new, "warn"), section("watchTransient", r.transient, "mute"), section("watchFixed", r.fixed, "ok"));
+    parts.push(section("watchNew", r.new, "warn"), section("watchSilent", r.silent, "mute"), section("watchMarked", r.marked, "mute"), section("watchTransient", r.transient, "mute"), section("watchFixed", r.fixed, "ok"));
     if (r.new_findings.length) parts.push(`<p class="sub">${this.t("watchNewFindings", { n: this.formatNumber(r.new_findings.length) })}</p>`);
-    if (!r.new.length && !r.transient.length && !r.fixed.length && !r.new_findings.length && w.before) parts.push(`<p class="sub">${this.t("watchNone")}</p>`);
+    if (!r.new.length && !r.silent.length && !r.marked.length && !r.transient.length && !r.fixed.length && !r.new_findings.length && w.before) parts.push(`<p class="sub">${this.t("watchNone")}</p>`);
     return parts.join("");
   }
 
@@ -15519,6 +15521,7 @@ class HAHousekeeperPanel extends HTMLElement {
       const kind = el.dataset.bhSave, date = root.querySelector(`[data-bh-date="${kind}"]`)?.value;
       this.loadBackup({ type: "ha_housekeeper/backup_attest", kind, ...(date ? { date } : {}) });
     });
+    root.querySelectorAll("[data-watch-mark]").forEach(el => el.onclick = async ev => { ev.stopPropagation(); const obj = this.findObject(el.dataset.watchMark); if (!obj) return; this._pendingTab = "actions"; await this.openObject(obj); this.openMark(el.dataset.watchMark); });
     root.querySelectorAll("[data-watch-go]").forEach(el => el.onclick = () => { this.noteJump?.("findingsNav"); this.view = "findingsNav"; this.pages = {}; this.selected = null; this.trail = []; this.folds = { ...this.folds, watch: true, [`watch_${el.dataset.watchGo}`]: true }; this.render(); });
     root.querySelectorAll("[data-fold]").forEach(el => el.onclick = () => { if (el.dataset.fold.startsWith("chg_")) this.changesCat = ""; this.folds = { ...this.folds, [el.dataset.fold]: el.getAttribute("aria-expanded") !== "true" }; this.render(); });
     root.querySelectorAll("[data-bh-clear]").forEach(el => el.onclick = () => this.loadBackup({ type: "ha_housekeeper/backup_attest", kind: el.dataset.bhClear, clear: true }));

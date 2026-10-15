@@ -1012,15 +1012,31 @@ class InventoryScanner:
 
     def _observe_watch(self, snapshot: dict[str, Any]) -> None:
         """A scan after an update is a sample of the watch, once the restart has calmed down."""
-        self.watch.sample(snapshot, datetime.now(UTC))
+        self.watch.sample(snapshot, datetime.now(UTC), self.watch_marked(snapshot))
         snapshot["meta"]["watch"] = self.watch_summary()
+
+    def watch_marked(self, snapshot: dict[str, Any] | None = None) -> frozenset[str]:
+        """Objects marked as expected (offline on purpose and the like); they do not count as new outages."""
+        snapshot = snapshot or self._snapshot or {}
+        objects = snapshot.get("objects") or []
+
+        def hides(item: dict[str, Any]) -> bool:
+            mark = item.get("mark")
+            return bool(mark and mark.get("kind") in HIDING_KINDS and not item.get("mark_due"))
+
+        devices = {i["object_id"] for i in objects if i["object_type"] == "device" and hides(i)}
+        return frozenset(
+            f"{i['object_type']}:{i['object_id']}"
+            for i in objects
+            if hides(i) or (i["object_type"] == "entity" and i.get("device_id") in devices)
+        )
 
     def watch_summary(self) -> dict[str, Any] | None:
         """The open watch in short, for the band in the panel header; None when none is open."""
         watch = self.watch.active()
         if watch is None:
             return None
-        result = evaluate(watch)
+        result = evaluate(watch, self.watch_marked())
         return {
             "id": watch["id"],
             "started_at": watch["started_at"],

@@ -106,3 +106,18 @@ def test_a_second_update_joins_the_open_watch_once() -> None:
     first = [{"kind": "ha_version", "from": "1", "to": "2"}]
     again = [*first, {"kind": "entry_version", "domain": "hue", "from": "1", "to": "2"}]
     assert len(merge_triggers(first, again)) == 2
+
+
+def test_silent_objects_are_a_group_of_their_own_and_marked_ones_make_nothing_worse() -> None:
+    before = _state()
+    after = {**_state(bad=["entity:a"]), "silent": {"entity:q": "unknown"}}
+    result = evaluate(_watch(before, [after]))
+    assert (result["verdict"], result["new"], result["silent"]) == (
+        "worse",
+        ["entity:a"],
+        ["entity:q"],
+    )
+    quiet = evaluate(_watch(before, [{**_state(), "silent": {"entity:q": "unknown"}}]))
+    assert (quiet["verdict"], quiet["silent"]) == ("stable", ["entity:q"])
+    marked = evaluate(_watch(before, [after]), frozenset({"entity:a"}))
+    assert (marked["verdict"], marked["new"], marked["marked"]) == ("stable", [], ["entity:a"])

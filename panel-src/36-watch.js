@@ -35,20 +35,22 @@ class WatchMixin {
     const pg = keys.slice(0, WATCH_LIST).map(key => {
       const item = this.findObject(key);
       const name = item?.name || key.split(":").slice(1).join(":");
-      return `<button class="row" data-object="${this.esc(key)}">${this.tile(item?.object_type || key.split(":")[0], tone)}<span class="row-text"><strong>${this.esc(name)}</strong><small>${this.esc(key)}</small></span></button>`;
+      const mark = item?.mark;
+      const act = mark ? `<span class="pill mute">${this.esc(this.t(`mark_${mark.kind}`))}</span>` : item ? `<button class="btn quiet" data-watch-mark="${this.esc(key)}"><ha-icon icon="mdi:bookmark-plus-outline"></ha-icon>${this.t("markSet")}</button>` : "";
+      return `<div class="row" role="button" tabindex="0" data-object="${this.esc(key)}">${this.tile(item?.object_type || key.split(":")[0], tone)}<span class="row-text"><strong>${this.esc(name)}</strong><small>${this.esc(key)}${item?.status ? ` · ${this.esc(item.status)}` : ""}</small></span>${act}</div>`;
     }).join("");
     const more = keys.length > WATCH_LIST ? `<p class="sub">${this.t("watchMore", { n: this.formatNumber(keys.length - WATCH_LIST) })}</p>` : "";
     return pg + more;
   }
 
   watchBody(w) {
-    const r = w.result, parts = [];
+    const r = { silent: [], marked: [], ...w.result }, parts = [];
     parts.push(`<p class="sub u-mb14">${w.before ? this.t("watchBefore", { when: this.formatDate(w.before.at) }) : this.t("watchNoBefore")} · ${this.t("watchSamples", { n: w.samples.length })}</p>`);
     if (r.reason === "unread") parts.push(`<p class="factnote">${this.t("watchUnread")}</p>`);
     const section = (id, keys, tone) => keys.length ? `<h3>${this.t(id, { n: this.formatNumber(keys.length) })}</h3>${this.watchRows(keys, tone)}` : "";
-    parts.push(section("watchNew", r.new, "warn"), section("watchTransient", r.transient, "mute"), section("watchFixed", r.fixed, "ok"));
+    parts.push(section("watchNew", r.new, "warn"), section("watchSilent", r.silent, "mute"), section("watchMarked", r.marked, "mute"), section("watchTransient", r.transient, "mute"), section("watchFixed", r.fixed, "ok"));
     if (r.new_findings.length) parts.push(`<p class="sub">${this.t("watchNewFindings", { n: this.formatNumber(r.new_findings.length) })}</p>`);
-    if (!r.new.length && !r.transient.length && !r.fixed.length && !r.new_findings.length && w.before) parts.push(`<p class="sub">${this.t("watchNone")}</p>`);
+    if (!r.new.length && !r.silent.length && !r.marked.length && !r.transient.length && !r.fixed.length && !r.new_findings.length && w.before) parts.push(`<p class="sub">${this.t("watchNone")}</p>`);
     return parts.join("");
   }
 
