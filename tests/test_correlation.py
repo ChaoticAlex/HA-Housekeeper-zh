@@ -41,3 +41,20 @@ def test_restarts_and_plan_runs_only_appear_as_groups_and_bad_input_is_skipped()
     )
     assert result["groups"][0]["only_group"] is True and result["groups"][0]["total"] == 1
     assert result["by_key"] == {}
+
+
+def test_updates_close_in_time_and_the_restart_beside_them_are_one_incident() -> None:
+    events = [
+        event("start", "2026-10-01T10:00:00+00:00"),
+        event("entry_version", "2026-10-01T10:05:00+00:00", domain="a", **{"from": "1", "to": "2"}),
+        event("entry_version", "2026-10-01T10:05:00+00:00", domain="b", **{"from": "1", "to": "2"}),
+        event("start", "2026-10-01T15:00:00+00:00"),
+    ]
+    found = [finding(k, "2026-10-01T10:06:00+00:00") for k in "xyz"] + [
+        finding("w", "2026-10-01T15:01:00+00:00")
+    ]
+    result = correlate(found, events)
+    update = next(g for g in result["groups"] if g["kind"] == "entry_version")
+    assert update["total"] == 3 and [a["domain"] for a in update["also"]] == ["b"]
+    assert len(result["groups"]) == 2, "the lone restart stays its own group"
+    assert set(result["by_key"]) == {"x", "y", "z"}

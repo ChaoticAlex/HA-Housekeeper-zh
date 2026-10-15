@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Zeitlicher Zusammenhang nach Vorfällen:** Updates, die wenige Minuten auseinander liegen, und der Neustart dabei bilden eine Zeile („Update von … +1“, aufgeklappt mit den übrigen Updates). Ein Befund wird je Vorfall nur einmal gezählt; die Summe der Zeilen passt damit zur Kachel „Nach Update neu“. Die Überschrift zählt „Vorfälle“ statt Ereignisse.
+
 - **Jeder Befund hat einen Schweregrad:** Befunde auf Objekten, die nichts nutzt und die nicht kritisch sind (mögliches Duplikat, ungenutzt), standen bisher ohne Schweregrad („–“, Filter „Keine“). Sie sind jetzt „Info“; der Filterwert „Keine“ entfällt.
 
 - **Info zieht keine Punkte ab:** Befunde der Stufe „Info“ (kurze Ausfälle unter der Niedrig-Schwelle) kosteten im Punktestand der Seite bisher einen Punkt (höchstens 5), im Verlauf aber nichts. Jetzt zählen sie nirgends.

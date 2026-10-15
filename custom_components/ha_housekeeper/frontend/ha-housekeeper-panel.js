@@ -2819,12 +2819,14 @@ class FindingsMixin {
 // Texts for the findings that began together with an update or restart; merged into TEXT.
 Object.assign(TEXT.de, {
   corrAfter: "Zeitlich zusammen mit: {what} ({when})", corrTile: "Nach Update neu", corrTileSub: "begannen zusammen mit einem Update", corrTitle: "Zeitlich zusammen mit Updates und Neustarts",
-  corrHint: "Befunde, die zur selben Zeit begannen wie ein Update, ein Neustart oder ein Plan. Das ist ein zeitlicher Zusammenhang, keine Ursache.",
+  corrIncidents: "{n} Vorfälle", corrAlso: "Zusammen mit: {list}",
+  corrHint: "Befunde, die zur selben Zeit begannen wie ein Update, ein Neustart oder ein Plan. Updates kurz nacheinander und der Neustart dabei sind ein Vorfall; ein Befund kann zu mehreren Vorfällen zählen. Das ist ein zeitlicher Zusammenhang, keine Ursache.",
   corr_ha_version: "Home-Assistant-Update {from} → {to}", corr_os_version: "Betriebssystem-Update {from} → {to}", corr_supervisor_version: "Supervisor-Update {from} → {to}", corr_entry_version: "Update von {domain} {from} → {to}", corr_start: "Neustart von Home Assistant", corr_plan: "Plan ausgeführt", corr_purge: "Statistiken gelöscht", corrCount: "{n} Befunde", corrReason: "{n}× {what}", corrSpan: "Begannen zwischen {first} und {last}.", corrMore: "{n} weitere sind hier nicht aufgeführt.",
 });
 Object.assign(TEXT.en, {
   corrAfter: "At about the same time as: {what} ({when})", corrTile: "New after update", corrTileSub: "began together with an update", corrTitle: "At about the same time as updates and restarts",
-  corrHint: "Findings that began at the same time as an update, a restart or a plan. This is a link in time, not a cause.",
+  corrIncidents: "{n} incidents", corrAlso: "Together with: {list}",
+  corrHint: "Findings that began at the same time as an update, a restart or a plan. Updates shortly after one another and the restart beside them are one incident; a finding can belong to several incidents. This is a link in time, not a cause.",
   corr_ha_version: "Home Assistant update {from} → {to}", corr_os_version: "Operating system update {from} → {to}", corr_supervisor_version: "Supervisor update {from} → {to}", corr_entry_version: "Update of {domain} {from} → {to}", corr_start: "Home Assistant restart", corr_plan: "Cleanup plan run", corr_purge: "Statistics deleted", corrCount: "{n} findings", corrReason: "{n}× {what}", corrSpan: "Began between {first} and {last}.", corrMore: "{n} more are not listed here.",
 });
 
@@ -7313,10 +7315,16 @@ class CorrelationMixin {
     return `<p class="sub u-mb14">${this.esc(span)}${more}</p><div class="chips u-mb14">${parts}</div>`;
   }
 
+  // The other updates of an incident, as one line under the title.
+  corrAlso(group) {
+    const list = (group.also || []).map(a => this.corrText(a));
+    return list.length ? `<p class="sub u-mb14">${this.t("corrAlso", { list: list.join(" · ") })}</p>` : "";
+  }
+
   corrGroupBody(group) {
     const findings = group.keys.map(k => this.data.findings.find(x => x.key === k)).filter(Boolean);
     const pg = this.paginate(`corr_${group.id}`, findings);
-    return `${this.corrSummary(group, findings)}${pg.rows.map(f => this.findingRow(f)).join("")}${pg.footer}`;
+    return `${this.corrAlso(group)}${this.corrSummary(group, findings)}${pg.rows.map(f => this.findingRow(f)).join("")}${pg.footer}`;
   }
 
   // Closed by default; one fold per group inside. Sits on the findings page next to the tile that filters by it.
@@ -7326,11 +7334,11 @@ class CorrelationMixin {
     const pg = this.paginate("corr", groups);
     const rows = pg.rows.map(g => {
       const icon = g.kind === "start" ? "mdi:restart" : g.kind === "plan" ? "mdi:broom" : g.kind === "purge" ? "mdi:database-remove" : g.kind === "note" ? "mdi:pin-outline" : "mdi:package-up";
-      const head = { tone: g.only_group ? "mute" : "warn", title: this.corrText(g), sub: this.formatDate(g.at), pill: this.t("corrCount", { n: this.formatNumber(g.total) }) };
+      const head = { tone: g.only_group ? "mute" : "warn", title: this.corrText(g) + (g.also?.length ? ` +${g.also.length}` : ""), sub: this.formatDate(g.at), pill: this.t("corrCount", { n: this.formatNumber(g.total) }) };
       const open = this.foldOpen(`corr_${g.id}`, false);
       return this.fold(`corr_${g.id}`, head, open ? this.corrGroupBody(g) : "", false).replace(/<ha-icon icon="mdi:chevron-(?:down|right)"><\/ha-icon>/, `<ha-icon icon="${open ? "mdi:chevron-down" : icon}"></ha-icon>`);
     }).join("");
-    return `<div class="panel">${this.fold("corr", { tone: "warn", title: this.t("corrTitle"), sub: this.t("corrHint"), pill: this.formatNumber(groups.length) }, rows + pg.footer, false)}</div>`;
+    return `<div class="panel">${this.fold("corr", { tone: "warn", title: this.t("corrTitle"), sub: this.t("corrHint"), pill: this.t("corrIncidents", { n: this.formatNumber(groups.length) }) }, rows + pg.footer, false)}</div>`;
   }
 }
 

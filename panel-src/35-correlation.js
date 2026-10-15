@@ -40,10 +40,16 @@ class CorrelationMixin {
     return `<p class="sub u-mb14">${this.esc(span)}${more}</p><div class="chips u-mb14">${parts}</div>`;
   }
 
+  // The other updates of an incident, as one line under the title.
+  corrAlso(group) {
+    const list = (group.also || []).map(a => this.corrText(a));
+    return list.length ? `<p class="sub u-mb14">${this.t("corrAlso", { list: list.join(" · ") })}</p>` : "";
+  }
+
   corrGroupBody(group) {
     const findings = group.keys.map(k => this.data.findings.find(x => x.key === k)).filter(Boolean);
     const pg = this.paginate(`corr_${group.id}`, findings);
-    return `${this.corrSummary(group, findings)}${pg.rows.map(f => this.findingRow(f)).join("")}${pg.footer}`;
+    return `${this.corrAlso(group)}${this.corrSummary(group, findings)}${pg.rows.map(f => this.findingRow(f)).join("")}${pg.footer}`;
   }
 
   // Closed by default; one fold per group inside. Sits on the findings page next to the tile that filters by it.
@@ -53,10 +59,10 @@ class CorrelationMixin {
     const pg = this.paginate("corr", groups);
     const rows = pg.rows.map(g => {
       const icon = g.kind === "start" ? "mdi:restart" : g.kind === "plan" ? "mdi:broom" : g.kind === "purge" ? "mdi:database-remove" : g.kind === "note" ? "mdi:pin-outline" : "mdi:package-up";
-      const head = { tone: g.only_group ? "mute" : "warn", title: this.corrText(g), sub: this.formatDate(g.at), pill: this.t("corrCount", { n: this.formatNumber(g.total) }) };
+      const head = { tone: g.only_group ? "mute" : "warn", title: this.corrText(g) + (g.also?.length ? ` +${g.also.length}` : ""), sub: this.formatDate(g.at), pill: this.t("corrCount", { n: this.formatNumber(g.total) }) };
       const open = this.foldOpen(`corr_${g.id}`, false);
       return this.fold(`corr_${g.id}`, head, open ? this.corrGroupBody(g) : "", false).replace(/<ha-icon icon="mdi:chevron-(?:down|right)"><\/ha-icon>/, `<ha-icon icon="${open ? "mdi:chevron-down" : icon}"></ha-icon>`);
     }).join("");
-    return `<div class="panel">${this.fold("corr", { tone: "warn", title: this.t("corrTitle"), sub: this.t("corrHint"), pill: this.formatNumber(groups.length) }, rows + pg.footer, false)}</div>`;
+    return `<div class="panel">${this.fold("corr", { tone: "warn", title: this.t("corrTitle"), sub: this.t("corrHint"), pill: this.t("corrIncidents", { n: this.formatNumber(groups.length) }) }, rows + pg.footer, false)}</div>`;
   }
 }
