@@ -922,3 +922,45 @@ async def test_a_nearly_full_disk_stops_a_plan_that_writes_into_the_recorder(
         assert await scanner.cleanup._disk_has_room(plan) is False
     assert plan["status"] == "aborted"
     assert plan["actions"][0]["result"]["reason"] == "disk_low"
+
+
+async def test_a_plan_does_not_start_while_home_assistant_makes_a_backup_or_the_recorder_struggles(
+    hass: HomeAssistant,
+) -> None:
+    from types import SimpleNamespace
+    from unittest.mock import patch
+
+    scanner = await make_scanner(hass)
+
+    def fresh():
+        return {"status": "running", "events": [], "actions": [{"object_id": "sensor.a"}]}
+
+    busy = SimpleNamespace(state=SimpleNamespace(value="create_backup"))
+    plan = fresh()
+    with patch("homeassistant.components.backup.async_get_manager", return_value=busy):
+        assert await scanner.cleanup._others_idle(plan, False) is False
+    assert plan["actions"][0]["result"]["reason"] == "backup_running"
+
+    idle = SimpleNamespace(state=SimpleNamespace(value="idle"))
+    for instance, reason in (
+        (SimpleNamespace(migration_in_progress=True, backlog=0), "recorder_migrating"),
+        (SimpleNamespace(migration_in_progress=False, backlog=20_000), "recorder_backlog"),
+    ):
+        plan = fresh()
+        with (
+            patch("homeassistant.components.backup.async_get_manager", return_value=idle),
+            patch("homeassistant.components.recorder.get_instance", return_value=instance),
+            patch(
+                "custom_components.ha_housekeeper.cleanup_exec.recorder_ready", return_value=True
+            ),
+        ):
+            assert await scanner.cleanup._others_idle(plan, True) is False
+        assert plan["actions"][0]["result"]["reason"] == reason
+        with (
+            patch("homeassistant.components.backup.async_get_manager", return_value=idle),
+            patch("homeassistant.components.recorder.get_instance", return_value=instance),
+            patch(
+                "custom_components.ha_housekeeper.cleanup_exec.recorder_ready", return_value=True
+            ),
+        ):
+            assert await scanner.cleanup._others_idle(fresh(), False) is True  # reads nothing

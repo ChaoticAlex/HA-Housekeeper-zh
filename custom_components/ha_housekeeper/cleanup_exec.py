@@ -139,6 +139,8 @@ INDEPENDENT_KINDS = PURGE_KINDS | TRIM_KINDS
 GLOBAL_STOPS = {"recorder_busy", "no_recorder"}
 LOCAL_AGENT = "backup.local"
 BACKUP_TIMEOUT = 30 * 60  # seconds; large installations can take a while
+BUSY_BACKUP_STATES = {"create_backup", "receive_backup", "restore_backup", "blocked"}
+RECORDER_BACKLOG_STOP = 10_000  # queued recorder writes; the recorder normally keeps this near zero
 INTEGRITY_TIMEOUT = (
     5 * 60
 )  # seconds; the check of a very large database is not worth waiting longer
@@ -510,6 +512,8 @@ class CleanupRunner:
                 writes_recorder = bool(kinds & DATABASE_KINDS) or any(
                     action.get("recorder") for action in selected
                 )
+                if not await self._others_idle(plan, writes_recorder):
+                    return
                 if writes_recorder and not (
                     await self._disk_has_room(plan) and await self._database_intact(plan)
                 ):
@@ -550,6 +554,40 @@ class CleanupRunner:
                 "total": 0,
             }
             journal.save()
+
+    async def _others_idle(self, plan: dict[str, Any], writes_recorder: bool) -> bool:
+        """Nothing is started while Home Assistant itself makes a backup or the recorder is struggling.
+
+        A plan that stops here has changed nothing and can be started again a little later.
+        What cannot be read (no backup component, no recorder) does not stop it.
+        """
+        try:
+            from homeassistant.components.backup import async_get_manager
+
+            state = getattr(getattr(async_get_manager(self.hass), "state", None), "value", None)
+        except Exception:
+            state = None
+        if state in BUSY_BACKUP_STATES:
+            return self._stop_before_start(plan, "backup_running", state=state)
+        if writes_recorder and recorder_ready(self.hass):
+            try:
+                from homeassistant.components.recorder import get_instance
+
+                instance = get_instance(self.hass)
+                migrating = getattr(instance, "migration_in_progress", False) is True
+                backlog = getattr(instance, "backlog", None)
+            except Exception:
+                return True
+            if migrating:
+                return self._stop_before_start(plan, "recorder_migrating")
+            if isinstance(backlog, int) and backlog >= RECORDER_BACKLOG_STOP:
+                return self._stop_before_start(plan, "recorder_backlog", backlog=backlog)
+        return True
+
+    def _stop_before_start(self, plan: dict[str, Any], reason: str, **detail: Any) -> bool:
+        _LOGGER.warning("A plan was not started: %s", reason)
+        self._backup_failed(plan, reason, **detail)
+        return False
 
     async def _disk_has_room(self, plan: dict[str, Any]) -> bool:
         """SQLite needs room for its journal and the backup for a copy: a nearly full disk stops the plan.
