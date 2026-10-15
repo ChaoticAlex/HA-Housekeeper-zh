@@ -188,10 +188,11 @@ async def test_options_flow_stores_threshold(hass: HomeAssistant) -> None:
     result = await hass.config_entries.options.async_init(entry.entry_id)
     assert result["type"] == FlowResultType.FORM
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {"min_unavailable_days": 7}
+        result["flow_id"], {"outage_high_hours": 168}
     )
     assert result["type"] == FlowResultType.CREATE_ENTRY
-    assert entry.options["min_unavailable_days"] == 7
+    assert entry.options["outage_high_hours"] == 168
+    assert entry.options["outage_info_minutes"] == 15
     assert entry.options["scan_interval_hours"] == 24
     assert entry.options["unused_automation_days"] == 90
     assert entry.options["low_battery_percent"] == 20

@@ -73,6 +73,7 @@ class SettingsMixin {
       const [min, max] = OPTION_LIMITS[key];
       return `<div class="optcard"><label for="opt-${key}"><strong>${this.t(title)}</strong></label><small>${this.t(hint)}</small>
         <div class="unitrow"><input id="opt-${key}" type="number" data-opt="${key}" data-saved="${this.esc(m[key] ?? "")}" min="${min}" max="${max}" step="1" value="${this.esc(m[key] ?? "")}"><span>${this.t(unit)}</span></div>
+        <small data-conv="${key}">${this.optConversion(unit, m[key])}</small>
         <small>${this.t("optDefault", { n: standard, unit: this.t(unit) })} · ${min}–${max}</small></div>`;
     }).join("");
     return `<section class="panel"><div class="panelhead"><div><h2>${this.t("scanSettings")}</h2><p>${this.t("scanSettingsHint")}</p></div></div><div class="optgrid">${cards}</div>
@@ -213,6 +214,16 @@ class SettingsMixin {
     return `${this.settingsBand()}<div class="taskgrid compactgrid setgrid" role="group" aria-label="${this.esc(this.t("settings"))}">${tiles}</div><div id="hk-setpanel">${body}</div>`;
   }
 
+  // "168 h" read as "= 7 days": only where the unit is minutes or hours and the number is large enough to say more.
+  optConversion(unit, value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "";
+    const round = x => this.formatNumber(Math.round(x * 10) / 10);
+    if (unit === "unitMinutes" && n >= 60) return this.t("optConvHours", { n: round(n / 60) });
+    if (unit === "unitHours" && n >= 24) return this.t("optConvDays", { n: round(n / 24) });
+    return "";
+  }
+
   async saveOptions() {
     const changes = {};
     for (const input of this.shadowRoot.querySelectorAll("[data-opt]")) {
@@ -220,12 +231,14 @@ class SettingsMixin {
       if (input.value === "" || !Number.isInteger(value) || value < min || value > max) { this.optionsMessage = this.t("optionsInvalid"); this.render(); return; }
       changes[input.dataset.opt] = value;
     }
+    const steps = [changes.outage_info_minutes / 60, changes.outage_low_hours, changes.outage_medium_hours, changes.outage_high_hours];
+    if (steps.every(Number.isFinite) && !steps.every((x, i) => i === 0 || steps[i - 1] < x)) { this.optionsMessage = this.t("optionsOrder"); this.render(); return; }
     try {
       await this._hass.callWS({ type: "ha_housekeeper/set_options", ...changes });
       this.optionsMessage = this.t("optionsSaved");
       this.data = null; // the integration reloads; fetch again once it is back
       this.render();
       setTimeout(() => { this.optionsMessage = ""; this.busy = false; this.load(false); }, 4000);
-    } catch (err) { this.optionsMessage = err?.code === "busy" ? this.t("optionsBusy") : err?.message || String(err); this.render(); }
+    } catch (err) { this.optionsMessage = err?.code === "busy" ? this.t("optionsBusy") : err?.code === "thresholds_order" ? this.t("optionsOrder") : err?.message || String(err); this.render(); }
   }
 }

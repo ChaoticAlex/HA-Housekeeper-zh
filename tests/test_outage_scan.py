@@ -60,3 +60,26 @@ def test_a_scan_is_not_planned_before_the_pause_after_the_last_one_is_over() -> 
     assert plan_time(NOW, NOW, NOW - timedelta(minutes=5), gap) == NOW + timedelta(minutes=10)
     later = NOW + timedelta(hours=1)
     assert plan_time(later, NOW, NOW - timedelta(minutes=5), gap) == later
+
+
+def test_the_old_option_keeps_its_meaning_until_the_new_ones_are_saved() -> None:
+    from custom_components.ha_housekeeper.outage_levels import (
+        thresholds_from_options,
+        thresholds_rise,
+    )
+
+    assert thresholds_from_options({}) == {
+        "outage_info_minutes": 15,
+        "outage_low_hours": 1,
+        "outage_medium_hours": 24,
+        "outage_high_hours": 168,
+    }
+    wide = thresholds_from_options({"min_unavailable_days": 30})
+    assert (wide["outage_medium_hours"], wide["outage_high_hours"]) == (720, 744)
+    near = thresholds_from_options({"min_unavailable_days": 3})
+    assert (near["outage_medium_hours"], near["outage_high_hours"]) == (24, 72)
+    assert thresholds_from_options({"min_unavailable_days": 0}) == thresholds_from_options({})
+    saved = thresholds_from_options({"min_unavailable_days": 30, "outage_high_hours": 100})
+    assert saved["outage_high_hours"] == 100 and saved["outage_medium_hours"] == 24
+    assert thresholds_rise(thresholds_from_options({}))
+    assert not thresholds_rise({**thresholds_from_options({}), "outage_low_hours": 24})

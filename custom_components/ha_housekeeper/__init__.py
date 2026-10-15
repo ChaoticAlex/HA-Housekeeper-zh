@@ -31,14 +31,16 @@ from . import storms as storms_module
 from .const import (
     CONF_HISTORY_DAYS,
     CONF_LOW_BATTERY_PERCENT,
-    CONF_MIN_UNAVAILABLE_DAYS,
+    CONF_OUTAGE_HIGH_HOURS,
+    CONF_OUTAGE_INFO_MINUTES,
+    CONF_OUTAGE_LOW_HOURS,
+    CONF_OUTAGE_MEDIUM_HOURS,
     CONF_SCAN_INTERVAL_HOURS,
     CONF_STALE_HOURS,
     CONF_UNUSED_AUTOMATION_DAYS,
     CONF_WATCH_HOURS,
     DEFAULT_HISTORY_DAYS,
     DEFAULT_LOW_BATTERY_PERCENT,
-    DEFAULT_MIN_UNAVAILABLE_DAYS,
     DEFAULT_SCAN_INTERVAL_HOURS,
     DEFAULT_STALE_HOURS,
     DEFAULT_UNUSED_AUTOMATION_DAYS,
@@ -57,6 +59,7 @@ from .issues import async_clear_issues
 from .maintenance import recorder_costs
 from .runs import run_key
 from .scan_coverage import RETRY_LIMIT, RETRY_MINUTES, retryable_gaps
+from .outage_levels import thresholds_from_options
 from .scan_trigger import ScanRefused
 from .services import async_register_services
 from .system_usage import system_light
@@ -94,9 +97,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     booting = hass.state is not CoreState.running
     if booting:
         scanner.begin_boot()
-    scanner.min_unavailable_days = entry.options.get(
-        CONF_MIN_UNAVAILABLE_DAYS, DEFAULT_MIN_UNAVAILABLE_DAYS
-    )
+    levels = thresholds_from_options(entry.options)
+    scanner.outage_info_minutes = levels[CONF_OUTAGE_INFO_MINUTES]
+    scanner.outage_low_hours = levels[CONF_OUTAGE_LOW_HOURS]
+    scanner.outage_medium_hours = levels[CONF_OUTAGE_MEDIUM_HOURS]
+    scanner.outage_high_hours = levels[CONF_OUTAGE_HIGH_HOURS]
+    scanner.min_unavailable_days = levels[CONF_OUTAGE_HIGH_HOURS] // 24  # until step 4 reads the hours
     scanner.unused_automation_days = entry.options.get(
         CONF_UNUSED_AUTOMATION_DAYS, DEFAULT_UNUSED_AUTOMATION_DAYS
     )

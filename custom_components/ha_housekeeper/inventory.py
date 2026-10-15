@@ -42,8 +42,10 @@ from .config_changes import ChangeStore, fingerprint
 from .const import (
     DEFAULT_LOW_BATTERY_PERCENT,
     DEFAULT_MIN_UNAVAILABLE_DAYS,
+    DEFAULT_OUTAGE_HIGH_HOURS,
     DEFAULT_OUTAGE_INFO_MINUTES,
     DEFAULT_OUTAGE_LOW_HOURS,
+    DEFAULT_OUTAGE_MEDIUM_HOURS,
     DEFAULT_SCAN_INTERVAL_HOURS,
     DEFAULT_STALE_HOURS,
     DEFAULT_UNUSED_AUTOMATION_DAYS,
@@ -795,6 +797,8 @@ class InventoryScanner:
         self.min_unavailable_days = DEFAULT_MIN_UNAVAILABLE_DAYS
         self.outage_info_minutes = DEFAULT_OUTAGE_INFO_MINUTES
         self.outage_low_hours = DEFAULT_OUTAGE_LOW_HOURS
+        self.outage_medium_hours = DEFAULT_OUTAGE_MEDIUM_HOURS
+        self.outage_high_hours = DEFAULT_OUTAGE_HIGH_HOURS
         self.last_scan_seconds = 0.0
         self.outage_scans = OutageScans(hass, self)
         self.unused_automation_days = DEFAULT_UNUSED_AUTOMATION_DAYS
@@ -1411,6 +1415,10 @@ class InventoryScanner:
                 "warmup_seconds_left": self.warmup_seconds_left,
                 "warmup_booting": self.booting,
                 "min_unavailable_days": self.min_unavailable_days,
+                "outage_info_minutes": self.outage_info_minutes,
+                "outage_low_hours": self.outage_low_hours,
+                "outage_medium_hours": self.outage_medium_hours,
+                "outage_high_hours": self.outage_high_hours,
                 "unused_automation_days": self.unused_automation_days,
                 "ignore_label": IGNORE_LABEL,
                 "version": self.version,

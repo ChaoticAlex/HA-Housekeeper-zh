@@ -57,6 +57,7 @@ from .cleanup import (
 )
 from .cleanup_exec import CleanupError, backup_is_local_only, entity_restorable
 from .const import DOMAIN, OPTION_LIMITS
+from .outage_levels import OUTAGE_KEYS, thresholds_from_options, thresholds_rise
 from .device_pairs import pair_devices
 from .history import PinError
 from .ignored import KINDS as IGNORE_KINDS
@@ -315,6 +316,11 @@ def websocket_set_options(
         return
     entry = entries[0]
     options = {**entry.options, **changes}
+    if any(key in changes for key in OUTAGE_KEYS) and not thresholds_rise(
+        thresholds_from_options(options)
+    ):
+        connection.send_error(msg["id"], "thresholds_order", "Info, low, medium and high must rise")
+        return
     if options != dict(entry.options):
         hass.config_entries.async_update_entry(entry, options=options)
     connection.send_result(msg["id"], {"options": options})

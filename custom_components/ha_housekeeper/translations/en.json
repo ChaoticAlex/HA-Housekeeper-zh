@@ -15,9 +15,12 @@
     "step": {
       "init": {
         "title": "HA Housekeeper options",
-        "description": "Short outages, for example after a restart, are not reported (0 reports every unavailable entity). Automations that are switched off or never run for the given number of days are reported as unused. Regular scans keep the history and repair hints current.",
+        "description": "An outage becomes a finding after the first threshold and rises with its duration: info, low, medium, high. The thresholds must rise. Automations that are switched off or never run for the given number of days are reported as unused. Regular scans keep the history and the repair hints current; outages are followed by extra scans.",
         "data": {
-          "min_unavailable_days": "Report unavailable entities after (days)",
+          "outage_info_minutes": "Report an outage as info after (minutes)",
+          "outage_low_hours": "Report an outage as low after (hours)",
+          "outage_medium_hours": "Report an outage as medium after (hours)",
+          "outage_high_hours": "Report an outage as high after (hours)",
           "unused_automation_days": "Report unused automations after (days, 0 = off)",
           "low_battery_percent": "Report batteries as low at or below (percent)",
           "scan_interval_hours": "Scan automatically every (hours, 0 = off)",
@@ -29,6 +32,9 @@
     },
     "abort": {
       "busy": "A plan, an undo or a purge is running. The options can be changed afterwards."
+    },
+    "error": {
+      "thresholds_order": "The thresholds must rise: info, low, medium, high."
     }
   },
   "issues": {

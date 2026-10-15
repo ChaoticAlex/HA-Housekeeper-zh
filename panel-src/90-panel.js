@@ -1055,6 +1055,8 @@ class HAHousekeeperPanel extends HTMLElement {
     // Saving stays off until a threshold differs from the saved one; typing must not rebuild the page.
     const optInputs = [...root.querySelectorAll("[data-opt]")];
     optInputs.forEach(el => el.oninput = () => {
+      const conv = root.querySelector(`[data-conv="${el.dataset.opt}"]`), field = OPTION_FIELDS.find(f => f[0] === el.dataset.opt);
+      if (conv && field) conv.textContent = this.optConversion(field[3], el.value);
       const save = root.querySelector("[data-opts-save]");
       if (save) save.disabled = !optInputs.some(input => input.value !== input.dataset.saved);
     });

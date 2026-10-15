@@ -15,9 +15,12 @@
     "step": {
       "init": {
         "title": "HA-Housekeeper-Optionen",
-        "description": "Kurze Ausfälle, etwa nach einem Neustart, werden nicht gemeldet (0 meldet jede nicht verfügbare Entität). Automationen, die ausgeschaltet sind oder die angegebene Zahl an Tagen nie laufen, werden als ungenutzt gemeldet. Regelmäßige Scans halten Verlauf und Reparaturhinweise aktuell.",
+        "description": "Ein Ausfall wird nach der ersten Schwelle ein Befund und steigt mit der Dauer: Info, niedrig, mittel, hoch. Die Schwellen müssen aufsteigen. Automationen, die ausgeschaltet sind oder die angegebene Zahl an Tagen nie laufen, werden als ungenutzt gemeldet. Regelmäßige Scans halten Verlauf und Reparaturhinweise aktuell; bei Ausfällen folgen zusätzliche Scans.",
         "data": {
-          "min_unavailable_days": "Nicht verfügbare Entitäten melden nach (Tage)",
+          "outage_info_minutes": "Ausfall als Info melden nach (Minuten)",
+          "outage_low_hours": "Ausfall als niedrig melden nach (Stunden)",
+          "outage_medium_hours": "Ausfall als mittel melden nach (Stunden)",
+          "outage_high_hours": "Ausfall als hoch melden nach (Stunden)",
           "unused_automation_days": "Ungenutzte Automationen melden nach (Tage, 0 = aus)",
           "low_battery_percent": "Batterie als schwach melden ab (Prozent)",
           "scan_interval_hours": "Automatisch scannen alle (Stunden, 0 = aus)",
@@ -29,6 +32,9 @@
     },
     "abort": {
       "busy": "Gerade läuft ein Plan, ein Rückgängigmachen oder eine Löschung. Die Optionen lassen sich danach ändern."
+    },
+    "error": {
+      "thresholds_order": "Die Schwellen müssen aufsteigen: Info, niedrig, mittel, hoch."
     }
   },
   "issues": {

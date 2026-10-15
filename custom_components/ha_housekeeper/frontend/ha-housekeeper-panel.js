@@ -96,7 +96,7 @@ const TEXT = {
     denseOn: "Kompakte Zeilen", denseOff: "Ausführliche Zeilen", sortAscending: "Aufsteigend", sortDescending: "Absteigend", searchList: "In der Liste suchen …", noMatches: "Keine Treffer für diese Filter.",
     density: "Dichte", densityNormal: "Normal", densityCompact: "Kompakt", motion: "Animationen", motionAuto: "Wie System", motionReduced: "Reduziert",
     motionHint: "Wie System folgt der Einstellung „Bewegung reduzieren“ deines Geräts.", prefsNote: "Die Darstellung wird in deinem Home-Assistant-Benutzerprofil gespeichert (und zusätzlich in diesem Browser).",
-    scanSettings: "Scan und Schwellenwerte", scanSettingsHint: "Ändert die Optionen der Integration. Housekeeper lädt danach neu.", optMinUnavailable: "Nicht verfügbar gilt als Befund nach (Tage, 0 = sofort)",
+    scanSettings: "Scan und Schwellenwerte", scanSettingsHint: "Ändert die Optionen der Integration. Housekeeper lädt danach neu.", 
     optUnusedAutomation: "Ungenutzte Automationen nach (Tage, 0 = aus)", optScanInterval: "Automatischer Scan alle (Stunden, 0 = aus)", optLowBattery: "Schwache Batterie ab (Prozent)",
     saveOptions: "Speichern", optionsSaved: "Gespeichert. Housekeeper lädt neu …", optionsBusy: "Gerade läuft ein Plan, ein Rückgängigmachen oder eine Löschung. Die Einstellungen lassen sich danach speichern.", optionsInvalid: "Bitte Werte im erlaubten Bereich eingeben.",
     cleanupSubtitle: "Erst deaktivieren, nach der Quarantäne entfernen; Reste in der Datenbank löschen.",
@@ -283,7 +283,7 @@ const TEXT = {
     denseOn: "Compact rows", denseOff: "Detailed rows", sortAscending: "Ascending", sortDescending: "Descending", searchList: "Search this list …", noMatches: "No matches for these filters.",
     density: "Density", densityNormal: "Normal", densityCompact: "Compact", motion: "Animation", motionAuto: "Like system", motionReduced: "Reduced",
     motionHint: "Like system follows your device's “reduce motion” setting.", prefsNote: "Appearance is stored in your Home Assistant user profile (and in this browser as well).",
-    scanSettings: "Scan and thresholds", scanSettingsHint: "Changes the integration options. Housekeeper reloads afterwards.", optMinUnavailable: "Unavailable becomes a finding after (days, 0 = immediately)",
+    scanSettings: "Scan and thresholds", scanSettingsHint: "Changes the integration options. Housekeeper reloads afterwards.", 
     optUnusedAutomation: "Unused automations after (days, 0 = off)", optScanInterval: "Automatic scan every (hours, 0 = off)", optLowBattery: "Low battery at (percent)",
     saveOptions: "Save", optionsSaved: "Saved. Housekeeper is reloading …", optionsBusy: "A plan, an undo or a purge is running. The settings can be saved afterwards.", optionsInvalid: "Please enter values within the allowed range.",
     cleanupSubtitle: "Disable first, remove after the quarantine; delete leftovers in the database.",
@@ -407,7 +407,7 @@ const MAX_PLAN_ACTIONS = 200; // as MAX_ACTIONS in cleanup.py: more entries do n
 const PREFS_KEY = "ha_housekeeper.prefs";
 const DEFAULT_PREFS = { size: "normal", mode: "auto", scheme: "standard", density: "normal", motion: "auto", pageSize: 20, startView: "overview", graphMode: "list", language: "auto" };
 const USER_DATA_KEY = "ha_housekeeper";
-const OPTION_LIMITS = { min_unavailable_days: [0, 365], unused_automation_days: [0, 3650], scan_interval_hours: [0, 720], low_battery_percent: [1, 100], stale_hours: [0, 8760], history_days: [1, 365], watch_hours: [0, 168] };
+const OPTION_LIMITS = { outage_info_minutes: [5, 1440], outage_low_hours: [1, 720], outage_medium_hours: [2, 2160], outage_high_hours: [3, 8760], unused_automation_days: [0, 3650], scan_interval_hours: [0, 720], low_battery_percent: [1, 100], stale_hours: [0, 8760], history_days: [1, 365], watch_hours: [0, 168] };
 // Text scale only; spacing and icons stay put. Normal is a bit larger than the original 1.0.
 const SIZES = { small: 1, normal: 1.1, large: 1.25 };
 // The dependency graph shows this many nodes per side at first; "more" adds another step.
@@ -415,7 +415,10 @@ const GRAPH_NODE_STEP = 40;
 const GRAPH_GROUP_MIN = 5; // leaf nodes of one type on one node from which the graph folds them into one
 // Scan thresholds as cards: option key, title, explanation, unit and default (the defaults of const.py).
 const OPTION_FIELDS = [
-  ["min_unavailable_days", "optMinUnavailableTitle", "optMinUnavailableHint", "unitDays", 7],
+  ["outage_info_minutes", "optOutageInfoTitle", "optOutageInfoHint", "unitMinutes", 15],
+  ["outage_low_hours", "optOutageLowTitle", "optOutageLowHint", "unitHours", 1],
+  ["outage_medium_hours", "optOutageMediumTitle", "optOutageMediumHint", "unitHours", 24],
+  ["outage_high_hours", "optOutageHighTitle", "optOutageHighHint", "unitHours", 168],
   ["unused_automation_days", "optUnusedAutomationTitle", "optUnusedAutomationHint", "unitDays", 90],
   ["scan_interval_hours", "optScanIntervalTitle", "optScanIntervalHint", "unitHours", 24],
   ["low_battery_percent", "optLowBatteryTitle", "optLowBatteryHint", "unitPercent", 20],
@@ -423,6 +426,7 @@ const OPTION_FIELDS = [
   ["history_days", "optHistoryDaysTitle", "optHistoryDaysHint", "unitDays", 30],
   ["watch_hours", "optWatchTitle", "optWatchHint", "unitHours", 24],
 ];
+const OUTAGE_OPTION_KEYS = ["outage_info_minutes", "outage_low_hours", "outage_medium_hours", "outage_high_hours"];
 const START_VIEWS = ["overview", "findingsNav", "inventory", "changes", "batteries"];
 const REPO_URL = "https://github.com/bertel2020/HA-Housekeeper";
 // Palettes for explicit light/dark; taken from the Zeitarchiv app's design system (app.css).
@@ -959,7 +963,11 @@ Object.assign(TEXT.de, {
   setTabLook: "Darstellung", setTabScan: "Scan und Schwellen", setTabHidden: "Ausgeblendet", setTabInfo: "Info",
   setReadability: "Lesbarkeit",
   unitDays: "Tage", unitHours: "Std.", unitPercent: "%", optDefault: "Standard: {n} {unit}",
-  optMinUnavailableTitle: "Nicht verfügbar", optMinUnavailableHint: "Ab wie vielen Tagen ohne Zustand eine Entität als Befund gilt. 0 meldet sofort.",
+  optOutageInfoTitle: "Ausfall: Info", optOutageInfoHint: "Ab wie vielen Minuten ohne Zustand ein Ausfall als Befund der Stufe Info gilt. Davor ist es kein Befund; nach einem Update zeigt die Beobachtung die ersten Stunden.",
+  optOutageLowTitle: "Ausfall: niedrig", optOutageLowHint: "Ab wie vielen Stunden ein Ausfall niedrig ist.",
+  optOutageMediumTitle: "Ausfall: mittel", optOutageMediumHint: "Ab wie vielen Stunden ein Ausfall mittel ist. Ab hier erscheint er in der Übersicht.",
+  optOutageHighTitle: "Ausfall: hoch", optOutageHighHint: "Ab wie vielen Stunden ein Ausfall hoch ist. Die Schwellen müssen aufsteigen; bei Ausfällen folgen zusätzliche Scans, damit sie zur Zeit greifen.",
+  unitMinutes: "Min.", optionsOrder: "Die Schwellen müssen aufsteigen: Info, niedrig, mittel, hoch.", optConvDays: "= {n} Tage", optConvHours: "= {n} Std.",
   optUnusedAutomationTitle: "Ungenutzte Automationen", optUnusedAutomationHint: "Ab wie vielen Tagen ohne Auslösung eine Automation als ungenutzt gilt. 0 schaltet die Prüfung aus.",
   optScanIntervalTitle: "Automatischer Scan", optScanIntervalHint: "Wie oft Housekeeper von selbst scannt. 0 schaltet den automatischen Scan aus.",
   optLowBatteryTitle: "Schwache Batterie", optLowBatteryHint: "Unter diesem Ladestand erscheint ein Batteriegerät in der Liste der schwachen Batterien.",
@@ -985,7 +993,11 @@ Object.assign(TEXT.en, {
   setTabLook: "Appearance", setTabScan: "Scan and thresholds", setTabHidden: "Hidden", setTabInfo: "Info",
   setReadability: "Readability",
   unitDays: "days", unitHours: "h", unitPercent: "%", optDefault: "Default: {n} {unit}",
-  optMinUnavailableTitle: "Unavailable", optMinUnavailableHint: "After how many days without a state an entity becomes a finding. 0 reports at once.",
+  optOutageInfoTitle: "Outage: info", optOutageInfoHint: "After how many minutes without a state an outage is a finding of level info. Before that it is no finding; after an update the watch shows the first hours.",
+  optOutageLowTitle: "Outage: low", optOutageLowHint: "After how many hours an outage is low.",
+  optOutageMediumTitle: "Outage: medium", optOutageMediumHint: "After how many hours an outage is medium. From here it shows on the overview.",
+  optOutageHighTitle: "Outage: high", optOutageHighHint: "After how many hours an outage is high. The thresholds must rise; outages are followed by extra scans so that they apply on time.",
+  unitMinutes: "min", optionsOrder: "The thresholds must rise: info, low, medium, high.", optConvDays: "= {n} days", optConvHours: "= {n} h",
   optUnusedAutomationTitle: "Unused automations", optUnusedAutomationHint: "After how many days without a trigger an automation counts as unused. 0 turns the check off.",
   optScanIntervalTitle: "Automatic scan", optScanIntervalHint: "How often Housekeeper scans by itself. 0 turns the automatic scan off.",
   optLowBatteryTitle: "Low battery", optLowBatteryHint: "Below this level a battery device appears in the list of low batteries.",
@@ -3085,6 +3097,7 @@ class SettingsMixin {
       const [min, max] = OPTION_LIMITS[key];
       return `<div class="optcard"><label for="opt-${key}"><strong>${this.t(title)}</strong></label><small>${this.t(hint)}</small>
         <div class="unitrow"><input id="opt-${key}" type="number" data-opt="${key}" data-saved="${this.esc(m[key] ?? "")}" min="${min}" max="${max}" step="1" value="${this.esc(m[key] ?? "")}"><span>${this.t(unit)}</span></div>
+        <small data-conv="${key}">${this.optConversion(unit, m[key])}</small>
         <small>${this.t("optDefault", { n: standard, unit: this.t(unit) })} · ${min}–${max}</small></div>`;
     }).join("");
     return `<section class="panel"><div class="panelhead"><div><h2>${this.t("scanSettings")}</h2><p>${this.t("scanSettingsHint")}</p></div></div><div class="optgrid">${cards}</div>
@@ -3225,6 +3238,16 @@ class SettingsMixin {
     return `${this.settingsBand()}<div class="taskgrid compactgrid setgrid" role="group" aria-label="${this.esc(this.t("settings"))}">${tiles}</div><div id="hk-setpanel">${body}</div>`;
   }
 
+  // "168 h" read as "= 7 days": only where the unit is minutes or hours and the number is large enough to say more.
+  optConversion(unit, value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "";
+    const round = x => this.formatNumber(Math.round(x * 10) / 10);
+    if (unit === "unitMinutes" && n >= 60) return this.t("optConvHours", { n: round(n / 60) });
+    if (unit === "unitHours" && n >= 24) return this.t("optConvDays", { n: round(n / 24) });
+    return "";
+  }
+
   async saveOptions() {
     const changes = {};
     for (const input of this.shadowRoot.querySelectorAll("[data-opt]")) {
@@ -3232,13 +3255,15 @@ class SettingsMixin {
       if (input.value === "" || !Number.isInteger(value) || value < min || value > max) { this.optionsMessage = this.t("optionsInvalid"); this.render(); return; }
       changes[input.dataset.opt] = value;
     }
+    const steps = [changes.outage_info_minutes / 60, changes.outage_low_hours, changes.outage_medium_hours, changes.outage_high_hours];
+    if (steps.every(Number.isFinite) && !steps.every((x, i) => i === 0 || steps[i - 1] < x)) { this.optionsMessage = this.t("optionsOrder"); this.render(); return; }
     try {
       await this._hass.callWS({ type: "ha_housekeeper/set_options", ...changes });
       this.optionsMessage = this.t("optionsSaved");
       this.data = null; // the integration reloads; fetch again once it is back
       this.render();
       setTimeout(() => { this.optionsMessage = ""; this.busy = false; this.load(false); }, 4000);
-    } catch (err) { this.optionsMessage = err?.code === "busy" ? this.t("optionsBusy") : err?.message || String(err); this.render(); }
+    } catch (err) { this.optionsMessage = err?.code === "busy" ? this.t("optionsBusy") : err?.code === "thresholds_order" ? this.t("optionsOrder") : err?.message || String(err); this.render(); }
   }
 }
 
@@ -15539,6 +15564,8 @@ class HAHousekeeperPanel extends HTMLElement {
     // Saving stays off until a threshold differs from the saved one; typing must not rebuild the page.
     const optInputs = [...root.querySelectorAll("[data-opt]")];
     optInputs.forEach(el => el.oninput = () => {
+      const conv = root.querySelector(`[data-conv="${el.dataset.opt}"]`), field = OPTION_FIELDS.find(f => f[0] === el.dataset.opt);
+      if (conv && field) conv.textContent = this.optConversion(field[3], el.value);
       const save = root.querySelector("[data-opts-save]");
       if (save) save.disabled = !optInputs.some(input => input.value !== input.dataset.saved);
     });
