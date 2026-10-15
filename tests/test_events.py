@@ -121,3 +121,19 @@ async def test_a_scan_records_the_installed_versions_and_events_are_served(
     assert [(e["kind"], e["from"]) for e in reply["result"]["events"]] == [
         ("ha_version", "1999.1.0")
     ]
+
+
+def test_a_start_after_a_run_that_never_announced_its_stop_is_marked_unclean() -> None:
+    from datetime import UTC, datetime, timedelta
+
+    from custom_components.ha_housekeeper.events import EventLog
+
+    log = EventLog.__new__(EventLog)
+    log.events, log.heartbeat, log.clean_stop = [], None, None
+    log._save = lambda: None  # type: ignore[method-assign]
+    now = datetime(2026, 10, 15, tzinfo=UTC)
+    log.record_start(now)  # the first start: nothing known
+    log.record_start(now + timedelta(hours=1))  # the run before never stopped
+    log.mark_clean_stop()
+    log.record_start(now + timedelta(hours=2))
+    assert [bool(e.get("unclean")) for e in log.events] == [False, True, False]

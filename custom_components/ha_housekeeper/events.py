@@ -72,6 +72,8 @@ class EventLog:
         self.heartbeat: str | None = None
         self.sizes: dict[str, int] = {}
         self.integrity: dict[str, Any] | None = None  # the last full database check
+        # False while Home Assistant runs, True once it announced its stop; None before the first start.
+        self.clean_stop: bool | None = None
 
     async def async_load(self) -> None:
         data = await self._store.async_load()
@@ -97,6 +99,8 @@ class EventLog:
                 if isinstance(size, int) and not isinstance(size, bool) and size >= 0
             }
             self._trim_sizes()
+        if isinstance(data.get("clean_stop"), bool):
+            self.clean_stop = data["clean_stop"]
         integrity = data.get("integrity")
         if (
             isinstance(integrity, dict)
@@ -119,6 +123,7 @@ class EventLog:
             "heartbeat": self.heartbeat,
             "sizes": self.sizes,
             "integrity": self.integrity,
+            "clean_stop": self.clean_stop,
         }
 
     def _trim_sizes(self) -> None:
@@ -152,8 +157,18 @@ class EventLog:
         fields: dict[str, Any] = {}
         if last is not None and last <= now:
             fields["down_seconds"] = int((now - last).total_seconds())
+        if self.clean_stop is False:
+            fields["unclean"] = (
+                True  # the last run never announced its stop: crash, power cut, kill
+            )
+        self.clean_stop = False
         self.record("start", now, **fields)
         self.beat(now)
+
+    def mark_clean_stop(self) -> None:
+        """Home Assistant is stopping on purpose; a start without this mark follows a crash."""
+        self.clean_stop = True
+        self._save()
 
     def beat(self, now: datetime) -> None:
         self.heartbeat = now.isoformat()

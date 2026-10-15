@@ -12,6 +12,8 @@
 
 - **Speicherplatz:** Die Recorder-Seite meldet wenig freien Platz auf dem Datenträger der Datenbank (unter 1 GB oder 5 %). Unter 512 MB stoppt ein Plan, der in den Recorder schreibt, ohne etwas zu ändern.
 
+- **Unsauberes Herunterfahren:** Housekeeper merkt sich, ob Home Assistant seinen Stopp angekündigt hat. Ist die Datenbank beschädigt, nennt der Befund, wie oft Home Assistant in den letzten 30 Tagen nach einem Absturz oder Stromausfall gestartet ist.
+
 ### English
 
 #### New
@@ -23,6 +25,8 @@
 - **Databases set aside:** If Home Assistant has replaced a damaged database before, the Recorder page names the leftover `….db.corrupt.…` files with their size. Nothing is deleted.
 
 - **Disk space:** The Recorder page reports little free space on the database’s disk (under 1 GB or 5 %). Below 512 MB a plan that writes into the recorder stops without changing anything.
+
+- **Unclean shutdowns:** Housekeeper remembers whether Home Assistant announced its stop. If the database is damaged, the finding says how often Home Assistant started after a crash or power cut in the last 30 days.
 
 ## 1.7.0 - 2026-10-14
 

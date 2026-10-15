@@ -1189,6 +1189,7 @@ Object.assign(TEXT.de, {
   dbAdvice_disk_low: "Ein voller Datenträger beschädigt Datenbanken und lässt Backups scheitern. Schaffe Platz (alte Backups, große Dateien unter Speicher). Unter 512 MB stoppt Housekeeper Pläne, die in den Recorder schreiben.",
   dbKind_corrupt_files: "Beschädigte Datenbank beiseitegelegt", dbCorruptFiles: "{n} Datei(en) mit {size}: {list}. Home Assistant hat die Datenbank schon einmal als beschädigt ersetzt.",
   dbAdvice_corrupt_files: "Die Dateien liegen im Konfigurationsordner und werden nicht mehr benutzt. Lösche sie von Hand, wenn du sie nicht mehr brauchst; Housekeeper löscht sie nicht. Prüfe die Ursache (Datenträger, unsauberes Herunterfahren).",
+  dbIntegrityCrash: "Home Assistant wurde in den letzten 30 Tagen {n}-mal nicht sauber heruntergefahren (Absturz, Stromausfall): eine häufige Ursache.",
   dbKind_integrity: "Datenbank beschädigt", dbIntegrity: "Die Prüfung vom {at} meldete: {lines}.",
   dbAdvice_integrity: "Lege zuerst ein Backup an. Betroffene Indizes lassen sich mit REINDEX neu aufbauen (zum Beispiel in SQLite Web), sonst hilft ein Backup. Housekeeper löscht nichts, solange die Datenbank beschädigt ist.",
   dbCheck: "Datenbank prüfen", dbChecking: "Die Datenbank wird geprüft. Das kann bei einer großen Datenbank Minuten dauern, die Seite bleibt benutzbar.",
@@ -1200,6 +1201,7 @@ Object.assign(TEXT.en, {
   dbAdvice_disk_low: "A full disk damages databases and makes backups fail. Free some space (old backups, large files under Storage). Below 512 MB Housekeeper stops plans that write into the recorder.",
   dbKind_corrupt_files: "Damaged database set aside", dbCorruptFiles: "{n} file(s) with {size}: {list}. Home Assistant has replaced the database as damaged before.",
   dbAdvice_corrupt_files: "The files lie in the configuration folder and are no longer used. Delete them by hand when you no longer need them; Housekeeper does not delete them. Look for the cause (storage, unclean shutdown).",
+  dbIntegrityCrash: "Home Assistant was not shut down cleanly {n} time(s) in the last 30 days (crash, power cut): a common cause.",
   dbKind_integrity: "Database damaged", dbIntegrity: "The check of {at} reported: {lines}.",
   dbAdvice_integrity: "Make a backup first. Affected indexes can be rebuilt with REINDEX (for example in SQLite Web), otherwise restore a backup. Housekeeper deletes nothing while the database is damaged.",
   dbCheck: "Check database", dbChecking: "Checking the database. On a large database this can take minutes; the page stays usable.",
@@ -6340,7 +6342,7 @@ class DbHealthMixin {
     if (f.kind === "statistics_issues") return this.t("dbIssues", { n: n(f.series_total), list: f.series.map(s => `${this.esc(s.name || s.statistic_id)} (${s.types.map(type => this.t(`dbIssue_${type}`) === `dbIssue_${type}` ? type : this.t(`dbIssue_${type}`)).join(", ")})`).join(", ") });
     if (f.kind === "disk_low") return this.t("dbDiskLow", { free: size(f.free_bytes), total: size(f.total_bytes) });
     if (f.kind === "corrupt_files") return this.t("dbCorruptFiles", { n: n(f.files), size: size(f.bytes), list: f.names.map(x => this.esc(x)).join(", ") });
-    if (f.kind === "integrity") return this.t("dbIntegrity", { at: this.formatDate(f.at), lines: f.lines.map(l => this.esc(l)).join("; ") });
+    if (f.kind === "integrity") return this.t("dbIntegrity", { at: this.formatDate(f.at), lines: f.lines.map(l => this.esc(l)).join("; ") }) + (f.unclean_starts ? ` ${this.t("dbIntegrityCrash", { n: n(f.unclean_starts) })}` : "");
     return this.t("dbRecorderGap", { n: n(f.gaps), longest: this.relDuration(f.longest_seconds), latest: this.formatDate(new Date(f.latest[0].start * 1000).toISOString()) });
   }
 

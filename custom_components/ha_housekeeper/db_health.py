@@ -24,6 +24,7 @@ from .queries import ReplyStore, cached_query, kept_reply
 
 _LOGGER = logging.getLogger(__name__)
 DAY = 86400
+UNCLEAN_DAYS = 30  # restarts after a crash that are named next to a damaged database
 DISK_LOW_BYTES = 1024**3  # free space under this is a finding
 DISK_LOW_SHARE = 0.05
 DISK_STOP_BYTES = 512 * 1024**2  # free space under this stops a plan that writes into the recorder
@@ -209,8 +210,20 @@ def with_integrity(hass: HomeAssistant, reply: Any, events: Any) -> Any:
         "integrity": {**(found or {}), "running": running, "state": (found or {}).get("state")},
     }
     if found and found["state"] == "damaged":
+        since = (datetime.now(UTC) - timedelta(days=UNCLEAN_DAYS)).isoformat()
+        unclean = sum(
+            1
+            for e in getattr(events, "events", [])
+            if e.get("kind") == "start" and e.get("unclean") and e.get("at", "") >= since
+        )
         out["findings"] = [
-            {"kind": "integrity", "level": "problem", "at": found["at"], "lines": found["lines"]},
+            {
+                "kind": "integrity",
+                "level": "problem",
+                "at": found["at"],
+                "lines": found["lines"],
+                "unclean_starts": unclean,
+            },
             *reply["findings"],
         ]
     return out
