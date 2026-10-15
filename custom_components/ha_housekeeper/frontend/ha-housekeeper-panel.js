@@ -2754,11 +2754,11 @@ class FindingsMixin {
     const afterAll = all.filter(f => this.corr?.by_key?.[f.key]);
     const afterCount = afterAll.filter(f => !isFollower(f)).length, afterFollows = afterAll.length - afterCount;
     // A reason counts what the list shows under it: the follow-ups of an outage hang on their cause and are named beside the number.
-    const tile = c => { const mine = all.filter(f => this.findingReason(f) === c), follows = mine.filter(isFollower).length; return { label: this.reasonLabel(c), value: this.formatNumber(mine.length - follows), sub: follows ? this.esc(this.t("findingsFollowSub", { n: this.formatNumber(follows) })) : undefined, tone: classTone(c), filter: c, active: this.findingFilter === c, spark: spark(`class:${c}`, "bad") }; };
+    const tile = c => { const mine = all.filter(f => this.findingReason(f) === c), follows = mine.filter(isFollower).length; return { label: this.reasonLabel(c), value: this.formatNumber(mine.length - follows), sub: follows ? this.esc(this.t("findingsFollowSub", { n: this.formatNumber(follows) })) : undefined, tone: classTone(c), filter: c, active: this.findingFilter === c, spark: spark(`lead:${c}`, "bad") }; };
     const rank = c => { const i = [...FINDING_URGENT, ...FINDING_TIDY].indexOf(c); return i < 0 ? FINDING_URGENT.length : i; };
     const sorted2 = [...classes].sort((a, b) => rank(a) - rank(b));
     const tidy = sorted2.filter(c => FINDING_TIDY.includes(c)), urgent = sorted2.filter(c => !FINDING_TIDY.includes(c));
-    const total = { label: this.t("allFindings"), value: this.formatNumber(this.findingTotal()), sub: this.followerCount() ? this.esc(this.t("findingsFollowSub", { n: this.formatNumber(this.followerCount()) })) : undefined, tone: this.findingTotal() ? "warn" : "ok", filter: "", active: !this.findingFilter, spark: spark("open", "bad") };
+    const total = { label: this.t("allFindings"), value: this.formatNumber(this.findingTotal()), sub: this.followerCount() ? this.esc(this.t("findingsFollowSub", { n: this.formatNumber(this.followerCount()) })) : undefined, tone: this.findingTotal() ? "warn" : "ok", filter: "", active: !this.findingFilter, spark: spark("lead", "bad") };
     const group = (title, list, make) => list.length ? `<div class="sumgroup" style="flex:${list.length} 1 ${list.length * 150}px"><div class="sumgrouphead">${this.t(title)}</div>${this.sumTiles(list.map(make))}</div>` : "";
     const tiles = `<div class="sumgroups">${group("sumGroupAll", [total], x => x)}${group("sumGroupUrgent", urgent, tile)}${group("sumGroupTidy", tidy, tile)}</div>`;
     const dueCount = this.data.findings.filter(f => f.resurfaced).length;
@@ -2901,7 +2901,7 @@ Object.assign(TEXT.de, {
   helpWatchT: "Beobachtung nach System-Update", helpWatch: "Nach einem Update von Home Assistant, Betriebssystem oder Supervisor scannt Housekeeper einige Stunden zusätzlich und vergleicht mit dem Stand davor. So siehst du, was seitdem nicht mehr läuft.",
   helpTogetherT: "Zeitlich zusammen", helpTogether: "Befunde, die zur selben Zeit begannen wie ein Update oder ein Neustart. Das ist ein Zusammenhang in der Zeit, keine Ursache.",
   helpNAllT: "Alle Befunde", helpNAll: "Befunde ohne ihre Folgen; eine Ursache mit Folgen zählt einmal. Die Kacheln darunter zählen dasselbe, nach Grund aufgeteilt, mit den Folgen klein dabei.",
-  helpNTrendT: "+n in 5 Tagen", helpNTrend: "Veränderung über die letzten Tage, rot bei Anstieg. Die Kurve zählt die Folgen mit, die Zahl in der Kachel nicht.",
+  helpNTrendT: "+n in 5 Tagen", helpNTrend: "Veränderung über die letzten Tage, rot bei Anstieg. Die Kurve zählt wie die Kachel ohne Folgen; sie beginnt neu, weil frühere Tage die Folgen nicht getrennt führten.",
   helpNTabsT: "Offen, Bekannt, Ausgeblendet, Erledigt", helpNTabs: "Befunde nach Status: noch zu tun, bewusst behalten, nicht mehr gezeigt, inzwischen behoben. „Alle einzeln“ zählt jeden Befund für sich, auch die Folgen; „Ursachen mit Folgen“ zählt nur die Ursachen, an denen Folgen hängen.",
   helpNFollowT: "n Folgen", helpNFollow: "Befunde, die nur entstehen, weil eine Ursache ausfiel. „erklärt n Befunde“ nennt dieselben, „n Entitäten betroffen“ die Entitäten dahinter.",
   helpNLevelT: "Schweregrad", helpNLevel: "Wie sehr es zählt: nach Dauer, Abhängigkeiten und kritischen Objekten. Im Detail steht der Grund.",
@@ -2921,7 +2921,7 @@ Object.assign(TEXT.en, {
   helpWatchT: "Watch after a system update", helpWatch: "After an update of Home Assistant, the operating system or the Supervisor, Housekeeper scans a few extra hours and compares with the state before. It shows what has stopped working since.",
   helpTogetherT: "At the same time", helpTogether: "Findings that began at the same time as an update or a restart. This is a link in time, not a cause.",
   helpNAllT: "All findings", helpNAll: "Findings without their follow-ups; a cause with follow-ups counts once. The tiles below count the same, split by reason, with the follow-ups small beside them.",
-  helpNTrendT: "+n in 5 days", helpNTrend: "Change over the last days, red when it rises. The line counts the follow-ups, the number in the tile does not.",
+  helpNTrendT: "+n in 5 days", helpNTrend: "Change over the last days, red when it rises. The line counts like the tile, without follow-ups; it starts afresh because earlier days did not keep the follow-ups apart.",
   helpNTabsT: "Open, Known, Hidden, Done", helpNTabs: "Findings by status: still to do, kept on purpose, no longer shown, mended since. “All one by one” counts every finding on its own, follow-ups included; “Causes with follow-ups” counts only the causes that have follow-ups.",
   helpNFollowT: "n follow-ups", helpNFollow: "Findings that only exist because a cause failed. “explains n findings” names the same ones, “n entities affected” the entities behind them.",
   helpNLevelT: "Severity", helpNLevel: "How much it matters: by duration, dependencies and critical objects. The detail page names the reason.",
@@ -12281,8 +12281,10 @@ class SparklineMixin {
   // Line, end point and the change over the period for one key of the series ("objects", "findings",
   // "unavailable"). "rising" says whether more is worse; without it the colour stays neutral.
   sparkline(key, rising) {
-    // "class:<name>" reads the open findings of one class; a day that stored classes without it had none.
-    const read = p => key.startsWith("class:") ? (p.classes ? p.classes[key.slice(6)] || 0 : undefined) : p[key];
+    // "class:<name>" reads the open findings of one class, "lead:<name>" the same without follow-ups; a day that stored
+    // classes without it had none, and a day from before the follow-ups were told apart has no such series at all.
+    const read = p => key.startsWith("class:") ? (p.classes ? p.classes[key.slice(6)] || 0 : undefined)
+      : key.startsWith("lead:") ? (p.lead_classes ? p.lead_classes[key.slice(5)] || 0 : undefined) : p[key];
     const points = (this.series?.points || []).filter(p => Number.isFinite(read(p)));
     if (points.length < SPARK_MIN_POINTS) return `<span class="spark-hint">${this.t("sparkBuilding")}</span>`;
     const values = points.map(read), n = values.length;

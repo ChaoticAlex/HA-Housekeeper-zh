@@ -242,6 +242,29 @@ def test_series_carries_open_findings_classes_and_the_score_for_the_sparklines(h
     }
 
 
+def test_the_lead_series_leaves_out_the_follow_ups_of_a_cause(hass) -> None:
+    history = ScanHistory(hass)
+    snapshot = _snapshot("2026-10-06T08:00:00+00:00", [("entity", "x.a", "active")])
+
+    def finding(rule: str, **extra) -> dict:
+        return {
+            "rule_id": rule,
+            "object_id": rule,
+            "classification": "unused",
+            "impact": "medium",
+            **extra,
+        }
+
+    snapshot["findings"] = [
+        finding("entity.unused"),
+        finding("entity.broken", cause_id="c1"),
+        finding("device.down", cause_id="c1"),
+    ]
+    history.record(snapshot)
+    point = history.series()["points"][0]
+    assert (point["open"], point["lead"], point["lead_classes"]) == (3, 2, {"unused": 2})
+
+
 def test_a_pinned_scan_point_is_named_compared_kept_beyond_the_retention_and_deleted(hass) -> None:
     from custom_components.ha_housekeeper.history import PIN_LIMIT, PinError
 

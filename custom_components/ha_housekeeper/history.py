@@ -76,6 +76,14 @@ def _score(snapshot: dict[str, Any]) -> int:
     return max(0, 100 - off)
 
 
+# The rules whose finding is a cause itself; any other finding with a cause_id is a follow-up.
+CAUSE_OWN_RULES = {"config_entry.not_loaded", "device.down", "app.stopped_in_use"}
+
+
+def _is_follower(finding: dict[str, Any]) -> bool:
+    return bool(finding.get("cause_id")) and finding.get("rule_id") not in CAUSE_OWN_RULES
+
+
 def make_checkpoint(snapshot: dict[str, Any]) -> dict[str, Any]:
     """Reduce a snapshot to what a later comparison needs."""
     objects: dict[str, dict[str, str]] = {}
@@ -86,6 +94,12 @@ def make_checkpoint(snapshot: dict[str, Any]) -> dict[str, Any]:
     for finding in open_findings:
         name = str(finding.get("classification") or "")
         classes[name] = classes.get(name, 0) + 1
+    # The tiles count without the follow-ups that hang on a cause, so their curves do too.
+    lead_classes: dict[str, int] = {}
+    for finding in open_findings:
+        if not _is_follower(finding):
+            name = str(finding.get("classification") or "")
+            lead_classes[name] = lead_classes.get(name, 0) + 1
     return {
         "at": snapshot["meta"]["scanned_at"],
         "objects": objects,
@@ -94,6 +108,8 @@ def make_checkpoint(snapshot: dict[str, Any]) -> dict[str, Any]:
         # For the sparklines: open findings, per class, and the score.
         "open": len(open_findings),
         "classes": classes,
+        "lead": sum(lead_classes.values()),
+        "lead_classes": lead_classes,
         "share": _score(snapshot),
         # The settings that decide whether some findings exist at all.
         "rules": {
@@ -355,6 +371,8 @@ class ScanHistory:
                     **checkpoint_counts(cp),
                     "open": cp.get("open"),
                     "classes": cp.get("classes"),
+                    "lead": cp.get("lead"),
+                    "lead_classes": cp.get("lead_classes"),
                     "share": cp.get("share"),
                     "unavailable": sum(
                         1

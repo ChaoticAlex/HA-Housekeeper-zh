@@ -24,8 +24,10 @@ class SparklineMixin {
   // Line, end point and the change over the period for one key of the series ("objects", "findings",
   // "unavailable"). "rising" says whether more is worse; without it the colour stays neutral.
   sparkline(key, rising) {
-    // "class:<name>" reads the open findings of one class; a day that stored classes without it had none.
-    const read = p => key.startsWith("class:") ? (p.classes ? p.classes[key.slice(6)] || 0 : undefined) : p[key];
+    // "class:<name>" reads the open findings of one class, "lead:<name>" the same without follow-ups; a day that stored
+    // classes without it had none, and a day from before the follow-ups were told apart has no such series at all.
+    const read = p => key.startsWith("class:") ? (p.classes ? p.classes[key.slice(6)] || 0 : undefined)
+      : key.startsWith("lead:") ? (p.lead_classes ? p.lead_classes[key.slice(5)] || 0 : undefined) : p[key];
     const points = (this.series?.points || []).filter(p => Number.isFinite(read(p)));
     if (points.length < SPARK_MIN_POINTS) return `<span class="spark-hint">${this.t("sparkBuilding")}</span>`;
     const values = points.map(read), n = values.length;
