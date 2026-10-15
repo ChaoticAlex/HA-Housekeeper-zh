@@ -943,7 +943,7 @@ test("cleanup view lists candidates, creates a dry-run plan and shows the verdic
   el._hass = { language: "en", callWS: async msg => {
     calls.push(msg);
     if (msg.type === "ha_housekeeper/plan_list") return { plans: [] };
-    return { plan_id: "p1", created_at: "2026-10-07T10:00:00+00:00", status: "dry_run", executed: false, summary: { total: 2, ok: 1, review: 0, blocked: 1, uses: 1, statistics: 0 },
+    return { plan_id: "p1", created_at: new Date().toISOString(), status: "dry_run", executed: false, summary: { total: 2, ok: 1, review: 0, blocked: 1, uses: 1, statistics: 0 },
       actions: [{ kind: "remove_entity", object_id: "sensor.old", name: "Old", verdict: "ok", reasons: [], used_by: [] },
         { kind: "remove_entity", object_id: "sensor.used", name: "Used", verdict: "blocked", reasons: ["used_certain"], used_by: [{ source: "automation:automation.a", relation: "TARGETS", confidence: "certain" }] }] };
   } };
@@ -1278,7 +1278,7 @@ test("a dry-run plan is confirmed, typed, executed with progress, and can be und
   const { el, shadow } = panel("en");
   el.data = { ...DATA, objects: [{ object_type: "entity", object_id: "sensor.a", name: "A", status: "orphaned" }, { object_type: "entity", object_id: "sensor.b", name: "B", status: "orphaned" }], edges: [], findings: [] };
   const action = (id, verdict, extra = {}) => ({ kind: "disable_entity", object_id: id, name: id, verdict, executable: verdict !== "blocked", reasons: [], used_by: [], ...extra });
-  const base = { plan_id: "p1", created_at: "2026-10-07T10:00:00+00:00", status: "dry_run", executed: false, summary: { total: 2, ok: 1, review: 1, blocked: 0 },
+  const base = { plan_id: "p1", created_at: new Date().toISOString(), status: "dry_run", executed: false, summary: { total: 2, ok: 1, review: 1, blocked: 0 },
     actions: [action("sensor.a", "ok"), action("sensor.b", "review", { reasons: ["has_statistics"] })] };
   el.plan = base;
   el.view = "cleanup";
@@ -1328,7 +1328,7 @@ test("a dry-run plan is confirmed, typed, executed with progress, and can be und
 test("a blocked removal cannot be confirmed; a ready one asks for the removal word and mentions the backup", async () => {
   const { el, shadow } = panel("en");
   el.data = { ...DATA, objects: [], edges: [], findings: [], quarantine: [] };
-  const plan = (executable, reasons) => ({ plan_id: "p2", created_at: "2026-10-07T10:00:00+00:00", status: "dry_run", executed: false, summary: { total: 1, ok: executable ? 1 : 0, review: 0, blocked: executable ? 0 : 1 },
+  const plan = (executable, reasons) => ({ plan_id: "p2", created_at: new Date().toISOString(), status: "dry_run", executed: false, summary: { total: 1, ok: executable ? 1 : 0, review: 0, blocked: executable ? 0 : 1 },
     actions: [{ kind: "remove_entity", object_id: "sensor.a", name: "A", verdict: executable ? "ok" : "blocked", executable, reasons, quarantine_days_left: 6, used_by: [] }] });
   el.view = "cleanup";
   el.journal = [];
@@ -1418,7 +1418,7 @@ test("the replace assistant previews sources and sends the new entity with the p
   assert.ok(offered.includes("sensor.new") && !offered.includes("light.live") && !/data-plan-create\s+disabled/.test(html));
   el.replNew = "sensor.new";
   const sent = [];
-  const plan = { plan_id: "r1", created_at: "2026-10-07T10:00:00+00:00", status: "dry_run", executed: false, summary: { total: 1, ok: 0, review: 1, blocked: 0 },
+  const plan = { plan_id: "r1", created_at: new Date().toISOString(), status: "dry_run", executed: false, summary: { total: 1, ok: 0, review: 1, blocked: 0 },
     actions: [{ kind: "replace_references", object_type: "entity", object_id: "sensor.old", target: "sensor.new", name: "sensor.old", verdict: "review", executable: true, reasons: ["config_rewrite", "source_manual"], used_by: [],
       sources: [{ source: "automation:automation.heat", type: "automation", name: "Heating", writable: true, reason: null, change_count: 2, changes: [{ location: "trigger/0/entity_id", from: "sensor.old", to: "sensor.new" }], manual: ["action/0/data/message"] },
         { source: "dashboard:yamlboard", type: "dashboard", name: "yamlboard", writable: false, reason: "yaml_mode", change_count: 0, changes: [], manual: [] }] }] };
@@ -1483,7 +1483,7 @@ const propertyData = () => {
 };
 
 const METER_PLAN = {
-  plan_id: "m1", created_at: "2026-10-07T10:00:00+00:00", status: "dry_run", executed: false, summary: { total: 1, ok: 0, review: 1, blocked: 0 },
+  plan_id: "m1", created_at: new Date().toISOString(), status: "dry_run", executed: false, summary: { total: 1, ok: 0, review: 1, blocked: 0 },
   actions: [{ kind: "migrate_meter", object_type: "entity", object_id: "sensor.meter_old", target: "sensor.meter_new", mode: "both", alt_id: "sensor.meter_old_alt", name: "Old meter", verdict: "review", executable: true,
     reasons: ["stats_write", "id_takeover", "stats_gap"], used_by: [],
     statistics: { import_count: 48, old_first: 1788220800, old_last: 1788390000, switch: 1788480000, offset: 47, unit: "kWh", dropped_overlap: 3, gap_hours: 24,
@@ -2352,7 +2352,7 @@ test("a large installation renders every view within generous time limits", () =
 test("the whole confirmation flow works end to end against a scripted backend", async () => {
   const sent = [], snapshots = [];
   const action = { kind: "remove_entity", object_id: "sensor.old", name: "Old", verdict: "ok", executable: true, reasons: [], used_by: [] };
-  const plan = (status, extra = {}) => ({ plan_id: "p1", created_at: "2026-10-07T10:00:00+00:00", status, executed: status !== "dry_run", summary: { total: 1, ok: 1, review: 0, blocked: 0 }, actions: [{ ...action, ...(extra.result ? { result: extra.result } : {}) }], ...(extra.plan || {}) });
+  const plan = (status, extra = {}) => ({ plan_id: "p1", created_at: new Date().toISOString(), status, executed: status !== "dry_run", summary: { total: 1, ok: 1, review: 0, blocked: 0 }, actions: [{ ...action, ...(extra.result ? { result: extra.result } : {}) }], ...(extra.plan || {}) });
   const statuses = [
     { progress: { running: true, phase: "backup" }, plan: plan("backup") },
     { progress: { running: true, phase: "running", done: 0, total: 1 }, plan: plan("running", { plan: { backup: { job_id: "j1", at: "2026-10-07T10:01:00+00:00" } } }) },
@@ -2733,7 +2733,7 @@ test("open previews can be selected and merged into one plan; a ran plan cannot"
   const { el, shadow } = panel("en");
   el.data = { ...DATA, objects: [], edges: [], findings: [], quarantine: [] };
   el.view = "journal";
-  const short = (id, extra = {}) => ({ plan_id: id, created_at: "2026-10-07T10:00:00+00:00", status: "dry_run", summary: { total: 1, ok: 1, review: 0, blocked: 0 }, ...extra });
+  const short = (id, extra = {}) => ({ plan_id: id, created_at: new Date().toISOString(), status: "dry_run", summary: { total: 1, ok: 1, review: 0, blocked: 0 }, ...extra });
   el.journal = [short("a"), short("b"), short("c", { executed: true, status: "verified" })];
   const calls = [];
   el._hass = { language: "en", callWS: async msg => { calls.push(msg); return { plan: { ...short("n"), actions: [] }, merged: msg.plan_ids, conflicts: [{ object_id: "sensor.x", kinds: ["remove_entity", "replace_references"] }], dropped: 0 }; } };
@@ -3205,7 +3205,7 @@ test("a device has a history tab with its steps and no note; removed devices sho
 
 test("the maintenance window is off until switched on, then shows the open step and builds a report", () => {
   const { el } = panel("en");
-  el.data = DATA; el._winRequested = true; el.journal = [{ plan_id: "aabbccddeeff", created_at: "2026-10-01T10:00:00+00:00", status: "dry_run", executed: false, summary: { total: 2, ok: 2, review: 0, blocked: 0 } }]; el._journalRequested = true;
+  el.data = DATA; el._winRequested = true; el.journal = [{ plan_id: "aabbccddeeff", created_at: new Date().toISOString(), status: "dry_run", executed: false, summary: { total: 2, ok: 2, review: 0, blocked: 0 } }]; el._journalRequested = true;
   el.win = { enabled: false, state: null, current: null };
   assert.ok(el.windowCard().includes("Switch on (experimental)") && !el.windowCard().includes("data-win-act=\"begin"));
   el.win = { enabled: true, state: null, current: null };
@@ -3765,7 +3765,7 @@ test("the counter assistant scans, previews with a chart and asks for REPAIR", a
 });
 
 const REPAIR_PLAN = {
-  plan_id: "r1", created_at: "2026-10-09T10:00:00+00:00", status: "dry_run", executed: false, summary: { total: 1, ok: 0, review: 1, blocked: 0 },
+  plan_id: "r1", created_at: new Date().toISOString(), status: "dry_run", executed: false, summary: { total: 1, ok: 0, review: 1, blocked: 0 },
   actions: [{ kind: "repair_counter", object_type: "entity", object_id: "sensor.water", mode: "interpolate", name: "Water", verdict: "review", executable: true, reasons: ["counter_write"], used_by: [],
     counter: { unit: "m³", counts: { states: 3, short_term: 10, long_term: 10, tail_short_term: 40, tail_long_term: 30 }, skipped: {},
       findings: [{ bad_first: 1788220800, bad_last: 1788260800, low: 41.5, high: 41.5, good_before: 91.69, good_after: 91.8, series: [[1, 91, 91], [2, 41, 91], [3, 41, 91], [4, 91, 91]] }] } }],
@@ -4007,7 +4007,7 @@ test("the loudest entities offer ticks, mark what can be excluded and share the 
 test("a plan runs as a wizard: review, confirm with a way back, run, result; long plans come in pages", () => {
   const { el, shadow } = panel("en");
   const action = id => ({ kind: "disable_entity", object_id: id, name: id, verdict: "ok", executable: true, reasons: [] });
-  const plan = (status, extra = {}) => ({ plan_id: "p", status, created_at: "2026-10-10T10:00:00Z", summary: { total: 25, ok: 25, review: 0, blocked: 0 }, actions: Array.from({ length: 25 }, (_, i) => action(`sensor.s${i}`)), ...extra });
+  const plan = (status, extra = {}) => ({ plan_id: "p", status, created_at: new Date().toISOString(), summary: { total: 25, ok: 25, review: 0, blocked: 0 }, actions: Array.from({ length: 25 }, (_, i) => action(`sensor.s${i}`)), ...extra });
   const stage = (p, confirming = false) => el.planStage(p, confirming);
   assert.deepEqual([stage(plan("dry_run")), stage(plan("dry_run"), true), stage(plan("running")), stage(plan("executed")), stage(plan("verified", { verification: { ok: true, checks: [] } })), stage(plan("aborted"))], [0, 1, 2, 2, 3, 3]);
   el.plan = plan("dry_run"); el.view = "cleanup"; el.render();
@@ -5322,4 +5322,18 @@ test("the delete button of a list row is the bin only, with the name as tooltip,
   assert.ok(on.includes('data-x="1"') && on.includes('title="Delete"') && on.includes('aria-label="Delete"') && on.includes("mdi:delete-outline") && !on.includes(">Delete<"));
   const off = el.deleteButton('data-x="1"', "Delete", { why: "In use" });
   assert.ok(off.includes("disabled") && off.includes('title="In use"') && !off.includes('data-x="1"'), "no action while disabled");
+});
+
+test("an outdated preview is marked and renewed; a reopened one is checked before it is confirmed", async () => {
+  const { el } = panel("en");
+  const old = { plan_id: "o1", created_at: new Date(Date.now() - 25 * 3600e3).toISOString(), status: "dry_run", executed: false, actions: [{ kind: "disable_entity", object_id: "sensor.a", name: "A", verdict: "ok", executable: true, reasons: [], used_by: [] }], summary: { total: 1, ok: 1 } };
+  assert.ok(el.planStale(old) && !el.planStale({ ...old, created_at: new Date().toISOString() }) && !el.planStale({ ...old, status: "verified" }));
+  assert.ok(el.planCard(old).includes("data-plan-renew") && !el.planCard(old).includes("data-plan-confirm"));
+  const calls = [];
+  el._hass = { language: "en", callWS: async msg => { calls.push(msg.type.split("/")[1]); return msg.type.endsWith("plan_check") ? { current: false, changed: [{ object_id: "sensor.a" }] } : {}; } };
+  el.plan = { ...old, plan_id: "o2", created_at: new Date().toISOString() };
+  el.reopenedPlanId = "o2";
+  await el.confirmAndRun();
+  assert.ok(calls.includes("plan_check") && !calls.includes("plan_confirm"));
+  assert.equal(el.planChanges.length, 1);
 });

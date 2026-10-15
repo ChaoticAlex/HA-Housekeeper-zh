@@ -605,6 +605,98 @@ async def websocket_plan_merge(
     )
 
 
+async def _rebuilt_preview(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> tuple[dict[str, Any], dict[str, Any]] | None:
+    """The open preview named in ``msg`` and the same requests judged again now (not journaled)."""
+    if scanner.warming_up:
+        connection.send_error(msg["id"], "warming_up", "Home Assistant is still starting")
+        return None
+    old = scanner.journal.get(msg["plan_id"])
+    if old is None:
+        connection.send_error(msg["id"], "not_found", "Plan not found")
+        return None
+    if old.get("status") != "dry_run" or old.get("executed") or old.get("run"):
+        connection.send_error(msg["id"], "plan_not_open", "Only open previews can be renewed")
+        return None
+    try:
+        snapshot = await scanner.async_get_snapshot()
+    except Exception as err:
+        connection.send_error(msg["id"], "scan_failed", f"{type(err).__name__}: {err}")
+        return None
+    requests, _, _ = merge_requests([old])
+    new = await _plan_from_requests(hass, snapshot, requests, scanner.refactor.enabled)
+    return old, new
+
+
+# What a person decides on in a preview: if one of these differs now, the preview is out of date.
+_CHECKED_FIELDS = ("verdict", "executable", "fingerprint", "has_statistics", "used_by")
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command(
+    {vol.Required("type"): f"{DOMAIN}/plan_renew", vol.Required("plan_id"): str}
+)
+@websocket_api.async_response
+@with_scanner
+async def websocket_plan_renew(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """Judge an open preview's requests again as a new preview and drop the old one."""
+    rebuilt = await _rebuilt_preview(hass, connection, msg, scanner)
+    if rebuilt is None:
+        return
+    old, plan = rebuilt
+    if old.get("full_backup"):
+        plan["full_backup"] = True
+    if backup_is_local_only(hass):
+        plan["backup_local"] = True
+    plan["events"].append(
+        {"at": datetime.now(UTC).isoformat(), "type": "renewed", "plans": [old["plan_id"]]}
+    )
+    scanner.journal.add(plan)
+    scanner.journal.remove(old["plan_id"])
+    connection.send_result(msg["id"], _versioned(public_plan(plan)))
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command(
+    {vol.Required("type"): f"{DOMAIN}/plan_check", vol.Required("plan_id"): str}
+)
+@websocket_api.async_response
+@with_scanner
+async def websocket_plan_check(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """Tell whether an open preview still matches the current state. Changes nothing."""
+    rebuilt = await _rebuilt_preview(hass, connection, msg, scanner)
+    if rebuilt is None:
+        return
+    old, plan = rebuilt
+    now = {a["object_id"]: a for a in plan["actions"]}
+    changed = []
+    for action in old["actions"]:
+        fresh = now.get(action["object_id"])
+        if fresh is None or any(action.get(k) != fresh.get(k) for k in _CHECKED_FIELDS):
+            changed.append(
+                {
+                    "object_id": action["object_id"],
+                    "was": action["verdict"],
+                    "now": fresh["verdict"] if fresh else "gone",
+                }
+            )
+    connection.send_result(msg["id"], {"current": not changed, "changed": changed})
+
+
 @websocket_api.require_admin
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/plan_list"})
 @callback
@@ -1304,6 +1396,8 @@ def async_register(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_set_options)
     websocket_api.async_register_command(hass, websocket_plan_create)
     websocket_api.async_register_command(hass, websocket_plan_merge)
+    websocket_api.async_register_command(hass, websocket_plan_renew)
+    websocket_api.async_register_command(hass, websocket_plan_check)
     websocket_api.async_register_command(hass, websocket_plan_list)
     websocket_api.async_register_command(hass, websocket_plan_detail)
     websocket_api.async_register_command(hass, websocket_plan_delete)

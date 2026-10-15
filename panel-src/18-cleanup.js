@@ -210,6 +210,7 @@ class CleanupMixin {
 
   // The journal list holds short entries only; the plan itself is fetched when it is opened.
   async openPlan(planId) {
+    this.reopenedPlanId = planId; this.planChanges = null;
     try { this.plan = await this._hass.callWS({ type: "ha_housekeeper/plan_detail", plan_id: planId }); this.cleanupError = ""; } catch (err) { this.cleanupError = this.errText(err); }
     this.render();
   }
@@ -292,15 +293,47 @@ class CleanupMixin {
     return TEXT[this.lang][key] ? this.t(key) : (err?.message || String(err));
   }
 
+  // An open preview is a plan that was neither confirmed nor run; it can only be confirmed for 24 hours.
+  isOpenPreview(plan) { return (plan.status || "dry_run") === "dry_run" && !plan.executed && !plan.run; }
+  planStale(plan) { return this.isOpenPreview(plan) && Date.now() - new Date(plan.created_at).getTime() > 24 * 3600 * 1000; }
+
+  // A preview that was opened again from a list, or is older than 5 minutes, is checked against the current
+  // state before it is confirmed. Only one just made in this view and confirmed at once is taken as it is.
+  planNeedsCheck(plan) { return this.reopenedPlanId === plan.plan_id || Date.now() - new Date(plan.created_at).getTime() > 5 * 60 * 1000; }
+
+  // The same requests judged again as a new preview; the old preview is dropped.
+  async renewPlan(planId) {
+    if (this.cleanupBusy) return;
+    this.cleanupBusy = true; this.cleanupError = ""; this.planChanges = null; this.render();
+    try {
+      const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_renew", plan_id: planId });
+      this.plan = plan; this.reopenedPlanId = null; this.confirmation = null; this.ack = new Set(); this.confirmWord = "";
+      this.journal = [plan, ...(this.journal || []).filter(p => p.plan_id !== planId)];
+      this.toast(this.t("toastRenewed"));
+    } catch (err) { this.failPlan(err, "renew"); }
+    this.cleanupBusy = false; this.render();
+  }
+
+  // Which step failed is said in the error line; the mark only counts while that error is still the one shown.
+  failPlan(err, from) { this.cleanupError = this.errText(err); this.cleanupErrorFrom = from; this.cleanupErrorStamp = this.cleanupError; this.cleanupErrorCode = err?.code; }
+
   async confirmPlan() {
     try {
       this.confirmation = await this._hass.callWS({ type: "ha_housekeeper/plan_confirm", plan_id: this.plan.plan_id, acknowledged: [...this.ack] });
       this.confirmWord = ""; this.cleanupError = "";
-    } catch (err) { this.cleanupError = this.errText(err); }
+    } catch (err) { this.failPlan(err, "confirm"); }
     this.render();
   }
 
   async confirmAndRun() {
+    if (this.planNeedsCheck(this.plan)) {
+      this.cleanupBusy = true; this.render();
+      let check = null;
+      try { check = await this._hass.callWS({ type: "ha_housekeeper/plan_check", plan_id: this.plan.plan_id }); } catch (err) { this.failPlan(err, "check"); }
+      this.cleanupBusy = false;
+      if (!check || !check.current) { this.planChanges = check ? check.changed : null; this.render(); return; }
+      this.planChanges = null;
+    }
     await this.confirmPlan();
     if (this.confirmation) await this.executePlan();
   }
@@ -497,7 +530,8 @@ class CleanupMixin {
     const executable = plan.actions.some(a => a.executable);
     const word = this.planWord(plan), conf = this.confirmation?.plan_id === plan.plan_id ? this.confirmation : null;
     let control = "";
-    if (open && !executable) control = `<p class="factnote">${this.t("nothingExecutable")}</p>`;
+    if (open && this.planStale(plan)) control = `<div class="setrow planfoot"><small class="u-m0">${this.t("planStaleHint")}</small><span class="planfootbtns"><button class="btn" data-plan-close>${this.t("confirmCancel")}</button><button class="btn primary" data-plan-renew="${this.esc(plan.plan_id)}" ${this.cleanupBusy ? 'disabled aria-busy="true"' : ""}><ha-icon icon="mdi:refresh"></ha-icon>${this.t("renewPlan")}</button></span></div>`;
+    else if (open && !executable) control = `<p class="factnote">${this.t("nothingExecutable")}</p>`;
     else if (open && !conf) {
       const review = plan.actions.filter(a => a.verdict === "review" && a.executable);
       const all = review.length && review.every(a => this.ack.has(a.object_id));
@@ -533,7 +567,7 @@ class CleanupMixin {
       : stage === 1 ? `${summary}${this.simulationBlock(plan)}${rows}${control}`
       : stage === 2 ? `${this.planOutcome(plan)}${this.planProgressBar()}${control}`
       : `${this.planOutcome(plan)}${this.logSuggestCard(plan)}${summary}${this.simulationBlock(plan)}${rows}${checks}${this.followupLine(plan)}${control}`;
-    return `<section class="panel" data-plan-card><div class="panelhead"><div><h2>${this.t(plan.status === "dry_run" ? "planResult" : "planResultDone")} · <span class="pill ${plan.status === "verified" ? "ok" : plan.status === "dry_run" ? "mute" : "warn"}">${this.t(`plan_status_${plan.status}`)}</span></h2><p>${this.esc(this.formatDate(plan.created_at))}</p></div><button class="btn" data-plan-close>${this.t("planClose")}</button></div>
+    return `<section class="panel" data-plan-card><div class="panelhead"><div><h2>${this.t(plan.status === "dry_run" ? "planResult" : "planResultDone")} · <span class="pill ${plan.status === "verified" ? "ok" : plan.status === "dry_run" ? "mute" : "warn"}">${this.t(`plan_status_${plan.status}`)}</span>${this.planStale(plan) ? ` <span class="pill warn">${this.t("planStale")}</span>` : ""}</h2><p>${this.esc(this.formatDate(plan.created_at))}</p></div><button class="btn" data-plan-close>${this.t("planClose")}</button></div>
       ${this.wizardBar(stage)}${flow}${body}${this.reportBlock(plan)}</section>`;
   }
 
@@ -755,8 +789,13 @@ class CleanupMixin {
   // An error from the last request and the plan that is open, on top of every view that can finish one.
   // The dry-run sentence sits behind the coloured (i) in the page title (Cleanup, Journal); Repair says it in its subtitle.
   planHeader() {
-    const error = this.cleanupError ? `<div class="error">${this.t("planError")}: ${this.esc(this.cleanupError)}</div>` : "";
-    return `${error ? `<div class="panel">${error}</div>` : ""}${this.plan ? this.planCard(this.plan) : ""}`;
+    const from = this.cleanupErrorStamp === this.cleanupError ? this.cleanupErrorFrom : "";
+    const lead = this.t({ confirm: "confirmError", check: "checkError", renew: "renewError" }[from] || "planError");
+    const open = this.plan && this.isOpenPreview(this.plan);
+    const renew = open && (this.planStale(this.plan) || this.planChanges || (from === "confirm" && this.cleanupErrorCode === "plan_too_old")) ? `<button class="btn primary" data-plan-renew="${this.esc(this.plan.plan_id)}" ${this.cleanupBusy ? "disabled" : ""}><ha-icon icon="mdi:refresh"></ha-icon>${this.t("renewPlan")}</button>` : "";
+    const error = this.cleanupError ? `<div class="error">${lead}: ${this.esc(this.cleanupError)}${renew && !this.planChanges ? ` ${renew}` : ""}</div>` : "";
+    const changes = this.planChanges?.length ? `<div class="panel"><div class="error"><strong>${this.t("planChangedTitle")}</strong><small class="dim7">${this.t("planChangedHint")}</small><ul class="evlist">${this.planChanges.slice(0, 10).map(c => `<li>${this.esc(c.object_id)}</li>`).join("")}</ul>${this.planChanges.length > 10 ? `<small>${this.t("planChangedMore", { count: this.planChanges.length - 10 })}</small>` : ""}${renew}</div></div>` : "";
+    return `${error ? `<div class="panel">${error}</div>` : ""}${changes}${this.plan ? this.planCard(this.plan) : ""}`;
   }
 
   // Every plan from Cleanup and Repair: what changed, what was checked, and what can be undone.
@@ -770,10 +809,10 @@ class CleanupMixin {
     const columns = [
       { key: "sel", label: "mergeSelect", narrow: true, sortable: false, allBox: rows => this.journalHeadBox(rows), cell: plan => (this.mergeable(plan) ? `<input type="checkbox" class="selbox" data-merge-sel="${this.esc(plan.plan_id)}" ${this.mergeSel?.has(plan.plan_id) ? "checked" : ""} aria-label="${this.esc(this.t("mergeSelect"))}">` : "") },
       { key: "date", label: "journalColDate", dir: "desc", cell: plan => `<span class="statcell"><span class="tile mute"><ha-icon icon="mdi:clipboard-text-clock-outline"></ha-icon></span><strong>${this.esc(this.formatDate(plan.created_at))}</strong></span>` },
-      { key: "status", label: "sortStatus", dir: "asc", cell: plan => `<span class="pill ${plan.status === "verified" ? "ok" : plan.status === "dry_run" ? "mute" : "warn"}">${this.t(`plan_status_${statusOf(plan)}`)}</span>` },
+      { key: "status", label: "sortStatus", dir: "asc", cell: plan => `<span class="pill ${plan.status === "verified" ? "ok" : plan.status === "dry_run" ? "mute" : "warn"}">${this.t(`plan_status_${statusOf(plan)}`)}</span>${this.planStale(plan) ? ` <span class="pill warn">${this.t("planStale")}</span>` : ""}` },
       ...(this.isDenseList("journal") ? [] : [{ key: "total", label: "journalColActions", dir: "desc", cell: plan => `<span class="jsum">${this.esc(summary(plan))}</span>` }]),
       { key: "follow", label: "journalColFollow", sortable: false, cell: plan => (fuState(plan) ? `<span class="pill ${this.followupTone(fuState(plan))}">${this.t(`fu_${fuState(plan)}`)}</span>` : "–") },
-      { key: "act", label: "journalColAct", sortable: false, cell: plan => `<span class="jbtns">${plan.executed || plan.run ? "" : this.deleteButton(`data-plan-delete="${this.esc(plan.plan_id)}"`, this.t("deletePlan"))}</span>` },
+      { key: "act", label: "journalColAct", sortable: false, cell: plan => `<span class="jbtns">${this.planStale(plan) ? `<button type="button" class="btn small" data-plan-renew="${this.esc(plan.plan_id)}" ${this.cleanupBusy ? "disabled" : ""}><ha-icon icon="mdi:refresh"></ha-icon>${this.t("renewPlan")}</button>` : ""}${plan.executed || plan.run ? "" : this.deleteButton(`data-plan-delete="${this.esc(plan.plan_id)}"`, this.t("deletePlan"))}</span>` },
     ];
     const table = plans.length ? this.sysList("journal", plans, {
       sort: "date", dir: "desc", columns, cls: "journal", empty: "journalEmpty",

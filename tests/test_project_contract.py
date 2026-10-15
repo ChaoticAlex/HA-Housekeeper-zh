@@ -110,8 +110,8 @@ def test_only_the_cleanup_runner_changes_the_registry() -> None:
 
 def test_every_websocket_command_uses_current_admin_decorator() -> None:
     source = _websocket_source()
-    assert source.count("@websocket_api.websocket_command") == 82
-    assert source.count("@websocket_api.require_admin") == 82
+    assert source.count("@websocket_api.websocket_command") == 84
+    assert source.count("@websocket_api.require_admin") == 84
     assert "connection.require_admin" not in source
 
 

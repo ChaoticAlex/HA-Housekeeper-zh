@@ -1047,6 +1047,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-merge-sel]").forEach(el => el.onchange = () => { this.mergeSel = new Set(this.mergeSel || []); el.checked ? this.mergeSel.add(el.dataset.mergeSel) : this.mergeSel.delete(el.dataset.mergeSel); this.render(); });
     root.querySelector("[data-merge]")?.addEventListener("click", () => this.mergePlans());
     root.querySelectorAll("[data-merge-page]").forEach(el => { el.indeterminate = el.hasAttribute("data-partial"); el.onchange = () => { this.mergeSel = new Set(this.mergeSel || []); el.dataset.mergePage.split(",").forEach(id => (el.checked ? this.mergeSel.add(id) : this.mergeSel.delete(id))); this.render(); }; });
+    root.querySelectorAll("[data-plan-renew]").forEach(el => el.onclick = ev => { ev.stopPropagation(); this.renewPlan(el.dataset.planRenew); });
     root.querySelectorAll("[data-plan-delete]").forEach(el => el.onclick = () => { const id = el.dataset.planDelete, plan = (this.journal || []).find(p => p.plan_id === id) || this.plan; this.confirmAsk(this.t("confirmPlanDelete", { date: this.formatDate(plan?.created_at) }), () => this.deletePlan(id)); });
     root.querySelector("[data-opts-save]")?.addEventListener("click", () => this.saveOptions());
     // Saving stays off until a threshold differs from the saved one; typing must not rebuild the page.

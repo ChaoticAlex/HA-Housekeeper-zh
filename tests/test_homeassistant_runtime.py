@@ -1384,6 +1384,43 @@ async def test_open_previews_merge_into_one_plan_and_conflicts_are_reported(
     assert (await client.receive_json())["error"]["code"] == "plan_not_open"
 
 
+async def test_an_open_preview_is_checked_against_the_current_state_and_renewed(
+    hass: HomeAssistant, hass_ws_client
+) -> None:
+    """A check reports what changed since the preview; renewing replaces the preview."""
+    registry = er.async_get(hass)
+    entry = registry.async_get_or_create(
+        domain="sensor", platform="test", unique_id="r-1", suggested_object_id="renew"
+    )
+    scanner, client = await _ws_setup(hass, hass_ws_client)
+    await scanner.async_scan()
+    await client.send_json_auto_id(
+        {
+            "type": "ha_housekeeper/plan_create",
+            "actions": [{"kind": "disable_entity", "object_id": entry.entity_id}],
+        }
+    )
+    plan = (await client.receive_json())["result"]
+    await client.send_json_auto_id(
+        {"type": "ha_housekeeper/plan_check", "plan_id": plan["plan_id"]}
+    )
+    assert (await client.receive_json())["result"] == {"current": True, "changed": []}
+
+    registry.async_update_entity(entry.entity_id, name="Changed")
+    await client.send_json_auto_id(
+        {"type": "ha_housekeeper/plan_check", "plan_id": plan["plan_id"]}
+    )
+    result = (await client.receive_json())["result"]
+    assert result["current"] is False and result["changed"][0]["object_id"] == entry.entity_id
+
+    await client.send_json_auto_id(
+        {"type": "ha_housekeeper/plan_renew", "plan_id": plan["plan_id"]}
+    )
+    renewed = (await client.receive_json())["result"]
+    assert renewed["plan_id"] != plan["plan_id"]
+    assert [p["plan_id"] for p in scanner.journal.plans] == [renewed["plan_id"]]
+
+
 async def test_the_window_reload_follows_the_rules_of_a_plan(
     hass: HomeAssistant, hass_ws_client
 ) -> None:

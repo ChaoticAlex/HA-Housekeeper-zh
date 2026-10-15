@@ -26,6 +26,8 @@
 
 - **Hinweis bei großen Löschungen:** Entfernt ein Plan die Hälfte oder mehr aller Entitäten oder Geräte, zeigt der Bestätigungsdialog einen deutlichen Hinweis mit den Zahlen. Sonst ändert sich nichts; bestätigt wird weiter einmal.
 
+- **Veraltete Vorschauen:** Eine Vorschau, die älter als 24 Stunden ist, trägt in der Journal-Liste und im Plan die Marke „Veraltet“ und lässt sich mit „Erneuern“ neu erstellen (die alte Vorschau entfällt). Vor dem Bestätigen prüft Housekeeper eine wieder geöffnete oder ältere Vorschau gegen den aktuellen Stand und nennt die Einträge, die sich seitdem geändert haben.
+
 - **Backup-Name im Ergebnis:** Hat ein Plan vorher ein Backup erstellt, nennt er dessen Namen („Housekeeper …“) in seinen Schritten, damit du es bei einer Wiederherstellung in der Backup-Liste von Home Assistant findest.
 
 ### English
@@ -53,6 +55,8 @@
 - **Unclean shutdowns:** Housekeeper remembers whether Home Assistant announced its stop. If the database is damaged, the finding says how often Home Assistant started after a crash or power cut in the last 30 days.
 
 - **Warning for large removals:** If a plan removes half or more of all entities or devices, the confirmation dialog shows a clear note with the numbers. Nothing else changes; you still confirm once.
+
+- **Outdated previews:** A preview older than 24 hours is marked “Outdated” in the journal list and in the plan, and “Renew” creates it again (the old preview is dropped). Before confirming, a preview that was opened again or is older is checked against the current state, and the entries that changed since are named.
 
 - **Backup name in the result:** A plan that made a backup first names it (“Housekeeper …”) in its steps, so you can find it in Home Assistant's backup list if you need to restore.
 
