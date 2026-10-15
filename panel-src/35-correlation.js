@@ -53,7 +53,7 @@ class CorrelationMixin {
   }
 
   // Closed by default; one fold per group inside. Sits on the findings page next to the tile that filters by it.
-  corrGroupsCard(afterCount = 0) {
+  corrGroupsCard(afterCount = 0, follows = 0) {
     const groups = this.corr?.groups || [];
     if (!groups.length) return "";
     const pg = this.paginate("corr", groups);
@@ -63,6 +63,6 @@ class CorrelationMixin {
       const open = this.foldOpen(`corr_${g.id}`, false);
       return this.fold(`corr_${g.id}`, head, open ? this.corrGroupBody(g) : "", false).replace(/<ha-icon icon="mdi:chevron-(?:down|right)"><\/ha-icon>/, `<ha-icon icon="${open ? "mdi:chevron-down" : icon}"></ha-icon>`);
     }).join("");
-    return `<div class="panel">${this.fold("corr", { tone: "warn", title: this.t("corrTitle"), sub: this.t("corrHint"), pill: this.t("corrIncidents", { n: this.formatNumber(groups.length) }) }, rows + pg.footer, false)}${afterCount ? `<div class="pad"><button class="btn" data-finding-after="1" aria-pressed="${Boolean(this.findingAfter)}"><ha-icon icon="mdi:filter-variant"></ha-icon>${this.t("corrShow", { n: this.formatNumber(afterCount) })}</button> <small class="factnote">${this.t("corrTileSub")}</small></div>` : ""}</div>`;
+    return `<div class="panel">${this.fold("corr", { tone: "warn", title: this.t("corrTitle"), sub: this.t("corrHint"), pill: this.t("corrIncidents", { n: this.formatNumber(groups.length) }) }, rows + pg.footer, false)}${afterCount ? `<div class="pad"><button class="btn" data-finding-after="1" aria-pressed="${Boolean(this.findingAfter)}"><ha-icon icon="mdi:filter-variant"></ha-icon>${this.t("corrShow", { n: this.formatNumber(afterCount) })}</button> <small class="factnote">${this.t("corrTileSub")}${follows ? ` · ${this.esc(this.t("findingsFollowSub", { n: this.formatNumber(follows) }))}` : ""}</small></div>` : ""}</div>`;
   }
 }

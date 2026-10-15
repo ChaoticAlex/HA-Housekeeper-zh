@@ -3248,6 +3248,17 @@ test("a reason tile counts what the list shows and names the follow-ups beside i
   assert.ok(html.includes("Unavailable") && /sumvalue">2<\/b><small>plus 2 follow-ups/.test(html));
 });
 
+test("the button for findings after an update counts what the list shows and names the follow-ups beside it", () => {
+  const { el } = panel("en");
+  const f = (key, cause) => ({ key, rule_id: "entity.state_unavailable", object_id: key, classification: "unavailable", confidence: 0.9, ignored: false, impact: "low", impact_facts: [], cause_id: cause });
+  el.data = { ...DATA, objects: [], edges: [], causes: [], findings: [f("a"), f("b"), f("c", "device:x")] };
+  el.corr = { groups: [{ id: "g", kind: "entry_version", at: "2026-10-01T10:05:00+00:00", domain: "hue", from: "1", to: "2", total: 3, keys: ["a", "b", "c"], only_group: false }], by_key: { a: "g", b: "g", c: "g" } };
+  el._corrRequested = true; el._corrKey = el.data.meta.scanned_at || ""; el.series = null; el._seriesFor = el.data;
+  el.findingAfter = true;
+  const html = el.findingsView();
+  assert.ok(html.includes("Show 2 findings") && html.includes("plus 1 follow-ups") && html.includes("2 in this view"));
+});
+
 test("the detail page rates a finding: level with reasons, certainty, and what the next level takes", () => {
   const { el } = panel("en");
   const ago = h => new Date(Date.now() - h * 3600000).toISOString();

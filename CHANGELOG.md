@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Knopf „Befunde anzeigen“ zählt wie die Liste:** Der Knopf für Befunde, die mit einem Update begannen, zählt ohne Folgen (vorher 28, die Liste zeigte 20) und nennt die Folgen daneben.
+
 - **Vorfälle besser lesbar:** Das „+1“ hinter einem Update steht als Chip, und „Zusammen mit“ ist ein abgesetzter Block mit einer Zeile je weiterem Update.
 
 - **Spaltenauswahl:** Die Kästchen in der Spaltenauswahl der Listen stehen jetzt in einer Reihe am rechten Rand.
