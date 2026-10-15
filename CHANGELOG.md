@@ -4,13 +4,13 @@
 
 ### Geändert
 
-- **Oberfläche:** Im Menü „⋯“ eines Befunds gibt es „Vermerk setzen“: öffnet im Logbuch einen neuen Eintrag zum Objekt des Befunds.
+- **Oberfläche:** Im Menü „⋯“ eines Befunds gibt es „Vermerk setzen“: öffnet im Logbuch einen neuen Eintrag zum Objekt des Befunds. Die Kachel „Nicht verfügbar“ der Übersicht öffnet die Befunde gefiltert nach diesem Grund; die Kacheln der Befundseite zählen alles samt Folgen und nennen die Folgen daneben („davon 12 Folgen“).
 
 ### English
 
 #### Changed
 
-- **Interface:** The “⋯” menu of a finding has “Add a note”: it opens a new logbook entry for the finding's object.
+- **Interface:** The “⋯” menu of a finding has “Add a note”: it opens a new logbook entry for the finding's object. The tile “Unavailable” of the overview opens the findings filtered by this reason; the tiles of the findings page count everything including follow-ups and name the follow-ups beside it (“of which 12 follow-ups”).
 
 ## 1.8.0 - 2026-10-15
 
