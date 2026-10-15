@@ -15754,6 +15754,7 @@ class HAHousekeeperPanel extends HTMLElement {
       if (el.dataset.filter !== undefined) { if (el.dataset.jump === "monitor") this.monitorFilter = el.dataset.filter; else this.findingFilter = el.dataset.filter; }
       if (el.dataset.jump === "inventory") { this.statusFilter = el.dataset.status || ""; this.typeFilter = el.dataset.type || ""; this.originFilter = ""; this.pages = {}; }
       this.render();
+      if (this.view === "changes" && !this.compare) this.loadCompare();
     });
     root.querySelectorAll("[data-tip]").forEach(el => { el.onmouseenter = () => this.showTip(el); el.onmouseleave = () => this.hideTip();
       const holder = el.closest?.("tr") || (el.hasAttribute?.("tabindex") || el.matches?.("button") ? el : null);
