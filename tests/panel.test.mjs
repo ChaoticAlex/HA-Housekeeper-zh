@@ -5338,3 +5338,18 @@ test("an outdated preview is marked and renewed; a reopened one is checked befor
   assert.ok(calls.includes("plan_check") && !calls.includes("plan_confirm"));
   assert.equal(el.planChanges.length, 1);
 });
+
+test("a quiet outage (info, low) stays off the overview counts and the line names the next level from the thresholds", () => {
+  const { el } = panel("en");
+  const meta = { ...DATA.meta, outage_info_minutes: 15, outage_low_hours: 1, outage_medium_hours: 24, outage_high_hours: 168 };
+  const quiet = { rule_id: "entity.state_unavailable", impact: "low", key: "k1", object_id: "sensor.a", classification: "unavailable", confidence: 0.75, first_detected_at: new Date(Date.now() - 2 * 3600000).toISOString() };
+  const loud = { ...quiet, key: "k2", object_id: "sensor.b", impact: "medium" };
+  const other = { rule_id: "automation.unused", impact: "low", key: "k3", object_id: "automation.x", classification: "unused", confidence: 0.7 };
+  el.data = { ...DATA, meta, findings: [quiet, loud, other], causes: [] };
+  assert.equal(el.isQuiet(quiet), true);
+  assert.equal(el.isQuiet(loud), false);
+  assert.equal(el.isQuiet(other), false, "only the findings of an outage are quiet");
+  assert.equal(el.quietCount(), 1);
+  const line = el.outageLineOf(quiet);
+  assert.ok(line.includes("Medium") || line.includes("medium"), line);
+});

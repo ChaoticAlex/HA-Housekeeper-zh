@@ -103,10 +103,10 @@ def test_a_finding_that_vanished_unread_or_under_a_changed_setting_is_not_resolv
     }
     objects = [("entity", "sensor.a", "active"), ("dashboard", "home", "active")]
     old_snap = _snapshot("2026-10-06T10:00:00+00:00", objects, [dash, unavailable])
-    old_snap["meta"]["min_unavailable_days"] = 1
+    old_snap["meta"]["outage_high_hours"] = 24
     old = make_checkpoint(old_snap)
     new = _snapshot("2026-10-07T10:00:00+00:00", objects)
-    new["meta"] |= {"min_unavailable_days": 3, "unchecked": ["dashboard:home"]}
+    new["meta"] |= {"outage_high_hours": 72, "unchecked": ["dashboard:home"]}
     diff = diff_checkpoints(old, new)
     assert diff["resolved_findings"]["total"] == 0
     assert {f["object_id"]: f["reason"] for f in diff["ended_findings"]["items"]} == {
@@ -114,10 +114,10 @@ def test_a_finding_that_vanished_unread_or_under_a_changed_setting_is_not_resolv
         "sensor.a": "rules_changed",
     }
     # without those causes the same disappearance is a repair, and an old checkpoint has no settings to compare
-    new["meta"] |= {"min_unavailable_days": 1, "unchecked": []}
+    new["meta"] |= {"outage_high_hours": 24, "unchecked": []}
     assert diff_checkpoints(old, new)["resolved_findings"]["total"] == 2
     del old["rules"]
-    new["meta"]["min_unavailable_days"] = 9
+    new["meta"]["outage_high_hours"] = 216
     assert diff_checkpoints(old, new)["resolved_findings"]["total"] == 2
 
 

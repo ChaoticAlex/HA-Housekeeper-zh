@@ -102,7 +102,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     scanner.outage_low_hours = levels[CONF_OUTAGE_LOW_HOURS]
     scanner.outage_medium_hours = levels[CONF_OUTAGE_MEDIUM_HOURS]
     scanner.outage_high_hours = levels[CONF_OUTAGE_HIGH_HOURS]
-    scanner.min_unavailable_days = levels[CONF_OUTAGE_HIGH_HOURS] // 24  # until step 4 reads the hours
     scanner.unused_automation_days = entry.options.get(
         CONF_UNUSED_AUTOMATION_DAYS, DEFAULT_UNUSED_AUTOMATION_DAYS
     )

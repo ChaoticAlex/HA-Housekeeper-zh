@@ -103,3 +103,17 @@ def outage_level(age: timedelta, levels: Levels, direct: bool = False) -> str | 
     if direct and (found is None or RANK.index(found) < RANK.index("medium")):
         return "medium"
     return found
+
+
+# The findings of an outage: they begin quiet (info, low) and are loud from medium on. Quiet ones
+# stay on the findings page but are left out of the overview, the sensors, the repair hints and the
+# lists of what is new or gone.
+OUTAGE_RULES = frozenset(
+    {"entity.state_unavailable", "device.down", "config_entry.not_loaded", "app.stopped_in_use"}
+)
+QUIET_IMPACTS = frozenset({"info", "low"})
+
+
+def is_quiet(finding: Mapping[str, Any]) -> bool:
+    """Whether the finding is an outage that is only info or low so far."""
+    return finding.get("rule_id") in OUTAGE_RULES and finding.get("impact") in QUIET_IMPACTS

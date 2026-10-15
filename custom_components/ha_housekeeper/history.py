@@ -11,6 +11,7 @@ from homeassistant.util import dt as dt_util
 
 from .const import DEFAULT_HISTORY_DAYS, HISTORY_STORAGE_KEY, STORAGE_VERSION
 from .hygiene import finding_key as _finding_key
+from .outage_levels import is_quiet
 
 SAVE_DELAY = 10
 LIST_LIMIT = 500  # entries per section sent to the panel; totals stay exact
@@ -39,7 +40,6 @@ def _valid_checkpoint(value: Any) -> dict[str, Any] | None:
 # vanished were not repaired, the rule just reads differently now.
 _OUTAGE_RULES = {"entity.state_unavailable", "config_entry.not_loaded", "device.down"}
 SETTING_RULES = {
-    "min_unavailable_days": _OUTAGE_RULES,
     "outage_info_minutes": _OUTAGE_RULES,
     "outage_low_hours": _OUTAGE_RULES,
     "outage_medium_hours": _OUTAGE_RULES,
@@ -84,7 +84,8 @@ def make_checkpoint(snapshot: dict[str, Any]) -> dict[str, Any]:
     return {
         "at": snapshot["meta"]["scanned_at"],
         "objects": objects,
-        "findings": sorted({_finding_key(f) for f in snapshot["findings"]}),
+        # A quiet outage (info, low) is not a change: it enters the list once it is medium.
+        "findings": sorted({_finding_key(f) for f in snapshot["findings"] if not is_quiet(f)}),
         # For the sparklines: open findings, per class, and the score.
         "open": len(open_findings),
         "classes": classes,
@@ -146,7 +147,9 @@ def diff_checkpoints(base: dict[str, Any], snapshot: dict[str, Any]) -> dict[str
     ]
 
     base_findings = set(base["findings"])
-    new_findings = [f for f in snapshot["findings"] if _finding_key(f) not in base_findings]
+    new_findings = [
+        f for f in snapshot["findings"] if _finding_key(f) not in base_findings and not is_quiet(f)
+    ]
     # Rules that read differently now than at the baseline: what vanished under them was not repaired.
     changed = {
         name

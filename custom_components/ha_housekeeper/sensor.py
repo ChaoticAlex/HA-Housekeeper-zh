@@ -22,6 +22,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN, NAME, SIGNAL_MONITOR_DEFINITIONS, SIGNAL_SCAN_COMPLETE
+from .outage_levels import is_quiet
 from .scan_coverage import gaps
 from .scan_health import STATES
 
@@ -41,7 +42,8 @@ def compute_values(snapshot: dict[str, Any] | None) -> dict[str, Any]:
     # Counts taken while Home Assistant is still starting would be wrong; stay "unknown".
     if snapshot is None or snapshot["meta"].get("preliminary"):
         return {}
-    active = [f for f in snapshot["findings"] if not f.get("ignored")]
+    # A quiet outage (info, low) is on the findings page only; the sensors count from medium on.
+    active = [f for f in snapshot["findings"] if not f.get("ignored") and not is_quiet(f)]
     by_class = Counter(f["classification"] for f in active)
     return {
         "findings": len(active),

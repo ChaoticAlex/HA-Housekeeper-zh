@@ -209,6 +209,7 @@ class FindingsMixin {
   }
 
   findingsView() {
+    if (this._impactOnce) { this.visibleFindings(); if (this.lv.findings) { this.lv.findings.f.impact = this._impactOnce; this.persistLv("findings"); } this._impactOnce = ""; }
     const all = this.sortedFindings(true).filter(f => this.statusMatch(f));
     const classes = [...new Set(all.map(f => this.findingReason(f)))];
     const open = !this.findingStatus && !this.findingFilter && !this.findingAfter && !this.lv.findings?.q && !Object.values(this.lv.findings?.f || {}).some(Boolean);

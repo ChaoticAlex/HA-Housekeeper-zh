@@ -25,9 +25,12 @@ class CausesMixin {
   outageLineOf(f) {
     const since = f && Date.parse(f.first_detected_at);
     if (!since) return "";
-    const hours = Math.max(0, (Date.now() - since) / 3600000), high = Math.max(24, (this.data.meta?.min_unavailable_days || 0) * 24);
+    const m = this.data.meta || {};
+    const hours = Math.max(0, (Date.now() - since) / 3600000);
+    // The next level and when it starts, from the four thresholds (info in minutes, the others in hours).
+    const steps = [[(m.outage_info_minutes ?? 15) / 60, "info"], [m.outage_low_hours ?? 1, "low"], [m.outage_medium_hours ?? 24, "medium"], [m.outage_high_hours ?? 168, "high"]];
     const span = h => h < 1 ? `${Math.max(1, Math.round(h * 60))} ${this.t("unitMin")}` : h < 48 ? `${Math.round(h)} ${this.t("unitHour")}` : `${Math.round(h / 24)} ${this.t("unitDay")}`;
-    const next = hours < 1 ? [1, "low"] : hours < 24 ? [24, "medium"] : hours < high ? [high, "high"] : null;
+    const next = steps.find(([at]) => at > hours);
     return [this.t("outageFor", { span: span(hours) }), next ? this.t("outageNext", { level: this.t(`chip_${next[1]}`), span: span(next[0] - hours) }) : ""].filter(Boolean).join(" · ");
   }
 
@@ -129,6 +132,13 @@ class CausesMixin {
   }
 
   // The number the findings are counted by: every chain of outages once, at its top, and every finding without an outage behind it; the follow-up findings of an outage are not counted again.
+  // A quiet outage (info, low) is on the findings page only: not in the overview counts, not in what is new.
+  isQuiet(f) { return OUTAGE_RULES.includes(f.rule_id) && ["info", "low"].includes(f.impact); }
+
+  quietCause(c) { return !c.virtual && ["info", "low"].includes(c.impact); }
+
+  quietCount() { return this.causeEntries().filter(c => this.quietCause(c)).length + this.data.findings.filter(f => !f.cause_id && !f.ignored && this.isQuiet(f)).length; }
+
   findingTotal() { return this.causeEntries().length + this.data.findings.filter(f => !f.cause_id && !f.ignored).length; }
 
   followerCount() { return this.data.findings.filter(f => f.cause_id && !f.ignored && !CAUSE_OWN_RULES.includes(f.rule_id)).length; }

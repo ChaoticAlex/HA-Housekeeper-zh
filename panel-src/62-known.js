@@ -227,7 +227,7 @@ class KnownMixin {
     const needLoad = recorder && type === "config_entry" && !this.storms?.available && !this.stormsError;
     const head = needLoad ? `<button class="btn" data-known-load="${this.esc(item.object_id)}" data-known-type="${type}" ${this.stormsLoading ? 'disabled aria-busy="true"' : ""}>${t(this.stormsLoading ? "knownLoading" : "knownLoad")}</button>` : "";
     const finding = type === "entity" ? this.data.findings.find(f => this.findingKey(f) === key) : null;
-    const note = type === "entity" && item.status === "unavailable" && !finding && (this.data.meta.min_unavailable_days || 0) > 0 ? `<p class="factnote">${t("belowThreshold", { days: this.data.meta.min_unavailable_days })}</p>` : "";
+    const note = type === "entity" && item.status === "unavailable" && !finding && (this.data.meta.outage_info_minutes || 0) > 0 ? `<p class="factnote">${t("belowThreshold", { span: `${this.data.meta.outage_info_minutes} ${t("unitMin")}` })}</p>` : "";
     return `<section class="panel"><div class="panelhead"><div><h2>${t(title)}</h2><p>${t(hint)}</p></div>${head}</div><div class="known">${groups.map(([name, lines]) => this.knownGroup(name, lines)).join("")}</div>${note}</section>`;
   }
 

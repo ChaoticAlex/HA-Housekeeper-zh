@@ -80,7 +80,7 @@ class OverviewMixin {
       items.push({ key: "monitor_problem", area: uncovered ? "state" : "findings", tone: "red", icon: "mdi:home-alert-outline", text: this.t("monitorOverviewProblem", { n: impaired.length }), hintText: `${first.name} · ${first.incident_open && first.state === "unverified" ? `${this.t("monitorOverviewUnresolved")}: ${this.monitorReason(first.last_problem_reason)}` : [object?.name || key, this.monitorReason(first.reason)].filter(Boolean).join(" · ")} · ${this.t("monitorFindingAt", { date: this.formatDate(first.scanned_at) })}`, view: "monitor", filter: "problem" });
     }
     if (uncertain.length) items.push({ key: "monitor_unknown", area: "state", tone: "warn", icon: "mdi:home-question-outline", text: this.t("monitorOverviewUnknown", { n: uncertain.length }), hintText: uncertain[0].last_verified_at ? this.t("monitorLastVerified", { date: this.formatDate(uncertain[0].last_verified_at) }) : this.t("monitorNeverVerified"), view: "monitor", filter: "unverified" });
-    const outages = this.causeList();
+    const outages = this.causeList().filter(c => !this.quietCause(c));
     if (outages.length) items.push({ key: "outages", area: "findings", tone: "red", icon: "mdi:source-branch", label: "actOutages", hintText: this.outagesHint(outages), count: outages.length, view: "findingsNav", filter: "" });
     const regressions = (this.data.regressions || []).length;
     if (regressions) items.push({ key: "followup", area: "findings", tone: "red", icon: "mdi:history", label: "actFollowup", hint: "actFollowupHint", count: regressions, view: "journal" });
@@ -157,7 +157,7 @@ class OverviewMixin {
   healthWhyCard(health) {
     const row = (label, value, cls = "") => `<div class="row ${cls}"><span>${label}</span><span>${value}</span></div>`;
     const lines = [row(this.t("whyStart"), "100")];
-    for (const l of health.lines) lines.push(row(this.t("whyLevel", { n: this.formatNumber(l.n), level: this.t(`impact_${l.level}`), each: l.each }), `− ${l.points}`, "minus"));
+    for (const l of health.lines) lines.push(row(`<button type="button" class="link" data-why-level="${l.level}" title="${this.esc(this.t("whyOpenLevel"))}">${this.t("whyLevel", { n: this.formatNumber(l.n), level: this.t(`impact_${l.level}`), each: l.each })}</button>`, `− ${l.points}`, "minus"));
     if (health.stateRed) lines.push(row(this.t("whyState", { n: this.formatNumber(health.stateRed), each: HEALTH_STATE_POINTS }), `− ${health.statePoints}`, "minus"));
     lines.push(row(this.t("whyTotal"), `${health.percent}`, "total"));
     return `<div class="healthwhy" role="region" aria-label="${this.esc(this.t("healthWhy"))}">${lines.join("")}<small>${this.t("whyNote", { green: HEALTH_GREEN, yellow: HEALTH_YELLOW })}</small></div>`;
@@ -232,7 +232,7 @@ class OverviewMixin {
   sinceVisit() {
     if (this._visit !== undefined) return this._visit;
     this._visit = null;
-    const keys = this.data.findings.filter(f => !f.ignored).map(f => this.findingKey(f));
+    const keys = this.data.findings.filter(f => !f.ignored && !this.isQuiet(f)).map(f => this.findingKey(f));
     let saved = null;
     try { saved = JSON.parse(globalThis.localStorage?.getItem("ha_housekeeper.visit") || "null"); } catch (_) { saved = null; }
     const now = Date.now();
@@ -257,12 +257,13 @@ class OverviewMixin {
     this.ensureTrend();
     this.ensureSeries();
     this.ensureBackup();
-    const kpi = ([label, value, tone, view, status, key, rising]) => `<button class="kpi ${tone}" data-jump="${view}" data-status="${status || ""}"><small>${this.t(label)}</small><strong>${this.formatNumber(value)}</strong>${this.series ? `<span class="spark-row">${this.sparkline(key, rising)}</span>` : ""}</button>`;
+    const quiet = this.quietCount();
+    const kpi = ([label, value, tone, view, status, key, rising, extra]) => `<button class="kpi ${tone}" data-jump="${view}" data-status="${status || ""}"><small>${this.t(label)}</small><strong>${this.formatNumber(value)}</strong>${extra ? `<small>${this.esc(extra)}</small>` : ""}${this.series ? `<span class="spark-row">${this.sparkline(key, rising)}</span>` : ""}</button>`;
     const headline = health.tasks ? `<button type="button" class="headlink" data-todo-jump title="${this.esc(this.t("statusTasksJump"))}">${this.esc(this.statusHeadline(health))}</button>` : this.t("statusAllGood");
     const why = this.healthWhy ? this.healthWhyCard(health) : "";
     return `<section class="statushead" title="${this.esc(this.t("healthTip", { affected: health.affected, base: health.base }))}"><button type="button" class="ring ${health.tone}" style="--p:${health.percent}" data-health-why aria-expanded="${Boolean(this.healthWhy)}" aria-label="${this.esc(this.t("healthWhy"))}"><b>${health.percent}<small>%</small></b></button>
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p>${this.series ? `<span class="spark-row">${this.sparkline("share", "good")}</span>` : ""}</div>
-      <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", total, total ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
+      <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", total - quiet, total - quiet ? "warn" : "", "findingsNav", "", "findings", "bad", quiet ? this.t("openFindingsQuiet", { n: this.formatNumber(quiet) }) : ""], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
       ${this.scanCoverageLine()}${this.todoCard()}<div class="ovzone">${this.cleanupCard()}${this.trendCard()}${this.inventoryStatusCard()}</div>
       <div class="ovzone">${this.systemCard()}${this.databaseCard()}${this.backupSummaryCard()}</div>`;
   }

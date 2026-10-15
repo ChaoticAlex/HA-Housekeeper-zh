@@ -8,6 +8,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
 
 from .const import DOMAIN, PANEL_URL
+from .outage_levels import is_quiet
 
 ISSUE_FILTERS = {
     "orphaned_entities": "orphaned",
@@ -34,7 +35,7 @@ def async_sync_issues(hass: HomeAssistant, findings: list[dict[str, Any]]) -> No
         # Only these three kinds are repairs; every other kind (duplicates, unused, stale,
         # failed config entries, ...) stays a finding in the panel, so no hint links to an empty filter.
         category = CATEGORIES.get(finding["classification"])
-        if category and not finding.get("ignored"):
+        if category and not finding.get("ignored") and not is_quiet(finding):
             counts[category] += 1
 
     for issue_id, count in counts.items():

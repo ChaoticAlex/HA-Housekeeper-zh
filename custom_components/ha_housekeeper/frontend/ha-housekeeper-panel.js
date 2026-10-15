@@ -157,7 +157,7 @@ const TEXT = {
     noBatteries: "Keine Batterie-Entitäten gefunden.", batteryLevel: "Ladestand",
     backTo: "Zurück zu", facts: "Eckdaten", relations: "Beziehungen", showInGraph: "Im Abhängigkeitsdiagramm", noState: "Kein Zustand vorhanden", notExpected: "Nicht erwartet",
     available: "Verfügbar", causeLabel: "Ursache", hintLabel: "Empfehlung", certainty: "Sicherheit", finding: "Befund", noFinding: "Kein Befund",
-    belowThreshold: "Noch kein Befund: nicht verfügbare Entitäten werden erst nach {days} Tagen gemeldet.", refCount: "Verwendet von",
+    belowThreshold: "Noch kein Befund: ein Ausfall wird erst nach {span} gemeldet.", refCount: "Verwendet von",
     automationOff: "Automation ist ausgeschaltet", refsResolved: "Alle Referenzen aufgelöst", entities: "Entitäten",
     cs_loaded: "Geladen", cs_setup_error: "Fehler beim Einrichten", cs_setup_retry: "Einrichtung wird wiederholt", cs_not_loaded: "Nicht geladen",
     cs_migration_error: "Fehler bei der Migration", cs_failed_unload: "Entladen fehlgeschlagen", cs_setup_in_progress: "Wird eingerichtet",
@@ -344,7 +344,7 @@ const TEXT = {
     noBatteries: "No battery entities found.", batteryLevel: "Level",
     backTo: "Back to", facts: "Key facts", relations: "Relationships", showInGraph: "In dependency graph", noState: "No state available", notExpected: "Not expected",
     available: "Available", causeLabel: "Cause", hintLabel: "Recommendation", certainty: "Confidence", finding: "Finding", noFinding: "No finding",
-    belowThreshold: "Not a finding yet: unavailable entities are reported only after {days} days.", refCount: "Used by",
+    belowThreshold: "Not a finding yet: an outage is reported only after {span}.", refCount: "Used by",
     automationOff: "Automation is turned off", refsResolved: "All references resolved", entities: "Entities",
     cs_loaded: "Loaded", cs_setup_error: "Setup error", cs_setup_retry: "Retrying setup", cs_not_loaded: "Not loaded",
     cs_migration_error: "Migration error", cs_failed_unload: "Unload failed", cs_setup_in_progress: "Setting up",
@@ -532,6 +532,8 @@ const STATUS_TONE = {
 // Finding classes that call for action when they are new.
 // The findings that belong to a cause itself (an integration, a device, an app); the others are its follow-up findings.
 const CAUSE_OWN_RULES = ["config_entry.not_loaded", "device.down", "app.stopped_in_use"];
+// The findings of an outage are quiet (info, low) at first and loud from medium on; quiet ones stay on the findings page only.
+const OUTAGE_RULES = ["entity.state_unavailable", "device.down", "config_entry.not_loaded", "app.stopped_in_use"];
 const CRITICAL_CLASSES = ["broken_reference", "unavailable", "problem"];
 
 // Object types the housekeeping status is calculated from.
@@ -2158,7 +2160,7 @@ class OverviewMixin {
       items.push({ key: "monitor_problem", area: uncovered ? "state" : "findings", tone: "red", icon: "mdi:home-alert-outline", text: this.t("monitorOverviewProblem", { n: impaired.length }), hintText: `${first.name} · ${first.incident_open && first.state === "unverified" ? `${this.t("monitorOverviewUnresolved")}: ${this.monitorReason(first.last_problem_reason)}` : [object?.name || key, this.monitorReason(first.reason)].filter(Boolean).join(" · ")} · ${this.t("monitorFindingAt", { date: this.formatDate(first.scanned_at) })}`, view: "monitor", filter: "problem" });
     }
     if (uncertain.length) items.push({ key: "monitor_unknown", area: "state", tone: "warn", icon: "mdi:home-question-outline", text: this.t("monitorOverviewUnknown", { n: uncertain.length }), hintText: uncertain[0].last_verified_at ? this.t("monitorLastVerified", { date: this.formatDate(uncertain[0].last_verified_at) }) : this.t("monitorNeverVerified"), view: "monitor", filter: "unverified" });
-    const outages = this.causeList();
+    const outages = this.causeList().filter(c => !this.quietCause(c));
     if (outages.length) items.push({ key: "outages", area: "findings", tone: "red", icon: "mdi:source-branch", label: "actOutages", hintText: this.outagesHint(outages), count: outages.length, view: "findingsNav", filter: "" });
     const regressions = (this.data.regressions || []).length;
     if (regressions) items.push({ key: "followup", area: "findings", tone: "red", icon: "mdi:history", label: "actFollowup", hint: "actFollowupHint", count: regressions, view: "journal" });
@@ -2235,7 +2237,7 @@ class OverviewMixin {
   healthWhyCard(health) {
     const row = (label, value, cls = "") => `<div class="row ${cls}"><span>${label}</span><span>${value}</span></div>`;
     const lines = [row(this.t("whyStart"), "100")];
-    for (const l of health.lines) lines.push(row(this.t("whyLevel", { n: this.formatNumber(l.n), level: this.t(`impact_${l.level}`), each: l.each }), `− ${l.points}`, "minus"));
+    for (const l of health.lines) lines.push(row(`<button type="button" class="link" data-why-level="${l.level}" title="${this.esc(this.t("whyOpenLevel"))}">${this.t("whyLevel", { n: this.formatNumber(l.n), level: this.t(`impact_${l.level}`), each: l.each })}</button>`, `− ${l.points}`, "minus"));
     if (health.stateRed) lines.push(row(this.t("whyState", { n: this.formatNumber(health.stateRed), each: HEALTH_STATE_POINTS }), `− ${health.statePoints}`, "minus"));
     lines.push(row(this.t("whyTotal"), `${health.percent}`, "total"));
     return `<div class="healthwhy" role="region" aria-label="${this.esc(this.t("healthWhy"))}">${lines.join("")}<small>${this.t("whyNote", { green: HEALTH_GREEN, yellow: HEALTH_YELLOW })}</small></div>`;
@@ -2310,7 +2312,7 @@ class OverviewMixin {
   sinceVisit() {
     if (this._visit !== undefined) return this._visit;
     this._visit = null;
-    const keys = this.data.findings.filter(f => !f.ignored).map(f => this.findingKey(f));
+    const keys = this.data.findings.filter(f => !f.ignored && !this.isQuiet(f)).map(f => this.findingKey(f));
     let saved = null;
     try { saved = JSON.parse(globalThis.localStorage?.getItem("ha_housekeeper.visit") || "null"); } catch (_) { saved = null; }
     const now = Date.now();
@@ -2335,12 +2337,13 @@ class OverviewMixin {
     this.ensureTrend();
     this.ensureSeries();
     this.ensureBackup();
-    const kpi = ([label, value, tone, view, status, key, rising]) => `<button class="kpi ${tone}" data-jump="${view}" data-status="${status || ""}"><small>${this.t(label)}</small><strong>${this.formatNumber(value)}</strong>${this.series ? `<span class="spark-row">${this.sparkline(key, rising)}</span>` : ""}</button>`;
+    const quiet = this.quietCount();
+    const kpi = ([label, value, tone, view, status, key, rising, extra]) => `<button class="kpi ${tone}" data-jump="${view}" data-status="${status || ""}"><small>${this.t(label)}</small><strong>${this.formatNumber(value)}</strong>${extra ? `<small>${this.esc(extra)}</small>` : ""}${this.series ? `<span class="spark-row">${this.sparkline(key, rising)}</span>` : ""}</button>`;
     const headline = health.tasks ? `<button type="button" class="headlink" data-todo-jump title="${this.esc(this.t("statusTasksJump"))}">${this.esc(this.statusHeadline(health))}</button>` : this.t("statusAllGood");
     const why = this.healthWhy ? this.healthWhyCard(health) : "";
     return `<section class="statushead" title="${this.esc(this.t("healthTip", { affected: health.affected, base: health.base }))}"><button type="button" class="ring ${health.tone}" style="--p:${health.percent}" data-health-why aria-expanded="${Boolean(this.healthWhy)}" aria-label="${this.esc(this.t("healthWhy"))}"><b>${health.percent}<small>%</small></b></button>
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p>${this.series ? `<span class="spark-row">${this.sparkline("share", "good")}</span>` : ""}</div>
-      <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", total, total ? "warn" : "", "findingsNav", "", "findings", "bad"], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
+      <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", total - quiet, total - quiet ? "warn" : "", "findingsNav", "", "findings", "bad", quiet ? this.t("openFindingsQuiet", { n: this.formatNumber(quiet) }) : ""], ["unavailable", counts.unavailable || 0, counts.unavailable ? "red" : "", "inventory", "unavailable", "unavailable", "bad"]].map(kpi).join("")}</div></section>${why}
       ${this.scanCoverageLine()}${this.todoCard()}<div class="ovzone">${this.cleanupCard()}${this.trendCard()}${this.inventoryStatusCard()}</div>
       <div class="ovzone">${this.systemCard()}${this.databaseCard()}${this.backupSummaryCard()}</div>`;
   }
@@ -2671,6 +2674,7 @@ class FindingsMixin {
   }
 
   findingsView() {
+    if (this._impactOnce) { this.visibleFindings(); if (this.lv.findings) { this.lv.findings.f.impact = this._impactOnce; this.persistLv("findings"); } this._impactOnce = ""; }
     const all = this.sortedFindings(true).filter(f => this.statusMatch(f));
     const classes = [...new Set(all.map(f => this.findingReason(f)))];
     const open = !this.findingStatus && !this.findingFilter && !this.findingAfter && !this.lv.findings?.q && !Object.values(this.lv.findings?.f || {}).some(Boolean);
@@ -5091,7 +5095,7 @@ class DiagnosisMixin {
 
   factsCard(item, key) {
     const finding = this.data.findings.find(f => this.findingKey(f) === key);
-    const min = this.data.meta.min_unavailable_days || 0;
+    const info = this.data.meta.outage_info_minutes || 0;
     const facts = [];
     if (item.status_since) facts.push([this.t("since"), `${this.formatDate(item.status_since)}<small>${this.esc(this.relTime(item.status_since))} · ${this.t("firstSeenNote")}</small>`]);
     if (["entity", "automation", "script", "scene", "dashboard"].includes(item.object_type)) {
@@ -5099,9 +5103,9 @@ class DiagnosisMixin {
     }
     const quarantined = ["entity", "device"].includes(item.object_type) ? this.quarantineOf(item.object_id) : null;
     if (quarantined) facts.push([this.t("quarantine"), `${this.t("quarantineFact", { date: this.formatDate(quarantined.since), days: this.daysSince(quarantined.since) })}<span class="factaction">${this.releaseControl(quarantined)}</span>`]);
-    const outage = finding?.rule_id === "config_entry.not_loaded" ? this.outageLineOf(finding) : "";
+    const outage = finding && OUTAGE_RULES.includes(finding.rule_id) ? this.outageLineOf(finding) : "";
     if (outage) facts.push([this.t("chip_outage"), this.esc(outage)]);
-    const note = item.status === "unavailable" && !finding && min > 0 ? `<p class="factnote">${this.t("belowThreshold", { days: min })}</p>` : "";
+    const note = item.status === "unavailable" && !finding && info > 0 ? `<p class="factnote">${this.t("belowThreshold", { span: `${info} ${this.t("unitMin")}` })}</p>` : "";
     return `<section class="panel"><div class="panelhead"><h2>${this.t("facts")}</h2></div><div class="facts">${facts.map(([k, v]) => `<div class="fact"><span>${k}</span><b>${v}</b></div>`).join("")}</div>${note}</section>`;
   }
 
@@ -7799,12 +7803,14 @@ class MarksMixin {
 
 // Texts for the impact of a finding (see impact.py); merged into TEXT.
 Object.assign(TEXT.de, {
+  openFindingsQuiet: "+ {n} weitere (Info, niedrig)", whyOpenLevel: "Befunde dieser Stufe anzeigen",
   sortImpact: "Schweregrad", allSeverities: "Alle Schweregrade", chip_none: "Keine", viewsClear: "Keine Ansicht", impact_high: "Hohe Auswirkung", impact_medium: "Mittlere Auswirkung", impact_low: "Geringe Auswirkung", impact_info: "Info", outageFor: "seit {span}", outageNext: "{level} in {span}", unitMin: "Min.", unitHour: "Std.", unitDay: "Tagen", chip_outage: "Ausfall", allReasons: "Alle Gründe", chip_high: "Hoch", chip_medium: "Mittel", chip_low: "Niedrig", chip_info: "Info", rowMenu: "Aktionen für diese Zeile", impact_none: "Keine Auswirkung",
   impactFact_outage_age: "Dauer des Ausfalls", impactFact_critical: "kritisch: {why}", impactFact_target_critical: "fehlendes Ziel {id} ist kritisch", impactFact_controls_critical: "steuert {n} kritische Objekte", impactFact_used_by_active: "von {n} aktiven Automationen oder Skripten genutzt", impactFact_on_dashboards: "auf {n} Dashboards", impactFact_many_dependents: "{n} Abhängige", impactFact_runs_active: "läuft aktiv", impactFact_runs_inactive: "ist deaktiviert",
   reason_critical_object: "Kritisches Objekt (Schloss, Alarm, Wasser- oder Rauchmelder, Label housekeeper_critical): bitte einzeln bestätigen.",
   impactWhy_label: "Label", impactWhy_device_label: "Label am Gerät", impactWhy_area_label: "Label am Bereich", impactWhy_kind: "Art des Objekts",
 });
 Object.assign(TEXT.en, {
+  openFindingsQuiet: "+ {n} more (info, low)", whyOpenLevel: "Show the findings of this level",
   sortImpact: "Severity", allSeverities: "All severities", chip_none: "None", viewsClear: "No view", impact_high: "High impact", impact_medium: "Medium impact", impact_low: "Low impact", impact_info: "Info", outageFor: "for {span}", outageNext: "{level} in {span}", unitMin: "min", unitHour: "h", unitDay: "days", chip_outage: "Outage", allReasons: "All reasons", chip_high: "High", chip_medium: "Medium", chip_low: "Low", chip_info: "Info", rowMenu: "Actions for this row", impact_none: "No impact",
   impactFact_outage_age: "length of the outage", impactFact_critical: "critical: {why}", impactFact_target_critical: "the missing target {id} is critical", impactFact_controls_critical: "controls {n} critical objects", impactFact_used_by_active: "used by {n} active automations or scripts", impactFact_on_dashboards: "on {n} dashboards", impactFact_many_dependents: "{n} dependents", impactFact_runs_active: "runs actively", impactFact_runs_inactive: "is disabled",
   reason_critical_object: "Critical object (lock, alarm, water or smoke sensor, label housekeeper_critical): confirm it on its own.",
@@ -7838,9 +7844,12 @@ class CausesMixin {
   outageLineOf(f) {
     const since = f && Date.parse(f.first_detected_at);
     if (!since) return "";
-    const hours = Math.max(0, (Date.now() - since) / 3600000), high = Math.max(24, (this.data.meta?.min_unavailable_days || 0) * 24);
+    const m = this.data.meta || {};
+    const hours = Math.max(0, (Date.now() - since) / 3600000);
+    // The next level and when it starts, from the four thresholds (info in minutes, the others in hours).
+    const steps = [[(m.outage_info_minutes ?? 15) / 60, "info"], [m.outage_low_hours ?? 1, "low"], [m.outage_medium_hours ?? 24, "medium"], [m.outage_high_hours ?? 168, "high"]];
     const span = h => h < 1 ? `${Math.max(1, Math.round(h * 60))} ${this.t("unitMin")}` : h < 48 ? `${Math.round(h)} ${this.t("unitHour")}` : `${Math.round(h / 24)} ${this.t("unitDay")}`;
-    const next = hours < 1 ? [1, "low"] : hours < 24 ? [24, "medium"] : hours < high ? [high, "high"] : null;
+    const next = steps.find(([at]) => at > hours);
     return [this.t("outageFor", { span: span(hours) }), next ? this.t("outageNext", { level: this.t(`chip_${next[1]}`), span: span(next[0] - hours) }) : ""].filter(Boolean).join(" · ");
   }
 
@@ -7942,6 +7951,13 @@ class CausesMixin {
   }
 
   // The number the findings are counted by: every chain of outages once, at its top, and every finding without an outage behind it; the follow-up findings of an outage are not counted again.
+  // A quiet outage (info, low) is on the findings page only: not in the overview counts, not in what is new.
+  isQuiet(f) { return OUTAGE_RULES.includes(f.rule_id) && ["info", "low"].includes(f.impact); }
+
+  quietCause(c) { return !c.virtual && ["info", "low"].includes(c.impact); }
+
+  quietCount() { return this.causeEntries().filter(c => this.quietCause(c)).length + this.data.findings.filter(f => !f.cause_id && !f.ignored && this.isQuiet(f)).length; }
+
   findingTotal() { return this.causeEntries().length + this.data.findings.filter(f => !f.cause_id && !f.ignored).length; }
 
   followerCount() { return this.data.findings.filter(f => f.cause_id && !f.ignored && !CAUSE_OWN_RULES.includes(f.rule_id)).length; }
@@ -11578,7 +11594,7 @@ class KnownMixin {
     const needLoad = recorder && type === "config_entry" && !this.storms?.available && !this.stormsError;
     const head = needLoad ? `<button class="btn" data-known-load="${this.esc(item.object_id)}" data-known-type="${type}" ${this.stormsLoading ? 'disabled aria-busy="true"' : ""}>${t(this.stormsLoading ? "knownLoading" : "knownLoad")}</button>` : "";
     const finding = type === "entity" ? this.data.findings.find(f => this.findingKey(f) === key) : null;
-    const note = type === "entity" && item.status === "unavailable" && !finding && (this.data.meta.min_unavailable_days || 0) > 0 ? `<p class="factnote">${t("belowThreshold", { days: this.data.meta.min_unavailable_days })}</p>` : "";
+    const note = type === "entity" && item.status === "unavailable" && !finding && (this.data.meta.outage_info_minutes || 0) > 0 ? `<p class="factnote">${t("belowThreshold", { span: `${this.data.meta.outage_info_minutes} ${t("unitMin")}` })}</p>` : "";
     return `<section class="panel"><div class="panelhead"><div><h2>${t(title)}</h2><p>${t(hint)}</p></div>${head}</div><div class="known">${groups.map(([name, lines]) => this.knownGroup(name, lines)).join("")}</div>${note}</section>`;
   }
 
@@ -15546,6 +15562,7 @@ class HAHousekeeperPanel extends HTMLElement {
       const kind = el.dataset.bhSave, date = root.querySelector(`[data-bh-date="${kind}"]`)?.value;
       this.loadBackup({ type: "ha_housekeeper/backup_attest", kind, ...(date ? { date } : {}) });
     });
+    root.querySelectorAll("[data-why-level]").forEach(el => el.onclick = () => { this.noteJump("findingsNav"); this.view = "findingsNav"; this.pages = {}; this.findingFilter = ""; this.findingAfter = false; this._impactOnce = el.dataset.whyLevel; this.render(); });
     root.querySelectorAll("[data-watch-mark]").forEach(el => el.onclick = async ev => { ev.stopPropagation(); const obj = this.findObject(el.dataset.watchMark); if (!obj) return; this._pendingTab = "actions"; await this.openObject(obj); this.openMark(el.dataset.watchMark); });
     root.querySelectorAll("[data-watch-go]").forEach(el => el.onclick = () => { this.noteJump?.("findingsNav"); this.view = "findingsNav"; this.pages = {}; this.selected = null; this.trail = []; this.folds = { ...this.folds, watch: true, [`watch_${el.dataset.watchGo}`]: true }; this.render(); });
     root.querySelectorAll("[data-fold]").forEach(el => el.onclick = () => { if (el.dataset.fold.startsWith("chg_")) this.changesCat = ""; this.folds = { ...this.folds, [el.dataset.fold]: el.getAttribute("aria-expanded") !== "true" }; this.render(); });
