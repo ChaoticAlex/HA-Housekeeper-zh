@@ -14,6 +14,8 @@
 
 - **Pläne warten auf einen ruhigen Recorder:** Ein Plan startet nicht, solange Home Assistant selbst ein Backup erstellt, der Recorder die Datenbank migriert oder sehr viele Schreibvorgänge in der Warteschlange hat. Er ändert dann nichts und lässt sich später erneut starten.
 
+- **Beschädigte Speicherdateien:** Lässt sich eine der gespeicherten Dateien von Housekeeper nicht lesen, beginnt nur dieser Teil leer, und die Integration startet trotzdem; die Diagnose nennt den Teil. Eine Datei aus einer neueren Version wird weiter nicht überschrieben.
+
 - **Backup wird geprüft:** Nach dem Backup vor einem Plan sieht Housekeeper in der Backup-Liste nach, ob es wirklich dort steht, nicht leer ist und bei Plänen im Recorder die Datenbank enthält. Sonst wird nichts geändert.
 
 - **Reparaturmeldung:** Ein Datenbankschaden erscheint auch unter Einstellungen → Reparaturen (mit dem Hinweis auf `REINDEX` und das Backup) und verschwindet, sobald eine Prüfung wieder sauber ist. Ein Schaden, auf den ein Plan stößt, zählt ebenso.
@@ -35,6 +37,8 @@
 - **Disk space:** The Recorder page reports little free space on the database’s disk (under 1 GB or 5 %). Below 512 MB a plan that writes into the recorder stops without changing anything.
 
 - **Plans wait for a calm recorder:** A plan does not start while Home Assistant itself is making a backup, the recorder is migrating the database or has a very long write queue. It changes nothing then and can be started again later.
+
+- **Damaged saved files:** If one of Housekeeper’s saved files cannot be read, only that part starts empty and the integration still starts; the diagnostics name the part. A file from a newer version is still not overwritten.
 
 - **The backup is verified:** After the backup before a plan, Housekeeper looks in the backup list to see that it is really there, not empty and, for plans in the recorder, contains the database. Otherwise nothing is changed.
 

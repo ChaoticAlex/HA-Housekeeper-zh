@@ -12,6 +12,7 @@ from typing import Any
 
 from homeassistant.const import __version__ as HA_VERSION
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import UnsupportedStorageVersionError
 from homeassistant.helpers import area_registry as ar
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
@@ -705,6 +706,39 @@ def storage_sizes(hass: HomeAssistant) -> dict[str, dict[str, float]]:
     return files
 
 
+STORE_NAMES = (
+    "observations",
+    "history",
+    "ignored",
+    "policies",
+    "replies",
+    "journal",
+    "preflight",
+    "attest",
+    "events",
+    "watch",
+    "marks",
+    "stale",
+    "load",
+    "goals",
+    "criteria",
+    "coverage",
+    "refactor",
+    "protection",
+    "signals",
+    "entry_states",
+    "health",
+    "reminders",
+    "notes",
+    "batteries",
+    "window",
+    "notify",
+    "monitor",
+    "runs",
+    "config_changes",
+)
+
+
 class InventoryScanner:
     """Build and cache a normalized, read-only inventory."""
 
@@ -762,6 +796,7 @@ class InventoryScanner:
         self.scan_interval_hours = DEFAULT_SCAN_INTERVAL_HOURS
         self.watch_hours = DEFAULT_WATCH_HOURS
         self.version: str | None = None
+        self.load_failures: list[str] = []  # stores whose saved data could not be read
         self.status: dict[str, Any] = {
             "running": False,
             "phase": "idle",
@@ -775,35 +810,15 @@ class InventoryScanner:
             self.version = str((await async_get_integration(self.hass, DOMAIN)).version)
         except IntegrationNotFound:
             self.version = None
-        await self.observations.async_load()
-        await self.history.async_load()
-        await self.ignored.async_load()
-        await self.policies.async_load()
-        await self.replies.async_load()
-        await self.journal.async_load()
-        await self.preflight.async_load()
-        await self.attest.async_load()
-        await self.events.async_load()
-        await self.watch.async_load()
-        await self.marks.async_load()
-        await self.stale.async_load()
-        await self.load.async_load()
-        await self.goals.async_load()
-        await self.criteria.async_load()
-        await self.coverage.async_load()
-        await self.refactor.async_load()
-        await self.protection.async_load()
-        await self.signals.async_load()
-        await self.entry_states.async_load()
-        await self.health.async_load()
-        await self.reminders.async_load()
-        await self.notes.async_load()
-        await self.batteries.async_load()
-        await self.window.async_load()
-        await self.notify.async_load()
-        await self.monitor.async_load()
-        await self.runs.async_load()
-        await self.config_changes.async_load()
+        for name in STORE_NAMES:
+            try:
+                await getattr(self, name).async_load()
+            except UnsupportedStorageVersionError:
+                raise  # written by a newer version: running on would overwrite it
+            except Exception:
+                # One unreadable file must not take the whole integration down; that part starts empty.
+                _LOGGER.exception("The saved data of %s could not be read, starting it empty", name)
+                self.load_failures.append(name)
 
     def begin_boot(self) -> None:
         """Home Assistant is still booting: scans are preliminary until the warm-up is over."""

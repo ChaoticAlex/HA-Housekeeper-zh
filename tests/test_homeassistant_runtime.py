@@ -1508,3 +1508,22 @@ async def test_a_damaged_database_is_a_repair_hint_until_a_check_comes_back_clea
     assert issue is not None and issue.severity == ir.IssueSeverity.ERROR and not issue.is_fixable
     async_sync_database_issue(hass, {**damaged, "state": "ok", "lines": []})
     assert registry.async_get_issue(DOMAIN, DATABASE_ISSUE_ID) is None
+
+
+async def test_one_unreadable_saved_file_starts_only_that_part_empty(hass: HomeAssistant) -> None:
+    from unittest.mock import AsyncMock, patch
+
+    from homeassistant.exceptions import UnsupportedStorageVersionError
+
+    scanner = InventoryScanner(hass)
+    with patch.object(scanner.notes, "async_load", AsyncMock(side_effect=ValueError("bad shape"))):
+        await scanner.async_initialize()
+    assert scanner.load_failures == ["notes"]
+
+    scanner = InventoryScanner(hass)
+    newer = AsyncMock(side_effect=UnsupportedStorageVersionError("housekeeper", 9, 1))
+    with (
+        patch.object(scanner.marks, "async_load", newer),
+        pytest.raises(UnsupportedStorageVersionError),
+    ):
+        await scanner.async_initialize()

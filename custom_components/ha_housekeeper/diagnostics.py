@@ -31,6 +31,8 @@ async def async_get_config_entry_diagnostics(
     return {
         "home_assistant": HA_VERSION,
         "loaded": True,
+        # Names of the saved data that could not be read at start and began empty (names of parts, no data).
+        "storage_load_failures": list(getattr(scanner, "load_failures", [])),
         "scan_status": {**scanner.status, "last_error": error.split(":", 1)[0] if error else None},
         # Without the error text: it can name entities or paths.
         "scan_health": {**scanner.health_report(), "error": None},
