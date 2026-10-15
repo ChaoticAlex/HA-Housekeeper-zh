@@ -13,6 +13,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 
 from .const import DOMAIN, NOTIFY_STORAGE_KEY, PANEL_URL, STORAGE_VERSION
+from .texts import pick
 
 SAVE_DELAY = 10
 SEEN_LIMIT = 500
@@ -88,7 +89,7 @@ def async_announce(hass: HomeAssistant, fresh: list[dict[str, Any]]) -> None:
         return
     from homeassistant.components import persistent_notification
 
-    title, template = TEXTS.get(hass.config.language.split("-")[0], TEXTS["en"])
+    title, template = pick(hass, TEXTS)
     names = sorted({str(f.get("affected_object") or f["object_id"]) for f in fresh})
     text = ", ".join(names[:LISTED]) + (", …" if len(names) > LISTED else "")
     persistent_notification.async_create(

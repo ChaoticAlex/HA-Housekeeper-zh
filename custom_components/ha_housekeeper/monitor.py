@@ -27,6 +27,7 @@ from .const import (
     STORAGE_VERSION,
 )
 from .scan_health import stale_after
+from .texts import pick
 
 SAVE_DELAY = 5
 MAX_ITEMS = 30
@@ -97,6 +98,21 @@ REASONS_EN = {
     "rule_waiting": "grace period running",
     "rule_no_value": "no numeric value",
     "rule_no_timestamp": "update time unknown",
+}
+MONITOR_REASONS = {"de": REASONS_DE, "en": REASONS_EN}
+MONITOR_TEXTS = {
+    "de": {
+        "uncertain_open": "Prüfung unvollständig; letzter bestätigter Defekt ({last_reason}) bleibt ungeklärt.",
+        "uncertain": "Prüfung unvollständig.",
+        "impaired": "Wichtige Funktion beeinträchtigt: {reason}",
+        "link": "Hausfunktionen öffnen",
+    },
+    "en": {
+        "uncertain_open": "Check incomplete; the last confirmed fault ({last_reason}) remains unresolved.",
+        "uncertain": "Check incomplete.",
+        "impaired": "Important function impaired: {reason}",
+        "link": "Open home functions",
+    },
 }
 
 
@@ -783,35 +799,20 @@ class MonitorStore:
     def _notify(self, result: dict[str, Any], *, uncertain: bool = False) -> None:
         if not result["notify"]:
             return
-        language = self.hass.config.language.split("-")[0]
-        if language == "de":
-            reason = REASONS_DE.get(result["reason"], result["reason"])
-            last_reason = REASONS_DE.get(
-                result.get("last_problem_reason"), result.get("last_problem_reason") or reason
-            )
-            title = f"Housekeeper: {result['name']}"
-            body = (
-                f"Prüfung unvollständig; letzter bestätigter Defekt ({last_reason}) bleibt ungeklärt."
-                if uncertain and result["incident_open"]
-                else "Prüfung unvollständig."
-                if uncertain
-                else f"Wichtige Funktion beeinträchtigt: {reason}"
-            )
-            link = "Hausfunktionen öffnen"
+        texts = pick(self.hass, MONITOR_TEXTS)
+        reasons = pick(self.hass, MONITOR_REASONS)
+        reason = reasons.get(result["reason"], result["reason"])
+        last_reason = reasons.get(
+            result.get("last_problem_reason"), result.get("last_problem_reason") or reason
+        )
+        title = f"Housekeeper: {result['name']}"
+        if uncertain and result["incident_open"]:
+            body = texts["uncertain_open"].format(last_reason=last_reason)
+        elif uncertain:
+            body = texts["uncertain"]
         else:
-            reason = REASONS_EN.get(result["reason"], result["reason"])
-            last_reason = REASONS_EN.get(
-                result.get("last_problem_reason"), result.get("last_problem_reason") or reason
-            )
-            title = f"Housekeeper: {result['name']}"
-            body = (
-                f"Check incomplete; the last confirmed fault ({last_reason}) remains unresolved."
-                if uncertain and result["incident_open"]
-                else "Check incomplete."
-                if uncertain
-                else f"Important function impaired: {reason}"
-            )
-            link = "Open home functions"
+            body = texts["impaired"].format(reason=reason)
+        link = texts["link"]
         persistent_notification.async_create(
             self.hass,
             f"{body} [{link}](/{PANEL_URL}?view=monitor&function={result['id']})",

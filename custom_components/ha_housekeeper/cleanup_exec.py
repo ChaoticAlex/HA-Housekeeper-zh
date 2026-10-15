@@ -128,12 +128,19 @@ from .references import (
     rewrite,
     yaml_hash,
 )
+from .texts import pick
 from .writelock import WriteBusy, acquire_write, release_write, write_holder
 
 TOKEN_TTL = timedelta(minutes=5)
 ID_FREE_TIMEOUT = 10.0  # seconds to wait until Home Assistant has removed a renamed entity's state
 STATISTIC_KEYS = ("state", "sum", "min", "max", "mean")
 _LOGGER = logging.getLogger(__name__)
+
+# The logbook entry of a removed or forgotten device: the sentence and the two words (forgotten, removed).
+LOGBOOK_DEVICE = {
+    "de": ("Gerät „{}“ {}", ("vergessen", "entfernt")),
+    "en": ("Device “{}” {}", ("forgotten", "removed")),
+}
 
 LOGBOOK_KINDS = ("remove_device", "forget_device")  # written to the logbook when done
 # Recorder steps do not depend on each other: one that fails must not hold back the others,
@@ -820,11 +827,9 @@ class CleanupRunner:
 
     def _write_logbook(self, plan: dict[str, Any], action: dict[str, Any]) -> None:
         """Enter a removed or forgotten device in the logbook; the entry outlives the device."""
-        german = str(self.hass.config.language).startswith("de")
         name = str(action.get("name") or action["object_id"])
-        text = "Gerät „{}“ {}" if german else "Device “{}” {}"
+        text, words = pick(self.hass, LOGBOOK_DEVICE)
         forgot = action["kind"] == "forget_device"
-        words = ("vergessen", "entfernt") if german else ("forgotten", "removed")
         try:
             self.scanner.notes.upsert(
                 None,
