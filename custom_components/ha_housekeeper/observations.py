@@ -35,10 +35,15 @@ class ObservationStore:
         for object_id, classification in classifications.items():
             previous = self._items.get(object_id)
             if previous is None or previous.get("classification") != classification:
-                self._items[object_id] = {
-                    "classification": classification,
-                    "since": timestamp,
-                }
+                item = {"classification": classification, "since": timestamp}
+                # Without a value now, but with one before: that is what makes "unknown" a problem.
+                if (
+                    previous is not None
+                    and classification in ("unknown", "unavailable")
+                    and (previous.get("classification") == "active" or previous.get("had_value"))
+                ):
+                    item["had_value"] = True
+                self._items[object_id] = item
                 changed = True
 
         for object_id in set(self._items) - active_ids:
@@ -47,6 +52,11 @@ class ObservationStore:
 
         if changed:
             self._store.async_delay_save(lambda: {"items": self._items}, SAVE_DELAY)
+
+    def had_value(self, object_id: str) -> bool:
+        """Whether the object had a value before it lost it; false for one never seen working."""
+        item = self._items.get(object_id)
+        return bool(item and item.get("had_value"))
 
     def since(self, object_id: str, classification: str) -> str | None:
         """Return the start of the current continuously observed classification."""

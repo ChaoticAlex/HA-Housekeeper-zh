@@ -484,7 +484,7 @@ def _reaches_info(item: dict[str, Any], now: datetime, levels: Levels | None) ->
     Orphaned entities always qualify; only an outage that is still younger than the first
     threshold is left out. Without ``levels`` nothing is left out.
     """
-    if levels is None or item["status"] != "unavailable":
+    if levels is None or item["status"] not in ("unavailable", "unknown"):
         return True
     age = _age(item, now)
     return age is not None and outage_level(age, levels) is not None
@@ -499,7 +499,10 @@ def _entity_findings(
     now = now or datetime.now(UTC)
     findings = []
     for item in entities:
-        if item["status"] not in {"orphaned", "unavailable"} or not _reaches_info(
+        # No value any more is a problem only for an entity that had one: some never report.
+        if item["status"] == "unknown" and not item.get("had_value"):
+            continue
+        if item["status"] not in {"orphaned", "unavailable", "unknown"} or not _reaches_info(
             item, now, levels
         ):
             continue
@@ -511,7 +514,7 @@ def _entity_findings(
             "first_detected_at": item["status_since"],
             "evidence": [{"kind": item["reason"], "source": "entity_registry"}],
         }
-        if levels is not None and item["status"] == "unavailable":
+        if levels is not None and item["status"] in ("unavailable", "unknown"):
             age = _age(item, now)
             if age is not None:
                 finding["outage_level"] = outage_level(age, levels)
@@ -1262,6 +1265,7 @@ class InventoryScanner:
                 item["status_since"], item["status_since_source"] = outage_start(
                     item["status_since"], item.get("last_changed")
                 )
+                item["had_value"] = self.observations.had_value(f"{kind}:{item['object_id']}")
         if not preliminary:
             self.stale.observe(
                 entities,

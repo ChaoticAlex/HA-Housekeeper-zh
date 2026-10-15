@@ -251,7 +251,7 @@ def apply_marks(
                 mark_key("app", finding["object_id"]),
                 mark_key("config_entry", finding.get("affected_object") or ""),
             )
-        elif finding["classification"] in ("unavailable", "stale"):
+        elif finding["classification"] in ("unavailable", "unknown", "stale"):
             entity_id = finding["object_id"]
             keys = (
                 mark_key("entity", entity_id),

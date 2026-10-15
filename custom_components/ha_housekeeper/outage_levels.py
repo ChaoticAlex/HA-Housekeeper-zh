@@ -109,7 +109,13 @@ def outage_level(age: timedelta, levels: Levels, direct: bool = False) -> str | 
 # stay on the findings page but are left out of the overview, the sensors, the repair hints and the
 # lists of what is new or gone.
 OUTAGE_RULES = frozenset(
-    {"entity.state_unavailable", "device.down", "config_entry.not_loaded", "app.stopped_in_use"}
+    {
+        "entity.state_unavailable",
+        "entity.state_unknown",
+        "device.down",
+        "config_entry.not_loaded",
+        "app.stopped_in_use",
+    }
 )
 QUIET_IMPACTS = frozenset({"info", "low"})
 

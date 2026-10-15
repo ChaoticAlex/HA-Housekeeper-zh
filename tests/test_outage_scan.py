@@ -127,3 +127,31 @@ def test_a_device_and_a_stopped_app_wait_for_the_first_level_too() -> None:
     ]
     apps[0]["status_since"] = (NOW - timedelta(minutes=3)).isoformat()
     assert stopped_app_findings(apps, entries, edges, NOW, levels) == []
+
+
+async def test_an_entity_that_lost_its_value_is_a_finding_but_one_that_never_had_one_is_not(
+    hass,
+) -> None:
+    from custom_components.ha_housekeeper.inventory import _entity_findings
+    from custom_components.ha_housekeeper.observations import ObservationStore
+
+    store = ObservationStore(hass)
+    await store.async_update({"entity:a": "active", "entity:b": "unknown"}, NOW)
+    await store.async_update({"entity:a": "unknown", "entity:b": "unknown"}, NOW + timedelta(hours=1))
+    assert store.had_value("entity:a") and not store.had_value("entity:b")
+    await store.async_update({"entity:a": "unavailable"}, NOW + timedelta(hours=2))
+    assert store.had_value("entity:a"), "unavailable after unknown is still the same loss"
+
+    def item(entity_id, had):
+        return {
+            "object_id": entity_id,
+            "status": "unknown",
+            "reason": "state_unknown",
+            "status_since": (NOW - timedelta(hours=2)).isoformat(),
+            "had_value": had,
+        }
+
+    found = _entity_findings([item("a", True), item("b", False)], NOW, (15, 1, 24, 168))
+    assert [(f["object_id"], f["rule_id"], f["outage_level"]) for f in found] == [
+        ("a", "entity.state_unknown", "low")
+    ]

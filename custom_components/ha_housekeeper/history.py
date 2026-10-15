@@ -38,7 +38,12 @@ def _valid_checkpoint(value: Any) -> dict[str, Any] | None:
 
 # The rules whose outcome depends on a setting: when it changed between two scans, findings that
 # vanished were not repaired, the rule just reads differently now.
-_OUTAGE_RULES = {"entity.state_unavailable", "config_entry.not_loaded", "device.down"}
+_OUTAGE_RULES = {
+    "entity.state_unavailable",
+    "entity.state_unknown",
+    "config_entry.not_loaded",
+    "device.down",
+}
 SETTING_RULES = {
     "outage_info_minutes": _OUTAGE_RULES,
     "outage_low_hours": _OUTAGE_RULES,
