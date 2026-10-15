@@ -69,7 +69,6 @@ from .protection import MODES as PROTECTION_MODES
 from .recorder_purge import MAX_IDS as PURGE_MAX_IDS
 from .recorder_purge import TRIM_MAX_DAYS, TRIM_TABLES, count_history, count_older, count_trim
 from .references import preview_replacement
-from .window import SKIPPABLE, STEPS, WindowError, reload_targets
 from .writelock import WriteBusy, acquire_write, release_write, write_holder
 from .ws_common import (
     _scanner,
@@ -976,25 +975,6 @@ async def websocket_backup_cleanup(
     connection.send_result(msg["id"], _versioned(result))
 
 
-def _window_view(scanner: InventoryScanner) -> dict[str, Any]:
-    window = scanner.window
-    return {"enabled": window.enabled, "state": window.state, "current": window.current()}
-
-
-@websocket_api.require_admin
-@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/window"})
-@callback
-@with_scanner
-def websocket_window(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-    scanner: InventoryScanner,
-) -> None:
-    """The maintenance window: whether it is switched on and where it stands. Reads the store only."""
-    connection.send_result(msg["id"], _versioned(_window_view(scanner)))
-
-
 @websocket_api.require_admin
 @websocket_api.websocket_command(
     {
@@ -1079,127 +1059,6 @@ async def websocket_purge_statistics(
             (r["reason"] for r in results.values() if r.get("reason") in failures), None
         )
     connection.send_result(msg["id"], _versioned(result))
-
-
-@websocket_api.require_admin
-@websocket_api.websocket_command(
-    {
-        vol.Required("type"): f"{DOMAIN}/window_set",
-        vol.Required("action"): vol.In(("enable", "disable", "begin", "advance", "clear")),
-        vol.Optional("plan_id"): str,
-        vol.Optional("step"): vol.In(STEPS),
-        vol.Optional("note", default=""): str,
-        vol.Optional("skip", default=False): bool,
-    }
-)
-@callback
-@with_scanner
-def websocket_window_set(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-    scanner: InventoryScanner,
-) -> None:
-    """Switch the window on or off, open it with a plan, take the next step, or close it.
-
-    Taking a step only records it. The plan step needs the plan to have run; the restart step needs
-    a restart in the event log after the window began (or an explicit skip).
-    """
-    window, now = scanner.window, datetime.now(UTC).isoformat()
-    try:
-        action = msg["action"]
-        if action in ("enable", "disable"):
-            window.set_enabled(action == "enable")
-        elif action == "begin":
-            window.begin(now, msg.get("plan_id", ""))
-        elif action == "clear":
-            window.clear()
-        else:
-            step = msg.get("step")
-            if step is None or window.state is None:
-                raise WindowError("out of order")
-            if msg["skip"] and step not in SKIPPABLE:
-                raise WindowError("not skippable")
-            if step == "plan":
-                plan = scanner.journal.get(window.state["plan_id"] or "")
-                if not plan or not plan.get("executed"):
-                    raise WindowError("the plan has not run")
-            if step == "restart" and not msg["skip"]:
-                started = window.state["started_at"]
-                if not any(
-                    e["kind"] == "start" and e["at"] > started for e in scanner.events.events
-                ):
-                    raise WindowError("no restart seen yet")
-            window.advance(step, now, "skipped" if msg["skip"] else msg["note"])
-    except WindowError as err:
-        connection.send_error(msg["id"], "invalid_format", f"Not accepted: {err}")
-        return
-    connection.send_result(msg["id"], _versioned(_window_view(scanner)))
-
-
-@websocket_api.require_admin
-@websocket_api.websocket_command(
-    {
-        vol.Required("type"): f"{DOMAIN}/window_reload",
-        vol.Optional("execute", default=False): bool,
-    }
-)
-@websocket_api.async_response
-@with_scanner
-async def websocket_window_reload(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-    scanner: InventoryScanner,
-) -> None:
-    """List, or with ``execute`` reload, the integrations that the window's executed plan changed."""
-    state = scanner.window.state
-    plan = scanner.journal.get((state or {}).get("plan_id") or "")
-    if state is None or not plan or not plan.get("executed"):
-        connection.send_error(msg["id"], "invalid_format", "Not accepted: the plan has not run")
-        return
-    snapshot = await scanner.async_get_snapshot()
-    targets = reload_targets(plan, snapshot)
-    if msg["execute"]:
-        if scanner.window.current() != "reload":
-            connection.send_error(msg["id"], "invalid_format", "Not accepted: out of order")
-            return
-        # A reload changes the running system, so it follows the same rules as a plan: not while
-        # Home Assistant starts or another change runs, not in the read-only modes, and it is journaled.
-        if scanner.warming_up or scanner.cleanup.running or write_holder(hass):
-            connection.send_error(
-                msg["id"], "busy", "Home Assistant is starting or a change is running"
-            )
-            return
-        if PROTECTION_MODES.index(scanner.protection.mode) < 2:
-            connection.send_error(msg["id"], "protection_mode", "Cleanup: protection_mode")
-            return
-        try:
-            acquire_write(hass, "window")
-        except WriteBusy:
-            connection.send_error(msg["id"], "busy", "Another change is running")
-            return
-        try:
-            for target in targets:
-                try:
-                    await hass.config_entries.async_reload(target["entry_id"])
-                    target["ok"] = True
-                except Exception as err:
-                    target["ok"] = False
-                    target["error"] = type(err).__name__
-                plan["events"].append(
-                    {
-                        "at": datetime.now(UTC).isoformat(),
-                        "type": "integration_reloaded"
-                        if target["ok"]
-                        else "integration_reload_failed",
-                        "object_id": target["entry_id"],
-                    }
-                )
-            scanner.journal.save()
-        finally:
-            release_write(hass, "window")
-    connection.send_result(msg["id"], _versioned({"targets": targets, "executed": msg["execute"]}))
 
 
 @websocket_api.require_admin
@@ -1414,11 +1273,8 @@ def async_register(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_plan_cancel)
     websocket_api.async_register_command(hass, websocket_plan_status)
     websocket_api.async_register_command(hass, websocket_plan_undo)
-    websocket_api.async_register_command(hass, websocket_window)
-    websocket_api.async_register_command(hass, websocket_window_set)
     websocket_api.async_register_command(hass, websocket_purge_statistics)
     websocket_api.async_register_command(hass, websocket_backup_cleanup)
-    websocket_api.async_register_command(hass, websocket_window_reload)
     websocket_api.async_register_command(hass, websocket_events)
     websocket_api.async_register_command(hass, websocket_monitor_list)
     websocket_api.async_register_command(hass, websocket_monitor_save)

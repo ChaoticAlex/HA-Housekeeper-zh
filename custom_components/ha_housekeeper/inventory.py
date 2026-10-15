@@ -19,6 +19,7 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import floor_registry as fr
 from homeassistant.helpers import label_registry as lr
 from homeassistant.helpers.dispatcher import async_dispatcher_send
+from homeassistant.helpers.storage import Store
 from homeassistant.loader import IntegrationNotFound, async_get_integration, async_get_integrations
 from homeassistant.util import dt as dt_util
 
@@ -54,7 +55,9 @@ from .const import (
     QUARANTINE_DAYS,
     SIGNAL_SCAN_COMPLETE,
     SIGNAL_SCAN_STARTED,
+    STORAGE_VERSION,
     WARMUP_SECONDS,
+    WINDOW_STORAGE_KEY,
 )
 from .coverage import CoverageStore
 from .criteria import CriteriaStore
@@ -123,7 +126,6 @@ from .signals import fire as signal_fire
 from .stale import StaleStore
 from .system_usage import supervisor_get, supervisor_token
 from .watch import WATCH_KINDS, WatchStore, evaluate, make_before, next_due
-from .window import WindowStore
 
 _LOGGER = logging.getLogger(__name__)
 SUGGEST_LIMIT = 200
@@ -749,7 +751,6 @@ STORE_NAMES = (
     "reminders",
     "notes",
     "batteries",
-    "window",
     "notify",
     "monitor",
     "runs",
@@ -788,7 +789,6 @@ class InventoryScanner:
         self.reminders = ReminderStore(hass)
         self.notes = NoteStore(hass)
         self.batteries = BatteryStore(hass)
-        self.window = WindowStore(hass)
         self.notify = NotifyStore(hass)
         self.monitor = MonitorStore(hass)
         self.runs = RunStore(hass)
@@ -852,6 +852,11 @@ class InventoryScanner:
                 # One unreadable file must not take the whole integration down; that part starts empty.
                 _LOGGER.exception("The saved data of %s could not be read, starting it empty", name)
                 self.load_failures.append(name)
+        # The maintenance window was removed: its saved state is of no use any more.
+        try:
+            await Store(self.hass, STORAGE_VERSION, WINDOW_STORAGE_KEY).async_remove()
+        except Exception:  # noqa: BLE001 - a file that cannot be deleted is left alone
+            _LOGGER.debug("The old maintenance window file could not be removed", exc_info=True)
 
     def begin_boot(self) -> None:
         """Home Assistant is still booting: scans are preliminary until the warm-up is over."""

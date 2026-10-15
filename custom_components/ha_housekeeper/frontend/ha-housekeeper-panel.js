@@ -1031,7 +1031,7 @@ Object.assign(TEXT.en, {
 const STORE_GROUPS = [
   ["history", ["observations", "history", "events", "runs", "replies", "load", "entry_states", "stale", "config_changes", "coverage", "scan_health", "signals"]],
   ["proof", ["journal", "attest", "preflight"]],
-  ["yours", ["ignored", "marks", "notes", "reminders", "goals", "criteria", "batteries", "policies", "notify", "window", "protection", "refactor"]],
+  ["yours", ["ignored", "marks", "notes", "reminders", "goals", "criteria", "batteries", "policies", "notify", "protection", "refactor"]],
 ];
 
 Object.assign(TEXT.de, {
@@ -1070,7 +1070,6 @@ Object.assign(TEXT.de, {
   store_batteries: "Batterien", storeText_batteries: "Die Art je Sensor und erledigte Wechsel.",
   store_policies: "Richtlinien", storeText_policies: "Die Regeln, die du eingeschaltet hast.",
   store_notify: "Benachrichtigung", storeText_notify: "Deine Einstellung zur Meldung bei neuen kaputten Referenzen.",
-  store_window: "Wartungsfenster", storeText_window: "Der Stand des geführten Durchlaufs, wenn du ihn einschaltest.",
   store_protection: "Schutzmodus", storeText_protection: "Die Begrenzung dessen, was Housekeeper ändern darf.",
   store_refactor: "Verbesserungen", storeText_refactor: "Der Stand der kleinen Verbesserungen einzelner Automationen.",
 });
@@ -1110,7 +1109,6 @@ Object.assign(TEXT.en, {
   store_batteries: "Batteries", storeText_batteries: "The type per sensor and handled replacements.",
   store_policies: "Policies", storeText_policies: "The rules you switched on.",
   store_notify: "Notification", storeText_notify: "Your setting for the message about new broken references.",
-  store_window: "Maintenance window", storeText_window: "The state of the guided run, when you switch it on.",
   store_protection: "Protection mode", storeText_protection: "The limit on what Housekeeper may change.",
   store_refactor: "Improvements", storeText_refactor: "The state of the small improvements of single automations.",
 });
@@ -2072,6 +2070,15 @@ class ListsMixin {
   // Long explanations of how a number is counted fold away, so the lists end earlier.
   howCounted(key, vars) {
     return `<details class="howto"><summary>${this.t("howCounted")}</summary><p class="factnote">${this.t(key, vars)}</p></details>`;
+  }
+
+  // Hands a text to the browser as a download.
+  downloadText(name, text, type) {
+    const url = URL.createObjectURL(new Blob([text], { type: `${type};charset=utf-8` }));
+    const a = document.createElement("a");
+    a.href = url; a.download = `ha-housekeeper-${name}`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   // Shared paging for long lists: returns the visible slice and the footer markup.
@@ -3123,36 +3130,6 @@ Object.assign(TEXT.en, {
   lifeTab: "History", lifeHint: "What the device registry, the journal and the reliability say about this device.", lifeNow: "Now", lifeNone: "No steps known yet.",
   life_discovered: "Discovered", life_quarantine: "In quarantine", life_disabled: "Disabled by a plan", life_removed: "Removed by a plan", life_replaced: "Replacement: {from} → {to}", lifeForgotten: "Forgotten by a plan",
   lifeRemovedTab: "Removed devices", lifeRemovedTitle: "Removed devices", lifeRemovedHint: "Devices that a Housekeeper plan removed or forgot, from the journal.", lifeRemovedNone: "Housekeeper has not removed a device yet.",
-});
-
-// Texts for the maintenance window; merged into TEXT.
-Object.assign(TEXT.de, {
-  winTab: "Wartungsfenster", winTitle: "Wartungsfenster", winExperimental: "experimentell", winHint: "Führt dich der Reihe nach durch Prüfung, einen Plan, das Neuladen, den Neustart und den Vergleich. Nichts läuft von allein, Housekeeper startet Home Assistant nie neu.",
-  winWarning: "Das Wartungsfenster verkettet Schritte, die es einzeln schon gibt. Es wurde mit simulierten Schritten getestet, aber noch nicht in einer echten Instanz ausprobiert. Es ist deshalb ausgeschaltet.", winEnable: "Experimentell einschalten", winDisable: "Wieder ausschalten",
-  winChoose: "Wähle einen Plan, der noch nicht gelaufen ist. Das Fenster begleitet dich durch Prüfung, Ausführung und Vergleich.", winNoPlans: "Es gibt keinen offenen Plan. Lege ihn unter Aufräumen an.", winBegin: "Fenster mit diesem Plan beginnen",
-  win_preflight: "1. Vorab prüfen", win_baseline: "2. Ausgangsstand speichern", win_plan: "3. Plan ausführen", win_reload: "4. Integrationen neu laden", win_restart: "5. Neustart (von dir)", win_compare: "6. Vergleichen", win_report: "7. Bericht",
-  winPreflightHint: "Prüft Backup, Reparaturen, fehlerhafte Integrationen und defekte Referenzen.", winCheck: "Prüfen", winNext: "Weiter",
-  winBaselineHint: "Merkt sich den jetzigen Zustand als Vergleichsbasis.", winSave: "Ausgangsstand speichern",
-  winPlanHint: "Öffne den Plan, bestätige ihn und führe ihn aus; der Plan legt vorher selbst ein Backup an. Komm danach hierher zurück.", winOpenPlan: "Plan öffnen", winPlanDone: "Der Plan ist gelaufen, weiter",
-  winReloadHint: "Lädt nur die Integrationen neu, deren Objekte der Plan geändert hat.", winShowTargets: "Betroffene anzeigen", winReload: "Jetzt neu laden", winSkip: "Überspringen", winNoTargets: "Der Plan hat keine Integration berührt, die neu geladen werden müsste.",
-  winRestartHint: "Starte Home Assistant bei Bedarf selbst neu. Housekeeper tut das nie. Danach erkennt das Fenster den Neustart im Ereignisprotokoll.", winRestartSeen: "Neustart prüfen",
-  winCompareHint: "Scannt neu und zeigt, was sich seit dem gespeicherten Ausgangsstand geändert hat.", winCompare: "Vergleichen",
-  winReportHint: "Der Bericht fasst die Schritte, den Plan und den Vergleich zusammen.", winDownload: "Bericht herunterladen (Markdown)", winClose: "Fenster schließen", winAbort: "Fenster abbrechen",
-  winAfterPlan: "Der Plan ist gelaufen. Zurückgehen geht nur noch über das Journal unter Aufräumen.", winStarted: "Begonnen", winSteps: "Schritte", winPlan: "Plan", winAfter: "Seit dem Ausgangsstand",
-});
-Object.assign(TEXT.en, {
-  winTab: "Maintenance window", winTitle: "Maintenance window", winExperimental: "experimental", winHint: "Guides you through the check, a plan, the reload, the restart and the comparison, one after the other. Nothing runs on its own, Housekeeper never restarts Home Assistant.",
-  winWarning: "The maintenance window chains steps that already exist on their own. It was tested with simulated steps but not yet tried in a real instance, so it is switched off.", winEnable: "Switch on (experimental)", winDisable: "Switch off again",
-  winChoose: "Pick a plan that has not run yet. The window guides you through the check, the run and the comparison.", winNoPlans: "There is no open plan. Create one under Cleanup.", winBegin: "Begin the window with this plan",
-  win_preflight: "1. Check first", win_baseline: "2. Save the starting state", win_plan: "3. Run the plan", win_reload: "4. Reload integrations", win_restart: "5. Restart (by you)", win_compare: "6. Compare", win_report: "7. Report",
-  winPreflightHint: "Checks backup, repairs, failing integrations and broken references.", winCheck: "Check", winNext: "Next",
-  winBaselineHint: "Remembers the current state as the base for the comparison.", winSave: "Save the starting state",
-  winPlanHint: "Open the plan, confirm it and run it; the plan makes a backup first on its own. Then come back here.", winOpenPlan: "Open the plan", winPlanDone: "The plan has run, next",
-  winReloadHint: "Reloads only the integrations whose objects the plan changed.", winShowTargets: "Show affected", winReload: "Reload now", winSkip: "Skip", winNoTargets: "The plan touched no integration that would need a reload.",
-  winRestartHint: "Restart Home Assistant yourself if needed. Housekeeper never does. After that the window notices the restart in the event log.", winRestartSeen: "Check for the restart",
-  winCompareHint: "Scans again and shows what changed since the saved starting state.", winCompare: "Compare",
-  winReportHint: "The report sums up the steps, the plan and the comparison.", winDownload: "Download the report (Markdown)", winClose: "Close the window", winAbort: "Abort the window",
-  winAfterPlan: "The plan has run. Going back is only possible through the journal under Cleanup.", winStarted: "Started", winSteps: "Steps", winPlan: "Plan", winAfter: "Since the starting state",
 });
 
 // SettingsMixin: methods of the panel element, mixed into the class in 99-register.js.
@@ -5715,15 +5692,12 @@ class MaintenanceMixin {
       { id: "preflight", icon: "mdi:rocket-launch-outline", label: this.t("preflightTitle"), hint: "maintHintPreflight", pill: !pf ? "" : pfRed || pfWarn ? this.t("mtOpen", { n: pfRed + pfWarn }) : this.t("bhLevel_ok"), tone: pfTone },
       { id: "blueprints", icon: "mdi:file-code-outline", label: this.t("bpTab"), hint: "maintHintBlueprints", pill: bpBad ? this.t("mtOpen", { n: bpBad }) : "", tone: "warn" },
       { id: "devices", icon: "mdi:devices", label: this.t("lifeRemovedTab"), hint: "maintHintDevices", pill: this.removed?.length ? this.formatNumber(this.removed.length) : "", tone: "mute" },
-      { id: "window", icon: "mdi:calendar-clock-outline", label: this.t("winTab"), hint: "maintHintWindow", pill: "", tone: "mute" },
       { id: "goals", icon: "mdi:target", label: this.t("goalsTitle"), hint: "maintHintGoals", pill: goalsMissed ? this.t("tilesMissed", { count: goalsMissed }) : "", tone: "red" },
     ];
     this.ensureBackupCleanup();
     const open = this.viewTabOf("maintenance", tabs, "backup");
     const grid = this.navTiles("maintenance", tabs.map(tab => ({ ...tab, hint: this.t(tab.hint), tone: tab.pill ? tab.tone : "ok" })), open, this.t("maintenance"), true);
-    // The window card loads nothing of its own and has no tool bar; the bar carries its "experimental" label.
-    const bar = open === "window" ? this.pageBar({ left: `<span class="pill warn">${this.t("winExperimental")}</span>`, refresh: false }) : "";
-    return `<div class="stack">${grid}${bar}${open === "goals" ? this.goalsCard() : open === "preflight" ? this.preflightCard() : open === "devices" ? this.removedCard() : open === "blueprints" ? this.blueprintsCard() : open === "window" ? this.windowCard() : open === "backups" ? this.backupCleanupCard() : this.backupCard()}</div>`;
+    return `<div class="stack">${grid}${open === "goals" ? this.goalsCard() : open === "preflight" ? this.preflightCard() : open === "devices" ? this.removedCard() : open === "blueprints" ? this.blueprintsCard() : open === "backups" ? this.backupCleanupCard() : this.backupCard()}</div>`;
   }
 }
 
@@ -7733,121 +7707,6 @@ class WatchMixin {
     if (r.new_findings.length) parts.push(`<p class="sub">${this.t("watchNewFindings", { n: this.formatNumber(r.new_findings.length) })}</p>`);
     if (!r.new.length && !r.silent.length && !r.marked.length && !r.transient.length && !r.fixed.length && !r.new_findings.length && w.before) parts.push(`<p class="sub">${this.t("watchNone")}</p>`);
     return parts.join("");
-  }
-}
-
-// WindowMixin: the maintenance window (experimental): a guided run through checks, one cleanup plan, a reload, a restart you do
-// yourself and a comparison; mixed in by 99-register.js. It only chains steps that exist elsewhere and never restarts Home Assistant.
-const WINDOW_STEPS = ["preflight", "baseline", "plan", "reload", "restart", "compare", "report"];
-
-class WindowMixin {
-  async loadWindow() {
-    try { this.win = await this._hass.callWS({ type: "ha_housekeeper/window" }); } catch (_) { this.win = { enabled: false, state: null, current: null, error: true }; }
-    this.render();
-  }
-
-  ensureWindow() {
-    if (this._winRequested) return;
-    this._winRequested = true;
-    if (this.journal === null && !this._journalRequested) { this._journalRequested = true; this.loadJournal(); }
-    setTimeout(() => this.loadWindow(), 0);
-  }
-
-  async windowSet(fields) {
-    this.winError = "";
-    try { this.win = await this._hass.callWS({ type: "ha_housekeeper/window_set", ...fields }); }
-    catch (err) { this.winError = this.errText(err); }
-    this.render();
-    return !this.winError;
-  }
-
-  winStepLabel(step) { return this.t(`win_${step}`); }
-
-  async winAct(name, arg) {
-    this.winError = "";
-    if (["enable", "disable", "clear"].includes(name)) { if (name === "clear") { this.winTargets = null; this.winCompared = false; } return this.windowSet({ action: name }); }
-    if (name === "begin") return this.windowSet({ action: "begin", plan_id: arg });
-    if (name === "preflight") { await this.loadPreflight(); return; }
-    if (name === "next") return this.windowSet({ action: "advance", step: arg });
-    if (name === "skip") return this.windowSet({ action: "advance", step: arg, skip: true });
-    if (name === "baseline") { await this.loadPreflight("save"); return this.windowSet({ action: "advance", step: "baseline" }); }
-    if (name === "plan") { this.noteJump("journal"); this.view = "journal"; await this.openPlan(arg); return; }
-    if (name === "targets" || name === "reload") {
-      try { this.winTargets = (await this._hass.callWS({ type: "ha_housekeeper/window_reload", execute: name === "reload" })).targets; }
-      catch (err) { this.winError = this.errText(err); }
-      if (name === "reload" && !this.winError) return this.windowSet({ action: "advance", step: "reload" });
-      this.render(); return;
-    }
-    if (name === "compare") { await this.load(true); await this.loadPreflight(); this.winCompared = true; this.render(); return; }
-    if (name === "report") { this.downloadText("maintenance-window.md", this.windowReport(), "text/markdown"); }
-  }
-
-  downloadText(name, text, type) {
-    const url = URL.createObjectURL(new Blob([text], { type: `${type};charset=utf-8` }));
-    const a = document.createElement("a");
-    a.href = url; a.download = `ha-housekeeper-${name}`;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }
-
-  // The report of the window as Markdown: the steps with their times, the plan and what changed since the saved state.
-  windowReport() {
-    const state = this.win?.state;
-    if (!state) return "";
-    const plan = (this.journal || []).find(p => p.plan_id === state.plan_id);
-    const lines = [`# ${this.t("winTitle")}`, "", `${this.t("winStarted")}: ${this.formatDate(state.started_at)}`, ""];
-    lines.push(`## ${this.t("winSteps")}`);
-    for (const e of state.log) lines.push(`- ${this.winStepLabel(e.step)} · ${this.formatDate(e.at)}${e.note ? ` · ${e.note}` : ""}`);
-    if (plan) lines.push("", `## ${this.t("winPlan")}`, `- ${this.t("planSummary", { total: plan.summary?.total ?? 0, ok: plan.summary?.ok ?? 0, review: plan.summary?.review ?? 0, blocked: plan.summary?.blocked ?? 0 })}`);
-    const after = this.preflight?.after;
-    if (after) {
-      lines.push("", `## ${this.t("winAfter")}`);
-      for (const [label, items] of [["pfNewRepairs", after.new_repairs], ["pfNewFailed", after.new_failed_entries], ["pfNewBroken", after.new_broken]]) lines.push(`- ${this.t(label)}: ${items.length}`);
-      const inv = after.inventory || {};
-      for (const [label, part] of [["newObjects", inv.new_objects], ["removedObjects", inv.removed_objects], ["statusChanges", inv.status_changes], ["newFindings", inv.new_findings], ["resolvedFindings", inv.resolved_findings]]) lines.push(`- ${this.t(label)}: ${part?.total ?? 0}`);
-    }
-    return `${lines.join("\n")}\n`;
-  }
-
-  winButton(label, name, arg = "", primary = false, disabled = false) {
-    return `<button class="btn ${primary ? "primary" : ""}" data-win-act="${name}:${this.esc(arg)}" ${disabled ? "disabled" : ""}>${this.t(label)}</button>`;
-  }
-
-  // What the open step asks for.
-  winStepBody(step, state) {
-    const p = this.preflight;
-    if (step === "preflight") return `<p class="factnote">${this.t("winPreflightHint")}</p>${p ? this.preflightRows(p.state, p.checks) : ""}<div class="actions">${this.winButton("winCheck", "preflight")}${this.winButton("winNext", "next", step, true, !p)}</div>`;
-    if (step === "baseline") return `<p class="factnote">${this.t("winBaselineHint")}</p><div class="actions">${this.winButton("winSave", "baseline", "", true)}</div>`;
-    if (step === "plan") return `<p class="factnote">${this.t("winPlanHint")}</p><div class="actions">${this.winButton("winOpenPlan", "plan", state.plan_id)}${this.winButton("winPlanDone", "next", step, true)}</div>`;
-    if (step === "reload") {
-      const list = this.winTargets ? (this.winTargets.length ? this.winTargets.map(x => `<div class="row rel"><span class="tile ${x.ok === false ? "red" : "mute"}"><ha-icon icon="mdi:reload"></ha-icon></span><span class="row-text"><strong>${this.esc(x.title)}</strong><small>${this.esc(x.domain)}${x.ok === false ? ` · ${this.esc(x.error || "")}` : ""}</small></span></div>`).join("") : `<p class="factnote">${this.t("winNoTargets")}</p>`) : "";
-      return `<p class="factnote">${this.t("winReloadHint")}</p>${list}<div class="actions">${this.winButton("winShowTargets", "targets")}${this.winButton("winReload", "reload", "", true, !this.winTargets?.length)}${this.winButton("winSkip", "skip", step)}</div>`;
-    }
-    if (step === "restart") return `<p class="factnote">${this.t("winRestartHint")}</p><div class="actions">${this.winButton("winRestartSeen", "next", step, true)}${this.winButton("winSkip", "skip", step)}</div>`;
-    if (step === "compare") return `<p class="factnote">${this.t("winCompareHint")}</p>${this.winCompared && p?.after ? this.preflightAfter(p.after) : ""}<div class="actions">${this.winButton("winCompare", "compare")}${this.winButton("winNext", "next", step, true, !this.winCompared)}</div>`;
-    return `<p class="factnote">${this.t("winReportHint")}</p><div class="actions">${this.winButton("winDownload", "report", "", true)}${this.winButton("winClose", "clear")}</div>`;
-  }
-
-  windowCard() {
-    this.ensureWindow();
-    const head = `<p class="factnote pad">${this.t("winHint")}</p>`;  // the tool bar above the card carries the "experimental" label; the title is on the tile
-    const w = this.win;
-    if (!w) return `<div class="panel">${head}${this.skeleton("loading")}</div>`;
-    const error = this.winError ? `<div class="error">${this.esc(this.winError)}</div>` : "";
-    if (!w.enabled) return `<div class="panel">${head}<div class="pad"><p class="factnote">${this.t("winWarning")}</p><div class="actions">${this.winButton("winEnable", "enable", "", true)}</div>${error}</div></div>`;
-    if (!w.state) {
-      const plans = (this.journal || []).filter(plan => !plan.executed && plan.status === "dry_run");
-      const rows = plans.map(plan => `<div class="row rel"><span class="tile mute"><ha-icon icon="mdi:clipboard-text-clock-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(this.formatDate(plan.created_at))}</strong><small>${this.t("planSummary", { total: plan.summary?.total ?? 0, ok: plan.summary?.ok ?? 0, review: plan.summary?.review ?? 0, blocked: plan.summary?.blocked ?? 0 })}</small></span>${this.winButton("winBegin", "begin", plan.plan_id, true)}</div>`).join("");
-      return `<div class="panel">${head}<div class="pad"><p class="factnote">${this.t("winChoose")}</p></div>${rows || `<div class="emptymsg"><ha-icon icon="mdi:clipboard-outline"></ha-icon>${this.t("winNoPlans")}</div>`}<div class="pad"><div class="actions">${this.winButton("winDisable", "disable")}</div>${error}</div></div>`;
-    }
-    const open = w.current;
-    const steps = WINDOW_STEPS.map(step => {
-      const done = w.state.done.includes(step), current = step === open;
-      const note = w.state.log.find(e => e.step === step)?.note;
-      return `<div class="row rel"><span class="tile ${done ? "ok" : current ? "warn" : "mute"}"><ha-icon icon="${done ? "mdi:check" : current ? "mdi:arrow-right-bold" : "mdi:circle-outline"}"></ha-icon></span><span class="row-text"><strong>${this.winStepLabel(step)}</strong>${note ? `<small>${this.esc(note)}</small>` : ""}</span></div>${current ? `<div class="pad">${this.winStepBody(step, w.state)}</div>` : ""}`;
-    }).join("");
-    const after = w.state.done.includes("plan") ? this.t("winAfterPlan") : "";
-    return `<div class="panel">${head}${steps}<div class="pad">${error}${after ? `<p class="factnote">${after}</p>` : ""}<div class="actions">${this.winButton(open ? "winAbort" : "winClose", "clear")}</div></div></div>`;
   }
 }
 
@@ -10604,7 +10463,7 @@ Object.assign(TEXT.de, {
   setLanguage: "Sprache", setLanguageHint: "Gilt für dieses Panel und wird in deinem Benutzerprofil gespeichert. Automatisch folgt der Sprache von Home Assistant.", langAuto: "Automatisch",
   setTabProtection: "Schutz und Ausnahmen", setHintLook: "Sprache, Dichte und Darstellung.", setHintProtection: "Schutzmodus und ausgeblendete Befunde.", setHintScan: "Wann geprüft wird, Grenzwerte und Meldungen.", setHintInfo: "Version, Diagnose und Support.",
   setEveryHours: "alle {n} h", setManual: "von Hand", setOn: "an", setOff: "aus",
-  maintHintBackup: "Backups prüfen und schützen.", maintHintPreflight: "Vor einem Update auf Probleme prüfen.", maintHintBlueprints: "Blueprints, die fehlen oder defekt sind.", maintHintDevices: "Entfernte Geräte ansehen.", maintHintWindow: "Zeitraum für Wartung und Neustarts.", maintHintGoals: "Eigene Grenzen für „in Ordnung“.",
+  maintHintBackup: "Backups prüfen und schützen.", maintHintPreflight: "Vor einem Update auf Probleme prüfen.", maintHintBlueprints: "Blueprints, die fehlen oder defekt sind.", maintHintDevices: "Entfernte Geräte ansehen.", maintHintGoals: "Eigene Grenzen für „in Ordnung“.",
   actRepairValues: "Werte reparieren", actHintRepair: "Falsche Werte im Verlauf und in der Statistik ersetzen.", actMeter: "Zähler wechseln", actHintMeter: "Die Statistik bei einem neuen Zähler fortführen.", actExchange: "Gerät austauschen", actHintExchange: "Durch ein neues Gerät ersetzen und alles übernehmen.",
   actHintReplace: "Überall durch eine andere Entität ersetzen.", actHintDisable: "Erst deaktivieren; nach der Wartezeit entfernen.",
   navGroupActions: "Aktionen", navGroupSecurity: "Sicherheit",
@@ -10647,7 +10506,7 @@ Object.assign(TEXT.en, {
   setLanguage: "Language", setLanguageHint: "Applies to this panel and is saved in your user profile. Automatic follows the language of Home Assistant.", langAuto: "Automatic",
   setTabProtection: "Protection and exceptions", setHintLook: "Language, density and appearance.", setHintProtection: "Protection mode and hidden findings.", setHintScan: "When it checks, limits and messages.", setHintInfo: "Version, diagnostics and support.",
   setEveryHours: "every {n} h", setManual: "manual", setOn: "on", setOff: "off",
-  maintHintBackup: "Check and protect backups.", maintHintPreflight: "Check for problems before an update.", maintHintBlueprints: "Blueprints that are missing or broken.", maintHintDevices: "Look at removed devices.", maintHintWindow: "A period for maintenance and restarts.", maintHintGoals: "Your own limits for what in order means.",
+  maintHintBackup: "Check and protect backups.", maintHintPreflight: "Check for problems before an update.", maintHintBlueprints: "Blueprints that are missing or broken.", maintHintDevices: "Look at removed devices.", maintHintGoals: "Your own limits for what in order means.",
   actRepairValues: "Repair values", actHintRepair: "Replace wrong values in the history and the statistics.", actMeter: "Replace the meter", actHintMeter: "Carry the statistics on with a new meter.", actExchange: "Exchange the device", actHintExchange: "Replace it with a new device and carry everything over.",
   actHintReplace: "Replace it with another entity everywhere.", actHintDisable: "Disable first; remove after the waiting time.",
   navGroupActions: "Actions", navGroupSecurity: "Security",
@@ -15869,7 +15728,6 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-exp-menu]").forEach(el => el.onclick = () => { this._expOpen = this._expOpen === el.dataset.expMenu ? "" : el.dataset.expMenu; this._colOpen = ""; this.render(); });
     root.querySelectorAll("[data-exp-fmt]").forEach(el => el.onclick = () => { const [id, fmt] = el.dataset.expFmt.split("|"); this._expOpen = ""; this.exportList(id, fmt); this.render(); });
     root.querySelectorAll("[data-exp-guided]").forEach(el => el.onclick = () => { this._expOpen = ""; this.xpOpen(); });
-    root.querySelectorAll("[data-win-act]").forEach(el => el.onclick = () => { const [name, ...rest] = el.dataset.winAct.split(":"); this.winAct(name, rest.join(":")); });
     root.querySelectorAll("[data-inv-filter]").forEach(el => el.onclick = () => { const [type, status, origin = ""] = el.dataset.invFilter.split("|"), same = (type || status) && this.typeFilter === type && this.statusFilter === status && this.originFilter === origin; this.typeFilter = same ? "" : type; this.statusFilter = same ? "" : status; this.originFilter = same ? "" : origin; this.pages = {}; (this.folds ||= {}).inv_types = !(this.typeFilter || this.statusFilter); this.render(); this.showList(); });
     root.querySelectorAll("[data-inv-more]").forEach(el => el.onclick = () => { this.invAllTypes = !this.invAllTypes; this.render(); });
     root.querySelectorAll("[data-type-jump]").forEach(el => el.onclick = () => { this.noteJump("inventory"); this.typeFilter = el.dataset.typeJump; this.statusFilter = ""; this.originFilter = ""; this.pages = {}; this.view = "inventory"; this.render(); });
@@ -16146,7 +16004,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, SearchPagesMixin, LayoutMixin, FlowMixin, CorrelationMixin, WatchMixin, LifecycleMixin, WindowMixin, BlueprintsMixin, MarksMixin, OftenMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, EntityStateMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, ScanCoverageMixin, ScanTimingMixin, SparklineMixin, BrokenCardsMixin, SystemMixin, ComponentsMixin, IntegrationPageMixin, MonitorMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, SearchPagesMixin, LayoutMixin, FlowMixin, CorrelationMixin, WatchMixin, LifecycleMixin, BlueprintsMixin, MarksMixin, OftenMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, EntityStateMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, ScanCoverageMixin, ScanTimingMixin, SparklineMixin, BrokenCardsMixin, SystemMixin, ComponentsMixin, IntegrationPageMixin, MonitorMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }

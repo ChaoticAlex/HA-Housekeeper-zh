@@ -1422,45 +1422,6 @@ async def test_an_open_preview_is_checked_against_the_current_state_and_renewed(
     assert [p["plan_id"] for p in scanner.journal.plans] == [renewed["plan_id"]]
 
 
-async def test_the_window_reload_follows_the_rules_of_a_plan(
-    hass: HomeAssistant, hass_ws_client
-) -> None:
-    """A reload waits for the write slot, respects the protection mode and is noted in the plan."""
-    from unittest.mock import AsyncMock, patch
-
-    from custom_components.ha_housekeeper.writelock import acquire_write, release_write
-
-    scanner, client = await _ws_setup(hass, hass_ws_client)
-    await scanner.async_scan()
-    plan = {"plan_id": "w1", "executed": True, "events": [], "actions": []}
-    scanner.journal.plans.append(plan)
-    scanner.window.state = {"plan_id": "w1"}
-    target = {"entry_id": "e1", "title": "T", "domain": "x"}
-
-    async def reload() -> dict:
-        await client.send_json_auto_id({"type": "ha_housekeeper/window_reload", "execute": True})
-        return await client.receive_json()
-
-    with (
-        patch.object(scanner.window, "current", return_value="reload"),
-        patch(
-            "custom_components.ha_housekeeper.websocket_api.reload_targets",
-            return_value=[dict(target)],
-        ),
-        patch.object(hass.config_entries, "async_reload", AsyncMock()) as reloaded,
-    ):
-        scanner.protection.mode = "quarantine"
-        assert (await reload())["error"]["code"] == "protection_mode"
-        scanner.protection.mode = "confirmed"
-        acquire_write(hass, "plan")
-        assert (await reload())["error"]["code"] == "busy"
-        release_write(hass, "plan")
-        reply = await reload()
-    assert reply["success"] and reply["result"]["targets"][0]["ok"] is True
-    reloaded.assert_awaited_once_with("e1")
-    assert [e["type"] for e in plan["events"]] == ["integration_reloaded"]
-
-
 async def test_reminders_are_saved_finished_and_deleted_over_the_websocket(
     hass: HomeAssistant, hass_ws_client
 ) -> None:

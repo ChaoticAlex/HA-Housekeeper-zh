@@ -3335,20 +3335,6 @@ test("a device has a history tab with its steps and no note; removed devices sho
   assert.ok(list.includes("Old hub") && list.includes("Removed by a plan") && list.includes("Device “Old plug” forgotten") && list.includes('data-note-edit="n1"') && list.includes("broken &lt;b&gt;") && !list.includes("<b>"));
 });
 
-test("the maintenance window is off until switched on, then shows the open step and builds a report", () => {
-  const { el } = panel("en");
-  el.data = DATA; el._winRequested = true; el.journal = [{ plan_id: "aabbccddeeff", created_at: new Date().toISOString(), status: "dry_run", executed: false, summary: { total: 2, ok: 2, review: 0, blocked: 0 } }]; el._journalRequested = true;
-  el.win = { enabled: false, state: null, current: null };
-  assert.ok(el.windowCard().includes("Switch on (experimental)") && !el.windowCard().includes("data-win-act=\"begin"));
-  el.win = { enabled: true, state: null, current: null };
-  assert.ok(el.windowCard().includes('data-win-act="begin:aabbccddeeff"'));
-  el.win = { enabled: true, current: "plan", state: { started_at: "2026-10-01T10:00:00+00:00", plan_id: "aabbccddeeff", done: ["preflight", "baseline"], log: [{ step: "preflight", at: "2026-10-01T10:01:00+00:00", note: "" }] } };
-  const html = el.windowCard();
-  assert.ok(html.includes('data-win-act="plan:aabbccddeeff"') && html.includes('data-win-act="next:plan"') && !html.includes("Restart (by you)</strong></span></div><div class=\"pad\">"));
-  const report = el.windowReport();
-  assert.ok(report.startsWith("# Maintenance window") && report.includes("1. Check first"));
-});
-
 test("missing statistics hours say what all series lack, name the periods and list the series", () => {
   const { el } = panel("en");
   el.data = DATA;
@@ -4061,7 +4047,7 @@ test("detail, maintenance and settings offer their options as tiles that open on
   assert.equal(el.view, "repair"); assert.equal(el.repairTask, "repair_counter"); assert.equal(el.counterId, "sensor.water");
   assert.equal(sent.at(-1).type, "ha_housekeeper/range_series");
   el.view = "maintenance"; el.render();
-  for (const id of ["backup", "preflight", "blueprints", "devices", "window", "goals"]) assert.ok(shadow.innerHTML.includes(`data-view-tab="maintenance|${id}"`), id);
+  for (const id of ["backup", "preflight", "blueprints", "devices", "goals"]) assert.ok(shadow.innerHTML.includes(`data-view-tab="maintenance|${id}"`), id);
   el.view = "settings"; el.settingsTab = "protection"; el.render();
   for (const id of ["look", "protection", "scan", "info"]) assert.ok(shadow.innerHTML.includes(`data-set-tab="${id}"`), id);
   assert.ok(shadow.innerHTML.includes("data-protection") && !shadow.innerHTML.includes("data-notify"));

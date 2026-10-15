@@ -398,6 +398,15 @@ class ListsMixin {
     return `<details class="howto"><summary>${this.t("howCounted")}</summary><p class="factnote">${this.t(key, vars)}</p></details>`;
   }
 
+  // Hands a text to the browser as a download.
+  downloadText(name, text, type) {
+    const url = URL.createObjectURL(new Blob([text], { type: `${type};charset=utf-8` }));
+    const a = document.createElement("a");
+    a.href = url; a.download = `ha-housekeeper-${name}`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
   // Shared paging for long lists: returns the visible slice and the footer markup.
   // `own` gives a short list its own page sizes (the first is the default, kept per list) instead of the global setting.
   paginate(id, items, own) {
