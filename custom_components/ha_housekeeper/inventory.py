@@ -42,6 +42,8 @@ from .config_changes import ChangeStore, fingerprint
 from .const import (
     DEFAULT_LOW_BATTERY_PERCENT,
     DEFAULT_MIN_UNAVAILABLE_DAYS,
+    DEFAULT_OUTAGE_INFO_MINUTES,
+    DEFAULT_OUTAGE_LOW_HOURS,
     DEFAULT_SCAN_INTERVAL_HOURS,
     DEFAULT_STALE_HOURS,
     DEFAULT_UNUSED_AUTOMATION_DAYS,
@@ -111,6 +113,7 @@ from .reminders import ReminderStore
 from .runs import RunStore
 from .scan_coverage import RETRY_LIMIT, RETRY_MINUTES, ScanCoverage, retryable_gaps
 from .scan_health import ScanHealth
+from .outage_scan import OutageScans, outage_start
 from .scan_trigger import ScanRefused, scan_request
 from .service_check import missing_service_findings
 from .signals import SignalStore, situations
@@ -790,6 +793,10 @@ class InventoryScanner:
         self._snapshot: dict[str, Any] | None = None
         self._details: dict[str, dict[str, Any]] = {}
         self.min_unavailable_days = DEFAULT_MIN_UNAVAILABLE_DAYS
+        self.outage_info_minutes = DEFAULT_OUTAGE_INFO_MINUTES
+        self.outage_low_hours = DEFAULT_OUTAGE_LOW_HOURS
+        self.last_scan_seconds = 0.0
+        self.outage_scans = OutageScans(hass, self)
         self.unused_automation_days = DEFAULT_UNUSED_AUTOMATION_DAYS
         self.low_battery_percent = DEFAULT_LOW_BATTERY_PERCENT
         self.stale_hours = DEFAULT_STALE_HOURS
@@ -848,8 +855,11 @@ class InventoryScanner:
         """Whether entity states may still be missing because Home Assistant is starting."""
         return self._booting or self.warmup_seconds_left > 0
 
-    async def async_scan(self) -> dict[str, Any]:
-        """Scan registries and states. Concurrent callers share serialized work."""
+    async def async_scan(self, record: bool = True) -> dict[str, Any]:
+        """Scan registries and states. Concurrent callers share serialized work.
+
+        ``record`` False is a scan that follows an outage: it is no point of the history.
+        """
         async with self._lock:
             self.status.update(running=True, phase="registries", progress=5, last_error=None)
             async_dispatcher_send(self.hass, SIGNAL_SCAN_STARTED)
@@ -865,7 +875,8 @@ class InventoryScanner:
                 if not preliminary:
                     async_sync_issues(self.hass, snapshot["findings"])
                     async_announce(self.hass, self.notify.new(snapshot["findings"]))
-                    self.history.record(snapshot)
+                    if record:
+                        self.history.record(snapshot)
                     self.entry_states.record(
                         {
                             e.entry_id: getattr(e.state, "value", str(e.state))
@@ -886,7 +897,10 @@ class InventoryScanner:
                     self.hass.async_create_background_task(
                         self._announce(snapshot), "HA Housekeeper events"
                     )
-                self.health.succeeded(datetime.now(UTC), time.monotonic() - began, preliminary)
+                self.last_scan_seconds = time.monotonic() - began
+                self.health.succeeded(datetime.now(UTC), self.last_scan_seconds, preliminary)
+                if not preliminary:
+                    self.outage_scans.after_scan(snapshot)
                 self.monitor.refresh(snapshot, self.health_report(), new_scan=not preliminary)
                 self.async_check_health()
                 self.status.update(running=False, phase="complete", progress=100)
@@ -902,7 +916,7 @@ class InventoryScanner:
                 self.async_check_health()
                 raise
 
-    async def async_request_scan(self, wait: bool = False) -> dict[str, Any]:
+    async def async_request_scan(self, wait: bool = False, record: bool = True) -> dict[str, Any]:
         """Start a scan for the service or the button; many requests make one scan.
 
         Returns how the request went (``start``, ``join``, ``recent``) and, once there is a
@@ -920,7 +934,7 @@ class InventoryScanner:
         )
         if decision == "start":
             task = self._scan_task = self.hass.async_create_background_task(
-                self._requested_scan(), "HA Housekeeper requested scan"
+                self._requested_scan(record), "HA Housekeeper requested scan"
             )
         if wait and decision != "recent":
             if task is not None:
@@ -930,9 +944,9 @@ class InventoryScanner:
                     pass
         return self.scan_summary(decision)
 
-    async def _requested_scan(self) -> None:
+    async def _requested_scan(self, record: bool = True) -> None:
         try:
-            await self.async_scan()
+            await self.async_scan(record)
         except Exception as err:  # the status and the scan health keep the reason
             _LOGGER.warning("The requested scan failed: %s", type(err).__name__)
 
@@ -1221,6 +1235,10 @@ class InventoryScanner:
             item["status_since"] = self.observations.since(
                 f"{kind}:{item['object_id']}", item["status"]
             )
+            if kind == "entity" and item["status"] in ("unavailable", "unknown"):
+                item["status_since"], item["status_since_source"] = outage_start(
+                    item["status_since"], item.get("last_changed")
+                )
         if not preliminary:
             self.stale.observe(
                 entities,

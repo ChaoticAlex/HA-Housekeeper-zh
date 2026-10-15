@@ -234,6 +234,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             _LOGGER.debug("Taking a load sample failed", exc_info=True)
 
     entry.async_on_unload(async_track_time_interval(hass, _sample_load, timedelta(minutes=5)))
+    entry.async_on_unload(scanner.outage_scans.start())
     entry.async_on_unload(criteria_module.async_listen(hass, scanner.criteria))
     entry.async_on_unload(scanner.criteria.cancel_all)
 
