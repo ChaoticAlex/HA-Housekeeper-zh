@@ -4,29 +4,15 @@
 
 ### Neu
 
-- **Zustand als Anteil der Objekte in Ordnung:** Der Status zählt jetzt Objekte statt Punkte: Ausgangswert ist die Zahl der geprüften Objekte, jedes Objekt mit Befund nimmt nach seiner schlimmsten Stufe ab (hoch voll, mittel halb, niedrig ein Fünftel, Info nichts), Folgen einer Ursache zählen nicht extra. Es gibt keine Obergrenzen mehr, jede Behebung zählt. Die Karte „Wie entsteht die Zahl?“ zeigt „1575 von 2000 in Ordnung“, der Ring und die Kurve zeigen den Anteil, der Ring ist etwas dicker. Der Verlauf des Zustands beginnt neu.
-
-- **Kacheln auf zwei Zeilen:** Auf breiten Fenstern stehen „Gesamt“ und „Dringend“ oben und „Aufräumen“ darunter. Alle Kacheln sind gleich breit, lange Namen brechen nicht mehr um.
-
-- **Kurven der Kacheln zählen wie die Zahl:** Die Kurve in den Kacheln der Befundseite zählt wie die Zahl ohne Folgen. Sie beginnt neu und füllt sich über die nächsten Tage.
-
-- **Klarere Filter der Befundliste:** „Alle einzeln (n)“ zeigt jeden Befund für sich, „Ursachen mit Folgen (n)“ nur die Ursachen, an denen Folgen hängen. Beide nennen ihre Anzahl, die Hilfekarte erklärt den Unterschied.
-
-- **Eine Karte „Nach Updates und Neustarts“:** Die Beobachtung nach System-Updates und der zeitliche Zusammenhang mit Updates und Neustarts stehen in einer Karte, eine Zeile je Vorfall. Bei einem System-Update zeigt die Zeile das Urteil der Beobachtung (Läuft, Verschlechtert, Stabil) und im aufgeklappten Teil getrennt, was seitdem nicht mehr läuft und welche Befunde dabei begannen. Die Beobachtung heißt jetzt „Beobachtung nach System-Update“. „Beobachtung beenden“ steht in der Zeile und fragt vorher nach; die Beobachtung wird dann mit den bisherigen Messungen ausgewertet und läuft nicht weiter. Der Filter für Befunde, die mit einem Update begannen, steht als Zeile in der Karte.
-
-- **Kacheln gleich hoch:** Die Kacheln der Befundseite sind in allen Gruppen gleich hoch, und die Kurven stehen auf einer Linie.
-
-- **Knopf „Befunde anzeigen“ zählt wie die Liste:** Der Knopf für Befunde, die mit einem Update begannen, zählt ohne Folgen (vorher 28, die Liste zeigte 20) und nennt die Folgen daneben.
-
-- **Vorfälle besser lesbar:** Das „+1“ hinter einem Update steht als Chip, und „Zusammen mit“ ist ein abgesetzter Block mit einer Zeile je weiterem Update.
-
-- **Spaltenauswahl:** Die Kästchen in der Spaltenauswahl der Listen stehen jetzt in einer Reihe am rechten Rand.
+- **Zustand als Anteil der Objekte in Ordnung:** Der Status zählt jetzt Objekte statt Punkte. Ausgangswert ist die Zahl der geprüften Objekte, jedes Objekt mit Befund nimmt nach seiner schlimmsten Stufe ab (hoch voll, mittel halb, niedrig ein Fünftel, Info nichts), Folgen einer Ursache zählen nicht extra. Es gibt keine Obergrenzen mehr, jede Behebung zählt. Die Karte „Wie entsteht die Zahl?“ zeigt zum Beispiel „1575 von 2000 in Ordnung“, Ring und Kurve zeigen den Anteil. Der Verlauf des Zustands beginnt neu.
 
 - **Ausfälle nach Dauer:** Nicht verfügbare Entitäten, Geräte, Integrationen und Apps werden nach 15 Minuten zum Befund und steigen mit der Dauer (Info, niedrig, mittel, hoch). Info und niedrig stehen nur auf der Befundseite; Übersicht, Sensoren und Reparaturhinweise zählen ab mittel. Die Einstellung „Nicht verfügbar nach Tagen“ ist durch vier einstellbare Schwellen ersetzt (ein alter Wert wird übernommen, bis du die neuen speicherst). Bei einem Ausfall scannt Housekeeper zu den Schwellen zusätzlich, ohne den Verlauf zu verändern. Entitäten werden dadurch viel früher gemeldet als bisher nach 7 Tagen.
 
 - **Bewertung und Hinweise:** Die Detailseite zeigt die Bewertung eines Befunds mit Gründen und nächster Stufe. Fällt ein Objekt regelmäßig aus, nennt der Befund die übliche Tageszeit und schlägt einen Vermerk mit Zeitfenster vor.
 
-- **Beobachtung nach Updates:** Sie startet nur noch bei Updates von Home Assistant, Betriebssystem und Supervisor (alles andere läuft über die üblichen Befunde). Das Band führt zur Auswertung; Objekte ohne Wert und Objekte mit Vermerk stehen getrennt, und die Beobachtung lässt sich vorzeitig beenden.
+- **Befundseite:** Eine Erklärung hinter der Überschrift, Kacheln in drei Gruppen, die wie die Liste zählen (die Kurven ebenfalls, ohne Folgen), ein Schweregrad für jeden Befund (Info zieht nichts ab), Folgen eingerückt unter ihrer Ursache, die Größe der Ansicht in der Auswahlzeile und die Filter „Alle einzeln“ und „Ursachen mit Folgen“ mit Anzahl. Auf dem Reiter „Technisch“ stehen Labels bei allen Objekten.
+
+- **Nach Updates und Neustarts:** Eine Karte auf der Befundseite zeigt, was nach einem Update oder Neustart begann, eine Zeile je Vorfall; zeitlich zusammenliegende Updates bilden einen Vorfall. Die Beobachtung nach einem System-Update steht in der Zeile des Vorfalls, mit Urteil (Läuft, Verschlechtert, Stabil), getrennt nach dem, was seitdem nicht mehr läuft, und den Befunden, die dabei begannen. Sie startet nur noch bei Updates von Home Assistant, Betriebssystem und Supervisor, lässt sich vorzeitig beenden (mit Rückfrage; sie wird dann mit den bisherigen Messungen ausgewertet) und das Band im Seitenkopf führt zu ihr. Ein Filter zeigt nur die Befunde, die mit einem Update begannen.
 
 - **Scan alle 6 Stunden:** Der Standard für den automatischen Scan ist 6 statt 24 Stunden (einstellbar; ein selbst gesetzter Wert bleibt). Der Verlauf behält einen Punkt pro Tag.
 
@@ -34,23 +20,23 @@
 
 - **Sicherere Pläne:** Das Backup vor einem Plan wird geprüft und mit Namen genannt. Veraltete Vorschauen sind markiert und lassen sich erneuern, große Löschungen zeigen einen deutlichen Hinweis, und zu viele Housekeeper-Backups werden gemeldet. Eine unlesbare Speicherdatei lässt nur ihren Teil leer starten.
 
-- **Befundseite:** Eine Erklärung hinter der Überschrift, Kacheln in drei Gruppen, die wie die Liste zählen, ein Schweregrad für jeden Befund (Info zieht keine Punkte ab), Folgen eingerückt unter ihrer Ursache und die Größe der Ansicht in der Auswahlzeile. Zeitlich zusammenliegende Updates bilden einen Vorfall. Auf dem Reiter „Technisch“ stehen Labels bei allen Objekten.
-
 - **Export überall:** Die Recorder-Seite hat einen Export-Knopf (CSV, Markdown, JSON) für alles, was ein Reiter zeigt. Alle Listen nutzen jetzt dasselbe Export-Menü statt des Download-Symbols.
 
-- **Oberfläche:** Korrekturen und kleine Verbesserungen an Listen, Dialogen, Beschriftungen und Bedienung.
+- **Oberfläche:** Korrekturen und kleine Verbesserungen an Listen, Dialogen, Beschriftungen und Bedienung, darunter die Kacheln der Befundseite (auf breiten Fenstern in zwei Zeilen, alle gleich hoch und breit), die Spaltenauswahl der Listen (Kästchen in einer Reihe am rechten Rand) und die Lesbarkeit der Vorfälle.
 
 ### English
 
 #### New
 
-- **State as the share of objects in order:** The status now counts objects instead of points: the starting value is the number of rated objects, each object with a finding takes off by its worst level (high fully, medium half, low a fifth, info nothing), follow-ups of a cause do not count extra. There are no caps any more, every fix counts. The card “How is this number made?” shows “1575 of 2000 in order”, the ring and the curve show the share, and the ring is a little thicker. The history of the state starts afresh.
+- **State as the share of objects in order:** The status now counts objects instead of points. The starting value is the number of rated objects, each object with a finding takes off by its worst level (high fully, medium half, low a fifth, info nothing), follow-ups of a cause do not count extra. There are no caps any more, every fix counts. The card “How is this number made?” shows, for example, “1575 of 2000 in order”; the ring and the curve show the share. The history of the state starts afresh.
 
 - **Outages by duration:** Unavailable entities, devices, integrations and apps become a finding after 15 minutes and rise with their duration (info, low, medium, high). Info and low appear only on the findings page; the overview, the sensors and the repair hints count from medium on. The setting “Unavailable after days” is replaced by four adjustable thresholds (an old value is kept until you save the new ones). During an outage Housekeeper scans additionally at the thresholds without changing the history. Entities are therefore reported much earlier than the former 7 days.
 
 - **Rating and hints:** The detail page shows the rating of a finding with its reasons and the next level. If an object fails regularly, the finding names the usual time of day and suggests a mark with a time window.
 
-- **Watch after updates:** It now starts only for updates of Home Assistant, the operating system and the Supervisor (everything else is covered by the usual findings). The band leads to the results; objects without a value and objects with a mark are listed apart, and the watch can be ended early.
+- **Findings page:** An explanation behind the heading, tiles in three groups that count like the list (the curves too, without follow-ups), a severity for every finding (info takes nothing off), follow-ups indented under their cause, the size of the view in the selection row and the filters “All one by one” and “Causes with follow-ups” with their counts. The tab “Technical” shows labels for all objects.
+
+- **After updates and restarts:** A card on the findings page shows what began after an update or restart, one row per incident; updates close in time form one incident. The watch after a system update sits in the row of its incident, with its verdict (Running, Worse, Stable), apart for what has stopped working since and the findings that began with it. It starts only for updates of Home Assistant, the operating system and the Supervisor, can be ended early (after a confirmation; it is then judged by the measurements so far), and the band in the page head leads to it. A filter shows only the findings that began with an update.
 
 - **Scan every 6 hours:** The default for the automatic scan is 6 instead of 24 hours (adjustable; a value you set yourself stays). The history keeps one point per day.
 
@@ -58,11 +44,9 @@
 
 - **Safer plans:** The backup before a plan is verified and named. Outdated previews are marked and can be renewed, large removals show a clear note, and too many Housekeeper backups are reported. An unreadable saved file only makes its own part start empty.
 
-- **Findings page:** An explanation behind the heading, tiles in three groups that count like the list, a severity for every finding (info costs no points), follow-ups indented under their cause and the size of the view in the selection row. Updates close in time form one incident. The tab “Technical” shows labels for all objects.
-
 - **Export everywhere:** The recorder page has an export button (CSV, Markdown, JSON) for everything a tab shows. All lists now use the same export menu instead of the download icon.
 
-- **Interface:** Corrections and small improvements to lists, dialogs, labels and handling.
+- **Interface:** Fixes and small improvements to lists, dialogs, labels and handling, among them the tiles of the findings page (in two rows on wide windows, all equally high and wide), the column picker of the lists (boxes in one line at the right edge) and the readability of incidents.
 
 ## 1.7.0 - 2026-10-14
 
