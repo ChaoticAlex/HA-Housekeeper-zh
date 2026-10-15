@@ -375,7 +375,7 @@ class CleanupRunner:
     def __init__(self, hass: HomeAssistant, scanner: Any) -> None:
         self.hass = hass
         self.scanner = scanner
-        self._tokens: dict[str, tuple[str, datetime, list[str]]] = {}
+        self._tokens: dict[str, tuple[str, datetime, list[str], str | None]] = {}
         self._cancel = False
         self._lineage: dict[str, dict[str, str]] = {}
         self._task: asyncio.Task[None] | None = None
@@ -440,7 +440,7 @@ class CleanupRunner:
             raise CleanupError("nothing_to_do")
         self._check_mode(plan, selected)
         token = secrets.token_urlsafe(16)
-        self._tokens[plan_id] = (token, _now() + TOKEN_TTL, selected)
+        self._tokens[plan_id] = (token, _now() + TOKEN_TTL, selected, user_id)
         plan["confirmed"] = {"at": _now().isoformat(), "user_id": user_id, "object_ids": selected}
         _event(plan, "confirmed", user_id=user_id, count=len(selected))
         self.scanner.journal.save()
@@ -476,7 +476,10 @@ class CleanupRunner:
         plan = self._plan(plan_id)
         if self.scanner.warming_up:
             raise CleanupError("warming_up")
-        saved = self._tokens.pop(plan_id, None)
+        saved = self._tokens.get(plan_id)
+        if saved is not None and saved[3] != user_id:
+            raise CleanupError("wrong_user")
+        self._tokens.pop(plan_id, None)
         if saved is None or not secrets.compare_digest(saved[0], token) or saved[1] < _now():
             raise CleanupError("bad_token")
         if plan["status"] != "dry_run" or plan.get("run"):

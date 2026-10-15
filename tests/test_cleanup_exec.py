@@ -168,6 +168,20 @@ async def test_review_actions_need_an_individual_acknowledgement(hass: HomeAssis
     )
 
 
+async def test_a_token_only_works_for_the_administrator_who_confirmed(
+    hass: HomeAssistant,
+) -> None:
+    entry = orphan(hass, "owner")
+    scanner = await make_scanner(hass)
+    plan = await make_plan(scanner, hass, entry.entity_id)
+    confirmation = scanner.cleanup.confirm(plan["plan_id"], [], "admin-a")
+    with pytest.raises(CleanupError, match="wrong_user"):
+        scanner.cleanup.start(plan["plan_id"], confirmation["token"], "admin-b")
+    scanner.cleanup.start(plan["plan_id"], confirmation["token"], "admin-a")
+    await scanner.cleanup._task
+    assert scanner.journal.get(plan["plan_id"])["run"]["user_id"] == "admin-a"
+
+
 async def test_tokens_are_single_use_and_plans_run_once(hass: HomeAssistant) -> None:
     entry = orphan(hass, "once")
     scanner = await make_scanner(hass)
