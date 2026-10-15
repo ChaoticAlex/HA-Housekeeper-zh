@@ -3166,6 +3166,16 @@ test("findings that began with an update get a line, a tile and a filter", () =>
   assert.ok(card.includes("Update of hue 1 → 2") && card.includes("1× ") && card.includes('data-object="entity:light.a"'));
 });
 
+test("the findings page has an info button that opens the help with every number named", () => {
+  const { el } = panel("en");
+  el.data = { ...DATA, objects: [], edges: [], causes: [], findings: [] };
+  el.view = "findingsNav"; el._corrRequested = true; el._corrKey = el.data.meta.scanned_at || "";
+  assert.ok(el.heading().includes('data-fold="findings_help"') && !el.findingsView().includes("helpcard"));
+  el.folds = { findings_help: true };
+  const help = el.findingsView();
+  assert.ok(help.includes("helpcard") && help.includes("Certainty") && help.includes("n incidents"));
+});
+
 test("a reason tile counts what the list shows and names the follow-ups beside it", () => {
   const { el } = panel("en");
   const f = (key, cause) => ({ key, rule_id: "entity.state_unavailable", object_id: key, classification: "unavailable", confidence: 0.9, ignored: false, impact: "low", cause_id: cause });
