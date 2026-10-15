@@ -108,7 +108,7 @@ class MarksMixin {
       await this._hass.callWS(msg);
       this.markForm = null;
       await this.refreshData();
-    } catch (err) { f.error = this.t("markFailed", { reason: err?.message || String(err) }); }
+    } catch (err) { f.error = this.t("markFailed", { reason: this.errText(err) }); }
     this.render();
   }
 

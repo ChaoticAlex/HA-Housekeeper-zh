@@ -117,7 +117,7 @@ class EntityTrimMixin {
     try {
       const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_create", actions: [this.entityTrimAction(item)] });
       this.openNewPlan(plan);
-    } catch (err) { e.error = err?.message || String(err); }
+    } catch (err) { e.error = this.errText(err); }
     e.busy = false;
     this.render();
   }

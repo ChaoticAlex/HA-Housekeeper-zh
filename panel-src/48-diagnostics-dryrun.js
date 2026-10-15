@@ -29,7 +29,7 @@ class DryRunMixin {
     const states = Object.fromEntries(dry.states.filter(s => s.entity_id.trim() && s.state.trim()).map(s => [s.entity_id.trim(), s.state.trim()]));
     dry.busy = true; dry.error = ""; this.render();
     try { dry.result = await this._hass.callWS({ type: "ha_housekeeper/automation_dry_run", entity_id: d.sel, states }); }
-    catch (err) { dry.result = null; dry.error = this.t("dryFailed", { reason: err?.message || String(err) }); }
+    catch (err) { dry.result = null; dry.error = this.t("dryFailed", { reason: this.errText(err) }); }
     dry.busy = false; this.render();
   }
 

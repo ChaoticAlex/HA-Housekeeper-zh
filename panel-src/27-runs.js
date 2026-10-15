@@ -10,7 +10,7 @@ class RunsMixin {
   async loadRuns() {
     this.runsLoading = true; this.runsError = ""; this.render();
     try { this.runs = await this._hass.callWS({ type: "ha_housekeeper/automation_runs" }); this.markLoaded("runs"); }
-    catch (err) { this.runsError = err?.message || String(err); }
+    catch (err) { this.runsError = this.errText(err); }
     this.runsLoading = false; this.render();
   }
 

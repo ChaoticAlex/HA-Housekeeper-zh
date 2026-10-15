@@ -2,7 +2,7 @@
 class MaintenanceMixin {
   async loadCosts(refresh = false) {
     this.costsLoading = true; this.costsError = ""; this.render();
-    try { this.costs = await this._hass.callWS({ type: "ha_housekeeper/recorder_costs", ...(refresh ? { refresh: true } : {}) }); this.markLoaded("costs"); } catch (err) { this.costs = null; this.costsError = err?.message || String(err); }
+    try { this.costs = await this._hass.callWS({ type: "ha_housekeeper/recorder_costs", ...(refresh ? { refresh: true } : {}) }); this.markLoaded("costs"); } catch (err) { this.costs = null; this.costsError = this.errText(err); }
     this.costsLoading = false; this.render();
     this.followUp("costs", "recorder", this.costs, r => this.loadCosts(r), refresh);
   }
@@ -21,7 +21,7 @@ class MaintenanceMixin {
       this.preflight = await this._hass.callWS(action ? { type: "ha_housekeeper/preflight_save", clear: action === "clear" } : { type: "ha_housekeeper/preflight" });
       this.markLoaded("preflight");
       if (action === "save" && this.data) this.load(false);
-    } catch (err) { this.preflightError = err?.message || String(err); }
+    } catch (err) { this.preflightError = this.errText(err); }
     this.preflightLoading = false; this.render();
   }
 

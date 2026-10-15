@@ -5,7 +5,7 @@ class BlueprintsMixin {
     this._blueprintsRequested = true;
     setTimeout(async () => {
       try { this.blueprints = await this._hass.callWS({ type: "ha_housekeeper/blueprints" }); this.blueprintsError = ""; this.markLoaded("blueprints"); }
-      catch (err) { this.blueprints = null; this.blueprintsError = err?.message || String(err); }
+      catch (err) { this.blueprints = null; this.blueprintsError = this.errText(err); }
       this.render();
     }, 0);
   }

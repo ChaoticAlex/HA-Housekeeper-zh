@@ -113,7 +113,7 @@ class ExcludeMixin {
       const actions = [...this.excludeSel].slice(0, MAX_PLAN_ACTIONS).map(object_id => ({ kind: "trim_history", object_id, keep_days }));
       const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_create", actions });
       this.openNewPlan(plan);
-    } catch (err) { this.trimError = err?.message || String(err); }
+    } catch (err) { this.trimError = this.errText(err); }
     this.trimBusy = false;
     this.render();
   }

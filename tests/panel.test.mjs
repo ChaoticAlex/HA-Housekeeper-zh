@@ -1237,6 +1237,18 @@ test("the scan button is disabled while a plan runs", () => {
   assert.ok(el.t("err_cleanup_busy").includes("plan is running"));
 });
 
+test("a refusal of the backend is shown in the language of the panel", () => {
+  const refusal = (code, message) => Object.assign(new Error(message), { code });
+  for (const lang of ["de", "en"]) {
+    const { el } = panel(lang);
+    assert.equal(el.errText(refusal("not_found", "Plan not found")), el.t("err_plan_not_found"));
+    assert.equal(el.errText(refusal("days_required", "Putting a finding off needs days")), el.t("err_days_required"));
+    assert.equal(el.errText(refusal("scan_failed", "ValueError: boom")), el.t("err_failed", { detail: "boom" }));
+    assert.equal(el.errText(refusal("other", "Something new")), "Something new");
+  }
+  assert.notEqual(panel("de").el.errText(refusal("not_found", "Plan not found")), panel("en").el.errText(refusal("not_found", "Plan not found")));
+});
+
 test("preliminary data during the Home Assistant start shows a banner on every page", () => {
   const { el } = panel("en");
   el.data = { ...DATA, meta: { ...DATA.meta, preliminary: false } };

@@ -3,7 +3,7 @@ class StormsMixin {
   async loadStorms(refresh = false) {
     this.stormsLoading = true; this.stormsError = ""; this.render();
     try { this.storms = await this._hass.callWS({ type: "ha_housekeeper/storms", window_days: this.stormsWindow, refresh }); this.markLoaded("storms"); }
-    catch (err) { this.stormsError = err?.message || String(err); }
+    catch (err) { this.stormsError = this.errText(err); }
     this.stormsLoading = false; this.render();
     this.followUp("storms", "recorder", this.storms, r => this.loadStorms(r), refresh);
   }

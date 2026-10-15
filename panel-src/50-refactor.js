@@ -106,7 +106,7 @@ class RefactorMixin {
     try {
       if (!await this.newPlan([{ kind: "refactor_automation", object_id: entityId, fix, values }], "repair")) return;
       this.repairTask = null;
-    } catch (err) { r.message = this.t("refactorFailed", { reason: err?.message || String(err) }); }
+    } catch (err) { r.message = this.t("refactorFailed", { reason: this.errText(err) }); }
     this.render();
   }
 

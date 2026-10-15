@@ -3349,7 +3349,7 @@ class SettingsMixin {
       this.data = null; // the integration reloads; fetch again once it is back
       this.render();
       setTimeout(() => { this.optionsMessage = ""; this.busy = false; this.load(false); }, 4000);
-    } catch (err) { this.optionsMessage = err?.code === "busy" ? this.t("optionsBusy") : err?.code === "thresholds_order" ? this.t("optionsOrder") : err?.message || String(err); this.render(); }
+    } catch (err) { this.optionsMessage = err?.code === "busy" ? this.t("optionsBusy") : err?.code === "thresholds_order" ? this.t("optionsOrder") : this.errText(err); this.render(); }
   }
 }
 
@@ -3643,9 +3643,14 @@ class CleanupMixin {
     this.cleanupBusy = false; this.render();
   }
 
+  // What the backend refused, in the language of the panel: its sentence, then its code, else the sentence as sent.
   errText(err) {
-    const key = `err_${err?.code}`;
-    return TEXT[this.lang][key] ? this.t(key) : (err?.message || String(err));
+    const raw = err?.message || String(err), has = key => TEXT[this.lang]?.[key] || TEXT.en[key];
+    const key = [ERR_MESSAGE_KEYS[raw], `err_${err?.code}`].find(has);
+    if (key) return this.t(key);
+    if (/_failed$/.test(err?.code || "")) return this.t("err_failed", { detail: raw.replace(/^\w+: /, "") });
+    const refused = /^Not accepted: (.+)$/.exec(raw);
+    return refused ? this.t("err_not_accepted", { detail: refused[1] }) : raw;
   }
 
   // An open preview is a plan that was neither confirmed nor run; it can only be confirmed for 24 hours.
@@ -4874,7 +4879,7 @@ class UnusedMixin {
       const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_create", actions });
       this.purgeSel = new Set(chosen.slice(MAX_PLAN_ACTIONS)); this.purgeOpen = false; this.purgeWord = "";
       this.openNewPlan(plan);
-    } catch (err) { this.purgeResult = { removed: [], skipped: [], error: "failed", detail: err?.message || String(err) }; }
+    } catch (err) { this.purgeResult = { removed: [], skipped: [], error: "failed", detail: this.errText(err) }; }
     this.purgeBusy = false;
     this.render();
   }
@@ -5500,7 +5505,7 @@ class PropertiesMixin {
 class MaintenanceMixin {
   async loadCosts(refresh = false) {
     this.costsLoading = true; this.costsError = ""; this.render();
-    try { this.costs = await this._hass.callWS({ type: "ha_housekeeper/recorder_costs", ...(refresh ? { refresh: true } : {}) }); this.markLoaded("costs"); } catch (err) { this.costs = null; this.costsError = err?.message || String(err); }
+    try { this.costs = await this._hass.callWS({ type: "ha_housekeeper/recorder_costs", ...(refresh ? { refresh: true } : {}) }); this.markLoaded("costs"); } catch (err) { this.costs = null; this.costsError = this.errText(err); }
     this.costsLoading = false; this.render();
     this.followUp("costs", "recorder", this.costs, r => this.loadCosts(r), refresh);
   }
@@ -5519,7 +5524,7 @@ class MaintenanceMixin {
       this.preflight = await this._hass.callWS(action ? { type: "ha_housekeeper/preflight_save", clear: action === "clear" } : { type: "ha_housekeeper/preflight" });
       this.markLoaded("preflight");
       if (action === "save" && this.data) this.load(false);
-    } catch (err) { this.preflightError = err?.message || String(err); }
+    } catch (err) { this.preflightError = this.errText(err); }
     this.preflightLoading = false; this.render();
   }
 
@@ -5681,7 +5686,7 @@ class BackupMixin {
     if (call) this.bhForm = null;
     this.backupLoading = true; this.backupError = ""; this.render();
     try { this.backup = await this._hass.callWS(call || { type: "ha_housekeeper/backup_health" }); this.markLoaded("backup"); }
-    catch (err) { this.backupError = err?.message || String(err); }
+    catch (err) { this.backupError = this.errText(err); }
     this.backupLoading = false; this.render();
   }
 
@@ -5818,7 +5823,7 @@ class ReliabilityMixin {
   async loadReliability(refresh = false) {
     this.relLoading = true; this.relError = ""; this.render();
     try { this.reliability = await this._hass.callWS({ type: "ha_housekeeper/reliability", window_days: this.relWindow, refresh, ...(this.relCompare ? { compare: true } : {}) }); }
-    catch (err) { this.relError = err?.message || String(err); }
+    catch (err) { this.relError = this.errText(err); }
     this.relLoading = false; this.render();
     this.followUp("reliability", "reliability", this.reliability, r => this.loadReliability(r), refresh);
   }
@@ -6061,7 +6066,7 @@ class RunsMixin {
   async loadRuns() {
     this.runsLoading = true; this.runsError = ""; this.render();
     try { this.runs = await this._hass.callWS({ type: "ha_housekeeper/automation_runs" }); this.markLoaded("runs"); }
-    catch (err) { this.runsError = err?.message || String(err); }
+    catch (err) { this.runsError = this.errText(err); }
     this.runsLoading = false; this.render();
   }
 
@@ -6251,7 +6256,7 @@ class StormsMixin {
   async loadStorms(refresh = false) {
     this.stormsLoading = true; this.stormsError = ""; this.render();
     try { this.storms = await this._hass.callWS({ type: "ha_housekeeper/storms", window_days: this.stormsWindow, refresh }); this.markLoaded("storms"); }
-    catch (err) { this.stormsError = err?.message || String(err); }
+    catch (err) { this.stormsError = this.errText(err); }
     this.stormsLoading = false; this.render();
     this.followUp("storms", "recorder", this.storms, r => this.loadStorms(r), refresh);
   }
@@ -6512,7 +6517,7 @@ class DbHealthMixin {
   async loadDbHealth(refresh = false, check = false) {
     this.dbLoading = true; this.dbError = ""; this.render();
     try { this.dbHealth = await this._hass.callWS({ type: "ha_housekeeper/db_health", refresh, ...(check ? { check } : {}) }); }
-    catch (err) { this.dbError = err?.message || String(err); }
+    catch (err) { this.dbError = this.errText(err); }
     this.dbLoading = false; this.render();
     this.followUp("db", "recorder", this.dbHealth, r => this.loadDbHealth(r), refresh);
     // The full check runs on in the background: look again until it is done (cached reply, no new query).
@@ -6634,7 +6639,7 @@ class ExposureMixin {
   async loadExposure() {
     this.exposureLoading = true; this.exposureError = ""; this.render();
     try { this.exposure = await this._hass.callWS({ type: "ha_housekeeper/exposure" }); this.exposureAt = new Date().toISOString(); }
-    catch (err) { this.exposureError = err?.message || String(err); }
+    catch (err) { this.exposureError = this.errText(err); }
     this.exposureLoading = false; this.render();
   }
 
@@ -6977,7 +6982,7 @@ class PoliciesMixin {
   async loadPolicies() {
     this.policiesLoading = true; this.policiesError = ""; this.render();
     try { this.policies = await this._hass.callWS({ type: "ha_housekeeper/policies" }); this.policiesAt = new Date().toISOString(); }
-    catch (err) { this.policiesError = err?.message || String(err); }
+    catch (err) { this.policiesError = this.errText(err); }
     this.policiesLoading = false; this.render();
   }
 
@@ -6990,7 +6995,7 @@ class PoliciesMixin {
 
   async changePolicy(call) {
     try { await this._hass.callWS(call); }
-    catch (err) { this.policiesError = err?.message || String(err); }
+    catch (err) { this.policiesError = this.errText(err); }
     await this.loadPolicies();
   }
 
@@ -7616,7 +7621,7 @@ class WindowMixin {
   async windowSet(fields) {
     this.winError = "";
     try { this.win = await this._hass.callWS({ type: "ha_housekeeper/window_set", ...fields }); }
-    catch (err) { this.winError = this.errText ? this.errText(err) : (err?.message || String(err)); }
+    catch (err) { this.winError = this.errText(err); }
     this.render();
     return !this.winError;
   }
@@ -7634,7 +7639,7 @@ class WindowMixin {
     if (name === "plan") { this.noteJump("journal"); this.view = "journal"; await this.openPlan(arg); return; }
     if (name === "targets" || name === "reload") {
       try { this.winTargets = (await this._hass.callWS({ type: "ha_housekeeper/window_reload", execute: name === "reload" })).targets; }
-      catch (err) { this.winError = err?.message || String(err); }
+      catch (err) { this.winError = this.errText(err); }
       if (name === "reload" && !this.winError) return this.windowSet({ action: "advance", step: "reload" });
       this.render(); return;
     }
@@ -7718,7 +7723,7 @@ class BlueprintsMixin {
     this._blueprintsRequested = true;
     setTimeout(async () => {
       try { this.blueprints = await this._hass.callWS({ type: "ha_housekeeper/blueprints" }); this.blueprintsError = ""; this.markLoaded("blueprints"); }
-      catch (err) { this.blueprints = null; this.blueprintsError = err?.message || String(err); }
+      catch (err) { this.blueprints = null; this.blueprintsError = this.errText(err); }
       this.render();
     }, 0);
   }
@@ -7876,7 +7881,7 @@ class MarksMixin {
       await this._hass.callWS(msg);
       this.markForm = null;
       await this.refreshData();
-    } catch (err) { f.error = this.t("markFailed", { reason: err?.message || String(err) }); }
+    } catch (err) { f.error = this.t("markFailed", { reason: this.errText(err) }); }
     this.render();
   }
 
@@ -8364,7 +8369,7 @@ class GoalsMixin {
       await this._hass.callWS({ type: "ha_housekeeper/goal_set", goal: f.id, enabled: f.enabled, limit });
       this.goalForm = null;
       await this.loadGoals();
-    } catch (err) { f.error = this.t("goalFailed", { reason: err?.message || String(err) }); this.render(); }
+    } catch (err) { f.error = this.t("goalFailed", { reason: this.errText(err) }); this.render(); }
   }
 
   bindGoals(root) {
@@ -8477,7 +8482,7 @@ class ExchangeMixin {
     if (!ex.oldDev || !ex.newDev || ex.loading) return;
     ex.loading = true; ex.error = ""; ex.choices = {}; this.render();
     try { ex.result = await this._hass.callWS({ type: "ha_housekeeper/device_pairs", old_device_id: ex.oldDev, new_device_id: ex.newDev }); }
-    catch (err) { ex.result = null; ex.error = this.t("exFailed", { reason: err?.message || String(err) }); }
+    catch (err) { ex.result = null; ex.error = this.t("exFailed", { reason: this.errText(err) }); }
     ex.loading = false; this.render();
   }
 
@@ -8497,7 +8502,7 @@ class ExchangeMixin {
       const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_create", actions });
       this.openNewPlan(plan, null);
       this.exchangeState().planned = this.exchangeState().oldDev;
-    } catch (err) { this.cleanupError = err?.message || String(err); }
+    } catch (err) { this.cleanupError = this.errText(err); }
     this.cleanupBusy = false; this.render();
   }
 
@@ -8599,7 +8604,7 @@ class ExchangeMixin {
     try {
       const reply = await this._hass.callWS({ type: "ha_housekeeper/plan_report", plan_id: planId, anonymize: !this.reportClear, lang: this.lang });
       this.report = { plan_id: planId, ...reply }; this.reportMessage = "";
-    } catch (err) { this.report = null; this.reportMessage = this.t("reportFailed", { reason: err?.message || String(err) }); }
+    } catch (err) { this.report = null; this.reportMessage = this.t("reportFailed", { reason: this.errText(err) }); }
     this.render();
   }
 
@@ -8613,7 +8618,7 @@ class ExchangeMixin {
 
   async copyReport() {
     try { await navigator.clipboard.writeText(this.report.markdown); this.reportMessage = this.t("reportCopied"); }
-    catch (err) { this.reportMessage = this.t("reportFailed", { reason: err?.message || String(err) }); }
+    catch (err) { this.reportMessage = this.t("reportFailed", { reason: this.errText(err) }); }
     this.render();
   }
 
@@ -8702,7 +8707,7 @@ class DiagnosticsMixin {
     const d = this.diagState();
     d.loading = true; d.error = ""; this.render();
     try { d.quality = await this._hass.callWS({ type: "ha_housekeeper/automation_quality" }); this.markLoaded("quality"); }
-    catch (err) { d.error = err?.message || String(err); }
+    catch (err) { d.error = this.errText(err); }
     d.loading = false; this.render();
   }
 
@@ -8929,7 +8934,7 @@ class DiagnosticsMixin {
     try {
       d.criteria[d.sel] = await this._hass.callWS({ type: "ha_housekeeper/criteria_set", entity_id: d.sel, criteria });
       d.draft = null; d.message = this.t("critSaved");
-    } catch (err) { d.message = this.t("critFailed", { reason: err?.message || String(err) }); }
+    } catch (err) { d.message = this.t("critFailed", { reason: this.errText(err) }); }
     this.render();
   }
 
@@ -9013,7 +9018,7 @@ class TraceDiagMixin {
     const c = this.diagState().compare;
     c.error = ""; c.result = null;
     try { c.result = await this._hass.callWS({ type: "ha_housekeeper/trace_compare", entity_id: this.diagState().sel, run_a: c.a, run_b: c.b }); }
-    catch (err) { c.error = this.t("cmpFailed", { reason: err?.message || String(err) }); }
+    catch (err) { c.error = this.t("cmpFailed", { reason: this.errText(err) }); }
     this.render();
   }
 
@@ -9077,7 +9082,7 @@ class DryRunMixin {
     const states = Object.fromEntries(dry.states.filter(s => s.entity_id.trim() && s.state.trim()).map(s => [s.entity_id.trim(), s.state.trim()]));
     dry.busy = true; dry.error = ""; this.render();
     try { dry.result = await this._hass.callWS({ type: "ha_housekeeper/automation_dry_run", entity_id: d.sel, states }); }
-    catch (err) { dry.result = null; dry.error = this.t("dryFailed", { reason: err?.message || String(err) }); }
+    catch (err) { dry.result = null; dry.error = this.t("dryFailed", { reason: this.errText(err) }); }
     dry.busy = false; this.render();
   }
 
@@ -9248,7 +9253,7 @@ class RefactorMixin {
     try {
       if (!await this.newPlan([{ kind: "refactor_automation", object_id: entityId, fix, values }], "repair")) return;
       this.repairTask = null;
-    } catch (err) { r.message = this.t("refactorFailed", { reason: err?.message || String(err) }); }
+    } catch (err) { r.message = this.t("refactorFailed", { reason: this.errText(err) }); }
     this.render();
   }
 
@@ -9402,7 +9407,7 @@ class BatteryCareMixin {
     this.batteryTrendLoading = true; this.render();
     const epoch = this._btEpoch || 0;
     try { const reply = await this._hass.callWS({ type: "ha_housekeeper/battery_trend", refresh }); if (epoch === (this._btEpoch || 0)) { this.batteryTrend = reply; this._btRequested = true; } else this._btRequested = false; this.batteryTrendError = ""; this.markLoaded("batteries"); }
-    catch (err) { this.batteryTrendError = err?.message || String(err); }
+    catch (err) { this.batteryTrendError = this.errText(err); }
     this.batteryTrendLoading = false; this.render();
   }
 
@@ -9603,7 +9608,7 @@ class CounterMixin {
     try {
       const id = (this.counterId || "").trim();
       this.counterScan = await this._hass.callWS({ type: "ha_housekeeper/counter_scan", refresh, ...(id ? { statistic_id: id } : {}) });
-    } catch (err) { this.counterError = err?.message || String(err); }
+    } catch (err) { this.counterError = this.errText(err); }
     this.counterLoading = false; this.render();
   }
 
@@ -9711,7 +9716,7 @@ class CounterMixin {
     try {
       const found = await this._hass.callWS({ type: "ha_housekeeper/range_series", statistic_id: id, from: this.rangeWin.from, to: this.rangeWin.to });
       if (found.error) this.rangeSeriesError = this.t(`reason_${found.error}`); else this.rangeSeries = { ...found, id };
-    } catch (err) { this.rangeSeriesError = err?.message || String(err); }
+    } catch (err) { this.rangeSeriesError = this.errText(err); }
     this.rangeSeriesLoading = false; this.render();
   }
 
@@ -10388,6 +10393,56 @@ Object.assign(TEXT.en, {
   actEditInHa: "Housekeeper does not remove a single reference itself. Open the automation in Home Assistant and edit it there.",
 });
 
+// Error texts for what the backend refuses. The backend sends a code and an English sentence; errText() looks the
+// sentence up here first, then the code, so a person reads it in the language of the panel.
+const ERR_MESSAGE_KEYS = {
+  "Plan not found": "err_plan_not_found",
+  "Unknown automation": "err_unknown_automation",
+  "Unknown device": "err_unknown_device",
+  "Finding not found in the latest scan": "err_finding_not_found",
+  "Object not found in the latest scan": "err_object_not_found",
+  "A run is no longer in the trace buffer": "err_run_gone",
+  "Two different known devices are needed": "err_two_devices",
+  "Two or more known plans are needed": "err_two_plans",
+  "Home Assistant is still starting": "err_warming_up",
+  "Home Assistant is starting or a change is running": "err_busy_starting",
+  "Home Assistant is starting or a plan or purge is running": "err_busy_starting",
+  "A plan, undo or purge is running": "err_busy",
+  "Another change is running": "err_busy_change",
+  "Nothing to change": "err_nothing_to_change",
+  "Not accepted: out of order": "err_out_of_order",
+  "Not accepted: the plan has not run": "err_plan_not_run",
+  "invalid window": "err_invalid_window",
+  "not_found": "err_not_found",
+  "The date does not exist": "err_date_invalid",
+  "The date lies in the future": "err_date_future",
+};
+
+Object.assign(TEXT.de, {
+  err_plan_not_found: "Der Plan wurde nicht gefunden.", err_unknown_automation: "Diese Automation ist unbekannt.", err_unknown_device: "Dieses Gerät ist unbekannt.",
+  err_finding_not_found: "Der Befund ist im letzten Scan nicht mehr vorhanden.", err_object_not_found: "Das Objekt ist im letzten Scan nicht mehr vorhanden.",
+  err_run_gone: "Dieser Lauf ist nicht mehr im Ablaufspeicher.", err_two_devices: "Es braucht zwei verschiedene bekannte Geräte.", err_two_plans: "Es braucht zwei oder mehr bekannte Pläne.",
+  err_busy_starting: "Home Assistant startet noch, oder ein Plan oder eine Änderung läuft.", err_busy_change: "Es läuft bereits eine andere Änderung.",
+  err_nothing_to_change: "Es gibt nichts zu ändern.", err_out_of_order: "Nicht angenommen: falsche Reihenfolge.", err_plan_not_run: "Nicht angenommen: der Plan ist nicht gelaufen.", err_invalid_window: "Das Zeitfenster ist ungültig.",
+  err_date_invalid: "Dieses Datum gibt es nicht.", err_date_future: "Das Datum liegt in der Zukunft.",
+  err_not_loaded: "HA Housekeeper ist nicht geladen.", err_days_required: "Zum Zurückstellen eines Befunds braucht es Tage.", err_reason_required: "Zum Behalten eines Befunds braucht es einen Grund.",
+  err_invalid_limit: "Der Grenzwert liegt außerhalb des erlaubten Bereichs.", err_no_recorder: "Der Recorder ist nicht verfügbar.", err_nothing_to_merge: "Nach den Konflikten bleibt nichts übrig.",
+  err_too_many: "Zu viele Aktionen in einem Plan.", err_thresholds_order: "Info, niedrig, mittel und hoch müssen ansteigen.",
+  err_failed: "Fehlgeschlagen: {detail}", err_not_accepted: "Nicht angenommen: {detail}",
+});
+Object.assign(TEXT.en, {
+  err_plan_not_found: "The plan was not found.", err_unknown_automation: "This automation is unknown.", err_unknown_device: "This device is unknown.",
+  err_finding_not_found: "The finding is no longer in the latest scan.", err_object_not_found: "The object is no longer in the latest scan.",
+  err_run_gone: "This run is no longer in the trace buffer.", err_two_devices: "Two different known devices are needed.", err_two_plans: "Two or more known plans are needed.",
+  err_busy_starting: "Home Assistant is still starting, or a plan or change is running.", err_busy_change: "Another change is already running.",
+  err_nothing_to_change: "There is nothing to change.", err_out_of_order: "Not accepted: out of order.", err_plan_not_run: "Not accepted: the plan has not run.", err_invalid_window: "The time window is invalid.",
+  err_date_invalid: "This date does not exist.", err_date_future: "The date lies in the future.",
+  err_not_loaded: "HA Housekeeper is not loaded.", err_days_required: "Putting a finding off needs days.", err_reason_required: "Keeping a finding needs a reason.",
+  err_invalid_limit: "The limit is outside the allowed range.", err_no_recorder: "The recorder is not available.", err_nothing_to_merge: "Nothing is left after the conflicts.",
+  err_too_many: "Too many actions in one plan.", err_thresholds_order: "Info, low, medium and high must rise.",
+  err_failed: "Failed: {detail}", err_not_accepted: "Not accepted: {detail}",
+});
+
 // Navigation split: Cleanup (remove what is not needed), Repair (fix what stays) and the shared Journal.
 Object.assign(TEXT.de, {
   findUnhide: "Wieder einblenden", findUnhidden: "{n} Befunde wieder eingeblendet", endedFindings: "Ohne Reparatur beendet", endedObjectRemoved: "Objekt entfernt", endedUnknown: "Grund unbekannt", endedUnchecked: "nicht geprüft", endedRules: "Einstellung geändert", healthFailed: "Der letzte Scan ist in der Phase „{phase}“ fehlgeschlagen. Die Zahlen stammen vom letzten erfolgreichen Scan ({last}).", healthStale: "Seit {last} war kein Scan erfolgreich. Die Zahlen können veraltet sein.", healthTries: "{n} Fehlversuche in Folge", healthStaleHint: "Der regelmäßige Scan ist ausgeblieben. Starte einen Scan von Hand; schlägt er fehl, steht der Grund hier.", bulkPartial: "{done} von {total} erledigt, {failed} fehlgeschlagen ({detail}). Die fehlgeschlagenen bleiben ausgewählt; ein neuer Versuch sendet nur diese.", viewsFull: "Es sind höchstens {n} gespeicherte Ansichten möglich. Lösche eine Ansicht oder speichere unter dem Namen einer vorhandenen.",
@@ -10723,7 +10778,7 @@ class EntityTrimMixin {
     try {
       const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_create", actions: [this.entityTrimAction(item)] });
       this.openNewPlan(plan);
-    } catch (err) { e.error = err?.message || String(err); }
+    } catch (err) { e.error = this.errText(err); }
     e.busy = false;
     this.render();
   }
@@ -11047,7 +11102,7 @@ class EntityRecorderMixin {
     try {
       const r = await this._hass.callWS({ type: "ha_housekeeper/entity_recorder", entity_id: entityId });
       next = r?.busy || !r?.available ? { message: this.t("erecBusy") } : { data: r };
-    } catch (err) { next = { message: this.t("erecFailed", { reason: err?.message || String(err) }) }; }
+    } catch (err) { next = { message: this.t("erecFailed", { reason: this.errText(err) }) }; }
     this.entityRec = { ...this.entityRec, [entityId]: next };
     this.render();
   }
@@ -11109,7 +11164,7 @@ class ScanPointsMixin {
     d.phase = "save"; this.render();
     try {
       await this._hass.callWS({ type: "ha_housekeeper/scan_point", action: "save", name });
-    } catch (err) { d.busy = false; d.error = this.t("pinFailed", { reason: err?.message || String(err) }); this.render(); return; }
+    } catch (err) { d.busy = false; d.error = this.t("pinFailed", { reason: this.errText(err) }); this.render(); return; }
     this.pinDraft = null; this.pinPreviousCompare = null;
     this.compare = null; this.render(); this.loadCompare();
   }
@@ -11253,7 +11308,7 @@ class ExcludeMixin {
       const actions = [...this.excludeSel].slice(0, MAX_PLAN_ACTIONS).map(object_id => ({ kind: "trim_history", object_id, keep_days }));
       const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_create", actions });
       this.openNewPlan(plan);
-    } catch (err) { this.trimError = err?.message || String(err); }
+    } catch (err) { this.trimError = this.errText(err); }
     this.trimBusy = false;
     this.render();
   }
@@ -12065,7 +12120,7 @@ class NotesMixin {
       this.data = { ...this.data, notes: res.notes };
       this._corrRequested = false;
       this.noteDraft = null; this._rev++;
-    } catch (err) { d.error = this.t("noteFailed", { reason: err?.message || String(err) }); }
+    } catch (err) { d.error = this.t("noteFailed", { reason: this.errText(err) }); }
     this.render();
   }
 
@@ -12221,7 +12276,7 @@ class BatteryTypeMixin {
       const reply = await this._hass.callWS({ type: "ha_housekeeper/battery_type_set", entity_id: entityId, battery_type: value });
       this.batteryTrend = { ...this.batteryTrend, types: reply.types, custom_types: reply.custom_types };
       this.btEdit = "";
-    } catch (err) { this.btMessage = this.t("btReplFailed", { detail: err?.message || String(err) }); }
+    } catch (err) { this.btMessage = this.t("btReplFailed", { detail: this.errText(err) }); }
     this.render();
   }
 
@@ -12249,7 +12304,7 @@ class BatteryTypeMixin {
       const reply = await this._hass.callWS({ type: "ha_housekeeper/battery_custom_type", action, name, new_name: newName });
       this.batteryTrend = { ...this.batteryTrend, types: reply.types, custom_types: reply.custom_types };
       this.btCtEdit = "";
-    } catch (err) { this.btCtMessage = this.t("btReplFailed", { detail: err?.message || String(err) }); }
+    } catch (err) { this.btCtMessage = this.t("btReplFailed", { detail: this.errText(err) }); }
     this.render();
   }
 
@@ -12260,7 +12315,7 @@ class BatteryTypeMixin {
       this.batteryTrend = { ...this.batteryTrend, replaced: (this.batteryTrend.replaced || []).filter(r => !(r.entity_id === entityId && r.day <= day)) };
       if (this.data) { this.data.notes = reply.notes; this.data.reminders = reply.reminders; }
       this.btMessage = action === "enter" ? (reply.reminders_updated ? this.t("btReplDoneRem", { count: reply.reminders_updated }) : this.t("btReplDone")) : "";
-    } catch (err) { this.btMessage = this.t("btReplFailed", { detail: err?.message || String(err) }); }
+    } catch (err) { this.btMessage = this.t("btReplFailed", { detail: this.errText(err) }); }
     this.render();
   }
 
@@ -12394,7 +12449,7 @@ class BackupCleanupMixin {
       this.bkcError = "";
       if (pick) this.bkcSel = new Set(this.bkc.rows.filter(r => r.suggested).map(r => r.backup_id));
       else this.bkcSel = new Set([...(this.bkcSel || [])].filter(id => this.bkc.rows.some(r => r.backup_id === id && !r.protected)));
-    } catch (err) { this.bkcError = err?.message || String(err); }
+    } catch (err) { this.bkcError = this.errText(err); }
     this.bkcLoading = false; this.render();
   }
 
@@ -12458,14 +12513,14 @@ class BackupCleanupMixin {
       const actions = [...(this.bkcSel || [])].slice(0, MAX_PLAN_ACTIONS).map(object_id => ({ kind: "delete_backup", object_id }));
       const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_create", actions });
       this.openNewPlan(plan);
-    } catch (err) { this.bkcPlanError = err?.message || String(err); }
+    } catch (err) { this.bkcPlanError = this.errText(err); }
     this.bkcBusy = false; this.render();
   }
 
   async automationDeletePlan(entityId) {
     try {
       if (!await this.newPlan([{ kind: "delete_automation", object_id: entityId }])) return;
-    } catch (err) { this.toast?.(this.t("autoDeleteFailed", { detail: err?.message || String(err) })); }
+    } catch (err) { this.toast?.(this.t("autoDeleteFailed", { detail: this.errText(err) })); }
     this.render();
   }
 
@@ -12756,7 +12811,7 @@ class BatteryKindMixin {
       this.bkEdit = "";
       this.batteryTrend = null; this._btRequested = false;
       await this.refreshData();
-    } catch (err) { this.bkMessage = this.t("bkFailed", { detail: err?.message || String(err) }); }
+    } catch (err) { this.bkMessage = this.t("bkFailed", { detail: this.errText(err) }); }
     this.render();
   }
 
@@ -14535,7 +14590,7 @@ class MonitorMixin {
         const response = await this._hass.callWS({ type: "ha_housekeeper/monitor_preview", members: this.monitorForm.members });
         if (this._monitorPreviewToken === token && this.monitorForm) { this.monitorPreview = response.preview; refresh(); }
       } catch (err) {
-        if (this._monitorPreviewToken === token && this.monitorForm) { this.monitorPreview = { error: err.message || String(err) }; refresh(); }
+        if (this._monitorPreviewToken === token && this.monitorForm) { this.monitorPreview = { error: this.errText(err) }; refresh(); }
       }
     }, 250);
   }
@@ -14806,14 +14861,14 @@ class MonitorMixin {
     try {
       const response = await this._hass.callWS({ type: "ha_housekeeper/monitor_save", ...(form.id ? { function_id: form.id } : {}), name: form.name, description: form.description, enabled: form.enabled !== false, notify: form.notify, members: form.members });
       this.data.monitor = response.functions; this.monitorSelected = response.function_id; this.monitorForm = null; this.monitorError = ""; this.render();
-    } catch (err) { this.monitorError = this.t("monitorSaveFailed", { reason: err.message || String(err) }); this.render(); }
+    } catch (err) { this.monitorError = this.t("monitorSaveFailed", { reason: this.errText(err) }); this.render(); }
   }
 
   async deleteMonitor() {
     try {
       const response = await this._hass.callWS({ type: "ha_housekeeper/monitor_delete", function_id: this.monitorForm.id });
       this.data.monitor = response.functions; delete this.monitorHistory?.[this.monitorForm.id]; this.monitorSelected = null; this.monitorForm = null; this.monitorError = ""; this.render();
-    } catch (err) { this.monitorError = this.t("monitorDeleteFailed", { reason: err.message || String(err) }); this.render(); }
+    } catch (err) { this.monitorError = this.t("monitorDeleteFailed", { reason: this.errText(err) }); this.render(); }
   }
 }
 

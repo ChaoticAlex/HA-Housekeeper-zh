@@ -5,7 +5,7 @@ class CounterMixin {
     try {
       const id = (this.counterId || "").trim();
       this.counterScan = await this._hass.callWS({ type: "ha_housekeeper/counter_scan", refresh, ...(id ? { statistic_id: id } : {}) });
-    } catch (err) { this.counterError = err?.message || String(err); }
+    } catch (err) { this.counterError = this.errText(err); }
     this.counterLoading = false; this.render();
   }
 
@@ -113,7 +113,7 @@ class CounterMixin {
     try {
       const found = await this._hass.callWS({ type: "ha_housekeeper/range_series", statistic_id: id, from: this.rangeWin.from, to: this.rangeWin.to });
       if (found.error) this.rangeSeriesError = this.t(`reason_${found.error}`); else this.rangeSeries = { ...found, id };
-    } catch (err) { this.rangeSeriesError = err?.message || String(err); }
+    } catch (err) { this.rangeSeriesError = this.errText(err); }
     this.rangeSeriesLoading = false; this.render();
   }
 

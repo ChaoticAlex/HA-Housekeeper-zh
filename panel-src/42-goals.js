@@ -89,7 +89,7 @@ class GoalsMixin {
       await this._hass.callWS({ type: "ha_housekeeper/goal_set", goal: f.id, enabled: f.enabled, limit });
       this.goalForm = null;
       await this.loadGoals();
-    } catch (err) { f.error = this.t("goalFailed", { reason: err?.message || String(err) }); this.render(); }
+    } catch (err) { f.error = this.t("goalFailed", { reason: this.errText(err) }); this.render(); }
   }
 
   bindGoals(root) {

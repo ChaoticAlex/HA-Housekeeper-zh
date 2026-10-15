@@ -50,7 +50,7 @@ class ScanPointsMixin {
     d.phase = "save"; this.render();
     try {
       await this._hass.callWS({ type: "ha_housekeeper/scan_point", action: "save", name });
-    } catch (err) { d.busy = false; d.error = this.t("pinFailed", { reason: err?.message || String(err) }); this.render(); return; }
+    } catch (err) { d.busy = false; d.error = this.t("pinFailed", { reason: this.errText(err) }); this.render(); return; }
     this.pinDraft = null; this.pinPreviousCompare = null;
     this.compare = null; this.render(); this.loadCompare();
   }

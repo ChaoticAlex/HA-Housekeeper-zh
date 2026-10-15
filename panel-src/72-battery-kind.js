@@ -100,7 +100,7 @@ class BatteryKindMixin {
       this.bkEdit = "";
       this.batteryTrend = null; this._btRequested = false;
       await this.refreshData();
-    } catch (err) { this.bkMessage = this.t("bkFailed", { detail: err?.message || String(err) }); }
+    } catch (err) { this.bkMessage = this.t("bkFailed", { detail: this.errText(err) }); }
     this.render();
   }
 

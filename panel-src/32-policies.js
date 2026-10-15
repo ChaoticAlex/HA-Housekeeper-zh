@@ -3,7 +3,7 @@ class PoliciesMixin {
   async loadPolicies() {
     this.policiesLoading = true; this.policiesError = ""; this.render();
     try { this.policies = await this._hass.callWS({ type: "ha_housekeeper/policies" }); this.policiesAt = new Date().toISOString(); }
-    catch (err) { this.policiesError = err?.message || String(err); }
+    catch (err) { this.policiesError = this.errText(err); }
     this.policiesLoading = false; this.render();
   }
 
@@ -16,7 +16,7 @@ class PoliciesMixin {
 
   async changePolicy(call) {
     try { await this._hass.callWS(call); }
-    catch (err) { this.policiesError = err?.message || String(err); }
+    catch (err) { this.policiesError = this.errText(err); }
     await this.loadPolicies();
   }
 

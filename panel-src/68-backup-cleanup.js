@@ -50,7 +50,7 @@ class BackupCleanupMixin {
       this.bkcError = "";
       if (pick) this.bkcSel = new Set(this.bkc.rows.filter(r => r.suggested).map(r => r.backup_id));
       else this.bkcSel = new Set([...(this.bkcSel || [])].filter(id => this.bkc.rows.some(r => r.backup_id === id && !r.protected)));
-    } catch (err) { this.bkcError = err?.message || String(err); }
+    } catch (err) { this.bkcError = this.errText(err); }
     this.bkcLoading = false; this.render();
   }
 
@@ -114,14 +114,14 @@ class BackupCleanupMixin {
       const actions = [...(this.bkcSel || [])].slice(0, MAX_PLAN_ACTIONS).map(object_id => ({ kind: "delete_backup", object_id }));
       const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_create", actions });
       this.openNewPlan(plan);
-    } catch (err) { this.bkcPlanError = err?.message || String(err); }
+    } catch (err) { this.bkcPlanError = this.errText(err); }
     this.bkcBusy = false; this.render();
   }
 
   async automationDeletePlan(entityId) {
     try {
       if (!await this.newPlan([{ kind: "delete_automation", object_id: entityId }])) return;
-    } catch (err) { this.toast?.(this.t("autoDeleteFailed", { detail: err?.message || String(err) })); }
+    } catch (err) { this.toast?.(this.t("autoDeleteFailed", { detail: this.errText(err) })); }
     this.render();
   }
 

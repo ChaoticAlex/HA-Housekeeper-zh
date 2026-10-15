@@ -11,7 +11,7 @@ class ExposureMixin {
   async loadExposure() {
     this.exposureLoading = true; this.exposureError = ""; this.render();
     try { this.exposure = await this._hass.callWS({ type: "ha_housekeeper/exposure" }); this.exposureAt = new Date().toISOString(); }
-    catch (err) { this.exposureError = err?.message || String(err); }
+    catch (err) { this.exposureError = this.errText(err); }
     this.exposureLoading = false; this.render();
   }
 

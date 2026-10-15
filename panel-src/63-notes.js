@@ -166,7 +166,7 @@ class NotesMixin {
       this.data = { ...this.data, notes: res.notes };
       this._corrRequested = false;
       this.noteDraft = null; this._rev++;
-    } catch (err) { d.error = this.t("noteFailed", { reason: err?.message || String(err) }); }
+    } catch (err) { d.error = this.t("noteFailed", { reason: this.errText(err) }); }
     this.render();
   }
 

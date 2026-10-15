@@ -1,0 +1,49 @@
+// Error texts for what the backend refuses. The backend sends a code and an English sentence; errText() looks the
+// sentence up here first, then the code, so a person reads it in the language of the panel.
+const ERR_MESSAGE_KEYS = {
+  "Plan not found": "err_plan_not_found",
+  "Unknown automation": "err_unknown_automation",
+  "Unknown device": "err_unknown_device",
+  "Finding not found in the latest scan": "err_finding_not_found",
+  "Object not found in the latest scan": "err_object_not_found",
+  "A run is no longer in the trace buffer": "err_run_gone",
+  "Two different known devices are needed": "err_two_devices",
+  "Two or more known plans are needed": "err_two_plans",
+  "Home Assistant is still starting": "err_warming_up",
+  "Home Assistant is starting or a change is running": "err_busy_starting",
+  "Home Assistant is starting or a plan or purge is running": "err_busy_starting",
+  "A plan, undo or purge is running": "err_busy",
+  "Another change is running": "err_busy_change",
+  "Nothing to change": "err_nothing_to_change",
+  "Not accepted: out of order": "err_out_of_order",
+  "Not accepted: the plan has not run": "err_plan_not_run",
+  "invalid window": "err_invalid_window",
+  "not_found": "err_not_found",
+  "The date does not exist": "err_date_invalid",
+  "The date lies in the future": "err_date_future",
+};
+
+Object.assign(TEXT.de, {
+  err_plan_not_found: "Der Plan wurde nicht gefunden.", err_unknown_automation: "Diese Automation ist unbekannt.", err_unknown_device: "Dieses Gerät ist unbekannt.",
+  err_finding_not_found: "Der Befund ist im letzten Scan nicht mehr vorhanden.", err_object_not_found: "Das Objekt ist im letzten Scan nicht mehr vorhanden.",
+  err_run_gone: "Dieser Lauf ist nicht mehr im Ablaufspeicher.", err_two_devices: "Es braucht zwei verschiedene bekannte Geräte.", err_two_plans: "Es braucht zwei oder mehr bekannte Pläne.",
+  err_busy_starting: "Home Assistant startet noch, oder ein Plan oder eine Änderung läuft.", err_busy_change: "Es läuft bereits eine andere Änderung.",
+  err_nothing_to_change: "Es gibt nichts zu ändern.", err_out_of_order: "Nicht angenommen: falsche Reihenfolge.", err_plan_not_run: "Nicht angenommen: der Plan ist nicht gelaufen.", err_invalid_window: "Das Zeitfenster ist ungültig.",
+  err_date_invalid: "Dieses Datum gibt es nicht.", err_date_future: "Das Datum liegt in der Zukunft.",
+  err_not_loaded: "HA Housekeeper ist nicht geladen.", err_days_required: "Zum Zurückstellen eines Befunds braucht es Tage.", err_reason_required: "Zum Behalten eines Befunds braucht es einen Grund.",
+  err_invalid_limit: "Der Grenzwert liegt außerhalb des erlaubten Bereichs.", err_no_recorder: "Der Recorder ist nicht verfügbar.", err_nothing_to_merge: "Nach den Konflikten bleibt nichts übrig.",
+  err_too_many: "Zu viele Aktionen in einem Plan.", err_thresholds_order: "Info, niedrig, mittel und hoch müssen ansteigen.",
+  err_failed: "Fehlgeschlagen: {detail}", err_not_accepted: "Nicht angenommen: {detail}",
+});
+Object.assign(TEXT.en, {
+  err_plan_not_found: "The plan was not found.", err_unknown_automation: "This automation is unknown.", err_unknown_device: "This device is unknown.",
+  err_finding_not_found: "The finding is no longer in the latest scan.", err_object_not_found: "The object is no longer in the latest scan.",
+  err_run_gone: "This run is no longer in the trace buffer.", err_two_devices: "Two different known devices are needed.", err_two_plans: "Two or more known plans are needed.",
+  err_busy_starting: "Home Assistant is still starting, or a plan or change is running.", err_busy_change: "Another change is already running.",
+  err_nothing_to_change: "There is nothing to change.", err_out_of_order: "Not accepted: out of order.", err_plan_not_run: "Not accepted: the plan has not run.", err_invalid_window: "The time window is invalid.",
+  err_date_invalid: "This date does not exist.", err_date_future: "The date lies in the future.",
+  err_not_loaded: "HA Housekeeper is not loaded.", err_days_required: "Putting a finding off needs days.", err_reason_required: "Keeping a finding needs a reason.",
+  err_invalid_limit: "The limit is outside the allowed range.", err_no_recorder: "The recorder is not available.", err_nothing_to_merge: "Nothing is left after the conflicts.",
+  err_too_many: "Too many actions in one plan.", err_thresholds_order: "Info, low, medium and high must rise.",
+  err_failed: "Failed: {detail}", err_not_accepted: "Not accepted: {detail}",
+});

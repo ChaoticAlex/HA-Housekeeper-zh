@@ -60,7 +60,7 @@ class BatteryTypeMixin {
       const reply = await this._hass.callWS({ type: "ha_housekeeper/battery_type_set", entity_id: entityId, battery_type: value });
       this.batteryTrend = { ...this.batteryTrend, types: reply.types, custom_types: reply.custom_types };
       this.btEdit = "";
-    } catch (err) { this.btMessage = this.t("btReplFailed", { detail: err?.message || String(err) }); }
+    } catch (err) { this.btMessage = this.t("btReplFailed", { detail: this.errText(err) }); }
     this.render();
   }
 
@@ -88,7 +88,7 @@ class BatteryTypeMixin {
       const reply = await this._hass.callWS({ type: "ha_housekeeper/battery_custom_type", action, name, new_name: newName });
       this.batteryTrend = { ...this.batteryTrend, types: reply.types, custom_types: reply.custom_types };
       this.btCtEdit = "";
-    } catch (err) { this.btCtMessage = this.t("btReplFailed", { detail: err?.message || String(err) }); }
+    } catch (err) { this.btCtMessage = this.t("btReplFailed", { detail: this.errText(err) }); }
     this.render();
   }
 
@@ -99,7 +99,7 @@ class BatteryTypeMixin {
       this.batteryTrend = { ...this.batteryTrend, replaced: (this.batteryTrend.replaced || []).filter(r => !(r.entity_id === entityId && r.day <= day)) };
       if (this.data) { this.data.notes = reply.notes; this.data.reminders = reply.reminders; }
       this.btMessage = action === "enter" ? (reply.reminders_updated ? this.t("btReplDoneRem", { count: reply.reminders_updated }) : this.t("btReplDone")) : "";
-    } catch (err) { this.btMessage = this.t("btReplFailed", { detail: err?.message || String(err) }); }
+    } catch (err) { this.btMessage = this.t("btReplFailed", { detail: this.errText(err) }); }
     this.render();
   }
 

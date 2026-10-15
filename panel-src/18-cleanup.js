@@ -288,9 +288,14 @@ class CleanupMixin {
     this.cleanupBusy = false; this.render();
   }
 
+  // What the backend refused, in the language of the panel: its sentence, then its code, else the sentence as sent.
   errText(err) {
-    const key = `err_${err?.code}`;
-    return TEXT[this.lang][key] ? this.t(key) : (err?.message || String(err));
+    const raw = err?.message || String(err), has = key => TEXT[this.lang]?.[key] || TEXT.en[key];
+    const key = [ERR_MESSAGE_KEYS[raw], `err_${err?.code}`].find(has);
+    if (key) return this.t(key);
+    if (/_failed$/.test(err?.code || "")) return this.t("err_failed", { detail: raw.replace(/^\w+: /, "") });
+    const refused = /^Not accepted: (.+)$/.exec(raw);
+    return refused ? this.t("err_not_accepted", { detail: refused[1] }) : raw;
   }
 
   // An open preview is a plan that was neither confirmed nor run; it can only be confirmed for 24 hours.

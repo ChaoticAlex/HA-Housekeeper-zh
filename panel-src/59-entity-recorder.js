@@ -61,7 +61,7 @@ class EntityRecorderMixin {
     try {
       const r = await this._hass.callWS({ type: "ha_housekeeper/entity_recorder", entity_id: entityId });
       next = r?.busy || !r?.available ? { message: this.t("erecBusy") } : { data: r };
-    } catch (err) { next = { message: this.t("erecFailed", { reason: err?.message || String(err) }) }; }
+    } catch (err) { next = { message: this.t("erecFailed", { reason: this.errText(err) }) }; }
     this.entityRec = { ...this.entityRec, [entityId]: next };
     this.render();
   }

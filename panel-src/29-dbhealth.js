@@ -3,7 +3,7 @@ class DbHealthMixin {
   async loadDbHealth(refresh = false, check = false) {
     this.dbLoading = true; this.dbError = ""; this.render();
     try { this.dbHealth = await this._hass.callWS({ type: "ha_housekeeper/db_health", refresh, ...(check ? { check } : {}) }); }
-    catch (err) { this.dbError = err?.message || String(err); }
+    catch (err) { this.dbError = this.errText(err); }
     this.dbLoading = false; this.render();
     this.followUp("db", "recorder", this.dbHealth, r => this.loadDbHealth(r), refresh);
     // The full check runs on in the background: look again until it is done (cached reply, no new query).

@@ -73,7 +73,7 @@ class ExchangeMixin {
     if (!ex.oldDev || !ex.newDev || ex.loading) return;
     ex.loading = true; ex.error = ""; ex.choices = {}; this.render();
     try { ex.result = await this._hass.callWS({ type: "ha_housekeeper/device_pairs", old_device_id: ex.oldDev, new_device_id: ex.newDev }); }
-    catch (err) { ex.result = null; ex.error = this.t("exFailed", { reason: err?.message || String(err) }); }
+    catch (err) { ex.result = null; ex.error = this.t("exFailed", { reason: this.errText(err) }); }
     ex.loading = false; this.render();
   }
 
@@ -93,7 +93,7 @@ class ExchangeMixin {
       const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_create", actions });
       this.openNewPlan(plan, null);
       this.exchangeState().planned = this.exchangeState().oldDev;
-    } catch (err) { this.cleanupError = err?.message || String(err); }
+    } catch (err) { this.cleanupError = this.errText(err); }
     this.cleanupBusy = false; this.render();
   }
 
@@ -195,7 +195,7 @@ class ExchangeMixin {
     try {
       const reply = await this._hass.callWS({ type: "ha_housekeeper/plan_report", plan_id: planId, anonymize: !this.reportClear, lang: this.lang });
       this.report = { plan_id: planId, ...reply }; this.reportMessage = "";
-    } catch (err) { this.report = null; this.reportMessage = this.t("reportFailed", { reason: err?.message || String(err) }); }
+    } catch (err) { this.report = null; this.reportMessage = this.t("reportFailed", { reason: this.errText(err) }); }
     this.render();
   }
 
@@ -209,7 +209,7 @@ class ExchangeMixin {
 
   async copyReport() {
     try { await navigator.clipboard.writeText(this.report.markdown); this.reportMessage = this.t("reportCopied"); }
-    catch (err) { this.reportMessage = this.t("reportFailed", { reason: err?.message || String(err) }); }
+    catch (err) { this.reportMessage = this.t("reportFailed", { reason: this.errText(err) }); }
     this.render();
   }
 

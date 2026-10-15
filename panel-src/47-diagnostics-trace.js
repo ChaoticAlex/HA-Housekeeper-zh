@@ -58,7 +58,7 @@ class TraceDiagMixin {
     const c = this.diagState().compare;
     c.error = ""; c.result = null;
     try { c.result = await this._hass.callWS({ type: "ha_housekeeper/trace_compare", entity_id: this.diagState().sel, run_a: c.a, run_b: c.b }); }
-    catch (err) { c.error = this.t("cmpFailed", { reason: err?.message || String(err) }); }
+    catch (err) { c.error = this.t("cmpFailed", { reason: this.errText(err) }); }
     this.render();
   }
 

@@ -18,7 +18,7 @@ class WindowMixin {
   async windowSet(fields) {
     this.winError = "";
     try { this.win = await this._hass.callWS({ type: "ha_housekeeper/window_set", ...fields }); }
-    catch (err) { this.winError = this.errText ? this.errText(err) : (err?.message || String(err)); }
+    catch (err) { this.winError = this.errText(err); }
     this.render();
     return !this.winError;
   }
@@ -36,7 +36,7 @@ class WindowMixin {
     if (name === "plan") { this.noteJump("journal"); this.view = "journal"; await this.openPlan(arg); return; }
     if (name === "targets" || name === "reload") {
       try { this.winTargets = (await this._hass.callWS({ type: "ha_housekeeper/window_reload", execute: name === "reload" })).targets; }
-      catch (err) { this.winError = err?.message || String(err); }
+      catch (err) { this.winError = this.errText(err); }
       if (name === "reload" && !this.winError) return this.windowSet({ action: "advance", step: "reload" });
       this.render(); return;
     }

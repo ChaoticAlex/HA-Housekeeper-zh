@@ -56,7 +56,7 @@ class DiagnosticsMixin {
     const d = this.diagState();
     d.loading = true; d.error = ""; this.render();
     try { d.quality = await this._hass.callWS({ type: "ha_housekeeper/automation_quality" }); this.markLoaded("quality"); }
-    catch (err) { d.error = err?.message || String(err); }
+    catch (err) { d.error = this.errText(err); }
     d.loading = false; this.render();
   }
 
@@ -283,7 +283,7 @@ class DiagnosticsMixin {
     try {
       d.criteria[d.sel] = await this._hass.callWS({ type: "ha_housekeeper/criteria_set", entity_id: d.sel, criteria });
       d.draft = null; d.message = this.t("critSaved");
-    } catch (err) { d.message = this.t("critFailed", { reason: err?.message || String(err) }); }
+    } catch (err) { d.message = this.t("critFailed", { reason: this.errText(err) }); }
     this.render();
   }
 

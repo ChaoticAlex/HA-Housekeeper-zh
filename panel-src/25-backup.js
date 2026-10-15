@@ -5,7 +5,7 @@ class BackupMixin {
     if (call) this.bhForm = null;
     this.backupLoading = true; this.backupError = ""; this.render();
     try { this.backup = await this._hass.callWS(call || { type: "ha_housekeeper/backup_health" }); this.markLoaded("backup"); }
-    catch (err) { this.backupError = err?.message || String(err); }
+    catch (err) { this.backupError = this.errText(err); }
     this.backupLoading = false; this.render();
   }
 

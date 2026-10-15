@@ -86,7 +86,7 @@ class MonitorMixin {
         const response = await this._hass.callWS({ type: "ha_housekeeper/monitor_preview", members: this.monitorForm.members });
         if (this._monitorPreviewToken === token && this.monitorForm) { this.monitorPreview = response.preview; refresh(); }
       } catch (err) {
-        if (this._monitorPreviewToken === token && this.monitorForm) { this.monitorPreview = { error: err.message || String(err) }; refresh(); }
+        if (this._monitorPreviewToken === token && this.monitorForm) { this.monitorPreview = { error: this.errText(err) }; refresh(); }
       }
     }, 250);
   }
@@ -357,13 +357,13 @@ class MonitorMixin {
     try {
       const response = await this._hass.callWS({ type: "ha_housekeeper/monitor_save", ...(form.id ? { function_id: form.id } : {}), name: form.name, description: form.description, enabled: form.enabled !== false, notify: form.notify, members: form.members });
       this.data.monitor = response.functions; this.monitorSelected = response.function_id; this.monitorForm = null; this.monitorError = ""; this.render();
-    } catch (err) { this.monitorError = this.t("monitorSaveFailed", { reason: err.message || String(err) }); this.render(); }
+    } catch (err) { this.monitorError = this.t("monitorSaveFailed", { reason: this.errText(err) }); this.render(); }
   }
 
   async deleteMonitor() {
     try {
       const response = await this._hass.callWS({ type: "ha_housekeeper/monitor_delete", function_id: this.monitorForm.id });
       this.data.monitor = response.functions; delete this.monitorHistory?.[this.monitorForm.id]; this.monitorSelected = null; this.monitorForm = null; this.monitorError = ""; this.render();
-    } catch (err) { this.monitorError = this.t("monitorDeleteFailed", { reason: err.message || String(err) }); this.render(); }
+    } catch (err) { this.monitorError = this.t("monitorDeleteFailed", { reason: this.errText(err) }); this.render(); }
   }
 }
