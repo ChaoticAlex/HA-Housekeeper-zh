@@ -141,6 +141,7 @@ const TEXT = {
     err_bad_token: "Bestätigung ungültig oder abgelaufen.", err_busy: "Es läuft bereits ein Plan.", sourceUndoPerItem: "Datei zu groß für eine Kopie: Rückgängig stellt diese Quelle nur Eintrag für Eintrag wieder her (Kommentare und Formatierung kehren nicht zurück).", snapshotDropped: "Die Dateikopie wurde aus Platzgründen entfernt; Rückgängig stellt nur einzelne Einträge wieder her.", err_cleanup_busy: "Es läuft gerade ein Plan. Scans sind bis zu seinem Ende gesperrt.", err_plan_not_open: "Dieser Plan wurde bereits bestätigt oder ausgeführt.", err_plan_too_old: "Der Plan ist älter als 24 Stunden. Bitte neu erstellen.", err_nothing_to_do: "Nichts auszuführen: blockierte Einträge laufen nie, „Zu prüfen“ braucht eine ausdrückliche Bestätigung.", err_not_found: "Plan nicht gefunden.",
     quarantine: "Quarantäne", quarantineHint: "Entitäten, die Housekeeper deaktiviert hat. Entfernen ist frühestens nach {days} Tagen möglich (Aktion „Entfernen“). Das Deaktivieren machst du über das Journal rückgängig.",
     quarantineSince: "seit {date} · {days} Tagen", quarantineWait: "Noch {days} Tage", quarantineReady: "Frühestens entfernbar", quarantineFact: "seit {date} ({days} Tage)",
+    largeShareEntity: "Ungewöhnlich viel: {count} von {total} Entitäten ({percent} %)", largeShareDevice: "Ungewöhnlich viel: {count} von {total} Geräten ({percent} %)", largeShareHint: "Dieser Plan entfernt mehr als die Hälfte. Prüfe die Auswahl, bevor du fortfährst.",
     confirmWordRemove: "ENTFERNEN", confirmedSummaryRemove: "{count} Entitäten werden entfernt. Vorher legt Housekeeper ein Home-Assistant-Backup an (das kann dauern) und startet nur, wenn es erfolgreich ist. Wiederherstellen geht, solange die Entitäts-ID frei ist und die Integration noch existiert.",
     reason_not_quarantined: "Nicht in Quarantäne: erst deaktivieren, nach der Quarantänezeit entfernen.", reason_quarantine_too_short: "Die Quarantäne ist noch zu kurz.", reason_not_restorable: "Nicht wiederherstellbar: Die Integration existiert nicht mehr, das Entfernen wäre endgültig.",
     abort_backup_failed: "Das Backup ist fehlgeschlagen – es wurde nichts geändert.", abort_backup_small_failed: "Das Backup nur von Home Assistant ist fehlgeschlagen – es wurde nichts geändert.", repeatFull: "Mit vollem Backup wiederholen", repeatFullHint: "Ein volles Backup nach deinen Backup-Einstellungen (mit Apps und Ordnern) dauert länger, zählt aber nicht als automatisches Backup. Oder wiederhole den Plan mit dem kleinen Backup.", backupFullPlanned: "Volles Backup nach deinen Backup-Einstellungen", abort_interrupted: "Der Lauf wurde unterbrochen (Neustart von Home Assistant); dieser Schritt lief nicht.", abort_database_corrupt: "Die Recorder-Datenbank ist beschädigt („database disk image is malformed“) – es wurde nichts geändert. Prüfe sie mit PRAGMA integrity_check (zum Beispiel in SQLite Web), repariere betroffene Indizes mit REINDEX oder spiele ein Backup ein.", abort_backup_unverified: "Das Backup wurde gemeldet, ist aber nicht wie erwartet in der Backup-Liste (fehlt, ist leer oder ohne Datenbank) – es wurde nichts geändert. Prüfe Einstellungen → System → Backups.", abort_backup_running: "Home Assistant erstellt gerade selbst ein Backup – es wurde nichts geändert. Versuche es danach noch einmal.", abort_recorder_migrating: "Der Recorder baut gerade die Datenbank um (Migration) – es wurde nichts geändert. Warte, bis er fertig ist.", abort_recorder_backlog: "Der Recorder kommt mit dem Schreiben nicht nach (große Warteschlange) – es wurde nichts geändert. Versuche es später noch einmal.", abort_disk_low: "Auf dem Datenträger der Recorder-Datenbank ist zu wenig Platz frei (unter 512 MB) – es wurde nichts geändert. Schaffe zuerst Platz.", abort_backup_unavailable: "Die Backup-Komponente ist nicht verfügbar – es wurde nichts geändert.", abort_no_backup_agent: "Es ist kein Backup-Ziel eingerichtet (Einstellungen → System → Backups) – es wurde nichts geändert.",
@@ -324,6 +325,7 @@ const TEXT = {
     err_bad_token: "Confirmation invalid or expired.", err_busy: "A plan is already running.", sourceUndoPerItem: "File too large to copy: undo restores this source item by item only (comments and formatting do not come back).", snapshotDropped: "The file copy was dropped to save space; undo restores single items only.", err_cleanup_busy: "A plan is running right now. Scans are locked until it ends.", err_plan_not_open: "This plan was already confirmed or executed.", err_plan_too_old: "The plan is older than 24 hours. Please create it again.", err_nothing_to_do: "Nothing to execute: blocked entries never run, “to review” needs an explicit confirmation.", err_not_found: "Plan not found.",
     quarantine: "Quarantine", quarantineHint: "Entities Housekeeper has disabled. Removal is possible no earlier than after {days} days (action “Remove”). You can undo the disabling from the journal.",
     quarantineSince: "since {date} · {days} days", quarantineWait: "{days} days to go", quarantineReady: "Removable at the earliest", quarantineFact: "since {date} ({days} days)",
+    largeShareEntity: "Unusually many: {count} of {total} entities ({percent} %)", largeShareDevice: "Unusually many: {count} of {total} devices ({percent} %)", largeShareHint: "This plan removes more than half. Check the selection before you continue.",
     confirmWordRemove: "REMOVE", confirmedSummaryRemove: "{count} entities will be removed. Housekeeper creates a Home Assistant backup first (this can take a while) and only continues if it succeeds. Restoring works while the entity ID is free and the integration still exists.",
     reason_not_quarantined: "Not in quarantine: disable first, remove after the quarantine period.", reason_quarantine_too_short: "The quarantine is still too short.", reason_not_restorable: "Not restorable: the integration no longer exists, so the removal would be final.",
     abort_backup_failed: "The backup failed – nothing was changed.", abort_backup_small_failed: "The backup of Home Assistant only failed – nothing was changed.", repeatFull: "Repeat with a full backup", repeatFullHint: "A full backup as your backup settings say (with apps and folders) takes longer but does not count as an automatic backup. Or repeat the plan with the small backup.", backupFullPlanned: "Full backup as your backup settings say", abort_interrupted: "The run was cut off (Home Assistant restarted); this step did not run.", abort_database_corrupt: "The recorder database is damaged (“database disk image is malformed”) – nothing was changed. Check it with PRAGMA integrity_check (for example in SQLite Web), repair the affected indexes with REINDEX or restore a backup.", abort_backup_unverified: "The backup was reported but is not in the backup list as expected (missing, empty or without the database) – nothing was changed. Check Settings → System → Backups.", abort_backup_running: "Home Assistant is making a backup itself – nothing was changed. Try again afterwards.", abort_recorder_migrating: "The recorder is migrating the database – nothing was changed. Wait until it is done.", abort_recorder_backlog: "The recorder cannot keep up with writing (a long queue) – nothing was changed. Try again later.", abort_disk_low: "The disk of the recorder database has too little free space (under 512 MB) – nothing was changed. Free some space first.", abort_backup_unavailable: "The backup component is not available – nothing was changed.", abort_no_backup_agent: "No backup location is set up (Settings → System → Backups) – nothing was changed.",
@@ -382,6 +384,8 @@ const BACKUP_KINDS = ["remove_entity", "remove_device", "forget_device", "replac
 const PURGE_KINDS = ["purge_statistics", "trim_history", "delete_backup"];
 // Reasons that mean "all is well, there is nothing to do" and not "Housekeeper may not".
 const NOTHING_REASONS = ["nothing_found", "nothing_to_do"];
+// A plan removing this share of all entities or devices (or more) gets a warning before it is confirmed.
+const LARGE_REMOVAL_SHARE = 0.5;
 const REPAIR_KINDS = ["repair_counter", "repair_range"];
 const IMPACT_RANK = { none: 0, info: 1, low: 2, medium: 3, high: 4 };
 const BACKUP_FAILURES = ["backup_failed", "backup_small_failed", "backup_unavailable", "no_backup_agent", "backup_unverified"];
@@ -3318,6 +3322,31 @@ class CleanupMixin {
     return this.t("confirmWord");
   }
 
+  // The removals that would run, against everything of that kind: null while it stays below the limit.
+  largeRemoval(plan, run) {
+    const totals = plan.summary?.totals || {};
+    const found = [["entity", ["remove_entity"], "largeShareEntity"], ["device", ["remove_device", "forget_device"], "largeShareDevice"]].map(([key, kinds, text]) => {
+      const count = run.filter(a => kinds.includes(a.kind)).length, total = totals[key] || 0;
+      return { count, total, text, share: total ? count / total : 0 };
+    }).filter(item => item.count && item.share >= LARGE_REMOVAL_SHARE);
+    return found.sort((a, b) => b.share - a.share)[0] || null;
+  }
+
+  // What the plan would run now: executable, and "to review" only when explicitly confirmed.
+  runActions(plan) {
+    return plan.actions.filter(a => a.executable && (a.verdict !== "review" || this.ack.has(a.object_id)));
+  }
+
+  largeRemovalWarning(plan) {
+    const large = this.largeRemoval(plan, this.runActions(plan));
+    return large ? { title: this.t(large.text, { count: large.count, total: large.total, percent: Math.round(large.share * 100) }), hint: this.t("largeShareHint") } : null;
+  }
+
+  largeRemovalNote(plan) {
+    const warn = this.largeRemovalWarning(plan);
+    return warn ? `<div class="outcome warn" role="status"><ha-icon icon="mdi:alert-outline"></ha-icon><span><strong>${this.esc(warn.title)}</strong><small>${this.esc(warn.hint)}</small></span></div>` : "";
+  }
+
   confirmSummary(plan, count) {
     const executable = plan.actions.filter(a => a.executable);
     const devices = executable.some(a => DEVICE_KINDS.includes(a.kind));
@@ -3708,9 +3737,9 @@ class CleanupMixin {
       const review = plan.actions.filter(a => a.verdict === "review" && a.executable);
       const all = review.length && review.every(a => this.ack.has(a.object_id));
       const reviewBox = review.length ? `<label class="factnote reportopt"><input type="checkbox" data-ack-all ${all ? "checked" : ""}><span><strong>${this.t("acknowledgeAll", { count: review.length })}</strong><small>${this.t("acknowledgeAllHint")}</small></span></label>` : "";
-      const run = plan.actions.filter(a => a.executable && (a.verdict !== "review" || this.ack.has(a.object_id)));
+      const run = this.runActions(plan);
       const risky = run.some(a => REMOVAL_KINDS.includes(a.kind) || PURGE_KINDS.includes(a.kind));
-      control = `<div class="setrow planfoot"><div>${run.length ? `<strong class="plansum">${this.confirmSummary(plan, run.length)}</strong>` : ""}<small>${this.t("cleanupDryRun")}</small>${reviewBox}</div><span class="planfootbtns"><button class="btn" data-plan-close>${this.t("confirmCancel")}</button><button class="btn ${risky ? "danger" : "primary"}" data-plan-confirm data-risky="${risky}" data-count="${run.length}">${this.t("confirmPlan")}</button></span></div>`;
+      control = `<div class="setrow planfoot"><div>${run.length ? `<strong class="plansum">${this.confirmSummary(plan, run.length)}</strong>` : ""}${this.largeRemovalNote(plan)}<small>${this.t("cleanupDryRun")}</small>${reviewBox}</div><span class="planfootbtns"><button class="btn" data-plan-close>${this.t("confirmCancel")}</button><button class="btn ${risky ? "danger" : "primary"}" data-plan-confirm data-risky="${risky}" data-count="${run.length}">${this.t("confirmPlan")}</button></span></div>`;
     }
     else if (plan.status === "aborted") {
       const small = plan.actions.some(a => a.result?.reason === "backup_small_failed");
@@ -13429,7 +13458,7 @@ class ConfirmMixin {
     if (!c) return "";
     return `<div class="hkmodal" data-confirm-modal><div class="hkdialog" role="alertdialog" aria-modal="true" aria-labelledby="hk-confirm-head" aria-describedby="hk-confirm-text">
       <div class="dhead"><h2 id="hk-confirm-head">${this.esc(c.title || this.t("confirmTitle"))}</h2></div>
-      <div class="dbody"><p id="hk-confirm-text" class="u-m0">${this.esc(c.text)}</p></div>
+      <div class="dbody"><p id="hk-confirm-text" class="u-m0">${this.esc(c.text)}</p>${c.warn ? `<div class="outcome warn" role="status"><ha-icon icon="mdi:alert-outline"></ha-icon><span><strong>${this.esc(c.warn.title)}</strong><small>${this.esc(c.warn.hint)}</small></span></div>` : ""}</div>
       <div class="dfoot"><span></span><span class="dbtns"><button type="button" class="btn" data-confirm-no>${this.t("confirmCancel")}</button><button type="button" class="btn ${c.danger === false ? "primary" : "danger"}" data-confirm-yes>${this.esc(c.yes || this.t("confirmDelete"))}</button></span></div></div></div>`;
   }
 
@@ -15387,7 +15416,7 @@ class HAHousekeeperPanel extends HTMLElement {
     const kind = root.querySelector("[data-cleanup-kind]"); if (kind) kind.onchange = () => { this.cleanupKind = kind.value; this.cleanupSel = new Set(); if (this.lv.cleanup) this.lv.cleanup.f = {}; this.pages = {}; this.render(); };
     root.querySelectorAll("[data-repair-task]").forEach(el => el.onclick = () => { if (this.repairTask === el.dataset.repairTask) { this.repairTask = null; this.render(); return; } this.repairTask = el.dataset.repairTask; this.cleanupKind = this.repairTask; this.cleanupSel = new Set(); this.plan = null; this.render(); });
     root.querySelector("[data-ack-all]")?.addEventListener("change", e => { this.ack = new Set(e.target.checked ? this.plan.actions.filter(x => x.verdict === "review" && x.executable).map(x => x.object_id) : []); this.render(); });
-    root.querySelector("[data-plan-confirm]")?.addEventListener("click", ev => this.confirmAsk(this.confirmSummary(this.plan, Number(ev.currentTarget.dataset.count)), () => this.confirmAndRun(), { title: this.t("confirmRunTitle"), yes: this.t("runNow"), danger: ev.currentTarget.dataset.risky === "true" }));
+    root.querySelector("[data-plan-confirm]")?.addEventListener("click", ev => this.confirmAsk(this.confirmSummary(this.plan, Number(ev.currentTarget.dataset.count)), () => this.confirmAndRun(), { title: this.t("confirmRunTitle"), yes: this.t("runNow"), danger: ev.currentTarget.dataset.risky === "true", warn: this.largeRemovalWarning(this.plan) }));
     root.querySelector("[data-plan-cancel]")?.addEventListener("click", () => this.cancelPlan());
     root.querySelector("[data-undo-all]")?.addEventListener("click", () => { this.undoAsk = "all"; this.render(); });
     root.querySelector("[data-undo-all-yes]")?.addEventListener("click", () => this.undoPlan());

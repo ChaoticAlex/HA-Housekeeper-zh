@@ -11,6 +11,8 @@ const BACKUP_KINDS = ["remove_entity", "remove_device", "forget_device", "replac
 const PURGE_KINDS = ["purge_statistics", "trim_history", "delete_backup"];
 // Reasons that mean "all is well, there is nothing to do" and not "Housekeeper may not".
 const NOTHING_REASONS = ["nothing_found", "nothing_to_do"];
+// A plan removing this share of all entities or devices (or more) gets a warning before it is confirmed.
+const LARGE_REMOVAL_SHARE = 0.5;
 const REPAIR_KINDS = ["repair_counter", "repair_range"];
 const IMPACT_RANK = { none: 0, info: 1, low: 2, medium: 3, high: 4 };
 const BACKUP_FAILURES = ["backup_failed", "backup_small_failed", "backup_unavailable", "no_backup_agent", "backup_unverified"];

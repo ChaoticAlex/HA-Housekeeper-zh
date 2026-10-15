@@ -14,7 +14,7 @@ class ConfirmMixin {
     if (!c) return "";
     return `<div class="hkmodal" data-confirm-modal><div class="hkdialog" role="alertdialog" aria-modal="true" aria-labelledby="hk-confirm-head" aria-describedby="hk-confirm-text">
       <div class="dhead"><h2 id="hk-confirm-head">${this.esc(c.title || this.t("confirmTitle"))}</h2></div>
-      <div class="dbody"><p id="hk-confirm-text" class="u-m0">${this.esc(c.text)}</p></div>
+      <div class="dbody"><p id="hk-confirm-text" class="u-m0">${this.esc(c.text)}</p>${c.warn ? `<div class="outcome warn" role="status"><ha-icon icon="mdi:alert-outline"></ha-icon><span><strong>${this.esc(c.warn.title)}</strong><small>${this.esc(c.warn.hint)}</small></span></div>` : ""}</div>
       <div class="dfoot"><span></span><span class="dbtns"><button type="button" class="btn" data-confirm-no>${this.t("confirmCancel")}</button><button type="button" class="btn ${c.danger === false ? "primary" : "danger"}" data-confirm-yes>${this.esc(c.yes || this.t("confirmDelete"))}</button></span></div></div></div>`;
   }
 

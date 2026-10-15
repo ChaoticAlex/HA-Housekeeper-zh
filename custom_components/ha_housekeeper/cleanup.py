@@ -1339,6 +1339,8 @@ def build_plan(
             **counts,
             "uses": sum(len(a["used_by"]) for a in actions),
             "statistics": sum(a["has_statistics"] for a in actions),
+            # What a removal is measured against: the panel warns when a plan takes most of it.
+            "totals": {"entity": len(objects), "device": len(devices)},
         },
         "simulation": simulate(actions),
         "events": [{"at": now.isoformat(), "type": "created"}],

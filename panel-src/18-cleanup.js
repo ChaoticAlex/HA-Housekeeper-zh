@@ -86,6 +86,31 @@ class CleanupMixin {
     return this.t("confirmWord");
   }
 
+  // The removals that would run, against everything of that kind: null while it stays below the limit.
+  largeRemoval(plan, run) {
+    const totals = plan.summary?.totals || {};
+    const found = [["entity", ["remove_entity"], "largeShareEntity"], ["device", ["remove_device", "forget_device"], "largeShareDevice"]].map(([key, kinds, text]) => {
+      const count = run.filter(a => kinds.includes(a.kind)).length, total = totals[key] || 0;
+      return { count, total, text, share: total ? count / total : 0 };
+    }).filter(item => item.count && item.share >= LARGE_REMOVAL_SHARE);
+    return found.sort((a, b) => b.share - a.share)[0] || null;
+  }
+
+  // What the plan would run now: executable, and "to review" only when explicitly confirmed.
+  runActions(plan) {
+    return plan.actions.filter(a => a.executable && (a.verdict !== "review" || this.ack.has(a.object_id)));
+  }
+
+  largeRemovalWarning(plan) {
+    const large = this.largeRemoval(plan, this.runActions(plan));
+    return large ? { title: this.t(large.text, { count: large.count, total: large.total, percent: Math.round(large.share * 100) }), hint: this.t("largeShareHint") } : null;
+  }
+
+  largeRemovalNote(plan) {
+    const warn = this.largeRemovalWarning(plan);
+    return warn ? `<div class="outcome warn" role="status"><ha-icon icon="mdi:alert-outline"></ha-icon><span><strong>${this.esc(warn.title)}</strong><small>${this.esc(warn.hint)}</small></span></div>` : "";
+  }
+
   confirmSummary(plan, count) {
     const executable = plan.actions.filter(a => a.executable);
     const devices = executable.some(a => DEVICE_KINDS.includes(a.kind));
@@ -476,9 +501,9 @@ class CleanupMixin {
       const review = plan.actions.filter(a => a.verdict === "review" && a.executable);
       const all = review.length && review.every(a => this.ack.has(a.object_id));
       const reviewBox = review.length ? `<label class="factnote reportopt"><input type="checkbox" data-ack-all ${all ? "checked" : ""}><span><strong>${this.t("acknowledgeAll", { count: review.length })}</strong><small>${this.t("acknowledgeAllHint")}</small></span></label>` : "";
-      const run = plan.actions.filter(a => a.executable && (a.verdict !== "review" || this.ack.has(a.object_id)));
+      const run = this.runActions(plan);
       const risky = run.some(a => REMOVAL_KINDS.includes(a.kind) || PURGE_KINDS.includes(a.kind));
-      control = `<div class="setrow planfoot"><div>${run.length ? `<strong class="plansum">${this.confirmSummary(plan, run.length)}</strong>` : ""}<small>${this.t("cleanupDryRun")}</small>${reviewBox}</div><span class="planfootbtns"><button class="btn" data-plan-close>${this.t("confirmCancel")}</button><button class="btn ${risky ? "danger" : "primary"}" data-plan-confirm data-risky="${risky}" data-count="${run.length}">${this.t("confirmPlan")}</button></span></div>`;
+      control = `<div class="setrow planfoot"><div>${run.length ? `<strong class="plansum">${this.confirmSummary(plan, run.length)}</strong>` : ""}${this.largeRemovalNote(plan)}<small>${this.t("cleanupDryRun")}</small>${reviewBox}</div><span class="planfootbtns"><button class="btn" data-plan-close>${this.t("confirmCancel")}</button><button class="btn ${risky ? "danger" : "primary"}" data-plan-confirm data-risky="${risky}" data-count="${run.length}">${this.t("confirmPlan")}</button></span></div>`;
     }
     else if (plan.status === "aborted") {
       const small = plan.actions.some(a => a.result?.reason === "backup_small_failed");

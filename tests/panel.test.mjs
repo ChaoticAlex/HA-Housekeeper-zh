@@ -1433,6 +1433,18 @@ test("the replace assistant previews sources and sends the new entity with the p
   assert.ok(el.confirmSummary(plan, 1).startsWith("In 2 entity references"));
 });
 
+test("a plan that removes half of all entities or more warns before it runs", () => {
+  const { el } = panel("en");
+  const remove = n => Array.from({ length: n }, () => ({ kind: "remove_entity", executable: true, verdict: "ok" }));
+  const plan = n => ({ actions: remove(n), summary: { totals: { entity: 120, device: 10 } } });
+  el.ack = new Set();
+  assert.equal(el.largeRemovalWarning(plan(59)), null);
+  assert.ok(el.largeRemovalWarning(plan(66)).title.includes("66 of 120 entities (55 %)"));
+  const devices = { actions: [{ kind: "forget_device", executable: true, verdict: "ok" }, { kind: "disable_device", executable: true, verdict: "ok" }], summary: { totals: { entity: 120, device: 2 } } };
+  assert.ok(el.largeRemovalWarning(devices).title.includes("1 of 2 devices (50 %)"));
+  assert.equal(el.largeRemovalWarning({ actions: [{ kind: "disable_entity", executable: true, verdict: "ok" }], summary: { totals: { entity: 1 } } }), null);
+});
+
 test("removing a device asks for the removal word and says that its entities go with it", () => {
   const { el } = panel("en");
   const plan = { actions: [{ kind: "forget_device", executable: true }, { kind: "disable_device", executable: true }] };

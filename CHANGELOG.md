@@ -24,6 +24,8 @@
 
 - **Unsauberes Herunterfahren:** Housekeeper merkt sich, ob Home Assistant seinen Stopp angekündigt hat. Ist die Datenbank beschädigt, nennt der Befund, wie oft Home Assistant in den letzten 30 Tagen nach einem Absturz oder Stromausfall gestartet ist.
 
+- **Hinweis bei großen Löschungen:** Entfernt ein Plan die Hälfte oder mehr aller Entitäten oder Geräte, zeigt der Bestätigungsdialog einen deutlichen Hinweis mit den Zahlen. Sonst ändert sich nichts; bestätigt wird weiter einmal.
+
 ### English
 
 #### New
@@ -47,6 +49,8 @@
 - **Check after deleting:** After a plan has deleted or changed recorder rows, the full database check starts in the background. A damage shows up as a finding and a repair hint, not at the next cleanup.
 
 - **Unclean shutdowns:** Housekeeper remembers whether Home Assistant announced its stop. If the database is damaged, the finding says how often Home Assistant started after a crash or power cut in the last 30 days.
+
+- **Warning for large removals:** If a plan removes half or more of all entities or devices, the confirmation dialog shows a clear note with the numbers. Nothing else changes; you still confirm once.
 
 ## 1.7.0 - 2026-10-14
 

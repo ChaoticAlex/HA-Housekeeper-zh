@@ -93,6 +93,7 @@ def test_plan_summary_dedupes_and_never_executes() -> None:
         "blocked": 1,
         "uses": 0,
         "statistics": 0,
+        "totals": {"entity": 2, "device": 0},
     }
     assert plan["events"][0]["type"] == "created"
 
