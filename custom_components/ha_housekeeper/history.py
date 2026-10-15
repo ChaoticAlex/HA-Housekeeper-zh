@@ -140,6 +140,8 @@ def make_checkpoint(snapshot: dict[str, Any]) -> dict[str, Any]:
         },
         # Sources this scan could not read: what is missing from it is unknown, not gone.
         "unchecked": sorted(snapshot["meta"].get("unchecked") or []),
+        # Open repairs (domain:issue_id), for the watch after an update.
+        "repairs": list(snapshot["meta"].get("repairs") or []),
     }
 
 

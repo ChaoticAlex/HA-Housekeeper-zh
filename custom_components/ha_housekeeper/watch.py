@@ -65,6 +65,7 @@ def make_before(checkpoint: dict[str, Any] | None) -> dict[str, Any] | None:
         **_bad(statuses),
         "findings": list(checkpoint["findings"]),
         "unchecked": list(checkpoint.get("unchecked") or []),
+        "repairs": checkpoint.get("repairs"),  # None: a checkpoint from before this was stored
     }
 
 
@@ -76,6 +77,7 @@ def make_sample(snapshot: dict[str, Any]) -> dict[str, Any]:
         **_bad(statuses),
         "findings": sorted({finding_key(f) for f in snapshot["findings"]}),
         "unchecked": sorted(snapshot["meta"].get("unchecked") or []),
+        "repairs": list(snapshot["meta"].get("repairs") or []),
     }
 
 
@@ -101,10 +103,19 @@ def evaluate(watch: dict[str, Any], marked: frozenset[str] = frozenset()) -> dic
     Bad objects of a source that one of the two scans could not read are not counted either way;
     when something is unread and nothing worse is known, the answer is ``unknown``. An object in
     ``marked`` (offline on purpose and the like) is listed apart and makes nothing worse. Objects that
-    answer without a value (``silent``) are a group of their own and do not change the verdict.
+    answer without a value (``silent``) are a group of their own and do not change the verdict. A repair
+    that is open now and was not before is listed by its key (``domain:issue_id``) and counts as worse.
     """
     before, samples = watch.get("before"), watch["samples"]
-    empty = {"new": [], "silent": [], "marked": [], "fixed": [], "transient": [], "new_findings": []}
+    empty = {
+        "new": [],
+        "silent": [],
+        "marked": [],
+        "fixed": [],
+        "transient": [],
+        "new_findings": [],
+        "new_repairs": [],
+    }
     if not samples:
         return {"verdict": "pending", **empty}
     if before is None:
@@ -122,7 +133,12 @@ def evaluate(watch: dict[str, Any], marked: frozenset[str] = frozenset()) -> dic
     fixed = sorted(k for k in was - now if not _unread(unread, k))
     transient = sorted(k for k in seen - now - was if not _unread(unread, k))
     new_findings = sorted(set(last["findings"]) - set(before["findings"]))
-    if new or new_findings:
+    # Repairs are compared only when both sides know them (older stored watches do not).
+    if isinstance(before.get("repairs"), list) and isinstance(last.get("repairs"), list):
+        new_repairs = sorted(set(last["repairs"]) - set(before["repairs"]))
+    else:
+        new_repairs = []
+    if new or new_findings or new_repairs:
         verdict, reason = "worse", None
     elif unread:
         verdict, reason = "unknown", "unread"
@@ -138,6 +154,7 @@ def evaluate(watch: dict[str, Any], marked: frozenset[str] = frozenset()) -> dic
         "fixed": fixed,
         "transient": transient,
         "new_findings": new_findings,
+        "new_repairs": new_repairs,
     }
     if reason:
         result["reason"] = reason

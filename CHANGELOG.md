@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Reparaturen nach Updates:** Die Beobachtung nach einem Update meldet auch Reparaturen, die seitdem neu aufgetaucht sind, und zählt sie als Verschlechterung.
+
 - **Backup-Liste mit Details:** Die Liste zeigt bis zu 20 Backups (10 pro Seite, wählbar) mit Art (automatisch, manuell, von Housekeeper) und Inhalt. Eine Zeile klappt auf: Name, HA-Version, Datenbank, Apps, Ordner, Größe je Ziel und fehlgeschlagene Teile.
 
 - **Zustand als Anteil der Objekte in Ordnung:** Der Status zählt jetzt Objekte statt Punkte. Ausgangswert ist die Zahl der geprüften Objekte, jedes Objekt mit Befund nimmt nach seiner schlimmsten Stufe ab (hoch voll, mittel halb, niedrig ein Fünftel, Info nichts), Folgen einer Ursache zählen nicht extra. Es gibt keine Obergrenzen mehr, jede Behebung zählt. Die Karte „Wie entsteht die Zahl?“ zeigt zum Beispiel „1575 von 2000 in Ordnung“, Ring und Kurve zeigen den Anteil. Der Verlauf des Zustands beginnt neu.
@@ -37,6 +39,8 @@
 ### English
 
 #### New
+
+- **Repairs after updates:** The watch after an update also reports repairs that have appeared since, and counts them as worse.
 
 - **Backup list with details:** The list shows up to 20 backups (10 per page, selectable) with type (automatic, manual, by Housekeeper) and contents. A row unfolds: name, HA version, database, apps, folders, size per target and failed parts.
 

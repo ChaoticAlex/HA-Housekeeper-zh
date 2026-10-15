@@ -91,7 +91,7 @@ from .impact import apply_impact
 from .issues import async_sync_database_issue, async_sync_issues, async_sync_scan_issue
 from .load_history import LoadStore
 from .log_facts import log_facts
-from .maintenance import PreflightStore
+from .maintenance import PreflightStore, repair_keys
 from .marks import (
     GRACE_DEFAULT,
     HIDING_KINDS,
@@ -1088,7 +1088,7 @@ class InventoryScanner:
             "until": watch["until"],
             "triggers": watch["triggers"],
             "samples": len(watch["samples"]),
-            "new": len(result["new"]) + len(result["new_findings"]),
+            "new": len(result["new"]) + len(result["new_findings"]) + len(result["new_repairs"]),
         }
 
     def end_watch(self) -> bool:
@@ -1443,6 +1443,7 @@ class InventoryScanner:
             "meta": {
                 "scan_timing": timing,
                 "unchecked": sorted(self._unchecked),
+                "repairs": repair_keys(self.hass),
                 "coverage": self.scan_coverage.report(),
                 "coverage_retry_minutes": RETRY_MINUTES
                 if self.retry_runs < RETRY_LIMIT and retryable_gaps(self.scan_coverage.report())

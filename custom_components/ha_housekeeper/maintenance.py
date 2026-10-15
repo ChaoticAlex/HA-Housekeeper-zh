@@ -28,6 +28,7 @@ USAGE_RELATIONS = frozenset(
 SUGGEST_MIN_PER_DAY = 100  # states per day from which an unused entity is worth excluding
 COST_CACHE_SECONDS = 300  # the ranking is expensive on a large database, so it is kept briefly
 DAY = 86400
+REPAIRS_KEPT = 200  # open repairs kept per scan
 BAD_ENTRY_STATES = {"setup_error", "setup_retry", "failed_unload", "migration_error"}
 
 
@@ -284,6 +285,11 @@ def _repairs(hass: HomeAssistant) -> list[dict[str, Any]]:
         ),
         key=lambda i: (i["domain"], i["issue_id"]),
     )
+
+
+def repair_keys(hass: HomeAssistant) -> list[str]:
+    """The open repairs as ``domain:issue_id``; what a scan stores so that a watch can tell new ones."""
+    return [f"{item['domain']}:{item['issue_id']}" for item in _repairs(hass)][:REPAIRS_KEPT]
 
 
 def _failed_entries(hass: HomeAssistant) -> list[dict[str, Any]]:

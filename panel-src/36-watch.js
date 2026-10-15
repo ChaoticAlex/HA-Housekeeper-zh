@@ -63,8 +63,9 @@ class WatchMixin {
     if (r.reason === "unread") parts.push(`<p class="factnote">${this.t("watchUnread")}</p>`);
     const section = (id, keys, tone) => keys.length ? `<h3>${this.t(id, { n: this.formatNumber(keys.length) })}</h3>${this.watchRows(keys, tone)}` : "";
     parts.push(section("watchNew", r.new, "warn"), section("watchSilent", r.silent, "mute"), section("watchMarked", r.marked, "mute"), section("watchTransient", r.transient, "mute"), section("watchFixed", r.fixed, "ok"));
+    if (r.new_repairs?.length) parts.push(`<h3>${this.t("watchRepairs", { n: this.formatNumber(r.new_repairs.length) })}</h3>${r.new_repairs.slice(0, WATCH_LIST).map(key => `<div class="row"><span class="tile warn"><ha-icon icon="mdi:wrench-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(key.split(":").slice(1).join(":"))}</strong><small>${this.esc(key.split(":")[0])}</small></span></div>`).join("")}`);
     if (r.new_findings.length) parts.push(`<p class="sub">${this.t("watchNewFindings", { n: this.formatNumber(r.new_findings.length) })}</p>`);
-    if (!r.new.length && !r.silent.length && !r.marked.length && !r.transient.length && !r.fixed.length && !r.new_findings.length && w.before) parts.push(`<p class="sub">${this.t("watchNone")}</p>`);
+    if (!r.new.length && !r.silent.length && !r.marked.length && !r.transient.length && !r.fixed.length && !r.new_findings.length && !r.new_repairs?.length && w.before) parts.push(`<p class="sub">${this.t("watchNone")}</p>`);
     return parts.join("");
   }
 }
