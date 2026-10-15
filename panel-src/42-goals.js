@@ -59,7 +59,7 @@ class GoalsMixin {
       ${f.error ? `<small class="error" role="alert">${this.esc(f.error)}</small>` : ""}</form>`;
   }
 
-  // The overview shows only what is missed (or that all is met) and leads to the settings, where the limits are set.
+  // The overview shows only what is missed (or that all is met) and leads to Maintenance, where the limits are set.
   goalsCard(compact = false) {
     this.ensureGoals();
     const r = this.goals;
@@ -93,7 +93,7 @@ class GoalsMixin {
   }
 
   bindGoals(root) {
-    root.querySelectorAll("[data-goals-settings]").forEach(el => el.onclick = () => { this.settingsTab = "goals"; this.noteJump?.("settings"); this.view = "settings"; this.selected = null; this.pages = {}; this.render(); });
+    root.querySelectorAll("[data-goals-settings]").forEach(el => el.onclick = () => { (this.viewTab ||= {}).maintenance = "goals"; this.noteJump?.("maintenance"); this.view = "maintenance"; this.selected = null; this.pages = {}; this.render(); });
     root.querySelectorAll("[data-goal-open]").forEach(el => el.onclick = () => this.openGoal(el.dataset.goalOpen));
     root.querySelectorAll("[data-goal-cancel]").forEach(el => el.onclick = () => { this.goalForm = null; this.render(); });
     root.querySelectorAll("[data-goal-form]").forEach(form => {

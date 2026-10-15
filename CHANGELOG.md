@@ -26,11 +26,10 @@
 
 ### Geändert
 
-- **Oberfläche:** Korrekturen und kleine Verbesserungen an Listen, Dialogen, Beschriftungen und Bedienung, darunter die Kacheln der Befundseite (auf breiten Fenstern in zwei Zeilen, alle gleich hoch und breit), die Spaltenauswahl der Listen (Kästchen in einer Reihe am rechten Rand), die Karten der Schwellen unter Einstellungen (gruppiert, einheitlich aufgebaut, mit Link „Standard“), die Ereignisse für eigene Automationen als Tabelle mit Kopier-Knopf; Speichern der Schwellen lässt die Seite offen, statt zum Home-Assistant-Dashboard zu springen und die Lesbarkeit der Vorfälle.
+- **Oberfläche:** Korrekturen und kleine Verbesserungen an Listen, Dialogen, Beschriftungen und Bedienung, darunter die Kacheln der Befundseite (auf breiten Fenstern in zwei Zeilen, alle gleich hoch und breit), die Spaltenauswahl der Listen (Kästchen in einer Reihe am rechten Rand), die Karten der Schwellen unter Einstellungen (gruppiert, einheitlich aufgebaut, mit Link „Standard“), die Ereignisse für eigene Automationen als Tabelle mit Kopier-Knopf, die Wartungsziele (nur noch unter Wartung, nicht mehr doppelt in den Einstellungen); Speichern der Schwellen lässt die Seite offen, statt zum Home-Assistant-Dashboard zu springen und die Lesbarkeit der Vorfälle.
 
 ### Behoben
 
-- **Benutzerhandbuch:** Neuer Abschnitt „Begriffe und Zahlen“: Objekt, Befund, Ursache, Vorfall, Beobachtung, die Berechnung des Zustands mit Beispiel und Farbschwellen, Ablauf eines Plans, die wichtigsten Einstellungen und was Housekeeper speichert. Das Handbuch ist nach den Menüs gegliedert (Übersicht und Befunde, Inventar, Automationen, Aufräumen, Pflegen, Betrieb, Sicherheit, Bedienung) und hat ein Inhaltsverzeichnis. Veraltete Sätze zur Zahl und zu Ursachen korrigiert.
 - **Backup-Prüfung:** Backups einzelner Apps, etwa vor einem App-Update, zählen nicht mehr als Backups von Home Assistant.
 
 ### English
@@ -59,11 +58,10 @@
 
 #### Changed
 
-- **Interface:** Fixes and small improvements to lists, dialogs, labels and handling, among them the tiles of the findings page (in two rows on wide windows, all equally high and wide), the column picker of the lists (boxes in one line at the right edge), the threshold cards in Settings (grouped, uniformly built, with a “Default” link), the events for your own automations as a table with a copy button; saving the thresholds keeps the page open instead of jumping to the Home Assistant dashboard and the readability of incidents.
+- **Interface:** Fixes and small improvements to lists, dialogs, labels and handling, among them the tiles of the findings page (in two rows on wide windows, all equally high and wide), the column picker of the lists (boxes in one line at the right edge), the threshold cards in Settings (grouped, uniformly built, with a “Default” link), the events for your own automations as a table with a copy button, the maintenance goals (only under Maintenance, no longer duplicated in Settings); saving the thresholds keeps the page open instead of jumping to the Home Assistant dashboard and the readability of incidents.
 
 #### Fixed
 
-- **User guide:** New section "Terms and numbers": object, finding, cause, incident, watch, how the state is calculated with an example and colour thresholds, how a plan runs, the most important settings and what Housekeeper stores. The guide is organised by the menus (overview and findings, inventory, automations, tidying up, maintaining, operation, security, interface) and has a table of contents. Outdated sentences about the number and about causes corrected.
 - **Backup check:** Backups of single apps, such as those made before an app update, no longer count as backups of Home Assistant.
 
 ## 1.7.0 - 2026-10-14
