@@ -29,6 +29,14 @@ class PropertiesMixin {
 
   propLabels(ids) { return this.propChips((ids || []).map(id => this.findObject(`label:${id}`)?.name || id)); }
 
+  // The labels of an object, always as a row: its own, or a note that there are none.
+  labelRows(item) {
+    return [[this.t("propLabels"), this.propLabels(item.labels) || `<span class="muted">${this.esc(this.t("propLabelsNone"))}</span>`]];
+  }
+
+  // Automations, scripts, scenes and areas have no property cards; their labels still get their place.
+  labelCard(item) { return this.propCard(this.t("propAssignment"), "mdi:link-variant", this.labelRows(item)); }
+
   propBy(value) { return value ? this.t(`by_${value}`) : ""; }
 
   entityCards(item) {
@@ -40,7 +48,7 @@ class PropertiesMixin {
       [t("propIntegration"), integration],
       [t("propDeviceOf"), device ? this.propLink(`device:${device.object_id}`, device.name, deviceSub) : ""],
       [t("propArea"), this.propArea(item.area_id, device?.area_id)],
-      [t("propLabels"), this.propLabels(item.labels)],
+      ...this.labelRows(item),
     ]);
     const properties = this.propCard(t("propProperties"), "mdi:tune-variant", [
       [t("propDomain"), this.esc(item.object_id.split(".")[0])],
@@ -92,7 +100,7 @@ class PropertiesMixin {
       [t("propVia"), via ? this.propLink(`device:${via.object_id}`, via.name) : ""],
       [t("propChildren"), children.length ? this.t("propChildrenCount", { count: children.length }) : ""],
       [t("propCleanupBlock"), blocks],
-      [t("propLabels"), this.propLabels(item.labels)],
+      ...this.labelRows(item),
       [t("propConfigUrl"), /^https?:\/\//i.test(item.configuration_url || "") ? `<a href="${this.esc(item.configuration_url)}" target="_blank" rel="noopener noreferrer">${this.esc(item.configuration_url)}</a>` : this.esc(item.configuration_url || "")],
     ]);
     const members = this.data.objects.filter(o => o.object_type === "entity" && o.device_id === item.object_id).sort((a, b) => a.name.localeCompare(b.name));
@@ -113,6 +121,7 @@ class PropertiesMixin {
     if (item.object_type === "entity") return this.entityCards(item);
     if (item.object_type === "device") return this.deviceCards(item);
     if (item.object_type === "config_entry") return this.integrationCard(item);
+    if (["automation", "script", "scene", "area"].includes(item.object_type)) return `<div class="propcol">${this.labelCard(item)}</div>`;
     return "";
   }
 }

@@ -1310,6 +1310,11 @@ class InventoryScanner:
             + automations
             + dashboards
         )
+        registry = er.async_get(self.hass)
+        for item in automations:  # automations, scripts and scenes carry their labels on their entity
+            if item["object_type"] in ("automation", "script", "scene") and "labels" not in item:
+                entry = registry.async_get(item["object_id"])
+                item["labels"] = sorted(entry.labels) if entry is not None else []
         findings = (
             _entity_findings(entities, observed_at, self.outage_levels)
             + duplicate_findings(

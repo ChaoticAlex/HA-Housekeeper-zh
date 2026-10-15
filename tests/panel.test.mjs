@@ -3189,6 +3189,16 @@ test("the follow-ups of a chain sit indented in one block, and one button opens 
   assert.ok(!el.causeTableRow(cause).includes('class="kids"'));
 });
 
+test("labels are always a row: the own ones, or a note that none are assigned", () => {
+  const { el } = panel("en");
+  el.data = { ...DATA, objects: [{ object_type: "label", object_id: "l1", name: "Kitchen" }], edges: [], findings: [] };
+  const rows = item => el.labelRows(item)[0][1];
+  assert.ok(rows({ object_type: "automation", object_id: "automation.a", labels: ["l1"] }).includes("Kitchen"));
+  assert.ok(rows({ object_type: "automation", object_id: "automation.a", labels: [] }).includes("No labels assigned"));
+  assert.ok(rows({ object_type: "script", object_id: "script.a" }).includes("No labels assigned"));
+  assert.ok(el.propertyCards({ object_type: "scene", object_id: "scene.a", labels: [] }).includes("No labels assigned"));
+});
+
 test("the selection row of the findings list names the size of the view at its right end", () => {
   const { el } = panel("en");
   const f = key => ({ key, rule_id: "entity.stale", object_id: key, classification: "unused", confidence: 0.7, ignored: false, impact: "info", impact_facts: [] });

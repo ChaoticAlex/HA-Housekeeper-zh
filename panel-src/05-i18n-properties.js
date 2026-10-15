@@ -1,6 +1,6 @@
 // Texts for the property cards on entity and device pages; merged into TEXT.
 Object.assign(TEXT.de, {
-  propAssignment: "Zuordnung", propProperties: "Eigenschaften", propTechnical: "Technische Angaben", propTimes: "Zeiten", propDevice: "Gerät", propEntities: "Entitäten des Geräts",
+  propAssignment: "Zuordnung", propLabelsNone: "Keine Labels vergeben", propProperties: "Eigenschaften", propTechnical: "Technische Angaben", propTimes: "Zeiten", propDevice: "Gerät", propEntities: "Entitäten des Geräts",
   propIntegration: "Integration", propDeviceOf: "Gerät", propArea: "Bereich", propAreaInherited: "{area} (vom Gerät)", propLabels: "Labels", propNone: "–",
   propDomain: "Typ", propDeviceClass: "Geräteklasse", propStateClass: "Zustandsklasse", propUnit: "Einheit", propCategory: "Kategorie", propOriginalName: "Originalname", propAliases: "Aliase", propIcon: "Symbol",
   propDisabledBy: "Deaktiviert durch", propHiddenBy: "Ausgeblendet durch", propEntityId: "Entitäts-ID", propUniqueId: "Eindeutige ID", propPlatform: "Plattform",
@@ -12,7 +12,7 @@ Object.assign(TEXT.de, {
   cat_config: "Konfiguration", cat_diagnostic: "Diagnose", type_service: "Dienst (kein physisches Gerät)",
 });
 Object.assign(TEXT.en, {
-  propAssignment: "Assignment", propProperties: "Properties", propTechnical: "Technical details", propTimes: "Times", propDevice: "Device", propEntities: "Entities of the device",
+  propAssignment: "Assignment", propLabelsNone: "No labels assigned", propProperties: "Properties", propTechnical: "Technical details", propTimes: "Times", propDevice: "Device", propEntities: "Entities of the device",
   propIntegration: "Integration", propDeviceOf: "Device", propArea: "Area", propAreaInherited: "{area} (from the device)", propLabels: "Labels", propNone: "–",
   propDomain: "Type", propDeviceClass: "Device class", propStateClass: "State class", propUnit: "Unit", propCategory: "Category", propOriginalName: "Original name", propAliases: "Aliases", propIcon: "Icon",
   propDisabledBy: "Disabled by", propHiddenBy: "Hidden by", propEntityId: "Entity ID", propUniqueId: "Unique ID", propPlatform: "Platform",
