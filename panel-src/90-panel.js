@@ -1037,6 +1037,7 @@ class HAHousekeeperPanel extends HTMLElement {
       const kind = el.dataset.bhSave, date = root.querySelector(`[data-bh-date="${kind}"]`)?.value;
       this.loadBackup({ type: "ha_housekeeper/backup_attest", kind, ...(date ? { date } : {}) });
     });
+    root.querySelectorAll("[data-watch-go]").forEach(el => el.onclick = () => { this.noteJump?.("findingsNav"); this.view = "findingsNav"; this.pages = {}; this.selected = null; this.trail = []; this.folds = { ...this.folds, watch: true, [`watch_${el.dataset.watchGo}`]: true }; this.render(); });
     root.querySelectorAll("[data-fold]").forEach(el => el.onclick = () => { if (el.dataset.fold.startsWith("chg_")) this.changesCat = ""; this.folds = { ...this.folds, [el.dataset.fold]: el.getAttribute("aria-expanded") !== "true" }; this.render(); });
     root.querySelectorAll("[data-bh-clear]").forEach(el => el.onclick = () => this.loadBackup({ type: "ha_housekeeper/backup_attest", kind: el.dataset.bhClear, clear: true }));
     root.querySelector("[data-pf-refresh]")?.addEventListener("click", () => this.loadPreflight());

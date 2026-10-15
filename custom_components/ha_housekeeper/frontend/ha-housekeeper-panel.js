@@ -2794,12 +2794,12 @@ class FindingsMixin {
 Object.assign(TEXT.de, {
   corrAfter: "Zeitlich zusammen mit: {what} ({when})", corrTile: "Nach Update neu", corrTileSub: "begannen zusammen mit einem Update", corrTitle: "Zeitlich zusammen mit Updates und Neustarts",
   corrHint: "Befunde, die zur selben Zeit begannen wie ein Update, ein Neustart oder ein Plan. Das ist ein zeitlicher Zusammenhang, keine Ursache.",
-  corr_ha_version: "Home-Assistant-Update {from} → {to}", corr_entry_version: "Update von {domain} {from} → {to}", corr_start: "Neustart von Home Assistant", corr_plan: "Plan ausgeführt", corr_purge: "Statistiken gelöscht", corrCount: "{n} Befunde", corrReason: "{n}× {what}", corrSpan: "Begannen zwischen {first} und {last}.", corrMore: "{n} weitere sind hier nicht aufgeführt.",
+  corr_ha_version: "Home-Assistant-Update {from} → {to}", corr_os_version: "Betriebssystem-Update {from} → {to}", corr_supervisor_version: "Supervisor-Update {from} → {to}", corr_entry_version: "Update von {domain} {from} → {to}", corr_start: "Neustart von Home Assistant", corr_plan: "Plan ausgeführt", corr_purge: "Statistiken gelöscht", corrCount: "{n} Befunde", corrReason: "{n}× {what}", corrSpan: "Begannen zwischen {first} und {last}.", corrMore: "{n} weitere sind hier nicht aufgeführt.",
 });
 Object.assign(TEXT.en, {
   corrAfter: "At about the same time as: {what} ({when})", corrTile: "New after update", corrTileSub: "began together with an update", corrTitle: "At about the same time as updates and restarts",
   corrHint: "Findings that began at the same time as an update, a restart or a plan. This is a link in time, not a cause.",
-  corr_ha_version: "Home Assistant update {from} → {to}", corr_entry_version: "Update of {domain} {from} → {to}", corr_start: "Home Assistant restart", corr_plan: "Cleanup plan run", corr_purge: "Statistics deleted", corrCount: "{n} findings", corrReason: "{n}× {what}", corrSpan: "Began between {first} and {last}.", corrMore: "{n} more are not listed here.",
+  corr_ha_version: "Home Assistant update {from} → {to}", corr_os_version: "Operating system update {from} → {to}", corr_supervisor_version: "Supervisor update {from} → {to}", corr_entry_version: "Update of {domain} {from} → {to}", corr_start: "Home Assistant restart", corr_plan: "Cleanup plan run", corr_purge: "Statistics deleted", corrCount: "{n} findings", corrReason: "{n}× {what}", corrSpan: "Began between {first} and {last}.", corrMore: "{n} more are not listed here.",
 });
 
 // ChangesMixin: methods of the panel element, mixed into the class in 99-register.js.
@@ -7294,24 +7294,24 @@ class CorrelationMixin {
 
 // Texts for the watch after updates; merged into TEXT.
 Object.assign(TEXT.de, {
-  watchTitle: "Beobachtung nach Updates", watchHint: "Nach einem Update scannt Housekeeper einige Stunden lang zusätzlich und vergleicht mit dem Stand vor dem Neustart. Das zeigt, was seither nicht mehr läuft: ein zeitlicher Zusammenhang, keine Ursache.",
+  watchGo: "Zur Auswertung bei den Befunden", watchTitle: "Beobachtung nach Updates", watchHint: "Nach einem Update von Home Assistant, Betriebssystem oder Supervisor scannt Housekeeper einige Stunden lang zusätzlich und vergleicht mit dem Stand vor dem Neustart. Das zeigt, was seither nicht mehr läuft: ein zeitlicher Zusammenhang, keine Ursache.",
   watchBand: "Beobachtung nach {what}: noch {hours} Std., bisher {n} Objekte betroffen", watchBandWait: "Beobachtung nach {what}: noch {hours} Std. Die erste Auswertung folgt 30 Minuten nach dem Neustart.",
   watchV_worse: "Verschlechtert", watchV_stable: "Stabil", watchV_transient: "Vorübergehend", watchV_unknown: "Unbekannt", watchV_pending: "Läuft",
   watchBefore: "Stand davor: Scan vom {when}", watchNoBefore: "Vor dem Neustart gab es keinen Scan, ein Vergleich ist nicht möglich.",
   watchUnread: "Eine Quelle konnte nicht gelesen werden. Was dort fehlt, gilt als unbekannt, nicht als in Ordnung.",
   watchNew: "Seitdem ausgefallen ({n})", watchFixed: "Wieder in Ordnung ({n})", watchTransient: "Kurz gestört, jetzt wieder in Ordnung ({n})", watchNewFindings: "Neue Befunde seit dem Update: {n}",
   watchNone: "Keine Auffälligkeiten.", watchSamples: "{n} Messungen", watchEnded: "beendet {when}", watchMore: "{n} weitere sind hier nicht aufgeführt.",
-  optWatchTitle: "Beobachtung nach Updates", optWatchHint: "Wie viele Stunden nach einem Update zusätzlich gescannt und mit dem Stand davor verglichen wird. 0 schaltet die Beobachtung aus.",
+  optWatchTitle: "Beobachtung nach Updates", optWatchHint: "Wie viele Stunden nach einem Update von Home Assistant, Betriebssystem oder Supervisor zusätzlich gescannt und mit dem Stand davor verglichen wird. 0 schaltet die Beobachtung aus.",
 });
 Object.assign(TEXT.en, {
-  watchTitle: "Watch after updates", watchHint: "After an update Housekeeper scans a few extra times and compares with the state before the restart. It shows what has stopped working since: a link in time, not a cause.",
+  watchGo: "Open the results on the findings page", watchTitle: "Watch after updates", watchHint: "After an update of Home Assistant, the operating system or the Supervisor Housekeeper scans a few extra times and compares with the state before the restart. It shows what has stopped working since: a link in time, not a cause.",
   watchBand: "Watching after {what}: {hours} h left, {n} objects affected so far", watchBandWait: "Watching after {what}: {hours} h left. The first check comes 30 minutes after the restart.",
   watchV_worse: "Worse", watchV_stable: "Stable", watchV_transient: "Temporary", watchV_unknown: "Unknown", watchV_pending: "Running",
   watchBefore: "State before: scan of {when}", watchNoBefore: "There was no scan before the restart, so there is nothing to compare with.",
   watchUnread: "A source could not be read. What is missing there counts as unknown, not as fine.",
   watchNew: "Failed since ({n})", watchFixed: "Working again ({n})", watchTransient: "Briefly disturbed, fine now ({n})", watchNewFindings: "New findings since the update: {n}",
   watchNone: "Nothing unusual.", watchSamples: "{n} checks", watchEnded: "ended {when}", watchMore: "{n} more are not listed here.",
-  optWatchTitle: "Watch after updates", optWatchHint: "For how many hours after an update Housekeeper scans extra and compares with the state before. 0 switches the watch off.",
+  optWatchTitle: "Watch after updates", optWatchHint: "For how many hours after an update of Home Assistant, the operating system or the Supervisor Housekeeper scans extra and compares with the state before. 0 switches the watch off.",
 });
 
 // LifecycleMixin: the "Verlauf" tab of a device and the list of removed devices in Maintenance; mixed in by 99-register.js.
@@ -7412,7 +7412,7 @@ class WatchMixin {
     if (!w) return "";
     const hours = Math.max(0, Math.ceil((Date.parse(w.until) - Date.now()) / 3600000)), n = w.new;
     const text = w.samples ? this.t("watchBand", { what: this.watchWhat(w), hours, n: this.formatNumber(n) }) : this.t("watchBandWait", { what: this.watchWhat(w), hours });
-    return `<div class="panel u-mb14" data-watch><div class="row"><span class="tile ${n ? "warn" : "mute"}"><ha-icon icon="mdi:eye-check-outline"></ha-icon></span><span class="row-text"><strong>${text}</strong></span></div></div>`;
+    return `<div class="panel u-mb14" data-watch><button class="row" data-watch-go="${this.esc(w.id || "")}" title="${this.esc(this.t("watchGo"))}"><span class="tile ${n ? "warn" : "mute"}"><ha-icon icon="mdi:eye-check-outline"></ha-icon></span><span class="row-text"><strong>${text}</strong><small>${this.t("watchGo")}</small></span></button></div>`;
   }
 
   watchRows(keys, tone) {
@@ -15515,6 +15515,7 @@ class HAHousekeeperPanel extends HTMLElement {
       const kind = el.dataset.bhSave, date = root.querySelector(`[data-bh-date="${kind}"]`)?.value;
       this.loadBackup({ type: "ha_housekeeper/backup_attest", kind, ...(date ? { date } : {}) });
     });
+    root.querySelectorAll("[data-watch-go]").forEach(el => el.onclick = () => { this.noteJump?.("findingsNav"); this.view = "findingsNav"; this.pages = {}; this.selected = null; this.trail = []; this.folds = { ...this.folds, watch: true, [`watch_${el.dataset.watchGo}`]: true }; this.render(); });
     root.querySelectorAll("[data-fold]").forEach(el => el.onclick = () => { if (el.dataset.fold.startsWith("chg_")) this.changesCat = ""; this.folds = { ...this.folds, [el.dataset.fold]: el.getAttribute("aria-expanded") !== "true" }; this.render(); });
     root.querySelectorAll("[data-bh-clear]").forEach(el => el.onclick = () => this.loadBackup({ type: "ha_housekeeper/backup_attest", kind: el.dataset.bhClear, clear: true }));
     root.querySelector("[data-pf-refresh]")?.addEventListener("click", () => this.loadPreflight());

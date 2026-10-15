@@ -117,7 +117,7 @@ from .signals import SignalStore, situations
 from .signals import fire as signal_fire
 from .stale import StaleStore
 from .system_usage import supervisor_get, supervisor_token
-from .watch import WatchStore, evaluate, make_before, next_due
+from .watch import WATCH_KINDS, WatchStore, evaluate, make_before, next_due
 from .window import WindowStore
 
 _LOGGER = logging.getLogger(__name__)
@@ -873,7 +873,7 @@ class InventoryScanner:
                         },
                         datetime.now(UTC),
                     )
-                    self._observe_versions(snapshot)
+                    await self._observe_versions(snapshot)
                     self._observe_watch(snapshot)
                     if followup.check(
                         self.journal.plans, snapshot, datetime.now(UTC), self.runs.errors_since
@@ -983,14 +983,25 @@ class InventoryScanner:
         except Exception:  # noqa: BLE001 - events never break a scan
             _LOGGER.debug("Events failed", exc_info=True)
 
-    def _observe_versions(self, snapshot: dict[str, Any]) -> None:
+    async def _system_versions(self) -> dict[str, str]:
+        """OS and Supervisor versions; empty where there is no Supervisor or it does not answer."""
+        found: dict[str, str] = {}
+        for key, path in (("os", "/os/info"), ("supervisor", "/supervisor/info")):
+            info = await supervisor_get(self.hass, path, timeout=10)
+            version = info.get("version") if isinstance(info, dict) else None
+            if isinstance(version, str) and version:
+                found[key] = version
+        return found
+
+    async def _observe_versions(self, snapshot: dict[str, Any]) -> None:
         custom = {
             item["domain"]: item["integration_version"]
             for item in snapshot["objects"]
             if item["object_type"] == "config_entry" and item.get("integration_version")
         }
         now = datetime.now(UTC)
-        found = self.events.observe(HA_VERSION, custom, now)
+        found = self.events.observe(HA_VERSION, custom, now, await self._system_versions())
+        found = [e for e in found if e["kind"] in WATCH_KINDS]  # integrations run on the usual findings
         if found and self.watch_hours > 0:
             # The restart is the moment of the update; the scan that notices it comes minutes later.
             started = self.events.last_start(now, timedelta(hours=24)) or now
@@ -1011,6 +1022,7 @@ class InventoryScanner:
             return None
         result = evaluate(watch)
         return {
+            "id": watch["id"],
             "started_at": watch["started_at"],
             "until": watch["until"],
             "triggers": watch["triggers"],

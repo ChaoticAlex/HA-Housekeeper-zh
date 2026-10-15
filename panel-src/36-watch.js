@@ -28,7 +28,7 @@ class WatchMixin {
     if (!w) return "";
     const hours = Math.max(0, Math.ceil((Date.parse(w.until) - Date.now()) / 3600000)), n = w.new;
     const text = w.samples ? this.t("watchBand", { what: this.watchWhat(w), hours, n: this.formatNumber(n) }) : this.t("watchBandWait", { what: this.watchWhat(w), hours });
-    return `<div class="panel u-mb14" data-watch><div class="row"><span class="tile ${n ? "warn" : "mute"}"><ha-icon icon="mdi:eye-check-outline"></ha-icon></span><span class="row-text"><strong>${text}</strong></span></div></div>`;
+    return `<div class="panel u-mb14" data-watch><button class="row" data-watch-go="${this.esc(w.id || "")}" title="${this.esc(this.t("watchGo"))}"><span class="tile ${n ? "warn" : "mute"}"><ha-icon icon="mdi:eye-check-outline"></ha-icon></span><span class="row-text"><strong>${text}</strong><small>${this.t("watchGo")}</small></span></button></div>`;
   }
 
   watchRows(keys, tone) {

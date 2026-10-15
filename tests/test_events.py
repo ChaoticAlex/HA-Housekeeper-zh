@@ -137,3 +137,10 @@ def test_a_start_after_a_run_that_never_announced_its_stop_is_marked_unclean() -
     log.mark_clean_stop()
     log.record_start(now + timedelta(hours=2))
     assert [bool(e.get("unclean")) for e in log.events] == [False, True, False]
+
+
+def test_system_updates_are_found_and_an_unread_version_is_no_change() -> None:
+    previous = {"ha": "1", "os": "15.0", "supervisor": "2026.9.0", "entries": {}}
+    found = detect(previous, "1", {}, NOW, {"os": "15.1"})
+    assert [(e["kind"], e["from"], e["to"]) for e in found] == [("os_version", "15.0", "15.1")]
+    assert detect(previous, "1", {}, NOW, {}) == []

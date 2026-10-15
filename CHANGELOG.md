@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Beobachtung nur nach System-Updates:** Die Beobachtung nach Updates startet nur noch bei einem Update von Home Assistant, Betriebssystem oder Supervisor. Updates einzelner Integrationen laufen über die üblichen Befunde und den zeitlichen Zusammenhang. Das Band im Seitenkopf führt jetzt zur Auswertung auf der Befundseite.
+
 - **Datenbank vor dem Löschen prüfen:** Bevor ein Plan Zeilen im Recorder löscht oder ändert, führt Housekeeper bei SQLite die vollständige Integritätsprüfung (`integrity_check`, prüft auch die Indizes) aus. Ist die Datenbank beschädigt, bricht der Plan ab, nichts wird geändert, und die Meldung nennt die Prüfung mit `PRAGMA integrity_check` und die Reparatur mit `REINDEX` (Issue 12). Ein „database disk image is malformed“ mitten im Lauf wird ebenso erklärt.
 
 - **Datenbank prüfen auf Wunsch:** Auf der Recorder-Seite startet ein Knopf „Datenbank prüfen“ die vollständige Prüfung im Hintergrund (bei großen Datenbanken Minuten). Das Ergebnis bleibt gespeichert; eine beschädigte Datenbank erscheint als Problem mit dem Hinweis auf `REINDEX` und das Backup. Eine saubere Prüfung der letzten drei Tage ersetzt den Check vor einem Plan.
@@ -30,9 +32,13 @@
 
 - **Backup-Name im Ergebnis:** Hat ein Plan vorher ein Backup erstellt, nennt er dessen Namen („Housekeeper …“) in seinen Schritten, damit du es bei einer Wiederherstellung in der Backup-Liste von Home Assistant findest.
 
+- **Viele Housekeeper-Backups:** Die Karte Backup-Schutz weist darauf hin, wenn die eigenen Backups von Housekeeper 10 erreichen oder 5 GB belegen. Home Assistant löscht sie nicht von selbst; der Reiter Backups aufräumen tut es.
+
 ### English
 
 #### New
+
+- **Watch only after system updates:** The watch after updates now starts only for an update of Home Assistant, the operating system or the Supervisor. Updates of single integrations are covered by the usual findings and the link in time. The band in the page header now leads to the results on the findings page.
 
 - **Check the database before deleting:** Before a plan deletes or changes recorder rows, Housekeeper runs the full integrity check (`integrity_check`, which also compares the indexes) on SQLite. If the database is damaged the plan stops, nothing is changed, and the message points to `PRAGMA integrity_check` and the repair with `REINDEX` (issue 12). A “database disk image is malformed” in the middle of a run is explained the same way.
 
@@ -59,6 +65,8 @@
 - **Outdated previews:** A preview older than 24 hours is marked “Outdated” in the journal list and in the plan, and “Renew” creates it again (the old preview is dropped). Before confirming, a preview that was opened again or is older is checked against the current state, and the entries that changed since are named.
 
 - **Backup name in the result:** A plan that made a backup first names it (“Housekeeper …”) in its steps, so you can find it in Home Assistant's backup list if you need to restore.
+
+- **Many Housekeeper backups:** The backup protection card notes it when Housekeeper's own backups reach 10 or take up 5 GB. Home Assistant does not delete them on its own; the Tidy backups tab does.
 
 ## 1.7.0 - 2026-10-14
 

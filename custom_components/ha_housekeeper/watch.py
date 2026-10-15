@@ -18,6 +18,7 @@ from .const import STORAGE_VERSION, WATCH_STORAGE_KEY
 from .hygiene import finding_key
 
 SAVE_DELAY = 10
+WATCH_KINDS = ("ha_version", "os_version", "supervisor_version")  # updates that start a watch
 KEEP = 3  # watches kept, the open one included
 BAD = frozenset({"unavailable", "problem", "stopped"})
 # Integrations load late after a restart: nothing is judged before this has passed.
