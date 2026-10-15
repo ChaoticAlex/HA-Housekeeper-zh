@@ -234,6 +234,15 @@ class WatchStore:
         self._save()
         return True
 
+    def end(self, now: datetime) -> bool:
+        """Close the open watch now, on the user's word; True when there was one."""
+        watch = self.active()
+        if watch is None:
+            return False
+        self._finish(watch, now, force=True)
+        self._save()
+        return True
+
     def _finish(
         self,
         watch: dict[str, Any],

@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Beobachtung vorzeitig beenden:** Eine laufende Beobachtung nach Updates hat in ihrer aufgeklappten Zeile den Knopf „Beobachtung beenden“. Sie wird mit dem Stand bis dahin ausgewertet und das Band im Seitenkopf verschwindet.
+
 - **Hinweis bei Objekten, die oft ausfallen:** Fällt eine Entität oder ein Gerät regelmäßig aus (instabil, flatternd oder immer zur selben Tageszeit), steht beim Befund „Fällt meist zwischen 22 und 00 Uhr aus“ und im Reiter „Aktionen“ die Frage „Absichtlich?“ mit einem vorbereiteten Vermerk samt Zeitfenster. Es wird nichts automatisch gesetzt; „Nicht mehr fragen“ gilt 180 Tage in diesem Browser.
 
 - **Ausfälle nach Dauer für alle Objekte:** Nicht verfügbare Entitäten, Geräte, Integrationen und Apps werden nach der Info-Schwelle (Standard 15 Minuten) zum Befund und steigen mit der Dauer: Info, ab 1 Stunde niedrig, ab 1 Tag mittel, ab 7 Tagen hoch. Info und niedrig stehen auf der Befundseite; Übersicht, Sensoren, Reparaturhinweise und „neue Befunde“ zählen ab mittel. Integrationen, die nicht starten können, sind sofort mindestens mittel. Eine Entität mit `unknown` ist ein Befund, wenn sie vorher einen Wert hatte. Bei einem Ausfall folgen zusätzliche Scans zu den Schwellen, ohne den Verlauf zu verändern. **Geändert:** Die Einstellung „Nicht verfügbar nach Tagen“ (`min_unavailable_days`) ist durch vier Schwellen ersetzt (Info in Minuten, niedrig, mittel und hoch in Stunden); ein gesetzter alter Wert wird übernommen, bis du die neuen speicherst. Entitäten werden dadurch viel früher gemeldet als bisher nach 7 Tagen.

@@ -102,6 +102,16 @@ def test_the_store_waits_for_the_calm_and_closes_at_the_end() -> None:
     assert not store.expire(end)
 
 
+def test_a_watch_can_be_ended_by_hand() -> None:
+    store = WatchStore.__new__(WatchStore)
+    store.watches = []
+    store._save = lambda: None
+    assert not store.end(START)
+    store.start(START, START, 24, [{"kind": "ha_version", "from": "1", "to": "2"}], None)
+    assert store.end(START + timedelta(hours=1))
+    assert store.active() is None and store.report()[0]["verdict"] == "unknown"
+
+
 def test_a_second_update_joins_the_open_watch_once() -> None:
     first = [{"kind": "ha_version", "from": "1", "to": "2"}]
     again = [*first, {"kind": "entry_version", "domain": "hue", "from": "1", "to": "2"}]

@@ -46,8 +46,15 @@ class WatchMixin {
     return pg + more;
   }
 
+  async endWatch() {
+    try { await this._hass.callWS({ type: "ha_housekeeper/watch_end" }); } catch (_) { return; }
+    if (this.data?.meta) this.data.meta.watch = null;
+    await this.loadWatches();
+  }
+
   watchBody(w) {
     const r = { silent: [], marked: [], ...w.result }, parts = [];
+    if (!w.closed_at) parts.push(`<div class="toolbar u-mb14"><button class="btn quiet" data-watch-end><ha-icon icon="mdi:eye-off-outline"></ha-icon>${this.t("watchEnd")}</button></div>`);
     parts.push(`<p class="sub u-mb14">${w.before ? this.t("watchBefore", { when: this.formatDate(w.before.at) }) : this.t("watchNoBefore")} · ${this.t("watchSamples", { n: w.samples.length })}</p>`);
     if (r.reason === "unread") parts.push(`<p class="factnote">${this.t("watchUnread")}</p>`);
     const section = (id, keys, tone) => keys.length ? `<h3>${this.t(id, { n: this.formatNumber(keys.length) })}</h3>${this.watchRows(keys, tone)}` : "";

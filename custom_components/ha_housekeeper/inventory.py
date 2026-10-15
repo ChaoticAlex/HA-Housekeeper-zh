@@ -1086,6 +1086,13 @@ class InventoryScanner:
             "new": len(result["new"]) + len(result["new_findings"]),
         }
 
+    def end_watch(self) -> bool:
+        """Close the open watch before its time; the band in the panel header goes with it."""
+        ended = self.watch.end(datetime.now(UTC))
+        if ended and self._snapshot is not None:
+            self._snapshot["meta"]["watch"] = None
+        return ended
+
     async def async_watch_tick(self) -> None:
         """Ask for the next scan of an open watch when it is due; it is judged at its end."""
         watch = self.watch.active()

@@ -385,6 +385,20 @@ async def websocket_watches(
 
 
 @websocket_api.require_admin
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/watch_end"})
+@websocket_api.async_response
+@with_scanner
+async def websocket_watch_end(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """End the open watch now; what it has measured so far is judged as it stands."""
+    connection.send_result(msg["id"], _versioned({"ended": scanner.end_watch()}))
+
+
+@websocket_api.require_admin
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/correlations"})
 @websocket_api.async_response
 @with_scanner
@@ -405,6 +419,7 @@ def async_register(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_blueprints)
     websocket_api.async_register_command(hass, websocket_correlations)
     websocket_api.async_register_command(hass, websocket_watches)
+    websocket_api.async_register_command(hass, websocket_watch_end)
     websocket_api.async_register_command(hass, websocket_automation_runs)
     websocket_api.async_register_command(hass, websocket_automation_quality)
     websocket_api.async_register_command(hass, websocket_criteria)
