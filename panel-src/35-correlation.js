@@ -49,7 +49,7 @@ class CorrelationMixin {
   corrGroupBody(group) {
     const findings = group.keys.map(k => this.data.findings.find(x => x.key === k)).filter(Boolean);
     const pg = this.paginate(`corr_${group.id}`, findings);
-    return `${this.corrAlso(group)}${this.corrSummary(group, findings)}${pg.rows.map(f => this.findingRow(f)).join("")}${pg.footer}`;
+    return `${this.corrAlso(group)}${this.corrSummary(group, findings)}${pg.rows.map(f => this.findingRow(f, false, false)).join("")}${pg.footer}`;
   }
 
   // The incidents of the findings page: every update or restart that has findings, and every watch after a system

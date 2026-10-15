@@ -35,7 +35,7 @@ class WatchMixin {
     const pg = keys.slice(0, WATCH_LIST).map(key => {
       // An object that is a finding already shows as in the findings list: checkbox, menu, decisions.
       const finding = (this.data?.findings || []).find(f => !f.ignored && this.findingKey(f) === key);
-      if (finding) return this.findingRow(finding);
+      if (finding) return this.findingRow(finding, false, false);
       const item = this.findObject(key);
       const name = item?.name || key.split(":").slice(1).join(":");
       const mark = item?.mark;

@@ -146,7 +146,7 @@ class ChangesMixin {
         const d = dir(ch), state = d > 0 ? "worsened" : d < 0 ? "improved" : "changed", tone = d > 0 ? "red" : d < 0 ? "ok" : "mute";
         return objRow(ch.object_type, ch.object_id, { name: ch.name || this.findObject(`${ch.object_type}:${ch.object_id}`)?.name || ch.object_id, sub: `${this.t(ch.from)} → ${this.t(ch.to)}`, tone, state, stateLabel: this.t(state), pill: `<span class="pill ${tone}">${this.t(state)}</span>`, rank: -d });
       }, "status"),
-      newFindings: paged("newFindings", c.new_findings.items, f => this.findingRow(f)),
+      newFindings: paged("newFindings", c.new_findings.items, f => this.findingRow(f, false, false)),
       resolvedFindings: tableOf("resolvedFindings", c.resolved_findings.items, f => findingRowOf(f, "improved", this.t("improved"), "ok", `<span class="pill ok">${this.t("improved")}</span>`)),
       // Gone, but not repaired: the object left with its findings, or the reason cannot be told.
       endedFindings: tableOf("endedFindings", (c.ended_findings || { items: [] }).items, f => {

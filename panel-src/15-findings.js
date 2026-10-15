@@ -81,10 +81,11 @@ class FindingsMixin {
     return { key, object, title, subtitle: `${subtitle}${finding.ignored ? ` · ${this.esc(finding.mark ? this.markLine(finding.mark) : this.decisionLabel(finding))}` : ""}${finding.resurfaced ? ` · ${this.t("dueLabel")}` : ""}${finding.mark_outside_window ? ` · ${this.t("markOutside")}` : ""}<span class="fextra">${this.statusTags(finding)}${this.followOf(finding)}${this.oftenChip(finding)}</span>` };
   }
 
-  findingRow(finding, inGroup = false) {
+  // pick = false outside the findings list: there is no bar for the actions on a selection there.
+  findingRow(finding, inGroup = false, pick = true) {
     const { key, object, title, subtitle } = this.findingRowContent(finding, inGroup);
     const button = `<button class="row ${finding.ignored ? "dim" : ""}" data-object="${this.esc(key)}">${this.tile(object?.object_type || "entity", this.tone(finding.classification))}<span class="row-text"><strong>${this.esc(title)}</strong><small>${subtitle}${finding.first_detected_at ? `<span class="msince"> · ${this.t("sortSince")} ${this.formatDate(finding.first_detected_at)}</span>` : ""}</small></span>${this.kindChip(this.reasonLabel(this.findingReason(finding)))}${this.impactChip(finding.impact)}</button>`;
-    return `<div class="rowwrap"><input type="checkbox" class="selbox" data-fsel="${this.esc(finding.key)}" ${this.findSel.has(finding.key) ? "checked" : ""} aria-label="${this.esc(title)}">${button}${this.rowMenu(finding)}</div>${this.rowDecide(finding)}`;
+    return `<div class="rowwrap">${pick ? `<input type="checkbox" class="selbox" data-fsel="${this.esc(finding.key)}" ${this.findSel.has(finding.key) ? "checked" : ""} aria-label="${this.esc(title)}">` : ""}${button}${this.rowMenu(finding)}</div>${this.rowDecide(finding)}`;
   }
 
   findingsTable(items) {

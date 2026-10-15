@@ -2631,10 +2631,11 @@ class FindingsMixin {
     return { key, object, title, subtitle: `${subtitle}${finding.ignored ? ` · ${this.esc(finding.mark ? this.markLine(finding.mark) : this.decisionLabel(finding))}` : ""}${finding.resurfaced ? ` · ${this.t("dueLabel")}` : ""}${finding.mark_outside_window ? ` · ${this.t("markOutside")}` : ""}<span class="fextra">${this.statusTags(finding)}${this.followOf(finding)}${this.oftenChip(finding)}</span>` };
   }
 
-  findingRow(finding, inGroup = false) {
+  // pick = false outside the findings list: there is no bar for the actions on a selection there.
+  findingRow(finding, inGroup = false, pick = true) {
     const { key, object, title, subtitle } = this.findingRowContent(finding, inGroup);
     const button = `<button class="row ${finding.ignored ? "dim" : ""}" data-object="${this.esc(key)}">${this.tile(object?.object_type || "entity", this.tone(finding.classification))}<span class="row-text"><strong>${this.esc(title)}</strong><small>${subtitle}${finding.first_detected_at ? `<span class="msince"> · ${this.t("sortSince")} ${this.formatDate(finding.first_detected_at)}</span>` : ""}</small></span>${this.kindChip(this.reasonLabel(this.findingReason(finding)))}${this.impactChip(finding.impact)}</button>`;
-    return `<div class="rowwrap"><input type="checkbox" class="selbox" data-fsel="${this.esc(finding.key)}" ${this.findSel.has(finding.key) ? "checked" : ""} aria-label="${this.esc(title)}">${button}${this.rowMenu(finding)}</div>${this.rowDecide(finding)}`;
+    return `<div class="rowwrap">${pick ? `<input type="checkbox" class="selbox" data-fsel="${this.esc(finding.key)}" ${this.findSel.has(finding.key) ? "checked" : ""} aria-label="${this.esc(title)}">` : ""}${button}${this.rowMenu(finding)}</div>${this.rowDecide(finding)}`;
   }
 
   findingsTable(items) {
@@ -3133,7 +3134,7 @@ class ChangesMixin {
         const d = dir(ch), state = d > 0 ? "worsened" : d < 0 ? "improved" : "changed", tone = d > 0 ? "red" : d < 0 ? "ok" : "mute";
         return objRow(ch.object_type, ch.object_id, { name: ch.name || this.findObject(`${ch.object_type}:${ch.object_id}`)?.name || ch.object_id, sub: `${this.t(ch.from)} → ${this.t(ch.to)}`, tone, state, stateLabel: this.t(state), pill: `<span class="pill ${tone}">${this.t(state)}</span>`, rank: -d });
       }, "status"),
-      newFindings: paged("newFindings", c.new_findings.items, f => this.findingRow(f)),
+      newFindings: paged("newFindings", c.new_findings.items, f => this.findingRow(f, false, false)),
       resolvedFindings: tableOf("resolvedFindings", c.resolved_findings.items, f => findingRowOf(f, "improved", this.t("improved"), "ok", `<span class="pill ok">${this.t("improved")}</span>`)),
       // Gone, but not repaired: the object left with its findings, or the reason cannot be told.
       endedFindings: tableOf("endedFindings", (c.ended_findings || { items: [] }).items, f => {
@@ -7507,7 +7508,7 @@ class CorrelationMixin {
   corrGroupBody(group) {
     const findings = group.keys.map(k => this.data.findings.find(x => x.key === k)).filter(Boolean);
     const pg = this.paginate(`corr_${group.id}`, findings);
-    return `${this.corrAlso(group)}${this.corrSummary(group, findings)}${pg.rows.map(f => this.findingRow(f)).join("")}${pg.footer}`;
+    return `${this.corrAlso(group)}${this.corrSummary(group, findings)}${pg.rows.map(f => this.findingRow(f, false, false)).join("")}${pg.footer}`;
   }
 
   // The incidents of the findings page: every update or restart that has findings, and every watch after a system
@@ -7703,7 +7704,7 @@ class WatchMixin {
     const pg = keys.slice(0, WATCH_LIST).map(key => {
       // An object that is a finding already shows as in the findings list: checkbox, menu, decisions.
       const finding = (this.data?.findings || []).find(f => !f.ignored && this.findingKey(f) === key);
-      if (finding) return this.findingRow(finding);
+      if (finding) return this.findingRow(finding, false, false);
       const item = this.findObject(key);
       const name = item?.name || key.split(":").slice(1).join(":");
       const mark = item?.mark;
