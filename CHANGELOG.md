@@ -4,107 +4,37 @@
 
 ### Neu
 
-- **Scan alle 6 Stunden:** Der Standard für den automatischen Scan ist jetzt 6 statt 24 Stunden (einstellbar; wer das Intervall selbst gesetzt hat, behält seinen Wert). Der Verlauf behält weiter einen Punkt pro Tag.
+- **Ausfälle nach Dauer:** Nicht verfügbare Entitäten, Geräte, Integrationen und Apps werden nach 15 Minuten zum Befund und steigen mit der Dauer (Info, niedrig, mittel, hoch). Info und niedrig stehen nur auf der Befundseite; Übersicht, Sensoren und Reparaturhinweise zählen ab mittel. Die Einstellung „Nicht verfügbar nach Tagen“ ist durch vier einstellbare Schwellen ersetzt (ein alter Wert wird übernommen, bis du die neuen speicherst). Bei einem Ausfall scannt Housekeeper zu den Schwellen zusätzlich, ohne den Verlauf zu verändern. Entitäten werden dadurch viel früher gemeldet als bisher nach 7 Tagen.
 
-- **Labels immer sichtbar:** Auf dem Reiter „Technisch“ steht die Zeile „Labels“ bei allen Objekten, die Labels tragen können (Entitäten, Geräte, Bereiche, Automationen, Skripte, Szenen). Hat das Objekt keins, steht dort „Keine Labels vergeben“. Automationen, Skripte und Szenen zeigen jetzt auch ihre Labels.
+- **Bewertung und Hinweise:** Die Detailseite zeigt die Bewertung eines Befunds mit Gründen und nächster Stufe. Fällt ein Objekt regelmäßig aus, nennt der Befund die übliche Tageszeit und schlägt einen Vermerk mit Zeitfenster vor.
 
-- **Ursachen und ihre Folgen übersichtlicher:** Aufklappbare Zeilen der Befundliste haben vorn einen Pfeil. Die Folgen stehen eingerückt in einem Block mit einer Linie links und leichtem Hintergrund, auch bei den Gruppen fehlender Referenzen. „Alle aufklappen“ und „Alle zuklappen“ öffnen oder schließen alle Ursachen und Gruppen auf einmal.
+- **Beobachtung nach Updates:** Sie startet nur noch bei Updates von Home Assistant, Betriebssystem und Supervisor (alles andere läuft über die üblichen Befunde). Das Band führt zur Auswertung; Objekte ohne Wert und Objekte mit Vermerk stehen getrennt, und die Beobachtung lässt sich vorzeitig beenden.
 
-- **Größe der Ansicht in der Auswahlzeile:** In der Zeile mit „Seite auswählen“ steht rechts, wie viele Einträge die aktuelle Ansicht nach Suche und Filtern hat („478 in dieser Ansicht“). Das gilt für Befunde, ungenutzte Statistiken, Aufräum-Kandidaten und Richtlinien.
+- **Scan alle 6 Stunden:** Der Standard für den automatischen Scan ist 6 statt 24 Stunden (einstellbar; ein selbst gesetzter Wert bleibt). Der Verlauf behält einen Punkt pro Tag.
 
-- **Erklärung auf der Befundseite:** Hinter der Überschrift „Befunde“ steht ein Info-Knopf. Er öffnet eine Karte, die Befund, Folgen, Beobachtung nach Updates und „Zeitlich zusammen“ unterscheidet und für jede Zahl der Seite sagt, was sie zählt.
+- **Schutz der Datenbank:** Vor dem Löschen im Recorder prüft Housekeeper die Datenbank vollständig (auch auf Wunsch und nach dem Löschen) und meldet einen Schaden als Befund und Reparaturmeldung, mit Hinweis auf `REINDEX` und das Backup (Issue 12). Dazu kommen Hinweise auf beiseitegelegte Datenbanken, wenig Speicherplatz und unsauberes Herunterfahren; Pläne warten auf einen ruhigen Recorder. Gelöscht wird dabei nichts.
 
-- **Kacheln zählen wie die Liste:** Die Kacheln der Befundseite zählen ohne die Folgen von Ausfällen, so wie „Alle Befunde“ und die Liste darunter. Wo es Folgen gibt, stehen sie klein in der Kachel („dazu 296 Folgen der Ausfälle“). Vorher zeigte „Nicht verfügbar“ 774 und die Liste 478.
+- **Sicherere Pläne:** Das Backup vor einem Plan wird geprüft und mit Namen genannt. Veraltete Vorschauen sind markiert und lassen sich erneuern, große Löschungen zeigen einen deutlichen Hinweis, und zu viele Housekeeper-Backups werden gemeldet. Eine unlesbare Speicherdatei lässt nur ihren Teil leer starten.
 
-- **Bewertung auf der Detailseite:** In der Karte „Diagnose“ steht bei einem Objekt mit offenem Befund der Block „Bewertung“: der Schweregrad mit seinen Gründen (bei Ausfällen mit Dauer und Balken über die Stufen), die Sicherheit mit einem Satz dazu und ein Hinweis, wann die nächste Stufe erreicht wird, nach der Dauer oder durch Abhängigkeiten.
-
-- **Kacheln der Befundseite neu geordnet:** Die Kacheln stehen in drei Gruppen: „Gesamt“, „Dringend“ (Problem, Nicht verfügbar, Ausfall, Defekte Referenz) und „Aufräumen“ (Unbekannt, Ungenutzt, Duplikat) in fester Reihenfolge. Die Kachel „Nach Update neu“ entfällt; der Filter steht jetzt als Knopf „n Befunde anzeigen“ unter „Zeitlich zusammen mit Updates und Neustarts“.
-
-- **Zeitlicher Zusammenhang nach Vorfällen:** Updates, die wenige Minuten auseinander liegen, und der Neustart dabei bilden eine Zeile („Update von … +1“, aufgeklappt mit den übrigen Updates). Ein Befund wird je Vorfall nur einmal gezählt; die Summe der Zeilen passt damit zur Kachel „Nach Update neu“. Die Überschrift zählt „Vorfälle“ statt Ereignisse.
-
-- **Jeder Befund hat einen Schweregrad:** Befunde auf Objekten, die nichts nutzt und die nicht kritisch sind (mögliches Duplikat, ungenutzt), standen bisher ohne Schweregrad („–“, Filter „Keine“). Sie sind jetzt „Info“; der Filterwert „Keine“ entfällt.
-
-- **Info zieht keine Punkte ab:** Befunde der Stufe „Info“ (kurze Ausfälle unter der Niedrig-Schwelle) kosteten im Punktestand der Seite bisher einen Punkt (höchstens 5), im Verlauf aber nichts. Jetzt zählen sie nirgends.
-
-- **Beobachtung vorzeitig beenden:** Eine laufende Beobachtung nach Updates hat in ihrer aufgeklappten Zeile den Knopf „Beobachtung beenden“. Sie wird mit dem Stand bis dahin ausgewertet und das Band im Seitenkopf verschwindet.
-
-- **Hinweis bei Objekten, die oft ausfallen:** Fällt eine Entität oder ein Gerät regelmäßig aus (instabil, flatternd oder immer zur selben Tageszeit), steht beim Befund „Fällt meist zwischen 22 und 00 Uhr aus“ und im Reiter „Aktionen“ die Frage „Absichtlich?“ mit einem vorbereiteten Vermerk samt Zeitfenster. Es wird nichts automatisch gesetzt; „Nicht mehr fragen“ gilt 180 Tage in diesem Browser.
-
-- **Ausfälle nach Dauer für alle Objekte:** Nicht verfügbare Entitäten, Geräte, Integrationen und Apps werden nach der Info-Schwelle (Standard 15 Minuten) zum Befund und steigen mit der Dauer: Info, ab 1 Stunde niedrig, ab 1 Tag mittel, ab 7 Tagen hoch. Info und niedrig stehen auf der Befundseite; Übersicht, Sensoren, Reparaturhinweise und „neue Befunde“ zählen ab mittel. Integrationen, die nicht starten können, sind sofort mindestens mittel. Eine Entität mit `unknown` ist ein Befund, wenn sie vorher einen Wert hatte. Bei einem Ausfall folgen zusätzliche Scans zu den Schwellen, ohne den Verlauf zu verändern. **Geändert:** Die Einstellung „Nicht verfügbar nach Tagen“ (`min_unavailable_days`) ist durch vier Schwellen ersetzt (Info in Minuten, niedrig, mittel und hoch in Stunden); ein gesetzter alter Wert wird übernommen, bis du die neuen speicherst. Entitäten werden dadurch viel früher gemeldet als bisher nach 7 Tagen.
-
-- **Beobachtung: ohne Wert und Vermerke:** Objekte, die nach dem Update erreichbar sind, aber keinen Wert mehr haben (`unknown`), stehen in einer eigenen Gruppe „Seitdem ohne Wert". Objekte mit einem Vermerk (absichtlich offline, saisonal, Reserve, ersetzt) zählen nicht als neu ausgefallen und stehen getrennt; ein Vermerk lässt sich direkt in der Zeile setzen.
-
-- **Beobachtung nur nach System-Updates:** Die Beobachtung nach Updates startet nur noch bei einem Update von Home Assistant, Betriebssystem oder Supervisor. Updates einzelner Integrationen laufen über die üblichen Befunde und den zeitlichen Zusammenhang. Das Band im Seitenkopf führt jetzt zur Auswertung auf der Befundseite.
-
-- **Datenbank vor dem Löschen prüfen:** Bevor ein Plan Zeilen im Recorder löscht oder ändert, führt Housekeeper bei SQLite die vollständige Integritätsprüfung (`integrity_check`, prüft auch die Indizes) aus. Ist die Datenbank beschädigt, bricht der Plan ab, nichts wird geändert, und die Meldung nennt die Prüfung mit `PRAGMA integrity_check` und die Reparatur mit `REINDEX` (Issue 12). Ein „database disk image is malformed“ mitten im Lauf wird ebenso erklärt.
-
-- **Datenbank prüfen auf Wunsch:** Auf der Recorder-Seite startet ein Knopf „Datenbank prüfen“ die vollständige Prüfung im Hintergrund (bei großen Datenbanken Minuten). Das Ergebnis bleibt gespeichert; eine beschädigte Datenbank erscheint als Problem mit dem Hinweis auf `REINDEX` und das Backup. Eine saubere Prüfung der letzten drei Tage ersetzt den Check vor einem Plan.
-
-- **Beiseitegelegte Datenbanken:** Hat Home Assistant eine beschädigte Datenbank schon einmal ersetzt, nennt die Recorder-Seite die übrig gebliebenen Dateien `….db.corrupt.…` mit ihrer Größe. Gelöscht wird nichts.
-
-- **Speicherplatz:** Die Recorder-Seite meldet wenig freien Platz auf dem Datenträger der Datenbank (unter 1 GB oder 5 %). Unter 512 MB oder unter etwa der halben Datenbankgröße (das Backup enthält eine Kopie) stoppt ein Plan, der in den Recorder schreibt, ohne etwas zu ändern.
-
-- **Pläne warten auf einen ruhigen Recorder:** Ein Plan startet nicht, solange Home Assistant selbst ein Backup erstellt, der Recorder die Datenbank migriert oder sehr viele Schreibvorgänge in der Warteschlange hat. Er ändert dann nichts und lässt sich später erneut starten.
-
-- **Beschädigte Speicherdateien:** Lässt sich eine der gespeicherten Dateien von Housekeeper nicht lesen, beginnt nur dieser Teil leer, und die Integration startet trotzdem; die Diagnose nennt den Teil. Eine Datei aus einer neueren Version wird weiter nicht überschrieben.
-
-- **Backup wird geprüft:** Nach dem Backup vor einem Plan sieht Housekeeper in der Backup-Liste nach, ob es wirklich dort steht, nicht leer ist und bei Plänen im Recorder die Datenbank enthält. Sonst wird nichts geändert.
-
-- **Reparaturmeldung:** Ein Datenbankschaden erscheint auch unter Einstellungen → Reparaturen (mit dem Hinweis auf `REINDEX` und das Backup) und verschwindet, sobald eine Prüfung wieder sauber ist. Ein Schaden, auf den ein Plan stößt, zählt ebenso.
-
-- **Prüfung nach dem Löschen:** Hat ein Plan Zeilen im Recorder gelöscht oder geändert, startet danach im Hintergrund die vollständige Datenbankprüfung. Ein Schaden erscheint als Befund und Reparaturmeldung, nicht erst beim nächsten Aufräumen.
-
-- **Unsauberes Herunterfahren:** Housekeeper merkt sich, ob Home Assistant seinen Stopp angekündigt hat. Ist die Datenbank beschädigt, nennt der Befund, wie oft Home Assistant in den letzten 30 Tagen nach einem Absturz oder Stromausfall gestartet ist.
-
-- **Hinweis bei großen Löschungen:** Entfernt ein Plan die Hälfte oder mehr aller Entitäten oder Geräte, zeigt der Bestätigungsdialog einen deutlichen Hinweis mit den Zahlen. Sonst ändert sich nichts; bestätigt wird weiter einmal.
-
-- **Veraltete Vorschauen:** Eine Vorschau, die älter als 24 Stunden ist, trägt in der Journal-Liste und im Plan die Marke „Veraltet“ und lässt sich mit „Erneuern“ neu erstellen (die alte Vorschau entfällt). Vor dem Bestätigen prüft Housekeeper eine wieder geöffnete oder ältere Vorschau gegen den aktuellen Stand und nennt die Einträge, die sich seitdem geändert haben.
-
-- **Backup-Name im Ergebnis:** Hat ein Plan vorher ein Backup erstellt, nennt er dessen Namen („Housekeeper …“) in seinen Schritten, damit du es bei einer Wiederherstellung in der Backup-Liste von Home Assistant findest.
-
-- **Viele Housekeeper-Backups:** Die Karte Backup-Schutz weist darauf hin, wenn die eigenen Backups von Housekeeper 10 erreichen oder 5 GB belegen. Home Assistant löscht sie nicht von selbst; der Reiter Backups aufräumen tut es.
+- **Befundseite:** Eine Erklärung hinter der Überschrift, Kacheln in drei Gruppen, die wie die Liste zählen, ein Schweregrad für jeden Befund (Info zieht keine Punkte ab), Folgen eingerückt unter ihrer Ursache und die Größe der Ansicht in der Auswahlzeile. Zeitlich zusammenliegende Updates bilden einen Vorfall. Auf dem Reiter „Technisch“ stehen Labels bei allen Objekten.
 
 ### English
 
 #### New
 
-- **Scan every 6 hours:** The default for the automatic scan is now 6 instead of 24 hours (adjustable; an interval you set yourself stays). The history still keeps one point per day.
+- **Outages by duration:** Unavailable entities, devices, integrations and apps become a finding after 15 minutes and rise with their duration (info, low, medium, high). Info and low appear only on the findings page; the overview, the sensors and the repair hints count from medium on. The setting “Unavailable after days” is replaced by four adjustable thresholds (an old value is kept until you save the new ones). During an outage Housekeeper scans additionally at the thresholds without changing the history. Entities are therefore reported much earlier than the former 7 days.
 
-- **Hint for objects that fail often:** If an entity or device fails regularly (unstable, flapping or always at the same time of day), the finding says “Usually fails between 22:00 and 00:00” and the tab “Actions” asks “On purpose?” with a mark prepared, time window included. Nothing is set automatically; “Do not ask again” holds for 180 days in this browser.
+- **Rating and hints:** The detail page shows the rating of a finding with its reasons and the next level. If an object fails regularly, the finding names the usual time of day and suggests a mark with a time window.
 
-- **Outages by duration for all objects:** Unavailable entities, devices, integrations and apps become a finding after the info threshold (default 15 minutes) and rise with their duration: info, low from 1 hour, medium from 1 day, high from 7 days. Info and low are on the findings page; the overview, the sensors, the repair hints and “new findings” count from medium on. Integrations that cannot start are at least medium at once. An entity with `unknown` is a finding if it had a value before. An outage is followed by extra scans at the thresholds that do not change the history. **Changed:** the setting “Unavailable after days” (`min_unavailable_days`) is replaced by four thresholds (info in minutes, low, medium and high in hours); an old value that was set is kept until you save the new ones. Entities are now reported much earlier than the former 7 days.
+- **Watch after updates:** It now starts only for updates of Home Assistant, the operating system and the Supervisor (everything else is covered by the usual findings). The band leads to the results; objects without a value and objects with a mark are listed apart, and the watch can be ended early.
 
-- **Watch: without a value, and marks:** Objects that answer after the update but have no value any more (`unknown`) are listed in a group of their own, “Without a value since”. Objects with a mark (offline on purpose, seasonal, spare, replaced) no longer count as newly failed and are listed apart; a mark can be set right in the row.
+- **Scan every 6 hours:** The default for the automatic scan is 6 instead of 24 hours (adjustable; a value you set yourself stays). The history keeps one point per day.
 
-- **Watch only after system updates:** The watch after updates now starts only for an update of Home Assistant, the operating system or the Supervisor. Updates of single integrations are covered by the usual findings and the link in time. The band in the page header now leads to the results on the findings page.
+- **Protecting the database:** Before deleting in the recorder, Housekeeper checks the database fully (also on request and after deleting) and reports damage as a finding and a repair hint, pointing to `REINDEX` and the backup (issue 12). Hints on databases set aside, little disk space and unclean shutdowns are added; plans wait for a calm recorder. Nothing is deleted by this.
 
-- **Check the database before deleting:** Before a plan deletes or changes recorder rows, Housekeeper runs the full integrity check (`integrity_check`, which also compares the indexes) on SQLite. If the database is damaged the plan stops, nothing is changed, and the message points to `PRAGMA integrity_check` and the repair with `REINDEX` (issue 12). A “database disk image is malformed” in the middle of a run is explained the same way.
+- **Safer plans:** The backup before a plan is verified and named. Outdated previews are marked and can be renewed, large removals show a clear note, and too many Housekeeper backups are reported. An unreadable saved file only makes its own part start empty.
 
-- **Check the database on request:** On the Recorder page a “Check database” button starts the full check in the background (minutes on a large database). The result is kept; a damaged database shows up as a problem with the hint to `REINDEX` and the backup. A clean check from the last three days replaces the check before a plan.
-
-- **Databases set aside:** If Home Assistant has replaced a damaged database before, the Recorder page names the leftover `….db.corrupt.…` files with their size. Nothing is deleted.
-
-- **Disk space:** The Recorder page reports little free space on the database’s disk (under 1 GB or 5 %). Below 512 MB, or below about half the database size (the backup holds a copy), a plan that writes into the recorder stops without changing anything.
-
-- **Plans wait for a calm recorder:** A plan does not start while Home Assistant itself is making a backup, the recorder is migrating the database or has a very long write queue. It changes nothing then and can be started again later.
-
-- **Damaged saved files:** If one of Housekeeper’s saved files cannot be read, only that part starts empty and the integration still starts; the diagnostics name the part. A file from a newer version is still not overwritten.
-
-- **The backup is verified:** After the backup before a plan, Housekeeper looks in the backup list to see that it is really there, not empty and, for plans in the recorder, contains the database. Otherwise nothing is changed.
-
-- **Repair hint:** A database damage also appears under Settings → Repairs (with the hint to `REINDEX` and the backup) and goes away once a check is clean again. A damage a plan runs into counts as well.
-
-- **Check after deleting:** After a plan has deleted or changed recorder rows, the full database check starts in the background. A damage shows up as a finding and a repair hint, not at the next cleanup.
-
-- **Unclean shutdowns:** Housekeeper remembers whether Home Assistant announced its stop. If the database is damaged, the finding says how often Home Assistant started after a crash or power cut in the last 30 days.
-
-- **Warning for large removals:** If a plan removes half or more of all entities or devices, the confirmation dialog shows a clear note with the numbers. Nothing else changes; you still confirm once.
-
-- **Outdated previews:** A preview older than 24 hours is marked “Outdated” in the journal list and in the plan, and “Renew” creates it again (the old preview is dropped). Before confirming, a preview that was opened again or is older is checked against the current state, and the entries that changed since are named.
-
-- **Backup name in the result:** A plan that made a backup first names it (“Housekeeper …”) in its steps, so you can find it in Home Assistant's backup list if you need to restore.
-
-- **Many Housekeeper backups:** The backup protection card notes it when Housekeeper's own backups reach 10 or take up 5 GB. Home Assistant does not delete them on its own; the Tidy backups tab does.
+- **Findings page:** An explanation behind the heading, tiles in three groups that count like the list, a severity for every finding (info costs no points), follow-ups indented under their cause and the size of the view in the selection row. Updates close in time form one incident. The tab “Technical” shows labels for all objects.
 
 ## 1.7.0 - 2026-10-14
 
