@@ -415,3 +415,16 @@ def test_the_last_full_check_is_a_finding_when_damaged_and_lets_a_plan_skip_its_
     assert integrity_fresh(clean, now + timedelta(days=2))
     assert not integrity_fresh(clean, now + timedelta(days=4))
     assert not integrity_fresh(SimpleNamespace(integrity=None), now)
+
+
+def test_files_the_recorder_set_aside_as_damaged_are_a_hint_and_found_next_to_the_database(
+    tmp_path,
+) -> None:
+    from custom_components.ha_housekeeper.db_health import corrupt_copies
+
+    (tmp_path / "home-assistant_v2.db").write_bytes(b"x")
+    (tmp_path / "home-assistant_v2.db.corrupt.2026-10-01").write_bytes(b"x" * 5)
+    (tmp_path / "other.db.corrupt.1").write_bytes(b"x")
+    found = corrupt_copies(str(tmp_path / "home-assistant_v2.db"))
+    assert found == [{"name": "home-assistant_v2.db.corrupt.2026-10-01", "bytes": 5}]
+    assert kinds(run(raw(corrupt=found))) == ["corrupt_files"]

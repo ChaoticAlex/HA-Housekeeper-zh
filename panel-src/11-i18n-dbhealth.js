@@ -43,6 +43,8 @@ Object.assign(TEXT.en, {
 });
 
 Object.assign(TEXT.de, {
+  dbKind_corrupt_files: "Beschädigte Datenbank beiseitegelegt", dbCorruptFiles: "{n} Datei(en) mit {size}: {list}. Home Assistant hat die Datenbank schon einmal als beschädigt ersetzt.",
+  dbAdvice_corrupt_files: "Die Dateien liegen im Konfigurationsordner und werden nicht mehr benutzt. Lösche sie von Hand, wenn du sie nicht mehr brauchst; Housekeeper löscht sie nicht. Prüfe die Ursache (Datenträger, unsauberes Herunterfahren).",
   dbKind_integrity: "Datenbank beschädigt", dbIntegrity: "Die Prüfung vom {at} meldete: {lines}.",
   dbAdvice_integrity: "Lege zuerst ein Backup an. Betroffene Indizes lassen sich mit REINDEX neu aufbauen (zum Beispiel in SQLite Web), sonst hilft ein Backup. Housekeeper löscht nichts, solange die Datenbank beschädigt ist.",
   dbCheck: "Datenbank prüfen", dbChecking: "Die Datenbank wird geprüft. Das kann bei einer großen Datenbank Minuten dauern, die Seite bleibt benutzbar.",
@@ -50,6 +52,8 @@ Object.assign(TEXT.de, {
   dbCheckOk: "Zuletzt geprüft am {at}: in Ordnung.", dbCheckFailed: "Die Prüfung vom {at} ist nicht fertig geworden.", dbCheckNever: "Noch nie geprüft.",
 });
 Object.assign(TEXT.en, {
+  dbKind_corrupt_files: "Damaged database set aside", dbCorruptFiles: "{n} file(s) with {size}: {list}. Home Assistant has replaced the database as damaged before.",
+  dbAdvice_corrupt_files: "The files lie in the configuration folder and are no longer used. Delete them by hand when you no longer need them; Housekeeper does not delete them. Look for the cause (storage, unclean shutdown).",
   dbKind_integrity: "Database damaged", dbIntegrity: "The check of {at} reported: {lines}.",
   dbAdvice_integrity: "Make a backup first. Affected indexes can be rebuilt with REINDEX (for example in SQLite Web), otherwise restore a backup. Housekeeper deletes nothing while the database is damaged.",
   dbCheck: "Check database", dbChecking: "Checking the database. On a large database this can take minutes; the page stays usable.",

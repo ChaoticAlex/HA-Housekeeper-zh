@@ -8,6 +8,8 @@
 
 - **Datenbank prüfen auf Wunsch:** Auf der Recorder-Seite startet ein Knopf „Datenbank prüfen“ die vollständige Prüfung im Hintergrund (bei großen Datenbanken Minuten). Das Ergebnis bleibt gespeichert; eine beschädigte Datenbank erscheint als Problem mit dem Hinweis auf `REINDEX` und das Backup. Eine saubere Prüfung der letzten drei Tage ersetzt den Check vor einem Plan.
 
+- **Beiseitegelegte Datenbanken:** Hat Home Assistant eine beschädigte Datenbank schon einmal ersetzt, nennt die Recorder-Seite die übrig gebliebenen Dateien `….db.corrupt.…` mit ihrer Größe. Gelöscht wird nichts.
+
 ### English
 
 #### New
@@ -15,6 +17,8 @@
 - **Check the database before deleting:** Before a plan deletes or changes recorder rows, Housekeeper runs the full integrity check (`integrity_check`, which also compares the indexes) on SQLite. If the database is damaged the plan stops, nothing is changed, and the message points to `PRAGMA integrity_check` and the repair with `REINDEX` (issue 12). A “database disk image is malformed” in the middle of a run is explained the same way.
 
 - **Check the database on request:** On the Recorder page a “Check database” button starts the full check in the background (minutes on a large database). The result is kept; a damaged database shows up as a problem with the hint to `REINDEX` and the backup. A clean check from the last three days replaces the check before a plan.
+
+- **Databases set aside:** If Home Assistant has replaced a damaged database before, the Recorder page names the leftover `….db.corrupt.…` files with their size. Nothing is deleted.
 
 ## 1.7.0 - 2026-10-14
 

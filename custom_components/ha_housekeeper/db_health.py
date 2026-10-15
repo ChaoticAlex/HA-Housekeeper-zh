@@ -69,7 +69,12 @@ def database_files(hass: HomeAssistant) -> dict[str, Any]:
         or getattr(instance, "dialect_name", "")
         or ""
     )
-    result: dict[str, Any] = {"dialect": dialect, "db_bytes": None, "wal_bytes": None}
+    result: dict[str, Any] = {
+        "dialect": dialect,
+        "db_bytes": None,
+        "wal_bytes": None,
+        "corrupt": [],
+    }
     if dialect != "sqlite":
         return result
     try:
@@ -86,7 +91,22 @@ def database_files(hass: HomeAssistant) -> dict[str, Any]:
             result[key] = os.stat(path + suffix).st_size
         except OSError:
             result[key] = 0 if suffix else None
+    result["corrupt"] = corrupt_copies(path)
     return result
+
+
+def corrupt_copies(path: str) -> list[dict[str, Any]]:
+    """Blocking: the damaged files the recorder set aside (``<database>.corrupt.<date>``), largest first."""
+    folder, name = os.path.split(path)
+    found = []
+    try:
+        with os.scandir(folder or ".") as entries:
+            for entry in entries:
+                if entry.name.startswith(name + ".corrupt") and entry.is_file():
+                    found.append({"name": entry.name, "bytes": entry.stat().st_size})
+    except OSError:
+        return []
+    return sorted(found, key=lambda f: f["bytes"], reverse=True)
 
 
 def integrity_lines(hass: HomeAssistant, limit: int = INTEGRITY_LINES) -> list[str]:
@@ -385,6 +405,17 @@ def evaluate(
                 "level": "hint",
                 "recent_bytes": grown["recent_bytes"],
                 "base_bytes": grown["base_bytes"],
+            }
+        )
+    corrupt = raw.get("corrupt", [])
+    if corrupt:
+        findings.append(
+            {
+                "kind": "corrupt_files",
+                "level": "hint",
+                "files": len(corrupt),
+                "bytes": sum(f["bytes"] for f in corrupt),
+                "names": [f["name"] for f in corrupt[:LIST_LIMIT]],
             }
         )
     duplicates = raw.get("duplicates", [])
