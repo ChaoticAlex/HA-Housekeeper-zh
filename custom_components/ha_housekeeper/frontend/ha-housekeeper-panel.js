@@ -7706,7 +7706,8 @@ class WatchMixin {
       const name = item?.name || key.split(":").slice(1).join(":");
       const mark = item?.mark;
       const again = past && finding ? `<span class="pill warn">${this.t("watchAgain")}</span>` : "";
-      const act = past ? again : mark ? `<span class="pill mute">${this.esc(this.t(`mark_${mark.kind}`))}</span>` : item ? `<button class="btn quiet" data-watch-mark="${this.esc(key)}"><ha-icon icon="mdi:bookmark-plus-outline"></ha-icon>${this.t("markSet")}</button>` : "";
+      const menu = item && !past ? this.objectMenu(key, !mark) : "";
+      const act = past ? again : `${mark ? `<span class="pill mute">${this.esc(this.t(`mark_${mark.kind}`))}</span>` : ""}${menu}`;
       return `<div class="row" role="button" tabindex="0" data-object="${this.esc(key)}">${this.tile(item?.object_type || key.split(":")[0], tone)}<span class="row-text"><strong>${this.esc(name)}</strong><small>${this.esc(key)}${item?.status && !past ? ` · ${this.esc(item.status)}` : ""}</small></span>${act}</div>`;
     }).join("");
     const more = keys.length > WATCH_LIST ? `<p class="sub">${this.t("watchMore", { n: this.formatNumber(keys.length - WATCH_LIST) })}</p>` : "";
@@ -8229,6 +8230,13 @@ class CausesMixin {
     const item = (icon, label, attr) => `<button type="button" class="menuitem" ${attr}><ha-icon icon="${icon}"></ha-icon>${this.t(label)}</button>`;
     const del = ["automation.never_triggered", "automation.stale", "automation.disabled_long"].includes(f.rule_id) ? item("mdi:delete-outline", "autoDelete", `data-auto-delete="${this.esc(f.object_id)}"`) : "";
     return `<details class="rowmenu"><summary aria-label="${this.esc(this.t("rowMenu"))}"><ha-icon icon="mdi:dots-vertical"></ha-icon></summary><div class="menupop">${item("mdi:bookmark-check-outline", "markKnown", `data-decide-open="${key}" data-decide-preset="keep"`)}${item("mdi:clock-outline", "fselSnooze", `data-decide-open="${key}" data-decide-preset="snooze"`)}${item("mdi:eye-off-outline", "hideFinding", `data-decide-open="${key}"`)}${item("mdi:notebook-edit-outline", "findingNote", `data-finding-note="${key}"`)}${del}</div></details>`;
+  }
+
+  // The menu of an object that is not a finding (the watch lists such objects): the same shape as the menu of a finding row, with what applies to an object.
+  objectMenu(key, canMark = true) {
+    const k = this.esc(key);
+    const item = (icon, label, attr) => `<button type="button" class="menuitem" ${attr}><ha-icon icon="${icon}"></ha-icon>${this.t(label)}</button>`;
+    return `<details class="rowmenu"><summary aria-label="${this.esc(this.t("rowMenu"))}"><ha-icon icon="mdi:dots-vertical"></ha-icon></summary><div class="menupop">${canMark ? item("mdi:bookmark-plus-outline", "markSet", `data-watch-mark="${k}"`) : ""}${item("mdi:notebook-edit-outline", "findingNote", `data-object-note="${k}"`)}</div></details>`;
   }
 
   rowDecide(f) { return f && this.decide && this.decide.key === f.key ? `<div class="pad">${this.decideForm(f)}</div>` : ""; }
@@ -12014,7 +12022,7 @@ Object.assign(TEXT.de, {
   noteNeedTitle: "Gib dem Eintrag einen Titel.", noteBadTime: "Die Zeit ist ungültig oder liegt zu weit in der Zukunft.", noteFailed: "Der Eintrag konnte nicht gespeichert werden: {reason}",
   noteConcerns: "Betrifft: {name}", noteHint: "Nur für dich. Housekeeper ändert nichts in Home Assistant.", noteConcernsNow: "Betrifft", noteChange: "ändern",
   noteDetailTitle: "Logbuch", noteDetailEmpty: "Noch kein Eintrag.", noteDetailHint: "Halte fest, was du hieran geändert hast, damit es nachvollziehbar bleibt.", noteDetailNone: "Halte fest, was du hieran geändert hast, damit es später als möglicher Zusammenhang auftaucht.", noteAddHere: "Eintrag",
-  noteDialogNew: "Neuer Eintrag", noteDialogEdit: "Eintrag bearbeiten", noteChips: "Schnell eintragen", findingNote: "Vermerk setzen",
+  noteDialogNew: "Neuer Eintrag", noteDialogEdit: "Eintrag bearbeiten", noteChips: "Schnell eintragen", findingNote: "Ins Logbuch eintragen",
   noteChipStick: "Stick getauscht", noteChipFirmware: "Firmware aktualisiert", noteChipPaired: "Neu angelernt", noteChipMoved: "Umgezogen",
   noteSeeAll: "Im Logbuch ansehen", logbook: "Logbuch", tabScans: "Scan-Vergleich", logbookHint: "Alle Einträge, neueste zuerst", logbookEmpty: "Das Logbuch ist leer. Trage ein, was du außerhalb von Housekeeper änderst, zum Beispiel einen getauschten Stick.",
   logColWhen: "Wann", logColTitle: "Titel", logColTarget: "Betrifft", logColSource: "Quelle", logAllSources: "Alle Quellen", logAllObjects: "Alle Objekte",
@@ -12030,7 +12038,7 @@ Object.assign(TEXT.en, {
   noteNeedTitle: "Give the entry a title.", noteBadTime: "The time is invalid or too far in the future.", noteFailed: "The entry could not be saved: {reason}",
   noteConcerns: "Concerns: {name}", noteHint: "Only for you. Housekeeper changes nothing in Home Assistant.", noteConcernsNow: "Concerns", noteChange: "change",
   noteDetailTitle: "Logbook", noteDetailEmpty: "No entry yet.", noteDetailHint: "Note what you changed here, so it stays traceable.", noteDetailNone: "Note what you changed here, so it shows up later as a possible connection.", noteAddHere: "Entry",
-  noteDialogNew: "New entry", noteDialogEdit: "Edit entry", noteChips: "Quick entry", findingNote: "Add a note",
+  noteDialogNew: "New entry", noteDialogEdit: "Edit entry", noteChips: "Quick entry", findingNote: "Add to logbook",
   noteChipStick: "Stick replaced", noteChipFirmware: "Firmware updated", noteChipPaired: "Paired again", noteChipMoved: "Moved",
   noteSeeAll: "See in the logbook", logbook: "Logbook", tabScans: "Scan comparison", logbookHint: "All entries, newest first", logbookEmpty: "The logbook is empty. Note what you change outside Housekeeper, for example a replaced stick.",
   logColWhen: "When", logColTitle: "Title", logColTarget: "Concerns", logColSource: "Source", logAllSources: "All sources", logAllObjects: "All objects",
@@ -12060,6 +12068,14 @@ class NotesMixin {
       ? { id: note.id, title: note.title, at: this.noteLocal(note.at), target: note.target, targetText: this.findObject(note.target)?.name || note.target || "", note: note.note, source: note.source, ref: note.ref, error: "", detailKey }
       : { id: null, title: "", at: this.noteLocal(new Date().toISOString()), target, targetText: obj?.name || "", note: "", error: "", detailKey };
     this._noteFocus = true;
+  }
+
+  // Opens the logbook with a new entry for an object (as far as the logbook knows its type).
+  noteForObject(key) {
+    const type = this.findObject(key)?.object_type || key.split(":")[0];
+    this.noteOpen(null, NOTE_TYPES.includes(type) ? key : "");
+    this.noteDraft.detailKey = "";
+    this.noteJump?.("changes"); this.view = "changes"; (this.viewTab ||= {}).changes = "logbook"; this.selected = null; this.pages = {}; this.render();
   }
 
   noteTargetName(target) {
@@ -12190,12 +12206,9 @@ class NotesMixin {
     root.querySelectorAll("[data-note-add]").forEach(el => el.onclick = () => { this.noteOpen(null, this.lv?.logbook?.f?.object || ""); this.render(); });
     root.querySelectorAll("[data-finding-note]").forEach(el => el.onclick = () => {
       const f = (this.data.findings || []).find(x => x.key === el.dataset.findingNote);
-      if (!f) return;
-      const key = this.findingKey(f), type = this.findObject(key)?.object_type || key.split(":")[0];
-      this.noteOpen(null, NOTE_TYPES.includes(type) ? key : "");
-      this.noteDraft.detailKey = "";
-      this.noteJump?.("changes"); this.view = "changes"; (this.viewTab ||= {}).changes = "logbook"; this.selected = null; this.pages = {}; this.render();
+      if (f) this.noteForObject(this.findingKey(f));
     });
+    root.querySelectorAll("[data-object-note]").forEach(el => el.onclick = () => this.noteForObject(el.dataset.objectNote));
     root.querySelectorAll("[data-note-add-for]").forEach(el => el.onclick = () => { this.noteOpen(null, el.dataset.noteAddFor); this.render(); });
     root.querySelectorAll("[data-note-edit]").forEach(el => el.onclick = () => { const n = this.notesList().find(x => x.id === el.dataset.noteEdit); if (n) { this.noteOpen(n); this.render(); } });
     root.querySelectorAll("[data-logbook-for]").forEach(el => el.onclick = () => {
@@ -15897,7 +15910,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-baseline]").forEach(b => b.addEventListener("click", () => { this.compareBaseline = b.dataset.baseline; this.pages = {}; this.loadCompare(); }));
     root.querySelector("[data-history-all]")?.addEventListener("click", () => { this.historyAll = !this.historyAll; this.pages = {}; this.render(); });
     const bl = root.querySelector("#baseline"); if (bl) bl.onchange = () => { this.compareBaseline = bl.value; this.pages = {}; this.loadCompare(); };
-    root.querySelectorAll("[data-object]").forEach(el => el.onclick = ev => { const inner = ev?.target?.closest?.("button, select, input, a, label"); if (inner && inner !== el && el.contains(inner)) return; const obj = this.findObject(el.dataset.object); if (obj) this.openObject(obj); });
+    root.querySelectorAll("[data-object]").forEach(el => el.onclick = ev => { const inner = ev?.target?.closest?.("button, select, input, a, label, summary, .menupop"); if (inner && inner !== el && el.contains(inner)) return; const obj = this.findObject(el.dataset.object); if (obj) this.openObject(obj); });
     // Table rows and graph nodes are not native buttons: Enter and Space open them like a click.
     const openByKey = el => el.onkeydown = ev => {
       if (ev.target !== el || (ev.key !== "Enter" && ev.key !== " ")) return;
