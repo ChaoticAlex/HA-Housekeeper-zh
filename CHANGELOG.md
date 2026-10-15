@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Vorfälle besser lesbar:** Das „+1“ hinter einem Update steht als Chip, und „Zusammen mit“ ist ein abgesetzter Block mit einer Zeile je weiterem Update.
+
 - **Spaltenauswahl:** Die Kästchen in der Spaltenauswahl der Listen stehen jetzt in einer Reihe am rechten Rand.
 
 - **Ausfälle nach Dauer:** Nicht verfügbare Entitäten, Geräte, Integrationen und Apps werden nach 15 Minuten zum Befund und steigen mit der Dauer (Info, niedrig, mittel, hoch). Info und niedrig stehen nur auf der Befundseite; Übersicht, Sensoren und Reparaturhinweise zählen ab mittel. Die Einstellung „Nicht verfügbar nach Tagen“ ist durch vier einstellbare Schwellen ersetzt (ein alter Wert wird übernommen, bis du die neuen speicherst). Bei einem Ausfall scannt Housekeeper zu den Schwellen zusätzlich, ohne den Verlauf zu verändern. Entitäten werden dadurch viel früher gemeldet als bisher nach 7 Tagen.

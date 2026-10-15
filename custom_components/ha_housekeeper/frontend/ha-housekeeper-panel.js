@@ -1481,6 +1481,7 @@ class StylesMixin {
       .helpcard{display:grid;gap:14px}.helphead{display:flex;align-items:center;justify-content:space-between}.helpgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px 22px}.helpgrid h3{margin:0 0 3px;font-size:calc(13px*var(--hk-fs,1));font-weight:500}.helpgrid p{margin:0;color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1))}.helpnums{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:6px 14px;padding-top:12px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.helpnums b{font-weight:500}.helpnums span{color:var(--hk-muted)}@media(max-width:560px){.helpnums{grid-template-columns:1fr}}
       .viewcount{margin-left:auto;color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1));white-space:nowrap}.toolgap+.viewcount{margin-left:0}
       .kids{margin:4px 0 6px 18px;padding-left:12px;border-left:2px solid var(--hk-border);background:color-mix(in srgb,var(--hk-soft) 45%,transparent);border-radius:0 0 8px 0}.kids .tile{width:28px;height:28px}.foldarrow{--mdc-icon-size:18px;color:var(--hk-muted);flex:none;margin-right:2px}
+      .alsopill{margin-left:6px;vertical-align:1px}.corralso{display:grid;gap:6px;padding:8px 12px;border-left:3px solid var(--hk-amber);background:var(--hk-soft);border-radius:0 8px 8px 0}.corralso strong{font-size:calc(12px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted)}.corralso ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}.corralso li{display:flex;align-items:center;gap:8px}.corralso ha-icon{--mdc-icon-size:18px;color:var(--hk-amber);flex:none}
       .sumgroups{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:14px;align-items:flex-start}.sumgroup{min-width:0}.sumgroup .sumtiles{margin-bottom:0}.sumgrouphead{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));margin:0 0 6px 2px}
       .sumtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.sumtile{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border:1px solid var(--hk-border);border-left:4px solid var(--hk-gray);border-radius:12px;background:var(--hk-surface);text-align:left;font:inherit;color:inherit}button.sumtile{cursor:pointer}button.sumtile:hover{background:var(--hk-soft)}.sumtile.ok{border-left-color:var(--hk-green)}.sumtile.warn{border-left-color:var(--hk-amber)}.sumtile.red{border-left-color:var(--hk-red)}.sumlabel{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.sumvalue{font-size:calc(22px*var(--hk-fs,1));font-weight:600;line-height:1.2;overflow-wrap:anywhere}.sumtile small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));overflow-wrap:anywhere}.sumtile{position:relative}button.sumtile .sumlabel{padding-right:20px}.sumcue{position:absolute;top:10px;right:10px;--mdc-icon-size:16px;color:var(--hk-muted)}div.sumtile,div.sumtile:hover{box-shadow:none;background:var(--hk-soft)}.sumtile.filter[aria-pressed=true]{border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 9%,var(--hk-surface));box-shadow:0 0 0 1px var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumcue{color:var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumlabel{color:var(--hk-blue-text)}.sumtile.filter[aria-pressed=true] .sumlabel:before{content:"\\2713";margin-right:.4em}.filteron{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 16px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);background:color-mix(in srgb,var(--hk-blue) 7%,var(--hk-surface));border-bottom:1px solid var(--hk-border)}.filteron ha-icon{--mdc-icon-size:16px;color:var(--hk-blue)}.filteron b{color:var(--hk-text);font-weight:600}.filteron .btn{margin-left:auto}.tabdot{display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:50%;background:var(--hk-gray)}.tabdot.warn{background:var(--hk-amber)}.tabdot.red{background:var(--hk-red)}
       .detailgrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:14px;align-items:start}.pad{padding:16px}.todofoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px}.visitline{display:inline-flex;align-items:center;gap:6px;color:var(--hk-muted)}.visitline ha-icon{--mdc-icon-size:16px}
@@ -2877,14 +2878,14 @@ class FindingsMixin {
 Object.assign(TEXT.de, {
   corrAfter: "Zeitlich zusammen mit: {what} ({when})", corrTile: "Nach Update neu", corrTileSub: "begannen zusammen mit einem Update", corrTitle: "Zeitlich zusammen mit Updates und Neustarts",
   sumGroupAll: "Gesamt", sumGroupUrgent: "Dringend", sumGroupTidy: "Aufräumen", corrShow: "{n} Befunde anzeigen",
-  corrIncidents: "{n} Vorfälle", corrAlso: "Zusammen mit: {list}",
+  corrIncidents: "{n} Vorfälle", corrAlsoLabel: "Zusammen mit",
   corrHint: "Befunde, die zur selben Zeit begannen wie ein Update, ein Neustart oder ein Plan. Updates kurz nacheinander und der Neustart dabei sind ein Vorfall; ein Befund kann zu mehreren Vorfällen zählen. Das ist ein zeitlicher Zusammenhang, keine Ursache.",
   corr_ha_version: "Home-Assistant-Update {from} → {to}", corr_os_version: "Betriebssystem-Update {from} → {to}", corr_supervisor_version: "Supervisor-Update {from} → {to}", corr_entry_version: "Update von {domain} {from} → {to}", corr_start: "Neustart von Home Assistant", corr_plan: "Plan ausgeführt", corr_purge: "Statistiken gelöscht", corrCount: "{n} Befunde", corrReason: "{n}× {what}", corrSpan: "Begannen zwischen {first} und {last}.", corrMore: "{n} weitere sind hier nicht aufgeführt.",
 });
 Object.assign(TEXT.en, {
   corrAfter: "At about the same time as: {what} ({when})", corrTile: "New after update", corrTileSub: "began together with an update", corrTitle: "At about the same time as updates and restarts",
   sumGroupAll: "Total", sumGroupUrgent: "Urgent", sumGroupTidy: "Tidying up", corrShow: "Show {n} findings",
-  corrIncidents: "{n} incidents", corrAlso: "Together with: {list}",
+  corrIncidents: "{n} incidents", corrAlsoLabel: "Together with",
   corrHint: "Findings that began at the same time as an update, a restart or a plan. Updates shortly after one another and the restart beside them are one incident; a finding can belong to several incidents. This is a link in time, not a cause.",
   corr_ha_version: "Home Assistant update {from} → {to}", corr_os_version: "Operating system update {from} → {to}", corr_supervisor_version: "Supervisor update {from} → {to}", corr_entry_version: "Update of {domain} {from} → {to}", corr_start: "Home Assistant restart", corr_plan: "Cleanup plan run", corr_purge: "Statistics deleted", corrCount: "{n} findings", corrReason: "{n}× {what}", corrSpan: "Began between {first} and {last}.", corrMore: "{n} more are not listed here.",
 });
@@ -7456,8 +7457,8 @@ class CorrelationMixin {
 
   // The other updates of an incident, as one line under the title.
   corrAlso(group) {
-    const list = (group.also || []).map(a => this.corrText(a));
-    return list.length ? `<p class="sub u-mb14">${this.t("corrAlso", { list: list.join(" · ") })}</p>` : "";
+    const list = (group.also || []).map(a => `<li><ha-icon icon="mdi:package-up"></ha-icon><span>${this.corrText(a)}</span></li>`);
+    return list.length ? `<div class="corralso u-mb14"><strong>${this.t("corrAlsoLabel")}</strong><ul>${list.join("")}</ul></div>` : "";
   }
 
   corrGroupBody(group) {
@@ -7473,7 +7474,7 @@ class CorrelationMixin {
     const pg = this.paginate("corr", groups);
     const rows = pg.rows.map(g => {
       const icon = g.kind === "start" ? "mdi:restart" : g.kind === "plan" ? "mdi:broom" : g.kind === "purge" ? "mdi:database-remove" : g.kind === "note" ? "mdi:pin-outline" : "mdi:package-up";
-      const head = { tone: g.only_group ? "mute" : "warn", title: this.corrText(g) + (g.also?.length ? ` +${g.also.length}` : ""), sub: this.formatDate(g.at), pill: this.t("corrCount", { n: this.formatNumber(g.total) }) };
+      const head = { tone: g.only_group ? "mute" : "warn", title: this.corrText(g) + (g.also?.length ? ` <span class="pill warn alsopill" title="${this.esc(this.t("corrAlsoLabel"))}">+${g.also.length}</span>` : ""), sub: this.formatDate(g.at), pill: this.t("corrCount", { n: this.formatNumber(g.total) }) };
       const open = this.foldOpen(`corr_${g.id}`, false);
       return this.fold(`corr_${g.id}`, head, open ? this.corrGroupBody(g) : "", false).replace(/<ha-icon icon="mdi:chevron-(?:down|right)"><\/ha-icon>/, `<ha-icon icon="${open ? "mdi:chevron-down" : icon}"></ha-icon>`);
     }).join("");

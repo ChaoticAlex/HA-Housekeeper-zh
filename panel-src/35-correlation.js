@@ -42,8 +42,8 @@ class CorrelationMixin {
 
   // The other updates of an incident, as one line under the title.
   corrAlso(group) {
-    const list = (group.also || []).map(a => this.corrText(a));
-    return list.length ? `<p class="sub u-mb14">${this.t("corrAlso", { list: list.join(" · ") })}</p>` : "";
+    const list = (group.also || []).map(a => `<li><ha-icon icon="mdi:package-up"></ha-icon><span>${this.corrText(a)}</span></li>`);
+    return list.length ? `<div class="corralso u-mb14"><strong>${this.t("corrAlsoLabel")}</strong><ul>${list.join("")}</ul></div>` : "";
   }
 
   corrGroupBody(group) {
@@ -59,7 +59,7 @@ class CorrelationMixin {
     const pg = this.paginate("corr", groups);
     const rows = pg.rows.map(g => {
       const icon = g.kind === "start" ? "mdi:restart" : g.kind === "plan" ? "mdi:broom" : g.kind === "purge" ? "mdi:database-remove" : g.kind === "note" ? "mdi:pin-outline" : "mdi:package-up";
-      const head = { tone: g.only_group ? "mute" : "warn", title: this.corrText(g) + (g.also?.length ? ` +${g.also.length}` : ""), sub: this.formatDate(g.at), pill: this.t("corrCount", { n: this.formatNumber(g.total) }) };
+      const head = { tone: g.only_group ? "mute" : "warn", title: this.corrText(g) + (g.also?.length ? ` <span class="pill warn alsopill" title="${this.esc(this.t("corrAlsoLabel"))}">+${g.also.length}</span>` : ""), sub: this.formatDate(g.at), pill: this.t("corrCount", { n: this.formatNumber(g.total) }) };
       const open = this.foldOpen(`corr_${g.id}`, false);
       return this.fold(`corr_${g.id}`, head, open ? this.corrGroupBody(g) : "", false).replace(/<ha-icon icon="mdi:chevron-(?:down|right)"><\/ha-icon>/, `<ha-icon icon="${open ? "mdi:chevron-down" : icon}"></ha-icon>`);
     }).join("");
