@@ -2,7 +2,7 @@
 const STORE_GROUPS = [
   ["history", ["observations", "history", "events", "runs", "replies", "load", "entry_states", "stale", "config_changes", "coverage", "scan_health", "signals"]],
   ["proof", ["journal", "attest", "preflight"]],
-  ["yours", ["ignored", "marks", "notes", "reminders", "goals", "criteria", "batteries", "policies", "notify", "window", "protection", "refactor"]],
+  ["yours", ["ignored", "marks", "notes", "reminders", "goals", "criteria", "batteries", "policies", "notify", "protection", "refactor"]],
 ];
 
 Object.assign(TEXT.de, {
@@ -41,7 +41,6 @@ Object.assign(TEXT.de, {
   store_batteries: "Batterien", storeText_batteries: "Die Art je Sensor und erledigte Wechsel.",
   store_policies: "Richtlinien", storeText_policies: "Die Regeln, die du eingeschaltet hast.",
   store_notify: "Benachrichtigung", storeText_notify: "Deine Einstellung zur Meldung bei neuen kaputten Referenzen.",
-  store_window: "Wartungsfenster", storeText_window: "Der Stand des geführten Durchlaufs, wenn du ihn einschaltest.",
   store_protection: "Schutzmodus", storeText_protection: "Die Begrenzung dessen, was Housekeeper ändern darf.",
   store_refactor: "Verbesserungen", storeText_refactor: "Der Stand der kleinen Verbesserungen einzelner Automationen.",
 });
@@ -81,7 +80,6 @@ Object.assign(TEXT.en, {
   store_batteries: "Batteries", storeText_batteries: "The type per sensor and handled replacements.",
   store_policies: "Policies", storeText_policies: "The rules you switched on.",
   store_notify: "Notification", storeText_notify: "Your setting for the message about new broken references.",
-  store_window: "Maintenance window", storeText_window: "The state of the guided run, when you switch it on.",
   store_protection: "Protection mode", storeText_protection: "The limit on what Housekeeper may change.",
   store_refactor: "Improvements", storeText_refactor: "The state of the small improvements of single automations.",
 });

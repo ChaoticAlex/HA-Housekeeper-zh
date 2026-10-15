@@ -167,14 +167,11 @@ class MaintenanceMixin {
       { id: "preflight", icon: "mdi:rocket-launch-outline", label: this.t("preflightTitle"), hint: "maintHintPreflight", pill: !pf ? "" : pfRed || pfWarn ? this.t("mtOpen", { n: pfRed + pfWarn }) : this.t("bhLevel_ok"), tone: pfTone },
       { id: "blueprints", icon: "mdi:file-code-outline", label: this.t("bpTab"), hint: "maintHintBlueprints", pill: bpBad ? this.t("mtOpen", { n: bpBad }) : "", tone: "warn" },
       { id: "devices", icon: "mdi:devices", label: this.t("lifeRemovedTab"), hint: "maintHintDevices", pill: this.removed?.length ? this.formatNumber(this.removed.length) : "", tone: "mute" },
-      { id: "window", icon: "mdi:calendar-clock-outline", label: this.t("winTab"), hint: "maintHintWindow", pill: "", tone: "mute" },
       { id: "goals", icon: "mdi:target", label: this.t("goalsTitle"), hint: "maintHintGoals", pill: goalsMissed ? this.t("tilesMissed", { count: goalsMissed }) : "", tone: "red" },
     ];
     this.ensureBackupCleanup();
     const open = this.viewTabOf("maintenance", tabs, "backup");
     const grid = this.navTiles("maintenance", tabs.map(tab => ({ ...tab, hint: this.t(tab.hint), tone: tab.pill ? tab.tone : "ok" })), open, this.t("maintenance"), true);
-    // The window card loads nothing of its own and has no tool bar; the bar carries its "experimental" label.
-    const bar = open === "window" ? this.pageBar({ left: `<span class="pill warn">${this.t("winExperimental")}</span>`, refresh: false }) : "";
-    return `<div class="stack">${grid}${bar}${open === "goals" ? this.goalsCard() : open === "preflight" ? this.preflightCard() : open === "devices" ? this.removedCard() : open === "blueprints" ? this.blueprintsCard() : open === "window" ? this.windowCard() : open === "backups" ? this.backupCleanupCard() : this.backupCard()}</div>`;
+    return `<div class="stack">${grid}${open === "goals" ? this.goalsCard() : open === "preflight" ? this.preflightCard() : open === "devices" ? this.removedCard() : open === "blueprints" ? this.blueprintsCard() : open === "backups" ? this.backupCleanupCard() : this.backupCard()}</div>`;
   }
 }
