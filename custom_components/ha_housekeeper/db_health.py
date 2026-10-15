@@ -18,6 +18,7 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 
 from .const import DOMAIN
+from .issues import async_sync_database_issue
 from .meter import recorder_ready
 from .payloads import DbHealthResult
 from .queries import ReplyStore, cached_query, kept_reply
@@ -186,6 +187,7 @@ async def _check(hass: HomeAssistant, events: Any) -> None:
             state = "failed"
             _LOGGER.warning("The database check did not finish", exc_info=True)
     events.record_integrity(datetime.now(UTC), state, lines)
+    async_sync_database_issue(hass, events.integrity)
     hass.data.get(DOMAIN, {}).pop("integrity_task", None)
 
 

@@ -51,6 +51,10 @@
     "scan_stale": {
       "title": "Housekeeper has not scanned for a while",
       "description": "No scan succeeded since {last}. The counts and findings may be outdated. [Open Housekeeper]({link}). Nothing is changed automatically."
+    },
+    "database_damaged": {
+      "title": "The recorder database is damaged",
+      "description": "A check on {at} found damage in the recorder database: {first} Housekeeper deletes nothing from the recorder until a check comes back clean. Make a backup first, rebuild the affected indexes with REINDEX or restore a backup. [Open Housekeeper]({link})."
     }
   },
   "entity": {

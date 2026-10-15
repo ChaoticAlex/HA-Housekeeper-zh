@@ -81,7 +81,7 @@ from .hygiene import (
 )
 from .ignored import IgnoreStore
 from .impact import apply_impact
-from .issues import async_sync_issues, async_sync_scan_issue
+from .issues import async_sync_database_issue, async_sync_issues, async_sync_scan_issue
 from .load_history import LoadStore
 from .log_facts import log_facts
 from .maintenance import PreflightStore
@@ -942,6 +942,7 @@ class InventoryScanner:
     def async_check_health(self) -> None:
         """Raise or clear the repair hint for a scan that keeps failing, and tell the sensor."""
         async_sync_scan_issue(self.hass, self.health_report())
+        async_sync_database_issue(self.hass, self.events.integrity)
         self.monitor.refresh(self._snapshot, self.health_report(), new_scan=False)
         async_dispatcher_send(self.hass, SIGNAL_SCAN_COMPLETE)
 

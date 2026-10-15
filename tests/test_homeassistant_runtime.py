@@ -1489,3 +1489,22 @@ async def test_a_detected_battery_replacement_is_entered_once_and_updates_a_matc
         {"type": "ha_housekeeper/battery_custom_type", "action": "add", "name": "LR44"}
     )
     assert (await client.receive_json())["result"]["custom_types"] == ["LR44"]
+
+
+async def test_a_damaged_database_is_a_repair_hint_until_a_check_comes_back_clean(
+    hass: HomeAssistant,
+) -> None:
+    from homeassistant.helpers import issue_registry as ir
+
+    from custom_components.ha_housekeeper.issues import (
+        DATABASE_ISSUE_ID,
+        async_sync_database_issue,
+    )
+
+    registry = ir.async_get(hass)
+    damaged = {"state": "damaged", "at": "2026-10-15T06:00:00+00:00", "lines": ["row 1 missing"]}
+    async_sync_database_issue(hass, damaged)
+    issue = registry.async_get_issue(DOMAIN, DATABASE_ISSUE_ID)
+    assert issue is not None and issue.severity == ir.IssueSeverity.ERROR and not issue.is_fixable
+    async_sync_database_issue(hass, {**damaged, "state": "ok", "lines": []})
+    assert registry.async_get_issue(DOMAIN, DATABASE_ISSUE_ID) is None

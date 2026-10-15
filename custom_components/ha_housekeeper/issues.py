@@ -17,6 +17,7 @@ ISSUE_FILTERS = {
 
 ISSUE_IDS = ("orphaned_entities", "unavailable_entities", "broken_automations")
 SCAN_ISSUE_ID = "scan_health"
+DATABASE_ISSUE_ID = "database_damaged"
 
 
 CATEGORIES = {
@@ -76,7 +77,30 @@ def async_sync_scan_issue(hass: HomeAssistant, health: dict[str, Any]) -> None:
     )
 
 
+def async_sync_database_issue(hass: HomeAssistant, integrity: dict[str, Any] | None) -> None:
+    """One hint while the last full check of the recorder database found damage; a clean check ends it."""
+    if not integrity or integrity.get("state") != "damaged":
+        ir.async_delete_issue(hass, DOMAIN, DATABASE_ISSUE_ID)
+        return
+    lines = integrity.get("lines") or []
+    link = f"/{PANEL_URL}?view=recorder"
+    ir.async_create_issue(
+        hass,
+        DOMAIN,
+        DATABASE_ISSUE_ID,
+        is_fixable=False,
+        learn_more_url=link,
+        severity=ir.IssueSeverity.ERROR,
+        translation_key=DATABASE_ISSUE_ID,
+        translation_placeholders={
+            "at": str(integrity.get("at") or "-")[:16].replace("T", " "),
+            "first": str(lines[0] if lines else "-")[:200],
+            "link": link,
+        },
+    )
+
+
 def async_clear_issues(hass: HomeAssistant) -> None:
     """Remove all hints, for example when the integration is unloaded."""
-    for issue_id in (*ISSUE_IDS, SCAN_ISSUE_ID):
+    for issue_id in (*ISSUE_IDS, SCAN_ISSUE_ID, DATABASE_ISSUE_ID):
         ir.async_delete_issue(hass, DOMAIN, issue_id)

@@ -103,6 +103,7 @@ from .db_health import (
     integrity_problem,
     is_corruption_error,
 )
+from .issues import async_sync_database_issue
 from .meter import analyse, prepare_meter, read_series, recorder_ready
 from .notes import NoteError
 from .protection import allows, allows_undo
@@ -533,6 +534,7 @@ class CleanupRunner:
                 **({"reason": "database_corrupt"} if corrupt else {}),
             )
             if corrupt:
+                self._note_damage(str(err))
                 for action in plan["actions"]:
                     action.setdefault(
                         "result",
@@ -607,6 +609,11 @@ class CleanupRunner:
         self._backup_failed(plan, "disk_low", free_bytes=free)
         return False
 
+    def _note_damage(self, line: str) -> None:
+        """Keep a damage the plan ran into like the result of a check: a finding and a repair hint."""
+        self.scanner.events.record_integrity(_now(), "damaged", [line])
+        async_sync_database_issue(self.hass, self.scanner.events.integrity)
+
     async def _database_intact(self, plan: dict[str, Any]) -> bool:
         """Check the SQLite file (full integrity check) before anything is deleted; a damaged one stops the plan.
 
@@ -631,6 +638,7 @@ class CleanupRunner:
         if problem is None:
             return True
         _LOGGER.warning("The recorder database is damaged, nothing was changed: %s", problem)
+        self._note_damage(problem)
         self._backup_failed(plan, "database_corrupt", error=problem)
         return False
 

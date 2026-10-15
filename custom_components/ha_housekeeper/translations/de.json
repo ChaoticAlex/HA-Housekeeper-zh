@@ -51,6 +51,10 @@
     "scan_stale": {
       "title": "Housekeeper hat länger nicht gescannt",
       "description": "Seit {last} war kein Scan erfolgreich. Zahlen und Befunde können veraltet sein. [Housekeeper öffnen]({link}). Es wird nichts automatisch geändert."
+    },
+    "database_damaged": {
+      "title": "Die Recorder-Datenbank ist beschädigt",
+      "description": "Eine Prüfung am {at} hat einen Schaden in der Recorder-Datenbank gefunden: {first} Housekeeper löscht nichts im Recorder, bis eine Prüfung wieder sauber ist. Lege zuerst ein Backup an, baue die betroffenen Indizes mit REINDEX neu auf oder spiele ein Backup ein. [Housekeeper öffnen]({link})."
     }
   },
   "entity": {

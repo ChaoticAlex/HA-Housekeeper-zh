@@ -14,6 +14,8 @@
 
 - **Pläne warten auf einen ruhigen Recorder:** Ein Plan startet nicht, solange Home Assistant selbst ein Backup erstellt, der Recorder die Datenbank migriert oder sehr viele Schreibvorgänge in der Warteschlange hat. Er ändert dann nichts und lässt sich später erneut starten.
 
+- **Reparaturmeldung:** Ein Datenbankschaden erscheint auch unter Einstellungen → Reparaturen (mit dem Hinweis auf `REINDEX` und das Backup) und verschwindet, sobald eine Prüfung wieder sauber ist. Ein Schaden, auf den ein Plan stößt, zählt ebenso.
+
 - **Unsauberes Herunterfahren:** Housekeeper merkt sich, ob Home Assistant seinen Stopp angekündigt hat. Ist die Datenbank beschädigt, nennt der Befund, wie oft Home Assistant in den letzten 30 Tagen nach einem Absturz oder Stromausfall gestartet ist.
 
 ### English
@@ -29,6 +31,8 @@
 - **Disk space:** The Recorder page reports little free space on the database’s disk (under 1 GB or 5 %). Below 512 MB a plan that writes into the recorder stops without changing anything.
 
 - **Plans wait for a calm recorder:** A plan does not start while Home Assistant itself is making a backup, the recorder is migrating the database or has a very long write queue. It changes nothing then and can be started again later.
+
+- **Repair hint:** A database damage also appears under Settings → Repairs (with the hint to `REINDEX` and the backup) and goes away once a check is clean again. A damage a plan runs into counts as well.
 
 - **Unclean shutdowns:** Housekeeper remembers whether Home Assistant announced its stop. If the database is damaged, the finding says how often Home Assistant started after a crash or power cut in the last 30 days.
 
