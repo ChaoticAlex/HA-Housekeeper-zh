@@ -3166,6 +3166,15 @@ test("findings that began with an update get a line, a tile and a filter", () =>
   assert.ok(card.includes("Update of hue 1 → 2") && card.includes("1× ") && card.includes('data-object="entity:light.a"'));
 });
 
+test("a reason tile counts what the list shows and names the follow-ups beside it", () => {
+  const { el } = panel("en");
+  const f = (key, cause) => ({ key, rule_id: "entity.state_unavailable", object_id: key, classification: "unavailable", confidence: 0.9, ignored: false, impact: "low", cause_id: cause });
+  el.data = { ...DATA, objects: [], edges: [], causes: [], findings: [f("a"), f("b"), f("c", "device:x"), f("d", "device:x")] };
+  el.series = null; el._seriesFor = el.data; el._corrRequested = true; el._corrKey = el.data.meta.scanned_at || "";
+  const html = el.findingsView();
+  assert.ok(html.includes("Unavailable") && /sumvalue">2<\/b><small>plus 2 follow-ups/.test(html));
+});
+
 test("the detail page rates a finding: level with reasons, certainty, and what the next level takes", () => {
   const { el } = panel("en");
   const ago = h => new Date(Date.now() - h * 3600000).toISOString();

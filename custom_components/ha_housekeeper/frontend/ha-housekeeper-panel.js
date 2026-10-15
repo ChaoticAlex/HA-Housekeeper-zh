@@ -2701,7 +2701,9 @@ class FindingsMixin {
     const classTone = c => { const tone = this.tone(c); return tone === "red" ? "red" : tone === "warn" ? "warn" : "mute"; };
     this.ensureCorrelations();
     const afterCount = all.filter(f => this.corr?.by_key?.[f.key]).length;
-    const tile = c => ({ label: this.reasonLabel(c), value: this.formatNumber(all.filter(f => this.findingReason(f) === c).length), tone: classTone(c), filter: c, active: this.findingFilter === c, spark: spark(`class:${c}`, "bad") });
+    // A reason counts what the list shows under it: the follow-ups of an outage hang on their cause and are named beside the number.
+    const isFollower = f => f.cause_id && !CAUSE_OWN_RULES.includes(f.rule_id);
+    const tile = c => { const mine = all.filter(f => this.findingReason(f) === c), follows = mine.filter(isFollower).length; return { label: this.reasonLabel(c), value: this.formatNumber(mine.length - follows), sub: follows ? this.esc(this.t("findingsFollowSub", { n: this.formatNumber(follows) })) : undefined, tone: classTone(c), filter: c, active: this.findingFilter === c, spark: spark(`class:${c}`, "bad") }; };
     const rank = c => { const i = [...FINDING_URGENT, ...FINDING_TIDY].indexOf(c); return i < 0 ? FINDING_URGENT.length : i; };
     const sorted2 = [...classes].sort((a, b) => rank(a) - rank(b));
     const tidy = sorted2.filter(c => FINDING_TIDY.includes(c)), urgent = sorted2.filter(c => !FINDING_TIDY.includes(c));

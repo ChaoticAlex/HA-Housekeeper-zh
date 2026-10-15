@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Kacheln zählen wie die Liste:** Die Kacheln der Befundseite zählen ohne die Folgen von Ausfällen, so wie „Alle Befunde“ und die Liste darunter. Wo es Folgen gibt, stehen sie klein in der Kachel („dazu 296 Folgen der Ausfälle“). Vorher zeigte „Nicht verfügbar“ 774 und die Liste 478.
+
 - **Bewertung auf der Detailseite:** In der Karte „Diagnose“ steht bei einem Objekt mit offenem Befund der Block „Bewertung“: der Schweregrad mit seinen Gründen (bei Ausfällen mit Dauer und Balken über die Stufen), die Sicherheit mit einem Satz dazu und ein Hinweis, wann die nächste Stufe erreicht wird, nach der Dauer oder durch Abhängigkeiten.
 
 - **Kacheln der Befundseite neu geordnet:** Die Kacheln stehen in drei Gruppen: „Gesamt“, „Dringend“ (Problem, Nicht verfügbar, Ausfall, Defekte Referenz) und „Aufräumen“ (Unbekannt, Ungenutzt, Duplikat) in fester Reihenfolge. Die Kachel „Nach Update neu“ entfällt; der Filter steht jetzt als Knopf „n Befunde anzeigen“ unter „Zeitlich zusammen mit Updates und Neustarts“.
