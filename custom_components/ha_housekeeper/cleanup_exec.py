@@ -63,7 +63,7 @@ from . import counter_repair, followup
 from . import refactor as refactor_module
 from . import rename as rename_module
 from .automation_delete import preview as preview_automation_delete
-from .backup_cleanup import backup_exists, delete_backup, list_backups
+from .backup_cleanup import backup_exists, delete_backup, list_backups, verify_backup
 from .cleanup import (
     AREA_KINDS,
     BACKUP_KINDS,
@@ -682,6 +682,7 @@ class CleanupRunner:
         # A plan asks for the full backup only after the small one failed and the person chose it
         # (a new preview with ``full_backup``). It follows the contents of the user's automatic
         # backup settings but is a manual backup: no retention, no effect on the schedule.
+        name = f"Housekeeper {plan['plan_id'][:8]}"
         full = bool(plan.get("full_backup"))
         scope = "full" if full else "database" if with_database else "config"
         try:
@@ -699,7 +700,7 @@ class CleanupRunner:
                     if full
                     else None,
                     include_homeassistant=True,
-                    name=f"Housekeeper {plan['plan_id'][:8]}",
+                    name=name,
                     password=getattr(settings, "password", None),
                 )
         except Exception as err:
@@ -707,6 +708,11 @@ class CleanupRunner:
             _LOGGER.warning("The backup before a plan failed (%s)", scope, exc_info=True)
             reason = "backup_failed" if full else "backup_small_failed"
             self._backup_failed(plan, reason, error=f"{type(err).__name__}: {err}")
+            return
+        if problem := await verify_backup(self.hass, name, full or with_database):
+            # The call came back but the backup is not in the list as it should be: do not rely on it.
+            _LOGGER.warning("The backup before a plan could not be verified (%s)", problem)
+            self._backup_failed(plan, "backup_unverified", problem=problem)
             return
         plan["backup"] = {
             "job_id": getattr(created, "backup_job_id", None),

@@ -976,3 +976,40 @@ def test_only_a_plan_that_really_wrote_into_the_recorder_asks_for_a_check_afterw
     assert not wrote({"kind": "remove_entity", "result": done})
     assert not wrote({"kind": "trim_history", "result": {"state": "not_run"}})
     assert not wrote({"kind": "trim_history"})
+
+
+async def test_a_backup_that_is_missing_empty_or_without_the_database_is_not_relied_on(
+    hass: HomeAssistant,
+) -> None:
+    from types import SimpleNamespace
+    from unittest.mock import AsyncMock, patch
+
+    from custom_components.ha_housekeeper import backup_cleanup
+
+    def manager(*backups):
+        return SimpleNamespace(
+            async_get_backups=AsyncMock(return_value=({b.backup_id: b for b in backups}, {}))
+        )
+
+    def backup(size=10, database=True, name="Housekeeper abcd1234"):
+        return SimpleNamespace(
+            backup_id="b1",
+            name=name,
+            extra_metadata={"housekeeper": True},
+            database_included=database,
+            agents={"backup.local": SimpleNamespace(size=size)},
+        )
+
+    async def verify(m, database=True):
+        with (
+            patch("homeassistant.components.backup.async_get_manager", return_value=m),
+            patch.object(backup_cleanup, "VERIFY_PAUSE", 0),
+        ):
+            return await backup_cleanup.verify_backup(hass, "Housekeeper abcd1234", database)
+
+    assert await verify(manager(backup())) is None
+    assert await verify(manager()) == "missing"
+    assert await verify(manager(backup(size=0))) == "empty"
+    assert await verify(manager(backup(database=False))) == "without_database"
+    assert await verify(manager(backup(database=False)), database=False) is None
+    assert await verify(SimpleNamespace()) is None  # a manager that cannot be read does not count

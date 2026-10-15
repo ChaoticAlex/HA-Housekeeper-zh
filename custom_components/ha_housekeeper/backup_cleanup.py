@@ -8,6 +8,7 @@ watched and while it is the newest one that still allows an undo.
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime
 from typing import Any
 
@@ -16,6 +17,7 @@ from homeassistant.core import HomeAssistant
 from .cleanup import plan_summary
 
 KEEP_LAST = 3
+VERIFY_PAUSE = 2.0  # seconds between two looks at the backup list after a backup was made
 KEEP_DAYS = 14
 MAX_DAYS = 3650
 MAX_LAST = 100
@@ -47,6 +49,37 @@ async def _read(hass: HomeAssistant) -> tuple[Any, dict[str, Any]] | None:
     except Exception:  # noqa: BLE001 - without a backup manager there is nothing to list
         return None
     return manager, backups
+
+
+async def verify_backup(
+    hass: HomeAssistant, name: str, with_database: bool, attempts: int = 3
+) -> str | None:
+    """Whether the backup just made is really there: None when it is (or cannot be looked at), else why not.
+
+    Looks for the Housekeeper backup of this name in the manager's list and wants a size above zero in
+    at least one place and, when the plan writes into the recorder, the database inside. The list is
+    read again a little later because an agent may need a moment to report a finished upload.
+    """
+    why = "missing"
+    for attempt in range(attempts):
+        read = await _read(hass)
+        if read is None:
+            return None  # a manager that cannot be read cannot be held against the backup
+        found = [b for b in read[1].values() if _own(b) and getattr(b, "name", None) == name]
+        if found:
+            backup = found[0]
+            sizes = [
+                getattr(s, "size", None) for s in (getattr(backup, "agents", None) or {}).values()
+            ]
+            if not any(isinstance(size, int) and size > 0 for size in sizes):
+                why = "empty"
+            elif with_database and not getattr(backup, "database_included", False):
+                why = "without_database"
+            else:
+                return None
+        if attempt + 1 < attempts:
+            await asyncio.sleep(VERIFY_PAUSE)
+    return why
 
 
 def _own(backup: Any) -> bool:

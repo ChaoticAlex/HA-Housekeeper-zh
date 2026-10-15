@@ -13,7 +13,7 @@ const PURGE_KINDS = ["purge_statistics", "trim_history", "delete_backup"];
 const NOTHING_REASONS = ["nothing_found", "nothing_to_do"];
 const REPAIR_KINDS = ["repair_counter", "repair_range"];
 const IMPACT_RANK = { none: 0, info: 1, low: 2, medium: 3, high: 4 };
-const BACKUP_FAILURES = ["backup_failed", "backup_small_failed", "backup_unavailable", "no_backup_agent"];
+const BACKUP_FAILURES = ["backup_failed", "backup_small_failed", "backup_unavailable", "no_backup_agent", "backup_unverified"];
 const DEVICE_KINDS = ["disable_device", "remove_device", "forget_device"];
 // What a finished action says it did; kinds not listed just say "done".
 const DONE_RESULTS = Object.fromEntries([
