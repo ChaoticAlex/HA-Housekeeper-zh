@@ -1558,7 +1558,7 @@ test("the maintenance view loads the preflight; the recorder view offers the cos
   const { el, shadow } = panel("en", { setTimeout: () => 0 });
   const sent = [];
   const state = { ha_version: "2026.2.3", backup: { available: true, configured: true, newest: "x", age_hours: 5 }, repairs: [{ issue_id: "old", domain: "demo" }], failed_entries: [], broken: [], pending_updates: [{ entity_id: "update.core", name: "Core", installed: "2026.2.3", latest: "2026.3.0" }] };
-  const report = { state, checks: [{ check: "backup", level: "ok" }, { check: "repairs", level: "warn", count: 1 }, { check: "failed_entries", level: "ok", count: 0 }, { check: "broken", level: "ok", count: 0 }], record: null, after: null };
+  const report = { state, checks: [{ check: "backup", level: "ok" }, { check: "repairs", level: "warn", count: 1 }, { check: "failed_entries", level: "ok", count: 0 }, { check: "broken", level: "ok", count: 0 }], watch: { hours: 24, active: null } };
   el._hass = { language: "en", callWS: async msg => { sent.push(msg.type); return msg.type.endsWith("recorder_costs") ? COSTS : report; } };
   el.view = "maintenance"; el.viewTab = { maintenance: "preflight" };
   el.render();
@@ -1568,7 +1568,7 @@ test("the maintenance view loads the preflight; the recorder view offers the cos
   let html = shadow.innerHTML;
   assert.deepEqual(sent, ["ha_housekeeper/preflight"]);
   assert.ok(html.includes("Last backup 5 h ago") && html.includes("Open repairs") && html.includes("1 · old"));
-  assert.ok(html.includes("Core 2026.2.3 → 2026.3.0") && html.includes("No starting state saved yet."));
+  assert.ok(html.includes("Core 2026.2.3 → 2026.3.0") && html.includes("watches for 24 hours"));
   el.view = "recorder"; el.viewTab = { recorder: "costs" };
   el.render();
   assert.ok(shadow.innerHTML.includes("Start analysis"));
@@ -1684,17 +1684,14 @@ test("backup confirmations are inline, saved with a date, and can be taken back"
   assert.equal(sent[1], JSON.stringify({ type: "ha_housekeeper/backup_attest", kind: "restore_test", clear: true }));
 });
 
-test("after an update the preflight lists what is new since the saved state", async () => {
+test("the preflight says what follows an update: the watch is on, running or off", () => {
   const { el, shadow } = panel("en");
   const state = { ha_version: "2026.3.0", backup: { available: false }, repairs: [], failed_entries: [], broken: [], pending_updates: [] };
-  const after = { from_version: "2026.2.3", to_version: "2026.3.0", new_repairs: [{ issue_id: "deprecated", domain: "hue", severity: "warning" }], new_failed_entries: [{ title: "Hub <x>", domain: "demo", entry_id: "e" }], new_broken: [],
-    inventory: { new_objects: { total: 2, items: [] }, removed_objects: { total: 0, items: [] }, status_changes: { total: 1, items: [] }, new_findings: { total: 0, items: [] }, resolved_findings: { total: 0, items: [] } } };
-  el.preflight = { state, checks: [{ check: "backup", level: "warn" }], record: { at: "2026-10-01T10:00:00+00:00", ha_version: "2026.2.3", repairs: 0, failed_entries: 0, broken: 0, objects: 40 }, after };
-  el.view = "maintenance"; el.viewTab = { maintenance: "preflight" }; el._pfRequested = true;
-  el.render();
-  const html = shadow.innerHTML;
-  assert.ok(html.includes("Since the update: Home Assistant 2026.2.3 → 2026.3.0") && html.includes("hue · deprecated") && html.includes("Hub &lt;x&gt; (demo)"));
-  assert.ok(html.includes("New objects") && html.includes("Backup component not available") && html.includes("Saved"));
+  const show = watch => { el.preflight = { state, checks: [{ check: "backup", level: "warn" }], watch }; el.view = "maintenance"; el.viewTab = { maintenance: "preflight" }; el._pfRequested = true; el.render(); return shadow.innerHTML; };
+  assert.ok(show({ hours: 24, active: null }).includes("watches for 24 hours") && !show({ hours: 24, active: null }).includes("data-watch-go"));
+  const running = show({ hours: 24, active: { id: "w1", until: new Date(Date.now() + 5 * 3600000).toISOString(), triggers: [{ kind: "ha_version", from: "1", to: "2" }], samples: 1, new: 2 } });
+  assert.ok(running.includes("2 findings so far") && running.includes('data-watch-go="w1"'));
+  assert.ok(show({ hours: 0, active: null }).includes("switched off"));
 });
 
 test("inventory rows and sortable headers can be used with the keyboard", () => {

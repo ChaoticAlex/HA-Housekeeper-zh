@@ -701,14 +701,11 @@ Object.assign(TEXT.de, {
   recorderColStat: "Statistik", recorderColRows: "Zeilen", recorderColShare: "Anteil", recorderColTotal: "Gesamt", recorderCol24h: "24 h", recorderCol7d: "7 Tage", recorderColAvg: "Ø pro Tag", recorderColMark: "Markierung", recorderSumAll: "Alle", recorderSumSuggest: "Vorschläge", recorderSumExcluded: "Ausgeschlossen", recorderSumUnused: "Nicht verwendet", recorderFilterAll: "Alle Einträge", recorderNone: "Keine Einträge.",
   recorderUsed: "{count} Verwendungen", recorderUnused: "nicht verwendet", recorderExcluded: "bereits ausgeschlossen", recorderSuggest: "Empfohlen", recorderStats: "Statistikwerte nach Entität",
   recorderSnippetTitle: "Vorschlag für die configuration.yaml", recorderSnippetHint: "Entitäten, die nichts verwendet, keine Statistik haben und sehr oft schreiben. Prüfe die Liste, bevor du sie übernimmst.", recorderCopy: "Kopieren", recorderCopied: "Kopiert",
-  preflightTitle: "Update-Preflight", 
-  preflightSave: "Ausgangszustand speichern", preflightClear: "Gespeicherten Zustand verwerfen", preflightLoading: "Wird geprüft …",
+  preflightTitle: "Update-Preflight", preflightLoading: "Wird geprüft …",
   pf_backup: "Backup", pf_repairs: "Offene Reparaturen", pf_failed_entries: "Ausgefallene Integrationen", pf_broken: "Fehlende Referenzen",
   pf_backup_ok: "Letztes Backup vor {hours} h", pf_backup_old: "Letztes Backup vor {hours} h – ein neues ist ratsam", pf_backup_none: "Kein Backup eingerichtet oder vorhanden", pf_backup_unavailable: "Backup-Komponente nicht verfügbar",
   pf_count_none: "keine", pf_updates: "Verfügbare Updates", pf_updates_none: "keine",
-  preflightRecord: "Gespeichert am {date} · Home Assistant {version} · {repairs} Reparaturen, {failed} ausgefallene Integrationen, {broken} fehlende Referenzen, {objects} Objekte",
-  preflightAfterTitle: "Seit dem Update: Home Assistant {from} → {to}", preflightAfterNone: "Seit dem gespeicherten Zustand ist nichts Neues aufgefallen.",
-  pfNewRepairs: "Neue Reparaturen", pfNewFailed: "Neu ausgefallene Integrationen", pfNewBroken: "Neue fehlende Referenzen", pfNoRecord: "Noch kein Ausgangszustand gespeichert.",
+  pfAfterTitle: "Danach", pfAfterOn: "Nach einem Update von Home Assistant, Betriebssystem oder Supervisor beobachtet Housekeeper {hours} Stunden lang, ob etwas ausfällt oder neue Reparaturen auftauchen. Beim Start des Updates hält es den Stand fest, die Auswertung steht auf der Befundseite.", pfAfterRunning: "Beobachtung nach {what} läuft, noch {hours} Std., bisher {n} Auffälligkeiten.", pfAfterOff: "Die Beobachtung nach Updates ist ausgeschaltet. Unter Einstellungen → Scan und Schwellen stellst du ein, wie lange sie läuft.",
 });
 Object.assign(TEXT.en, {
   kindMeter: "Meter change (continue statistics / take over ID, with backup)",
@@ -741,14 +738,11 @@ Object.assign(TEXT.en, {
   recorderColStat: "Statistic", recorderColRows: "Rows", recorderColShare: "Share", recorderColTotal: "Total", recorderCol24h: "24 h", recorderCol7d: "7 days", recorderColAvg: "Avg per day", recorderColMark: "Mark", recorderSumAll: "All", recorderSumSuggest: "Suggestions", recorderSumExcluded: "Excluded", recorderSumUnused: "Not used", recorderFilterAll: "All entries", recorderNone: "No entries.",
   recorderUsed: "{count} uses", recorderUnused: "not used", recorderExcluded: "already excluded", recorderSuggest: "Recommended", recorderStats: "Statistics values by entity",
   recorderSnippetTitle: "Suggestion for configuration.yaml", recorderSnippetHint: "Entities that nothing uses, that have no statistics and that write very often. Review the list before you adopt it.", recorderCopy: "Copy", recorderCopied: "Copied",
-  preflightTitle: "Update preflight", 
-  preflightSave: "Save starting state", preflightClear: "Discard saved state", preflightLoading: "Checking …",
+  preflightTitle: "Update preflight", preflightLoading: "Checking …",
   pf_backup: "Backup", pf_repairs: "Open repairs", pf_failed_entries: "Failed integrations", pf_broken: "Missing references",
   pf_backup_ok: "Last backup {hours} h ago", pf_backup_old: "Last backup {hours} h ago – a new one is advisable", pf_backup_none: "No backup set up or available", pf_backup_unavailable: "Backup component not available",
   pf_count_none: "none", pf_updates: "Available updates", pf_updates_none: "none",
-  preflightRecord: "Saved {date} · Home Assistant {version} · {repairs} repairs, {failed} failed integrations, {broken} missing references, {objects} objects",
-  preflightAfterTitle: "Since the update: Home Assistant {from} → {to}", preflightAfterNone: "Nothing new has shown up since the saved state.",
-  pfNewRepairs: "New repairs", pfNewFailed: "Newly failed integrations", pfNewBroken: "New missing references", pfNoRecord: "No starting state saved yet.",
+  pfAfterTitle: "Afterwards", pfAfterOn: "After an update of Home Assistant, the operating system or the Supervisor, Housekeeper watches for {hours} hours whether something fails or new repairs appear. When the update starts it keeps the state, the results are on the findings page.", pfAfterRunning: "Watching after {what}, {hours} h left, {n} findings so far.", pfAfterOff: "The watch after updates is switched off. Under Settings → Scan and thresholds you set how long it runs.",
 });
 Object.assign(TEXT.de, {
   meterCard_both: "Statistik und ID", meterCard_statistics: "Nur Statistik", meterCard_id: "Nur ID", meterUsual: "üblich",
@@ -1030,7 +1024,7 @@ Object.assign(TEXT.en, {
 // Texts for the list of Housekeeper's own files (Settings, Info); merged into TEXT.
 const STORE_GROUPS = [
   ["history", ["observations", "history", "events", "runs", "replies", "load", "entry_states", "stale", "config_changes", "coverage", "scan_health", "signals"]],
-  ["proof", ["journal", "attest", "preflight"]],
+  ["proof", ["journal", "attest"]],
   ["yours", ["ignored", "marks", "notes", "reminders", "goals", "criteria", "batteries", "policies", "notify", "protection", "refactor"]],
 ];
 
@@ -1060,7 +1054,6 @@ Object.assign(TEXT.de, {
   store_signals: "Signale", storeText_signals: "Welche Situationen schon als Ereignis gemeldet wurden, damit jede nur einmal gemeldet wird.",
   store_journal: "Journal", storeText_journal: "Pläne des Aufräumens mit Ergebnis und Rückgängig-Angaben. Nie ausgeführte Pläne kannst du löschen; ausgeführte bleiben als Nachweis. Alte Dateisnapshots werden verdichtet, wenn die Größenbegrenzung erreicht ist.",
   store_attest: "Backup-Bestätigungen", storeText_attest: "Zwei Angaben, die nur du kennst: Notfall-Set sicher verwahrt und eine Wiederherstellung ausprobiert.",
-  store_preflight: "Update-Check", storeText_preflight: "Der Zustand vor einem Home-Assistant-Update, um ihn danach vergleichen zu können.",
   store_ignored: "Entscheidungen zu Befunden", storeText_ignored: "Ausgeblendet, bewusst behalten oder verschoben, mit Grund. Bleibt, bis du es änderst.",
   store_marks: "Markierungen", storeText_marks: "Hinweise an Objekten: absichtlich offline, saisonal, Reserve, behalten.",
   store_notes: "Logbuch", storeText_notes: "Einträge, die du selbst schreibst.",
@@ -1099,7 +1092,6 @@ Object.assign(TEXT.en, {
   store_signals: "Signals", storeText_signals: "Which situations were already announced as an event, so each is announced once.",
   store_journal: "Journal", storeText_journal: "Cleanup plans with their result and undo details. You can delete plans that were never run; executed ones stay as the audit trail. Old file snapshots are condensed when the size limit is reached.",
   store_attest: "Backup confirmations", storeText_attest: "Two facts only you know: the emergency kit is stored safely and a restore was tried.",
-  store_preflight: "Update check", storeText_preflight: "The state before a Home Assistant update, to compare it afterwards.",
   store_ignored: "Decisions about findings", storeText_ignored: "Hidden, deliberately kept or put off, with the reason. Stays until you change it.",
   store_marks: "Marks", storeText_marks: "Notes on objects: offline on purpose, seasonal, spare, keep.",
   store_notes: "Logbook", storeText_notes: "Entries you write yourself.",
@@ -5539,13 +5531,11 @@ class MaintenanceMixin {
     setTimeout(() => this.loadCosts(), 0);
   }
 
-  // `action` is "save" (remember the state as the starting point), "clear" (forget it) or nothing (just check).
-  async loadPreflight(action) {
+  async loadPreflight() {
     this.preflightLoading = true; this.preflightError = ""; this.render();
     try {
-      this.preflight = await this._hass.callWS(action ? { type: "ha_housekeeper/preflight_save", clear: action === "clear" } : { type: "ha_housekeeper/preflight" });
+      this.preflight = await this._hass.callWS({ type: "ha_housekeeper/preflight" });
       this.markLoaded("preflight");
-      if (action === "save" && this.data) this.load(false);
     } catch (err) { this.preflightError = this.errText(err); }
     this.preflightLoading = false; this.render();
   }
@@ -5646,31 +5636,25 @@ class MaintenanceMixin {
     }).join("");
   }
 
-  preflightAfter(after) {
-    const parts = [
-      ["pfNewRepairs", after.new_repairs, r => `${r.domain} · ${r.issue_id}`],
-      ["pfNewFailed", after.new_failed_entries, e => `${e.title} (${e.domain})`],
-      ["pfNewBroken", after.new_broken, b => b.name],
-    ].filter(([, items]) => items.length);
-    const inv = after.inventory || {};
-    const counts = [["newObjects", inv.new_objects], ["removedObjects", inv.removed_objects], ["statusChanges", inv.status_changes], ["newFindings", inv.new_findings], ["resolvedFindings", inv.resolved_findings]].filter(([, part]) => part?.total);
-    const lists = parts.map(([label, items, text]) => `<div class="row rel"><span class="tile warn"><ha-icon icon="mdi:alert-outline"></ha-icon></span><span class="row-text"><strong>${this.t(label)} (${items.length})</strong><small>${items.slice(0, 8).map(i => this.esc(text(i))).join(" · ")}</small></span></div>`).join("");
-    const summary = counts.map(([label, part]) => `<div class="row rel"><span class="tile mute"><ha-icon icon="mdi:compare-horizontal"></ha-icon></span><span class="row-text"><strong>${this.t(label)}</strong></span><span class="pill mute">${this.formatNumber(part.total)}</span></div>`).join("");
-    const body = lists + summary || `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("preflightAfterNone")}</div>`;
-    return `<div class="panelhead topline"><div><h3>${this.t("preflightAfterTitle", { from: this.esc(after.from_version), to: this.esc(after.to_version) })}</h3></div></div>${body}`;
+  // What follows an update: the watch (on, running, or off), with the way to its results.
+  preflightAfter(watch) {
+    if (!watch) return "";
+    const active = watch.active;
+    const text = !(watch.hours > 0) ? this.t("pfAfterOff")
+      : active ? this.t("pfAfterRunning", { what: this.watchWhat(active), hours: Math.max(0, Math.ceil((Date.parse(active.until) - Date.now()) / 3600000)), n: this.formatNumber(active.new) })
+      : this.t("pfAfterOn", { hours: watch.hours });
+    const go = active ? ` <button class="btn" data-watch-go="${this.esc(active.id || "")}">${this.t("watchGo")}</button>` : "";
+    return `<div class="panelhead topline"><div><h3>${this.t("pfAfterTitle")}</h3></div></div><p class="factnote">${text}${go}</p>`;
   }
 
   preflightCard() {
     const p = this.preflight;
-    const head = this.pageBar({ left: `<button class="btn primary" data-pf-save ${this.preflightLoading ? 'disabled aria-busy="true"' : ""}>${this.t("preflightSave")}</button>`, at: this.loadedAt("preflight"), loading: this.preflightLoading, attr: "data-pf-refresh" });
+    const head = this.pageBar({ at: this.loadedAt("preflight"), loading: this.preflightLoading, attr: "data-pf-refresh" });
     if (this.preflightError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.preflightError)}</div></div></div>`;
     if (!p) return `<div class="stack">${head}<div class="panel">${this.skeleton("preflightLoading")}</div></div>`;
     const updates = p.state.pending_updates || [];
     const updateRow = `<div class="row rel"><span class="tile ${updates.length ? "warn" : "ok"}"><ha-icon icon="mdi:package-up"></ha-icon></span><span class="row-text"><strong>${this.t("pf_updates")}</strong><small>${updates.length ? updates.slice(0, 6).map(u => `${this.esc(u.name)} ${this.esc(u.installed ?? "")} → ${this.esc(u.latest ?? "")}`).join(" · ") : this.t("pf_updates_none")}</small></span></div>`;
-    const record = p.record
-      ? `<p class="factnote">${this.t("preflightRecord", { date: this.formatDate(p.record.at), version: this.esc(p.record.ha_version), repairs: p.record.repairs, failed: p.record.failed_entries, broken: p.record.broken, objects: this.formatNumber(p.record.objects) })} <button class="btn" data-pf-clear>${this.t("preflightClear")}</button></p>`
-      : `<p class="factnote">${this.t("pfNoRecord")}</p>`;
-    return `<div class="stack">${head}<div class="panel">${this.preflightRows(p.state, p.checks)}${updateRow}${record}${p.after ? this.preflightAfter(p.after) : ""}</div></div>`;
+    return `<div class="stack">${head}<div class="panel">${this.preflightRows(p.state, p.checks)}${updateRow}${this.preflightAfter(p.watch)}</div></div>`;
   }
 
   maintenanceView() {
@@ -15918,8 +15902,6 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-fold]").forEach(el => el.onclick = () => { if (el.dataset.fold.startsWith("chg_")) this.changesCat = ""; this.folds = { ...this.folds, [el.dataset.fold]: el.getAttribute("aria-expanded") !== "true" }; this.render(); });
     root.querySelectorAll("[data-bh-clear]").forEach(el => el.onclick = () => this.loadBackup({ type: "ha_housekeeper/backup_attest", kind: el.dataset.bhClear, clear: true }));
     root.querySelector("[data-pf-refresh]")?.addEventListener("click", () => this.loadPreflight());
-    root.querySelector("[data-pf-save]")?.addEventListener("click", () => this.loadPreflight("save"));
-    root.querySelector("[data-pf-clear]")?.addEventListener("click", () => this.loadPreflight("clear"));
     root.querySelectorAll("[data-plan-close]").forEach(el => el.addEventListener("click", () => { this.plan = null; this.render(); }));
     root.querySelectorAll("[data-plan-open]").forEach(el => el.onclick = ev => { const inner = ev?.target?.closest?.("button, select, input, a, label"); if (inner && inner !== el && el.contains(inner)) return; this.openPlan(el.dataset.planOpen); });
     root.querySelectorAll("[data-merge-sel]").forEach(el => el.onchange = () => { this.mergeSel = new Set(this.mergeSel || []); el.checked ? this.mergeSel.add(el.dataset.mergeSel) : this.mergeSel.delete(el.dataset.mergeSel); this.render(); });

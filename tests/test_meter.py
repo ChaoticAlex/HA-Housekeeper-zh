@@ -387,17 +387,13 @@ async def test_the_panel_commands_plan_a_meter_change_and_report_maintenance(
 
     await client.send_json_auto_id({"type": "ha_housekeeper/preflight"})
     report = (await client.receive_json())["result"]
-    assert report["record"] is None and {c["check"] for c in report["checks"]} == {
+    assert {c["check"] for c in report["checks"]} == {
         "backup",
         "repairs",
         "failed_entries",
         "broken",
     }
-    await client.send_json_auto_id({"type": "ha_housekeeper/preflight_save"})
-    saved = (await client.receive_json())["result"]
-    assert saved["record"]["objects"] > 0 and saved["after"] is None
-    await client.send_json_auto_id({"type": "ha_housekeeper/preflight_save", "clear": True})
-    assert (await client.receive_json())["result"]["record"] is None
+    assert report["watch"]["hours"] > 0 and report["watch"]["active"] is None
 
 
 def test_analyse_asks_for_a_look_when_the_old_series_has_no_final_total() -> None:

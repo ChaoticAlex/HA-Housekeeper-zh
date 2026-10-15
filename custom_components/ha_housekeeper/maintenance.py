@@ -1,7 +1,7 @@
-"""Maintenance assistant: what the recorder costs, and a preflight around Home Assistant updates.
+"""Maintenance assistant: what the recorder costs, and a preflight before Home Assistant updates.
 
-Everything here only reads Home Assistant. The preflight record is stored by Housekeeper itself
-and is the only thing that is written.
+Everything here only reads Home Assistant and writes nothing. What happens after an update is the
+job of the watch (``watch.py``).
 """
 
 from __future__ import annotations
@@ -14,10 +14,7 @@ from typing import Any
 from homeassistant.const import __version__ as HA_VERSION
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
-from homeassistant.helpers.storage import Store
 
-from .const import PREFLIGHT_STORAGE_KEY, STORAGE_VERSION
-from .history import diff_checkpoints, make_checkpoint
 from .meter import recorder_ready
 from .queries import ReplyStore, cached_query, kept_reply
 
@@ -360,73 +357,7 @@ def judge_preflight(state: dict[str, Any]) -> list[dict[str, Any]]:
     return checks
 
 
-def compare_after(
-    record: dict[str, Any], state: dict[str, Any], snapshot: dict[str, Any]
-) -> dict[str, Any]:
-    """What changed since the preflight record: new repairs, newly failing entries, inventory."""
-    known_repairs = {r["issue_id"] for r in record["state"]["repairs"]}
-    known_entries = {e["entry_id"] for e in record["state"]["failed_entries"]}
-    known_broken = {b["key"] for b in record["state"]["broken"]}
-    return {
-        "from_version": record["state"]["ha_version"],
-        "to_version": state["ha_version"],
-        "new_repairs": [r for r in state["repairs"] if r["issue_id"] not in known_repairs],
-        "new_failed_entries": [
-            e for e in state["failed_entries"] if e["entry_id"] not in known_entries
-        ],
-        "new_broken": [b for b in state["broken"] if b["key"] not in known_broken],
-        "inventory": diff_checkpoints(record["checkpoint"], snapshot),
-    }
-
-
-class PreflightStore:
-    """The record saved before an update: state plus an inventory checkpoint."""
-
-    def __init__(self, hass: HomeAssistant) -> None:
-        self._store: Store[dict[str, Any]] = Store(hass, STORAGE_VERSION, PREFLIGHT_STORAGE_KEY)
-        self.record: dict[str, Any] | None = None
-
-    async def async_load(self) -> None:
-        data = await self._store.async_load()
-        if isinstance(data, dict) and isinstance(data.get("record"), dict):
-            self.record = data["record"]
-
-    def save(self, state: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, Any]:
-        self.record = {
-            "at": state["at"],
-            "state": state,
-            "checkpoint": make_checkpoint(snapshot),
-        }
-        self._store.async_delay_save(lambda: {"record": self.record}, 1)
-        return self.record
-
-    def clear(self) -> None:
-        self.record = None
-        self._store.async_delay_save(lambda: {"record": None}, 1)
-
-
-async def preflight_report(
-    hass: HomeAssistant, snapshot: dict[str, Any], store: PreflightStore
-) -> dict[str, Any]:
-    """Current state, its judgement, and, if a record exists, what changed since."""
+async def preflight_report(hass: HomeAssistant, snapshot: dict[str, Any]) -> dict[str, Any]:
+    """The state right before an update and its judgement; the time after belongs to the watch."""
     state = await collect_preflight(hass, snapshot)
-    record = store.record
-    report: dict[str, Any] = {
-        "state": state,
-        "checks": judge_preflight(state),
-        "record": None if record is None else {"at": record["at"], **_record_head(record)},
-        "after": None,
-    }
-    if record is not None and record["state"]["ha_version"] != state["ha_version"]:
-        report["after"] = compare_after(record, state, snapshot)
-    return report
-
-
-def _record_head(record: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "ha_version": record["state"]["ha_version"],
-        "repairs": len(record["state"]["repairs"]),
-        "failed_entries": len(record["state"]["failed_entries"]),
-        "broken": len(record["state"]["broken"]),
-        "objects": sum(len(o) for o in record["checkpoint"]["objects"].values()),
-    }
+    return {"state": state, "checks": judge_preflight(state)}

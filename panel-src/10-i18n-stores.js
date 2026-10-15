@@ -1,7 +1,7 @@
 // Texts for the list of Housekeeper's own files (Settings, Info); merged into TEXT.
 const STORE_GROUPS = [
   ["history", ["observations", "history", "events", "runs", "replies", "load", "entry_states", "stale", "config_changes", "coverage", "scan_health", "signals"]],
-  ["proof", ["journal", "attest", "preflight"]],
+  ["proof", ["journal", "attest"]],
   ["yours", ["ignored", "marks", "notes", "reminders", "goals", "criteria", "batteries", "policies", "notify", "protection", "refactor"]],
 ];
 
@@ -31,7 +31,6 @@ Object.assign(TEXT.de, {
   store_signals: "Signale", storeText_signals: "Welche Situationen schon als Ereignis gemeldet wurden, damit jede nur einmal gemeldet wird.",
   store_journal: "Journal", storeText_journal: "Pläne des Aufräumens mit Ergebnis und Rückgängig-Angaben. Nie ausgeführte Pläne kannst du löschen; ausgeführte bleiben als Nachweis. Alte Dateisnapshots werden verdichtet, wenn die Größenbegrenzung erreicht ist.",
   store_attest: "Backup-Bestätigungen", storeText_attest: "Zwei Angaben, die nur du kennst: Notfall-Set sicher verwahrt und eine Wiederherstellung ausprobiert.",
-  store_preflight: "Update-Check", storeText_preflight: "Der Zustand vor einem Home-Assistant-Update, um ihn danach vergleichen zu können.",
   store_ignored: "Entscheidungen zu Befunden", storeText_ignored: "Ausgeblendet, bewusst behalten oder verschoben, mit Grund. Bleibt, bis du es änderst.",
   store_marks: "Markierungen", storeText_marks: "Hinweise an Objekten: absichtlich offline, saisonal, Reserve, behalten.",
   store_notes: "Logbuch", storeText_notes: "Einträge, die du selbst schreibst.",
@@ -70,7 +69,6 @@ Object.assign(TEXT.en, {
   store_signals: "Signals", storeText_signals: "Which situations were already announced as an event, so each is announced once.",
   store_journal: "Journal", storeText_journal: "Cleanup plans with their result and undo details. You can delete plans that were never run; executed ones stay as the audit trail. Old file snapshots are condensed when the size limit is reached.",
   store_attest: "Backup confirmations", storeText_attest: "Two facts only you know: the emergency kit is stored safely and a restore was tried.",
-  store_preflight: "Update check", storeText_preflight: "The state before a Home Assistant update, to compare it afterwards.",
   store_ignored: "Decisions about findings", storeText_ignored: "Hidden, deliberately kept or put off, with the reason. Stays until you change it.",
   store_marks: "Marks", storeText_marks: "Notes on objects: offline on purpose, seasonal, spare, keep.",
   store_notes: "Logbook", storeText_notes: "Entries you write yourself.",

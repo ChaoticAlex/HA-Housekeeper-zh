@@ -14,13 +14,11 @@ class MaintenanceMixin {
     setTimeout(() => this.loadCosts(), 0);
   }
 
-  // `action` is "save" (remember the state as the starting point), "clear" (forget it) or nothing (just check).
-  async loadPreflight(action) {
+  async loadPreflight() {
     this.preflightLoading = true; this.preflightError = ""; this.render();
     try {
-      this.preflight = await this._hass.callWS(action ? { type: "ha_housekeeper/preflight_save", clear: action === "clear" } : { type: "ha_housekeeper/preflight" });
+      this.preflight = await this._hass.callWS({ type: "ha_housekeeper/preflight" });
       this.markLoaded("preflight");
-      if (action === "save" && this.data) this.load(false);
     } catch (err) { this.preflightError = this.errText(err); }
     this.preflightLoading = false; this.render();
   }
@@ -121,31 +119,25 @@ class MaintenanceMixin {
     }).join("");
   }
 
-  preflightAfter(after) {
-    const parts = [
-      ["pfNewRepairs", after.new_repairs, r => `${r.domain} · ${r.issue_id}`],
-      ["pfNewFailed", after.new_failed_entries, e => `${e.title} (${e.domain})`],
-      ["pfNewBroken", after.new_broken, b => b.name],
-    ].filter(([, items]) => items.length);
-    const inv = after.inventory || {};
-    const counts = [["newObjects", inv.new_objects], ["removedObjects", inv.removed_objects], ["statusChanges", inv.status_changes], ["newFindings", inv.new_findings], ["resolvedFindings", inv.resolved_findings]].filter(([, part]) => part?.total);
-    const lists = parts.map(([label, items, text]) => `<div class="row rel"><span class="tile warn"><ha-icon icon="mdi:alert-outline"></ha-icon></span><span class="row-text"><strong>${this.t(label)} (${items.length})</strong><small>${items.slice(0, 8).map(i => this.esc(text(i))).join(" · ")}</small></span></div>`).join("");
-    const summary = counts.map(([label, part]) => `<div class="row rel"><span class="tile mute"><ha-icon icon="mdi:compare-horizontal"></ha-icon></span><span class="row-text"><strong>${this.t(label)}</strong></span><span class="pill mute">${this.formatNumber(part.total)}</span></div>`).join("");
-    const body = lists + summary || `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("preflightAfterNone")}</div>`;
-    return `<div class="panelhead topline"><div><h3>${this.t("preflightAfterTitle", { from: this.esc(after.from_version), to: this.esc(after.to_version) })}</h3></div></div>${body}`;
+  // What follows an update: the watch (on, running, or off), with the way to its results.
+  preflightAfter(watch) {
+    if (!watch) return "";
+    const active = watch.active;
+    const text = !(watch.hours > 0) ? this.t("pfAfterOff")
+      : active ? this.t("pfAfterRunning", { what: this.watchWhat(active), hours: Math.max(0, Math.ceil((Date.parse(active.until) - Date.now()) / 3600000)), n: this.formatNumber(active.new) })
+      : this.t("pfAfterOn", { hours: watch.hours });
+    const go = active ? ` <button class="btn" data-watch-go="${this.esc(active.id || "")}">${this.t("watchGo")}</button>` : "";
+    return `<div class="panelhead topline"><div><h3>${this.t("pfAfterTitle")}</h3></div></div><p class="factnote">${text}${go}</p>`;
   }
 
   preflightCard() {
     const p = this.preflight;
-    const head = this.pageBar({ left: `<button class="btn primary" data-pf-save ${this.preflightLoading ? 'disabled aria-busy="true"' : ""}>${this.t("preflightSave")}</button>`, at: this.loadedAt("preflight"), loading: this.preflightLoading, attr: "data-pf-refresh" });
+    const head = this.pageBar({ at: this.loadedAt("preflight"), loading: this.preflightLoading, attr: "data-pf-refresh" });
     if (this.preflightError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.preflightError)}</div></div></div>`;
     if (!p) return `<div class="stack">${head}<div class="panel">${this.skeleton("preflightLoading")}</div></div>`;
     const updates = p.state.pending_updates || [];
     const updateRow = `<div class="row rel"><span class="tile ${updates.length ? "warn" : "ok"}"><ha-icon icon="mdi:package-up"></ha-icon></span><span class="row-text"><strong>${this.t("pf_updates")}</strong><small>${updates.length ? updates.slice(0, 6).map(u => `${this.esc(u.name)} ${this.esc(u.installed ?? "")} → ${this.esc(u.latest ?? "")}`).join(" · ") : this.t("pf_updates_none")}</small></span></div>`;
-    const record = p.record
-      ? `<p class="factnote">${this.t("preflightRecord", { date: this.formatDate(p.record.at), version: this.esc(p.record.ha_version), repairs: p.record.repairs, failed: p.record.failed_entries, broken: p.record.broken, objects: this.formatNumber(p.record.objects) })} <button class="btn" data-pf-clear>${this.t("preflightClear")}</button></p>`
-      : `<p class="factnote">${this.t("pfNoRecord")}</p>`;
-    return `<div class="stack">${head}<div class="panel">${this.preflightRows(p.state, p.checks)}${updateRow}${record}${p.after ? this.preflightAfter(p.after) : ""}</div></div>`;
+    return `<div class="stack">${head}<div class="panel">${this.preflightRows(p.state, p.checks)}${updateRow}${this.preflightAfter(p.watch)}</div></div>`;
   }
 
   maintenanceView() {

@@ -31,14 +31,11 @@ Object.assign(TEXT.de, {
   recorderColStat: "Statistik", recorderColRows: "Zeilen", recorderColShare: "Anteil", recorderColTotal: "Gesamt", recorderCol24h: "24 h", recorderCol7d: "7 Tage", recorderColAvg: "Ø pro Tag", recorderColMark: "Markierung", recorderSumAll: "Alle", recorderSumSuggest: "Vorschläge", recorderSumExcluded: "Ausgeschlossen", recorderSumUnused: "Nicht verwendet", recorderFilterAll: "Alle Einträge", recorderNone: "Keine Einträge.",
   recorderUsed: "{count} Verwendungen", recorderUnused: "nicht verwendet", recorderExcluded: "bereits ausgeschlossen", recorderSuggest: "Empfohlen", recorderStats: "Statistikwerte nach Entität",
   recorderSnippetTitle: "Vorschlag für die configuration.yaml", recorderSnippetHint: "Entitäten, die nichts verwendet, keine Statistik haben und sehr oft schreiben. Prüfe die Liste, bevor du sie übernimmst.", recorderCopy: "Kopieren", recorderCopied: "Kopiert",
-  preflightTitle: "Update-Preflight", 
-  preflightSave: "Ausgangszustand speichern", preflightClear: "Gespeicherten Zustand verwerfen", preflightLoading: "Wird geprüft …",
+  preflightTitle: "Update-Preflight", preflightLoading: "Wird geprüft …",
   pf_backup: "Backup", pf_repairs: "Offene Reparaturen", pf_failed_entries: "Ausgefallene Integrationen", pf_broken: "Fehlende Referenzen",
   pf_backup_ok: "Letztes Backup vor {hours} h", pf_backup_old: "Letztes Backup vor {hours} h – ein neues ist ratsam", pf_backup_none: "Kein Backup eingerichtet oder vorhanden", pf_backup_unavailable: "Backup-Komponente nicht verfügbar",
   pf_count_none: "keine", pf_updates: "Verfügbare Updates", pf_updates_none: "keine",
-  preflightRecord: "Gespeichert am {date} · Home Assistant {version} · {repairs} Reparaturen, {failed} ausgefallene Integrationen, {broken} fehlende Referenzen, {objects} Objekte",
-  preflightAfterTitle: "Seit dem Update: Home Assistant {from} → {to}", preflightAfterNone: "Seit dem gespeicherten Zustand ist nichts Neues aufgefallen.",
-  pfNewRepairs: "Neue Reparaturen", pfNewFailed: "Neu ausgefallene Integrationen", pfNewBroken: "Neue fehlende Referenzen", pfNoRecord: "Noch kein Ausgangszustand gespeichert.",
+  pfAfterTitle: "Danach", pfAfterOn: "Nach einem Update von Home Assistant, Betriebssystem oder Supervisor beobachtet Housekeeper {hours} Stunden lang, ob etwas ausfällt oder neue Reparaturen auftauchen. Beim Start des Updates hält es den Stand fest, die Auswertung steht auf der Befundseite.", pfAfterRunning: "Beobachtung nach {what} läuft, noch {hours} Std., bisher {n} Auffälligkeiten.", pfAfterOff: "Die Beobachtung nach Updates ist ausgeschaltet. Unter Einstellungen → Scan und Schwellen stellst du ein, wie lange sie läuft.",
 });
 Object.assign(TEXT.en, {
   kindMeter: "Meter change (continue statistics / take over ID, with backup)",
@@ -71,14 +68,11 @@ Object.assign(TEXT.en, {
   recorderColStat: "Statistic", recorderColRows: "Rows", recorderColShare: "Share", recorderColTotal: "Total", recorderCol24h: "24 h", recorderCol7d: "7 days", recorderColAvg: "Avg per day", recorderColMark: "Mark", recorderSumAll: "All", recorderSumSuggest: "Suggestions", recorderSumExcluded: "Excluded", recorderSumUnused: "Not used", recorderFilterAll: "All entries", recorderNone: "No entries.",
   recorderUsed: "{count} uses", recorderUnused: "not used", recorderExcluded: "already excluded", recorderSuggest: "Recommended", recorderStats: "Statistics values by entity",
   recorderSnippetTitle: "Suggestion for configuration.yaml", recorderSnippetHint: "Entities that nothing uses, that have no statistics and that write very often. Review the list before you adopt it.", recorderCopy: "Copy", recorderCopied: "Copied",
-  preflightTitle: "Update preflight", 
-  preflightSave: "Save starting state", preflightClear: "Discard saved state", preflightLoading: "Checking …",
+  preflightTitle: "Update preflight", preflightLoading: "Checking …",
   pf_backup: "Backup", pf_repairs: "Open repairs", pf_failed_entries: "Failed integrations", pf_broken: "Missing references",
   pf_backup_ok: "Last backup {hours} h ago", pf_backup_old: "Last backup {hours} h ago – a new one is advisable", pf_backup_none: "No backup set up or available", pf_backup_unavailable: "Backup component not available",
   pf_count_none: "none", pf_updates: "Available updates", pf_updates_none: "none",
-  preflightRecord: "Saved {date} · Home Assistant {version} · {repairs} repairs, {failed} failed integrations, {broken} missing references, {objects} objects",
-  preflightAfterTitle: "Since the update: Home Assistant {from} → {to}", preflightAfterNone: "Nothing new has shown up since the saved state.",
-  pfNewRepairs: "New repairs", pfNewFailed: "Newly failed integrations", pfNewBroken: "New missing references", pfNoRecord: "No starting state saved yet.",
+  pfAfterTitle: "Afterwards", pfAfterOn: "After an update of Home Assistant, the operating system or the Supervisor, Housekeeper watches for {hours} hours whether something fails or new repairs appear. When the update starts it keeps the state, the results are on the findings page.", pfAfterRunning: "Watching after {what}, {hours} h left, {n} findings so far.", pfAfterOff: "The watch after updates is switched off. Under Settings → Scan and thresholds you set how long it runs.",
 });
 Object.assign(TEXT.de, {
   meterCard_both: "Statistik und ID", meterCard_statistics: "Nur Statistik", meterCard_id: "Nur ID", meterUsual: "üblich",

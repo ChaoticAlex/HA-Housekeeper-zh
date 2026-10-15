@@ -116,10 +116,9 @@ def test_judging_the_preflight() -> None:
     assert counts["repairs"]["level"] == "warn" and counts["repairs"]["count"] == 1
 
 
-async def test_preflight_saves_a_record_and_compares_after_an_update(hass: HomeAssistant) -> None:
+async def test_preflight_reads_the_state_and_judges_it(hass: HomeAssistant) -> None:
     from custom_components.ha_housekeeper import maintenance
 
-    er.async_get(hass).async_get_or_create("sensor", "test", "before", suggested_object_id="before")
     ir.async_create_issue(
         hass,
         "demo",
@@ -128,38 +127,15 @@ async def test_preflight_saves_a_record_and_compares_after_an_update(hass: HomeA
         severity=ir.IssueSeverity.WARNING,
         translation_key="x",
     )
+    MockConfigEntry(domain="demo", title="Hub", state=ConfigEntryState.SETUP_RETRY).add_to_hass(hass)
     scanner = await make_scanner(hass)
     snapshot = await scanner.async_scan()
 
-    report = await maintenance.preflight_report(hass, snapshot, scanner.preflight)
-    assert report["record"] is None and report["after"] is None
+    report = await maintenance.preflight_report(hass, snapshot)
+    assert set(report) == {"state", "checks"}  # nothing is stored, the time after is the watch's
     assert [r["issue_id"] for r in report["state"]["repairs"]] == ["old_issue"]
-    scanner.preflight.save(report["state"], snapshot)
-
-    same = await maintenance.preflight_report(hass, snapshot, scanner.preflight)
-    assert same["record"]["repairs"] == 1 and same["after"] is None  # no update happened yet
-
-    # The update: a newer version, one more repair, an integration that fails, a new entity.
-    ir.async_create_issue(
-        hass,
-        "demo",
-        "new_issue",
-        is_fixable=False,
-        severity=ir.IssueSeverity.ERROR,
-        translation_key="y",
-    )
-    broken = MockConfigEntry(domain="demo", title="Hub", state=ConfigEntryState.SETUP_RETRY)
-    broken.add_to_hass(hass)
-    er.async_get(hass).async_get_or_create("sensor", "test", "after", suggested_object_id="after")
-    snapshot = await scanner.async_scan()
-    installed = maintenance.HA_VERSION
-    with patch.object(maintenance, "HA_VERSION", "2099.1.0"):
-        after = (await maintenance.preflight_report(hass, snapshot, scanner.preflight))["after"]
-    assert after["from_version"] == installed and after["to_version"] == "2099.1.0"
-    assert [r["issue_id"] for r in after["new_repairs"]] == ["new_issue"]
-    assert [e["title"] for e in after["new_failed_entries"]] == ["Hub"]
-    new_ids = {o["object_id"] for o in after["inventory"]["new_objects"]["items"]}
-    assert "sensor.after" in new_ids and "sensor.before" not in new_ids
+    assert [e["title"] for e in report["state"]["failed_entries"]] == ["Hub"]
+    assert maintenance.repair_keys(hass) == ["demo:old_issue"]
 
 
 async def test_preflight_ignores_persisted_issues_that_are_not_active(hass: HomeAssistant) -> None:

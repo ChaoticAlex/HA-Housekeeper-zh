@@ -890,13 +890,9 @@ async def test_manual_scans_are_refused_while_a_plan_runs(
     await scanner.async_scan()
 
     scanner.cleanup.status["running"] = True
-    for message in (
-        {"type": "ha_housekeeper/scan"},
-        {"type": "ha_housekeeper/preflight_save", "clear": False},
-    ):
-        await client.send_json_auto_id(message)
-        reply = await client.receive_json()
-        assert reply["success"] is False and reply["error"]["code"] == "cleanup_busy", message
+    await client.send_json_auto_id({"type": "ha_housekeeper/scan"})
+    reply = await client.receive_json()
+    assert reply["success"] is False and reply["error"]["code"] == "cleanup_busy"
 
     # Reading the last result stays possible, and the runner's own scan is not affected.
     await client.send_json_auto_id({"type": "ha_housekeeper/inventory"})

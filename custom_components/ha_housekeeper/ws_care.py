@@ -53,41 +53,12 @@ async def websocket_preflight(
     msg: dict[str, Any],
     scanner: InventoryScanner,
 ) -> None:
-    """Check backup, repairs, failing integrations and broken references; compare with the record."""
+    """Check backup, repairs, failing integrations and broken references before an update."""
     try:
         snapshot = await scanner.async_get_snapshot()
-        result = await preflight_report(hass, snapshot, scanner.preflight)
-    except Exception as err:
-        connection.send_error(msg["id"], "scan_failed", f"{type(err).__name__}: {err}")
-        return
-    connection.send_result(msg["id"], result)
-
-
-@websocket_api.require_admin
-@websocket_api.websocket_command(
-    {vol.Required("type"): f"{DOMAIN}/preflight_save", vol.Optional("clear", default=False): bool}
-)
-@websocket_api.async_response
-@with_scanner
-async def websocket_preflight_save(
-    hass: HomeAssistant,
-    connection: websocket_api.ActiveConnection,
-    msg: dict[str, Any],
-    scanner: InventoryScanner,
-) -> None:
-    """Remember the current state as the starting point for the next update check."""
-    try:
-        if msg["clear"]:
-            scanner.preflight.clear()
-        else:
-            if scanner.cleanup.running:
-                connection.send_error(msg["id"], "cleanup_busy", "A cleanup plan is running")
-                return
-            snapshot = await scanner.async_scan()
-            report = await preflight_report(hass, snapshot, scanner.preflight)
-            scanner.preflight.save(report["state"], snapshot)
-        snapshot = await scanner.async_get_snapshot()
-        result = await preflight_report(hass, snapshot, scanner.preflight)
+        result = await preflight_report(hass, snapshot)
+        # What follows an update: whether the watch is on, and the one that runs now.
+        result["watch"] = {"hours": scanner.watch_hours, "active": scanner.watch_summary()}
     except Exception as err:
         connection.send_error(msg["id"], "scan_failed", f"{type(err).__name__}: {err}")
         return
@@ -842,7 +813,6 @@ async def websocket_backup_attest(
 def async_register(hass: HomeAssistant) -> None:
     """Register the commands of this part."""
     websocket_api.async_register_command(hass, websocket_preflight)
-    websocket_api.async_register_command(hass, websocket_preflight_save)
     websocket_api.async_register_command(hass, websocket_backup_health)
     websocket_api.async_register_command(hass, websocket_policies)
     websocket_api.async_register_command(hass, websocket_set_policy)

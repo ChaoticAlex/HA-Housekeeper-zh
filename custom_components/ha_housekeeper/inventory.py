@@ -55,6 +55,7 @@ from .const import (
     QUARANTINE_DAYS,
     SIGNAL_SCAN_COMPLETE,
     SIGNAL_SCAN_STARTED,
+    PREFLIGHT_STORAGE_KEY,
     STORAGE_VERSION,
     WARMUP_SECONDS,
     WINDOW_STORAGE_KEY,
@@ -91,7 +92,7 @@ from .impact import apply_impact
 from .issues import async_sync_database_issue, async_sync_issues, async_sync_scan_issue
 from .load_history import LoadStore
 from .log_facts import log_facts
-from .maintenance import PreflightStore, repair_keys
+from .maintenance import repair_keys
 from .marks import (
     GRACE_DEFAULT,
     HIDING_KINDS,
@@ -733,7 +734,6 @@ STORE_NAMES = (
     "policies",
     "replies",
     "journal",
-    "preflight",
     "attest",
     "events",
     "watch",
@@ -769,7 +769,6 @@ class InventoryScanner:
         self.policies = PolicyStore(hass)
         self.replies = ReplyStore(hass)
         self.journal = JournalStore(hass)
-        self.preflight = PreflightStore(hass)
         self.attest = AttestStore(hass)
         self.events = EventLog(hass)
         self.watch = WatchStore(hass)
@@ -852,11 +851,12 @@ class InventoryScanner:
                 # One unreadable file must not take the whole integration down; that part starts empty.
                 _LOGGER.exception("The saved data of %s could not be read, starting it empty", name)
                 self.load_failures.append(name)
-        # The maintenance window was removed: its saved state is of no use any more.
-        try:
-            await Store(self.hass, STORAGE_VERSION, WINDOW_STORAGE_KEY).async_remove()
-        except Exception:  # noqa: BLE001 - a file that cannot be deleted is left alone
-            _LOGGER.debug("The old maintenance window file could not be removed", exc_info=True)
+        # Features that were removed leave a file behind that is of no use any more.
+        for key in (WINDOW_STORAGE_KEY, PREFLIGHT_STORAGE_KEY):
+            try:
+                await Store(self.hass, STORAGE_VERSION, key).async_remove()
+            except Exception:  # noqa: BLE001 - a file that cannot be deleted is left alone
+                _LOGGER.debug("The old file %s could not be removed", key, exc_info=True)
 
     def begin_boot(self) -> None:
         """Home Assistant is still booting: scans are preliminary until the warm-up is over."""

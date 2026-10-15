@@ -28,6 +28,8 @@
 
 ### Geändert
 
+- **Update-Preflight nur noch für vorher:** Der manuell gespeicherte Ausgangszustand und der Vergleich danach entfallen. Die Karte prüft den Zustand vor einem Update und sagt unten, was danach geschieht: Die Beobachtung nach Updates übernimmt das Nachher.
+
 - **Wartungsfenster entfernt:** Das experimentelle, standardmäßig ausgeschaltete Wartungsfenster unter Wartung gibt es nicht mehr. Wer es eingeschaltet hatte, verliert den gespeicherten Stand. Nach einem Update zeigt die Beobachtung, was seitdem ausfiel.
 
 - **Oberfläche:** Korrekturen und kleine Verbesserungen an Listen, Dialogen, Beschriftungen und Bedienung, darunter die Kacheln der Befundseite (auf breiten Fenstern in zwei Zeilen, alle gleich hoch und breit), die Spaltenauswahl der Listen (Kästchen in einer Reihe am rechten Rand), die Karten der Schwellen unter Einstellungen (gruppiert, einheitlich aufgebaut, mit Link „Standard“), die Ereignisse für eigene Automationen als Tabelle mit Kopier-Knopf, die Wartungsziele (nur noch unter Wartung, nicht mehr doppelt in den Einstellungen), die Liste der letzten Backups (Pfeil neben dem Datum, Details ausgerichtet), die Einstellungen mit vier statt sieben Reitern (Darstellung, Scan und Meldungen, Schutz und Ausnahmen, Info); Speichern der Schwellen lässt die Seite offen, statt zum Home-Assistant-Dashboard zu springen und die Lesbarkeit der Vorfälle.
@@ -63,6 +65,8 @@
 - **Export everywhere:** The recorder page has an export button (CSV, Markdown, JSON) for everything a tab shows. All lists now use the same export menu instead of the download icon.
 
 #### Changed
+
+- **Update preflight only for before:** The manually saved starting state and the comparison afterwards are gone. The card checks the state before an update and says below what happens afterwards: the watch after updates takes over the time after.
 
 - **Maintenance window removed:** The experimental maintenance window under Maintenance, off by default, is gone. If you had switched it on, its saved state is dropped. After an update, the watch shows what has failed since.
 
