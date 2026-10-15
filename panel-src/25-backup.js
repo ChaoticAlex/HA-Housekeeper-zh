@@ -121,7 +121,7 @@ class BackupMixin {
     const pg = this.paginate(id, rows, [10, 20]);
     const open = b => (this.bhOpen || []).includes(this.bhKey(b));
     const columns = [
-      { key: "date", label: "bhColDate", dir: "desc", cell: b => `${this.expandBtn("data-bh-more", this.bhKey(b), open(b), this.t(open(b) ? "bhClose" : "bhOpen"))}${this.esc(this.formatDate(b.date))}` },
+      { key: "date", label: "bhColDate", dir: "desc", cell: b => `<div class="statcell">${this.expandBtn("data-bh-more", this.bhKey(b), open(b), this.t(open(b) ? "bhClose" : "bhOpen"))}<div>${this.esc(this.formatDate(b.date))}</div></div>` },
       { key: "kind", label: "bhColKind", sortable: false, cell: b => `<span class="pill ${b.own ? "warn" : "mute"}">${this.t(`bhKind_${this.bhKind(b)}`)}</span>` },
       { key: "content", label: "bhColContent", sortable: false, cell: b => `<span class="pill ${this.bhContent(b) === "full" ? "ok" : "mute"}">${this.t(`bhContent_${this.bhContent(b)}`)}</span>${this.bhFailed(b).length ? `<span class="pill red bhfail">${this.t("bhFailedPill")}</span>` : ""}` },
       { key: "size", label: "bhColSize", dir: "desc", cell: b => this.esc(this.formatBytes(b.size)) },
