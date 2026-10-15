@@ -96,7 +96,7 @@ from .cleanup import (
     trim_is_plain,
 )
 from .const import DOMAIN, MAX_FILE_BACKUP, MAX_PLAN_SNAPSHOTS
-from .db_health import integrity_problem, is_corruption_error
+from .db_health import integrity_fresh, integrity_problem, is_corruption_error
 from .meter import analyse, prepare_meter, read_series, recorder_ready
 from .notes import NoteError
 from .protection import allows, allows_undo
@@ -548,8 +548,8 @@ class CleanupRunner:
 
         A check that cannot run (no recorder, another database, timeout) does not stop it.
         """
-        if not recorder_ready(self.hass):
-            return True
+        if not recorder_ready(self.hass) or integrity_fresh(self.scanner.events, _now()):
+            return True  # a clean full check of the last days stands in for this one
         from homeassistant.components.recorder import get_instance
 
         self.status["phase"] = "check"

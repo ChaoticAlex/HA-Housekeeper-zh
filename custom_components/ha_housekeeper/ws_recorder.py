@@ -12,7 +12,7 @@ from homeassistant.core import HomeAssistant
 
 from . import counter_repair
 from .const import DOMAIN
-from .db_health import database_first, db_health
+from .db_health import database_first, db_health, start_check
 from .entity_recorder import entity_recorder
 from .inventory import InventoryScanner
 from .maintenance import recorder_costs
@@ -98,6 +98,7 @@ async def websocket_reliability(
     {
         vol.Required("type"): f"{DOMAIN}/db_health",
         vol.Optional("refresh", default=False): bool,
+        vol.Optional("check", default=False): bool,
     }
 )
 @websocket_api.async_response
@@ -109,6 +110,8 @@ async def websocket_db_health(
     scanner: InventoryScanner,
 ) -> None:
     """Database size, statistics and recorder gaps. Read-only; kept for ten minutes."""
+    if msg["check"]:
+        start_check(hass, scanner.events)  # runs on in the background; the reply shows it
     try:
         snapshot = await scanner.async_get_snapshot()
         async with asyncio.timeout(RELIABILITY_TIMEOUT):

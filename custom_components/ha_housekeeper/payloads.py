@@ -151,6 +151,7 @@ class DbHealthResult(Reply, total=False):
     wal_bytes: int | None
     growth: dict[str, Any]
     restart_gaps: int
+    integrity: dict[str, Any]
 
 
 class StatisticsLastResult(TypedDict):

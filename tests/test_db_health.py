@@ -389,3 +389,29 @@ def test_a_malformed_database_error_is_recognised_wrapped_or_not() -> None:
         RuntimeError("(sqlite3.DatabaseError) database disk image is malformed")
     )
     assert not is_corruption_error(RuntimeError("database is locked"))
+
+
+def test_the_last_full_check_is_a_finding_when_damaged_and_lets_a_plan_skip_its_own_when_clean() -> (
+    None
+):
+    from datetime import UTC, datetime, timedelta
+    from types import SimpleNamespace
+
+    from custom_components.ha_housekeeper.db_health import integrity_fresh, with_integrity
+
+    now = datetime(2026, 10, 15, tzinfo=UTC)
+    hass = SimpleNamespace(data={})
+    reply = {"available": True, "findings": [{"kind": "growth", "level": "hint"}]}
+
+    damaged = SimpleNamespace(
+        integrity={"at": now.isoformat(), "state": "damaged", "lines": ["row 1 missing"]}
+    )
+    out = with_integrity(hass, reply, damaged)
+    assert out["findings"][0]["kind"] == "integrity" and out["findings"][0]["level"] == "problem"
+    assert out["integrity"]["state"] == "damaged" and not integrity_fresh(damaged, now)
+
+    clean = SimpleNamespace(integrity={"at": now.isoformat(), "state": "ok", "lines": []})
+    assert with_integrity(hass, reply, clean)["findings"] == reply["findings"]
+    assert integrity_fresh(clean, now + timedelta(days=2))
+    assert not integrity_fresh(clean, now + timedelta(days=4))
+    assert not integrity_fresh(SimpleNamespace(integrity=None), now)

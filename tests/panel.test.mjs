@@ -2933,6 +2933,8 @@ test("the database card loads once per visit of Maintenance and asks the backend
   assert.equal(JSON.stringify(calls[0]), JSON.stringify({ type: "ha_housekeeper/db_health", refresh: false }));
   await el.loadDbHealth(true);
   assert.equal(calls.at(-1).refresh, true);
+  await el.loadDbHealth(false, true);
+  assert.equal(calls.at(-1).check, true);
 });
 
 test("only database problems reach the overview to-do list, and only once they were calculated", () => {

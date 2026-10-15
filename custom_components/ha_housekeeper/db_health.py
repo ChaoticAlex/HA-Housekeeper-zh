@@ -7,19 +7,25 @@ share the lock of the reliability query and the result is kept for a few minutes
 
 from __future__ import annotations
 
+import asyncio
+import logging
 import os
 import time
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from homeassistant.core import HomeAssistant
 
+from .const import DOMAIN
 from .meter import recorder_ready
 from .payloads import DbHealthResult
 from .queries import ReplyStore, cached_query, kept_reply
 
+_LOGGER = logging.getLogger(__name__)
 DAY = 86400
 INTEGRITY_LINES = 5  # complaints of the full check that are kept
+INTEGRITY_FRESH_DAYS = 3  # a clean check this recent lets a plan skip its own
+INTEGRITY_TIMEOUT = 60 * 60  # seconds the check on demand may run
 CACHE_SECONDS = 600
 WAL_SHARE = 0.25
 WAL_BYTES = 1024**3
@@ -116,6 +122,69 @@ def integrity_problem(hass: HomeAssistant) -> str | None:
 def is_corruption_error(err: BaseException) -> bool:
     """Whether an error means a damaged SQLite file (also when SQLAlchemy wraps it)."""
     return "malformed" in str(err).lower()
+
+
+def integrity_fresh(events: Any, now: datetime) -> bool:
+    """Whether the last full check found nothing and is recent enough to count for a plan."""
+    found = getattr(events, "integrity", None)
+    if not found or found.get("state") != "ok":
+        return False
+    try:
+        return now - datetime.fromisoformat(found["at"]) <= timedelta(days=INTEGRITY_FRESH_DAYS)
+    except (KeyError, ValueError):
+        return False
+
+
+def check_running(hass: HomeAssistant) -> bool:
+    task = hass.data.get(DOMAIN, {}).get("integrity_task")
+    return task is not None and not task.done()
+
+
+async def _check(hass: HomeAssistant, events: Any) -> None:
+    """Run the full check and keep its result; a damaged file may also raise while it is read."""
+    from homeassistant.components.recorder import get_instance
+
+    state, lines = "ok", []
+    try:
+        async with asyncio.timeout(INTEGRITY_TIMEOUT):
+            lines = await get_instance(hass).async_add_executor_job(integrity_lines, hass)
+        state = "damaged" if lines else "ok"
+    except Exception as err:
+        if is_corruption_error(err):
+            state, lines = "damaged", [str(err)]
+        else:
+            state = "failed"
+            _LOGGER.warning("The database check did not finish", exc_info=True)
+    events.record_integrity(datetime.now(UTC), state, lines)
+    hass.data.get(DOMAIN, {}).pop("integrity_task", None)
+
+
+def start_check(hass: HomeAssistant, events: Any) -> bool:
+    """Start the full check in the background; False when none can run or one already does."""
+    if not recorder_ready(hass) or check_running(hass):
+        return False
+    hass.data.setdefault(DOMAIN, {})["integrity_task"] = hass.async_create_background_task(
+        _check(hass, events), "ha_housekeeper_integrity_check"
+    )
+    return True
+
+
+def with_integrity(hass: HomeAssistant, reply: Any, events: Any) -> Any:
+    """The state of the full check on every reply, also a kept one; a damaged result is a finding."""
+    if not reply.get("available") or reply.get("busy"):
+        return reply
+    found = getattr(events, "integrity", None)
+    running = check_running(hass)
+    out = {
+        **reply,
+        "integrity": {**(found or {}), "running": running, "state": (found or {}).get("state")},
+    }
+    if found and found["state"] == "damaged":
+        out["findings"] = [
+            {"kind": "integrity", "level": "problem", "at": found["at"], "lines": found["lines"]},
+            *reply["findings"],
+        ]
+    return out
 
 
 def query_db(hass: HomeAssistant, now: float) -> dict[str, Any]:
@@ -495,7 +564,7 @@ async def database_summary(hass: HomeAssistant, events: Any) -> dict[str, Any] |
     }
 
 
-async def db_health(
+async def _db_health(
     hass: HomeAssistant,
     snapshot: dict[str, Any],
     events: Any,
@@ -544,3 +613,16 @@ async def db_health(
     if store is not None:
         store.keep("db_health", reply)
     return reply  # type: ignore[return-value]
+
+
+async def db_health(
+    hass: HomeAssistant,
+    snapshot: dict[str, Any],
+    events: Any,
+    *,
+    refresh: bool = False,
+    store: ReplyStore | None = None,
+) -> DbHealthResult:
+    """Database health and the state of the full integrity check (never cached)."""
+    reply = await _db_health(hass, snapshot, events, refresh=refresh, store=store)
+    return with_integrity(hass, reply, events)  # type: ignore[no-any-return]

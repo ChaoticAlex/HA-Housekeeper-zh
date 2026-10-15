@@ -20,6 +20,7 @@ SAVE_DELAY = 300  # seconds; coalesces writes, Home Assistant flushes the store 
 SIZE_DAYS = 120  # daily database sizes kept for the growth hint
 MAX_EVENTS = 5000
 EVENT_KINDS = ("ha_version", "entry_version", "start", "plan", "purge")
+INTEGRITY_STATES = ("ok", "damaged", "failed")
 LIST_LIMIT = 200  # events sent to the panel
 
 
@@ -70,6 +71,7 @@ class EventLog:
         self.versions: dict[str, Any] = {}
         self.heartbeat: str | None = None
         self.sizes: dict[str, int] = {}
+        self.integrity: dict[str, Any] | None = None  # the last full database check
 
     async def async_load(self) -> None:
         data = await self._store.async_load()
@@ -95,6 +97,17 @@ class EventLog:
                 if isinstance(size, int) and not isinstance(size, bool) and size >= 0
             }
             self._trim_sizes()
+        integrity = data.get("integrity")
+        if (
+            isinstance(integrity, dict)
+            and integrity.get("state") in INTEGRITY_STATES
+            and _parse(integrity.get("at"))
+        ):
+            self.integrity = {
+                "at": integrity["at"],
+                "state": integrity["state"],
+                "lines": [str(x) for x in integrity.get("lines", [])][:10],
+            }
 
     def _save(self) -> None:
         self._store.async_delay_save(self._data, SAVE_DELAY)
@@ -105,6 +118,7 @@ class EventLog:
             "versions": self.versions,
             "heartbeat": self.heartbeat,
             "sizes": self.sizes,
+            "integrity": self.integrity,
         }
 
     def _trim_sizes(self) -> None:
@@ -117,6 +131,11 @@ class EventLog:
             return
         self.sizes[day] = int(size)
         self._trim_sizes()
+        self._save()
+
+    def record_integrity(self, now: datetime, state: str, lines: list[str]) -> None:
+        """The result of the last full database check; only the last one is kept."""
+        self.integrity = {"at": now.isoformat(), "state": state, "lines": lines[:10]}
         self._save()
 
     def record(self, kind: str, now: datetime, **fields: Any) -> None:

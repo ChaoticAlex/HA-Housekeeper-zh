@@ -6,11 +6,15 @@
 
 - **Datenbank vor dem Löschen prüfen:** Bevor ein Plan Zeilen im Recorder löscht oder ändert, führt Housekeeper bei SQLite die vollständige Integritätsprüfung (`integrity_check`, prüft auch die Indizes) aus. Ist die Datenbank beschädigt, bricht der Plan ab, nichts wird geändert, und die Meldung nennt die Prüfung mit `PRAGMA integrity_check` und die Reparatur mit `REINDEX` (Issue 12). Ein „database disk image is malformed“ mitten im Lauf wird ebenso erklärt.
 
+- **Datenbank prüfen auf Wunsch:** Auf der Recorder-Seite startet ein Knopf „Datenbank prüfen“ die vollständige Prüfung im Hintergrund (bei großen Datenbanken Minuten). Das Ergebnis bleibt gespeichert; eine beschädigte Datenbank erscheint als Problem mit dem Hinweis auf `REINDEX` und das Backup. Eine saubere Prüfung der letzten drei Tage ersetzt den Check vor einem Plan.
+
 ### English
 
 #### New
 
 - **Check the database before deleting:** Before a plan deletes or changes recorder rows, Housekeeper runs the full integrity check (`integrity_check`, which also compares the indexes) on SQLite. If the database is damaged the plan stops, nothing is changed, and the message points to `PRAGMA integrity_check` and the repair with `REINDEX` (issue 12). A “database disk image is malformed” in the middle of a run is explained the same way.
+
+- **Check the database on request:** On the Recorder page a “Check database” button starts the full check in the background (minutes on a large database). The result is kept; a damaged database shows up as a problem with the hint to `REINDEX` and the backup. A clean check from the last three days replaces the check before a plan.
 
 ## 1.7.0 - 2026-10-14
 

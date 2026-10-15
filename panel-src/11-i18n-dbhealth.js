@@ -41,3 +41,18 @@ Object.assign(TEXT.en, {
   dbColFrom: "From", dbColTo: "To", dbColHours: "Length", dbColCause: "Cause",
   stormTabFindings: "Findings", stormTabEntities: "Loudest entities", stormTabIntegrations: "Integrations", stormTabEvents: "Events", dbMissingShared: "{n} series have gaps in their hourly record. {hours} hours are missing from all series at once, in {count} periods; no statistics were compiled then.", dbMissingOwn: "On top of that, single sensors have gaps of their own (list below).", dbMissingOnlyShared: "All gaps fall into these shared periods.", dbMissingOwnOnly: "{n} sensors have gaps in their hourly record, all in the sensors themselves. There are no shared outages.", dbSeriesNone: "No sensors with gaps.", dbGapCause_restart: "Home Assistant was down (restart)", dbGapCause_recorder: "The recorder was not running or the statistics were not compiled", dbDetails: "Details: {gaps} shared periods, {series} series", dbGapsTitle: "Shared gaps (all series)", dbSeriesTitle: "Sensors with the most gaps ({n})", dbColSeries: "Sensor", dbColOwn: "Own", dbColShared: "Shared", dbColMissing: "Total",
 });
+
+Object.assign(TEXT.de, {
+  dbKind_integrity: "Datenbank beschädigt", dbIntegrity: "Die Prüfung vom {at} meldete: {lines}.",
+  dbAdvice_integrity: "Lege zuerst ein Backup an. Betroffene Indizes lassen sich mit REINDEX neu aufbauen (zum Beispiel in SQLite Web), sonst hilft ein Backup. Housekeeper löscht nichts, solange die Datenbank beschädigt ist.",
+  dbCheck: "Datenbank prüfen", dbChecking: "Die Datenbank wird geprüft. Das kann bei einer großen Datenbank Minuten dauern, die Seite bleibt benutzbar.",
+  dbCheckHint: "Prüft mit SQLite (integrity_check), ob Tabellen und Indizes zusammenpassen. Liest nur, belastet die Datenbank aber einige Minuten.",
+  dbCheckOk: "Zuletzt geprüft am {at}: in Ordnung.", dbCheckFailed: "Die Prüfung vom {at} ist nicht fertig geworden.", dbCheckNever: "Noch nie geprüft.",
+});
+Object.assign(TEXT.en, {
+  dbKind_integrity: "Database damaged", dbIntegrity: "The check of {at} reported: {lines}.",
+  dbAdvice_integrity: "Make a backup first. Affected indexes can be rebuilt with REINDEX (for example in SQLite Web), otherwise restore a backup. Housekeeper deletes nothing while the database is damaged.",
+  dbCheck: "Check database", dbChecking: "Checking the database. On a large database this can take minutes; the page stays usable.",
+  dbCheckHint: "Uses SQLite (integrity_check) to see whether tables and indexes match. Reads only, but loads the database for a few minutes.",
+  dbCheckOk: "Last checked {at}: fine.", dbCheckFailed: "The check of {at} did not finish.", dbCheckNever: "Never checked.",
+});
