@@ -3176,6 +3176,19 @@ test("the findings page has an info button that opens the help with every number
   assert.ok(help.includes("helpcard") && help.includes("Certainty") && help.includes("n incidents"));
 });
 
+test("the follow-ups of a chain sit indented in one block, and one button opens or closes all chains", () => {
+  const { el } = panel("en");
+  const cause = { id: "device_down:d1", kind: "device_down", object_type: "device", object_id: "d1", name: "Keypad", follower_count: 2, total_followers: 2, consumers: {}, impact: "high", parent_id: null, child_ids: [], finding_key: "own" };
+  const f = (key, extra = {}) => ({ key, rule_id: "entity.state_unavailable", object_id: key, classification: "unavailable", confidence: 0.9, ignored: false, impact: "high", impact_facts: [], first_detected_at: new Date().toISOString(), ...extra });
+  el.data = { ...DATA, objects: [], edges: [], causes: [cause], findings: [f("own", { rule_id: "device.down", cause_id: "device_down:d1" }), f("x", { cause_id: "device_down:d1" }), f("y", { cause_id: "device_down:d1" })] };
+  assert.ok(!el.causeTableRow(cause).includes('class="kids"') && el.causeTableRow(cause).includes("mdi:chevron-right"));
+  el.foldAllFindings(true);
+  const open = el.causeTableRow(cause);
+  assert.ok(open.includes("mdi:chevron-down") && /class="kids"/.test(open));
+  el.foldAllFindings(false);
+  assert.ok(!el.causeTableRow(cause).includes('class="kids"'));
+});
+
 test("the selection row of the findings list names the size of the view at its right end", () => {
   const { el } = panel("en");
   const f = key => ({ key, rule_id: "entity.stale", object_id: key, classification: "unused", confidence: 0.7, ignored: false, impact: "info", impact_facts: [] });
