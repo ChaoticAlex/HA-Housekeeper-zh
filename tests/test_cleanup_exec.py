@@ -964,3 +964,15 @@ async def test_a_plan_does_not_start_while_home_assistant_makes_a_backup_or_the_
             ),
         ):
             assert await scanner.cleanup._others_idle(fresh(), False) is True  # reads nothing
+
+
+def test_only_a_plan_that_really_wrote_into_the_recorder_asks_for_a_check_afterwards() -> None:
+    from custom_components.ha_housekeeper.cleanup_exec import CleanupRunner
+
+    done = {"state": "done"}
+    wrote = lambda *actions: CleanupRunner._deleted_from_recorder({"actions": list(actions)})  # noqa: E731
+    assert wrote({"kind": "trim_history", "result": done})
+    assert wrote({"kind": "remove_entity", "recorder": "statistics", "result": done})
+    assert not wrote({"kind": "remove_entity", "result": done})
+    assert not wrote({"kind": "trim_history", "result": {"state": "not_run"}})
+    assert not wrote({"kind": "trim_history"})

@@ -16,6 +16,8 @@
 
 - **Reparaturmeldung:** Ein Datenbankschaden erscheint auch unter Einstellungen → Reparaturen (mit dem Hinweis auf `REINDEX` und das Backup) und verschwindet, sobald eine Prüfung wieder sauber ist. Ein Schaden, auf den ein Plan stößt, zählt ebenso.
 
+- **Prüfung nach dem Löschen:** Hat ein Plan Zeilen im Recorder gelöscht oder geändert, startet danach im Hintergrund die vollständige Datenbankprüfung. Ein Schaden erscheint als Befund und Reparaturmeldung, nicht erst beim nächsten Aufräumen.
+
 - **Unsauberes Herunterfahren:** Housekeeper merkt sich, ob Home Assistant seinen Stopp angekündigt hat. Ist die Datenbank beschädigt, nennt der Befund, wie oft Home Assistant in den letzten 30 Tagen nach einem Absturz oder Stromausfall gestartet ist.
 
 ### English
@@ -33,6 +35,8 @@
 - **Plans wait for a calm recorder:** A plan does not start while Home Assistant itself is making a backup, the recorder is migrating the database or has a very long write queue. It changes nothing then and can be started again later.
 
 - **Repair hint:** A database damage also appears under Settings → Repairs (with the hint to `REINDEX` and the backup) and goes away once a check is clean again. A damage a plan runs into counts as well.
+
+- **Check after deleting:** After a plan has deleted or changed recorder rows, the full database check starts in the background. A damage shows up as a finding and a repair hint, not at the next cleanup.
 
 - **Unclean shutdowns:** Housekeeper remembers whether Home Assistant announced its stop. If the database is damaged, the finding says how often Home Assistant started after a crash or power cut in the last 30 days.
 

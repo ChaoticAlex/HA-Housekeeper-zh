@@ -102,6 +102,7 @@ from .db_health import (
     integrity_fresh,
     integrity_problem,
     is_corruption_error,
+    start_check,
 )
 from .issues import async_sync_database_issue
 from .meter import analyse, prepare_meter, read_series, recorder_ready
@@ -494,8 +495,20 @@ class CleanupRunner:
         try:
             await self._run_plan(plan, object_ids, user_id)
             await self._verify(plan)
+            if self._deleted_from_recorder(plan):
+                # In the background, like the check on the Recorder page: a damage the run caused
+                # or ran into shows up as a finding and a repair hint, not at the next plan.
+                start_check(self.hass, self.scanner.events)
         finally:
             release_write(self.hass, "plan")  # whatever happens, the slot must not stay taken
+
+    @staticmethod
+    def _deleted_from_recorder(plan: dict[str, Any]) -> bool:
+        return any(
+            (action["kind"] in DATABASE_KINDS or action.get("recorder"))
+            and (action.get("result") or {}).get("state") == "done"
+            for action in plan["actions"]
+        )
 
     async def _run_plan(
         self, plan: dict[str, Any], object_ids: list[str], user_id: str | None
