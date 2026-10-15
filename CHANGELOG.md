@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Klarere Filter der Befundliste:** „Alle einzeln (n)“ zeigt jeden Befund für sich, „Ursachen mit Folgen (n)“ nur die Ursachen, an denen Folgen hängen. Beide nennen ihre Anzahl, die Hilfekarte erklärt den Unterschied.
+
 - **Eine Karte „Nach Updates und Neustarts“:** Die Beobachtung nach System-Updates und der zeitliche Zusammenhang mit Updates und Neustarts stehen in einer Karte, eine Zeile je Vorfall. Bei einem System-Update zeigt die Zeile das Urteil der Beobachtung (Läuft, Verschlechtert, Stabil) und im aufgeklappten Teil getrennt, was seitdem nicht mehr läuft und welche Befunde dabei begannen. Die Beobachtung heißt jetzt „Beobachtung nach System-Update“. „Beobachtung beenden“ steht in der Zeile und fragt vorher nach; die Beobachtung wird dann mit den bisherigen Messungen ausgewertet und läuft nicht weiter. Der Filter für Befunde, die mit einem Update begannen, steht als Zeile in der Karte.
 
 - **Kacheln gleich hoch:** Die Kacheln der Befundseite sind in allen Gruppen gleich hoch, und die Kurven stehen auf einer Linie.
