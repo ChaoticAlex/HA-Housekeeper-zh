@@ -29,6 +29,7 @@ SIZE_LOW, SIZE_HIGH = 0.5, 2.0
 RESTORE_TEST_DAYS = 180
 LOCAL_SUFFIX = ".local"  # agent ids such as backup.local or hassio.local; anything else is remote
 MAX_PLANS_CHECKED = 5
+BACKUP_LIST_MAX = 20  # the newest backups the report lists in detail
 OWN_BACKUPS_NOTE = 10  # Housekeeper's own backups: this many ...
 OWN_BACKUPS_BYTES = 5 * 1024**3  # ... or this much space in total is a hint to clean up
 PLAN_BACKUP_WINDOW_SECONDS = 2 * 3600  # the backup started up to this long before it was recorded
@@ -55,6 +56,20 @@ def _iso(value: Any) -> str | None:
 
 def _is_local(agent_id: str) -> bool:
     return agent_id.endswith(LOCAL_SUFFIX)
+
+
+def _names(items: Any) -> list[str]:
+    """Names of apps or folders; HA hands over objects with a ``name``, a ``folder`` or a plain string."""
+    names = []
+    for item in items or []:
+        value = (
+            item
+            if isinstance(item, str)
+            else getattr(item, "name", None) or getattr(item, "value", None) or getattr(item, "slug", None)
+        )
+        if value:
+            names.append(str(value))
+    return sorted(names)
 
 
 async def collect(hass: HomeAssistant) -> dict[str, Any]:
@@ -109,6 +124,19 @@ async def collect(hass: HomeAssistant) -> dict[str, Any]:
                         "housekeeper_scope"
                     )
                     == "config",
+                    "id": str(getattr(backup, "backup_id", "") or "") or None,
+                    "name": getattr(backup, "name", None),
+                    "version": getattr(backup, "homeassistant_version", None),
+                    "database": getattr(backup, "database_included", None),
+                    "apps": _names(getattr(backup, "addons", None)),
+                    "folders": _names(getattr(backup, "folders", None)),
+                    "failed_apps": _names(getattr(backup, "failed_addons", None)),
+                    "failed_folders": _names(getattr(backup, "failed_folders", None)),
+                    "agent_sizes": {
+                        str(agent): getattr(status, "size", None)
+                        for agent, status in agents.items()
+                        if isinstance(getattr(status, "size", None), int)
+                    },
                 }
             )
     except Exception:
@@ -339,8 +367,20 @@ def evaluate(
                 "protected": item["protected"],
                 "automatic": item["automatic"],
                 "failed_agents": item["failed_agents"],
+                "own": bool(item.get("own")),
+                "partial": bool(item.get("partial")),
+                "id": item.get("id"),
+                "name": item.get("name"),
+                "version": item.get("version"),
+                "database": item.get("database"),
+                "ha_included": item.get("ha_included"),
+                "apps": item.get("apps") or [],
+                "folders": item.get("folders") or [],
+                "failed_apps": item.get("failed_apps") or [],
+                "failed_folders": item.get("failed_folders") or [],
+                "agent_sizes": item.get("agent_sizes") or {},
             }
-            for item in listing[:10]
+            for item in everything[:BACKUP_LIST_MAX]
         ],
         "backup_count": len(listing),
         "attest": {kind: attest.get(kind) for kind in ATTEST_KINDS},

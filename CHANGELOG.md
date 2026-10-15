@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Backup-Liste mit Details:** Die Liste zeigt bis zu 20 Backups (10 pro Seite, wählbar) mit Art (automatisch, manuell, von Housekeeper) und Inhalt. Eine Zeile klappt auf: Name, HA-Version, Datenbank, Apps, Ordner, Größe je Ziel und fehlgeschlagene Teile.
+
 - **Zustand als Anteil der Objekte in Ordnung:** Der Status zählt jetzt Objekte statt Punkte. Ausgangswert ist die Zahl der geprüften Objekte, jedes Objekt mit Befund nimmt nach seiner schlimmsten Stufe ab (hoch voll, mittel halb, niedrig ein Fünftel, Info nichts), Folgen einer Ursache zählen nicht extra. Es gibt keine Obergrenzen mehr, jede Behebung zählt. Die Karte „Wie entsteht die Zahl?“ zeigt zum Beispiel „1575 von 2000 in Ordnung“, Ring und Kurve zeigen den Anteil. Der Verlauf des Zustands beginnt neu.
 
 - **Ausfälle nach Dauer:** Nicht verfügbare Entitäten, Geräte, Integrationen und Apps werden nach 15 Minuten zum Befund und steigen mit der Dauer (Info, niedrig, mittel, hoch). Info und niedrig stehen nur auf der Befundseite; Übersicht, Sensoren und Reparaturhinweise zählen ab mittel. Die Einstellung „Nicht verfügbar nach Tagen“ ist durch vier einstellbare Schwellen ersetzt (ein alter Wert wird übernommen, bis du die neuen speicherst). Bei einem Ausfall scannt Housekeeper zu den Schwellen zusätzlich, ohne den Verlauf zu verändern. Entitäten werden dadurch viel früher gemeldet als bisher nach 7 Tagen.
@@ -34,6 +36,8 @@
 ### English
 
 #### New
+
+- **Backup list with details:** The list shows up to 20 backups (10 per page, selectable) with type (automatic, manual, by Housekeeper) and contents. A row unfolds: name, HA version, database, apps, folders, size per target and failed parts.
 
 - **State as the share of objects in order:** The status now counts objects instead of points. The starting value is the number of rated objects, each object with a finding takes off by its worst level (high fully, medium half, low a fifth, info nothing), follow-ups of a cause do not count extra. There are no caps any more, every fix counts. The card “How is this number made?” shows, for example, “1575 of 2000 in order”; the ring and the curve show the share. The history of the state starts afresh.
 

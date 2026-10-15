@@ -88,6 +88,12 @@ def test_a_sound_setup_is_all_ok() -> None:
     assert report["backup_count"] == 3 and len(report["backups"]) == 3
 
 
+def test_the_report_lists_at_most_twenty_backups_and_marks_the_own_ones() -> None:
+    many = [backup(hours) for hours in range(1, 26)] + [backup(0.5, own=True, partial=True)]
+    report, _ = judge(state(many))
+    assert len(report["backups"]) == 20 and report["backups"][0]["own"] is True
+
+
 def test_a_missing_backup_component_is_reported_not_guessed() -> None:
     report = evaluate({"available": False}, NOW, ATTEST, [])
     assert report == {"available": False, "checks": [], "backups": [], "overall": "unknown"}
@@ -339,6 +345,15 @@ async def test_the_collector_reads_the_manager_without_leaking_names_or_secrets(
         "ha_included",
         "own",
         "partial",
+        "id",
+        "name",
+        "version",
+        "database",
+        "apps",
+        "folders",
+        "failed_apps",
+        "failed_folders",
+        "agent_sizes",
     }
     report = evaluate(collected, NOW, ATTEST, [])
     assert report["available"] is True and report["checks"][0]["id"] == "setup"

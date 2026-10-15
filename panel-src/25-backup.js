@@ -85,6 +85,25 @@ class BackupMixin {
     return `${row}<div class="bhattest"><label>${this.t("bhAttestDate")} <input type="date" data-bh-date="${c.id}" value="${today}" max="${today}"></label><button class="btn small primary" data-bh-save="${c.id}">${this.t("bhAttestSave")}</button><button class="bhcancel" data-bh-cancel>${this.t("bhAttestCancel")}</button>${clear}</div>`;
   }
 
+  // What a backup is: Housekeeper's own safety copy, one HA made on its schedule, or a manual one.
+  bhKind(b) { return b.own ? "own" : b.automatic ? "auto" : "manual"; }
+
+  bhKey(b) { return b.id || b.date || ""; }
+
+  bhContent(b) { return b.partial ? "config" : b.ha_included === false ? "apps" : "full"; }
+
+  bhFailed(b) { return [...(b.failed_agents || []), ...(b.failed_apps || []), ...(b.failed_folders || [])]; }
+
+  // The row under an open backup: name, version, what it holds, size per target, failures.
+  bhDetail(b) {
+    if (!(this.bhOpen || []).includes(this.bhKey(b))) return "";
+    const t = (k, v) => this.t(k, v), field = (label, value, cls = "") => `<div${cls ? ` class="${cls}"` : ""}><small>${t(label)}</small>${value}</div>`;
+    const dash = "–", list = items => (items?.length ? items.map(i => this.esc(i)).join(", ") : dash);
+    const sizes = Object.entries(b.agent_sizes || {}).map(([agent, size]) => `${this.esc(agent)} ${this.esc(this.formatBytes(size))}`).join(" · ") || dash;
+    const db = b.database === null || b.database === undefined ? dash : t(b.database ? "bhYes" : "bhNo");
+    return `<tr class="static remhist"><td colspan="6"><div class="bhgrid">${field("bhName", this.esc(b.name || dash))}${field("bhVersion", this.esc(b.version || dash))}${field("bhDatabase", db)}${field("bhApps", list(b.apps), "wide")}${field("bhFolders", list(b.folders))}${field("bhSizes", sizes)}${field("bhFailed", list(this.bhFailed(b)))}${field("bhId", this.esc(b.id || dash))}</div></td></tr>`;
+  }
+
   bhBackups(list) {
     if (!list?.length) return "";
     const id = "bhbackups";
@@ -94,16 +113,22 @@ class BackupMixin {
       { key: "size", label: "bhColSize", dir: "desc", get: b => b.size },
       { key: "protected", label: "bhColProtected", dir: "desc", get: b => (b.protected ? 1 : 0) },
     ];
-    const bar = this.listBar(id, { table: true, dense: true, sorts, filters: [{ name: "protected", all: this.t("bhAllProtected"), options: [["yes", this.t("bhYes")], ["no", this.t("bhNo")]] }] });
-    const rows = this.refine(id, list, { text: b => [this.formatDate(b.date), ...(b.agents || [])].join(" "), filters: { protected: (b, v) => Boolean(b.protected) === (v === "yes") }, sorts, tie: b => b.date });
-    const pg = this.paginate(id, rows);
+    const bar = this.listBar(id, { table: true, dense: true, sorts, filters: [
+      { name: "kind", all: this.t("bhAllKinds"), options: ["auto", "manual", "own"].map(k => [k, this.t(`bhKind_${k}`)]) },
+      { name: "protected", all: this.t("bhAllProtected"), options: [["yes", this.t("bhYes")], ["no", this.t("bhNo")]] },
+    ] });
+    const rows = this.refine(id, list, { text: b => [this.formatDate(b.date), b.name, ...(b.agents || [])].join(" "), filters: { kind: (b, v) => this.bhKind(b) === v, protected: (b, v) => Boolean(b.protected) === (v === "yes") }, sorts, tie: b => b.date });
+    const pg = this.paginate(id, rows, [10, 20]);
+    const open = b => (this.bhOpen || []).includes(this.bhKey(b));
     const columns = [
-      { key: "date", label: "bhColDate", dir: "desc", cell: b => this.esc(this.formatDate(b.date)) },
+      { key: "date", label: "bhColDate", dir: "desc", cell: b => `${this.expandBtn("data-bh-more", this.bhKey(b), open(b), this.t(open(b) ? "bhClose" : "bhOpen"))}${this.esc(this.formatDate(b.date))}` },
+      { key: "kind", label: "bhColKind", sortable: false, cell: b => `<span class="pill ${b.own ? "warn" : "mute"}">${this.t(`bhKind_${this.bhKind(b)}`)}</span>` },
+      { key: "content", label: "bhColContent", sortable: false, cell: b => `<span class="pill ${this.bhContent(b) === "full" ? "ok" : "mute"}">${this.t(`bhContent_${this.bhContent(b)}`)}</span>${this.bhFailed(b).length ? `<span class="pill red bhfail">${this.t("bhFailedPill")}</span>` : ""}` },
       { key: "size", label: "bhColSize", dir: "desc", cell: b => this.esc(this.formatBytes(b.size)) },
       { key: "targets", label: "bhColTargets", sortable: false, cell: b => this.bhList(b.agents) },
       { key: "protected", label: "bhColProtected", dir: "desc", cell: b => this.t(b.protected ? "bhYes" : "bhNo") },
     ];
-    const table = rows.length ? this.listTable(id, columns, pg.rows, { cls: "bh", rowAttrs: () => 'class="static"' }) : `<div class="emptymsg">${this.noMatches(id)}</div>`;
+    const table = rows.length ? this.listTable(id, columns, pg.rows, { cls: "bh", rowAttrs: b => `data-bh-row="${this.esc(this.bhKey(b))}" tabindex="0" role="button" aria-expanded="${open(b)}"`, after: b => this.bhDetail(b) }) : `<div class="emptymsg">${this.noMatches(id)}</div>`;
     return `<div class="panel"><div class="sectionlabel">${this.t("bhListTitle")}</div>${bar}${table}${pg.footer}</div>`;
   }
 

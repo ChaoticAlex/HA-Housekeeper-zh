@@ -399,15 +399,17 @@ class ListsMixin {
   }
 
   // Shared paging for long lists: returns the visible slice and the footer markup.
-  paginate(id, items) {
-    const count = Math.max(1, Math.ceil(items.length / this.pageSize));
+  // `own` gives a short list its own page sizes (the first is the default, kept per list) instead of the global setting.
+  paginate(id, items, own) {
+    const size = own ? (this.listSizes?.[id] || own[0]) : this.pageSize;
+    const count = Math.max(1, Math.ceil(items.length / size));
     const page = Math.min(Math.max(1, this.pages[id] || 1), count);
     this.pages[id] = page;
-    const from = (page - 1) * this.pageSize;
-    const rows = items.slice(from, from + this.pageSize);
-    if (items.length <= 20) return { rows, footer: "" };
-    const sizes = [20, 50, 100].map(n => `<option value="${n}" ${n === this.pageSize ? "selected" : ""}>${n}</option>`).join("");
-    const footer = `<div class="tablefoot" data-lpage-footer="${this.esc(id)}" data-page-count="${count}"><span>${this.formatNumber(from + 1)}–${this.formatNumber(from + rows.length)} ${this.t("of")} ${this.formatNumber(items.length)} · ${this.t("perPage")} <select data-pagesize aria-label="${this.t("perPage")}">${sizes}</select></span>${count > 1 ? `<span class="pager"><button data-lpage="${id}|${page - 1}" ${page === 1 ? "disabled" : ""}>${this.t("previous")}</button> ${this.t("page")} ${page} ${this.t("of")} ${count} <button data-lpage="${id}|${page + 1}" ${page === count ? "disabled" : ""}>${this.t("next")}</button></span>` : ""}</div>`;
+    const from = (page - 1) * size;
+    const rows = items.slice(from, from + size);
+    if (items.length <= (own ? own[0] : 20)) return { rows, footer: "" };
+    const sizes = (own || [20, 50, 100]).map(n => `<option value="${n}" ${n === size ? "selected" : ""}>${n}</option>`).join("");
+    const footer = `<div class="tablefoot" data-lpage-footer="${this.esc(id)}" data-page-count="${count}"><span>${this.formatNumber(from + 1)}–${this.formatNumber(from + rows.length)} ${this.t("of")} ${this.formatNumber(items.length)} · ${this.t("perPage")} <select ${own ? `data-lpagesize="${this.esc(id)}"` : "data-pagesize"} aria-label="${this.t("perPage")}">${sizes}</select></span>${count > 1 ? `<span class="pager"><button data-lpage="${id}|${page - 1}" ${page === 1 ? "disabled" : ""}>${this.t("previous")}</button> ${this.t("page")} ${page} ${this.t("of")} ${count} <button data-lpage="${id}|${page + 1}" ${page === count ? "disabled" : ""}>${this.t("next")}</button></span>` : ""}</div>`;
     return { rows, footer };
   }
 
