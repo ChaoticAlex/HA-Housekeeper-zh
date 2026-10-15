@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Sechs neue Farbschemata:** Aurora, Honig, Lagune, Smaragd, Frost und Mitternacht, jeweils in Hell und Dunkel. Die Kacheln der Auswahl sind kleiner, „Lesbarkeit“ steht jetzt rechts.
+
 - **Stand beim Start eines Updates:** Beginnt ein Update von Home Assistant, Betriebssystem oder Supervisor, scannt Housekeeper sofort. Die Beobachtung danach vergleicht mit diesem Stand statt mit dem letzten planmäßigen Scan.
 
 - **Reparaturen nach Updates:** Die Beobachtung nach einem Update meldet auch Reparaturen, die seitdem neu aufgetaucht sind, und zählt sie als Verschlechterung.
@@ -43,6 +45,8 @@
 ### English
 
 #### New
+
+- **Six new color schemes:** Aurora, Honey, Lagoon, Emerald, Frost and Midnight, each in light and dark. The scheme tiles are smaller and "Readability" now sits on the right.
 
 - **State when an update starts:** When an update of Home Assistant, the operating system or the Supervisor begins, Housekeeper scans at once. The watch afterwards compares with that state instead of the last scheduled scan.
 

@@ -874,6 +874,8 @@ test("display preferences are saved, validated, and turned into theme CSS", () =
   assert.equal(el.pageSize, 50);
   const saved = JSON.parse(storage.store["ha_housekeeper.prefs"]);
   assert.equal(saved.scheme, "housekeeper");
+  el.setPref("scheme", "midnight");
+  assert.ok(el.themeCss().includes("--hk-blue:#5aa9ff"));
   assert.equal(saved.pageSize, 50);
   // a fresh panel reads them back; invalid values fall back to defaults
   assert.equal(panel("en", { localStorage: storage }).el.prefs.mode, "dark");

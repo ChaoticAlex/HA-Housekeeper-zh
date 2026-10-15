@@ -65,6 +65,30 @@ const SCHEMES = {
     light: { accent: "#3157c8", bg: "#f6f7fb", surface: "#ffffff", soft: "#eef1f6", text: "#172033", muted: "#566176", border: "#d9dee8", positive: "#1f8a54", warning: "#a96700", danger: "#c83737" },
     dark: { accent: "#7ea1ff", on: "#0f1218", bg: "#0f1218", surface: "#171c25", soft: "#222936", text: "#f3f6fb", muted: "#b3bdcc", border: "#303949", positive: "#5fcb89", warning: "#e6a15a", danger: "#f07a7a" },
   },
+  aurora: {
+    light: { accent: "#7a3ff2", bg: "#f7f5fb", surface: "#ffffff", soft: "#f0ecf8", text: "#1c1730", muted: "#5d5675", border: "#e1dbef", positive: "#1f8a5b", warning: "#a45d00", danger: "#c42a4f" },
+    dark: { accent: "#b79cff", on: "#130f1d", bg: "#130f1d", surface: "#1c1728", soft: "#272037", text: "#f4f1fb", muted: "#b9b1cc", border: "#362d4a", positive: "#62d19a", warning: "#f0b35c", danger: "#ff8aa3" },
+  },
+  honey: {
+    light: { accent: "#a16207", bg: "#fbf8ef", surface: "#ffffff", soft: "#f4eedb", text: "#261f0f", muted: "#6b5f3f", border: "#e9e0c4", positive: "#2f7d46", warning: "#b8470f", danger: "#b3261e" },
+    dark: { accent: "#f5c542", on: "#16130a", bg: "#16130a", surface: "#201c10", soft: "#2d2717", text: "#faf5e4", muted: "#c9bd98", border: "#403819", positive: "#7fd68f", warning: "#ff9f5a", danger: "#ff8f87" },
+  },
+  lagoon: {
+    light: { accent: "#0b7a8f", bg: "#f2f8fa", surface: "#ffffff", soft: "#e5f1f4", text: "#0f2229", muted: "#4a6770", border: "#d3e5ea", positive: "#1f8a54", warning: "#9a6200", danger: "#c23b3b" },
+    dark: { accent: "#4fd8ee", on: "#0b1619", bg: "#0b1619", surface: "#122126", soft: "#1a2f36", text: "#e8f6f9", muted: "#9fc0c8", border: "#25404a", positive: "#62d19a", warning: "#f0b35c", danger: "#ff8a8a" },
+  },
+  emerald: {
+    light: { accent: "#047857", bg: "#f1f8f5", surface: "#ffffff", soft: "#e2f1ea", text: "#0b1f18", muted: "#46665a", border: "#cfe6dc", positive: "#3a8f2f", warning: "#9a6200", danger: "#c0392b" },
+    dark: { accent: "#34d399", on: "#07140f", bg: "#07140f", surface: "#0e1f18", soft: "#162d23", text: "#e6f7ef", muted: "#98c2b0", border: "#1f3b2f", positive: "#86d96a", warning: "#f0b35c", danger: "#ff8a80" },
+  },
+  frost: {
+    light: { accent: "#3b6a8f", bg: "#f3f6f8", surface: "#ffffff", soft: "#e6ecf0", text: "#14202a", muted: "#51636f", border: "#d6dfe5", positive: "#2a8a5a", warning: "#9a6200", danger: "#c23b3b" },
+    dark: { accent: "#8cc1e8", on: "#0d1318", bg: "#0d1318", surface: "#151d24", soft: "#1e2a33", text: "#eaf1f6", muted: "#a3b5c2", border: "#2a3a46", positive: "#62d19a", warning: "#f0b35c", danger: "#ff8a8a" },
+  },
+  midnight: {
+    light: { accent: "#0b4f9c", bg: "#f2f6fb", surface: "#ffffff", soft: "#e4ecf6", text: "#0c1a2e", muted: "#485a74", border: "#d2deec", positive: "#1f8a54", warning: "#9a6200", danger: "#c23b3b" },
+    dark: { accent: "#5aa9ff", on: "#060c18", bg: "#060c18", surface: "#0d1626", soft: "#15233a", text: "#e9f1fc", muted: "#9db2cf", border: "#1f3250", positive: "#62d19a", warning: "#f0b35c", danger: "#ff8a8a" },
+  },
 };
 // Earlier builds saved other scheme names.
 const SCHEME_ALIASES = { teal: "housekeeper", amber: "housekeeper", sage: "housekeeper", zeitarchiv: "housekeeper", indigo: "modern" };
