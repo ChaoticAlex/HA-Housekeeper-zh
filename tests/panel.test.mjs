@@ -3166,6 +3166,21 @@ test("findings that began with an update get a line, a tile and a filter", () =>
   assert.ok(card.includes("Update of hue 1 → 2") && card.includes("1× ") && card.includes('data-object="entity:light.a"'));
 });
 
+test("the detail page rates a finding: level with reasons, certainty, and what the next level takes", () => {
+  const { el } = panel("en");
+  const ago = h => new Date(Date.now() - h * 3600000).toISOString();
+  const out = { key: "o", rule_id: "entity.state_unavailable", object_id: "light.a", classification: "unavailable", confidence: 0.75, ignored: false, impact: "low", impact_facts: [], first_detected_at: ago(6) };
+  const dup = { key: "d", rule_id: "entity.possible_duplicate", object_id: "sensor.x_2", classification: "possible_duplicate", confidence: 0.7, ignored: false, impact: "info", impact_facts: [], first_detected_at: ago(100) };
+  el.data = { ...DATA, objects: [], edges: [], causes: [], findings: [out, dup] };
+  const a = el.ratingBlock({ object_type: "entity", object_id: "light.a" }, el.findingKey(out));
+  assert.ok(a.includes("for 6 h") && a.includes("75 %") && a.includes("rbar") && a.includes("Medium in 18 h or as soon as an active automation"));
+  const b = el.ratingBlock({ object_type: "entity", object_id: "sensor.x_2" }, el.findingKey(dup));
+  assert.ok(b.includes("Low as soon as a dashboard") && !b.includes("rbar") && b.includes("70 %"));
+  el.data.findings[0].impact = "high";
+  assert.ok(el.ratingBlock({ object_type: "entity", object_id: "light.a" }, el.findingKey(out)).includes("highest level"));
+  assert.equal(el.ratingBlock({ object_type: "entity", object_id: "light.zz" }, "entity:light.zz"), "");
+});
+
 test("the watch after an update shows a band while it runs and a card with what failed since", () => {
   const { el } = panel("en");
   el.data = { ...DATA, objects: [{ object_type: "entity", object_id: "light.a", name: "Hall lamp", status: "unavailable" }], edges: [], findings: [] };

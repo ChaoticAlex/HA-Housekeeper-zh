@@ -21,6 +21,9 @@ class CausesMixin {
   // How long an integration has not been loaded and when that becomes more serious: "for 6 h · Medium in 18 h".
   outageLine(c) { return this.outageLineOf(c.finding_key && this.data.findings.find(x => x.key === c.finding_key)); }
 
+  // A length of time in hours as "40 min", "6 h" or "9 d".
+  spanText(h) { return h < 1 ? `${Math.max(1, Math.round(h * 60))} ${this.t("unitMin")}` : h < 48 ? `${Math.round(h)} ${this.t("unitHour")}` : `${Math.round(h / 24)} ${this.t("unitDay")}`; }
+
   // The same for the finding of an outage itself, as the detail page shows it.
   outageLineOf(f) {
     const since = f && Date.parse(f.first_detected_at);
@@ -29,9 +32,63 @@ class CausesMixin {
     const hours = Math.max(0, (Date.now() - since) / 3600000);
     // The next level and when it starts, from the four thresholds (info in minutes, the others in hours).
     const steps = [[(m.outage_info_minutes ?? 15) / 60, "info"], [m.outage_low_hours ?? 1, "low"], [m.outage_medium_hours ?? 24, "medium"], [m.outage_high_hours ?? 168, "high"]];
-    const span = h => h < 1 ? `${Math.max(1, Math.round(h * 60))} ${this.t("unitMin")}` : h < 48 ? `${Math.round(h)} ${this.t("unitHour")}` : `${Math.round(h / 24)} ${this.t("unitDay")}`;
+    const span = h => this.spanText(h);
     const next = steps.find(([at]) => at > hours);
     return [this.t("outageFor", { span: span(hours) }), next ? this.t("outageNext", { level: this.t(`chip_${next[1]}`), span: span(next[0] - hours) }) : ""].filter(Boolean).join(" · ");
+  }
+
+  // The staircase of an outage by duration: each level with the hours it starts at.
+  outageSteps() {
+    const m = this.data.meta || {};
+    return [["info", 0], ["low", m.outage_low_hours ?? 1], ["medium", m.outage_medium_hours ?? 24], ["high", m.outage_high_hours ?? 168]];
+  }
+
+  // The block "Rating" of the detail page: how serious the finding is and why, how sure the diagnosis is, and what it
+  // would take to reach the next level. Only when the object has an open finding.
+  ratingBlock(item, key) {
+    const finding = this.data.findings.filter(f => this.findingKey(f) === key && !f.ignored).sort((a, b) => this.impactScore(b) - this.impactScore(a))[0];
+    if (!finding) return "";
+    const cause = this.causeList().find(c => c.object_type === item.object_type && c.object_id === item.object_id);
+    const raw = cause?.impact && cause.impact !== "none" ? cause.impact : finding.impact;
+    const level = raw && raw !== "none" ? raw : "info";
+    const order = ["info", "low", "medium", "high"], idx = order.indexOf(level);
+    const outage = OUTAGE_RULES.includes(finding.rule_id) || Boolean(cause);
+    const since = Date.parse(finding.first_detected_at);
+    const hours = outage && since ? Math.max(0, (Date.now() - since) / 3600000) : null;
+    const reasons = [];
+    if (hours !== null) reasons.push(this.t("outageFor", { span: this.spanText(hours) }));
+    (finding.impact_facts || []).filter(x => x.fact !== "outage_age").forEach(x => reasons.push(this.t(`impactFact_${x.fact}`, { n: x.n ?? "", id: x.id ?? "", why: this.t(`impactWhy_${x.why}`) })));
+    if (cause) {
+      if (this.causeTotal(cause)) reasons.push(this.t("ratingFollowers", { n: this.formatNumber(this.causeTotal(cause)) }));
+      ["automation", "script", "dashboard"].filter(k => cause.consumers?.[k]).forEach(k => reasons.push(this.t(`causeUses_${k}`, { n: cause.consumers[k] })));
+    }
+    if (!reasons.length) reasons.push(this.t("ratingNoReason"));
+    let bar = "";
+    if (hours !== null) {
+      const steps = this.outageSteps();
+      let stage = 0; steps.forEach(([, at], i) => { if (at <= hours) stage = i; });
+      const end = steps[stage + 1]?.[1], frac = end ? Math.min(1, (hours - steps[stage][1]) / Math.max(0.001, end - steps[stage][1])) : 1;
+      bar = `<div class="rbar"><span style="width:${Math.round((stage + frac) / 4 * 100)}%"></span></div><div class="rticks">${steps.map(([lv, at], i) => `<span>${this.t(`chip_${lv}`)}${i ? ` ${this.t("ratingFrom", { span: this.spanText(at) })}` : ""}</span>`).join("")}</div>`;
+    }
+    const why = this.t(`certWhy_${finding.classification}`), kind = why === `certWhy_${finding.classification}` ? "" : why;
+    const label = lv => this.t(`chip_${lv}`);
+    let next;
+    if (idx >= 3) next = `<i class="ratingicon"><ha-icon icon="mdi:check"></ha-icon></i><span>${this.t("ratingTop")}</span>`;
+    else {
+      const target = order[idx + 1], cond = this.t(`ratingNext_${level}`);
+      const steps = hours !== null ? this.outageSteps() : [], step = steps.find(([, at]) => at > hours);
+      const parts = [];
+      if (step && step[0] === target) parts.push(this.t("ratingNextBoth", { level: label(target), span: this.spanText(step[1] - hours), cond }));
+      else {
+        parts.push(this.t("ratingNextCond", { level: label(target), cond }));
+        if (step) parts.push(this.t("ratingNextDur", { level: label(step[0]), span: this.spanText(step[1] - hours) }));
+      }
+      next = `<i class="ratingicon"><ha-icon icon="mdi:arrow-top-right"></ha-icon></i><span>${parts.map(x => this.esc(x)).join(" ")}</span>`;
+    }
+    return `<div class="rating"><h3 class="ratinghead">${this.t("ratingTitle")}</h3>
+      <div class="rrow"><b>${this.t("sortImpact")}</b><div>${this.impactChip(level)}<div class="factnote">${reasons.map(x => this.esc(x)).join(" · ")}</div>${bar}</div></div>
+      <div class="rrow"><b>${this.t("sortCertainty")}</b><div>${Math.round((finding.confidence || 0) * 100)} %${kind ? ` <span class="factnote">${this.esc(kind)}</span>` : ""}<div class="factnote">${this.t("ratingCertMeaning")}</div></div></div>
+      <div class="rnext">${next}</div></div>`;
   }
 
   // The short line of a row: the counts and, for an integration, how long it has been down; reason and log are for the detail page.

@@ -4,6 +4,8 @@
 
 ### Neu
 
+- **Bewertung auf der Detailseite:** In der Karte „Diagnose“ steht bei einem Objekt mit offenem Befund der Block „Bewertung“: der Schweregrad mit seinen Gründen (bei Ausfällen mit Dauer und Balken über die Stufen), die Sicherheit mit einem Satz dazu und ein Hinweis, wann die nächste Stufe erreicht wird, nach der Dauer oder durch Abhängigkeiten.
+
 - **Kacheln der Befundseite neu geordnet:** Die Kacheln stehen in drei Gruppen: „Gesamt“, „Dringend“ (Problem, Nicht verfügbar, Ausfall, Defekte Referenz) und „Aufräumen“ (Unbekannt, Ungenutzt, Duplikat) in fester Reihenfolge. Die Kachel „Nach Update neu“ entfällt; der Filter steht jetzt als Knopf „n Befunde anzeigen“ unter „Zeitlich zusammen mit Updates und Neustarts“.
 
 - **Zeitlicher Zusammenhang nach Vorfällen:** Updates, die wenige Minuten auseinander liegen, und der Neustart dabei bilden eine Zeile („Update von … +1“, aufgeklappt mit den übrigen Updates). Ein Befund wird je Vorfall nur einmal gezählt; die Summe der Zeilen passt damit zur Kachel „Nach Update neu“. Die Überschrift zählt „Vorfälle“ statt Ereignisse.

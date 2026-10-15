@@ -15,3 +15,21 @@ Object.assign(TEXT.en, {
   reason_critical_object: "Critical object (lock, alarm, water or smoke sensor, label housekeeper_critical): confirm it on its own.",
   impactWhy_label: "label", impactWhy_device_label: "label on the device", impactWhy_area_label: "label on the area", impactWhy_kind: "kind of object",
 });
+
+Object.assign(TEXT.de, {
+  ratingTitle: "Bewertung", ratingFollowers: "erklärt {n} Folgebefunde", ratingNoReason: "Nichts nutzt dieses Objekt", ratingFrom: "ab {span}",
+  ratingCertMeaning: "Die Zahl sagt, wie sicher die Diagnose ist, nicht wie schlimm es ist.",
+  ratingTop: "Das ist die höchste Stufe, der Schweregrad kann nicht mehr steigen.",
+  ratingNext_info: "ein Dashboard oder eine Automation darauf verweist", ratingNext_low: "eine aktive Automation oder ein aktives Skript es nutzt", ratingNext_medium: "es kritisch wird (Label, Art des Objekts) oder 5 oder mehr Abhängige hat",
+  ratingNextCond: "{level}, sobald {cond}.", ratingNextBoth: "{level} in {span} oder sobald {cond}.", ratingNextDur: "Nach der Dauer: {level} in {span}.",
+  certWhy_problem: "Befund aus dem Zustand des Objekts", certWhy_unavailable: "der Zustand ist nicht verfügbar", certWhy_broken_reference: "die fehlende Referenz ist belegt", certWhy_possible_duplicate: "Vermutung aus dem Namen und der Registry, nicht belegt", certWhy_unused: "Vermutung: nichts verweist darauf", certWhy_stale: "Vermutung aus dem Alter des Zustands", certWhy_unknown: "der Zustand ist unbekannt",
+});
+
+Object.assign(TEXT.en, {
+  ratingTitle: "Rating", ratingFollowers: "explains {n} follow-up findings", ratingNoReason: "Nothing uses this object", ratingFrom: "from {span}",
+  ratingCertMeaning: "The number says how sure the diagnosis is, not how bad it is.",
+  ratingTop: "This is the highest level; the severity cannot rise any further.",
+  ratingNext_info: "a dashboard or an automation refers to it", ratingNext_low: "an active automation or script uses it", ratingNext_medium: "it becomes critical (label, kind of object) or has 5 or more dependents",
+  ratingNextCond: "{level} as soon as {cond}.", ratingNextBoth: "{level} in {span} or as soon as {cond}.", ratingNextDur: "By duration: {level} in {span}.",
+  certWhy_problem: "finding from the state of the object", certWhy_unavailable: "the state is unavailable", certWhy_broken_reference: "the missing reference is proven", certWhy_possible_duplicate: "a guess from the name and the registry, not proven", certWhy_unused: "a guess: nothing refers to it", certWhy_stale: "a guess from the age of the state", certWhy_unknown: "the state is unknown",
+});

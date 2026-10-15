@@ -1477,6 +1477,7 @@ class StylesMixin {
       .remform{display:grid;gap:14px;padding:16px;border-top:1px solid var(--hk-border);background:var(--hk-soft)}.remgrid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;align-items:start}.remfield{display:grid;grid-template-rows:auto 40px auto;gap:4px;font-size:calc(12px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted);min-width:0}.remfield input{height:40px;min-width:0}.remfield.full{grid-column:1/-1;grid-template-rows:auto 40px}.remchips{display:flex;gap:6px;flex-wrap:wrap}.remchips .chip{padding:2px 10px;font-size:calc(12px*var(--hk-fs,1))}.remhint{color:var(--hk-blue-text);font-weight:600}.remactions{display:flex;gap:14px;align-items:center;justify-content:flex-end}
       .tablewrap.rem td:first-child{white-space:normal}.chevbtn{display:inline-flex;vertical-align:middle;padding:0;margin-right:4px;border:0;background:none;color:var(--hk-muted);cursor:pointer}.remnote{display:block;margin-left:28px;color:var(--hk-muted)}.remact{text-align:right;white-space:nowrap}.remact .btn{margin-left:6px}.remhist td{padding:10px 16px 14px 44px;background:var(--hk-soft)}.remhist h3{margin:0 0 6px;font-size:calc(11px*var(--hk-fs,1));font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--hk-muted)}.remhist ul{display:grid;gap:4px;margin:0;padding:0;list-style:none}.remhist li{display:flex;gap:12px;align-items:center}.remhist li .linkbtn{margin-left:auto;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.remhist p{margin:0}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
       @media(max-width:700px){.remact{display:flex;flex-wrap:wrap;gap:8px;white-space:normal}.remact .btn{margin-left:0}.remgrid{grid-template-columns:1fr}.remfield.wide,.remfield.full{grid-column:auto}}
+      .rating{display:grid;gap:8px;margin:0 0 14px;padding:0 0 12px;border-bottom:1px solid var(--hk-border)}.ratinghead{margin:0;font-size:calc(12px*var(--hk-fs,1));font-weight:500;color:var(--hk-muted)}.rrow{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:baseline}.rrow>b{font-weight:500}.rbar{height:6px;border-radius:3px;background:var(--hk-soft);overflow:hidden;margin:8px 0 3px}.rbar span{display:block;height:100%;background:var(--hk-amber)}.rticks{display:grid;grid-template-columns:repeat(4,1fr);font-size:calc(11px*var(--hk-fs,1));color:var(--hk-muted)}.rnext{display:flex;gap:8px;align-items:flex-start;padding-top:8px;border-top:1px solid var(--hk-border)}.ratingicon{--mdc-icon-size:16px;color:var(--hk-muted);flex:none}
       .sumgroups{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:14px;align-items:flex-start}.sumgroup{min-width:0}.sumgroup .sumtiles{margin-bottom:0}.sumgrouphead{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));margin:0 0 6px 2px}
       .sumtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.sumtile{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border:1px solid var(--hk-border);border-left:4px solid var(--hk-gray);border-radius:12px;background:var(--hk-surface);text-align:left;font:inherit;color:inherit}button.sumtile{cursor:pointer}button.sumtile:hover{background:var(--hk-soft)}.sumtile.ok{border-left-color:var(--hk-green)}.sumtile.warn{border-left-color:var(--hk-amber)}.sumtile.red{border-left-color:var(--hk-red)}.sumlabel{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.sumvalue{font-size:calc(22px*var(--hk-fs,1));font-weight:600;line-height:1.2;overflow-wrap:anywhere}.sumtile small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));overflow-wrap:anywhere}.sumtile{position:relative}button.sumtile .sumlabel{padding-right:20px}.sumcue{position:absolute;top:10px;right:10px;--mdc-icon-size:16px;color:var(--hk-muted)}div.sumtile,div.sumtile:hover{box-shadow:none;background:var(--hk-soft)}.sumtile.filter[aria-pressed=true]{border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 9%,var(--hk-surface));box-shadow:0 0 0 1px var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumcue{color:var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumlabel{color:var(--hk-blue-text)}.sumtile.filter[aria-pressed=true] .sumlabel:before{content:"\\2713";margin-right:.4em}.filteron{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 16px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);background:color-mix(in srgb,var(--hk-blue) 7%,var(--hk-surface));border-bottom:1px solid var(--hk-border)}.filteron ha-icon{--mdc-icon-size:16px;color:var(--hk-blue)}.filteron b{color:var(--hk-text);font-weight:600}.filteron .btn{margin-left:auto}.tabdot{display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:50%;background:var(--hk-gray)}.tabdot.warn{background:var(--hk-amber)}.tabdot.red{background:var(--hk-red)}
       .detailgrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:14px;align-items:start}.pad{padding:16px}.todofoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px}.visitline{display:inline-flex;align-items:center;gap:6px;color:var(--hk-muted)}.visitline ha-icon{--mdc-icon-size:16px}
@@ -5048,7 +5049,7 @@ class DiagnosisMixin {
     const icon = { ok: "mdi:check-circle", warn: "mdi:alert-circle", red: "mdi:close-circle", mute: "mdi:minus-circle", violet: "mdi:help-circle" };
     const rows = d.rows.map(r => `<div class="check ${r.tone}"><ha-icon icon="${icon[r.tone] || icon.ok}"></ha-icon><b>${this.esc(r.label)}</b><span class="val">${this.esc(r.value)}</span><i class="pill ${r.tone}">${this.esc(r.badge)}</i></div>`).join("");
     return `<section class="panel"><div class="panelhead"><div><h2>${this.t("diagnosis")}</h2></div></div>
-      <div class="diagcard"><div class="checks">${rows}</div>
+      <div class="diagcard">${this.ratingBlock(item, this.objectKey(item))}<div class="checks">${rows}</div>
       ${d.cause ? `<div class="cause ${d.tone}"><ha-icon icon="mdi:text-search"></ha-icon><div><strong>${this.t("causeLabel")}</strong><p>${this.esc(d.cause)}</p></div></div>` : ""}
       ${d.hint ? `<div class="hintbox"><ha-icon icon="mdi:lightbulb-on-outline"></ha-icon><div><strong>${this.t("hintLabel")}</strong><p>${this.esc(d.hint)}</p></div></div>` : ""}</div></section>`;
   }
@@ -7961,6 +7962,24 @@ Object.assign(TEXT.en, {
   impactWhy_label: "label", impactWhy_device_label: "label on the device", impactWhy_area_label: "label on the area", impactWhy_kind: "kind of object",
 });
 
+Object.assign(TEXT.de, {
+  ratingTitle: "Bewertung", ratingFollowers: "erklärt {n} Folgebefunde", ratingNoReason: "Nichts nutzt dieses Objekt", ratingFrom: "ab {span}",
+  ratingCertMeaning: "Die Zahl sagt, wie sicher die Diagnose ist, nicht wie schlimm es ist.",
+  ratingTop: "Das ist die höchste Stufe, der Schweregrad kann nicht mehr steigen.",
+  ratingNext_info: "ein Dashboard oder eine Automation darauf verweist", ratingNext_low: "eine aktive Automation oder ein aktives Skript es nutzt", ratingNext_medium: "es kritisch wird (Label, Art des Objekts) oder 5 oder mehr Abhängige hat",
+  ratingNextCond: "{level}, sobald {cond}.", ratingNextBoth: "{level} in {span} oder sobald {cond}.", ratingNextDur: "Nach der Dauer: {level} in {span}.",
+  certWhy_problem: "Befund aus dem Zustand des Objekts", certWhy_unavailable: "der Zustand ist nicht verfügbar", certWhy_broken_reference: "die fehlende Referenz ist belegt", certWhy_possible_duplicate: "Vermutung aus dem Namen und der Registry, nicht belegt", certWhy_unused: "Vermutung: nichts verweist darauf", certWhy_stale: "Vermutung aus dem Alter des Zustands", certWhy_unknown: "der Zustand ist unbekannt",
+});
+
+Object.assign(TEXT.en, {
+  ratingTitle: "Rating", ratingFollowers: "explains {n} follow-up findings", ratingNoReason: "Nothing uses this object", ratingFrom: "from {span}",
+  ratingCertMeaning: "The number says how sure the diagnosis is, not how bad it is.",
+  ratingTop: "This is the highest level; the severity cannot rise any further.",
+  ratingNext_info: "a dashboard or an automation refers to it", ratingNext_low: "an active automation or script uses it", ratingNext_medium: "it becomes critical (label, kind of object) or has 5 or more dependents",
+  ratingNextCond: "{level} as soon as {cond}.", ratingNextBoth: "{level} in {span} or as soon as {cond}.", ratingNextDur: "By duration: {level} in {span}.",
+  certWhy_problem: "finding from the state of the object", certWhy_unavailable: "the state is unavailable", certWhy_broken_reference: "the missing reference is proven", certWhy_possible_duplicate: "a guess from the name and the registry, not proven", certWhy_unused: "a guess: nothing refers to it", certWhy_stale: "a guess from the age of the state", certWhy_unknown: "the state is unknown",
+});
+
 // CausesMixin: one note for the common cause behind many "not available" findings (see causes.py).
 class CausesMixin {
   causeList() { return this.data?.causes || []; }
@@ -7984,6 +8003,9 @@ class CausesMixin {
   // How long an integration has not been loaded and when that becomes more serious: "for 6 h · Medium in 18 h".
   outageLine(c) { return this.outageLineOf(c.finding_key && this.data.findings.find(x => x.key === c.finding_key)); }
 
+  // A length of time in hours as "40 min", "6 h" or "9 d".
+  spanText(h) { return h < 1 ? `${Math.max(1, Math.round(h * 60))} ${this.t("unitMin")}` : h < 48 ? `${Math.round(h)} ${this.t("unitHour")}` : `${Math.round(h / 24)} ${this.t("unitDay")}`; }
+
   // The same for the finding of an outage itself, as the detail page shows it.
   outageLineOf(f) {
     const since = f && Date.parse(f.first_detected_at);
@@ -7992,9 +8014,63 @@ class CausesMixin {
     const hours = Math.max(0, (Date.now() - since) / 3600000);
     // The next level and when it starts, from the four thresholds (info in minutes, the others in hours).
     const steps = [[(m.outage_info_minutes ?? 15) / 60, "info"], [m.outage_low_hours ?? 1, "low"], [m.outage_medium_hours ?? 24, "medium"], [m.outage_high_hours ?? 168, "high"]];
-    const span = h => h < 1 ? `${Math.max(1, Math.round(h * 60))} ${this.t("unitMin")}` : h < 48 ? `${Math.round(h)} ${this.t("unitHour")}` : `${Math.round(h / 24)} ${this.t("unitDay")}`;
+    const span = h => this.spanText(h);
     const next = steps.find(([at]) => at > hours);
     return [this.t("outageFor", { span: span(hours) }), next ? this.t("outageNext", { level: this.t(`chip_${next[1]}`), span: span(next[0] - hours) }) : ""].filter(Boolean).join(" · ");
+  }
+
+  // The staircase of an outage by duration: each level with the hours it starts at.
+  outageSteps() {
+    const m = this.data.meta || {};
+    return [["info", 0], ["low", m.outage_low_hours ?? 1], ["medium", m.outage_medium_hours ?? 24], ["high", m.outage_high_hours ?? 168]];
+  }
+
+  // The block "Rating" of the detail page: how serious the finding is and why, how sure the diagnosis is, and what it
+  // would take to reach the next level. Only when the object has an open finding.
+  ratingBlock(item, key) {
+    const finding = this.data.findings.filter(f => this.findingKey(f) === key && !f.ignored).sort((a, b) => this.impactScore(b) - this.impactScore(a))[0];
+    if (!finding) return "";
+    const cause = this.causeList().find(c => c.object_type === item.object_type && c.object_id === item.object_id);
+    const raw = cause?.impact && cause.impact !== "none" ? cause.impact : finding.impact;
+    const level = raw && raw !== "none" ? raw : "info";
+    const order = ["info", "low", "medium", "high"], idx = order.indexOf(level);
+    const outage = OUTAGE_RULES.includes(finding.rule_id) || Boolean(cause);
+    const since = Date.parse(finding.first_detected_at);
+    const hours = outage && since ? Math.max(0, (Date.now() - since) / 3600000) : null;
+    const reasons = [];
+    if (hours !== null) reasons.push(this.t("outageFor", { span: this.spanText(hours) }));
+    (finding.impact_facts || []).filter(x => x.fact !== "outage_age").forEach(x => reasons.push(this.t(`impactFact_${x.fact}`, { n: x.n ?? "", id: x.id ?? "", why: this.t(`impactWhy_${x.why}`) })));
+    if (cause) {
+      if (this.causeTotal(cause)) reasons.push(this.t("ratingFollowers", { n: this.formatNumber(this.causeTotal(cause)) }));
+      ["automation", "script", "dashboard"].filter(k => cause.consumers?.[k]).forEach(k => reasons.push(this.t(`causeUses_${k}`, { n: cause.consumers[k] })));
+    }
+    if (!reasons.length) reasons.push(this.t("ratingNoReason"));
+    let bar = "";
+    if (hours !== null) {
+      const steps = this.outageSteps();
+      let stage = 0; steps.forEach(([, at], i) => { if (at <= hours) stage = i; });
+      const end = steps[stage + 1]?.[1], frac = end ? Math.min(1, (hours - steps[stage][1]) / Math.max(0.001, end - steps[stage][1])) : 1;
+      bar = `<div class="rbar"><span style="width:${Math.round((stage + frac) / 4 * 100)}%"></span></div><div class="rticks">${steps.map(([lv, at], i) => `<span>${this.t(`chip_${lv}`)}${i ? ` ${this.t("ratingFrom", { span: this.spanText(at) })}` : ""}</span>`).join("")}</div>`;
+    }
+    const why = this.t(`certWhy_${finding.classification}`), kind = why === `certWhy_${finding.classification}` ? "" : why;
+    const label = lv => this.t(`chip_${lv}`);
+    let next;
+    if (idx >= 3) next = `<i class="ratingicon"><ha-icon icon="mdi:check"></ha-icon></i><span>${this.t("ratingTop")}</span>`;
+    else {
+      const target = order[idx + 1], cond = this.t(`ratingNext_${level}`);
+      const steps = hours !== null ? this.outageSteps() : [], step = steps.find(([, at]) => at > hours);
+      const parts = [];
+      if (step && step[0] === target) parts.push(this.t("ratingNextBoth", { level: label(target), span: this.spanText(step[1] - hours), cond }));
+      else {
+        parts.push(this.t("ratingNextCond", { level: label(target), cond }));
+        if (step) parts.push(this.t("ratingNextDur", { level: label(step[0]), span: this.spanText(step[1] - hours) }));
+      }
+      next = `<i class="ratingicon"><ha-icon icon="mdi:arrow-top-right"></ha-icon></i><span>${parts.map(x => this.esc(x)).join(" ")}</span>`;
+    }
+    return `<div class="rating"><h3 class="ratinghead">${this.t("ratingTitle")}</h3>
+      <div class="rrow"><b>${this.t("sortImpact")}</b><div>${this.impactChip(level)}<div class="factnote">${reasons.map(x => this.esc(x)).join(" · ")}</div>${bar}</div></div>
+      <div class="rrow"><b>${this.t("sortCertainty")}</b><div>${Math.round((finding.confidence || 0) * 100)} %${kind ? ` <span class="factnote">${this.esc(kind)}</span>` : ""}<div class="factnote">${this.t("ratingCertMeaning")}</div></div></div>
+      <div class="rnext">${next}</div></div>`;
   }
 
   // The short line of a row: the counts and, for an integration, how long it has been down; reason and log are for the detail page.
