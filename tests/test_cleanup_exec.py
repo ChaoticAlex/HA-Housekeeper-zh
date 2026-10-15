@@ -886,3 +886,20 @@ async def test_a_new_install_starts_read_only_and_one_with_scan_data_keeps_full(
     old = InventoryScanner(hass)
     await old.protection.async_load()
     assert old.protection.mode == "full"
+
+
+async def test_a_damaged_database_stops_a_plan_before_anything_is_deleted(
+    hass: HomeAssistant,
+) -> None:
+    from unittest.mock import AsyncMock, MagicMock, patch
+
+    scanner = await make_scanner(hass)
+    plan = {"status": "running", "events": [], "actions": [{"object_id": "sensor.a"}]}
+    instance = MagicMock(async_add_executor_job=AsyncMock(return_value="row 7 missing from index"))
+    with (
+        patch("custom_components.ha_housekeeper.cleanup_exec.recorder_ready", return_value=True),
+        patch("homeassistant.components.recorder.get_instance", return_value=instance),
+    ):
+        assert await scanner.cleanup._database_intact(plan) is False
+    assert plan["status"] == "aborted"
+    assert plan["actions"][0]["result"]["reason"] == "database_corrupt"

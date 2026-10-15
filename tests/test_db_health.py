@@ -380,3 +380,12 @@ def test_missing_hours_tell_what_all_series_lack_from_what_only_one_lacks() -> N
         ("A", 20, 0),
     ]
     assert finding["own_series"] == 1  # A is explained by the shared gap alone
+
+
+def test_a_malformed_database_error_is_recognised_wrapped_or_not() -> None:
+    from custom_components.ha_housekeeper.db_health import is_corruption_error
+
+    assert is_corruption_error(
+        RuntimeError("(sqlite3.DatabaseError) database disk image is malformed")
+    )
+    assert not is_corruption_error(RuntimeError("database is locked"))

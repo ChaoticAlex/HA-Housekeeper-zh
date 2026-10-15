@@ -96,6 +96,7 @@ from .cleanup import (
     trim_is_plain,
 )
 from .const import DOMAIN, MAX_FILE_BACKUP, MAX_PLAN_SNAPSHOTS
+from .db_health import integrity_problem, is_corruption_error
 from .meter import analyse, prepare_meter, read_series, recorder_ready
 from .notes import NoteError
 from .protection import allows, allows_undo
@@ -132,6 +133,9 @@ INDEPENDENT_KINDS = PURGE_KINDS | TRIM_KINDS
 GLOBAL_STOPS = {"recorder_busy", "no_recorder"}
 LOCAL_AGENT = "backup.local"
 BACKUP_TIMEOUT = 30 * 60  # seconds; large installations can take a while
+INTEGRITY_TIMEOUT = (
+    5 * 60
+)  # seconds; the check of a very large database is not worth waiting longer
 
 
 def backup_is_local_only(hass: HomeAssistant) -> bool:
@@ -500,6 +504,8 @@ class CleanupRunner:
                 writes_recorder = bool(kinds & DATABASE_KINDS) or any(
                     action.get("recorder") for action in selected
                 )
+                if writes_recorder and not await self._database_intact(plan):
+                    return
                 await self._backup(plan, with_database=writes_recorder)
             if plan["status"] == "running":
                 await self._execute(plan, object_ids)
@@ -507,7 +513,23 @@ class CleanupRunner:
             end_interrupted(plan, _now().isoformat())
             raise
         except Exception as err:  # Never leave the plan in "running".
-            _event(plan, "failed", error=f"{type(err).__name__}: {err}")
+            corrupt = is_corruption_error(err)
+            _event(
+                plan,
+                "failed",
+                error=f"{type(err).__name__}: {err}",
+                **({"reason": "database_corrupt"} if corrupt else {}),
+            )
+            if corrupt:
+                for action in plan["actions"]:
+                    action.setdefault(
+                        "result",
+                        {
+                            "state": "not_run",
+                            "at": _now().isoformat(),
+                            "reason": "database_corrupt",
+                        },
+                    )
             plan["status"] = "partial" if plan["executed"] else "aborted"
         finally:
             plan["run"]["finished_at"] = _now().isoformat()
@@ -520,6 +542,33 @@ class CleanupRunner:
                 "total": 0,
             }
             journal.save()
+
+    async def _database_intact(self, plan: dict[str, Any]) -> bool:
+        """Check the SQLite file before anything is deleted; a damaged one stops the plan.
+
+        A check that cannot run (no recorder, another database, timeout) does not stop it.
+        """
+        if not recorder_ready(self.hass):
+            return True
+        from homeassistant.components.recorder import get_instance
+
+        self.status["phase"] = "check"
+        try:
+            async with asyncio.timeout(INTEGRITY_TIMEOUT):
+                problem = await get_instance(self.hass).async_add_executor_job(
+                    integrity_problem, self.hass
+                )
+        except Exception as err:
+            if is_corruption_error(err):
+                problem = str(err)
+            else:
+                _LOGGER.debug("The database check did not run", exc_info=True)
+                return True
+        if problem is None:
+            return True
+        _LOGGER.warning("The recorder database is damaged, nothing was changed: %s", problem)
+        self._backup_failed(plan, "database_corrupt", error=problem)
+        return False
 
     async def _backup(self, plan: dict[str, Any], with_database: bool = True) -> None:
         """Create a Home Assistant backup and wait for it: Home Assistant only, no apps or folders.

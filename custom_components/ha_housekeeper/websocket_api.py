@@ -965,7 +965,13 @@ async def websocket_purge_statistics(
             if i not in result["removed"]
         ]
         result["backup"] = bool(plan.get("backup"))
-        failures = {"backup_unavailable", "no_backup_agent", "backup_failed", "recorder_busy"}
+        failures = {
+            "backup_unavailable",
+            "no_backup_agent",
+            "backup_failed",
+            "recorder_busy",
+            "database_corrupt",
+        }
         result["error"] = next(
             (r["reason"] for r in results.values() if r.get("reason") in failures), None
         )
