@@ -132,18 +132,11 @@ class ListsMixin {
     return `${note}<div class="listbar"><input type="search" data-lq="${id}" value="${this.esc(st.q)}" placeholder="${this.t("searchList")}" aria-label="${this.t("searchList")}">${selects}${sorts.length ? `<span class="sortgroup${table ? " table-sort" : ""}"><select data-ls="${id}" aria-label="${this.t("sortBy")}" title="${this.t("sortBy")}">${sortOptions}</select><button class="dirbtn" data-ld="${id}" title="${this.t(desc ? "sortDescending" : "sortAscending")}" aria-label="${this.t(desc ? "sortDescending" : "sortAscending")}"><ha-icon icon="${desc ? "mdi:sort-descending" : "mdi:sort-ascending"}"></ha-icon></button></span>` : ""}<span class="listbar-actions">${this.viewsControl(id)}${dense ? this.denseButton(id) : ""}${this.listTools(id, columns)}</span></div>`;
   }
 
-  // Column picker and CSV export of a list; both are optional. `columns` are the switchable columns: { key, label }.
+  // Column picker and export menu of a list; both are optional. `columns` are the switchable columns: { key, label }.
   listTools(id, columns = []) {
     const open = this._colOpen === id;
     const picker = columns.length ? `<span class="colwrap"><button type="button" class="dirbtn ${open ? "on" : ""}" data-col-open="${id}" aria-expanded="${open}" title="${this.esc(this.t("colsLabel"))}" aria-label="${this.esc(this.t("colsLabel"))}"><ha-icon icon="mdi:table-column"></ha-icon></button>${open ? `<span class="colpop" role="group" aria-label="${this.esc(this.t("colsLabel"))}">${columns.map(c => `<label><span>${this.t(c.label)}</span><input type="checkbox" data-col="${id}|${c.key}" ${this.colHidden(id, c.key) ? "" : "checked"}></label>`).join("")}</span>` : ""}</span>` : "";
-    // Lists with a guided export get one menu (list as CSV, guided export); the others keep the plain download button.
-    if (this._exporters?.[id] && GUIDED_EXPORT_LISTS.includes(id)) {
-      const expOpen = this._expOpen === id;
-      const menu = expOpen ? `<span class="colpop exppop" role="menu"><button type="button" class="expitem" role="menuitem" data-exp-csv="${id}"><strong>${this.t("exportCsvItem")}</strong><small>${this.t("exportCsvHint")}</small></button><button type="button" class="expitem" role="menuitem" data-exp-guided><strong>${this.t("xpGuided")}</strong><small>${this.t("xpGuidedHint")}</small></button></span>` : "";
-      return `${picker}<span class="colwrap"><button type="button" class="btn expbtn ${expOpen ? "on" : ""}" data-exp-menu="${id}" aria-haspopup="menu" aria-expanded="${expOpen}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}<ha-icon icon="mdi:chevron-down"></ha-icon></button>${menu}</span>`;
-    }
-    const download = this._exporters?.[id] ? `<button type="button" class="dirbtn" data-export-list="${id}" title="${this.esc(this.t("exportListTitle"))}" aria-label="${this.esc(this.t("exportListTitle"))}"><ha-icon icon="mdi:download"></ha-icon></button>` : "";
-    return picker + download;
+    return picker + this.exportMenu(id);
   }
 
   // Hidden columns per list, kept in this browser only.
@@ -175,14 +168,47 @@ class ListsMixin {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
-  // The view registers what its export holds before it draws the list bar: { name, header, rows() }.
-  exportList(id) {
+  // The view registers what its export holds before it draws the list bar: { name, header, rows() }, or, for a whole page,
+  // { name, title, sections: [{ name, title, header, rows }] } (see setPageExporter). A list exports the rows of its search and filters.
+  exportParts(ex) { return ex.sections || [{ name: "", title: "", header: ex.header, rows: ex.rows }]; }
+
+  exportList(id, fmt = "csv") {
     const ex = this._exporters?.[id];
-    const st = this.lv?.[id], filtered = Boolean(st && (st.q?.trim() || Object.values(st.f || {}).some(Boolean)));
-    if (ex) this.downloadRows(filtered ? `${ex.name}-filtered` : ex.name, ex.header, ex.rows());
+    if (!ex) return;
+    const st = this.lv?.[id], filtered = Boolean(!ex.sections && st && (st.q?.trim() || Object.values(st.f || {}).some(Boolean)));
+    const name = filtered ? `${ex.name}-filtered` : ex.name;
+    const parts = this.exportParts(ex).map(p => ({ ...p, rows: typeof p.rows === "function" ? p.rows() : p.rows }));
+    if (fmt === "md") {
+      const cell = v => String(v ?? "").replace(/\|/g, "\\|").replace(/\s*\r?\n\s*/g, " ");
+      const table = p => [`| ${p.header.map(cell).join(" | ")} |`, `| ${p.header.map(() => "---").join(" | ")} |`, ...p.rows.map(r => `| ${r.map(cell).join(" | ")} |`)].join("\n");
+      const body = parts.map(p => `${p.title ? `## ${p.title}\n\n` : ""}${table(p)}`).join("\n\n");
+      this.downloadText(`${name}.md`, `${ex.title ? `# ${ex.title}\n\n` : ""}${body}\n`, "text/markdown");
+    } else if (fmt === "json") {
+      const objects = p => p.rows.map(r => Object.fromEntries(p.header.map((h, i) => [h, r[i] ?? null])));
+      const data = ex.sections ? Object.fromEntries(parts.map(p => [p.name, objects(p)])) : objects(parts[0]);
+      this.downloadText(`${name}.json`, JSON.stringify(data, null, 2), "application/json");
+    } else {
+      parts.forEach((p, i) => { const save = () => this.downloadRows(p.name ? `${name}-${p.name}` : name, p.header, p.rows); if (i) setTimeout(save, i * 300); else save(); });
+    }
   }
 
   setExporter(id, name, header, rows) { (this._exporters ||= {})[id] = { name, header, rows }; }
+
+  // A page that exports everything it shows: one section per list or table, rows as arrays or as a function.
+  setPageExporter(id, name, title, sections) { (this._exporters ||= {})[id] = { name, title, sections }; }
+
+  // Texts built for the screen carry HTML entities; a file wants the plain characters.
+  plainText(text) { return String(text ?? "").replace(/&(amp|lt|gt|quot|#39);/g, (m, e) => ({ amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" }[e])); }
+
+  // The one export button of lists and pages: CSV, Markdown and JSON, and for the inventory the guided export as well.
+  exportMenu(id) {
+    const ex = this._exporters?.[id];
+    if (!ex) return "";
+    const open = this._expOpen === id, parts = this.exportParts(ex).length;
+    const item = (attr, label, hint) => `<button type="button" class="expitem" role="menuitem" ${attr}><strong>${label}</strong><small>${hint}</small></button>`;
+    const menu = open ? `<span class="colpop exppop" role="menu">${item(`data-exp-fmt="${id}|csv"`, this.t("xpFmtCsv"), parts > 1 ? this.t("expCsvMulti", { n: parts }) : this.t("exportCsvHint"))}${item(`data-exp-fmt="${id}|md"`, this.t("xpFmtMd"), this.t("expMdD"))}${item(`data-exp-fmt="${id}|json"`, this.t("xpFmtJson"), this.t("xpFmtJsonD"))}${GUIDED_EXPORT_LISTS.includes(id) ? item("data-exp-guided", this.t("xpGuided"), this.t("xpGuidedHint")) : ""}</span>` : "";
+    return `<span class="colwrap"><button type="button" class="btn expbtn ${open ? "on" : ""}" data-exp-menu="${id}" aria-haspopup="menu" aria-expanded="${open}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}<ha-icon icon="mdi:chevron-down"></ha-icon></button>${menu}</span>`;
+  }
 
   // Tables offer compact rows (one line, no ID line), saved separately per list.
   denseLists() {

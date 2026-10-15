@@ -3125,14 +3125,32 @@ test("the old load link opens the Recorder view", () => {
   assert.equal(el.view, "recorder");
 });
 
+test("a page exports all its sections as one file in Markdown or JSON, and as CSV files per section", () => {
+  const { el } = panel("en");
+  const saved = [];
+  el.downloadText = (name, text) => saved.push([name, text]);
+  el.downloadRows = (name, header, rows) => saved.push([name, header, rows]);
+  el.setPageExporter("pg", "page", "Page", [
+    { name: "a", title: "A", header: ["Name", "N"], rows: () => [["x|y", 1]] },
+    { name: "b", title: "B", header: ["Id"], rows: () => [["z"]] },
+  ]);
+  assert.ok(el.pageBar({ exportId: "pg" }).includes('data-exp-menu="pg"'));
+  el.exportList("pg", "md");
+  assert.ok(saved[0][0] === "page.md" && saved[0][1].includes("## A") && saved[0][1].includes("x\\|y") && saved[0][1].includes("## B"));
+  el.exportList("pg", "json");
+  assert.deepEqual(JSON.parse(saved[1][1]), { a: [{ Name: "x|y", N: 1 }], b: [{ Id: "z" }] });
+  el.exportList("pg", "csv");
+  assert.equal(saved[2][0], "page-a");
+});
+
 test("a list can hide columns and offers its rows as CSV", () => {
   const { el, shadow } = panel("en");
   el.data = DATA; el.view = "inventory"; el.render();
   assert.ok(shadow.innerHTML.includes('data-exp-menu="inventory"') && shadow.innerHTML.includes('data-col-open="inventory"'), "the inventory has one export menu in the list bar");
   assert.ok(!shadow.innerHTML.includes('data-export-list="inventory"') && !shadow.innerHTML.includes("data-xp-open"), "no separate download button and no extra row");
-  assert.ok(!shadow.innerHTML.includes('data-exp-csv'), "the menu is closed at first");
+  assert.ok(!shadow.innerHTML.includes('data-exp-fmt'), "the menu is closed at first");
   el._expOpen = "inventory"; el.render();
-  assert.ok(shadow.innerHTML.includes('data-exp-csv="inventory"') && shadow.innerHTML.includes("data-exp-guided"), "the open menu offers the CSV and the guided export");
+  assert.ok(shadow.innerHTML.includes('data-exp-fmt="inventory|csv"') && shadow.innerHTML.includes('data-exp-fmt="inventory|json"') && shadow.innerHTML.includes("data-exp-guided"), "the open menu offers the formats and the guided export");
   el._expOpen = "";
   assert.ok(shadow.innerHTML.includes(">Type<"));
   el.toggleCol("inventory", "type");
@@ -5338,7 +5356,7 @@ test("object lists share one table: device entities, integration entries, remind
   assert.ok(el.bhBackups([{ date: "2026-10-01T10:00:00+00:00", size: 1000, agents: ["backup.local"], protected: true }]).includes('data-lsort="bhbackups|size'));
   assert.ok(rem.includes('data-rem-row="r1"') && rem.includes('role="button"'), "the row opens the history");
   assert.ok(rem.includes('data-lf-set="reminders|state|soon"') && rem.includes('data-lf-set="reminders||"'), "the key figures set the state filter");
-  assert.ok(rem.includes('data-export-list="reminders"') && el._exporters.reminders.rows()[0][0] === "Filter", "the list exports to CSV");
+  assert.ok(rem.includes('data-exp-menu="reminders"') && !rem.includes("data-export-list") && el._exporters.reminders.rows()[0][0] === "Filter", "the list exports to CSV");
 });
 
 test("the changes page counts what a filter shows, says so, and lists objects as tables", () => {

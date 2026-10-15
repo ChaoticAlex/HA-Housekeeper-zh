@@ -4,7 +4,7 @@ const TEXT = {
   de: {
     title: "Housekeeper", subtitle: "Deine Home-Assistant-Installation im Blick",
     overview: "Übersicht", inventory: "Inventar", graph: "Abhängigkeiten", findingsNav: "Befunde",
-    sumLabel: "Kennzahlen", findSumAffected: "{n} von {m} Objekten betroffen", cleanupSumSelected: "Ausgewählt", colsLabel: "Spalten ein- und ausblenden", exportListTitle: "Liste als CSV exportieren (alle Zeilen der Suche)", batterySumLimit: "unter {n} %", batterySumLowest: "Niedrigster Stand", recSumCosts: "Größter Platzbedarf", unrefSumStats: "Mit Statistik", unrefSumStatsHint: "stehen im Recorder", unrefSumDomain: "Häufigste Domain", unrefSumPlatform: "Häufigste Integration", unrefSumEnergy: "Energie", unrefSumEnergyHint: "noch in der Energie-Konfiguration", navMain: "Hauptnavigation", navMenu: "Menü", howCounted: "Wie wird das gezählt?", enabled: "aktiviert", agoNow: "gerade eben", agoMinutes: "vor {n} Min.", agoHours: "vor {n} Std.", agoDays: "vor {n} Tagen", navGroupOverview: "Überblick", navGroupOperation: "Betrieb", navGroupExplore: "Bestand", navGroupClean: "Bereinigen", navGroupMaintain: "Pflegen",
+    sumLabel: "Kennzahlen", findSumAffected: "{n} von {m} Objekten betroffen", cleanupSumSelected: "Ausgewählt", colsLabel: "Spalten ein- und ausblenden", batterySumLimit: "unter {n} %", batterySumLowest: "Niedrigster Stand", recSumCosts: "Größter Platzbedarf", unrefSumStats: "Mit Statistik", unrefSumStatsHint: "stehen im Recorder", unrefSumDomain: "Häufigste Domain", unrefSumPlatform: "Häufigste Integration", unrefSumEnergy: "Energie", unrefSumEnergyHint: "noch in der Energie-Konfiguration", navMain: "Hauptnavigation", navMenu: "Menü", howCounted: "Wie wird das gezählt?", enabled: "aktiviert", agoNow: "gerade eben", agoMinutes: "vor {n} Min.", agoHours: "vor {n} Std.", agoDays: "vor {n} Tagen", navGroupOverview: "Überblick", navGroupOperation: "Betrieb", navGroupExplore: "Bestand", navGroupClean: "Bereinigen", navGroupMaintain: "Pflegen",
     scan: "Neu scannen", scanHint: "Liest das ganze Inventar neu: Entitäten, Automationen, Dashboards und Befunde.", exportJson: "JSON", exportCsv: "CSV", exportTitle: "Befunde exportieren", scanning: "Scan läuft …", all: "Alle Typen",
     allStatus: "Alle Zustände", search: "Name, ID, Integration …",
     name: "Name", type: "Typ", status: "Zustand", reason: "Begründung",
@@ -191,7 +191,7 @@ const TEXT = {
   en: {
     title: "Housekeeper", subtitle: "Keep your Home Assistant installation in view",
     overview: "Overview", inventory: "Inventory", graph: "Dependencies", findingsNav: "Findings",
-    sumLabel: "Key figures", findSumAffected: "{n} of {m} objects affected", cleanupSumSelected: "Selected", colsLabel: "Show or hide columns", exportListTitle: "Export the list as CSV (all rows of the search)", batterySumLimit: "below {n} %", batterySumLowest: "Lowest level", recSumCosts: "Largest footprint", unrefSumStats: "With statistics", unrefSumStatsHint: "are in the recorder", unrefSumDomain: "Most common domain", unrefSumPlatform: "Most common integration", unrefSumEnergy: "Energy", unrefSumEnergyHint: "still in the energy configuration", navMain: "Main navigation", navMenu: "Menu", howCounted: "How is this counted?", enabled: "enabled", agoNow: "just now", agoMinutes: "{n} min ago", agoHours: "{n} h ago", agoDays: "{n} days ago", navGroupOverview: "Overview", navGroupOperation: "Operation", navGroupExplore: "Catalog", navGroupClean: "Clean up", navGroupMaintain: "Maintain",
+    sumLabel: "Key figures", findSumAffected: "{n} of {m} objects affected", cleanupSumSelected: "Selected", colsLabel: "Show or hide columns", batterySumLimit: "below {n} %", batterySumLowest: "Lowest level", recSumCosts: "Largest footprint", unrefSumStats: "With statistics", unrefSumStatsHint: "are in the recorder", unrefSumDomain: "Most common domain", unrefSumPlatform: "Most common integration", unrefSumEnergy: "Energy", unrefSumEnergyHint: "still in the energy configuration", navMain: "Main navigation", navMenu: "Menu", howCounted: "How is this counted?", enabled: "enabled", agoNow: "just now", agoMinutes: "{n} min ago", agoHours: "{n} h ago", agoDays: "{n} days ago", navGroupOverview: "Overview", navGroupOperation: "Operation", navGroupExplore: "Catalog", navGroupClean: "Clean up", navGroupMaintain: "Maintain",
     scan: "Scan now", scanHint: "Reads the whole inventory again: entities, automations, dashboards and findings.", exportJson: "JSON", exportCsv: "CSV", exportTitle: "Export findings", scanning: "Scanning …", all: "All types",
     allStatus: "All states", search: "Name, ID, integration …",
     name: "Name", type: "Type", status: "Status", reason: "Reason",
@@ -1803,18 +1803,11 @@ class ListsMixin {
     return `${note}<div class="listbar"><input type="search" data-lq="${id}" value="${this.esc(st.q)}" placeholder="${this.t("searchList")}" aria-label="${this.t("searchList")}">${selects}${sorts.length ? `<span class="sortgroup${table ? " table-sort" : ""}"><select data-ls="${id}" aria-label="${this.t("sortBy")}" title="${this.t("sortBy")}">${sortOptions}</select><button class="dirbtn" data-ld="${id}" title="${this.t(desc ? "sortDescending" : "sortAscending")}" aria-label="${this.t(desc ? "sortDescending" : "sortAscending")}"><ha-icon icon="${desc ? "mdi:sort-descending" : "mdi:sort-ascending"}"></ha-icon></button></span>` : ""}<span class="listbar-actions">${this.viewsControl(id)}${dense ? this.denseButton(id) : ""}${this.listTools(id, columns)}</span></div>`;
   }
 
-  // Column picker and CSV export of a list; both are optional. `columns` are the switchable columns: { key, label }.
+  // Column picker and export menu of a list; both are optional. `columns` are the switchable columns: { key, label }.
   listTools(id, columns = []) {
     const open = this._colOpen === id;
     const picker = columns.length ? `<span class="colwrap"><button type="button" class="dirbtn ${open ? "on" : ""}" data-col-open="${id}" aria-expanded="${open}" title="${this.esc(this.t("colsLabel"))}" aria-label="${this.esc(this.t("colsLabel"))}"><ha-icon icon="mdi:table-column"></ha-icon></button>${open ? `<span class="colpop" role="group" aria-label="${this.esc(this.t("colsLabel"))}">${columns.map(c => `<label><span>${this.t(c.label)}</span><input type="checkbox" data-col="${id}|${c.key}" ${this.colHidden(id, c.key) ? "" : "checked"}></label>`).join("")}</span>` : ""}</span>` : "";
-    // Lists with a guided export get one menu (list as CSV, guided export); the others keep the plain download button.
-    if (this._exporters?.[id] && GUIDED_EXPORT_LISTS.includes(id)) {
-      const expOpen = this._expOpen === id;
-      const menu = expOpen ? `<span class="colpop exppop" role="menu"><button type="button" class="expitem" role="menuitem" data-exp-csv="${id}"><strong>${this.t("exportCsvItem")}</strong><small>${this.t("exportCsvHint")}</small></button><button type="button" class="expitem" role="menuitem" data-exp-guided><strong>${this.t("xpGuided")}</strong><small>${this.t("xpGuidedHint")}</small></button></span>` : "";
-      return `${picker}<span class="colwrap"><button type="button" class="btn expbtn ${expOpen ? "on" : ""}" data-exp-menu="${id}" aria-haspopup="menu" aria-expanded="${expOpen}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}<ha-icon icon="mdi:chevron-down"></ha-icon></button>${menu}</span>`;
-    }
-    const download = this._exporters?.[id] ? `<button type="button" class="dirbtn" data-export-list="${id}" title="${this.esc(this.t("exportListTitle"))}" aria-label="${this.esc(this.t("exportListTitle"))}"><ha-icon icon="mdi:download"></ha-icon></button>` : "";
-    return picker + download;
+    return picker + this.exportMenu(id);
   }
 
   // Hidden columns per list, kept in this browser only.
@@ -1846,14 +1839,47 @@ class ListsMixin {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
-  // The view registers what its export holds before it draws the list bar: { name, header, rows() }.
-  exportList(id) {
+  // The view registers what its export holds before it draws the list bar: { name, header, rows() }, or, for a whole page,
+  // { name, title, sections: [{ name, title, header, rows }] } (see setPageExporter). A list exports the rows of its search and filters.
+  exportParts(ex) { return ex.sections || [{ name: "", title: "", header: ex.header, rows: ex.rows }]; }
+
+  exportList(id, fmt = "csv") {
     const ex = this._exporters?.[id];
-    const st = this.lv?.[id], filtered = Boolean(st && (st.q?.trim() || Object.values(st.f || {}).some(Boolean)));
-    if (ex) this.downloadRows(filtered ? `${ex.name}-filtered` : ex.name, ex.header, ex.rows());
+    if (!ex) return;
+    const st = this.lv?.[id], filtered = Boolean(!ex.sections && st && (st.q?.trim() || Object.values(st.f || {}).some(Boolean)));
+    const name = filtered ? `${ex.name}-filtered` : ex.name;
+    const parts = this.exportParts(ex).map(p => ({ ...p, rows: typeof p.rows === "function" ? p.rows() : p.rows }));
+    if (fmt === "md") {
+      const cell = v => String(v ?? "").replace(/\|/g, "\\|").replace(/\s*\r?\n\s*/g, " ");
+      const table = p => [`| ${p.header.map(cell).join(" | ")} |`, `| ${p.header.map(() => "---").join(" | ")} |`, ...p.rows.map(r => `| ${r.map(cell).join(" | ")} |`)].join("\n");
+      const body = parts.map(p => `${p.title ? `## ${p.title}\n\n` : ""}${table(p)}`).join("\n\n");
+      this.downloadText(`${name}.md`, `${ex.title ? `# ${ex.title}\n\n` : ""}${body}\n`, "text/markdown");
+    } else if (fmt === "json") {
+      const objects = p => p.rows.map(r => Object.fromEntries(p.header.map((h, i) => [h, r[i] ?? null])));
+      const data = ex.sections ? Object.fromEntries(parts.map(p => [p.name, objects(p)])) : objects(parts[0]);
+      this.downloadText(`${name}.json`, JSON.stringify(data, null, 2), "application/json");
+    } else {
+      parts.forEach((p, i) => { const save = () => this.downloadRows(p.name ? `${name}-${p.name}` : name, p.header, p.rows); if (i) setTimeout(save, i * 300); else save(); });
+    }
   }
 
   setExporter(id, name, header, rows) { (this._exporters ||= {})[id] = { name, header, rows }; }
+
+  // A page that exports everything it shows: one section per list or table, rows as arrays or as a function.
+  setPageExporter(id, name, title, sections) { (this._exporters ||= {})[id] = { name, title, sections }; }
+
+  // Texts built for the screen carry HTML entities; a file wants the plain characters.
+  plainText(text) { return String(text ?? "").replace(/&(amp|lt|gt|quot|#39);/g, (m, e) => ({ amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" }[e])); }
+
+  // The one export button of lists and pages: CSV, Markdown and JSON, and for the inventory the guided export as well.
+  exportMenu(id) {
+    const ex = this._exporters?.[id];
+    if (!ex) return "";
+    const open = this._expOpen === id, parts = this.exportParts(ex).length;
+    const item = (attr, label, hint) => `<button type="button" class="expitem" role="menuitem" ${attr}><strong>${label}</strong><small>${hint}</small></button>`;
+    const menu = open ? `<span class="colpop exppop" role="menu">${item(`data-exp-fmt="${id}|csv"`, this.t("xpFmtCsv"), parts > 1 ? this.t("expCsvMulti", { n: parts }) : this.t("exportCsvHint"))}${item(`data-exp-fmt="${id}|md"`, this.t("xpFmtMd"), this.t("expMdD"))}${item(`data-exp-fmt="${id}|json"`, this.t("xpFmtJson"), this.t("xpFmtJsonD"))}${GUIDED_EXPORT_LISTS.includes(id) ? item("data-exp-guided", this.t("xpGuided"), this.t("xpGuidedHint")) : ""}</span>` : "";
+    return `<span class="colwrap"><button type="button" class="btn expbtn ${open ? "on" : ""}" data-exp-menu="${id}" aria-haspopup="menu" aria-expanded="${open}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}<ha-icon icon="mdi:chevron-down"></ha-icon></button>${menu}</span>`;
+  }
 
   // Tables offer compact rows (one line, no ID line), saved separately per list.
   denseLists() {
@@ -5541,7 +5567,7 @@ class MaintenanceMixin {
   recorderCard() {
     this.ensureCosts();
     const c = this.costs;
-    const bar = (extra = "", attr = "") => this.pageBar({ left: extra, at: this.isoOf(c?.computed_at) || this.loadedAt("costs"), loading: this.costsLoading, attr, refresh: Boolean(attr) });
+    const bar = (extra = "", attr = "", exportId = "") => this.pageBar({ left: extra, at: this.isoOf(c?.computed_at) || this.loadedAt("costs"), loading: this.costsLoading, attr, refresh: Boolean(attr), exportId });
     const head = (extra = "", attr = "") => `${bar(extra, attr)}<div class="panel">`; // the states without a list: the card holds the message
     if (this.costsLoading) return `<div class="stack">${head("", "data-costs-load")}${this.skeleton("recorderLoading")}</div></div>`;
     if (this.costsError) return `<div class="stack">${head("", "data-costs-load")}<div class="error">${this.esc(this.costsError)}</div></div></div>`;
@@ -5564,6 +5590,10 @@ class MaintenanceMixin {
       { key: "avg", label: "recorderColAvg", dir: "desc", cell: e => num(Math.round(avg(e))) },
       { key: "mark", label: "recorderColMark", sortable: false, cell: e => (e.excluded ? `<span class="pill ok">${this.t("recorderExcluded")}</span>` : sug(e) ? `<span class="pill warn">${this.t("recorderSuggest")}</span>` : `<span class="pill ${e.used ? "mute" : "blue"}">${e.used ? this.t("recorderUsed", { count: e.used }) : this.t("recorderUnused")}</span>`) },
     ];
+    this.setPageExporter("reccost", "recorder-costs", `${this.t("recorder")} · ${this.t("recorderTitle")}`, [
+      { name: "entities", title: this.t("recorderTitle"), header: [this.t("utName"), "ID", this.t("recorderColShare"), this.t("recorderColTotal"), this.t("recorderCol24h"), this.t("recorderCol7d"), this.t("recorderColAvg")], rows: () => all.map(e => [e.name, e.entity_id, e.share, e.states, e.states_24h ?? "", e.states_7d ?? "", Math.round(avg(e))]) },
+      { name: "statistics", title: this.t("recorderStats"), header: [this.t("recorderColStat"), this.t("recorderColRows")], rows: () => (c.statistics || []).map(x => [x.statistic_id, x.rows ?? ""]) },
+    ].filter(sec => sec.rows().length));
     const list = this.sysList("costlist", all, {
       sort: "d1", dir: "desc",
       sorts: [
@@ -5578,7 +5608,6 @@ class MaintenanceMixin {
       filterFns: { state: (e, v) => (v === "suggest" ? sug(e) : v === "excluded" ? e.excluded : !e.used) },
       text: e => `${e.name} ${e.entity_id}`, tie: e => e.entity_id, empty: "recorderNone", columns,
       rowAttrs: e => `${this.findObject(`entity:${e.entity_id}`) ? `data-object="${this.esc(`entity:${e.entity_id}`)}" tabindex="0" role="button" aria-label="${this.esc(e.name)}" ` : ""}class="${[e.excluded ? "exdone" : "", sug(e) ? "exsug" : "", this.findObject(`entity:${e.entity_id}`) ? "" : "static"].filter(Boolean).join(" ")}"`,
-      exportName: "recorder-costs", header: [this.t("utName"), "ID", this.t("recorderColTotal"), this.t("recorderCol24h"), this.t("recorderCol7d"), this.t("recorderColAvg")], rows: e => [e.name, e.entity_id, e.states, e.states_24h ?? "", e.states_7d ?? "", Math.round(avg(e))],
     });
     const tiles = all.length ? this.sumTiles([
       { label: this.t("recorderSumAll"), value: this.formatNumber(all.length), tone: "mute", lf: ["costlist", "", ""] },
@@ -5598,7 +5627,7 @@ class MaintenanceMixin {
     }) : "";
     const snippet = this.excludeCard(this.suggestedExclusions(), { only: false });
     // The key figures stand free above the card of the list, with the usual gap.
-    return `<div class="stack">${bar("", "data-costs-load data-refresh")}${tiles}<div class="panel"><p class="factnote">${this.esc(summary)}</p>${snippet}${list}${stats ? this.fold("recorder_stats", { title: this.t("recorderStats"), pill: this.formatNumber((c.statistics || []).length) }, stats, false) : ""}</div></div>`;
+    return `<div class="stack">${bar("", "data-costs-load data-refresh", "reccost")}${tiles}<div class="panel"><p class="factnote">${this.esc(summary)}</p>${snippet}${list}${stats ? this.fold("recorder_stats", { title: this.t("recorderStats"), pill: this.formatNumber((c.statistics || []).length) }, stats, false) : ""}</div></div>`;
   }
 
   // One line per check; `level` decides the colour.
@@ -6465,12 +6494,30 @@ class StormsMixin {
     return `<div class="stack">${this.navTiles("recorder", tabs, open, this.t("recorder"), true)}${body}</div>`;
   }
 
+  // What the load view shows, for the export of the page: findings, loudest entities, integrations and events.
+  stormsExporter(r) {
+    const days = r.window_days || 1, kb = e => (e.attr_bytes === null || e.attr_bytes === undefined ? "" : Math.round(e.attr_bytes / 102.4) / 10), total = r.event_total || (r.events || []).reduce((sum, e) => sum + e.count, 0) || 1;
+    const name = g => (g.type === "events" ? g.items[0].event_type : g.type === "integrations" ? g.items[0].title : g.items[0].name || g.items[0].entity_id);
+    this.setPageExporter("recload", `recorder-load-${days}d`, `${this.t("recorder")} · ${this.t("stormTitle")}`, [
+      { name: "findings", title: this.t("stormTabFindings"), header: [this.t("utName"), "ID", this.t("stormColKinds"), this.t("stormColPerDay"), this.t("stormColPeak"), this.t("stormColNoNew"), this.t("expColText")],
+        rows: () => this.stormGroups(r).map(g => [name(g), g.type === "entities" ? g.items[0].entity_id : "", g.items.map(f => this.t(`stormKind_${f.kind}`)).join(", "), g.items.map(f => f.per_day ?? f.count).find(v => v !== undefined) ?? "", this.stormGroupFact(g, "storm", "peak_hour") ?? "", this.stormGroupFact(g, "no_new_state", "share") ?? "", g.items.map(f => this.plainText(this.stormFindingText(f))).join(" ")]) },
+      { name: "entities", title: this.t("stormTabEntities"), header: [this.t("utName"), "ID", this.t("stormColRows"), this.t("stormColPerDay"), this.t("stormColNoNew"), this.t("stormColAttr"), this.t("stormColPeak")],
+        rows: () => (r.entities || []).map(e => [e.name || "", e.entity_id, e.rows ?? "", e.per_day ?? "", e.no_new_state === null || e.no_new_state === undefined ? "" : Math.round(e.no_new_state * 100), kb(e), e.peak_hour ?? ""]) },
+      { name: "integrations", title: this.t("stormTabIntegrations"), header: [this.t("utName"), "Domain", this.t("stormColEntities"), this.t("stormColPerDay"), this.t("stormColRowShare"), this.t("stormColLoad")],
+        rows: () => (r.integrations || []).map(i => [i.title, i.domain || "", i.entities ?? "", i.per_day ?? "", i.row_share ?? "", i.load_share ?? ""]) },
+      { name: "events", title: this.t("stormTabEvents"), header: [this.t("stormColEvent"), this.t("stormColCount"), "%", this.t("stormColPerDay")],
+        rows: () => (r.events || []).map(e => [e.type, e.count, Math.round((e.count / total) * 1000) / 10, Math.round(e.count / days)]) },
+    ].filter(sec => sec.rows().length));
+  }
+
   stormsView() {
     this.ensureStorms();
     const r = this.storms;
     const windows = [[1, "relWindow1"], [7, "relWindow7"]].map(([days, key]) => `<button class="chip ${this.stormsWindow === days ? "active" : ""}" data-storm-window="${days}" aria-pressed="${this.stormsWindow === days}">${this.t(key)}</button>`).join("");
     const aged = Boolean(r?.computed_at && (r.stale || r.age_seconds >= 60)), took = aged ? "" : this.tookNote(r).replace(/^ · /, "");
-    const head = this.pageBar({ left: `${windows}${took ? `<span>${this.esc(took)}</span>` : ""}`, at: this.isoOf(r?.computed_at) || this.loadedAt("storms"), loading: this.stormsLoading, attr: "data-storm-refresh" });
+    const ready = Boolean(r?.available && !r.busy);
+    if (ready) this.stormsExporter(r);
+    const head = this.pageBar({ left: `${windows}${took ? `<span>${this.esc(took)}</span>` : ""}`, at: this.isoOf(r?.computed_at) || this.loadedAt("storms"), loading: this.stormsLoading, attr: "data-storm-refresh", exportId: ready ? "recload" : "" });
     if (this.stormsError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.stormsError)}</div></div></div>`;
     if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("stormLoading")}</div></div>`;
     if (!r.available) return `<div class="stack">${head}<div class="panel"><p class="factnote">${this.t("relNoRecorder")}</p></div></div>`;
@@ -6607,7 +6654,8 @@ class DbHealthMixin {
   dbCard() {
     const r = this.dbHealth;
     const took = this.tookNote(r);
-    const head = this.pageBar({ left: took ? `<span>${this.esc(took.replace(/^ · /, ""))}</span>` : "", at: this.isoOf(r?.computed_at), loading: this.dbLoading, attr: "data-db-refresh" });
+    const ready = Boolean(r?.available && !r.busy);
+    const head = this.pageBar({ left: took ? `<span>${this.esc(took.replace(/^ · /, ""))}</span>` : "", at: this.isoOf(r?.computed_at), loading: this.dbLoading, attr: "data-db-refresh", exportId: ready && !this.dbError ? "recdb" : "" });
     if (this.dbError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.dbError)}</div></div></div>`;
     if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("dbLoading")}</div></div>`;
     if (!r.available) return `<div class="stack">${head}<div class="panel"><p class="factnote">${this.t("relNoRecorder")}</p></div></div>`;
@@ -6621,6 +6669,10 @@ class DbHealthMixin {
     if (r.keep_days) facts.push(this.t("dbKeep", { n: this.formatNumber(r.keep_days) }));
     if (r.auto_purge === false) facts.push(this.t("dbOvPurgeOff"));
     if (r.restart_gaps) facts.push(this.t("dbRestartGaps", { n: this.formatNumber(r.restart_gaps) }));
+    this.setPageExporter("recdb", "recorder-database", `${this.t("recorder")} · ${this.t("dbTitle")}`, [
+      { name: "findings", title: this.t("stormTabFindings"), header: [this.t("stormColKinds"), this.t("expColLevel"), this.t("expColText"), this.t("expColAdvice")], rows: () => r.findings.map(f => [this.t(`dbKind_${f.kind}`), this.t(f.level === "problem" ? "dbProblem" : "dbHint"), this.plainText(this.dbFindingText(f)), this.t(`dbAdvice_${f.kind}`)]) },
+      { name: "facts", title: this.t("expColFact"), header: [this.t("expColFact")], rows: () => facts.map(x => [this.plainText(x)]) },
+    ].filter(sec => sec.rows().length));
     const rows = r.findings.length ? r.findings.map(f => this.dbFindingRow(f)).join("") : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("dbNone")}</div>`;
     return `<div class="stack">${head}<div class="panel">${rows}${this.dbCheckRow(r)}<p class="factnote">${facts.join(" · ")}</p>${this.howCounted("dbFootnote", { gap: th.state_gap_minutes ?? 10, gapDays: th.state_gap_window_days ?? 7, missing: th.gap_min_hours ?? 6, missingDays: th.gap_window_days ?? 30 })}</div></div>`;
   }
@@ -7186,10 +7238,10 @@ class LayoutMixin {
   isoOf(seconds) { return seconds ? new Date(seconds * 1000).toISOString() : null; }
 
   // The slim row under a page title: the page's own controls and facts on the left, "as of" and the refresh button on the
-  // right. { left, at (ISO time or null), loading, error, attr (the data-… attribute of the refresh button) }.
-  pageBar({ left = "", at = null, loading = false, attr = "", refresh = true }) {
+  // right. { left, at (ISO time or null), loading, error, attr (the data-… attribute of the refresh button), exportId (a page exporter) }.
+  pageBar({ left = "", at = null, loading = false, attr = "", refresh = true, exportId = "" }) {
     const stand = loading ? this.t("sysReading") : at ? this.t("sysAsOf", { time: this.formatDate(at) }) : "";
-    return `<div class="pagebar"><div class="pb-left">${left}</div><div class="pb-right">${stand ? `<span class="scanago">${this.esc(stand)}</span>` : ""}${refresh ? `<button class="btn" ${attr} title="${this.esc(this.t("sysRefreshHint"))}" ${loading ? 'disabled aria-busy="true"' : ""}><ha-icon icon="mdi:refresh" class="${loading ? "spin" : ""}"></ha-icon>${this.t("sysRefresh")}</button>` : ""}</div></div>`;
+    return `<div class="pagebar"><div class="pb-left">${left}</div><div class="pb-right">${stand ? `<span class="scanago">${this.esc(stand)}</span>` : ""}${exportId ? this.exportMenu(exportId) : ""}${refresh ? `<button class="btn" ${attr} title="${this.esc(this.t("sysRefreshHint"))}" ${loading ? 'disabled aria-busy="true"' : ""}><ha-icon icon="mdi:refresh" class="${loading ? "spin" : ""}"></ha-icon>${this.t("sysRefresh")}</button>` : ""}</div></div>`;
   }
 
   // Tiles that switch between the areas of one view: icon, title, number and a short hint; the open one is marked.
@@ -11382,7 +11434,7 @@ class PlanWizardMixin {
 // Export of chosen entities as CSV, Markdown or JSON, as a wizard: pick, fields, format, preview.
 // Only reads the inventory and `hass.states`; nothing leaves the browser. Mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
-  exportCsvItem: "Liste als CSV", exportCsvHint: "Alle Zeilen der Suche, sofort", xpGuided: "Geführter Export …", xpGuidedHint: "Felder, Platzhalter, Vorschau; CSV, Markdown, JSON",
+  exportCsvHint: "Alle Zeilen der Suche, sofort", expCsvMulti: "{n} Dateien, eine je Bereich", expMdD: "Tabellen, lesbar", expColText: "Beschreibung", expColLevel: "Stufe", expColAdvice: "Empfehlung", expColFact: "Kennzahl", xpGuided: "Geführter Export …", xpGuidedHint: "Felder, Platzhalter, Vorschau; CSV, Markdown, JSON",
   xpButton: "Exportieren", xpTitle: "Exportieren", xpStepsLabel: "Schritte des Exports", xpCancel: "Abbrechen", xpBack: "Zurück", xpNext: "Weiter",
   xpStep0: "Auswahl", xpStep1: "Angaben", xpStep2: "Format", xpStep3: "Vorschau",
   xpSelTitle: "Was soll in den Export?", xpSelHint: "Wähle Entitäten aus dem Bestand. Schnellwahlen setzen mehrere Häkchen auf einmal.",
@@ -11403,7 +11455,7 @@ Object.assign(TEXT.de, {
   xpCopy: "Kopieren", xpCopied: "Kopiert", xpDownload: "Herunterladen",
 });
 Object.assign(TEXT.en, {
-  exportCsvItem: "List as CSV", exportCsvHint: "All rows of the search, right away", xpGuided: "Guided export…", xpGuidedHint: "Fields, placeholders, preview; CSV, Markdown, JSON",
+  exportCsvHint: "All rows of the search, right away", expCsvMulti: "{n} files, one per section", expMdD: "tables, readable", expColText: "Description", expColLevel: "Level", expColAdvice: "Advice", expColFact: "Figure", xpGuided: "Guided export…", xpGuidedHint: "Fields, placeholders, preview; CSV, Markdown, JSON",
   xpButton: "Export", xpTitle: "Export", xpStepsLabel: "Steps of the export", xpCancel: "Cancel", xpBack: "Back", xpNext: "Next",
   xpStep0: "Selection", xpStep1: "Fields", xpStep2: "Format", xpStep3: "Preview",
   xpSelTitle: "What goes into the export?", xpSelHint: "Pick entities from the inventory. Quick picks tick several at once.",
@@ -15728,9 +15780,8 @@ class HAHousekeeperPanel extends HTMLElement {
     });
     root.querySelectorAll("[data-col-open]").forEach(el => el.onclick = () => { this._colOpen = this._colOpen === el.dataset.colOpen ? "" : el.dataset.colOpen; this.render(); });
     root.querySelectorAll("[data-col]").forEach(el => el.onchange = () => { const [id, key] = el.dataset.col.split("|"); this.toggleCol(id, key); });
-    root.querySelectorAll("[data-export-list]").forEach(el => el.onclick = () => this.exportList(el.dataset.exportList));
     root.querySelectorAll("[data-exp-menu]").forEach(el => el.onclick = () => { this._expOpen = this._expOpen === el.dataset.expMenu ? "" : el.dataset.expMenu; this._colOpen = ""; this.render(); });
-    root.querySelectorAll("[data-exp-csv]").forEach(el => el.onclick = () => { this._expOpen = ""; this.exportList(el.dataset.expCsv); this.render(); });
+    root.querySelectorAll("[data-exp-fmt]").forEach(el => el.onclick = () => { const [id, fmt] = el.dataset.expFmt.split("|"); this._expOpen = ""; this.exportList(id, fmt); this.render(); });
     root.querySelectorAll("[data-exp-guided]").forEach(el => el.onclick = () => { this._expOpen = ""; this.xpOpen(); });
     root.querySelectorAll("[data-win-act]").forEach(el => el.onclick = () => { const [name, ...rest] = el.dataset.winAct.split(":"); this.winAct(name, rest.join(":")); });
     root.querySelectorAll("[data-inv-filter]").forEach(el => el.onclick = () => { const [type, status, origin = ""] = el.dataset.invFilter.split("|"), same = (type || status) && this.typeFilter === type && this.statusFilter === status && this.originFilter === origin; this.typeFilter = same ? "" : type; this.statusFilter = same ? "" : status; this.originFilter = same ? "" : origin; this.pages = {}; (this.folds ||= {}).inv_types = !(this.typeFilter || this.statusFilter); this.render(); this.showList(); });

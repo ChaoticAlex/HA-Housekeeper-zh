@@ -212,12 +212,30 @@ class StormsMixin {
     return `<div class="stack">${this.navTiles("recorder", tabs, open, this.t("recorder"), true)}${body}</div>`;
   }
 
+  // What the load view shows, for the export of the page: findings, loudest entities, integrations and events.
+  stormsExporter(r) {
+    const days = r.window_days || 1, kb = e => (e.attr_bytes === null || e.attr_bytes === undefined ? "" : Math.round(e.attr_bytes / 102.4) / 10), total = r.event_total || (r.events || []).reduce((sum, e) => sum + e.count, 0) || 1;
+    const name = g => (g.type === "events" ? g.items[0].event_type : g.type === "integrations" ? g.items[0].title : g.items[0].name || g.items[0].entity_id);
+    this.setPageExporter("recload", `recorder-load-${days}d`, `${this.t("recorder")} · ${this.t("stormTitle")}`, [
+      { name: "findings", title: this.t("stormTabFindings"), header: [this.t("utName"), "ID", this.t("stormColKinds"), this.t("stormColPerDay"), this.t("stormColPeak"), this.t("stormColNoNew"), this.t("expColText")],
+        rows: () => this.stormGroups(r).map(g => [name(g), g.type === "entities" ? g.items[0].entity_id : "", g.items.map(f => this.t(`stormKind_${f.kind}`)).join(", "), g.items.map(f => f.per_day ?? f.count).find(v => v !== undefined) ?? "", this.stormGroupFact(g, "storm", "peak_hour") ?? "", this.stormGroupFact(g, "no_new_state", "share") ?? "", g.items.map(f => this.plainText(this.stormFindingText(f))).join(" ")]) },
+      { name: "entities", title: this.t("stormTabEntities"), header: [this.t("utName"), "ID", this.t("stormColRows"), this.t("stormColPerDay"), this.t("stormColNoNew"), this.t("stormColAttr"), this.t("stormColPeak")],
+        rows: () => (r.entities || []).map(e => [e.name || "", e.entity_id, e.rows ?? "", e.per_day ?? "", e.no_new_state === null || e.no_new_state === undefined ? "" : Math.round(e.no_new_state * 100), kb(e), e.peak_hour ?? ""]) },
+      { name: "integrations", title: this.t("stormTabIntegrations"), header: [this.t("utName"), "Domain", this.t("stormColEntities"), this.t("stormColPerDay"), this.t("stormColRowShare"), this.t("stormColLoad")],
+        rows: () => (r.integrations || []).map(i => [i.title, i.domain || "", i.entities ?? "", i.per_day ?? "", i.row_share ?? "", i.load_share ?? ""]) },
+      { name: "events", title: this.t("stormTabEvents"), header: [this.t("stormColEvent"), this.t("stormColCount"), "%", this.t("stormColPerDay")],
+        rows: () => (r.events || []).map(e => [e.type, e.count, Math.round((e.count / total) * 1000) / 10, Math.round(e.count / days)]) },
+    ].filter(sec => sec.rows().length));
+  }
+
   stormsView() {
     this.ensureStorms();
     const r = this.storms;
     const windows = [[1, "relWindow1"], [7, "relWindow7"]].map(([days, key]) => `<button class="chip ${this.stormsWindow === days ? "active" : ""}" data-storm-window="${days}" aria-pressed="${this.stormsWindow === days}">${this.t(key)}</button>`).join("");
     const aged = Boolean(r?.computed_at && (r.stale || r.age_seconds >= 60)), took = aged ? "" : this.tookNote(r).replace(/^ · /, "");
-    const head = this.pageBar({ left: `${windows}${took ? `<span>${this.esc(took)}</span>` : ""}`, at: this.isoOf(r?.computed_at) || this.loadedAt("storms"), loading: this.stormsLoading, attr: "data-storm-refresh" });
+    const ready = Boolean(r?.available && !r.busy);
+    if (ready) this.stormsExporter(r);
+    const head = this.pageBar({ left: `${windows}${took ? `<span>${this.esc(took)}</span>` : ""}`, at: this.isoOf(r?.computed_at) || this.loadedAt("storms"), loading: this.stormsLoading, attr: "data-storm-refresh", exportId: ready ? "recload" : "" });
     if (this.stormsError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.stormsError)}</div></div></div>`;
     if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("stormLoading")}</div></div>`;
     if (!r.available) return `<div class="stack">${head}<div class="panel"><p class="factnote">${this.t("relNoRecorder")}</p></div></div>`;

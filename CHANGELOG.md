@@ -18,6 +18,8 @@
 
 - **Befundseite:** Eine Erklärung hinter der Überschrift, Kacheln in drei Gruppen, die wie die Liste zählen, ein Schweregrad für jeden Befund (Info zieht keine Punkte ab), Folgen eingerückt unter ihrer Ursache und die Größe der Ansicht in der Auswahlzeile. Zeitlich zusammenliegende Updates bilden einen Vorfall. Auf dem Reiter „Technisch“ stehen Labels bei allen Objekten.
 
+- **Export überall:** Die Recorder-Seite hat einen Export-Knopf (CSV, Markdown, JSON) für alles, was ein Reiter zeigt. Alle Listen nutzen jetzt dasselbe Export-Menü statt des Download-Symbols.
+
 - **Oberfläche:** Korrekturen und kleine Verbesserungen an Listen, Dialogen, Beschriftungen und Bedienung.
 
 ### English
@@ -37,6 +39,8 @@
 - **Safer plans:** The backup before a plan is verified and named. Outdated previews are marked and can be renewed, large removals show a clear note, and too many Housekeeper backups are reported. An unreadable saved file only makes its own part start empty.
 
 - **Findings page:** An explanation behind the heading, tiles in three groups that count like the list, a severity for every finding (info costs no points), follow-ups indented under their cause and the size of the view in the selection row. Updates close in time form one incident. The tab “Technical” shows labels for all objects.
+
+- **Export everywhere:** The recorder page has an export button (CSV, Markdown, JSON) for everything a tab shows. All lists now use the same export menu instead of the download icon.
 
 - **Interface:** Corrections and small improvements to lists, dialogs, labels and handling.
 

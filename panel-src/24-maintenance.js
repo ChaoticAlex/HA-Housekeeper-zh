@@ -38,7 +38,7 @@ class MaintenanceMixin {
   recorderCard() {
     this.ensureCosts();
     const c = this.costs;
-    const bar = (extra = "", attr = "") => this.pageBar({ left: extra, at: this.isoOf(c?.computed_at) || this.loadedAt("costs"), loading: this.costsLoading, attr, refresh: Boolean(attr) });
+    const bar = (extra = "", attr = "", exportId = "") => this.pageBar({ left: extra, at: this.isoOf(c?.computed_at) || this.loadedAt("costs"), loading: this.costsLoading, attr, refresh: Boolean(attr), exportId });
     const head = (extra = "", attr = "") => `${bar(extra, attr)}<div class="panel">`; // the states without a list: the card holds the message
     if (this.costsLoading) return `<div class="stack">${head("", "data-costs-load")}${this.skeleton("recorderLoading")}</div></div>`;
     if (this.costsError) return `<div class="stack">${head("", "data-costs-load")}<div class="error">${this.esc(this.costsError)}</div></div></div>`;
@@ -61,6 +61,10 @@ class MaintenanceMixin {
       { key: "avg", label: "recorderColAvg", dir: "desc", cell: e => num(Math.round(avg(e))) },
       { key: "mark", label: "recorderColMark", sortable: false, cell: e => (e.excluded ? `<span class="pill ok">${this.t("recorderExcluded")}</span>` : sug(e) ? `<span class="pill warn">${this.t("recorderSuggest")}</span>` : `<span class="pill ${e.used ? "mute" : "blue"}">${e.used ? this.t("recorderUsed", { count: e.used }) : this.t("recorderUnused")}</span>`) },
     ];
+    this.setPageExporter("reccost", "recorder-costs", `${this.t("recorder")} · ${this.t("recorderTitle")}`, [
+      { name: "entities", title: this.t("recorderTitle"), header: [this.t("utName"), "ID", this.t("recorderColShare"), this.t("recorderColTotal"), this.t("recorderCol24h"), this.t("recorderCol7d"), this.t("recorderColAvg")], rows: () => all.map(e => [e.name, e.entity_id, e.share, e.states, e.states_24h ?? "", e.states_7d ?? "", Math.round(avg(e))]) },
+      { name: "statistics", title: this.t("recorderStats"), header: [this.t("recorderColStat"), this.t("recorderColRows")], rows: () => (c.statistics || []).map(x => [x.statistic_id, x.rows ?? ""]) },
+    ].filter(sec => sec.rows().length));
     const list = this.sysList("costlist", all, {
       sort: "d1", dir: "desc",
       sorts: [
@@ -75,7 +79,6 @@ class MaintenanceMixin {
       filterFns: { state: (e, v) => (v === "suggest" ? sug(e) : v === "excluded" ? e.excluded : !e.used) },
       text: e => `${e.name} ${e.entity_id}`, tie: e => e.entity_id, empty: "recorderNone", columns,
       rowAttrs: e => `${this.findObject(`entity:${e.entity_id}`) ? `data-object="${this.esc(`entity:${e.entity_id}`)}" tabindex="0" role="button" aria-label="${this.esc(e.name)}" ` : ""}class="${[e.excluded ? "exdone" : "", sug(e) ? "exsug" : "", this.findObject(`entity:${e.entity_id}`) ? "" : "static"].filter(Boolean).join(" ")}"`,
-      exportName: "recorder-costs", header: [this.t("utName"), "ID", this.t("recorderColTotal"), this.t("recorderCol24h"), this.t("recorderCol7d"), this.t("recorderColAvg")], rows: e => [e.name, e.entity_id, e.states, e.states_24h ?? "", e.states_7d ?? "", Math.round(avg(e))],
     });
     const tiles = all.length ? this.sumTiles([
       { label: this.t("recorderSumAll"), value: this.formatNumber(all.length), tone: "mute", lf: ["costlist", "", ""] },
@@ -95,7 +98,7 @@ class MaintenanceMixin {
     }) : "";
     const snippet = this.excludeCard(this.suggestedExclusions(), { only: false });
     // The key figures stand free above the card of the list, with the usual gap.
-    return `<div class="stack">${bar("", "data-costs-load data-refresh")}${tiles}<div class="panel"><p class="factnote">${this.esc(summary)}</p>${snippet}${list}${stats ? this.fold("recorder_stats", { title: this.t("recorderStats"), pill: this.formatNumber((c.statistics || []).length) }, stats, false) : ""}</div></div>`;
+    return `<div class="stack">${bar("", "data-costs-load data-refresh", "reccost")}${tiles}<div class="panel"><p class="factnote">${this.esc(summary)}</p>${snippet}${list}${stats ? this.fold("recorder_stats", { title: this.t("recorderStats"), pill: this.formatNumber((c.statistics || []).length) }, stats, false) : ""}</div></div>`;
   }
 
   // One line per check; `level` decides the colour.

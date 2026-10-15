@@ -1,7 +1,7 @@
 // Export of chosen entities as CSV, Markdown or JSON, as a wizard: pick, fields, format, preview.
 // Only reads the inventory and `hass.states`; nothing leaves the browser. Mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
-  exportCsvItem: "Liste als CSV", exportCsvHint: "Alle Zeilen der Suche, sofort", xpGuided: "Geführter Export …", xpGuidedHint: "Felder, Platzhalter, Vorschau; CSV, Markdown, JSON",
+  exportCsvHint: "Alle Zeilen der Suche, sofort", expCsvMulti: "{n} Dateien, eine je Bereich", expMdD: "Tabellen, lesbar", expColText: "Beschreibung", expColLevel: "Stufe", expColAdvice: "Empfehlung", expColFact: "Kennzahl", xpGuided: "Geführter Export …", xpGuidedHint: "Felder, Platzhalter, Vorschau; CSV, Markdown, JSON",
   xpButton: "Exportieren", xpTitle: "Exportieren", xpStepsLabel: "Schritte des Exports", xpCancel: "Abbrechen", xpBack: "Zurück", xpNext: "Weiter",
   xpStep0: "Auswahl", xpStep1: "Angaben", xpStep2: "Format", xpStep3: "Vorschau",
   xpSelTitle: "Was soll in den Export?", xpSelHint: "Wähle Entitäten aus dem Bestand. Schnellwahlen setzen mehrere Häkchen auf einmal.",
@@ -22,7 +22,7 @@ Object.assign(TEXT.de, {
   xpCopy: "Kopieren", xpCopied: "Kopiert", xpDownload: "Herunterladen",
 });
 Object.assign(TEXT.en, {
-  exportCsvItem: "List as CSV", exportCsvHint: "All rows of the search, right away", xpGuided: "Guided export…", xpGuidedHint: "Fields, placeholders, preview; CSV, Markdown, JSON",
+  exportCsvHint: "All rows of the search, right away", expCsvMulti: "{n} files, one per section", expMdD: "tables, readable", expColText: "Description", expColLevel: "Level", expColAdvice: "Advice", expColFact: "Figure", xpGuided: "Guided export…", xpGuidedHint: "Fields, placeholders, preview; CSV, Markdown, JSON",
   xpButton: "Export", xpTitle: "Export", xpStepsLabel: "Steps of the export", xpCancel: "Cancel", xpBack: "Back", xpNext: "Next",
   xpStep0: "Selection", xpStep1: "Fields", xpStep2: "Format", xpStep3: "Preview",
   xpSelTitle: "What goes into the export?", xpSelHint: "Pick entities from the inventory. Quick picks tick several at once.",
