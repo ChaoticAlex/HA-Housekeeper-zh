@@ -5479,6 +5479,8 @@ test("the watch lists an object that is a finding like the findings list does, a
   const html = el.watchRows(["entity:light.a", "entity:light.b"], "warn");
   assert.ok(html.includes("data-decide-open=") && !html.includes("data-fsel=") && html.includes('data-watch-mark="entity:light.b"'));
   assert.equal(html.includes('data-watch-mark="entity:light.a"'), false);
+  const past = el.watchRows(["entity:light.a"], "mute", true);
+  assert.ok(past.includes("Disturbed again now") && !past.includes("data-decide-open"), "a group about the past shows no finding row, only a note");
 });
 
 test("an entity that fails regularly gets a hint with a mark prepared for the time it falls out; a dismissed one stays quiet", () => {
