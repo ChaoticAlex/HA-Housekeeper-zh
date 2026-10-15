@@ -172,6 +172,15 @@ def test_unavailable_threshold_hides_short_outages_only() -> None:
             "status_since": "2026-10-09T00:00:00+00:00",
         },
     ]
-    ids = lambda days: [f["object_id"] for f in _entity_findings(entities, now, days)]  # noqa: E731
-    assert ids(0) == ["old", "new", "none", "orph"]
-    assert ids(7) == ["old", "orph"]
+    # info after 2 days: the outage of one day is too young, the one without a start is unknown
+    ids = lambda info: [  # noqa: E731
+        f["object_id"] for f in _entity_findings(entities, now, (info, 50, 60, 200))
+    ]
+    assert ids(5) == ["old", "new", "orph"]
+    assert ids(2880) == ["old", "orph"]
+    assert [f["object_id"] for f in _entity_findings(entities, now)] == [
+        "old",
+        "new",
+        "none",
+        "orph",
+    ]

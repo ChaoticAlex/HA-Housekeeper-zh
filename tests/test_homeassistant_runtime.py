@@ -428,7 +428,7 @@ async def test_scan_flags_duplicates_and_keeps_hints_out_of_repairs(hass: HomeAs
     hass.states.async_set(twin.entity_id, "unavailable")
 
     scanner = InventoryScanner(hass)
-    scanner.min_unavailable_days = 0
+    scanner.outage_info_minutes = 0  # an outage counts at once
     snapshot = await scanner.async_scan()
 
     duplicate = next(f for f in snapshot["findings"] if f["rule_id"] == "entity.possible_duplicate")

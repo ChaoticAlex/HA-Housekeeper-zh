@@ -115,6 +115,7 @@ from .reminders import ReminderStore
 from .runs import RunStore
 from .scan_coverage import RETRY_LIMIT, RETRY_MINUTES, ScanCoverage, retryable_gaps
 from .scan_health import ScanHealth
+from .outage_levels import DIRECT_ENTRY_STATES, Levels, outage_level
 from .outage_scan import OutageScans, outage_start
 from .scan_trigger import ScanRefused, scan_request
 from .service_check import missing_service_findings
@@ -473,26 +474,37 @@ def _fallback_automation_item(state: Any) -> dict[str, Any]:
     }
 
 
-def _long_enough(item: dict[str, Any], now: datetime, min_days: int) -> bool:
-    """Whether an unavailable entity has been so for at least ``min_days``.
-
-    Orphaned entities always qualify; only transient outages are filtered.
-    """
-    if min_days <= 0 or item["status"] != "unavailable":
-        return True
+def _age(item: dict[str, Any], now: datetime) -> timedelta | None:
     since = item.get("status_since")
-    return bool(since) and now - datetime.fromisoformat(since) >= timedelta(days=min_days)
+    return max(now - datetime.fromisoformat(since), timedelta(0)) if since else None
+
+
+def _reaches_info(item: dict[str, Any], now: datetime, levels: Levels | None) -> bool:
+    """Whether an unavailable entity has been so long enough to be a finding.
+
+    Orphaned entities always qualify; only an outage that is still younger than the first
+    threshold is left out. Without ``levels`` nothing is left out.
+    """
+    if levels is None or item["status"] != "unavailable":
+        return True
+    age = _age(item, now)
+    return age is not None and outage_level(age, levels) is not None
 
 
 def _entity_findings(
     entities: list[dict[str, Any]],
     now: datetime | None = None,
-    min_unavailable_days: int = 0,
+    levels: Levels | None = None,
 ) -> list[dict[str, Any]]:
-    """Create findings for entities that need attention."""
+    """Create findings for entities that need attention; an outage is graded by how long it lasts."""
     now = now or datetime.now(UTC)
-    return [
-        {
+    findings = []
+    for item in entities:
+        if item["status"] not in {"orphaned", "unavailable"} or not _reaches_info(
+            item, now, levels
+        ):
+            continue
+        finding = {
             "rule_id": f"entity.{item['reason']}",
             "object_id": item["object_id"],
             "classification": item["status"],
@@ -500,32 +512,12 @@ def _entity_findings(
             "first_detected_at": item["status_since"],
             "evidence": [{"kind": item["reason"], "source": "entity_registry"}],
         }
-        for item in entities
-        if item["status"] in {"orphaned", "unavailable"}
-        and _long_enough(item, now, min_unavailable_days)
-    ]
-
-
-ENTRY_INFO = timedelta(hours=1)  # a restart or a retry in progress is only an info
-ENTRY_MEDIUM = timedelta(days=1)
-
-
-def _dashboard_failure(err: Exception) -> str:
-    """Why a dashboard could not be read: a category only, never the error text."""
-    if type(err).__name__ == "ConfigNotFound":
-        return "auto_generated"
-    if type(err).__name__ in ("HomeAssistantError", "JSONDecodeError", "ValueError"):
-        return "invalid"
-    return "error"
-
-
-def _outage_level(age: timedelta, min_unavailable_days: int) -> str:
-    """How much an integration that has not been loaded for ``age`` matters: info, low, medium, high."""
-    if age < ENTRY_INFO:
-        return "info"
-    if age < ENTRY_MEDIUM:
-        return "low"
-    return "medium" if age < timedelta(days=min_unavailable_days) else "high"
+        if levels is not None and item["status"] == "unavailable":
+            age = _age(item, now)
+            if age is not None:
+                finding["outage_level"] = outage_level(age, levels)
+        findings.append(finding)
+    return findings
 
 
 FAILED_ENTRY_STATES = frozenset(
@@ -540,21 +532,34 @@ FAILED_ENTRY_STATES = frozenset(
 )
 
 
+def _dashboard_failure(err: Exception) -> str:
+    """Why a dashboard could not be read: a category only, never the error text."""
+    if type(err).__name__ == "ConfigNotFound":
+        return "auto_generated"
+    if type(err).__name__ in ("HomeAssistantError", "JSONDecodeError", "ValueError"):
+        return "invalid"
+    return "error"
+
+
 def _graded_outage(
-    began: str, now: datetime, min_unavailable_days: int, counted_from: datetime | None
-) -> tuple[str, str]:
+    began: str,
+    now: datetime,
+    levels: Levels,
+    counted_from: datetime | None,
+    direct: bool = False,
+) -> tuple[str, str | None]:
     """``(since, level)`` of an outage that began at ``began``; a mark window moves ``since`` later."""
     started = datetime.fromisoformat(began)
     if counted_from and counted_from > started:
         started = counted_from
     age = max(now - started, timedelta(0))
-    return started.isoformat(), _outage_level(age, min_unavailable_days)
+    return started.isoformat(), outage_level(age, levels, direct)
 
 
 def _config_entry_findings(
     integrations: list[dict[str, Any]],
     now: datetime,
-    min_unavailable_days: int = 0,
+    levels: Levels,
     counted_from: dict[str, datetime] | None = None,
 ) -> list[dict[str, Any]]:
     """Findings for active config entries that are not loaded, graded by how long that has lasted.
@@ -568,8 +573,14 @@ def _config_entry_findings(
         if item["status"] != "problem" or item["state"] not in FAILED_ENTRY_STATES or not since:
             continue
         counted, level = _graded_outage(
-            since, now, min_unavailable_days, (counted_from or {}).get(item["object_id"])
+            since,
+            now,
+            levels,
+            (counted_from or {}).get(item["object_id"]),
+            item["state"] in DIRECT_ENTRY_STATES,
         )
+        if level is None:
+            continue  # younger than the first threshold: no finding yet
         findings.append(
             {
                 "rule_id": "config_entry.not_loaded",
@@ -814,6 +825,16 @@ class InventoryScanner:
             "progress": 0,
             "last_error": None,
         }
+
+    @property
+    def outage_levels(self) -> Levels:
+        """The thresholds of the levels: info in minutes, low, medium and high in hours."""
+        return (
+            self.outage_info_minutes,
+            self.outage_low_hours,
+            self.outage_medium_hours,
+            self.outage_high_hours,
+        )
 
     async def async_initialize(self) -> None:
         """Load persisted observations and read the installed version."""
@@ -1281,10 +1302,10 @@ class InventoryScanner:
             + dashboards
         )
         findings = (
-            _entity_findings(entities, observed_at, self.min_unavailable_days)
+            _entity_findings(entities, observed_at, self.outage_levels)
             + duplicate_findings(
                 entities,
-                lambda item: _long_enough(item, observed_at, self.min_unavailable_days),
+                lambda item: _reaches_info(item, observed_at, self.outage_levels),
             )
             + ([] if preliminary else self.stale.findings(entities, observed_at, self.stale_hours))
             + automation_hygiene_findings(automations, observed_at, self.unused_automation_days)
@@ -1299,7 +1320,7 @@ class InventoryScanner:
             + dashboard_findings
             + helper_findings
             + group_findings
-            + stopped_app_findings(apps, integrations, app_links)
+            + stopped_app_findings(apps, integrations, app_links, observed_at, self.outage_levels)
             + ([] if preliminary else missing_blueprint_findings(automations, blueprint_files))
             + (
                 []
@@ -1317,10 +1338,10 @@ class InventoryScanner:
                 )
             )
             + _config_entry_findings(
-                integrations, observed_at, self.min_unavailable_days, self._counts_from()
+                integrations, observed_at, self.outage_levels, self._counts_from()
             )
         )
-        findings += device_down_findings(entities, devices, findings)
+        findings += device_down_findings(entities, devices, findings, observed_at, self.outage_levels)
 
         quarantine = quarantine_entries(self.journal.plans, [*entities, *devices])
         recurring = recurring_devices(

@@ -94,11 +94,13 @@ def test_a_config_entry_that_is_not_loaded_is_a_finding_graded_by_how_long() -> 
             {**item("new", "setup_error", "problem", 9), "status_since": None},
         ],
         now,
-        7,
+        (15, 1, 24, 168),
     )
     assert {f["object_id"]: f["outage_level"] for f in found} == {
         "old": "low",
         "day": "medium",
         "week": "high",
-        "fresh": "info",
+        "fresh": "medium",  # an error that does not heal on its own is at least medium
     }
+    young = _config_entry_findings([item("retry", "setup_retry", "problem", 0.1)], now, (15, 1, 24, 168))
+    assert young == [], "a retry that is still running is no finding before the first threshold"

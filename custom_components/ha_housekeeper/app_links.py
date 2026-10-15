@@ -15,8 +15,10 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterable, Mapping
+from datetime import datetime, timedelta
 from typing import Any
 
+from .outage_levels import Levels, outage_level
 from .sensitive_fields import kind_of
 
 MAX_DEPTH = 3
@@ -77,6 +79,8 @@ def stopped_app_findings(
     apps: Iterable[dict[str, Any]],
     integrations: Iterable[dict[str, Any]],
     edges: Iterable[dict[str, str]],
+    now: datetime | None = None,
+    levels: Levels | None = None,
 ) -> list[dict[str, Any]]:
     """One finding for each integration that is not working while the app it seems to use is stopped.
 
@@ -92,15 +96,22 @@ def stopped_app_findings(
         app = stopped.get(edge["target"].removeprefix("app:"))
         entry = failed.get(edge["source"].removeprefix("config_entry:"))
         if app and entry:
-            findings.append(
-                {
-                    "rule_id": "app.stopped_in_use",
-                    "object_id": app["object_id"],
-                    "classification": "problem",
-                    "confidence": 0.6,
-                    "first_detected_at": app.get("status_since"),
-                    "affected_object": entry["object_id"],
-                    "evidence": [{"kind": "app_stopped", "source": "supervisor"}],
-                }
-            )
+            finding = {
+                "rule_id": "app.stopped_in_use",
+                "object_id": app["object_id"],
+                "classification": "problem",
+                "confidence": 0.6,
+                "first_detected_at": app.get("status_since"),
+                "affected_object": entry["object_id"],
+                "evidence": [{"kind": "app_stopped", "source": "supervisor"}],
+            }
+            if levels is not None and now is not None:
+                since = app.get("status_since")
+                if not since:
+                    continue
+                level = outage_level(max(now - datetime.fromisoformat(since), timedelta(0)), levels)
+                if level is None:
+                    continue  # younger than the first threshold
+                finding["outage_level"] = level
+            findings.append(finding)
     return findings

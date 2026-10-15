@@ -8,6 +8,7 @@ high, a smaller one only high. Once the new options are saved the old one is ign
 from __future__ import annotations
 
 from collections.abc import Mapping
+from datetime import timedelta
 from typing import Any
 
 from .const import (
@@ -65,3 +66,40 @@ def thresholds_rise(values: Mapping[str, int]) -> bool:
         values[CONF_OUTAGE_HIGH_HOURS],
     )
     return all(a < b for a, b in zip(steps, steps[1:], strict=False))
+
+
+Levels = tuple[int, int, int, int]  # info in minutes, low, medium and high in hours
+RANK = ("info", "low", "medium", "high")
+# Integrations that cannot start and do not heal on their own: a finding from the first scan on.
+DIRECT_ENTRY_STATES = frozenset({"setup_error", "migration_error", "failed_unload"})
+
+
+def levels_of(values: Mapping[str, int]) -> Levels:
+    return (
+        values[CONF_OUTAGE_INFO_MINUTES],
+        values[CONF_OUTAGE_LOW_HOURS],
+        values[CONF_OUTAGE_MEDIUM_HOURS],
+        values[CONF_OUTAGE_HIGH_HOURS],
+    )
+
+
+def outage_level(age: timedelta, levels: Levels, direct: bool = False) -> str | None:
+    """The level of an outage that has lasted ``age``; None below the first threshold (no finding).
+
+    ``direct`` is an outage that does not heal on its own: it is at least medium from the start.
+    """
+    info, low, medium, high = levels
+    seconds = age.total_seconds()
+    if seconds >= high * 3600:
+        found: str | None = "high"
+    elif seconds >= medium * 3600:
+        found = "medium"
+    elif seconds >= low * 3600:
+        found = "low"
+    elif seconds >= info * 60:
+        found = "info"
+    else:
+        found = None
+    if direct and (found is None or RANK.index(found) < RANK.index("medium")):
+        return "medium"
+    return found

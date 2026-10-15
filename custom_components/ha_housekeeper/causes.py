@@ -18,9 +18,11 @@ automations, scripts or dashboards point to it, and the cause is ``virtual``.
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta
 from typing import Any
 
 from .impact import RANK, USAGE
+from .outage_levels import Levels, outage_level
 
 DEVICE_MIN_ENTITIES = 3  # a device with fewer entities is not a pattern
 KEY_LIMIT = 500
@@ -45,6 +47,8 @@ def device_down_findings(
     entities: list[dict[str, Any]],
     devices: list[dict[str, Any]],
     findings: list[dict[str, Any]],
+    now: datetime | None = None,
+    levels: Levels | None = None,
 ) -> list[dict[str, Any]]:
     """One finding for each device whose entities are all unavailable (at least three).
 
@@ -64,16 +68,24 @@ def device_down_findings(
         if not any(e["object_id"] in flagged for e in group):
             continue
         since = [e["status_since"] for e in group if e.get("status_since")]
-        result.append(
-            {
-                "rule_id": DEVICE_RULE,
-                "object_id": device["object_id"],
-                "classification": "problem",
-                "confidence": 0.9,
-                "first_detected_at": max(since) if since else None,
-                "evidence": [{"kind": "all_entities_unavailable", "source": "entity_registry"}],
-            }
-        )
+        level = None
+        if levels is not None and now is not None:
+            if not since:
+                continue
+            level = outage_level(max(now - datetime.fromisoformat(max(since)), timedelta(0)), levels)
+            if level is None:
+                continue  # younger than the first threshold
+        found = {
+            "rule_id": DEVICE_RULE,
+            "object_id": device["object_id"],
+            "classification": "problem",
+            "confidence": 0.9,
+            "first_detected_at": max(since) if since else None,
+            "evidence": [{"kind": "all_entities_unavailable", "source": "entity_registry"}],
+        }
+        if level is not None:
+            found["outage_level"] = level
+        result.append(found)
     return result
 
 

@@ -83,3 +83,47 @@ def test_the_old_option_keeps_its_meaning_until_the_new_ones_are_saved() -> None
     assert saved["outage_high_hours"] == 100 and saved["outage_medium_hours"] == 24
     assert thresholds_rise(thresholds_from_options({}))
     assert not thresholds_rise({**thresholds_from_options({}), "outage_low_hours": 24})
+
+
+def test_the_level_of_an_outage_follows_its_duration_and_direct_errors_start_at_medium() -> None:
+    from custom_components.ha_housekeeper.outage_levels import outage_level
+
+    levels = (15, 1, 24, 168)
+
+    def level(**age):
+        return outage_level(timedelta(**age), levels)
+
+    assert level(minutes=14) is None
+    assert [level(minutes=15), level(hours=1), level(hours=24), level(days=7)] == [
+        "info",
+        "low",
+        "medium",
+        "high",
+    ]
+    assert outage_level(timedelta(minutes=1), levels, direct=True) == "medium"
+    assert outage_level(timedelta(days=9), levels, direct=True) == "high"
+
+
+def test_a_device_and_a_stopped_app_wait_for_the_first_level_too() -> None:
+    from custom_components.ha_housekeeper.app_links import stopped_app_findings
+    from custom_components.ha_housekeeper.causes import device_down_findings
+
+    levels = (15, 1, 24, 168)
+    began = (NOW - timedelta(minutes=40)).isoformat()
+    entities = [
+        {"object_id": f"sensor.{n}", "device_id": "d1", "status": "unavailable", "status_since": began}
+        for n in "abc"
+    ]
+    flagged = [{"object_id": "sensor.a", "classification": "unavailable"}]
+    found = device_down_findings(entities, [{"object_id": "d1"}], flagged, NOW, levels)
+    assert [f["outage_level"] for f in found] == ["info"]
+    early = [{**e, "status_since": (NOW - timedelta(minutes=3)).isoformat()} for e in entities]
+    assert device_down_findings(early, [{"object_id": "d1"}], flagged, NOW, levels) == []
+    apps = [{"slug": "a", "object_id": "a", "status": "stopped", "status_since": began}]
+    entries = [{"object_id": "e", "status": "problem"}]
+    edges = [{"source": "config_entry:e", "target": "app:a", "relation": "CONNECTED"}]
+    assert [f["outage_level"] for f in stopped_app_findings(apps, entries, edges, NOW, levels)] == [
+        "info"
+    ]
+    apps[0]["status_since"] = (NOW - timedelta(minutes=3)).isoformat()
+    assert stopped_app_findings(apps, entries, edges, NOW, levels) == []
