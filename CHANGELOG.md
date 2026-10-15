@@ -10,7 +10,7 @@
 
 - **Beiseitegelegte Datenbanken:** Hat Home Assistant eine beschädigte Datenbank schon einmal ersetzt, nennt die Recorder-Seite die übrig gebliebenen Dateien `….db.corrupt.…` mit ihrer Größe. Gelöscht wird nichts.
 
-- **Speicherplatz:** Die Recorder-Seite meldet wenig freien Platz auf dem Datenträger der Datenbank (unter 1 GB oder 5 %). Unter 512 MB stoppt ein Plan, der in den Recorder schreibt, ohne etwas zu ändern.
+- **Speicherplatz:** Die Recorder-Seite meldet wenig freien Platz auf dem Datenträger der Datenbank (unter 1 GB oder 5 %). Unter 512 MB oder unter etwa der halben Datenbankgröße (das Backup enthält eine Kopie) stoppt ein Plan, der in den Recorder schreibt, ohne etwas zu ändern.
 
 - **Pläne warten auf einen ruhigen Recorder:** Ein Plan startet nicht, solange Home Assistant selbst ein Backup erstellt, der Recorder die Datenbank migriert oder sehr viele Schreibvorgänge in der Warteschlange hat. Er ändert dann nichts und lässt sich später erneut starten.
 
@@ -40,7 +40,7 @@
 
 - **Databases set aside:** If Home Assistant has replaced a damaged database before, the Recorder page names the leftover `….db.corrupt.…` files with their size. Nothing is deleted.
 
-- **Disk space:** The Recorder page reports little free space on the database’s disk (under 1 GB or 5 %). Below 512 MB a plan that writes into the recorder stops without changing anything.
+- **Disk space:** The Recorder page reports little free space on the database’s disk (under 1 GB or 5 %). Below 512 MB, or below about half the database size (the backup holds a copy), a plan that writes into the recorder stops without changing anything.
 
 - **Plans wait for a calm recorder:** A plan does not start while Home Assistant itself is making a backup, the recorder is migrating the database or has a very long write queue. It changes nothing then and can be started again later.
 

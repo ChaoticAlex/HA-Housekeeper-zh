@@ -925,6 +925,29 @@ async def test_a_nearly_full_disk_stops_a_plan_that_writes_into_the_recorder(
     assert plan["actions"][0]["result"]["reason"] == "disk_low"
 
 
+async def test_the_backup_needs_room_for_about_half_of_the_database(hass: HomeAssistant) -> None:
+    from unittest.mock import patch
+
+    scanner = await make_scanner(hass)
+
+    def files(free: int):
+        return {"disk_free": free * 1024**2, "db_bytes": 6 * 1024**3}
+
+    for free, fits in ((2000, False), (3500, True)):
+        plan = {"status": "running", "events": [], "actions": [{"object_id": "sensor.a"}]}
+        with (
+            patch(
+                "custom_components.ha_housekeeper.cleanup_exec.recorder_ready", return_value=True
+            ),
+            patch(
+                "custom_components.ha_housekeeper.cleanup_exec.database_files",
+                return_value=files(free),
+            ),
+        ):
+            assert await scanner.cleanup._disk_has_room(plan) is fits
+        assert (plan["status"] == "running") is fits
+
+
 async def test_a_plan_does_not_start_while_home_assistant_makes_a_backup_or_the_recorder_struggles(
     hass: HomeAssistant,
 ) -> None:

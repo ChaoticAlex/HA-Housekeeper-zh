@@ -29,6 +29,7 @@ UNCLEAN_DAYS = 30  # restarts after a crash that are named next to a damaged dat
 DISK_LOW_BYTES = 1024**3  # free space under this is a finding
 DISK_LOW_SHARE = 0.05
 DISK_STOP_BYTES = 512 * 1024**2  # free space under this stops a plan that writes into the recorder
+BACKUP_SPACE_SHARE = 0.5  # and so does less than this share of the database: the backup copies it
 INTEGRITY_LINES = 5  # complaints of the full check that are kept
 INTEGRITY_FRESH_DAYS = 3  # a clean check this recent lets a plan skip its own
 INTEGRITY_TIMEOUT = 60 * 60  # seconds the check on demand may run

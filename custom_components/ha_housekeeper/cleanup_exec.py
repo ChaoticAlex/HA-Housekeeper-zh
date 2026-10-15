@@ -97,6 +97,7 @@ from .cleanup import (
 )
 from .const import DOMAIN, MAX_FILE_BACKUP, MAX_PLAN_SNAPSHOTS
 from .db_health import (
+    BACKUP_SPACE_SHARE,
     DISK_STOP_BYTES,
     database_files,
     integrity_fresh,
@@ -605,7 +606,9 @@ class CleanupRunner:
         return False
 
     async def _disk_has_room(self, plan: dict[str, Any]) -> bool:
-        """SQLite needs room for its journal and the backup for a copy: a nearly full disk stops the plan.
+        """A nearly full disk stops the plan: SQLite needs room for its journal, the backup for a copy.
+
+        Less room than about half of the database stops it too.
 
         A disk that cannot be measured (no recorder, another database) does not stop it.
         """
@@ -616,10 +619,12 @@ class CleanupRunner:
         except Exception:
             return True
         free = files.get("disk_free")
-        if free is None or free >= DISK_STOP_BYTES:
+        # The backup holds a copy of the database; it is packed, so about half of it is a guess.
+        needed = max(DISK_STOP_BYTES, int((files.get("db_bytes") or 0) * BACKUP_SPACE_SHARE))
+        if free is None or free >= needed:
             return True
         _LOGGER.warning("Too little free space for the recorder database (%s bytes)", free)
-        self._backup_failed(plan, "disk_low", free_bytes=free)
+        self._backup_failed(plan, "disk_low", free_bytes=free, needed_bytes=needed)
         return False
 
     def _note_damage(self, line: str) -> None:
