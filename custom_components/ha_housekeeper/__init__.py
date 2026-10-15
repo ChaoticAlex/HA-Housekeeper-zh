@@ -134,17 +134,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             ]
         )
         hass.data[DOMAIN]["static_path_registered"] = True
-    await panel_custom.async_register_panel(
-        hass,
-        webcomponent_name=PANEL_ELEMENT,
-        frontend_url_path=PANEL_URL,
-        module_url=f"{FRONTEND_URL}?v={digest}",
-        sidebar_title="Housekeeper",
-        sidebar_icon="mdi:broom",
-        require_admin=True,
-        config={"entry_id": entry.entry_id},
-        config_panel_domain=DOMAIN,
-    )
+    # A reload for new options keeps the panel: removing it makes Home Assistant leave the open page.
+    if PANEL_URL not in hass.data.get(frontend.DATA_PANELS, {}):
+        await panel_custom.async_register_panel(
+            hass,
+            webcomponent_name=PANEL_ELEMENT,
+            frontend_url_path=PANEL_URL,
+            module_url=f"{FRONTEND_URL}?v={digest}",
+            sidebar_title="Housekeeper",
+            sidebar_icon="mdi:broom",
+            require_admin=True,
+            config={"entry_id": entry.entry_id},
+            config_panel_domain=DOMAIN,
+        )
 
     # A gap that a new scan may close (Lovelace not ready, a dashboard being saved) is tried again
     # a few minutes later, a few times, instead of waiting for the next regular scan.
@@ -341,6 +343,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def _async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Reload so the new thresholds apply."""
+    hass.data[DOMAIN]["keep_panel"] = True
     await hass.config_entries.async_reload(entry.entry_id)
 
 
@@ -354,7 +357,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await scanner.cleanup.wait()
     unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unloaded:
-        frontend.async_remove_panel(hass, PANEL_URL)
+        if not hass.data[DOMAIN].pop("keep_panel", False):
+            frontend.async_remove_panel(hass, PANEL_URL)
         hass.data[DOMAIN].pop("scanner", None)
         if scanner is not None:
             await scanner.cleanup.flush_journal()
