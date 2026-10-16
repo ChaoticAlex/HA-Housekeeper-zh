@@ -329,7 +329,7 @@ class SystemMixin {
         ],
         exportName: "webhooks", header: [this.t("accColAutomation"), "ID", this.t("accColReach")], rows: w => [w.name, w.object_id, this.t(w.local_only ? "accHookLocal" : "accHookOpen")],
       });
-      const panel = (id, body, legend = "accLegend") => `<div class="panel">${legend ? `<p class="factnote">${this.t(legend)}</p>` : ""}${body}</div>`;
+      const panel = (id, body, legend = "accLegend") => `<div class="panel">${legend ? `<p class="factnote">${this.t(legend)}</p>` : ""}${body}${this.howCounted("accFootnote")}</div>`;
       const hi = list => list.filter(e => e.risk === "high").length;
       const tone = (n, level = "red") => (n ? level : "ok");
       const tabs = [
@@ -344,7 +344,7 @@ class SystemMixin {
         : open === "cloud" ? panel("acccloud", cloudTable)
         : open === "apps" ? panel("accapps", this.accAppsTable(appList, risks, sorts.find(x => x.key === "risk")), "accLegendApps")
         : panel("accsys", sysTable);
-      return `<div class="stack">${head}${this.navTiles("dataflow", tabs, open, this.t("dataflow"), true)}${body}<div class="panel">${this.howCounted("accFootnote")}</div></div>`;
+      return `<div class="stack">${head}${this.navTiles("dataflow", tabs, open, this.t("dataflow"), true)}${body}</div>`;
     }, e => `<span>${this.esc(this.t("sysChecked", { n: this.formatNumber((e.entries || []).length) }))}</span>`);
   }
 
