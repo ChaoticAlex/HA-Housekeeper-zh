@@ -22,7 +22,7 @@ class WatchMixin {
     return w.triggers.length > 1 ? `${what} +${w.triggers.length - 1}` : what;
   }
 
-  // One line while a watch runs; sits in the page header next to the other banners.
+  // One line while a watch runs; sits on the overview, below the health ring.
   watchBand() {
     const w = this.data?.meta?.watch;
     if (!w) return "";

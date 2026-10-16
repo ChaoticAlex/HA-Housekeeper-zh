@@ -2443,7 +2443,7 @@ class OverviewMixin {
     const why = this.healthWhy ? this.healthWhyCard(health) : "";
     return `${this.levelsBanner()}<section class="statushead" title="${this.esc(this.t("healthTip", { affected: health.affected, base: health.base }))}"><button type="button" class="ring ${health.tone}" style="--p:${health.percent}" data-health-why aria-expanded="${Boolean(this.healthWhy)}" aria-label="${this.esc(this.t("healthWhy"))}"><b>${Math.floor(health.percent)}<small>%</small></b></button>
       <div class="statustext"><h2>${headline}</h2><p>${this.statusSubline(health)}</p>${this.series ? `<span class="spark-row">${this.sparkline("health", "good")}</span>` : ""}</div>
-      <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", total - quiet, total - quiet ? "warn" : "", "findingsNav", "", "findings", "bad", quiet ? this.t("openFindingsQuiet", { n: this.formatNumber(quiet) }) : ""], ["unavailable", down.length, down.length ? "red" : "", "findingsNav", "", "class:unavailable", "bad", downFollows ? this.t("findingsOfFollow", { n: this.formatNumber(downFollows) }) : "", "unavailable"]].map(kpi).join("")}</div></section>${why}
+      <div class="kpis">${[["objects", m.object_count, "", "inventory", "", "objects"], ["openFindings", total - quiet, total - quiet ? "warn" : "", "findingsNav", "", "findings", "bad", quiet ? this.t("openFindingsQuiet", { n: this.formatNumber(quiet) }) : ""], ["unavailable", down.length, down.length ? "red" : "", "findingsNav", "", "class:unavailable", "bad", downFollows ? this.t("findingsOfFollow", { n: this.formatNumber(downFollows) }) : "", "unavailable"]].map(kpi).join("")}</div></section>${why}${this.watchBand()}
       ${this.scanCoverageLine()}${this.todoCard()}<div class="ovzone">${this.cleanupCard()}${this.trendCard()}${this.inventoryStatusCard()}</div>
       <div class="ovzone">${this.systemCard()}${this.databaseCard()}${this.backupSummaryCard()}</div>`;
   }
@@ -7781,7 +7781,7 @@ class WatchMixin {
     return w.triggers.length > 1 ? `${what} +${w.triggers.length - 1}` : what;
   }
 
-  // One line while a watch runs; sits in the page header next to the other banners.
+  // One line while a watch runs; sits on the overview, below the health ring.
   watchBand() {
     const w = this.data?.meta?.watch;
     if (!w) return "";
@@ -15792,7 +15792,7 @@ class HAHousekeeperPanel extends HTMLElement {
     const viewBack = from ? `<button class="btn" data-action="view-back"><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("backTo")} ${this.t(from.view)}</button>` : "";
     const back = graphBack || viewBack ? `<div class="crumbs">${viewBack}${graphBack}</div>` : "";
     return `${back}<div class="heading"><div>${this.eyebrowFor(this.view) ? `<p class="eyebrow">${this.eyebrowFor(this.view)}</p>` : ""}<h1>${title}${this.view === "findingsNav" ? `<button type="button" class="infotip${this.foldOpen("findings_help", false) ? " on" : ""}" data-fold="findings_help" aria-expanded="${this.foldOpen("findings_help", false)}" aria-label="${this.esc(this.t("helpOpen"))}" title="${this.esc(this.t("helpOpen"))}"><ha-icon icon="mdi:information-outline"></ha-icon></button>` : ""}${INFO_SUB_VIEWS.includes(this.view) ? this.infoTip(sub) : ""}${["cleanup", "repair", "journal"].includes(this.view) ? this.infoTip(this.t("cleanupDryRun"), true) : ""}</h1>${VIEW_HINT[this.view] ? `<span class="sub">${this.t(VIEW_HINT[this.view])}</span>` : INFO_SUB_VIEWS.includes(this.view) ? "" : `<span class="sub">${sub}</span>`}</div>
-      <div class="head-actions">${modePill}${ago}<button class="btn primary" data-action="scan" ${this.busy || this.cleanupRunning() ? 'disabled aria-busy="true"' : ""} title="${this.esc(this.t("scanHint"))}">${this.scanButtonInner()}</button></div></div>${this.warmupBanner()}${this.healthBanner()}${this.watchBand()}`;
+      <div class="head-actions">${modePill}${ago}<button class="btn primary" data-action="scan" ${this.busy || this.cleanupRunning() ? 'disabled aria-busy="true"' : ""} title="${this.esc(this.t("scanHint"))}">${this.scanButtonInner()}</button></div></div>${this.warmupBanner()}${this.healthBanner()}`;
   }
 
   content() {
