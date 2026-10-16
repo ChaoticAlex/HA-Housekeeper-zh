@@ -9,7 +9,7 @@
 
 ### Behoben
 
-- **Oberfläche, Korrekturen:** Der Start-Hinweis zeigt nach dem Neuladen der Seite nicht mehr kurz die alten „5 Minuten“, sondern wartet auf die aktuelle Angabe. Der Puffer von einer Minute fängt wegen einer kurz ladenden Integration nicht mehr mehrmals von vorn an. Die Zeile „Beobachtung nach Update“ steht auf der Übersicht unter dem Gesundheitsring statt im Seitenkopf. Der Info-Hinweis „ändert nichts von selbst“ oben auf der Befundseite entfällt; eine kurze Erklärung steht stattdessen unter „Über Housekeeper“ in den Einstellungen, die Zeile „Betriebsart“ entfällt dort.
+- **Oberfläche, Korrekturen:** Der Start-Hinweis zeigt nach dem Neuladen der Seite nicht mehr kurz die alten „5 Minuten“, sondern wartet auf die aktuelle Angabe. Der Puffer von einer Minute fängt wegen einer kurz ladenden Integration nicht mehr mehrmals von vorn an. Die Zeile „Beobachtung nach Update“ steht auf der Übersicht unter dem Gesundheitsring statt im Seitenkopf. Der Info-Hinweis „ändert nichts von selbst“ oben auf der Befundseite entfällt; eine kurze Erklärung steht stattdessen unter „Über Housekeeper“ in den Einstellungen, die Zeile „Betriebsart“ entfällt dort. Auf schmalen Bildschirmen (Handy) brechen Zeilen mit Knöpfen um, statt den Text auf eine Buchstabenspalte zu quetschen (z. B. der Hinweis zu den Ausfall-Stufen auf der Übersicht).
 
 ### English
 
@@ -20,7 +20,7 @@
 
 #### Fixed
 
-- **Interface, corrections:** After a page reload the start notice no longer shows the old “5 minutes” for a moment but waits for the current figure. The one-minute buffer no longer starts over because an integration loads briefly. The “Observation after update” line now sits on the overview below the health ring instead of in the page header. The “changes nothing by itself” info notice at the top of the findings page is gone; a short explanation now sits under “About Housekeeper” in the settings, and the “Mode” row is dropped there.
+- **Interface, corrections:** After a page reload the start notice no longer shows the old “5 minutes” for a moment but waits for the current figure. The one-minute buffer no longer starts over because an integration loads briefly. The “Observation after update” line now sits on the overview below the health ring instead of in the page header. The “changes nothing by itself” info notice at the top of the findings page is gone; a short explanation now sits under “About Housekeeper” in the settings, and the “Mode” row is dropped there. On narrow screens (phones) rows with buttons now wrap instead of squeezing the text into a one-letter column (e.g. the notice about outage levels on the overview).
 
 ## 1.8.2 - 2026-10-16
 
