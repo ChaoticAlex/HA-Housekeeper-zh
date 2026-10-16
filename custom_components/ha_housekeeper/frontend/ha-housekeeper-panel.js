@@ -1676,10 +1676,10 @@ class StylesMixin {
 
 // Texts of the shared table of objects (objectTable); merged into TEXT.
 Object.assign(TEXT.de, {
-  objColState: "Zustand", objAllStatus: "Alle Zustände", objColEntities: "Entitäten", objColDevices: "Geräte", relColAvail: "Verfügbarkeit", relColObject: "Objekt", relColType: "Typ", relColRelation: "Beziehung", relColKind: "Art", relColStatus: "Zustand", relAllGroups: "Alle Arten", relAvailOk: "Ab 99,5 %", relAvailWarn: "95 bis 99,5 %", cleanupAllClasses: "Alle Einstufungen", cleanupAllReadiness: "Alle Zustände", cleanupColRecorder: "Recorder-Daten", recurringColSince: "Vergessen am", recurringColDomains: "Integrationen", recurringPill: "Kehrt zurück", purgeColWhen: "Zeit", purgeColWhat: "Gelöscht", purgeColDetails: "Einzelheiten", bkcColName: "Backup", bkcColDb: "Datenbank", bkcColState: "Schutz / Alter", bkcAllStates: "Alle Backups", bkcFilterProtected: "Geschützt", bkcFilterSelected: "Ausgewählt", bpColFile: "Datei", bpColKind: "Art", bpColDomain: "Domain", bpColUsers: "Verwendet von", bpAllKinds: "Alle Arten", bpAllDomains: "Alle Domains", lifeColDevice: "Gerät", lifeColKind: "Art", lifeColWhen: "Wann", lifeColNote: "Notiz", lifeAllKinds: "Alle Arten", journalColDate: "Erstellt", journalColActions: "Prüfung", journalColFollow: "Nachkontrolle", journalColAct: "Aktionen", journalAllStatus: "Alle Zustände", journalAllFollow: "Alle Nachkontrollen", exColEntity: "Entität", exColUsed: "Verwendung", exColTarget: "Ersatz", exColHow: "Art", exAllPairs: "Alle Paare", exFilterSuggest: "Mit Vorschlag", exFilterNone: "Ohne Verwendung", exFilterChosen: "Gewählt", counterColName: "Entität", counterColKind: "Art", counterColFound: "Fund", counterColAction: "Aktion", counterAllKinds: "Alle Arten", counterKindMeasurement: "Messwert", counterKindCounter: "Zähler", relAvailRed: "Unter 95 %",
+  objColState: "Zustand", objAllStatus: "Alle Zustände", objColEntities: "Entitäten", objColDevices: "Geräte", relColAvail: "Verfügbarkeit", relColObject: "Objekt", relColType: "Typ", relColRelation: "Beziehung", relColKind: "Art", relColStatus: "Zustand", relAllGroups: "Alle Arten", relAvailOk: "Ab 99,5 %", relAvailWarn: "95 bis 99,5 %", cleanupAllClasses: "Alle Einstufungen", cleanupAllReadiness: "Alle Zustände", cleanupColRecorder: "Recorder-Daten", recurringColSince: "Vergessen am", recurringColDomains: "Integrationen", recurringPill: "Kehrt zurück", purgeColWhen: "Zeit", purgeColWhat: "Gelöscht", purgeColDetails: "Einzelheiten", bkcColName: "Backup", bkcColDb: "Datenbank", bkcColState: "Schutz / Alter", bkcAllStates: "Alle Backups", bkcFilterProtected: "Geschützt", bkcFilterSelected: "Ausgewählt", bpColFile: "Datei", bpColKind: "Art", bpColDomain: "Domain", bpColUsers: "Verwendet von", bpBack: "Zur Liste", bpDetPath: "Pfad", bpDetAuthor: "Autor", bpDetSource: "Quelle", bpHint_missing: "Die Datei gibt es nicht mehr. Diese Automationen oder Skripte laufen nicht, solange sie nicht neu zugewiesen werden.", bpHint_broken: "Die Datei lässt sich nicht laden. Die Nutzer unten laufen nicht, bis sie repariert ist.", bpHint_unused: "Keine Automation und kein Skript benutzt dieses Blueprint.", bpAllKinds: "Alle Arten", bpAllDomains: "Alle Domains", lifeColDevice: "Gerät", lifeColKind: "Art", lifeColWhen: "Wann", lifeColNote: "Notiz", lifeAllKinds: "Alle Arten", journalColDate: "Erstellt", journalColActions: "Prüfung", journalColFollow: "Nachkontrolle", journalColAct: "Aktionen", journalAllStatus: "Alle Zustände", journalAllFollow: "Alle Nachkontrollen", exColEntity: "Entität", exColUsed: "Verwendung", exColTarget: "Ersatz", exColHow: "Art", exAllPairs: "Alle Paare", exFilterSuggest: "Mit Vorschlag", exFilterNone: "Ohne Verwendung", exFilterChosen: "Gewählt", counterColName: "Entität", counterColKind: "Art", counterColFound: "Fund", counterColAction: "Aktion", counterAllKinds: "Alle Arten", counterKindMeasurement: "Messwert", counterKindCounter: "Zähler", relAvailRed: "Unter 95 %",
 });
 Object.assign(TEXT.en, {
-  objColState: "State", objAllStatus: "All states", objColEntities: "Entities", objColDevices: "Devices", relColAvail: "Availability", relColObject: "Object", relColType: "Type", relColRelation: "Relation", relColKind: "Kind", relColStatus: "State", relAllGroups: "All kinds", relAvailOk: "99.5 % and above", relAvailWarn: "95 to 99.5 %", cleanupAllClasses: "All classes", cleanupAllReadiness: "All states", cleanupColRecorder: "Recorder data", recurringColSince: "Forgotten on", recurringColDomains: "Integrations", recurringPill: "Keeps coming back", purgeColWhen: "Time", purgeColWhat: "Deleted", purgeColDetails: "Details", bkcColName: "Backup", bkcColDb: "Database", bkcColState: "Protection / age", bkcAllStates: "All backups", bkcFilterProtected: "Protected", bkcFilterSelected: "Selected", bpColFile: "File", bpColKind: "Kind", bpColDomain: "Domain", bpColUsers: "Used by", bpAllKinds: "All kinds", bpAllDomains: "All domains", lifeColDevice: "Device", lifeColKind: "Kind", lifeColWhen: "When", lifeColNote: "Note", lifeAllKinds: "All kinds", journalColDate: "Created", journalColActions: "Check", journalColFollow: "Follow-up", journalColAct: "Actions", journalAllStatus: "All states", journalAllFollow: "All follow-ups", exColEntity: "Entity", exColUsed: "Use", exColTarget: "Replacement", exColHow: "How", exAllPairs: "All pairs", exFilterSuggest: "With a proposal", exFilterNone: "Unused", exFilterChosen: "Chosen", counterColName: "Entity", counterColKind: "Kind", counterColFound: "Finding", counterColAction: "Action", counterAllKinds: "All kinds", counterKindMeasurement: "Measurement", counterKindCounter: "Counter", relAvailRed: "Below 95 %",
+  objColState: "State", objAllStatus: "All states", objColEntities: "Entities", objColDevices: "Devices", relColAvail: "Availability", relColObject: "Object", relColType: "Type", relColRelation: "Relation", relColKind: "Kind", relColStatus: "State", relAllGroups: "All kinds", relAvailOk: "99.5 % and above", relAvailWarn: "95 to 99.5 %", cleanupAllClasses: "All classes", cleanupAllReadiness: "All states", cleanupColRecorder: "Recorder data", recurringColSince: "Forgotten on", recurringColDomains: "Integrations", recurringPill: "Keeps coming back", purgeColWhen: "Time", purgeColWhat: "Deleted", purgeColDetails: "Details", bkcColName: "Backup", bkcColDb: "Database", bkcColState: "Protection / age", bkcAllStates: "All backups", bkcFilterProtected: "Protected", bkcFilterSelected: "Selected", bpColFile: "File", bpColKind: "Kind", bpColDomain: "Domain", bpColUsers: "Used by", bpBack: "Back to list", bpDetPath: "Path", bpDetAuthor: "Author", bpDetSource: "Source", bpHint_missing: "The file is gone. These automations or scripts do not run until they are pointed at another blueprint.", bpHint_broken: "The file fails to load. The users below do not run until it is repaired.", bpHint_unused: "No automation or script uses this blueprint.", bpAllKinds: "All kinds", bpAllDomains: "All domains", lifeColDevice: "Device", lifeColKind: "Kind", lifeColWhen: "When", lifeColNote: "Note", lifeAllKinds: "All kinds", journalColDate: "Created", journalColActions: "Check", journalColFollow: "Follow-up", journalColAct: "Actions", journalAllStatus: "All states", journalAllFollow: "All follow-ups", exColEntity: "Entity", exColUsed: "Use", exColTarget: "Replacement", exColHow: "How", exAllPairs: "All pairs", exFilterSuggest: "With a proposal", exFilterNone: "Unused", exFilterChosen: "Chosen", counterColName: "Entity", counterColKind: "Kind", counterColFound: "Finding", counterColAction: "Action", counterAllKinds: "All kinds", counterKindMeasurement: "Measurement", counterKindCounter: "Counter", relAvailRed: "Below 95 %",
 });
 
 // Texts for the policies view; merged into TEXT.
@@ -7916,10 +7916,15 @@ class BlueprintsMixin {
       return obj ? `<button class="linklike" data-object="${this.esc(this.objectKey(obj))}">${this.esc(u.name)}</button>` : this.esc(u.name);
     }).join(", ") + (b.count > (b.users || []).length ? ` +${b.count - b.users.length}` : "");
     const items = this.blueprints.domains.flatMap(d => [
-      ...d.missing.map(b => ({ kind: "missing", domain: d.domain, path: b.path, title: b.path, users: users(b) })),
-      ...d.broken.map(b => ({ kind: "broken", domain: d.domain, path: b.path, title: b.path, users: b.count ? users(b) : "" })),
-      ...d.unused.map(b => ({ kind: "unused", domain: d.domain, path: b.path, title: b.name === b.path ? b.path : b.name, users: "" })),
+      ...d.missing.map(b => ({ kind: "missing", domain: d.domain, path: b.path, title: b.path, users: users(b), raw: b })),
+      ...d.broken.map(b => ({ kind: "broken", domain: d.domain, path: b.path, title: b.path, users: b.count ? users(b) : "", raw: b })),
+      ...d.unused.map(b => ({ kind: "unused", domain: d.domain, path: b.path, title: b.name === b.path ? b.path : b.name, users: "", raw: b })),
     ]);
+    if (this.bpOpen) {
+      const item = items.find(i => `${i.domain}/${i.path}` === this.bpOpen);
+      if (item) return `<div class="stack">${head}${this.blueprintDetail(item)}</div>`;
+      this.bpOpen = "";
+    }
     const rank = { missing: 0, broken: 1, unused: 2 }, label = { missing: "bpMissing", broken: "bpBroken", unused: "bpUnused" }, tone = { missing: "red", broken: "red", unused: "mute" };
     const domains = this.blueprints.domains.filter(d => items.some(i => i.domain === d.domain));
     const files = this.blueprints.domains.map(d => `${this.t(d.domain)}: ${this.formatNumber(d.total)} ${this.t("bpFiles")}`).join(" · ");
@@ -7936,6 +7941,7 @@ class BlueprintsMixin {
       ],
       filterFns: { kind: (i, v) => i.kind === v, domain: (i, v) => i.domain === v },
       text: i => `${i.title} ${i.path}`, tie: i => `${i.domain}/${i.path}`,
+      rowAttrs: i => `data-bp-open="${this.esc(`${i.domain}/${i.path}`)}" tabindex="0" role="button" aria-label="${this.esc(i.title)}"`,
       columns: [
         { key: "name", label: "bpColFile", dir: "asc", cell: i => `<div class="statcell"><span class="tile ${tone[i.kind]}"><ha-icon icon="${{ missing: "mdi:file-question-outline", broken: "mdi:file-alert-outline", unused: "mdi:file-hidden" }[i.kind]}"></ha-icon></span><div>${this.nameCell(i.title, i.title === i.path ? "" : i.path)}</div></div>` },
         { key: "kind", label: "bpColKind", dir: "asc", cell: i => `<span class="pill ${tone[i.kind]}">${this.t(label[i.kind])}</span>` },
@@ -7944,6 +7950,23 @@ class BlueprintsMixin {
       ],
     });
     return `<div class="stack">${head}<div class="panel"><p class="factnote pad">${this.esc(files)}</p>${table}</div></div>`;
+  }
+
+  // One blueprint: what it is and who uses it. A missing or broken file has no metadata; the fields stay out.
+  blueprintDetail(i) {
+    const b = i.raw, tone = { missing: "red", broken: "red", unused: "mute" }[i.kind];
+    const users = (b.users || []).map(u => {
+      const obj = this.findObject(`${u.id.split(".")[0]}:${u.id}`);
+      return `<li>${obj ? `<button class="linklike" data-object="${this.esc(this.objectKey(obj))}">${this.esc(u.name)}</button>` : this.esc(u.name)}</li>`;
+    }).join("");
+    const url = typeof b.source_url === "string" && /^https?:\/\//.test(b.source_url) ? `<a href="${this.esc(b.source_url)}" target="_blank" rel="noopener noreferrer">${this.esc(b.source_url)}</a>` : "";
+    const fact = (label, value) => value ? `<div class="fact"><span>${this.t(label)}</span><b>${value}</b></div>` : "";
+    const rest = Math.max(0, (b.count || 0) - (b.users || []).length);
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.esc(i.title)}</h2><p><span class="pill ${tone}">${this.t({ missing: "bpMissing", broken: "bpBroken", unused: "bpUnused" }[i.kind])}</span></p></div><button class="link" data-bp-back><ha-icon icon="mdi:arrow-left"></ha-icon> ${this.t("bpBack")}</button></div>
+      <div class="facts">${fact("bpColDomain", this.esc(this.t(i.domain)))}${fact("bpDetPath", `<code>${this.esc(i.path)}</code>`)}${fact("bpDetAuthor", this.esc(b.author || ""))}${fact("bpDetSource", url)}</div>
+      ${b.description ? `<p class="factnote pad">${this.esc(b.description)}</p>` : ""}
+      <p class="factnote pad">${this.t(`bpHint_${i.kind}`)}</p>
+      ${users ? `<h3 class="pad">${this.t("bpColUsers")}</h3><ul class="pad">${users}${rest ? `<li>+${rest}</li>` : ""}</ul>` : ""}</section>`;
   }
 }
 
@@ -16269,6 +16292,9 @@ class HAHousekeeperPanel extends HTMLElement {
       catch (err) { this.failed(err); }
       this.render();
     });
+    root.querySelectorAll("[data-bp-open]").forEach(el => el.onclick = ev => { const inner = ev?.target?.closest?.("button, select, input, a, label"); if (inner && inner !== el && el.contains(inner)) return; this.bpOpen = el.dataset.bpOpen; this.render(); });
+    root.querySelectorAll("tr[data-bp-open]").forEach(openByKey);
+    root.querySelector("[data-bp-back]")?.addEventListener("click", () => { this.bpOpen = ""; this.render(); });
     root.querySelector("[data-bp-refresh]")?.addEventListener("click", () => { this._blueprintsRequested = false; this.blueprints = null; this.render(); });
     root.querySelector("[data-weekly]")?.addEventListener("click", () => this.weeklyReport());
     root.querySelectorAll("[data-fsel-group]").forEach(el => el.onchange = () => { (this._findGroups?.[el.dataset.fselGroup] || []).forEach(key => (el.checked ? this.findSel.add(key) : this.findSel.delete(key))); this.render(); });

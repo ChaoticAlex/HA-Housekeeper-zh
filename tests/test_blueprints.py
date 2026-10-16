@@ -37,6 +37,16 @@ def test_unused_missing_and_broken_blueprints() -> None:
     assert (result["unused"], result["missing"], result["broken"]) == (1, 1, 1)
 
 
+def test_an_unused_blueprint_carries_its_metadata() -> None:
+    available = {
+        "automation": {
+            "a/idle.yaml": {"ok": True, "name": "Idle", "author": "me", "source_url": "https://x.y"}
+        }
+    }
+    unused = evaluate(available, {})["domains"][0]["unused"][0]
+    assert (unused["author"], unused["source_url"], unused["description"]) == ("me", "https://x.y", None)
+
+
 def test_a_missing_blueprint_file_is_found_but_a_broken_or_unread_one_is_not() -> None:
     class Unloaded:  # Home Assistant keeps an automation whose blueprint is gone like this
         referenced_blueprint = None

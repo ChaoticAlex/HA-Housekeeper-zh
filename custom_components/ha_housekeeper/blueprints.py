@@ -14,21 +14,27 @@ from .payloads import BlueprintsResult
 
 DOMAINS = ("automation", "script")
 LIST_LIMIT = 100
-USERS_LIMIT = 5
+USERS_LIMIT = 50
 
 
 def evaluate(
     available: dict[str, dict[str, dict[str, Any]]],
     users: dict[str, dict[str, list[dict[str, str]]]],
 ) -> BlueprintsResult:
-    """``available``: domain -> path -> {name, ok}; ``users``: domain -> path -> [{id, name}]."""
+    """``available``: domain -> path -> {name, ok, author, source_url, description}; ``users``: domain -> path -> [{id, name}]."""
     domains = []
     totals = {"unused": 0, "missing": 0, "broken": 0}
     for domain in DOMAINS:
         files = available.get(domain, {})
         used = users.get(domain, {})
         unused = [
-            {"path": path, "name": info["name"]}
+            {
+                "path": path,
+                "name": info["name"],
+                "author": info.get("author"),
+                "source_url": info.get("source_url"),
+                "description": info.get("description"),
+            }
             for path, info in sorted(files.items())
             if info["ok"] and not used.get(path)
         ]
@@ -115,8 +121,12 @@ def missing_blueprint_findings(
     return findings
 
 
+def _text(value: Any) -> str | None:
+    return value if isinstance(value, str) and value else None
+
+
 async def async_available(hass: HomeAssistant) -> dict[str, dict[str, dict[str, Any]]]:
-    """Every blueprint file by domain and path: ``{name, ok}``; ``ok`` is False for one that fails."""
+    """Every blueprint file by domain and path: ``{name, ok, author, source_url, description}``; ``ok`` is False for one that fails."""
     from homeassistant.components.automation.helpers import (
         async_get_blueprints as automation_blueprints,
     )
@@ -129,7 +139,15 @@ async def async_available(hass: HomeAssistant) -> dict[str, dict[str, dict[str, 
         found: dict[str, dict[str, Any]] = {}
         for path, blueprint in (await getter(hass).async_get_blueprints()).items():
             ok = blueprint is not None and not isinstance(blueprint, BlueprintException)
-            found[str(path)] = {"ok": ok, "name": getattr(blueprint, "name", None) or str(path)}
+            metadata = getattr(blueprint, "metadata", None)
+            metadata = metadata if isinstance(metadata, Mapping) else {}
+            found[str(path)] = {
+                "ok": ok,
+                "name": getattr(blueprint, "name", None) or str(path),
+                "author": _text(metadata.get("author")),
+                "source_url": _text(metadata.get("source_url")),
+                "description": _text(metadata.get("description")),
+            }
         available[domain] = found
     return available
 

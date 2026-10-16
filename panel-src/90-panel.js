@@ -1006,6 +1006,9 @@ class HAHousekeeperPanel extends HTMLElement {
       catch (err) { this.failed(err); }
       this.render();
     });
+    root.querySelectorAll("[data-bp-open]").forEach(el => el.onclick = ev => { const inner = ev?.target?.closest?.("button, select, input, a, label"); if (inner && inner !== el && el.contains(inner)) return; this.bpOpen = el.dataset.bpOpen; this.render(); });
+    root.querySelectorAll("tr[data-bp-open]").forEach(openByKey);
+    root.querySelector("[data-bp-back]")?.addEventListener("click", () => { this.bpOpen = ""; this.render(); });
     root.querySelector("[data-bp-refresh]")?.addEventListener("click", () => { this._blueprintsRequested = false; this.blueprints = null; this.render(); });
     root.querySelector("[data-weekly]")?.addEventListener("click", () => this.weeklyReport());
     root.querySelectorAll("[data-fsel-group]").forEach(el => el.onchange = () => { (this._findGroups?.[el.dataset.fselGroup] || []).forEach(key => (el.checked ? this.findSel.add(key) : this.findSel.delete(key))); this.render(); });
