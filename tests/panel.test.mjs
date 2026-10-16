@@ -1315,12 +1315,11 @@ test("a dry-run plan is confirmed, typed, executed with progress, and can be und
   } };
   el.render();
   let html = shadow.innerHTML;
-  assert.ok(html.includes("data-plan-confirm") && html.includes("data-plan-close>Cancel") && html.includes('data-ack-all') && !html.includes("data-plan-execute"));
-  el.ack.add("sensor.b"); el.render();
+  assert.ok(html.includes("data-plan-confirm") && html.includes("data-plan-discard>Cancel") && !html.includes('data-ack-all') && !html.includes("data-plan-execute"));
   assert.ok(shadow.innerHTML.includes("2 entities will be disabled") && shadow.innerHTML.includes('data-count="2"'), "the preview already names what runs");
   await el.confirmPlan();
   const confirm = sent.find(m => m.type === "ha_housekeeper/plan_confirm");
-  assert.equal(JSON.stringify(confirm.acknowledged), JSON.stringify(["sensor.b"]));
+  assert.equal(JSON.stringify(confirm.acknowledged), JSON.stringify(["sensor.b"]), "the dialog is the acknowledgement: every step to review is sent");
   el.render();
   html = shadow.innerHTML;
   assert.ok(!html.includes("data-confirm-word") && !html.includes("data-plan-execute"), "one step: no second screen and no word to type");
@@ -3975,6 +3974,24 @@ test("every new plan opens through openNewPlan, so none is left out of view (iss
       assert.ok(src.slice(m.index, m.index + 400).split("\n").slice(0, 3).join("\n").includes("openNewPlan("), `${name}: plan_create without openNewPlan`);
     }
   }
+});
+
+test("a preview that deletes statistics offers the states switch and is cancelled for good", async () => {
+  const { el, shadow } = panel("en");
+  el.data = { ...DATA, objects: [], edges: [], findings: [] };
+  const act = { kind: "purge_statistics", object_id: "sensor.old", name: "sensor.old", verdict: "review", executable: true, reasons: ["irreversible"], used_by: [], states: true };
+  el.plan = { plan_id: "p9", created_at: new Date().toISOString(), status: "dry_run", executed: false, summary: { total: 1, ok: 0, review: 1, blocked: 0 }, actions: [act], simulation: { purge_states_rows: 7 } };
+  el.journal = [el.plan]; el.view = "plan";
+  const sent = [];
+  el._hass = { language: "en", callWS: async msg => { sent.push(msg); return msg.type === "ha_housekeeper/plan_create" ? { ...el.plan, plan_id: "p10", actions: [{ ...act, states: msg.actions[0].states }] } : {}; } };
+  el.render();
+  assert.ok(shadow.innerHTML.includes("data-purge-states-switch") && shadow.innerHTML.includes("7 stored states"));
+  await el.setPurgeStates(false);
+  assert.equal(sent.find(m => m.type === "ha_housekeeper/plan_create").actions[0].states, false);
+  assert.equal(el.plan.plan_id, "p10");
+  assert.ok(sent.some(m => m.type === "ha_housekeeper/plan_delete" && m.plan_id === "p9"));
+  await el.discardPlan();
+  assert.ok(sent.some(m => m.type === "ha_housekeeper/plan_delete" && m.plan_id === "p10") && !el.journal.length && !el.plan);
 });
 
 test("the overview of an object offers its actions: decide a finding, replace a missing entity, disable, label", () => {

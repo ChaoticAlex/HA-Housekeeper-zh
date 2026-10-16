@@ -2,11 +2,19 @@
 
 ## Unreleased
 
+### Geändert
+
+- **Oberfläche, Plan-Vorschau:** „Aus dem Recorder löschen“ führt direkt in die Vorschau. Die Wahl „Auch die gespeicherten Zustände löschen“ ist dort ein hervorgehobener Schiebeschalter unten (an, nur bei Plänen, die Statistiken löschen). „Erwarteter Endzustand“ ist hervorgehoben, nennt Statistik und Rohdaten getrennt und zeigt „bleiben bestehen“-Zeilen nur, wenn sie nicht 0 sind. Das Kästchen „zur Kenntnis genommen“ entfällt: Das Bestätigen-Popup ist die Bestätigung. „Abbrechen“ verwirft die Vorschau ganz und speichert sie nicht im Journal.
+
 ### Behoben
 
 - **Oberfläche, Korrekturen:** „In HA öffnen“ (Befundseite, HACS-Knöpfe) öffnet Home Assistant in einem neuen Tab statt im selben. Das Schließen des Dialogs „Mehr Infos“ lässt die Seite, auf der man ist. „Ausgewählte zusammenführen“ ist bei mehr als 10 Plänen gesperrt (statt mit Serverfehler abzubrechen).
 
 ### English
+
+#### Changed
+
+- **Interface, plan preview:** “Delete from the recorder” goes straight to the preview. The choice “Also delete the stored states” is a highlighted switch at the foot of the preview (on, only for plans that delete statistics). “Expected end state” is highlighted, names statistics and raw data separately and shows the “remain” lines only when they are not 0. The “acknowledged” box is gone: the confirm dialog is the confirmation. “Cancel” drops the preview completely and does not keep it in the journal.
 
 #### Fixed
 

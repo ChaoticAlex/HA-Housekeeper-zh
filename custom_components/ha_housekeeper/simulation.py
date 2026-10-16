@@ -32,7 +32,7 @@ def simulate(actions: list[dict[str, Any]]) -> dict[str, Any]:
     uncertain: set[tuple[str, str]] = set()
     statistics: set[str] = set()
     manual = 0
-    purge_rows = kept_rows = 0
+    purge_rows = kept_rows = purge_stat_rows = purge_states_rows = 0
     counted = False
     for action in runnable:
         kind, object_id = action["kind"], action["object_id"]
@@ -52,9 +52,10 @@ def simulate(actions: list[dict[str, Any]]) -> dict[str, Any]:
         if kind == "purge_statistics":
             purged.add(object_id)
             if history:
-                purge_rows += history["statistics"] + (
-                    history["states"] if action.get("states") else 0
-                )
+                states_rows = history["states"] if action.get("states") else 0
+                purge_rows += history["statistics"] + states_rows
+                purge_stat_rows += history["statistics"]
+                purge_states_rows += states_rows
         elif kind == "delete_backup":
             backups_deleted += 1
             backup_bytes += (action.get("backup") or {}).get("size") or 0
@@ -118,5 +119,7 @@ def simulate(actions: list[dict[str, Any]]) -> dict[str, Any]:
         "blocked": len(actions) - len(runnable),
         "rows_counted": counted,
         "purge_rows": purge_rows,
+        "purge_stat_rows": purge_stat_rows,
+        "purge_states_rows": purge_states_rows,
         "history_rows_kept": kept_rows,
     }

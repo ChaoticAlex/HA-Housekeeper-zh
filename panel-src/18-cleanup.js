@@ -98,7 +98,7 @@ class CleanupMixin {
 
   // What the plan would run now: executable, and "to review" only when explicitly confirmed.
   runActions(plan) {
-    return plan.actions.filter(a => a.executable && (a.verdict !== "review" || this.ack.has(a.object_id)));
+    return plan.actions.filter(a => a.executable);
   }
 
   // The steps the protection mode would refuse; the server checks again, this only warns before the click.
@@ -339,7 +339,7 @@ class CleanupMixin {
 
   async confirmPlan() {
     try {
-      this.confirmation = await this._hass.callWS({ type: "ha_housekeeper/plan_confirm", plan_id: this.plan.plan_id, acknowledged: [...this.ack] });
+      this.confirmation = await this._hass.callWS({ type: "ha_housekeeper/plan_confirm", plan_id: this.plan.plan_id, acknowledged: this.plan.actions.filter(a => a.verdict === "review" && a.executable).map(a => a.object_id) });
       this.confirmWord = ""; this.cleanupError = "";
     } catch (err) { this.failPlan(err, "confirm"); }
     this.render();
@@ -558,13 +558,10 @@ class CleanupMixin {
     if (open && this.planStale(plan)) control = `<div class="setrow planfoot"><small class="u-m0">${this.t("planStaleHint")}</small><span class="planfootbtns"><button class="btn" data-plan-close>${this.t("confirmCancel")}</button><button class="btn primary" data-plan-renew="${this.esc(plan.plan_id)}" ${this.cleanupBusy ? 'disabled aria-busy="true"' : ""}><ha-icon icon="mdi:refresh"></ha-icon>${this.t("renewPlan")}</button></span></div>`;
     else if (open && !executable) control = `<p class="factnote">${this.t("nothingExecutable")}</p>`;
     else if (open && !conf) {
-      const review = plan.actions.filter(a => a.verdict === "review" && a.executable);
-      const all = review.length && review.every(a => this.ack.has(a.object_id));
-      const reviewBox = review.length ? `<label class="factnote reportopt"><input type="checkbox" data-ack-all ${all ? "checked" : ""}><span><strong>${this.t("acknowledgeAll", { count: review.length })}</strong><small>${this.t("acknowledgeAllHint")}</small></span></label>` : "";
       const run = this.runActions(plan);
       const blocked = this.modeBlocked(plan);
       const risky = run.some(a => REMOVAL_KINDS.includes(a.kind) || PURGE_KINDS.includes(a.kind));
-      control = `<div class="setrow planfoot"><div>${run.length ? `<strong class="plansum">${this.confirmSummary(plan, run.length)}</strong>` : ""}${this.largeRemovalNote(plan)}<small>${this.t("cleanupDryRun")}</small>${blocked.length ? this.modeHint(blocked) : ""}${run.length ? "" : `<small class="dim7">${this.t("nothingToRun")}</small>`}${reviewBox}</div><span class="planfootbtns"><button class="btn" data-plan-close>${this.t("confirmCancel")}</button><button class="btn ${risky ? "danger" : "primary"}" data-plan-confirm data-risky="${risky}" data-count="${run.length}" ${blocked.length || !run.length ? `disabled title="${this.esc(blocked.length ? this.t("modeBlockTitle", { mode: this.modeName() }) : this.t("nothingToRun"))}"` : ""}>${this.t("confirmPlan")}</button></span></div>`;
+      control = `<div class="setrow planfoot"><div>${run.length ? `<strong class="plansum">${this.confirmSummary(plan, run.length)}</strong>` : ""}${this.largeRemovalNote(plan)}<small>${this.t("cleanupDryRun")}</small>${this.purgeStatesSwitch(plan)}${blocked.length ? this.modeHint(blocked) : ""}${run.length ? "" : `<small class="dim7">${this.t("nothingToRun")}</small>`}</div><span class="planfootbtns"><button class="btn" data-plan-discard>${this.t("confirmCancel")}</button><button class="btn ${risky ? "danger" : "primary"}" data-plan-confirm data-risky="${risky}" data-count="${run.length}" ${blocked.length || !run.length ? `disabled title="${this.esc(blocked.length ? this.t("modeBlockTitle", { mode: this.modeName() }) : this.t("nothingToRun"))}"` : ""}>${this.t("confirmPlan")}</button></span></div>`;
     }
     else if (plan.status === "aborted") {
       const small = plan.actions.some(a => a.result?.reason === "backup_small_failed");
@@ -802,6 +799,39 @@ class CleanupMixin {
   showPlanView() {
     this._scrollPlan = true;
     if (this.view !== "plan") { this.noteJump?.("plan"); this.view = "plan"; this.pages = {}; this.selected = null; }
+  }
+
+  // "Cancel" on a preview: the plan is dropped for good, nothing stays in the journal.
+  async discardPlan() {
+    const id = this.plan?.plan_id;
+    if (id) {
+      try { await this._hass.callWS({ type: "ha_housekeeper/plan_delete", plan_id: id }); } catch (_) { /* already gone */ }
+      this.journal = (this.journal || []).filter(p => p.plan_id !== id);
+    }
+    this.leavePlan();
+  }
+
+  // Whether a deletion of statistics also deletes the stored states: the preview is made again with that choice.
+  async setPurgeStates(on) {
+    const old = this.plan;
+    if (!old || this.cleanupBusy) return;
+    this.cleanupBusy = true; this.cleanupError = ""; this.render();
+    try {
+      const actions = old.actions.map(a => ({ kind: a.kind, object_id: a.object_id, ...(a.kind === "purge_statistics" ? { states: on } : {}) }));
+      const fresh = await this._hass.callWS({ type: "ha_housekeeper/plan_create", actions });
+      this.openNewPlan(fresh, null);
+      try { await this._hass.callWS({ type: "ha_housekeeper/plan_delete", plan_id: old.plan_id }); } catch (_) { /* already gone */ }
+      this.journal = (this.journal || []).filter(p => p.plan_id !== old.plan_id);
+    } catch (err) { this.failPlan(err, "renew"); }
+    this.cleanupBusy = false; this.render();
+  }
+
+  // The choice sits at the foot of the preview, only for plans that delete statistics.
+  purgeStatesSwitch(plan) {
+    const purges = plan.actions.filter(a => a.kind === "purge_statistics" && a.executable);
+    if (!purges.length) return "";
+    const on = purges.every(a => a.states), n = plan.simulation?.purge_states_rows;
+    return `<label class="optswitch"><input class="policyswitch" type="checkbox" role="switch" data-purge-states-switch ${on ? "checked" : ""} ${this.cleanupBusy ? "disabled" : ""}><span><strong>${this.t("purgeStates")}</strong><small>${this.t(on ? "purgeStatesOn" : "purgeStatesOff", { n: this.formatNumber(n || 0) })}</small></span></label>`;
   }
 
   // Closing the plan page: back to the page it came from, else the journal.

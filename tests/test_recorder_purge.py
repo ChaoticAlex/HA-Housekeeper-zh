@@ -136,3 +136,13 @@ async def test_trimming_waits_for_every_batch_and_stops_when_nothing_moves(
 
     rows.update(n=5000, batch=0)  # a recorder that stops deleting
     assert await recorder_purge.trim_states(hass, "sensor.power", 14) == (5000, None)
+
+
+def test_simulation_splits_the_purged_rows_into_statistics_and_states():
+    from custom_components.ha_housekeeper.simulation import simulate
+
+    action = {"kind": "purge_statistics", "object_id": "sensor.old", "executable": True, "history": {"states": 5, "statistics": 3}}
+    both = simulate([{**action, "states": True}])
+    assert (both["purge_stat_rows"], both["purge_states_rows"], both["purge_rows"]) == (3, 5, 8)
+    only = simulate([{**action, "states": False}])
+    assert (only["purge_stat_rows"], only["purge_states_rows"]) == (3, 0)
