@@ -41,6 +41,7 @@ class OverviewMixin {
     const st = this.scanStatus;
     let step, frac = null;
     if (w.booting) step = this.t("warmupStepBoot");
+    else if (!w.known) step = ""; // the numbers of the scan are old; they wait for the first answer of the backend
     else if (left) {
       const time = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
       step = w.settling ? this.t("warmupStepSettle", { time }) : this.t("warmupStepWait", { time, count: w.pending || 0 });
@@ -53,18 +54,24 @@ class OverviewMixin {
 
   // Counts the warm-up down in the banner without rebuilding the page; every few seconds the backend is asked for the step.
   startWarmupTicker(meta) {
-    this._warm = { booting: Boolean(meta.warmup_booting), until: Date.now() + (Number(meta.warmup_seconds_left) || 0) * 1000, total: 300, pending: Number(meta.warmup_pending) || 0, settling: Boolean(meta.warmup_settling) };
+    this._warm = { booting: Boolean(meta.warmup_booting), until: Date.now() + (Number(meta.warmup_seconds_left) || 0) * 1000, total: 300, pending: Number(meta.warmup_pending) || 0, settling: Boolean(meta.warmup_settling), known: false };
     if (this._warmTick) return;
-    let n = 0;
+    let n = 0, asking = false;
+    const ask = async () => {
+      if (asking || this.busy || !this._hass) return;
+      asking = true;
+      try {
+        const s = await this._hass.callWS({ type: "ha_housekeeper/status" });
+        this.scanStatus = s;
+        this._warm = { ...this._warm, booting: Boolean(s.warmup?.booting), until: Date.now() + (Number(s.warmup?.seconds_left) || 0) * 1000, pending: Number(s.warmup?.pending) || 0, settling: Boolean(s.warmup?.settling), known: true };
+        const box = this.shadowRoot?.querySelector?.("[data-warmup] .row-text");
+        if (box) box.innerHTML = this.warmupInner();
+      } catch (_) { /* the next tick asks again */ } finally { asking = false; }
+    };
+    ask();
     this._warmTick = window.setInterval(async () => {
       if (this._gone || !this.data?.meta?.preliminary) { this.stopWarmupTicker(); return; }
-      if (++n % 5 === 0 && !this.busy && this._hass) {
-        try {
-          const s = await this._hass.callWS({ type: "ha_housekeeper/status" });
-          this.scanStatus = s;
-          this._warm = { ...this._warm, booting: Boolean(s.warmup?.booting), until: Date.now() + (Number(s.warmup?.seconds_left) || 0) * 1000, pending: Number(s.warmup?.pending) || 0, settling: Boolean(s.warmup?.settling) };
-        } catch (_) { /* the next tick asks again */ }
-      }
+      if (++n % 5 === 0) ask();
       const box = this.shadowRoot?.querySelector?.("[data-warmup] .row-text");
       if (box) box.innerHTML = this.warmupInner();
     }, 1000);

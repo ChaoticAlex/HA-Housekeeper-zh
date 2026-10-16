@@ -884,6 +884,27 @@ async def test_warmup_ends_a_minute_after_the_integrations_have_loaded(hass: Hom
     assert not scanner.warming_up
 
 
+async def test_a_short_loading_blip_does_not_restart_the_warmup_buffer(hass: HomeAssistant) -> None:
+    """Only an integration that keeps loading for a while takes the settled mark away."""
+    import time
+
+    from homeassistant.config_entries import ConfigEntryState
+
+    from custom_components.ha_housekeeper.const import WARMUP_BLIP_SECONDS, WARMUP_SECONDS
+    from custom_components.ha_housekeeper.inventory import InventoryScanner
+
+    scanner = InventoryScanner(hass)
+    scanner.begin_warmup(WARMUP_SECONDS)
+    settled = scanner._settled_at
+    assert settled is not None
+    scanner.hass = type("H", (), {"config_entries": type("C", (), {"async_entries": lambda self: [type("E", (), {"state": ConfigEntryState.SETUP_IN_PROGRESS})()]})()})()
+    scanner.check_warmup()
+    assert scanner._settled_at == settled
+    scanner._pending_since = time.monotonic() - WARMUP_BLIP_SECONDS - 1
+    scanner.check_warmup()
+    assert scanner._settled_at is None
+
+
 async def test_a_set_up_after_the_start_has_no_warmup(hass: HomeAssistant) -> None:
     """Reloading the integration on a running Home Assistant scans normally."""
     result = await hass.config_entries.flow.async_init(

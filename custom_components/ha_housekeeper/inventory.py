@@ -59,6 +59,7 @@ from .const import (
     SIGNAL_SCAN_STARTED,
     STORAGE_VERSION,
     WARMUP_SECONDS,
+    WARMUP_BLIP_SECONDS,
     WARMUP_SETTLE_SECONDS,
     WINDOW_STORAGE_KEY,
 )
@@ -815,6 +816,7 @@ class InventoryScanner:
         self._booting = False
         self._warmup_until: float | None = None
         self._settled_at: float | None = None  # since when no integration has been loading
+        self._pending_since: float | None = None  # since when an integration has been loading again
         self.integrations_pending = 0
         self._recorder_available = False
         # What the scan in progress could not read: "dashboard", "dashboard:<id>" or "app".
@@ -886,6 +888,7 @@ class InventoryScanner:
         self._booting = False
         self._warmup_until = time.monotonic() + seconds
         self._settled_at = None
+        self._pending_since = None
         self.check_warmup()
 
     def check_warmup(self) -> None:
@@ -897,10 +900,17 @@ class InventoryScanner:
             for entry in self.hass.config_entries.async_entries()
             if entry.state is ConfigEntryState.SETUP_IN_PROGRESS
         )
+        now = time.monotonic()
         if self.integrations_pending:
-            self._settled_at = None
-        elif self._settled_at is None:
-            self._settled_at = time.monotonic()
+            if self._pending_since is None:
+                self._pending_since = now
+            # A short blip after the integrations had settled does not start the buffer over.
+            if self._settled_at is None or now - self._pending_since >= WARMUP_BLIP_SECONDS:
+                self._settled_at = None
+        else:
+            self._pending_since = None
+            if self._settled_at is None:
+                self._settled_at = now
 
     @property
     def warmup_settling(self) -> bool:

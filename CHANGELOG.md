@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Behoben
+
+- **Oberfläche, Korrekturen:** Der Start-Hinweis zeigt nach dem Neuladen der Seite nicht mehr kurz die alten „5 Minuten“, sondern wartet auf die aktuelle Angabe. Der Puffer von einer Minute fängt wegen einer kurz ladenden Integration nicht mehr mehrmals von vorn an.
+
+### English
+
+#### Fixed
+
+- **Interface, corrections:** After a page reload the start notice no longer shows the old “5 minutes” for a moment but waits for the current figure. The one-minute buffer no longer starts over because an integration loads briefly.
+
 ## 1.8.2 - 2026-10-16
 
 ### Geändert

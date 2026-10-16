@@ -1270,13 +1270,15 @@ test("the start banner names the step and counts the warm-up down", () => {
   el.data = { ...DATA, meta: { ...DATA.meta, preliminary: true } };
   el._warm = { booting: true };
   assert.ok(el.warmupBanner().includes("Step 1 of 3"));
-  el._warm = { until: Date.now() + 125000, total: 300 };
+  el._warm = { until: Date.now() + 125000, total: 300, known: true };
   assert.ok(el.warmupBanner().includes("2:0") && el.warmupBanner().includes("Step 2 of 3"));
-  el._warm = { until: Date.now() + 45000, total: 300, settling: true };
+  el._warm = { until: Date.now() + 45000, total: 300, settling: true, known: true };
   assert.ok(el.warmupBanner().includes("all integrations have loaded"));
-  el._warm = { until: Date.now() - 1000 };
+  el._warm = { until: Date.now() - 1000, known: true };
   el.scanStatus = { running: true, progress: 40 };
   assert.ok(el.warmupBanner().includes("Step 3 of 3") && el.warmupBanner().includes("40%"));
+  el._warm = { until: Date.now() + 290000, total: 300, known: false }; // numbers of an old scan are not shown
+  assert.ok(!el.warmupBanner().includes("4:5") && !el.warmupBanner().includes("Step 2 of 3"));
 });
 
 test("the recorder load header shows rows, entities and events as figures and names what was left out", () => {
