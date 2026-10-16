@@ -22,7 +22,8 @@ class Reply(TypedDict, total=False):
 
 class ExposureAssistant(TypedDict):
     id: str
-    status: str  # ok, inactive or unavailable (never "not exposed")
+    # ok, inactive, off (switched off in Nabu Casa) or unavailable (never "not exposed")
+    status: str
     exposed: int
 
 

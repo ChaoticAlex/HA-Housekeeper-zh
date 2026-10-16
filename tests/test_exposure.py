@@ -227,6 +227,21 @@ async def test_cloud_assistants_inactive_without_cloud(hass: HomeAssistant) -> N
     assert data["assistants"]["cloud.alexa"]["status"] == "inactive"
 
 
+async def test_cloud_assistant_switched_off_in_nabu_casa(hass: HomeAssistant) -> None:
+    from types import SimpleNamespace
+
+    hass.config.components.add("cloud")
+    prefs = SimpleNamespace(alexa_enabled=True, google_enabled=False)
+    hass.data["cloud"] = SimpleNamespace(client=SimpleNamespace(prefs=prefs))
+    with patch(
+        "homeassistant.components.homeassistant.exposed_entities.async_should_expose",
+        return_value=True,
+    ):
+        data = collect(hass, ["light.a"])
+    assert data["assistants"]["cloud.google_assistant"] == {"status": "off", "exposed": []}
+    assert data["assistants"]["cloud.alexa"] == {"status": "ok", "exposed": ["light.a"]}
+
+
 async def test_collect_runs_against_real_exposed_entities(hass: HomeAssistant) -> None:
     from homeassistant.components.homeassistant.exposed_entities import async_expose_entity
     from homeassistant.setup import async_setup_component

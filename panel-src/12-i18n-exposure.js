@@ -6,7 +6,7 @@ Object.assign(TEXT.de, {
   expoNone: "Nichts Auffälliges bei den Freigaben.", expoHint2: "Hinweis", expoWarn: "Prüfen",
   expoAssistants: "Assistenten und Bridges", expoFindings: "Auffälligkeiten",
   expoName_conversation: "Assist", expoName_cloud_alexa: "Alexa", expoName_cloud_google_assistant: "Google Assistant", expoName_homekit: "HomeKit",
-  expoOk: "{n} Entitäten freigegeben", expoInactive: "nicht eingerichtet", expoUnavailable: "nicht prüfbar", expoBridge: "{n} Entitäten durch den Filter",
+  expoOk: "{n} Entitäten freigegeben", expoInactive: "nicht eingerichtet", expoOff: "in Nabu Casa ausgeschaltet", expoUnavailable: "nicht prüfbar", expoBridge: "{n} Entitäten durch den Filter",
   expoKind_diagnostic_exposed: "Diagnose-Entitäten freigegeben", expoKind_sensitive_exposed: "Sensible Entitäten freigegeben", expoKind_stale_exposed: "Freigabe für deaktivierte oder verwaiste Entitäten", expoKind_alias_duplicate: "Doppelter Sprachname", expoKind_webhook_orphan: "Webhooks ohne Integration",
   expoText_diagnostic_exposed: "{n} Entitäten aus der Kategorie Diagnose oder Konfiguration sind freigegeben. Sie helfen beim Sprechen selten.",
   expoText_sensitive_exposed: "{n} Schlösser, Alarmanlagen, Personen, Tracker oder Garagentore sind freigegeben. Das kann gewollt sein; prüfe, ob der Assistent sie steuern oder verraten darf.",
@@ -19,7 +19,7 @@ Object.assign(TEXT.de, {
   expoAdvice_alias_duplicate: "Einen der Namen ändern, damit die Sprachbefehle eindeutig sind.",
   expoAdvice_webhook_orphan: "Die Integration neu einrichten oder die Reste entfernen, falls sie nicht mehr gebraucht werden.",
   expoMore: "und {n} weitere", expoToCheck: "Zu prüfen", expoToNote: "Zur Kenntnis",
-  expoFootnote: "Housekeeper liest je Assistent, welche Entitäten Home Assistant freigibt, bei HomeKit nur den gespeicherten Entitäts-Filter der Bridge. Passwörter, Tokens, Ports und Webhook-IDs werden nie gelesen oder angezeigt. Wenn eine Quelle nicht antwortet, steht „nicht prüfbar“, nie „nicht freigegeben“. Sprachnamen gelten als gleich, wenn sie sich nur in Groß- und Kleinschreibung, Leerzeichen oder Umlauten unterscheiden.",
+  expoFootnote: "Housekeeper liest je Assistent, welche Entitäten Home Assistant freigibt, bei HomeKit nur den gespeicherten Entitäts-Filter der Bridge. Passwörter, Tokens, Ports und Webhook-IDs werden nie gelesen oder angezeigt. Ist Alexa oder Google Assistant in den Nabu-Casa-Einstellungen ausgeschaltet, erreicht er nichts und wird nicht bewertet. Wenn eine Quelle nicht antwortet, steht „nicht prüfbar“, nie „nicht freigegeben“. Sprachnamen gelten als gleich, wenn sie sich nur in Groß- und Kleinschreibung, Leerzeichen oder Umlauten unterscheiden.",
 });
 Object.assign(TEXT.en, {
   expoSumEntities: "entities exposed", expoColName: "Name", expoColDomain: "Type", expoColArea: "Area", expoColAlso: "Also exposed to", expoColAssistants: "Exposed to", expoAllDomains: "All types", expoAllAlso: "All services", expoSumFindings: "Findings", expoTabFindings: "Findings", expoSourceHint: "{n} entities are exposed to {name}.", expoAlso: "also: {list}", expoCapped: "The first {n} are shown.", expoNoneFor: "Nothing is exposed to this source.", expoInactiveText: "Not set up: nothing is exposed.",
@@ -28,7 +28,7 @@ Object.assign(TEXT.en, {
   expoNone: "Nothing unusual in the exposure.", expoHint2: "Note", expoWarn: "Check",
   expoAssistants: "Assistants and bridges", expoFindings: "Findings",
   expoName_conversation: "Assist", expoName_cloud_alexa: "Alexa", expoName_cloud_google_assistant: "Google Assistant", expoName_homekit: "HomeKit",
-  expoOk: "{n} entities exposed", expoInactive: "not set up", expoUnavailable: "cannot be checked", expoBridge: "{n} entities through the filter",
+  expoOk: "{n} entities exposed", expoInactive: "not set up", expoOff: "switched off in Nabu Casa", expoUnavailable: "cannot be checked", expoBridge: "{n} entities through the filter",
   expoKind_diagnostic_exposed: "Diagnostic entities exposed", expoKind_sensitive_exposed: "Sensitive entities exposed", expoKind_stale_exposed: "Exposed but disabled or orphaned", expoKind_alias_duplicate: "Duplicate voice name", expoKind_webhook_orphan: "Webhooks without integration",
   expoText_diagnostic_exposed: "{n} entities in the diagnostic or configuration category are exposed. They rarely help when speaking.",
   expoText_sensitive_exposed: "{n} locks, alarm panels, persons, trackers or garage doors are exposed. That can be intended; check whether the assistant may control or reveal them.",
@@ -41,5 +41,5 @@ Object.assign(TEXT.en, {
   expoAdvice_alias_duplicate: "Rename one of them so voice commands are unambiguous.",
   expoAdvice_webhook_orphan: "Set the integration up again or remove the leftovers if they are no longer needed.",
   expoMore: "and {n} more", expoToCheck: "To check", expoToNote: "For your information",
-  expoFootnote: "Housekeeper reads, per assistant, which entities Home Assistant exposes; for HomeKit only the stored entity filter of the bridge. Passwords, tokens, ports and webhook ids are never read or shown. If a source does not answer, it says \"cannot be checked\", never \"not exposed\". Voice names count as equal when they differ only in case, spaces or umlauts.",
+  expoFootnote: "Housekeeper reads, per assistant, which entities Home Assistant exposes; for HomeKit only the stored entity filter of the bridge. Passwords, tokens, ports and webhook ids are never read or shown. If Alexa or Google Assistant is switched off in the Nabu Casa settings, it reaches nothing and is not judged. If a source does not answer, it says \"cannot be checked\", never \"not exposed\". Voice names count as equal when they differ only in case, spaces or umlauts.",
 });

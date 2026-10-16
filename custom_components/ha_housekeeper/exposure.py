@@ -2,7 +2,8 @@
 
 Only reads, nothing is stored and nothing is changed. Only metadata leaves this module: entity ids,
 names, the assistant and counts. Config entries are read through a whitelist (the entity filter of
-a bridge and nothing else), webhooks are only counted per integration. A webhook id or url never
+a bridge and nothing else), of Nabu Casa only whether Alexa and Google are switched on, webhooks are
+only counted per integration. A webhook id or url never
 appears in a result, not even shortened: whoever knows it can call the webhook.
 """
 
@@ -19,6 +20,8 @@ from .payloads import ExposureResult
 
 ASSISTANTS = ("conversation", "cloud.alexa", "cloud.google_assistant")
 CLOUD_ASSISTANTS = ("cloud.alexa", "cloud.google_assistant")
+# The Nabu Casa switch of a cloud assistant: off means it reaches nothing, whatever is exposed.
+CLOUD_SWITCHES = {"cloud.alexa": "alexa_enabled", "cloud.google_assistant": "google_enabled"}
 BRIDGE_DOMAINS = ("homekit",)
 # The only keys read from the options of a bridge: the entity filter, never ports, codes or pairing data.
 FILTER_KEYS = (
@@ -58,6 +61,20 @@ def normalize_alias(alias: str) -> str:
     return "".join(ch for ch in text if ch.isalnum())
 
 
+def _cloud_prefs(hass: HomeAssistant) -> Any:
+    """The Nabu Casa preferences, or None when the cloud is not loaded or they cannot be read."""
+    cloud = hass.data.get("cloud")
+    return getattr(getattr(cloud, "client", None), "prefs", None)
+
+
+def _cloud_switch_off(prefs: Any, name: str) -> bool:
+    """True only when the switch reads as a plain False; anything unreadable keeps the check."""
+    try:
+        return getattr(prefs, CLOUD_SWITCHES[name]) is False
+    except Exception:  # noqa: BLE001 - another cloud version: check as before, never assume off
+        return False
+
+
 def _assistant_exposure(hass: HomeAssistant, entity_ids: list[str]) -> dict[str, dict[str, Any]]:
     """Per assistant: its status and the entities it may use. A source that fails is "unavailable"."""
     result: dict[str, dict[str, Any]] = {}
@@ -65,9 +82,13 @@ def _assistant_exposure(hass: HomeAssistant, entity_ids: list[str]) -> dict[str,
         from homeassistant.components.homeassistant.exposed_entities import async_should_expose
     except Exception:  # noqa: BLE001 - another Home Assistant version without this module
         return {name: {"status": "unavailable", "exposed": []} for name in ASSISTANTS}
+    prefs = _cloud_prefs(hass)
     for name in ASSISTANTS:
         if name in CLOUD_ASSISTANTS and "cloud" not in hass.config.components:
             result[name] = {"status": "inactive", "exposed": []}
+            continue
+        if name in CLOUD_ASSISTANTS and prefs is not None and _cloud_switch_off(prefs, name):
+            result[name] = {"status": "off", "exposed": []}
             continue
         try:
             exposed = [eid for eid in entity_ids if async_should_expose(hass, name, eid)]
