@@ -5124,6 +5124,19 @@ test("the rights of the apps show under access and data flow, or why they are mi
   assert.ok(html.includes("Apps gibt es nur mit Home Assistant OS oder Supervised.") && html.includes("taskcard t-mute off"));
 });
 
+test("the ways in from outside show in their own tab", () => {
+  const { el, shadow } = systemPanel("de");
+  el._sys.dataflow.data = { ...ACCESS, inbound: [
+    { kind: "nabu_casa", name: "Nabu Casa", state: "on", level: "warn" },
+    { kind: "vpn", name: "Tailscale", slug: "a0d7b954_tailscale", state: "running", level: "ok" },
+  ] };
+  el.view = "dataflow";
+  el.pickViewTab("dataflow|inbound");
+  const html = shadow.innerHTML;
+  assert.ok(html.includes("Von außen erreichbar") && html.includes("Fernzugriff auf die Oberfläche über Nabu Casa"));
+  assert.ok(html.includes('data-ha-path="/hassio/addon/a0d7b954_tailscale/info"') && html.includes("1 offen"));
+});
+
 test("the menu button for Home Assistant's sidebar shows when the sidebar is hidden", () => {
   const Event = class { constructor(type, init) { this.type = type; Object.assign(this, init); } };
   const { el, shadow } = panel("en", { Event });

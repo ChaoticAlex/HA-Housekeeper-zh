@@ -280,7 +280,8 @@ class SystemMixin {
       const cloud = entries.filter(e => e.external);
       const appList = r.apps || [];
       const hooks = r.webhooks || [], hooksOpen = hooks.filter(w => !w.local_only && w.enabled !== false).length;
-      const open = this.viewTabOf("dataflow", [{ id: "sys" }, { id: "cloud" }, ...(r.apps_available ? [{ id: "apps" }] : []), ...(hooks.length ? [{ id: "hooks" }] : [])], "sys");
+      const inbound = r.inbound || [], inboundWarn = inbound.filter(i => i.level === "warn").length;
+      const open = this.viewTabOf("dataflow", [{ id: "sys" }, { id: "cloud" }, ...(r.apps_available ? [{ id: "apps" }] : []), { id: "inbound" }, ...(hooks.length ? [{ id: "hooks" }] : [])], "sys");
       const risks = [["high", this.t("accRisk_high")], ["medium", this.t("accRisk_medium")], ["low", this.t("accRisk_low")]];
       const riskOrder = { high: 0, medium: 1, low: 2 };
       const flows = e => e.flows.map(f => this.t(`accFlow_${f}`));
@@ -336,13 +337,39 @@ class SystemMixin {
         { id: "cloud", icon: "mdi:cloud-outline", label: this.t("accCloudTitle"), hint: this.t("accCloudHint"), count: cloud.length, tone: tone(hi(cloud)), ...(hi(cloud) ? { pill: this.t("accTabHigh", { n: this.formatNumber(hi(cloud)) }), pillTone: "red" } : {}) },
         r.apps_available ? { id: "apps", icon: "mdi:package-variant-closed", label: this.t("accAppsTitle"), hint: this.t("accAppsHint"), count: appList.length, tone: tone(hi(appList)), ...(hi(appList) ? { pill: this.t("accTabHigh", { n: this.formatNumber(hi(appList)) }), pillTone: "red" } : {}) } : { id: "apps", icon: "mdi:package-variant-closed", label: this.t("accAppsTitle"), hint: this.t("accAppsNoSupervisor"), disabled: true },
       ];
+      tabs.push({ id: "inbound", icon: "mdi:earth", label: this.t("accInTitle"), hint: this.t("accInHint"), count: inbound.length, tone: tone(inboundWarn, "warn"), ...(inboundWarn ? { pill: this.t("accTabOpen", { n: this.formatNumber(inboundWarn) }), pillTone: "warn" } : {}) });
       if (hooks.length) tabs.push({ id: "hooks", icon: "mdi:webhook", label: this.t("accHooksTitle"), hint: this.t("accHooksHint"), count: hooks.length, tone: tone(hooksOpen, "warn"), ...(hooksOpen ? { pill: this.t("accTabOpen", { n: this.formatNumber(hooksOpen) }), pillTone: "warn" } : {}) });
       const body = open === "hooks" ? panel("acchooks", hookTable, "")
+        : open === "inbound" ? panel("accin", `${this.accInboundTable(inbound)}<p class="factnote">${this.t("accInNote")}</p>`, "accInLegend")
         : open === "cloud" ? panel("acccloud", cloudTable)
         : open === "apps" ? panel("accapps", this.accAppsTable(appList, risks, sorts.find(x => x.key === "risk")), "accLegendApps")
         : panel("accsys", sysTable);
       return `<div class="stack">${head}${this.navTiles("dataflow", tabs, open, this.t("dataflow"), true)}${body}<div class="panel">${this.howCounted("accFootnote")}</div></div>`;
     }, e => `<span>${this.esc(this.t("sysChecked", { n: this.formatNumber((e.entries || []).length) }))}</span>`);
+  }
+
+  // Ways in from outside. A row opens the app, the integration, the cloud settings or the webhook tab.
+  accInboundTable(list) {
+    const rowAttrs = i => {
+      const label = `aria-label="${this.esc(i.name)}" tabindex="0"`;
+      if (i.slug) return `data-ha-path="${this.esc(`/hassio/addon/${encodeURIComponent(i.slug)}/info`)}" role="link" ${label}`;
+      if (i.domain) return `data-ha-path="${this.esc(`/config/integrations/integration/${encodeURIComponent(i.domain)}`)}" role="link" ${label}`;
+      if (i.kind === "nabu_casa") return `data-ha-path="/config/cloud/account" role="link" ${label}`;
+      return i.kind === "webhooks" ? `data-view-tab="dataflow|hooks" role="button" ${label}` : "";
+    };
+    const tone = { warn: "warn", ok: "ok", mute: "mute" };
+    return this.sysList("accin", list, {
+      sort: "level", dir: "asc", cls: "acc", tie: i => `${i.kind} ${i.name}`, empty: "accInNone",
+      sorts: [{ key: "level", label: "accInColState", dir: "asc", get: i => ({ warn: 0, mute: 1, ok: 2 })[i.level] ?? 3 }, { key: "name", label: "accInColWay", dir: "asc", get: i => i.name }],
+      text: i => `${i.name} ${this.t(`accIn_${i.kind}`)}`,
+      rowAttrs,
+      columns: [
+        { key: "name", label: "accInColWay", cell: i => this.nameCell(i.name, this.t(`accInKind_${i.kind}`)) },
+        { key: "what", label: "accInColWhat", sortable: false, cell: i => this.esc(this.t(`accIn_${i.kind}`, { n: this.formatNumber(i.count || 0) })) },
+        { key: "level", label: "accInColState", cell: i => `<span class="pill ${tone[i.level] || "mute"}">${this.esc(this.t(`accInState_${i.state}`, { n: this.formatNumber(i.count || 0) }))}</span>` },
+      ],
+      exportName: "inbound", header: [this.t("accInColWay"), this.t("accInColWhat"), this.t("accInColState")], rows: i => [i.name, this.t(`accIn_${i.kind}`, { n: i.count || 0 }), this.t(`accInState_${i.state}`, { n: i.count || 0 })],
+    });
   }
 
   // A row of an app opens its detail page when the scan knows it, else the app in Home Assistant.

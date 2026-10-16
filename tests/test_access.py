@@ -162,6 +162,27 @@ def test_app_protection_ports_and_origin() -> None:
     assert app_origin({"repository": "core", "stage": "stable"})["origin"] == "core"
 
 
+async def test_inbound_paths_name_the_ways_in(hass: HomeAssistant) -> None:
+    from types import SimpleNamespace
+
+    from custom_components.ha_housekeeper.access import inbound_paths
+
+    hass.config.components.add("cloud")
+    prefs = SimpleNamespace(remote_enabled=True)
+    hass.data["cloud"] = SimpleNamespace(client=SimpleNamespace(prefs=prefs), is_logged_in=True)
+    apps = [
+        {"slug": "9074a9fa_cloudflared", "name": "Cloudflared", "state": "started"},
+        {"slug": "a0d7b954_tailscale", "name": "Tailscale", "state": "started"},
+        {"slug": "core_mosquitto", "name": "Mosquitto", "state": "started"},
+    ]
+    entries = [{"domain": "mcp_server", "title": "MCP", "disabled": False}]
+    hooks = [{"local_only": False, "enabled": True}]
+    found = {i["kind"]: i for i in inbound_paths(hass, entries, apps, hooks)}
+    assert set(found) == {"nabu_casa", "tunnel", "vpn", "mcp_server", "webhooks"}
+    assert found["nabu_casa"]["state"] == "on" and found["tunnel"]["level"] == "warn"
+    assert found["vpn"]["level"] == "ok" and found["webhooks"]["count"] == 1
+
+
 async def test_apps_report_reads_every_app_and_marks_one_without_answer(
     hass: HomeAssistant,
 ) -> None:

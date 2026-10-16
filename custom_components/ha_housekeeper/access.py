@@ -379,6 +379,92 @@ def webhook_triggers(automations: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return found
 
 
+# Apps that open a way in from outside, by a part of their slug: a public tunnel, a reverse proxy,
+# a dynamic DNS name, or a private VPN (only members of the network reach it).
+INBOUND_APPS: dict[str, str] = {
+    "cloudflared": "tunnel",
+    "ngrok": "tunnel",
+    "nginx_proxy": "proxy",
+    "nginxproxymanager": "proxy",
+    "duckdns": "dyndns",
+    "tailscale": "vpn",
+    "zerotier": "vpn",
+    "wireguard": "vpn",
+}
+
+
+def _nabu_casa(hass: HomeAssistant) -> dict[str, Any] | None:
+    """Whether the remote UI of Nabu Casa is on. None without the cloud; "unknown" if unreadable."""
+    if "cloud" not in hass.config.components:
+        return None
+    cloud = hass.data.get("cloud")
+    try:
+        remote = cloud.client.prefs.remote_enabled  # type: ignore[union-attr]
+        logged_in = cloud.is_logged_in  # type: ignore[union-attr]
+    except Exception:  # noqa: BLE001 - another cloud version: say so, never guess "off"
+        return {"kind": "nabu_casa", "name": "Nabu Casa", "state": "unknown", "level": "mute"}
+    state = "logged_out" if not logged_in else "on" if remote is True else "off"
+    return {
+        "kind": "nabu_casa",
+        "name": "Nabu Casa",
+        "state": state,
+        "level": "warn" if state == "on" else "ok",
+    }
+
+
+def inbound_paths(
+    hass: HomeAssistant,
+    entries: list[dict[str, Any]],
+    apps: list[dict[str, Any]],
+    webhooks: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Ways in from outside that Housekeeper can see: the remote UI of Nabu Casa, tunnel, proxy,
+    dynamic DNS and VPN apps (by name), the MCP server and webhooks open beyond the local network.
+    A port forwarding on the router is not visible from here."""
+    found: list[dict[str, Any]] = []
+    nabu = _nabu_casa(hass)
+    if nabu:
+        found.append(nabu)
+    for app in apps:
+        kind = next((k for token, k in INBOUND_APPS.items() if matches(app["slug"], token)), None)
+        if kind is None:
+            continue
+        running = app.get("state") == "started"
+        level = "ok" if kind == "vpn" or not running else "warn"
+        found.append(
+            {
+                "kind": kind,
+                "name": app["name"],
+                "slug": app["slug"],
+                "state": "running" if running else "stopped",
+                "level": level,
+            }
+        )
+    for entry in entries:
+        if entry["domain"] == "mcp_server" and not entry["disabled"]:
+            found.append(
+                {
+                    "kind": "mcp_server",
+                    "name": entry["title"],
+                    "domain": entry["domain"],
+                    "state": "set_up",
+                    "level": "warn",
+                }
+            )
+    if webhooks:
+        opened = sum(1 for w in webhooks if not w["local_only"] and w["enabled"])
+        found.append(
+            {
+                "kind": "webhooks",
+                "name": "Webhooks",
+                "state": "open" if opened else "local",
+                "count": opened,
+                "level": "warn" if opened else "ok",
+            }
+        )
+    return found
+
+
 async def access_report(
     hass: HomeAssistant, automations: list[dict[str, Any]] | None = None
 ) -> dict[str, Any]:
@@ -408,11 +494,13 @@ async def access_report(
         )
     items.sort(key=lambda i: (RISK_ORDER[i["risk"]], i["domain"], str(i["title"]).lower()))
     apps = await apps_report(hass)
+    webhooks = webhook_triggers(automations or [])
     return {
         "entries": items,
         "apps": apps["apps"],
         "apps_available": apps["available"],
-        "webhooks": webhook_triggers(automations or []),
+        "webhooks": webhooks,
+        "inbound": inbound_paths(hass, items, apps["apps"], webhooks),
         "with_access": sum(1 for i in items if i["access"]),
         "external": sum(1 for i in items if i["external"]),
         "high": sum(1 for i in items if i["risk"] == "high"),
