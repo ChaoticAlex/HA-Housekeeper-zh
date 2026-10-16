@@ -82,4 +82,7 @@ async def test_accounts_name_role_and_two_factor_but_never_a_token(hass: HomeAss
     row = rows["Admin"]
     assert (row["admin"], row["mfa"], row["token_count"], row["logins"]) == (True, False, 1, False)
     assert row["inactive"] is False, "only tokens: a service account, as the account rule says"
+    assert [(t["name"], t["account"], t["days"], t["old"]) for t in result["tokens"]] == [
+        ("Node-RED", "Admin", 0, False)
+    ]
     assert token.token not in json.dumps(result) and token.jwt_key not in json.dumps(result)

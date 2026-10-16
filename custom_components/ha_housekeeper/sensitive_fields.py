@@ -18,7 +18,7 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
 
-from .policy_rules import user_inactive
+from .policy_rules import ACCOUNT_DAYS, user_inactive
 
 SOURCES = ("data", "options")
 MAX_DEPTH = 3  # nested mappings below a field (OAuth keeps the tokens in "token")
@@ -126,6 +126,27 @@ def accounts(facts: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
 
 
+def long_lived_tokens(facts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Every long-lived token by name, account and age. Home Assistant does not record when one is
+    used, so the age is all there is; ``old`` from ACCOUNT_DAYS on, as the token rule says."""
+    now = dt_util.utcnow()
+    rows = []
+    for user in facts:
+        for token in user["tokens"]:
+            days = max(0, (now - token["created"]).days)
+            rows.append(
+                {
+                    "name": token["name"],
+                    "account": user["name"],
+                    "account_active": user["active"],
+                    "created": token["created"].isoformat(),
+                    "days": days,
+                    "old": days >= ACCOUNT_DAYS,
+                }
+            )
+    return sorted(rows, key=lambda row: -row["days"])
+
+
 async def sensitive_fields(hass: HomeAssistant) -> dict[str, Any]:
     """Every config entry with credential fields (kind and set or empty, never a value) and the
     accounts."""
@@ -147,4 +168,8 @@ async def sensitive_fields(hass: HomeAssistant) -> dict[str, Any]:
         facts = await account_facts(hass)
     except Exception:  # noqa: BLE001 - no readable accounts, the integrations still show
         facts = None
-    return {"entries": rows, "accounts": None if facts is None else accounts(facts)}
+    return {
+        "entries": rows,
+        "accounts": None if facts is None else accounts(facts),
+        "tokens": None if facts is None else long_lived_tokens(facts),
+    }

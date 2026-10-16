@@ -2,8 +2,8 @@
 // All three only read. A page loads on its first visit; its refresh button reads again.
 // A page and the WebSocket command it asks.
 const SYS_COMMANDS = { storage: "system_usage", dataflow: "access", secrets: "sensitive_fields" };
-// The tiles of the credentials page that filter the accounts instead of the integrations.
-const SEC_ACCOUNT_SHOWS = ["nomfa"];
+// What a tile of the credentials page opens: [tab, list, state filter]; "" clears the filters.
+const SEC_SHOWS = { "": ["entries", "seclist", ""], gap: ["entries", "seclist", "gap"], nomfa: ["accounts", "secusers", "nomfa"], tokens: ["tokens", "sectokens", ""] };
 const SYS_WARN_PERCENT = 75, SYS_RED_PERCENT = 90;
 
 class SystemMixin {
@@ -472,11 +472,11 @@ class SystemMixin {
   // Tiles in even rows of three; each one opens its tab with its filter.
   secretsView() {
     return this.sysFrame("secrets", "secLoading", (r, head) => {
-      const entries = r.entries || [], users = r.accounts || [];
+      const entries = r.entries || [], users = r.accounts || [], tokens = r.tokens || [];
       const count = (e, set) => e.fields.filter(f => f.set === set).length;
       const kinds = e => [...new Set(e.fields.map(f => f.kind))];
       const empty = entries.reduce((n, e) => n + count(e, false), 0);
-      const tabs = [{ id: "entries", label: this.t("secListTitle"), count: entries.length }, ...(r.accounts ? [{ id: "accounts", label: this.t("secTabAccounts"), count: users.length }] : [])];
+      const tabs = [{ id: "entries", label: this.t("secListTitle"), count: entries.length }, ...(r.accounts ? [{ id: "accounts", label: this.t("secTabAccounts"), count: users.length }] : []), ...(r.tokens ? [{ id: "tokens", label: this.t("secTabTokens"), count: tokens.length }] : [])];
       const open = this.viewTabOf("secrets", tabs, "entries");
       const on = (tab, list, value) => open === tab && (value ? this.lv?.[list]?.f?.state === value : !Object.values(this.lv?.[list]?.f || {}).some(Boolean));
       const admins = users.filter(u => u.active && u.admin), noMfa = admins.filter(u => !u.mfa);
@@ -485,9 +485,14 @@ class SystemMixin {
         tile("secSumEntries", entries.length, this.t("secSumEntriesSub", { n: this.formatNumber(entries.reduce((n, e) => n + count(e, true), 0)) }), "mute", "", on("entries", "seclist")),
         tile("secSumEmpty", empty, this.t("secSumEmptySub"), empty ? "warn" : "ok", "gap", on("entries", "seclist", "gap")),
       ];
-      const rowTwo = r.accounts ? [tile("secSumNoMfa", noMfa.length, this.t("secSumNoMfaSub", { n: this.formatNumber(admins.length) }), noMfa.length ? "warn" : "ok", "nomfa", on("accounts", "secusers", "nomfa"))] : [];
+      const old = tokens.filter(x => x.old || !x.account_active).length;
+      const rowTwo = [
+        r.accounts && tile("secSumNoMfa", noMfa.length, this.t("secSumNoMfaSub", { n: this.formatNumber(admins.length) }), noMfa.length ? "warn" : "ok", "nomfa", on("accounts", "secusers", "nomfa")),
+        r.tokens && tile("secSumTokens", tokens.length, this.t("secSumTokensSub", { n: this.formatNumber(old) }), old ? "warn" : "mute", "tokens", on("tokens", "sectokens")),
+      ];
       const tiles = `<div class="tilerows"><div class="sumgrouphead">${this.t("secListTitle")}</div>${this.sumTiles(rowOne, "even")}${this.sumTiles(rowTwo, "even")}</div>`;
       const bar = tabs.length > 1 ? this.viewTabBar("secrets", tabs, open) : "";
+      if (open === "tokens") return `<div class="stack">${head}${tiles}<div class="panel">${bar}<div class="panelhead"><div><h2>${this.t("secTabTokens")}</h2><p>${this.t("secTokHint")}</p></div></div>${this.secTokens(tokens)}${this.howCounted("secTokFootnote")}</div></div>`;
       if (open === "accounts") return `<div class="stack">${head}${tiles}<div class="panel">${bar}<div class="panelhead"><div><h2>${this.t("secTabAccounts")}</h2><p>${this.t("secAccHint")}</p></div></div>${this.secAccounts(users)}${this.howCounted("secAccFootnote")}</div></div>`;
       const state = e => (count(e, false) === 0 ? "set" : count(e, true) === 0 ? "empty" : "part");
       const stateCell = e => `<span class="pill ${{ set: "ok", part: "warn", empty: "warn" }[state(e)]}">${this.esc(this.t("secState", { n: count(e, true), total: e.fields.length }))}</span>`;
@@ -542,6 +547,27 @@ class SystemMixin {
     });
   }
 
+  // The long-lived tokens by name, account and age. Home Assistant does not record their use, so the age is all there is.
+  secTokens(tokens) {
+    const state = x => (!x.account_active ? "dead" : x.old ? "old" : "");
+    const hint = x => ({ dead: this.t("secTokDead"), old: this.t("secTokOld") })[state(x)] || "";
+    return this.sysList("sectokens", tokens, {
+      sort: "age", dir: "desc", cls: "acc", tie: x => `${x.account} ${x.name} ${x.created}`,
+      sorts: [{ key: "age", label: "secColAge", dir: "desc", get: x => x.days }, { key: "name", label: "secColToken", dir: "asc", get: x => x.name }, { key: "account", label: "secColAccount", dir: "asc", get: x => x.account }],
+      filters: [{ name: "state", all: this.t("secAllStates"), options: [["old", this.t("secTokOld")], ["dead", this.t("secTokDead")]] }],
+      filterFns: { state: (x, v) => state(x) === v },
+      text: x => `${x.name} ${x.account}`, empty: "secNoTokens",
+      columns: [
+        { key: "name", label: "secColToken", cell: x => `<strong>${this.esc(x.name)}</strong>` },
+        { key: "account", label: "secColAccount", cell: x => `${this.esc(x.account)}${x.account_active ? "" : ` <span class="pill mute">${this.t("secRoleOff")}</span>`}` },
+        { key: "age", label: "secColAge", dir: "desc", cell: x => `<span class="pill ${state(x) ? "warn" : "mute"}">${this.esc(this.t("secTokDays", { n: this.formatNumber(x.days) }))}</span>` },
+        { key: "hint", label: "secColHint", sortable: false, cell: x => `<span class="muted">${this.esc(hint(x))}</span>` },
+      ],
+      exportName: "long-lived-tokens", header: [this.t("secColToken"), this.t("secColAccount"), this.t("secColAge"), this.t("secColHint")],
+      rows: x => [x.name, x.account, x.days, hint(x)],
+    });
+  }
+
   // ---------------------------------------------------------------- bindings
 
   bindSystem(root) {
@@ -559,8 +585,8 @@ class SystemMixin {
     root.querySelectorAll("[data-detail-tab-go]").forEach(el => el.onclick = () => { this.detailTab = el.dataset.detailTabGo; this.render(); });
     // A key figure of the credential overview opens its tab and sets its state filter, or clears all filters.
     root.querySelectorAll("[data-sec-show]").forEach(el => el.onclick = () => {
-      const value = el.dataset.secShow, list = SEC_ACCOUNT_SHOWS.includes(value) ? "secusers" : "seclist";
-      (this.viewTab ||= {}).secrets = list === "secusers" ? "accounts" : "entries";
+      const [tab, list, value] = SEC_SHOWS[el.dataset.secShow] || SEC_SHOWS[""];
+      (this.viewTab ||= {}).secrets = tab;
       const st = this.lvState(list, "name", "asc");
       st.f = value ? { ...st.f, state: value } : {};
       this.persistLv(list); this.pages = {}; this.render();
