@@ -4,7 +4,7 @@
 
 ### Geändert
 
-- **Weniger CPU-Last:** Die Recorder-Ansichten werden im Hintergrund verteilt und nur bei Bedarf aufgefrischt, statt alle 30 Minuten gebündelt; die Rangliste der Recorder-Kosten läuft dabei nur noch einmal am Tag, die Datenbank-Gesundheit alle drei Stunden, und die Suche nach doppelten Statistikzeilen entfällt, wo die Datenbank sie ausschließt. Zuverlässigkeit und Recorder-Last rechnen abgeschlossene Tage nur noch einmal. Wo ein Scan lange dauert, liegen die Scans nach Ausfällen weiter auseinander (bis zu einer Stunde). Die Laufzeit pro Ansicht steht im Debug-Log.
+- **Weniger CPU-Last:** Die Auswertungen aus der Recorder-Datenbank laufen im Hintergrund seltener und verteilt, abgeschlossene Tage werden nur noch einmal gerechnet, und Scans nach Ausfällen rücken bei langsamen Systemen weiter auseinander.
 - **Übersicht, Inventarstatus:** Objekte mit einer Markierung (z. B. „Absichtlich offline“), auch die Entitäten eines markierten Geräts, stehen in einer eigenen Zeile „Markiert (erwartet)“ und zählen nicht mehr unter „Problematisch“ (Issue 25).
 - **Oberfläche:** Der Start-Hinweis ist eine kompakte Karte: vier Schritte als Leiste, „38 von 41 Integrationen geladen“ mit Balken und Wartezeit daneben, die Namen der noch ladenden Integrationen und beim Scan die aktuelle Phase. Er aktualisiert sich selbst (alle 3 Sekunden) und verschwindet, sobald die endgültigen Befunde da sind.
 
@@ -16,7 +16,7 @@
 
 #### Changed
 
-- **Less CPU load:** The recorder views are refreshed in the background one at a time and only when due, instead of all together every 30 minutes; the recorder cost ranking now runs once a day, the database health every three hours, and the search for duplicate statistics rows is skipped where the database rules them out. Reliability and recorder load calculate finished days only once. Where a scan takes long, the scans that follow outages are spaced further apart (up to an hour). The time each view takes is in the debug log.
+- **Less CPU load:** The analyses of the recorder database run less often in the background and spread out, finished days are calculated only once, and on slow systems the scans after outages are spaced further apart.
 - **Overview, inventory status:** Objects with a mark (e.g. “Offline on purpose”), including the entities of a marked device, sit in their own row “Marked (expected)” and no longer count as “Problematic” (issue 25).
 - **Interface:** The start notice is a compact card: four steps in one track, “38 of 41 integrations loaded” with a bar and the waiting time beside it, the names of the integrations still loading and, during the scan, the current phase. It updates by itself (every 3 seconds) and goes away as soon as the final findings are in.
 
