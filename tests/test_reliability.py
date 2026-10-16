@@ -550,7 +550,10 @@ async def test_kept_days_give_the_same_runs_and_loads_as_one_query_also_over_mid
         split = await run(query_runs, hass, base, end, days)
         assert split["seen"] == whole["seen"]
         assert _merge(split["intervals"]["sensor.a"]) == _merge(whole["intervals"]["sensor.a"])
-        assert _merge(split["intervals"]["sensor.a"])[0] == (base + 23 * HOUR, base + day + 2 * HOUR)
+        assert _merge(split["intervals"]["sensor.a"])[0] == (
+            base + 23 * HOUR,
+            base + day + 2 * HOUR,
+        )
     loads = DayCache(hass, "storms")
     plain = await run(query_storms, hass, base, end)
     for _ in range(2):

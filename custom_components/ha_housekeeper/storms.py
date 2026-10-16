@@ -181,9 +181,7 @@ def _count_piece(
             ).all()
             if mid in found["entities"]
         }
-    fired = (
-        Events.time_fired_ts <= end if last else Events.time_fired_ts < end
-    )
+    fired = Events.time_fired_ts <= end if last else Events.time_fired_ts < end
     for event_type, count in session.execute(
         select(EventTypes.event_type, func.count())
         .select_from(Events)
