@@ -3865,6 +3865,17 @@ class CleanupMixin {
     this.cleanupBusy = false; this.render();
   }
 
+  // Deletes the picked previews; a plan that ran is never in the picks (it is not mergeable) and the server refuses it anyway.
+  async deletePlans() {
+    const ids = [...(this.mergeSel || [])].filter(id => (this.journal || []).some(p => p.plan_id === id && this.mergeable(p)));
+    if (!ids.length) return;
+    for (const id of ids) { try { await this._hass.callWS({ type: "ha_housekeeper/plan_delete", plan_id: id }); } catch (_) { /* already gone */ } }
+    this.journal = (this.journal || []).filter(p => !ids.includes(p.plan_id));
+    this.mergeSel = new Set();
+    if (this.plan && ids.includes(this.plan.plan_id)) { this.leavePlan(); return; }
+    this.render();
+  }
+
   async deletePlan(id) {
     try { await this._hass.callWS({ type: "ha_housekeeper/plan_delete", plan_id: id }); } catch (_) { /* already gone */ }
     this.journal = (this.journal || []).filter(p => p.plan_id !== id);
@@ -4286,7 +4297,7 @@ class CleanupMixin {
       text: p => `${this.formatDate(p.created_at)} ${this.t(`plan_status_${statusOf(p)}`)}`, tie: p => p.created_at,
     }) : `<div class="emptymsg mute"><ha-icon icon="mdi:clipboard-text-outline"></ha-icon><strong>${this.t("journalEmpty")}</strong>${this.t("journalEmptyNext")}<button class="btn" data-jump="repair">${this.t("repair")}</button></div>`;
     const picked = this.mergeSel?.size || 0;
-    const tools = plans.some(p => this.mergeable(p)) ? `<div class="toolbar${picked ? "" : " nosel"}"><button class="btn" data-merge ${picked >= 2 && !this.cleanupBusy ? "" : "disabled"}>${this.t("mergeButton", { count: picked })}</button><span class="selcount" aria-live="polite">${this.t("selectedCount", { count: picked })}</span>${this.viewCount(this.lv.journal?.shown ?? plans.length)}</div>` : "";
+    const tools = plans.some(p => this.mergeable(p)) ? `<div class="toolbar${picked ? "" : " nosel"}"><button class="btn" data-merge ${picked >= 2 && !this.cleanupBusy ? "" : "disabled"}>${this.t("mergeButton", { count: picked })}</button><button class="btn" data-merge-delete ${picked && !this.cleanupBusy ? "" : "disabled"}>${this.t("deleteSelectedPlans", { count: picked })}</button><span class="selcount" aria-live="polite">${this.t("selectedCount", { count: picked })}</span>${this.viewCount(this.lv.journal?.shown ?? plans.length)}</div>` : "";
     const journalCard = `<div class="panel"><div class="panelhead"><div><h2>${this.t("journal")} (${plans.length})</h2><p>${this.t("journalHint")}</p></div></div>${this.mergeNote ? `<div class="pad"><small role="status">${this.esc(this.mergeNote)}</small></div>` : ""}${tools}${table}</div>`;
     return `<div class="stack">${this.planHeader()}${journalCard}</div>`;
   }
@@ -14015,8 +14026,8 @@ class HistoryTabMixin {
 
 // ConfirmMixin: one dialog for every deletion of something you made yourself (a reminder, a plan, a saved view, a template).
 // The buttons open `confirmAsk`; nothing is deleted before "Delete". Mixed into the panel in 99-register.js.
-Object.assign(TEXT.de, { confirmRunTitle: "Plan jetzt ausführen?", confirmTitle: "Wirklich löschen?", confirmDelete: "Löschen", confirmCancel: "Abbrechen", confirmRem: "Die Erinnerung „{name}“ und ihre Historie werden gelöscht.", confirmRemDay: "Der Eintrag vom {date} wird aus der Historie von „{name}“ gelöscht. Die Fälligkeit bleibt.", confirmPlanDelete: "Der Plan vom {date} wird aus dem Journal gelöscht. Ein bereits ausgeführter Plan bleibt in Home Assistant wirksam; ein Rückgängig ist danach nicht mehr möglich.", confirmView: "Die gespeicherte Ansicht „{name}“ wird gelöscht.", confirmTpl: "Die Vorlage „{name}“ wird gelöscht." });
-Object.assign(TEXT.en, { confirmRunTitle: "Run the plan now?", confirmTitle: "Really delete?", confirmDelete: "Delete", confirmCancel: "Cancel", confirmRem: "The reminder “{name}” and its history will be deleted.", confirmRemDay: "The entry of {date} will be deleted from the history of “{name}”. The due day stays.", confirmPlanDelete: "The plan of {date} will be deleted from the journal. A plan that already ran stays in effect in Home Assistant; undoing it is no longer possible afterwards.", confirmView: "The saved view “{name}” will be deleted.", confirmTpl: "The template “{name}” will be deleted." });
+Object.assign(TEXT.de, { deleteSelectedPlans: "Ausgewählte löschen ({count})", confirmPlansDelete: "{count} Vorschauen werden aus dem Journal gelöscht. Ausgeführte Pläne bleiben erhalten; Vorschauen lassen sich jederzeit neu anlegen.", confirmRunTitle: "Plan jetzt ausführen?", confirmTitle: "Wirklich löschen?", confirmDelete: "Löschen", confirmCancel: "Abbrechen", confirmRem: "Die Erinnerung „{name}“ und ihre Historie werden gelöscht.", confirmRemDay: "Der Eintrag vom {date} wird aus der Historie von „{name}“ gelöscht. Die Fälligkeit bleibt.", confirmPlanDelete: "Der Plan vom {date} wird aus dem Journal gelöscht. Ein bereits ausgeführter Plan bleibt in Home Assistant wirksam; ein Rückgängig ist danach nicht mehr möglich.", confirmView: "Die gespeicherte Ansicht „{name}“ wird gelöscht.", confirmTpl: "Die Vorlage „{name}“ wird gelöscht." });
+Object.assign(TEXT.en, { deleteSelectedPlans: "Delete selected ({count})", confirmPlansDelete: "{count} previews will be deleted from the journal. Plans that ran stay; previews can be created again at any time.", confirmRunTitle: "Run the plan now?", confirmTitle: "Really delete?", confirmDelete: "Delete", confirmCancel: "Cancel", confirmRem: "The reminder “{name}” and its history will be deleted.", confirmRemDay: "The entry of {date} will be deleted from the history of “{name}”. The due day stays.", confirmPlanDelete: "The plan of {date} will be deleted from the journal. A plan that already ran stays in effect in Home Assistant; undoing it is no longer possible afterwards.", confirmView: "The saved view “{name}” will be deleted.", confirmTpl: "The template “{name}” will be deleted." });
 
 class ConfirmMixin {
   // `run` is called only after "Delete"; `text` is the sentence of the dialog.
@@ -16091,6 +16102,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-plan-open]").forEach(el => el.onclick = ev => { const inner = ev?.target?.closest?.("button, select, input, a, label"); if (inner && inner !== el && el.contains(inner)) return; this.openPlan(el.dataset.planOpen); });
     root.querySelectorAll("[data-merge-sel]").forEach(el => el.onchange = () => { this.mergeSel = new Set(this.mergeSel || []); el.checked ? this.mergeSel.add(el.dataset.mergeSel) : this.mergeSel.delete(el.dataset.mergeSel); this.render(); });
     root.querySelector("[data-merge]")?.addEventListener("click", () => this.mergePlans());
+    root.querySelector("[data-merge-delete]")?.addEventListener("click", () => { const n = this.mergeSel?.size || 0; if (n) this.confirmAsk(this.t("confirmPlansDelete", { count: n }), () => this.deletePlans()); });
     root.querySelectorAll("[data-merge-page]").forEach(el => { el.indeterminate = el.hasAttribute("data-partial"); el.onchange = () => { this.mergeSel = new Set(this.mergeSel || []); el.dataset.mergePage.split(",").forEach(id => (el.checked ? this.mergeSel.add(id) : this.mergeSel.delete(id))); this.render(); }; });
     root.querySelectorAll("[data-plan-renew]").forEach(el => el.onclick = ev => { ev.stopPropagation(); this.renewPlan(el.dataset.planRenew); });
     root.querySelectorAll("[data-plan-delete]").forEach(el => el.onclick = () => { const id = el.dataset.planDelete, plan = (this.journal || []).find(p => p.plan_id === id) || this.plan; this.confirmAsk(this.t("confirmPlanDelete", { date: this.formatDate(plan?.created_at) }), () => this.deletePlan(id)); });

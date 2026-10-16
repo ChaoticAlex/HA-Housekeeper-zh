@@ -1525,8 +1525,28 @@ class JournalStore:
         now = datetime.now(UTC).isoformat()
         for plan in stopped:
             end_interrupted(plan, now)
-        if stopped:
+        if stopped or self.drop_stale_previews():
             self._save()
+
+    def drop_stale_previews(self) -> int:
+        """Remove previews that were never started and are older than ``PLAN_MAX_AGE_HOURS``.
+
+        They cannot be confirmed any more. Plans that ran are never touched here.
+        """
+        cutoff = (datetime.now(UTC) - timedelta(hours=PLAN_MAX_AGE_HOURS)).isoformat()
+        kept = [
+            plan
+            for plan in self._plans
+            if not (
+                isinstance(plan, dict)
+                and self._is_open_preview(plan)
+                and str(plan.get("created_at") or cutoff) < cutoff
+            )
+        ]
+        removed = len(self._plans) - len(kept)
+        if removed:
+            self._plans[:] = kept
+        return removed
 
     @property
     def store(self) -> Store[dict[str, Any]]:
@@ -1551,6 +1571,7 @@ class JournalStore:
     def add(self, plan: dict[str, Any]) -> None:
         """Record a plan and trim the journal."""
         self._plans.insert(0, plan)
+        self.drop_stale_previews()
         self._trim()
         self._save()
 

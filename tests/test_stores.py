@@ -261,3 +261,19 @@ async def test_purges_are_noted_in_the_journal_and_survive_a_reload(
     third = JournalStore(hass)
     await third.async_load()
     assert third.purges == [{"at": "t"}]
+
+
+async def test_previews_older_than_a_day_are_dropped_but_plans_that_ran_stay(
+    hass: HomeAssistant,
+) -> None:
+    journal = JournalStore(hass)
+    await journal.async_load()
+    old = (datetime.now(UTC) - timedelta(hours=25)).isoformat()
+    fresh = datetime.now(UTC).isoformat()
+    journal._plans[:] = [
+        {"plan_id": "old", "created_at": old},
+        {"plan_id": "fresh", "created_at": fresh},
+        {"plan_id": "ran", "created_at": old, "executed": True},
+    ]
+    assert journal.drop_stale_previews() == 1
+    assert [p["plan_id"] for p in journal.plans] == ["fresh", "ran"]

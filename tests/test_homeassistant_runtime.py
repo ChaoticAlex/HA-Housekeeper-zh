@@ -1205,7 +1205,7 @@ async def test_report_and_device_pairs_are_served_to_admins(
     scanner.journal.add(
         {
             "plan_id": "p1",
-            "created_at": "2026-10-09T10:00:00+00:00",
+            "created_at": datetime.now(UTC).isoformat(),
             "status": "dry_run",
             "actions": [],
             "events": [],

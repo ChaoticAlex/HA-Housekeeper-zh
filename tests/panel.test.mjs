@@ -2771,6 +2771,20 @@ test("open previews can be selected and merged into one plan; a ran plan cannot"
   assert.ok(el.mergeNote.includes("1 objects were left out") && el.mergeNote.includes("sensor.x"));
 });
 
+test("picked previews can be deleted at once; a ran plan is not among them", async () => {
+  const { el } = panel("en");
+  el.data = { ...DATA, objects: [], edges: [], findings: [], quarantine: [] };
+  const short = (id, extra = {}) => ({ plan_id: id, created_at: new Date().toISOString(), status: "dry_run", summary: { total: 1, ok: 1, review: 0, blocked: 0 }, ...extra });
+  el.journal = [short("a"), short("b"), short("c", { executed: true, status: "verified" })];
+  const calls = [];
+  el._hass = { language: "en", callWS: async msg => { if (msg.type === "ha_housekeeper/plan_delete") calls.push(msg.plan_id); return { removed: true }; } };
+  el.mergeSel = new Set(["a", "c"]);
+  await el.deletePlans();
+  assert.equal(JSON.stringify(calls), '["a"]');
+  assert.equal(JSON.stringify(el.journal.map(p => p.plan_id)), '["b","c"]');
+  assert.equal(el.mergeSel.size, 0);
+});
+
 test("the improve block asks for the switch, offers fixes and turns one into a plan under cleanup", async () => {
   const { el } = panel("en");
   el.data = { ...DATA };

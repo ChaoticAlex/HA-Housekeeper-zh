@@ -712,6 +712,8 @@ def websocket_plan_list(
     scanner: InventoryScanner,
 ) -> None:
     """Return the journal of plans as short entries, newest first; details come per plan."""
+    if scanner.journal.drop_stale_previews():
+        scanner.journal.save()
     connection.send_result(
         msg["id"],
         _versioned(
