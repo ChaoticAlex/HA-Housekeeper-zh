@@ -13113,6 +13113,7 @@ Object.assign(TEXT.de, {
   secStateGap: "mit leeren Feldern", secState: "{n} von {total}", secStateSet: "alle hinterlegt", secStatePart: "teilweise", secStateEmpty: "nichts hinterlegt", secAllKinds: "Alle Arten", secAllStates: "Alle Zustände",
   secKind_password: "Passwort", secKind_token: "Token", secKind_api_key: "API-Schlüssel", secKind_secret: "Secret", secKind_webhook: "Webhook", secKind_pin: "PIN",
   secNone: "Keine Integration mit gespeicherten Zugangsdaten erkannt.", secOpen: "{name} in Home Assistant öffnen",
+  secSumDisabled: "Deaktivierte Integrationen", secSumDisabledSub: "Zugangsdaten bleiben gespeichert", secStateDisabled: "deaktiviert, mit Wert",
   secSumReauth: "Anmeldung nötig", secSumReauthSub: "Integration verlangt neuen Login", secReauth: "Anmeldung nötig",
   secTabAccounts: "Konten", secAccHint: "Benutzer dieses Home Assistant ohne Systemkonten; ein Klick öffnet die Benutzerverwaltung",
   secSumNoMfa: "Admins ohne Zwei-Faktor", secSumNoMfaSub: "von {n} Admins",
@@ -13126,7 +13127,7 @@ Object.assign(TEXT.de, {
   secTokOld: "älter als 90 Tage", secTokDead: "Konto abgeschaltet, wirkungslos", secNoTokens: "Keine Langzeit-Tokens.",
   secTokFootnote: "Wann ein Langzeit-Token zuletzt benutzt wurde, merkt sich Home Assistant nicht; deshalb steht hier nur sein Alter. Gelb ist ein Token ab 90 Tagen oder eines abgeschalteten Kontos, wie in den Richtlinien „Alte Langzeit-Tokens“ und „Langzeit-Tokens abgeschalteter Konten“. Widerrufen kann ein Token nur sein Konto, im eigenen Profil unter Sicherheit. Housekeeper zeigt nur Name, Konto und Alter, nie den Token selbst.",
   secAccFootnote: "Konten, die Home Assistant für sich selbst anlegt (Supervisor, Apps), fehlen. Die letzte Anmeldung ist die jüngste Nutzung einer Anmeldung im Browser oder in der App; gelb ist sie nach 90 Tagen ohne Anmeldung, wie in der Richtlinie „Benutzer lange nicht angemeldet“. Ein Konto, das nur Langzeit-Tokens hat, meldet sich nie an und zählt dort nicht. Zwei-Faktor heißt: mindestens ein Verfahren wie Einmalcode ist für das Konto eingerichtet. Housekeeper liest nur Namen, Rollen und Zeiten, nie einen Token oder eine Adresse.",
-  secFootnote: "Housekeeper erkennt Zugangsdaten am Namen eines Feldes in der Konfiguration einer Integration (password, token, api_key, secret, webhook, pin) und prüft nur, ob es leer ist. Werte, Auszüge davon und ihre Länge werden weder gelesen noch angezeigt noch exportiert. Die Erkennung ist ein Hinweis: Zugangsdaten unter einem anderen Namen fehlen, und ein Feld mit so einem Namen kann etwas Harmloses enthalten. „Anmeldung nötig“ heißt: Die Integration hat Home Assistant um eine neue Anmeldung gebeten, etwa weil ein Token abgelaufen oder ein Passwort geändert ist; sie steht dann auch ohne erkanntes Feld in der Liste. Ein Klick auf eine Zeile öffnet die Integration in Home Assistant, dort lassen sich die Zugangsdaten ändern. Es wird nichts geändert und nichts gespeichert.",
+  secFootnote: "Housekeeper erkennt Zugangsdaten am Namen eines Feldes in der Konfiguration einer Integration (password, token, api_key, secret, webhook, pin) und prüft nur, ob es leer ist. Werte, Auszüge davon und ihre Länge werden weder gelesen noch angezeigt noch exportiert. Die Erkennung ist ein Hinweis: Zugangsdaten unter einem anderen Namen fehlen, und ein Feld mit so einem Namen kann etwas Harmloses enthalten. „Anmeldung nötig“ heißt: Die Integration hat Home Assistant um eine neue Anmeldung gebeten, etwa weil ein Token abgelaufen oder ein Passwort geändert ist; sie steht dann auch ohne erkanntes Feld in der Liste. Eine deaktivierte Integration behält ihre Zugangsdaten, solange sie eingerichtet ist; wird sie nicht mehr gebraucht, entfernt Löschen der Integration sie mit. Ein Klick auf eine Zeile öffnet die Integration in Home Assistant, dort lassen sich die Zugangsdaten ändern. Es wird nichts geändert und nichts gespeichert.",
 });
 Object.assign(TEXT.en, {
   sysTabUsage: "Usage", sysTabUsageHint: "categories and folders", sysByCategory: "By category", sysByFolder: "By folder under /config", sysByMisc: "More", sysLineBuilding: "The line appears within the first hour", sysLineHours: "last {n} h", sysLineDays: "last {n} days", sysLinePeak: "peak {n}", sysLineLabel: "Trend, {span}: from {from} to {to}", sysHeadCategory: "Usage by category", sysHeadFolder: "Usage by folder", sysAppsHint: "Apps and custom integrations with size, CPU and RAM are under",
@@ -13182,6 +13183,7 @@ Object.assign(TEXT.en, {
   secStateGap: "with empty fields", secState: "{n} of {total}", secStateSet: "all set", secStatePart: "partly", secStateEmpty: "nothing set", secAllKinds: "All kinds", secAllStates: "All states",
   secKind_password: "Password", secKind_token: "Token", secKind_api_key: "API key", secKind_secret: "Secret", secKind_webhook: "Webhook", secKind_pin: "PIN",
   secNone: "No integration with stored credentials found.", secOpen: "Open {name} in Home Assistant",
+  secSumDisabled: "Disabled integrations", secSumDisabledSub: "credentials stay stored", secStateDisabled: "disabled, with a value",
   secSumReauth: "Login needed", secSumReauthSub: "integration asks to sign in again", secReauth: "login needed",
   secTabAccounts: "Accounts", secAccHint: "Users of this Home Assistant without system accounts; a click opens the user settings",
   secSumNoMfa: "Admins without two-factor", secSumNoMfaSub: "of {n} admins",
@@ -13195,7 +13197,7 @@ Object.assign(TEXT.en, {
   secTokOld: "older than 90 days", secTokDead: "account switched off, no effect", secNoTokens: "No long-lived tokens.",
   secTokFootnote: "Home Assistant does not record when a long-lived token was last used, so only its age is shown. A token turns amber from 90 days on or when its account is switched off, as in the rules \"Old long-lived tokens\" and \"Long-lived tokens of switched-off accounts\". Only its own account can revoke a token, in its profile under Security. Housekeeper shows only name, account and age, never the token itself.",
   secAccFootnote: "Accounts Home Assistant makes for itself (Supervisor, apps) are left out. The last login is the latest use of a login in the browser or the app; it turns amber after 90 days without a login, as in the rule \"User not logged in for a long time\". An account that only holds long-lived tokens never logs in and does not count there. Two-factor means at least one method such as a one-time code is set up for the account. Housekeeper reads only names, roles and times, never a token or an address.",
-  secFootnote: "Housekeeper recognises credentials by the name of a field in an integration's configuration (password, token, api_key, secret, webhook, pin) and only checks whether it is empty. Values, parts of them and their length are neither read nor shown nor exported. The detection is a hint: credentials under another name are missing, and a field with such a name may hold something harmless. \"Login needed\" means the integration asked Home Assistant for a new login, for example because a token expired or a password changed; it is then listed even without a recognised field. A click on a row opens the integration in Home Assistant, where the credentials can be changed. Nothing is changed and nothing is stored.",
+  secFootnote: "Housekeeper recognises credentials by the name of a field in an integration's configuration (password, token, api_key, secret, webhook, pin) and only checks whether it is empty. Values, parts of them and their length are neither read nor shown nor exported. The detection is a hint: credentials under another name are missing, and a field with such a name may hold something harmless. \"Login needed\" means the integration asked Home Assistant for a new login, for example because a token expired or a password changed; it is then listed even without a recognised field. A disabled integration keeps its credentials as long as it is set up; if it is no longer needed, deleting the integration removes them too. A click on a row opens the integration in Home Assistant, where the credentials can be changed. Nothing is changed and nothing is stored.",
 });
 
 // The Batteries view as one table: level, type and forecast side by side, and the need of the next 30 days above it.
@@ -13383,7 +13385,7 @@ class BatteryTableMixin {
 // A page and the WebSocket command it asks.
 const SYS_COMMANDS = { storage: "system_usage", dataflow: "access", secrets: "sensitive_fields" };
 // What a tile of the credentials page opens: [tab, list, state filter]; "" clears the filters.
-const SEC_SHOWS = { "": ["entries", "seclist", ""], gap: ["entries", "seclist", "gap"], reauth: ["entries", "seclist", "reauth"], nomfa: ["accounts", "secusers", "nomfa"], tokens: ["tokens", "sectokens", ""] };
+const SEC_SHOWS = { "": ["entries", "seclist", ""], gap: ["entries", "seclist", "gap"], reauth: ["entries", "seclist", "reauth"], disabled: ["entries", "seclist", "disabled"], nomfa: ["accounts", "secusers", "nomfa"], tokens: ["tokens", "sectokens", ""] };
 const SYS_WARN_PERCENT = 75, SYS_RED_PERCENT = 90;
 
 class SystemMixin {
@@ -13856,6 +13858,8 @@ class SystemMixin {
       const count = (e, set) => e.fields.filter(f => f.set === set).length;
       const kinds = e => [...new Set(e.fields.map(f => f.kind))];
       const empty = entries.reduce((n, e) => n + count(e, false), 0), reauth = entries.filter(e => e.reauth).length;
+      // A switched-off integration keeps what it stored; worth a look only when a value is set.
+      const kept = e => e.disabled && count(e, true) > 0, disabled = entries.filter(kept).length;
       const tabs = [{ id: "entries", label: this.t("secListTitle"), count: entries.length }, ...(r.accounts ? [{ id: "accounts", label: this.t("secTabAccounts"), count: users.length }] : []), ...(r.tokens ? [{ id: "tokens", label: this.t("secTabTokens"), count: tokens.length }] : [])];
       const open = this.viewTabOf("secrets", tabs, "entries");
       const on = (tab, list, value) => open === tab && (value ? this.lv?.[list]?.f?.state === value : !Object.values(this.lv?.[list]?.f || {}).some(Boolean));
@@ -13868,6 +13872,7 @@ class SystemMixin {
       ];
       const old = tokens.filter(x => x.old || !x.account_active).length;
       const rowTwo = [
+        tile("secSumDisabled", disabled, this.t("secSumDisabledSub"), disabled ? "warn" : "ok", "disabled", on("entries", "seclist", "disabled")),
         r.accounts && tile("secSumNoMfa", noMfa.length, this.t("secSumNoMfaSub", { n: this.formatNumber(admins.length) }), noMfa.length ? "warn" : "ok", "nomfa", on("accounts", "secusers", "nomfa")),
         r.tokens && tile("secSumTokens", tokens.length, this.t("secSumTokensSub", { n: this.formatNumber(old) }), old ? "warn" : "mute", "tokens", on("tokens", "sectokens")),
       ];
@@ -13884,9 +13889,9 @@ class SystemMixin {
         sorts: [{ key: "name", label: "accColIntegration", dir: "asc", get: e => `${e.domain} ${e.title}` }, { key: "state", label: "secColState", dir: "desc", get: e => (e.reauth ? 3 : ({ empty: 2, part: 1, set: 0 })[state(e)]) }],
         filters: [
           { name: "kind", all: this.t("secAllKinds"), options: ["password", "token", "api_key", "secret", "webhook", "pin"].map(k => [k, this.t(`secKind_${k}`)]) },
-          { name: "state", all: this.t("secAllStates"), options: [["reauth", this.t("secReauth")], ["gap", this.t("secStateGap")], ["set", this.t("secStateSet")], ["part", this.t("secStatePart")], ["empty", this.t("secStateEmpty")]] },
+          { name: "state", all: this.t("secAllStates"), options: [["reauth", this.t("secReauth")], ["disabled", this.t("secStateDisabled")], ["gap", this.t("secStateGap")], ["set", this.t("secStateSet")], ["part", this.t("secStatePart")], ["empty", this.t("secStateEmpty")]] },
         ],
-        filterFns: { kind: (e, v) => kinds(e).includes(v), state: (e, v) => (v === "reauth" ? Boolean(e.reauth) : v === "gap" ? state(e) !== "set" : state(e) === v) },
+        filterFns: { kind: (e, v) => kinds(e).includes(v), state: (e, v) => (v === "reauth" ? Boolean(e.reauth) : v === "disabled" ? kept(e) : v === "gap" ? state(e) !== "set" : state(e) === v) },
         text: e => `${e.domain} ${e.title} ${names(e)} ${kindNames(e).join(" ")}`, empty: "secNone",
         rowAttrs: e => `data-ha-path="${this.esc(`/config/integrations/integration/${encodeURIComponent(e.domain)}`)}" tabindex="0" role="link" aria-label="${this.esc(this.t("secOpen", { name: e.title || e.domain }))}"`,
         columns: [
