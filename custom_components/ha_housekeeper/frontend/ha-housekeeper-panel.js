@@ -3646,7 +3646,7 @@ class CleanupMixin {
   // The journal list holds short entries only; the plan itself is fetched when it is opened.
   async openPlan(planId) {
     this.reopenedPlanId = planId; this.planChanges = null;
-    try { this.plan = await this._hass.callWS({ type: "ha_housekeeper/plan_detail", plan_id: planId }); this.cleanupError = ""; } catch (err) { this.cleanupError = this.errText(err); }
+    try { this.plan = await this._hass.callWS({ type: "ha_housekeeper/plan_detail", plan_id: planId }); this.cleanupError = ""; this.showPlanView(); } catch (err) { this.cleanupError = this.errText(err); }
     this.render();
   }
 
@@ -3749,6 +3749,7 @@ class CleanupMixin {
       const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_renew", plan_id: planId });
       this.plan = plan; this.reopenedPlanId = null; this.confirmation = null; this.ack = new Set(); this.confirmWord = "";
       this.journal = [plan, ...(this.journal || []).filter(p => p.plan_id !== planId)];
+      this.showPlanView();
       this.toast(this.t("toastRenewed"));
     } catch (err) { this.failPlan(err, "renew"); }
     this.cleanupBusy = false; this.render();
@@ -3857,6 +3858,7 @@ class CleanupMixin {
     try {
       const result = await this._hass.callWS({ type: "ha_housekeeper/plan_merge", plan_ids: ids });
       this.plan = result.plan; this.confirmation = null; this.ack = new Set(); this.confirmWord = ""; this.mergeSel = new Set();
+      this.showPlanView();
       this.journal = [result.plan, ...(this.journal || []).filter(p => !result.merged.includes(p.plan_id))];
       this.mergeNote = result.conflicts.length ? this.t("mergeConflicts", { count: result.conflicts.length, list: result.conflicts.slice(0, 5).map(c => `${c.object_id} (${c.kinds.join(" / ")})`).join(", ") }) : this.t("mergeDone", { count: result.merged.length });
     } catch (err) { this.cleanupError = this.errText(err); }
@@ -3866,7 +3868,7 @@ class CleanupMixin {
   async deletePlan(id) {
     try { await this._hass.callWS({ type: "ha_housekeeper/plan_delete", plan_id: id }); } catch (_) { /* already gone */ }
     this.journal = (this.journal || []).filter(p => p.plan_id !== id);
-    if (this.plan?.plan_id === id) this.plan = null;
+    if (this.plan?.plan_id === id) { this.leavePlan(); return; }
     this.render();
   }
 
@@ -4199,12 +4201,32 @@ class CleanupMixin {
   }
 
   // Every new plan opens the same way: it becomes the open plan, goes on top of the journal and the
-  // page scrolls to its card. `view` switches to the page that shows it; null stays on the current one.
-  openNewPlan(plan, view = "cleanup") {
+  // plan page shows it. The page it came from stays one step back. (`view` is kept for the callers' sake.)
+  openNewPlan(plan, _view) {
     this.plan = plan; this.confirmation = null; this.ack = new Set(); this.confirmWord = "";
     this.journal = [plan, ...(this.journal || [])];
+    this.showPlanView();
+  }
+
+  // The plan page is a page of its own without a menu entry; "back" returns to where the plan was started.
+  showPlanView() {
     this._scrollPlan = true;
-    if (view) { this.noteJump?.(view); this.view = view; this.pages = {}; }
+    if (this.view !== "plan") { this.noteJump?.("plan"); this.view = "plan"; this.pages = {}; this.selected = null; }
+  }
+
+  // Closing the plan page: back to the page it came from, else the journal.
+  leavePlan() {
+    this.plan = null; this.planChanges = null; this.cleanupError = "";
+    if (this.view === "plan") {
+      if (this.viewTrail.length) { this.viewBack(); return; }
+      this.view = "journal"; this.pages = {};
+    }
+    this.render();
+  }
+
+  planView() {
+    if (this.plan) return `<div class="stack">${this.planHeader(true)}</div>`;
+    return `<div class="stack">${this.planHeader()}<p class="factnote pad">${this.t("planNone")}</p><div class="pad"><button class="btn" data-plan-close>${this.t("planClose")}</button></div></div>`;
   }
 
   // For the paths without a busy flag of their own: one request at a time, and their buttons are off
@@ -4221,7 +4243,7 @@ class CleanupMixin {
 
   // An error from the last request and the plan that is open, on top of every view that can finish one.
   // The dry-run sentence sits behind the coloured (i) in the page title (Cleanup, Journal); Repair says it in its subtitle.
-  planHeader() {
+  planHeader(withCard = false) {
     const from = this.cleanupErrorStamp === this.cleanupError ? this.cleanupErrorFrom : "";
     const lead = this.t({ confirm: "confirmError", check: "checkError", renew: "renewError" }[from] || "planError");
     const open = this.plan && this.isOpenPreview(this.plan);
@@ -4229,7 +4251,7 @@ class CleanupMixin {
     const modeLink = this.cleanupError && this.cleanupError === this.t("err_protection_mode") ? ` <button class="linkbtn" data-goto-protection>${this.t("modeBlockLink")}</button>` : "";
     const error = this.cleanupError ? `<div class="error">${lead}: ${this.esc(this.cleanupError)}${modeLink}${renew && !this.planChanges ? ` ${renew}` : ""}</div>` : "";
     const changes = this.planChanges?.length ? `<div class="panel"><div class="error"><strong>${this.t("planChangedTitle")}</strong><small class="dim7">${this.t("planChangedHint")}</small><ul class="evlist">${this.planChanges.slice(0, 10).map(c => `<li>${this.esc(c.object_id)}</li>`).join("")}</ul>${this.planChanges.length > 10 ? `<small>${this.t("planChangedMore", { count: this.planChanges.length - 10 })}</small>` : ""}${renew}</div></div>` : "";
-    return `${error ? `<div class="panel">${error}</div>` : ""}${changes}${this.plan ? this.planCard(this.plan) : ""}`;
+    return `${error ? `<div class="panel">${error}</div>` : ""}${changes}${withCard && this.plan ? this.planCard(this.plan) : ""}`;
   }
 
   // Every plan from Cleanup and Repair: what changed, what was checked, and what can be undone.
@@ -4289,7 +4311,7 @@ class CleanupMixin {
     if (task) {
       const card = { exchange_device: () => this.exchangeCard(), replace_references: () => this.replaceCard(), migrate_meter: () => this.meterCard(), repair_counter: () => this.counterCard() }[task]();
       const chosen = { repair_counter: (this.counterId || "").trim(), migrate_meter: this.meterOld, replace_references: this.replOld, exchange_device: this.exchangeState().oldDev }[task];
-      body = `${this.stepsBar(this.plan ? 3 : chosen ? 2 : 1)}${card}`;
+      body = `${this.stepsBar(chosen ? 2 : 1)}${card}`;
     } else {
       body = `<p class="factnote pad">${this.t("repairHint")}</p>`;
     }
@@ -9406,6 +9428,7 @@ Object.assign(TEXT.de, {
   modeTitle: "Schutzmodus", modeHint: "Legt auf dem Server fest, was Pläne ändern dürfen. Das gilt für Bestätigen, Starten und Rückgängig, nicht nur für Knöpfe im Panel. Pläne anlegen und alle Ansichten bleiben immer erlaubt.", modeLabel: "Was Housekeeper ändern darf",
   mode_read_only: "1 · Nur lesen", mode_quarantine: "2 · Quarantäne erlaubt", mode_confirmed: "3 · Bestätigte Änderungen mit Backup", mode_full: "4 · Voller Wartungsmodus",
   modeText_read_only: "Nichts wird geändert, auch kein Rückgängig.", modeText_quarantine: "Nur Deaktivieren (und dessen Rückgängig) ist erlaubt.", modeText_confirmed: "Alles mit Einzelbestätigung und Backup außer unumkehrbarem Löschen von Recorder-Daten.", modeText_full: "Alles, wie bisher.",
+  plan: "Plan", planPageSubtitle: "Vorschau, Prüfung und Ergebnis eines Plans. Nichts wird geändert, bevor du bestätigst.", planNone: "Dieser Plan ist nicht mehr geöffnet. Alle Pläne stehen im Journal.",
   nothingToRun: "Noch nichts zum Ausführen: Hake darunter an, dass du die zu prüfenden Einträge gesehen hast.",
   modeBlockTitle: "Der Schutzmodus „{mode}“ erlaubt diesen Plan nicht", modeBlockText: "{count} Schritt(e) darf Housekeeper in diesem Modus nicht ausführen. Du kannst den Plan ansehen, aber erst nach einer Änderung des Modus bestätigen.", modeBlockLink: "Schutzmodus ändern",
   err_protection_mode: "Der Schutzmodus erlaubt das nicht. Ändere ihn unter Einstellungen → Schutz und Ausnahmen.",
@@ -9417,6 +9440,7 @@ Object.assign(TEXT.en, {
   modeTitle: "Protection mode", modeHint: "Sets on the server what plans may change. It holds for confirming, starting and undoing, not only for buttons in the panel. Making plans and every view stay allowed.", modeLabel: "What Housekeeper may change",
   mode_read_only: "1 · Read only", mode_quarantine: "2 · Quarantine allowed", mode_confirmed: "3 · Confirmed changes with backup", mode_full: "4 · Full maintenance",
   modeText_read_only: "Nothing is changed, not even an undo.", modeText_quarantine: "Only disabling (and undoing it) is allowed.", modeText_confirmed: "Everything with one-by-one confirmation and backup except irreversible deletion of recorder data.", modeText_full: "Everything, as before.",
+  plan: "Plan", planPageSubtitle: "Preview, check and result of a plan. Nothing changes before you confirm.", planNone: "This plan is no longer open. All plans are in the journal.",
   nothingToRun: "Nothing to run yet: tick the box below this line to say you have seen the entries to review.",
   modeBlockTitle: "The protection mode “{mode}” does not allow this plan", modeBlockText: "Housekeeper may not run {count} step(s) in this mode. You can look at the plan, but only confirm it after changing the mode.", modeBlockLink: "Change protection mode",
   err_protection_mode: "The protection mode does not allow this. Change it under Settings → Protection and exceptions.",
@@ -15691,6 +15715,7 @@ class HAHousekeeperPanel extends HTMLElement {
       cleanup: [this.t("cleanup"), this.t("cleanupSubtitle")],
       repair: [this.t("repair"), this.t("repairSubtitle")],
       journal: [this.t("journal"), this.t("journalSubtitle")],
+      plan: [this.t("plan"), this.t("planPageSubtitle")],
       maintenance: [this.t("maintenance"), this.t("maintenanceSubtitle")],
       reliability: [this.t("reliability"), this.t("reliabilitySubtitle")],
       monitor: [this.t("monitor"), this.t("monitorSubtitle")],
@@ -15703,7 +15728,7 @@ class HAHousekeeperPanel extends HTMLElement {
       secrets: [this.t("secrets"), this.t("secretsSubtitle")],
     };
     const [title, sub] = titles[this.view] || titles.overview;
-    const writes = ["cleanup", "repair", "maintenance", "policies", "monitor"].includes(this.view);
+    const writes = ["cleanup", "repair", "plan", "maintenance", "policies", "monitor"].includes(this.view);
     const modePill = this.view === "overview" || this.view === "settings" ? "" : `<span class="pill ${writes ? "warn" : "mute"} modepill" title="${this.esc(this.t(writes ? "canChangeHint" : "readOnlyHint"))}"><ha-icon icon="${writes ? "mdi:pencil-outline" : "mdi:eye-outline"}"></ha-icon>${this.t(writes ? "canChange" : "readOnly")}</span>`;
     const scanned = this.data?.meta?.scanned_at;
     const ago = scanned ? `<span class="scanago" title="${this.esc(this.formatDate(scanned))}">${this.t("lastScan")}: ${this.agoText(scanned)}</span>` : "";
@@ -15730,6 +15755,7 @@ class HAHousekeeperPanel extends HTMLElement {
     if (this.view === "unreferenced") return this.unreferencedView();
     if (this.view === "cleanup") return this.cleanupView();
     if (this.view === "repair") return this.repairView();
+    if (this.view === "plan") return this.planView();
     if (this.view === "journal") return this.journalView();
     if (this.view === "maintenance") return this.maintenanceView();
     if (this.view === "reliability") return this.reliabilityView();
@@ -16061,7 +16087,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-fold]").forEach(el => el.onclick = () => { if (el.dataset.fold.startsWith("chg_")) this.changesCat = ""; this.folds = { ...this.folds, [el.dataset.fold]: el.getAttribute("aria-expanded") !== "true" }; this.render(); });
     root.querySelectorAll("[data-bh-clear]").forEach(el => el.onclick = () => this.loadBackup({ type: "ha_housekeeper/backup_attest", kind: el.dataset.bhClear, clear: true }));
     root.querySelector("[data-pf-refresh]")?.addEventListener("click", () => this.loadPreflight());
-    root.querySelectorAll("[data-plan-close]").forEach(el => el.addEventListener("click", () => { this.plan = null; this.render(); }));
+    root.querySelectorAll("[data-plan-close]").forEach(el => el.addEventListener("click", () => this.leavePlan()));
     root.querySelectorAll("[data-plan-open]").forEach(el => el.onclick = ev => { const inner = ev?.target?.closest?.("button, select, input, a, label"); if (inner && inner !== el && el.contains(inner)) return; this.openPlan(el.dataset.planOpen); });
     root.querySelectorAll("[data-merge-sel]").forEach(el => el.onchange = () => { this.mergeSel = new Set(this.mergeSel || []); el.checked ? this.mergeSel.add(el.dataset.mergeSel) : this.mergeSel.delete(el.dataset.mergeSel); this.render(); });
     root.querySelector("[data-merge]")?.addEventListener("click", () => this.mergePlans());

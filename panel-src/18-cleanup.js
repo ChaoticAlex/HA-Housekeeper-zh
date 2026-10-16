@@ -225,7 +225,7 @@ class CleanupMixin {
   // The journal list holds short entries only; the plan itself is fetched when it is opened.
   async openPlan(planId) {
     this.reopenedPlanId = planId; this.planChanges = null;
-    try { this.plan = await this._hass.callWS({ type: "ha_housekeeper/plan_detail", plan_id: planId }); this.cleanupError = ""; } catch (err) { this.cleanupError = this.errText(err); }
+    try { this.plan = await this._hass.callWS({ type: "ha_housekeeper/plan_detail", plan_id: planId }); this.cleanupError = ""; this.showPlanView(); } catch (err) { this.cleanupError = this.errText(err); }
     this.render();
   }
 
@@ -328,6 +328,7 @@ class CleanupMixin {
       const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_renew", plan_id: planId });
       this.plan = plan; this.reopenedPlanId = null; this.confirmation = null; this.ack = new Set(); this.confirmWord = "";
       this.journal = [plan, ...(this.journal || []).filter(p => p.plan_id !== planId)];
+      this.showPlanView();
       this.toast(this.t("toastRenewed"));
     } catch (err) { this.failPlan(err, "renew"); }
     this.cleanupBusy = false; this.render();
@@ -436,6 +437,7 @@ class CleanupMixin {
     try {
       const result = await this._hass.callWS({ type: "ha_housekeeper/plan_merge", plan_ids: ids });
       this.plan = result.plan; this.confirmation = null; this.ack = new Set(); this.confirmWord = ""; this.mergeSel = new Set();
+      this.showPlanView();
       this.journal = [result.plan, ...(this.journal || []).filter(p => !result.merged.includes(p.plan_id))];
       this.mergeNote = result.conflicts.length ? this.t("mergeConflicts", { count: result.conflicts.length, list: result.conflicts.slice(0, 5).map(c => `${c.object_id} (${c.kinds.join(" / ")})`).join(", ") }) : this.t("mergeDone", { count: result.merged.length });
     } catch (err) { this.cleanupError = this.errText(err); }
@@ -445,7 +447,7 @@ class CleanupMixin {
   async deletePlan(id) {
     try { await this._hass.callWS({ type: "ha_housekeeper/plan_delete", plan_id: id }); } catch (_) { /* already gone */ }
     this.journal = (this.journal || []).filter(p => p.plan_id !== id);
-    if (this.plan?.plan_id === id) this.plan = null;
+    if (this.plan?.plan_id === id) { this.leavePlan(); return; }
     this.render();
   }
 
@@ -778,12 +780,32 @@ class CleanupMixin {
   }
 
   // Every new plan opens the same way: it becomes the open plan, goes on top of the journal and the
-  // page scrolls to its card. `view` switches to the page that shows it; null stays on the current one.
-  openNewPlan(plan, view = "cleanup") {
+  // plan page shows it. The page it came from stays one step back. (`view` is kept for the callers' sake.)
+  openNewPlan(plan, _view) {
     this.plan = plan; this.confirmation = null; this.ack = new Set(); this.confirmWord = "";
     this.journal = [plan, ...(this.journal || [])];
+    this.showPlanView();
+  }
+
+  // The plan page is a page of its own without a menu entry; "back" returns to where the plan was started.
+  showPlanView() {
     this._scrollPlan = true;
-    if (view) { this.noteJump?.(view); this.view = view; this.pages = {}; }
+    if (this.view !== "plan") { this.noteJump?.("plan"); this.view = "plan"; this.pages = {}; this.selected = null; }
+  }
+
+  // Closing the plan page: back to the page it came from, else the journal.
+  leavePlan() {
+    this.plan = null; this.planChanges = null; this.cleanupError = "";
+    if (this.view === "plan") {
+      if (this.viewTrail.length) { this.viewBack(); return; }
+      this.view = "journal"; this.pages = {};
+    }
+    this.render();
+  }
+
+  planView() {
+    if (this.plan) return `<div class="stack">${this.planHeader(true)}</div>`;
+    return `<div class="stack">${this.planHeader()}<p class="factnote pad">${this.t("planNone")}</p><div class="pad"><button class="btn" data-plan-close>${this.t("planClose")}</button></div></div>`;
   }
 
   // For the paths without a busy flag of their own: one request at a time, and their buttons are off
@@ -800,7 +822,7 @@ class CleanupMixin {
 
   // An error from the last request and the plan that is open, on top of every view that can finish one.
   // The dry-run sentence sits behind the coloured (i) in the page title (Cleanup, Journal); Repair says it in its subtitle.
-  planHeader() {
+  planHeader(withCard = false) {
     const from = this.cleanupErrorStamp === this.cleanupError ? this.cleanupErrorFrom : "";
     const lead = this.t({ confirm: "confirmError", check: "checkError", renew: "renewError" }[from] || "planError");
     const open = this.plan && this.isOpenPreview(this.plan);
@@ -808,7 +830,7 @@ class CleanupMixin {
     const modeLink = this.cleanupError && this.cleanupError === this.t("err_protection_mode") ? ` <button class="linkbtn" data-goto-protection>${this.t("modeBlockLink")}</button>` : "";
     const error = this.cleanupError ? `<div class="error">${lead}: ${this.esc(this.cleanupError)}${modeLink}${renew && !this.planChanges ? ` ${renew}` : ""}</div>` : "";
     const changes = this.planChanges?.length ? `<div class="panel"><div class="error"><strong>${this.t("planChangedTitle")}</strong><small class="dim7">${this.t("planChangedHint")}</small><ul class="evlist">${this.planChanges.slice(0, 10).map(c => `<li>${this.esc(c.object_id)}</li>`).join("")}</ul>${this.planChanges.length > 10 ? `<small>${this.t("planChangedMore", { count: this.planChanges.length - 10 })}</small>` : ""}${renew}</div></div>` : "";
-    return `${error ? `<div class="panel">${error}</div>` : ""}${changes}${this.plan ? this.planCard(this.plan) : ""}`;
+    return `${error ? `<div class="panel">${error}</div>` : ""}${changes}${withCard && this.plan ? this.planCard(this.plan) : ""}`;
   }
 
   // Every plan from Cleanup and Repair: what changed, what was checked, and what can be undone.
@@ -868,7 +890,7 @@ class CleanupMixin {
     if (task) {
       const card = { exchange_device: () => this.exchangeCard(), replace_references: () => this.replaceCard(), migrate_meter: () => this.meterCard(), repair_counter: () => this.counterCard() }[task]();
       const chosen = { repair_counter: (this.counterId || "").trim(), migrate_meter: this.meterOld, replace_references: this.replOld, exchange_device: this.exchangeState().oldDev }[task];
-      body = `${this.stepsBar(this.plan ? 3 : chosen ? 2 : 1)}${card}`;
+      body = `${this.stepsBar(chosen ? 2 : 1)}${card}`;
     } else {
       body = `<p class="factnote pad">${this.t("repairHint")}</p>`;
     }

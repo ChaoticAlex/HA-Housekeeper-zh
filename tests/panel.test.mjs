@@ -959,11 +959,13 @@ test("cleanup view lists candidates, creates a dry-run plan and shows the verdic
   await el.createPlan();
   const create = calls.find(c => c.type === "ha_housekeeper/plan_create");
   assert.equal(JSON.stringify(create.actions), JSON.stringify([{ kind: "disable_entity", object_id: "sensor.old" }, { kind: "disable_entity", object_id: "sensor.used" }]));
-  el.view = "journal";
+  el.view = "plan";
   el.render();
   const html = shadow.innerHTML;
-  assert.ok(html.includes("2 checked: 1 with no known use, 0 to review, 1 blocked.") && html.includes("Blocked") && html.includes("Definitely in use"));
-  assert.ok(html.includes('data-plan-open="p1"')); // journaled
+  assert.ok(html.includes("Blocked") && html.includes("Definitely in use"));
+  el.view = "journal";
+  el.render();
+  assert.ok(shadow.innerHTML.includes("2 checked: 1 with no known use, 0 to review, 1 blocked.") && shadow.innerHTML.includes('data-plan-open="p1"')); // journaled
   await el.deletePlan("p1");
   assert.equal(el.plan, null);
 });
@@ -1297,7 +1299,7 @@ test("a dry-run plan is confirmed, typed, executed with progress, and can be und
   const base = { plan_id: "p1", created_at: new Date().toISOString(), status: "dry_run", executed: false, summary: { total: 2, ok: 1, review: 1, blocked: 0 },
     actions: [action("sensor.a", "ok"), action("sensor.b", "review", { reasons: ["has_statistics"] })] };
   el.plan = base;
-  el.view = "cleanup";
+  el.view = "plan";
   const sent = [];
   let current = base;
   el._hass = { language: "en", callWS: async msg => {
@@ -1346,7 +1348,7 @@ test("a blocked removal cannot be confirmed; a ready one asks for the removal wo
   el.data = { ...DATA, objects: [], edges: [], findings: [], quarantine: [] };
   const plan = (executable, reasons) => ({ plan_id: "p2", created_at: new Date().toISOString(), status: "dry_run", executed: false, summary: { total: 1, ok: executable ? 1 : 0, review: 0, blocked: executable ? 0 : 1 },
     actions: [{ kind: "remove_entity", object_id: "sensor.a", name: "A", verdict: executable ? "ok" : "blocked", executable, reasons, quarantine_days_left: 6, used_by: [] }] });
-  el.view = "cleanup";
+  el.view = "plan";
   el.journal = [];
   el.plan = plan(false, ["quarantine_too_short"]);
   el.render();
@@ -1531,7 +1533,7 @@ test("the meter assistant offers the modes and sends the pair with the plan", as
 test("a meter plan explains the copy, the shifted total and the ID move, and asks for MIGRATE", () => {
   const { el, shadow } = panel("en");
   const { data } = stepCData();
-  el.data = data; el.journal = []; el.view = "repair"; el.repairTask = "migrate_meter"; el.plan = METER_PLAN;
+  el.data = data; el.journal = []; el.view = "plan"; el.repairTask = "migrate_meter"; el.plan = METER_PLAN;
   el.render();
   const html = shadow.innerHTML;
   assert.ok(html.includes("sensor.meter_old → sensor.meter_new") && html.includes("48 hourly values"));
@@ -2200,7 +2202,7 @@ test("orphaned statistics are selected and turned into a purge plan, which asks 
   await el.purgeRun();
   assert.equal(JSON.stringify(asked[0]), JSON.stringify({ type: "ha_housekeeper/plan_create", actions: [{ kind: "purge_statistics", object_id: "sensor.old_power", states: true }] }));
   assert.equal(el.purgeSel.size, 0);
-  assert.equal(el.view, "cleanup");
+  assert.equal(el.view, "plan");
   assert.equal(el.plan.plan_id, "p9");
   assert.equal(el.planWord({ actions: [{ kind: "purge_statistics", executable: true }] }), "DELETE");
   assert.equal(el.successorsOf("sensor.power_new", "W")[0].object_id, "sensor.new_power");
@@ -2794,7 +2796,7 @@ test("the improve block asks for the switch, offers fixes and turns one into a p
   assert.ok(scrolled, "the page opens at the new plan");
   const create = calls.find(c => c.type.endsWith("/plan_create"));
   assert.equal(JSON.stringify(create.actions), JSON.stringify([{ kind: "refactor_automation", object_id: "automation.hall", fix: "add_description", values: { description: "Warms the hall" } }]));
-  assert.equal(el.view, "repair");
+  assert.equal(el.view, "plan");
   assert.equal(el.plan.plan_id, "r1");
   enabled = true;
   el.refactor.by["automation.hall"] = { enabled: true, editable: true, proposals: [{ fix: "set_timeout", count: 2, paths: ["action/0", "action/2"] }, { fix: "set_mode", mode: "single", max: null }] };
@@ -3861,6 +3863,7 @@ test("the counter assistant scans, previews with a chart and asks for REPAIR", a
   el.render();
   const html = shadow.innerHTML;
   assert.ok(html.includes("<polyline") && html.includes("5-minute rows") && !html.includes("data-confirm-word"));
+  el.view = "repair"; el.render();
   // A range picked by hand becomes a repair_range request with seconds since 1970.
   el.counterId = "sensor.water"; el.rangeFrom = "2026-10-01T10:00"; el.rangeTo = "2026-10-01T12:00"; el.rangeMode = "fixed"; el.rangeFixed = "91,7";
   el.pickRange(shadow);
@@ -3869,6 +3872,7 @@ test("the counter assistant scans, previews with a chart and asks for REPAIR", a
   assert.equal(range.kind, "repair_range"); assert.equal(range.mode, "fixed"); assert.equal(range.range.fixed, 91.7);
   assert.equal(range.range.to - range.range.from, 7200);
   // A spike found in a measurement fills the range and shows the readings with two sliders.
+  el.view = "repair"; el.render();
   el._hass = { language: "en", callWS: async msg => { sent.push(msg); return { error: null, kind: "measurement", unit: "°C", table: "short_term", points: Array.from({ length: 20 }, (_, i) => [1788200000 + i * 300, 20 + (i === 10 ? 65 : 0)]) }; } };
   el.takeRange("sensor.boiler", 1788202900, 1788203300);
   await new Promise(r => setTimeout(r, 0));
@@ -3911,7 +3915,7 @@ test("selected findings get a label through a plan that opens under Cleanup", as
   await el.commitBulk();
   const sent = calls.find(c => c.type === "ha_housekeeper/plan_create");
   assert.equal(JSON.stringify(sent.actions.map(a => [a.kind, a.target])), JSON.stringify([["add_label", "review"]]));
-  assert.equal(el.view, "cleanup");
+  assert.equal(el.view, "plan");
   await el.planLabel(sent.actions[0].object_id, "review"); // the same from the detail page
   assert.equal(scrolls.filter(Boolean).length, 2, "both open the page at the new plan (issue #8)");
 });
@@ -4127,7 +4131,7 @@ test("a plan runs as a wizard: review, confirm with a way back, run, result; lon
   const plan = (status, extra = {}) => ({ plan_id: "p", status, created_at: new Date().toISOString(), summary: { total: 25, ok: 25, review: 0, blocked: 0 }, actions: Array.from({ length: 25 }, (_, i) => action(`sensor.s${i}`)), ...extra });
   const stage = (p, confirming = false) => el.planStage(p, confirming);
   assert.deepEqual([stage(plan("dry_run")), stage(plan("dry_run"), true), stage(plan("running")), stage(plan("executed")), stage(plan("verified", { verification: { ok: true, checks: [] } })), stage(plan("aborted"))], [0, 1, 2, 2, 3, 3]);
-  el.plan = plan("dry_run"); el.view = "cleanup"; el.render();
+  el.plan = plan("dry_run"); el.view = "plan"; el.render();
   let html = shadow.innerHTML;
   assert.ok(html.includes("1. Review") && html.includes("sensor.s0") && html.includes("sensor.s19") && !html.includes("sensor.s20") && html.includes("data-lpage"), "a long plan comes in pages");
   el.confirmation = { plan_id: "p", token: "t", execute: ["sensor.s0"], needs_acknowledgement: [] }; el.render();
@@ -4520,7 +4524,7 @@ test("the selection can be trimmed: a plan with a day count for each entity, and
   await el.trimPlan();
   assert.equal(sent.type, "ha_housekeeper/plan_create");
   assert.equal(JSON.stringify(sent.actions.map(a => [a.kind, a.object_id, a.keep_days])), JSON.stringify([["trim_history", "sensor.hue", 30], ["trim_history", "sensor.hue2", 30]]));
-  assert.equal(el.view, "cleanup");
+  assert.equal(el.view, "plan");
   const action = { kind: "trim_history", object_id: "sensor.hue", name: "Hue", object_type: "entity", verdict: "review", executable: true, reasons: ["irreversible"], keep_days: 30, trim: { rows: 5000 } };
   const plan = { plan_id: "p2", status: "dry_run", actions: [action], summary: {} };
   assert.ok(el.planCard(plan).includes("older than 30 days: 5000 rows"));
@@ -4602,7 +4606,7 @@ test("housekeeper backups: the list marks protected ones, the rule picks the res
   el._hass.callWS = async msg => { sent = msg; return { plan_id: "p9", status: "dry_run", actions: [], summary: {} }; };
   await el.backupDeletePlan();
   assert.equal(JSON.stringify(sent.actions), JSON.stringify([{ kind: "delete_backup", object_id: "b2" }]));
-  assert.equal(el.view, "cleanup");
+  assert.equal(el.view, "plan");
   const action = { kind: "delete_backup", object_id: "b2", name: "Housekeeper bbbb2222", object_type: "backup", verdict: "review", executable: true, reasons: ["irreversible", "only_return"], backup: { date: "2026-08-30T10:00:00+00:00", size: 900 } };
   assert.ok(el.undoBadge(action).includes("final"));
   assert.equal(el.planWord({ actions: [action] }), el.t("purgeWord"));
@@ -4638,7 +4642,7 @@ test("ticked policy violations get an area through a plan, by suggestion or by c
   el.polSel = new Set(["ka"]); el.bulk = { kind: "area", area: "kitchen", error: "" };
   await el.commitBulk();
   assert.equal(calls[1].actions[0].target, "kitchen");
-  assert.equal(el.view, "cleanup");
+  assert.equal(el.view, "plan");
 });
 
 test("a violation row folds open to a rename that checks the name and plans one rename", async () => {
@@ -5518,4 +5522,20 @@ test("a newer scan found in the background reloads the panel; the same scan or a
   status = { running: false, scanned_at: "2026-10-07T16:00:00+00:00" };
   await el.checkNewScan();
   assert.equal(loads, 1, "a newer scan");
+});
+
+test("a new plan opens on its own page, and closing it returns to the page it came from", () => {
+  const { el, shadow } = panel("en");
+  el.data = DATA; el.journal = []; el.view = "cleanup";
+  const plan = { plan_id: "pn", created_at: new Date().toISOString(), status: "dry_run", executed: false, summary: { total: 1, ok: 1, review: 0, blocked: 0 },
+    actions: [{ kind: "disable_entity", object_id: "sensor.a", name: "A", verdict: "ok", executable: true, reasons: [], used_by: [] }] };
+  el.openNewPlan(plan);
+  el.render();
+  assert.equal(el.view, "plan");
+  assert.ok(shadow.innerHTML.includes("data-plan-card") && shadow.innerHTML.includes('data-action="view-back"'));
+  assert.ok(shadow.innerHTML.includes("data-plan-close"));
+  el.leavePlan();
+  assert.equal(el.view, "cleanup");
+  assert.equal(el.plan, null);
+  assert.ok(!shadow.innerHTML.includes("data-plan-card"));
 });
