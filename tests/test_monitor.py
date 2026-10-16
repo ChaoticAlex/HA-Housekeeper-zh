@@ -12,7 +12,7 @@ from custom_components.ha_housekeeper.monitor import (  # noqa: E402
     evaluate,
 )
 
-NOW = datetime(2026, 10, 13, 12, tzinfo=UTC)
+NOW = datetime.now(UTC).replace(microsecond=0)
 
 
 def definition(*members):
