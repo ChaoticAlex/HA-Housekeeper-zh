@@ -535,7 +535,7 @@ class CleanupMixin {
         return `<button class="chip" data-object="${this.esc(u.source)}">${this.esc(obj?.name || u.source.split(":").slice(1).join(":"))}</button>`;
       }).join("");
       const more = (a.used_by || []).length > 4 ? `<small>+${a.used_by.length - 4}</small>` : "";
-      const reasons = (a.reasons || []).map(r => (r === "quarantine_too_short" && a.quarantine_days_left ? `${this.t("reason_quarantine_too_short")} (${this.t("daysLeftShort", { days: a.quarantine_days_left })})` : this.t(`reason_${r}`))).join(" ");
+      const reasons = (a.reasons || []).filter(r => !(a.kind === "purge_statistics" && ["irreversible", "with_states"].includes(r))).map(r => (r === "quarantine_too_short" && a.quarantine_days_left ? `${this.t("reason_quarantine_too_short")} (${this.t("daysLeftShort", { days: a.quarantine_days_left })})` : this.t(`reason_${r}`))).join(" ");
       const type = a.object_type || "entity", obj = this.findObject(`${type}:${a.object_id}`);
       const result = a.result;
       const resultPill = result ? `<span class="pill ${{ done: "ok", undone: "mute" }[result.state] || "warn"}">${this.t(`result_${result.state === "done" ? DONE_RESULTS[a.kind] || "done" : result.state}`)}</span>` : "";
@@ -561,7 +561,7 @@ class CleanupMixin {
       const run = this.runActions(plan);
       const blocked = this.modeBlocked(plan);
       const risky = run.some(a => REMOVAL_KINDS.includes(a.kind) || PURGE_KINDS.includes(a.kind));
-      control = `<div class="setrow planfoot"><div>${run.length ? `<strong class="plansum">${this.confirmSummary(plan, run.length)}</strong>` : ""}${this.largeRemovalNote(plan)}<small>${this.t("cleanupDryRun")}</small>${this.purgeStatesSwitch(plan)}${blocked.length ? this.modeHint(blocked) : ""}${run.length ? "" : `<small class="dim7">${this.t("nothingToRun")}</small>`}</div><span class="planfootbtns"><button class="btn" data-plan-discard>${this.t("confirmCancel")}</button><button class="btn ${risky ? "danger" : "primary"}" data-plan-confirm data-risky="${risky}" data-count="${run.length}" ${blocked.length || !run.length ? `disabled title="${this.esc(blocked.length ? this.t("modeBlockTitle", { mode: this.modeName() }) : this.t("nothingToRun"))}"` : ""}>${this.t("confirmPlan")}</button></span></div>`;
+      control = `<div class="setrow planfoot planfootcol"><div>${run.length ? `<strong class="plansum">${this.confirmSummary(plan, run.length)}</strong>` : ""}${this.largeRemovalNote(plan)}<small>${this.t("cleanupDryRun")}</small>${this.purgeStatesSwitch(plan)}${blocked.length ? this.modeHint(blocked) : ""}${run.length ? "" : `<small class="dim7">${this.t("nothingToRun")}</small>`}</div><span class="planfootbtns"><button class="btn" data-plan-discard>${this.t("confirmCancel")}</button><button class="btn ${risky ? "danger" : "primary"}" data-plan-confirm data-risky="${risky}" data-count="${run.length}" ${blocked.length || !run.length ? `disabled title="${this.esc(blocked.length ? this.t("modeBlockTitle", { mode: this.modeName() }) : this.t("nothingToRun"))}"` : ""}>${this.t("confirmPlan")}</button></span></div>`;
     }
     else if (plan.status === "aborted") {
       const small = plan.actions.some(a => a.result?.reason === "backup_small_failed");
@@ -583,12 +583,12 @@ class CleanupMixin {
         <div class="outcome ${nothing ? "ok" : "warn"}" role="status"><ha-icon icon="${nothing ? "mdi:check-circle-outline" : "mdi:information-outline"}"></ha-icon><span><strong>${this.t(nothing ? "wzIdleNothingTitle" : "wzIdleTitle")}</strong><small>${this.esc(why)}</small></span></div>${rowList.join("")}${this.reportBlock(plan, `<button class="btn primary" data-plan-close>${this.t("planClose")}</button>`)}</section>`;
     }
     const rowTexts = plan.actions.map(a => [a.name, a.object_id, a.target, a.label_name, a.area_name, ...(a.reasons || []).map(r => this.t(`reason_${r}`))].filter(Boolean).join(" "));
-    const rows = this.planRowsShown(plan, rowList, rowTexts);
+    const rows = this.fold("planrows", { title: this.t("planObjects", { n: this.formatNumber(plan.actions.length) }) }, this.planRowsShown(plan, rowList, rowTexts), true);
     const summary = this.exchangeSummary(plan) + `<p class="factnote">${this.t("planSummary", { total: sm.total ?? 0, ok: sm.ok ?? 0, review: sm.review ?? 0, blocked: sm.blocked ?? 0 })}${extra ? ` ${this.esc(extra)}` : ""}</p>${this.recorderSummary(plan)}`;
-    const body = stage === 0 ? `${summary}${this.simulationBlock(plan)}${rows}${control}`
-      : stage === 1 ? `${summary}${this.simulationBlock(plan)}${rows}${control}`
+    const body = stage === 0 ? `${summary}${rows}${this.simulationBlock(plan)}${control}`
+      : stage === 1 ? `${summary}${rows}${this.simulationBlock(plan)}${control}`
       : stage === 2 ? `${this.planOutcome(plan)}${control}`
-      : `${this.planOutcome(plan)}${this.logSuggestCard(plan)}${summary}${this.simulationBlock(plan)}${rows}${checks}${this.followupLine(plan)}${control}`;
+      : `${this.planOutcome(plan)}${this.logSuggestCard(plan)}${summary}${rows}${this.simulationBlock(plan)}${checks}${this.followupLine(plan)}${control}`;
     return `<section class="panel" data-plan-card><div class="panelhead"><div><h2>${this.t(plan.status === "dry_run" ? "planResult" : "planResultDone")} · <span class="pill ${plan.status === "verified" ? "ok" : plan.status === "dry_run" ? "mute" : "warn"}">${this.t(`plan_status_${plan.status}`)}</span>${this.planStale(plan) ? ` <span class="pill warn">${this.t("planStale")}</span>` : ""}</h2><p>${this.esc(this.formatDate(plan.created_at))}</p></div><button class="btn" data-plan-close>${this.t("planClose")}</button></div>
       ${this.planTrack(plan, stage, Boolean(conf))}${body}${this.reportBlock(plan)}</section>`;
   }
