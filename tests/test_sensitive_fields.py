@@ -86,3 +86,16 @@ async def test_accounts_name_role_and_two_factor_but_never_a_token(hass: HomeAss
         ("Node-RED", "Admin", 0, False)
     ]
     assert token.token not in json.dumps(result) and token.jwt_key not in json.dumps(result)
+
+
+async def test_an_integration_waiting_for_a_new_login_is_marked(hass: HomeAssistant) -> None:
+    from unittest.mock import patch
+
+    entry = MockConfigEntry(domain="plain", title="Plain", data={"host": "h"})
+    entry.add_to_hass(hass)
+    flows = [{"context": {"source": "reauth", "entry_id": entry.entry_id}}]
+    with patch.object(hass.config_entries.flow, "async_progress", return_value=flows):
+        result = await sensitive_fields(hass)
+    assert [(e["domain"], e["reauth"], e["fields"]) for e in result["entries"]] == [
+        ("plain", True, [])
+    ], "listed although no field name gave it away"

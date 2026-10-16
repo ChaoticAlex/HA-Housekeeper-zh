@@ -429,13 +429,11 @@ def flapping(
 async def entry_info(hass: HomeAssistant) -> dict[str, dict[str, Any]]:
     from homeassistant.loader import async_get_integrations
 
+    from .sensitive_fields import reauth_entry_ids
+
     entries = hass.config_entries.async_entries()
     integrations = await async_get_integrations(hass, {entry.domain for entry in entries})
-    reauth = {
-        flow["context"].get("entry_id")
-        for flow in hass.config_entries.flow.async_progress()
-        if flow["context"].get("source") == "reauth"
-    }
+    reauth = reauth_entry_ids(hass)
     info = {}
     for entry in entries:
         integration = integrations.get(entry.domain)

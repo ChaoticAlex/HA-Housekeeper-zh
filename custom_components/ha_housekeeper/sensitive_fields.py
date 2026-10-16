@@ -75,6 +75,15 @@ def fields_of(entry: Any) -> list[dict[str, Any]]:
     return found
 
 
+def reauth_entry_ids(hass: HomeAssistant) -> set[str]:
+    """The config entries that wait for a new login (a running reauth flow)."""
+    return {
+        flow["context"].get("entry_id")
+        for flow in hass.config_entries.flow.async_progress()
+        if flow["context"].get("source") == "reauth"
+    }
+
+
 async def account_facts(hass: HomeAssistant) -> list[dict[str, Any]]:
     """The people of this Home Assistant with their tokens; accounts the system made for itself
     (Supervisor, add-ons) are left out. The account rules read the same facts."""
@@ -151,15 +160,18 @@ async def sensitive_fields(hass: HomeAssistant) -> dict[str, Any]:
     """Every config entry with credential fields (kind and set or empty, never a value) and the
     accounts."""
     rows = []
+    reauth = reauth_entry_ids(hass)
     for entry in hass.config_entries.async_entries():
         fields = fields_of(entry)
-        if fields:
+        # One that waits for a new login is listed even when no field name gave it away.
+        if fields or entry.entry_id in reauth:
             rows.append(
                 {
                     "entry_id": entry.entry_id,
                     "domain": entry.domain,
                     "title": entry.title,
                     "disabled": bool(entry.disabled_by),
+                    "reauth": entry.entry_id in reauth,
                     "fields": fields,
                 }
             )

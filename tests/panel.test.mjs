@@ -4893,6 +4893,7 @@ const ACCESS = {
 
 const SECRETS = { entries: [
   { entry_id: "c1", domain: "demo_cloud", title: "<i>Demo</i>", disabled: false, fields: [{ source: "data", key: "password", kind: "password", set: true }, { source: "data", key: "token.access_token", kind: "token", set: false }] },
+  { entry_id: "c2", domain: "netatmo", title: "Netatmo", disabled: false, reauth: true, fields: [] },
 ], accounts: [
   { id: "u1", name: "Roberto", active: true, owner: true, admin: true, local_only: false, mfa: true, logins: true, last_login: "2026-10-16T08:00:00+00:00", inactive: false, token_count: 2 },
   { id: "u2", name: "<b>Partner</b>", active: true, owner: false, admin: true, local_only: false, mfa: false, logins: true, last_login: "2026-10-13T08:00:00+00:00", inactive: false, token_count: 0 },
@@ -5068,6 +5069,16 @@ test("the credential page shows the accounts with role and two-factor, and its t
   html = shadow.innerHTML;
   assert.ok(html.includes("&lt;b&gt;Partner&lt;/b&gt;") && !html.includes("Roberto</strong>") && !html.includes("Gast</strong>"), "only the admin without two-factor, escaped");
   assert.ok(html.includes('data-ha-path="/config/users"'), "a row opens the users in Home Assistant");
+});
+
+test("an integration that asks for a new login is marked and has a tile of its own", () => {
+  const { el, shadow } = systemPanel("de");
+  el.view = "secrets";
+  el.lvState("seclist", "name", "asc").f.state = "reauth";
+  el.render();
+  const html = shadow.innerHTML;
+  assert.ok(html.includes('data-sec-show="reauth"') && html.includes('class="pill red">Anmeldung nötig'));
+  assert.ok(html.includes("Netatmo") && !html.includes("&lt;i&gt;Demo"), "the filter keeps only the one asking");
 });
 
 test("the credential page lists the long-lived tokens by age and never more than name, account and age", () => {

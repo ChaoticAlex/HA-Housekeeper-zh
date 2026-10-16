@@ -3,7 +3,7 @@
 // A page and the WebSocket command it asks.
 const SYS_COMMANDS = { storage: "system_usage", dataflow: "access", secrets: "sensitive_fields" };
 // What a tile of the credentials page opens: [tab, list, state filter]; "" clears the filters.
-const SEC_SHOWS = { "": ["entries", "seclist", ""], gap: ["entries", "seclist", "gap"], nomfa: ["accounts", "secusers", "nomfa"], tokens: ["tokens", "sectokens", ""] };
+const SEC_SHOWS = { "": ["entries", "seclist", ""], gap: ["entries", "seclist", "gap"], reauth: ["entries", "seclist", "reauth"], nomfa: ["accounts", "secusers", "nomfa"], tokens: ["tokens", "sectokens", ""] };
 const SYS_WARN_PERCENT = 75, SYS_RED_PERCENT = 90;
 
 class SystemMixin {
@@ -475,7 +475,7 @@ class SystemMixin {
       const entries = r.entries || [], users = r.accounts || [], tokens = r.tokens || [];
       const count = (e, set) => e.fields.filter(f => f.set === set).length;
       const kinds = e => [...new Set(e.fields.map(f => f.kind))];
-      const empty = entries.reduce((n, e) => n + count(e, false), 0);
+      const empty = entries.reduce((n, e) => n + count(e, false), 0), reauth = entries.filter(e => e.reauth).length;
       const tabs = [{ id: "entries", label: this.t("secListTitle"), count: entries.length }, ...(r.accounts ? [{ id: "accounts", label: this.t("secTabAccounts"), count: users.length }] : []), ...(r.tokens ? [{ id: "tokens", label: this.t("secTabTokens"), count: tokens.length }] : [])];
       const open = this.viewTabOf("secrets", tabs, "entries");
       const on = (tab, list, value) => open === tab && (value ? this.lv?.[list]?.f?.state === value : !Object.values(this.lv?.[list]?.f || {}).some(Boolean));
@@ -484,6 +484,7 @@ class SystemMixin {
       const rowOne = [
         tile("secSumEntries", entries.length, this.t("secSumEntriesSub", { n: this.formatNumber(entries.reduce((n, e) => n + count(e, true), 0)) }), "mute", "", on("entries", "seclist")),
         tile("secSumEmpty", empty, this.t("secSumEmptySub"), empty ? "warn" : "ok", "gap", on("entries", "seclist", "gap")),
+        tile("secSumReauth", reauth, this.t("secSumReauthSub"), reauth ? "red" : "ok", "reauth", on("entries", "seclist", "reauth")),
       ];
       const old = tokens.filter(x => x.old || !x.account_active).length;
       const rowTwo = [
@@ -495,17 +496,17 @@ class SystemMixin {
       if (open === "tokens") return `<div class="stack">${head}${tiles}<div class="panel">${bar}<div class="panelhead"><div><h2>${this.t("secTabTokens")}</h2><p>${this.t("secTokHint")}</p></div></div>${this.secTokens(tokens)}${this.howCounted("secTokFootnote")}</div></div>`;
       if (open === "accounts") return `<div class="stack">${head}${tiles}<div class="panel">${bar}<div class="panelhead"><div><h2>${this.t("secTabAccounts")}</h2><p>${this.t("secAccHint")}</p></div></div>${this.secAccounts(users)}${this.howCounted("secAccFootnote")}</div></div>`;
       const state = e => (count(e, false) === 0 ? "set" : count(e, true) === 0 ? "empty" : "part");
-      const stateCell = e => `<span class="pill ${{ set: "ok", part: "warn", empty: "warn" }[state(e)]}">${this.esc(this.t("secState", { n: count(e, true), total: e.fields.length }))}</span>`;
+      const stateCell = e => `${e.fields.length ? `<span class="pill ${{ set: "ok", part: "warn", empty: "warn" }[state(e)]}">${this.esc(this.t("secState", { n: count(e, true), total: e.fields.length }))}</span>` : ""}${e.reauth ? `<span class="pill red">${this.t("secReauth")}</span>` : ""}`;
       const kindNames = e => kinds(e).map(k => this.t(`secKind_${k}`));
       const names = e => e.fields.map(f => f.key).join(", ");
       const table = this.sysList("seclist", entries, {
         sort: "name", dir: "asc", cls: "acc", tie: e => e.entry_id,
-        sorts: [{ key: "name", label: "accColIntegration", dir: "asc", get: e => `${e.domain} ${e.title}` }, { key: "state", label: "secColState", dir: "desc", get: e => ({ empty: 2, part: 1, set: 0 })[state(e)] }],
+        sorts: [{ key: "name", label: "accColIntegration", dir: "asc", get: e => `${e.domain} ${e.title}` }, { key: "state", label: "secColState", dir: "desc", get: e => (e.reauth ? 3 : ({ empty: 2, part: 1, set: 0 })[state(e)]) }],
         filters: [
           { name: "kind", all: this.t("secAllKinds"), options: ["password", "token", "api_key", "secret", "webhook", "pin"].map(k => [k, this.t(`secKind_${k}`)]) },
-          { name: "state", all: this.t("secAllStates"), options: [["gap", this.t("secStateGap")], ["set", this.t("secStateSet")], ["part", this.t("secStatePart")], ["empty", this.t("secStateEmpty")]] },
+          { name: "state", all: this.t("secAllStates"), options: [["reauth", this.t("secReauth")], ["gap", this.t("secStateGap")], ["set", this.t("secStateSet")], ["part", this.t("secStatePart")], ["empty", this.t("secStateEmpty")]] },
         ],
-        filterFns: { kind: (e, v) => kinds(e).includes(v), state: (e, v) => (v === "gap" ? state(e) !== "set" : state(e) === v) },
+        filterFns: { kind: (e, v) => kinds(e).includes(v), state: (e, v) => (v === "reauth" ? Boolean(e.reauth) : v === "gap" ? state(e) !== "set" : state(e) === v) },
         text: e => `${e.domain} ${e.title} ${names(e)} ${kindNames(e).join(" ")}`, empty: "secNone",
         rowAttrs: e => `data-ha-path="${this.esc(`/config/integrations/integration/${encodeURIComponent(e.domain)}`)}" tabindex="0" role="link" aria-label="${this.esc(this.t("secOpen", { name: e.title || e.domain }))}"`,
         columns: [
