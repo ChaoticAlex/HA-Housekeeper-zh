@@ -32,8 +32,16 @@ FILTER_KEYS = (
     "exclude_entities",
     "exclude_entity_globs",
 )
-SENSITIVE_DOMAINS = ("alarm_control_panel", "lock", "person", "device_tracker")
-SENSITIVE_COVERS = ("garage", "gate")
+SENSITIVE_DOMAINS = (
+    "alarm_control_panel",
+    "lock",
+    "person",
+    "device_tracker",
+    "camera",
+    "siren",
+    "valve",
+)
+SENSITIVE_COVERS = ("garage", "gate", "door")
 DIAGNOSTIC_CATEGORIES = ("diagnostic", "config")
 STALE_STATUSES = ("disabled", "orphaned")
 ITEM_LIMIT = 200

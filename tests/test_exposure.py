@@ -83,6 +83,18 @@ def test_sensitive_classes_are_a_hint_never_a_problem() -> None:
     assert "cover.blind" not in {i["entity_id"] for i in found["items"]}
 
 
+def test_cameras_sirens_valves_and_doors_are_sensitive_too() -> None:
+    entities = {
+        "camera.drive": entity(domain="camera"),
+        "siren.alarm": entity(domain="siren"),
+        "valve.water": entity(domain="valve"),
+        "cover.patio": entity(domain="cover", device_class="door"),
+    }
+    result = evaluate(raw(exposed=entities), entities, set())
+    found = next(f for f in result["findings"] if f["kind"] == "sensitive_exposed")
+    assert found["count"] == 4
+
+
 def test_stale_exposed_disabled_or_orphaned() -> None:
     entities = {
         "light.a": entity(status="disabled"),
