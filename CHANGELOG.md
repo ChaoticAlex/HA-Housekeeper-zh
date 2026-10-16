@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Behoben
+
+- **Oberfläche, Korrekturen:** „In HA öffnen“ (Befundseite, HACS-Knöpfe) öffnet Home Assistant in einem neuen Tab statt im selben. Das Schließen des Dialogs „Mehr Infos“ lässt die Seite, auf der man ist.
+
+### English
+
+#### Fixed
+
+- **Interface, corrections:** “Open in HA” (findings page, HACS buttons) opens Home Assistant in a new tab instead of the same one. Closing the “More info” dialog keeps you on the page you were on.
+
 ## 1.8.1 - 2026-10-16
 
 ### Geändert
