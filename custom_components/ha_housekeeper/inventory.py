@@ -10,6 +10,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+from homeassistant.config_entries import ConfigEntryState
 from homeassistant.const import __version__ as HA_VERSION
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import UnsupportedStorageVersionError
@@ -58,6 +59,7 @@ from .const import (
     SIGNAL_SCAN_STARTED,
     STORAGE_VERSION,
     WARMUP_SECONDS,
+    WARMUP_SETTLE_SECONDS,
     WINDOW_STORAGE_KEY,
 )
 from .coverage import CoverageStore
@@ -812,6 +814,8 @@ class InventoryScanner:
         self.retry_runs = 0  # Rescans after a gap in a row; set by the scheduler in __init__.py
         self._booting = False
         self._warmup_until: float | None = None
+        self._settled_at: float | None = None  # since when no integration has been loading
+        self.integrations_pending = 0
         self._recorder_available = False
         # What the scan in progress could not read: "dashboard", "dashboard:<id>" or "app".
         self._unchecked: set[str] = set()
@@ -881,6 +885,27 @@ class InventoryScanner:
         """Home Assistant just started: scans stay preliminary for the next ``seconds``."""
         self._booting = False
         self._warmup_until = time.monotonic() + seconds
+        self._settled_at = None
+        self.check_warmup()
+
+    def check_warmup(self) -> None:
+        """Look at the integrations: the warm-up ends a minute after none of them is loading any more."""
+        if self._booting or self._warmup_until is None:
+            return
+        self.integrations_pending = sum(
+            1
+            for entry in self.hass.config_entries.async_entries()
+            if entry.state is ConfigEntryState.SETUP_IN_PROGRESS
+        )
+        if self.integrations_pending:
+            self._settled_at = None
+        elif self._settled_at is None:
+            self._settled_at = time.monotonic()
+
+    @property
+    def warmup_settling(self) -> bool:
+        """Whether every integration has loaded and only the safety buffer is left."""
+        return self._settled_at is not None and self.warmup_seconds_left > 0
 
     @property
     def booting(self) -> bool:
@@ -894,7 +919,11 @@ class InventoryScanner:
             return WARMUP_SECONDS
         if self._warmup_until is None:
             return 0
-        return max(0, round(self._warmup_until - time.monotonic()))
+        now = time.monotonic()
+        left = self._warmup_until - now
+        if self._settled_at is not None:
+            left = min(left, self._settled_at + WARMUP_SETTLE_SECONDS - now)
+        return max(0, round(left))
 
     @property
     def warming_up(self) -> bool:
@@ -1494,6 +1523,8 @@ class InventoryScanner:
                 "preliminary": preliminary,
                 "warmup_seconds_left": self.warmup_seconds_left,
                 "warmup_booting": self.booting,
+                "warmup_pending": self.integrations_pending,
+                "warmup_settling": self.warmup_settling,
                 "outage_info_minutes": self.outage_info_minutes,
                 "outage_low_hours": self.outage_low_hours,
                 "outage_medium_hours": self.outage_medium_hours,

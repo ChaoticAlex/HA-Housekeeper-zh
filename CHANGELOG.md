@@ -8,6 +8,7 @@
 
 ### Behoben
 
+- **Start, Anlaufphase:** Sie endet eine Minute, nachdem keine Integration mehr lädt (spätestens nach 5 Minuten), statt immer 5 Minuten zu laufen. Das Banner nennt die Zahl der ladenden Integrationen oder den Sicherheitspuffer.
 - **Oberfläche, Korrekturen:** „In HA öffnen“ (Befundseite, HACS-Knöpfe) öffnet Home Assistant in einem neuen Tab statt im selben. Das Schließen des Dialogs „Mehr Infos“ lässt die Seite, auf der man ist. „Ausgewählte zusammenführen“ ist bei mehr als 10 Plänen gesperrt (statt mit Serverfehler abzubrechen).
 
 ### English
@@ -18,6 +19,7 @@
 
 #### Fixed
 
+- **Startup, warm-up:** It ends one minute after no integration is loading any more (5 minutes at most) instead of always running 5 minutes. The banner names the number of integrations still loading or the safety buffer.
 - **Interface, corrections:** “Open in HA” (findings page, HACS buttons) opens Home Assistant in a new tab instead of the same one. Closing the “More info” dialog keeps you on the page you were on. “Merge selected” is disabled for more than 10 plans (instead of failing with a server error).
 
 ## 1.8.1 - 2026-10-16

@@ -870,6 +870,20 @@ async def test_a_boot_scan_is_followed_by_a_final_scan(hass: HomeAssistant) -> N
     assert scanner.snapshot["meta"]["preliminary"] is False
 
 
+async def test_warmup_ends_a_minute_after_the_integrations_have_loaded(hass: HomeAssistant) -> None:
+    """With nothing loading any more only the safety buffer is left, never more than the cap."""
+    import time
+
+    from custom_components.ha_housekeeper.const import WARMUP_SECONDS, WARMUP_SETTLE_SECONDS
+    from custom_components.ha_housekeeper.inventory import InventoryScanner
+
+    scanner = InventoryScanner(hass)
+    scanner.begin_warmup(WARMUP_SECONDS)
+    assert scanner.warmup_settling and scanner.warmup_seconds_left <= WARMUP_SETTLE_SECONDS
+    scanner._settled_at = time.monotonic() - WARMUP_SETTLE_SECONDS - 1
+    assert not scanner.warming_up
+
+
 async def test_a_set_up_after_the_start_has_no_warmup(hass: HomeAssistant) -> None:
     """Reloading the integration on a running Home Assistant scans normally."""
     result = await hass.config_entries.flow.async_init(

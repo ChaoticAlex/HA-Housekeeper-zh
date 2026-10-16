@@ -142,7 +142,13 @@ def websocket_status(
     scanner: InventoryScanner,
 ) -> None:
     """Return scan progress without triggering work."""
-    warmup = {"booting": scanner.booting, "seconds_left": scanner.warmup_seconds_left}
+    scanner.check_warmup()
+    warmup = {
+        "booting": scanner.booting,
+        "seconds_left": scanner.warmup_seconds_left,
+        "pending": scanner.integrations_pending,
+        "settling": scanner.warmup_settling,
+    }
     connection.send_result(
         msg["id"],
         _versioned(

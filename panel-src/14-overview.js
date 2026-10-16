@@ -42,8 +42,9 @@ class OverviewMixin {
     let step, frac = null;
     if (w.booting) step = this.t("warmupStepBoot");
     else if (left) {
-      step = this.t("warmupStepWait", { time: `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}` });
-      frac = 1 - left / (w.total || 300);
+      const time = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
+      step = w.settling ? this.t("warmupStepSettle", { time }) : this.t("warmupStepWait", { time, count: w.pending || 0 });
+      frac = 1 - left / (w.settling ? 60 : (w.total || 300));
     } else if (st?.running) { step = this.t("warmupStepScan", { percent: st.progress }); frac = st.progress / 100; }
     else step = this.t("warmupStepFinal");
     const bar = frac === null ? "" : `<span class="bar"><i class="warn" style="width:${Math.round(Math.min(1, Math.max(0, frac)) * 100)}%"></i></span>`;
@@ -52,7 +53,7 @@ class OverviewMixin {
 
   // Counts the warm-up down in the banner without rebuilding the page; every few seconds the backend is asked for the step.
   startWarmupTicker(meta) {
-    this._warm = { booting: Boolean(meta.warmup_booting), until: Date.now() + (Number(meta.warmup_seconds_left) || 0) * 1000, total: 300 };
+    this._warm = { booting: Boolean(meta.warmup_booting), until: Date.now() + (Number(meta.warmup_seconds_left) || 0) * 1000, total: 300, pending: Number(meta.warmup_pending) || 0, settling: Boolean(meta.warmup_settling) };
     if (this._warmTick) return;
     let n = 0;
     this._warmTick = window.setInterval(async () => {
@@ -61,7 +62,7 @@ class OverviewMixin {
         try {
           const s = await this._hass.callWS({ type: "ha_housekeeper/status" });
           this.scanStatus = s;
-          this._warm = { ...this._warm, booting: Boolean(s.warmup?.booting), until: Date.now() + (Number(s.warmup?.seconds_left) || 0) * 1000 };
+          this._warm = { ...this._warm, booting: Boolean(s.warmup?.booting), until: Date.now() + (Number(s.warmup?.seconds_left) || 0) * 1000, pending: Number(s.warmup?.pending) || 0, settling: Boolean(s.warmup?.settling) };
         } catch (_) { /* the next tick asks again */ }
       }
       const box = this.shadowRoot?.querySelector?.("[data-warmup] .row-text");

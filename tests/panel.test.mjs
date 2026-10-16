@@ -1272,6 +1272,8 @@ test("the start banner names the step and counts the warm-up down", () => {
   assert.ok(el.warmupBanner().includes("Step 1 of 3"));
   el._warm = { until: Date.now() + 125000, total: 300 };
   assert.ok(el.warmupBanner().includes("2:0") && el.warmupBanner().includes("Step 2 of 3"));
+  el._warm = { until: Date.now() + 45000, total: 300, settling: true };
+  assert.ok(el.warmupBanner().includes("all integrations have loaded"));
   el._warm = { until: Date.now() - 1000 };
   el.scanStatus = { running: true, progress: 40 };
   assert.ok(el.warmupBanner().includes("Step 3 of 3") && el.warmupBanner().includes("40%"));
