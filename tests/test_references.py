@@ -229,7 +229,9 @@ async def test_a_script_home_assistant_cannot_read_does_not_stop_the_scan(
         snapshot = await scanner.async_scan()
 
     script = next(o for o in snapshot["objects"] if o["object_id"] == "script.broken")
-    assert {"entity:" + OLD} <= {e["target"] for e in snapshot["edges"] if e["source"] == "script:script.broken"}
+    assert {"entity:" + OLD} <= {
+        e["target"] for e in snapshot["edges"] if e["source"] == "script:script.broken"
+    }
     assert script["object_type"] == "script"
 
 
