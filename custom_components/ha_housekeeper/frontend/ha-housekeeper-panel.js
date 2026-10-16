@@ -669,7 +669,7 @@ Object.assign(TEXT.de, {
   propIntegration: "Integration", propDeviceOf: "Gerät", propArea: "Bereich", propAreaInherited: "{area} (vom Gerät)", propLabels: "Labels", propNone: "–",
   propDomain: "Typ", propDeviceClass: "Geräteklasse", propStateClass: "Zustandsklasse", propUnit: "Einheit", propCategory: "Kategorie", propOriginalName: "Originalname", propAliases: "Aliase", propIcon: "Symbol",
   propDisabledBy: "Deaktiviert durch", propHiddenBy: "Ausgeblendet durch", propEntityId: "Entitäts-ID", propUniqueId: "Eindeutige ID", propPlatform: "Plattform",
-  propCreated: "Angelegt", propModified: "Geändert", propLastChanged: "Letzter Zustandswechsel", propLastUpdated: "Letzte Aktualisierung", propLastChangedShort: "Letzter Wechsel", propLastUpdatedShort: "Aktualisiert", propLastReported: "Letzte Meldung", statLastEntry: "Letzter Statistik-Eintrag", invOk: "Unauffällig", invCheck: "Prüfen", invProblem: "Problematisch", invHint: "Alle erfassten Objekte", dbOvTitle: "Datenbank", dbOvHint: "Größe und Wachstum des Recorders.", dbOvSize: "Größe", dbOvWal: "WAL-Datei", dbOvFirst: "Ältester Eintrag", dbOvGrowth: "Wachstum", dbOvPerDay: "{size} pro Tag", dbOvObserving: "wird beobachtet", dbOvNoSize: "nicht messbar ({dialect})", dbOvDetails: "Details im Recorder",
+  propCreated: "Angelegt", propModified: "Geändert", propLastChanged: "Letzter Zustandswechsel", propLastUpdated: "Letzte Aktualisierung", propLastChangedShort: "Letzter Wechsel", propLastUpdatedShort: "Aktualisiert", propLastReported: "Letzte Meldung", statLastEntry: "Letzter Statistik-Eintrag", invOk: "Unauffällig", invCheck: "Prüfen", invProblem: "Problematisch", invMarked: "Markiert (erwartet)", invHint: "Alle erfassten Objekte", dbOvTitle: "Datenbank", dbOvHint: "Größe und Wachstum des Recorders.", dbOvSize: "Größe", dbOvWal: "WAL-Datei", dbOvFirst: "Ältester Eintrag", dbOvGrowth: "Wachstum", dbOvPerDay: "{size} pro Tag", dbOvObserving: "wird beobachtet", dbOvNoSize: "nicht messbar ({dialect})", dbOvDetails: "Details im Recorder",
   propManufacturer: "Hersteller", propModel: "Modell", propSerial: "Seriennummer", propFirmware: "Firmware", propHardware: "Hardware", propEntryType: "Art", propUserName: "Eigener Name", propOriginalDeviceName: "Name laut Integration",
   propKind: "Art", propKindChild: "Untergerät", propParent: "Übergeordnetes Gerät", propCleanupBlock: "Aufräumen gesperrt", propVia: "Verbunden über", propChildren: "Daran hängen", propChildrenCount: "{count} Geräte", propConfigUrl: "Konfigurationsseite", propDeviceId: "Geräte-ID", propIdentifiers: "Kennungen", propConnections: "Verbindungen",
   propNoEntities: "Dieses Gerät hat keine Entitäten.",
@@ -681,7 +681,7 @@ Object.assign(TEXT.en, {
   propIntegration: "Integration", propDeviceOf: "Device", propArea: "Area", propAreaInherited: "{area} (from the device)", propLabels: "Labels", propNone: "–",
   propDomain: "Type", propDeviceClass: "Device class", propStateClass: "State class", propUnit: "Unit", propCategory: "Category", propOriginalName: "Original name", propAliases: "Aliases", propIcon: "Icon",
   propDisabledBy: "Disabled by", propHiddenBy: "Hidden by", propEntityId: "Entity ID", propUniqueId: "Unique ID", propPlatform: "Platform",
-  propCreated: "Created", propModified: "Modified", propLastChanged: "Last state change", propLastUpdated: "Last update", propLastChangedShort: "Last change", propLastUpdatedShort: "Updated", propLastReported: "Last report", statLastEntry: "Last statistics entry", invOk: "Unremarkable", invCheck: "Check", invProblem: "Problematic", invHint: "All recorded objects", dbOvTitle: "Database", dbOvHint: "Recorder size and growth.", dbOvSize: "Size", dbOvWal: "WAL file", dbOvFirst: "Oldest entry", dbOvGrowth: "Growth", dbOvPerDay: "{size} a day", dbOvObserving: "being observed", dbOvNoSize: "not measurable ({dialect})", dbOvDetails: "Details in Recorder",
+  propCreated: "Created", propModified: "Modified", propLastChanged: "Last state change", propLastUpdated: "Last update", propLastChangedShort: "Last change", propLastUpdatedShort: "Updated", propLastReported: "Last report", statLastEntry: "Last statistics entry", invOk: "Unremarkable", invCheck: "Check", invProblem: "Problematic", invMarked: "Marked (expected)", invHint: "All recorded objects", dbOvTitle: "Database", dbOvHint: "Recorder size and growth.", dbOvSize: "Size", dbOvWal: "WAL file", dbOvFirst: "Oldest entry", dbOvGrowth: "Growth", dbOvPerDay: "{size} a day", dbOvObserving: "being observed", dbOvNoSize: "not measurable ({dialect})", dbOvDetails: "Details in Recorder",
   propManufacturer: "Manufacturer", propModel: "Model", propSerial: "Serial number", propFirmware: "Firmware", propHardware: "Hardware", propEntryType: "Kind", propUserName: "Custom name", propOriginalDeviceName: "Name from the integration",
   propKind: "Kind", propKindChild: "Child device", propParent: "Parent device", propCleanupBlock: "Cleanup blocked", propVia: "Connected via", propChildren: "Attached devices", propChildrenCount: "{count} devices", propConfigUrl: "Configuration page", propDeviceId: "Device ID", propIdentifiers: "Identifiers", propConnections: "Connections",
   propNoEntities: "This device has no entities.",
@@ -2486,17 +2486,22 @@ class OverviewMixin {
 
   // Three groups instead of seven raw statuses: what is fine, what to look at, what is broken.
   inventoryStatusCard() {
-    const m = this.data.meta, counts = m.status_counts || {}, total = Math.max(1, m.object_count);
+    const m = this.data.meta, raw = m.status_counts || {}, marked = m.marked_status_counts || {}, total = Math.max(1, m.object_count);
+    const counts = Object.fromEntries(Object.keys(raw).map(s => [s, raw[s] - (marked[s] || 0)])); // marked objects have their own row
+    const markedN = Object.values(marked).reduce((sum, n) => sum + n, 0);
     const groups = [
       ["invOk", "ok", ["active"]],
       ["invCheck", "warn", ["unknown", "disabled", "empty"]],
       ["invProblem", "red", ["unavailable", "orphaned", "problem"]],
     ].map(([label, tone, statuses]) => ({ label, tone, statuses, n: statuses.reduce((sum, s) => sum + (counts[s] || 0), 0) }));
-    const known = groups.reduce((sum, g) => sum + g.n, 0);
+    const known = groups.reduce((sum, g) => sum + g.n, 0) + markedN;
     const percent = n => `${new Intl.NumberFormat(this.lang, { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(100 * n / total)} %`;
     const detail = g => g.statuses.filter(s => counts[s]).map(s => `${this.formatNumber(counts[s])} ${this.t(s)}`).join(" · ");
-    const rows = groups.map(g => `<div title="${this.esc(detail(g))}"><span><i class="dot ${g.tone}"></i>${this.t(g.label)}</span><span class="nums"><b>${this.formatNumber(g.n)}</b><em class="pct">${percent(g.n)}</em></span></div>`).join("");
-    const bar = groups.filter(g => g.n).map(g => `<i class="${g.tone}" style="width:${(100 * g.n / Math.max(1, known)).toFixed(2)}%"></i>`).join("");
+    const row = (g, title) => `<div title="${this.esc(title)}"><span><i class="dot ${g.tone}"></i>${this.t(g.label)}</span><span class="nums"><b>${this.formatNumber(g.n)}</b><em class="pct">${percent(g.n)}</em></span></div>`;
+    const markedGroup = { label: "invMarked", tone: "mute", n: markedN };
+    const markedDetail = Object.entries(marked).filter(([, n]) => n).map(([s, n]) => `${this.formatNumber(n)} ${this.t(s)}`).join(" · ");
+    const rows = groups.map(g => row(g, detail(g))).join("") + (markedN ? row(markedGroup, markedDetail) : "");
+    const bar = [...groups, ...(markedN ? [markedGroup] : [])].filter(g => g.n).map(g => `<i class="${g.tone}" style="width:${(100 * g.n / Math.max(1, known)).toFixed(2)}%"></i>`).join("");
     return `<div class="panel"><div class="panelhead"><div><h2>${this.t("inventoryStatus")}</h2><p>${this.t("invHint")}</p></div></div><div class="legend invlegend">${rows}</div><div class="bar">${bar}</div></div>`;
   }
 

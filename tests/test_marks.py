@@ -181,3 +181,15 @@ def test_the_scanner_looks_again_when_the_window_of_an_integration_closes() -> N
     assert scanner.refresh_marks_on_window_change() is False and calls == [1], "nothing moved"
     sun["state"] = "above_horizon"  # long past the grace period
     assert scanner.refresh_marks_on_window_change() is True and calls == [1, 1], "closed: scan"
+
+
+def test_marked_keys_cover_the_entities_of_a_marked_device():
+    from custom_components.ha_housekeeper.inventory import marked_keys
+
+    objects = [
+        {"object_type": "device", "object_id": "d1", "mark": {"kind": "expected_offline"}},
+        {"object_type": "entity", "object_id": "sensor.a", "device_id": "d1"},
+        {"object_type": "entity", "object_id": "sensor.b", "device_id": "d2"},
+        {"object_type": "entity", "object_id": "sensor.c", "mark": {"kind": "keep"}},
+    ]
+    assert marked_keys(objects) == {"device:d1", "entity:sensor.a"}

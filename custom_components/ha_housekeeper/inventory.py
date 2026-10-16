@@ -168,6 +168,21 @@ def _enum(value: Any) -> str | None:
     return str(getattr(value, "value", value))
 
 
+def marked_keys(objects: list[dict[str, Any]]) -> frozenset[str]:
+    """Keys of the objects a hiding mark covers, with the entities of a marked device."""
+
+    def hides(item: dict[str, Any]) -> bool:
+        mark = item.get("mark")
+        return bool(mark and mark.get("kind") in HIDING_KINDS and not item.get("mark_due"))
+
+    devices = {i["object_id"] for i in objects if i["object_type"] == "device" and hides(i)}
+    return frozenset(
+        f"{i['object_type']}:{i['object_id']}"
+        for i in objects
+        if hides(i) or (i["object_type"] == "entity" and i.get("device_id") in devices)
+    )
+
+
 class _DeviceIds(set):
     """The IDs of all devices; an ID Home Assistant still resolves (composite) counts as well."""
 
@@ -1135,18 +1150,7 @@ class InventoryScanner:
     def watch_marked(self, snapshot: dict[str, Any] | None = None) -> frozenset[str]:
         """Objects marked as expected (offline on purpose and the like); they do not count as new outages."""
         snapshot = snapshot or self._snapshot or {}
-        objects = snapshot.get("objects") or []
-
-        def hides(item: dict[str, Any]) -> bool:
-            mark = item.get("mark")
-            return bool(mark and mark.get("kind") in HIDING_KINDS and not item.get("mark_due"))
-
-        devices = {i["object_id"] for i in objects if i["object_type"] == "device" and hides(i)}
-        return frozenset(
-            f"{i['object_type']}:{i['object_id']}"
-            for i in objects
-            if hides(i) or (i["object_type"] == "entity" and i.get("device_id") in devices)
-        )
+        return marked_keys(snapshot.get("objects") or [])
 
     def watch_summary(self) -> dict[str, Any] | None:
         """The open watch in short, for the band in the panel header; None when none is open."""
@@ -1504,6 +1508,7 @@ class InventoryScanner:
 
         lap("analysis")
         self.status.update(phase="finalizing", progress=90)
+        marked = marked_keys(objects)
 
         storage = await self.hass.async_add_executor_job(storage_sizes, self.hass)
         try:
@@ -1581,6 +1586,13 @@ class InventoryScanner:
                 "low_batteries": len(low_battery_ids(entities, self.low_battery_percent)),
                 "object_count": len(objects),
                 "status_counts": dict(Counter(item["status"] for item in objects)),
+                "marked_status_counts": dict(
+                    Counter(
+                        i["status"]
+                        for i in objects
+                        if f"{i['object_type']}:{i['object_id']}" in marked
+                    )
+                ),
                 "type_counts": dict(Counter(item["object_type"] for item in objects)),
             },
             "objects": objects,

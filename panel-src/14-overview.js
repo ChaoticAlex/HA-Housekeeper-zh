@@ -327,17 +327,22 @@ class OverviewMixin {
 
   // Three groups instead of seven raw statuses: what is fine, what to look at, what is broken.
   inventoryStatusCard() {
-    const m = this.data.meta, counts = m.status_counts || {}, total = Math.max(1, m.object_count);
+    const m = this.data.meta, raw = m.status_counts || {}, marked = m.marked_status_counts || {}, total = Math.max(1, m.object_count);
+    const counts = Object.fromEntries(Object.keys(raw).map(s => [s, raw[s] - (marked[s] || 0)])); // marked objects have their own row
+    const markedN = Object.values(marked).reduce((sum, n) => sum + n, 0);
     const groups = [
       ["invOk", "ok", ["active"]],
       ["invCheck", "warn", ["unknown", "disabled", "empty"]],
       ["invProblem", "red", ["unavailable", "orphaned", "problem"]],
     ].map(([label, tone, statuses]) => ({ label, tone, statuses, n: statuses.reduce((sum, s) => sum + (counts[s] || 0), 0) }));
-    const known = groups.reduce((sum, g) => sum + g.n, 0);
+    const known = groups.reduce((sum, g) => sum + g.n, 0) + markedN;
     const percent = n => `${new Intl.NumberFormat(this.lang, { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(100 * n / total)} %`;
     const detail = g => g.statuses.filter(s => counts[s]).map(s => `${this.formatNumber(counts[s])} ${this.t(s)}`).join(" · ");
-    const rows = groups.map(g => `<div title="${this.esc(detail(g))}"><span><i class="dot ${g.tone}"></i>${this.t(g.label)}</span><span class="nums"><b>${this.formatNumber(g.n)}</b><em class="pct">${percent(g.n)}</em></span></div>`).join("");
-    const bar = groups.filter(g => g.n).map(g => `<i class="${g.tone}" style="width:${(100 * g.n / Math.max(1, known)).toFixed(2)}%"></i>`).join("");
+    const row = (g, title) => `<div title="${this.esc(title)}"><span><i class="dot ${g.tone}"></i>${this.t(g.label)}</span><span class="nums"><b>${this.formatNumber(g.n)}</b><em class="pct">${percent(g.n)}</em></span></div>`;
+    const markedGroup = { label: "invMarked", tone: "mute", n: markedN };
+    const markedDetail = Object.entries(marked).filter(([, n]) => n).map(([s, n]) => `${this.formatNumber(n)} ${this.t(s)}`).join(" · ");
+    const rows = groups.map(g => row(g, detail(g))).join("") + (markedN ? row(markedGroup, markedDetail) : "");
+    const bar = [...groups, ...(markedN ? [markedGroup] : [])].filter(g => g.n).map(g => `<i class="${g.tone}" style="width:${(100 * g.n / Math.max(1, known)).toFixed(2)}%"></i>`).join("");
     return `<div class="panel"><div class="panelhead"><div><h2>${this.t("inventoryStatus")}</h2><p>${this.t("invHint")}</p></div></div><div class="legend invlegend">${rows}</div><div class="bar">${bar}</div></div>`;
   }
 
