@@ -13,6 +13,7 @@ from custom_components.ha_housekeeper.outage_scan import (  # noqa: E402
     next_due,
     outage_start,
     plan_time,
+    scan_gap,
     state_filter,
 )
 
@@ -165,3 +166,10 @@ async def test_an_entity_that_lost_its_value_is_a_finding_but_one_that_never_had
     assert [(f["object_id"], f["rule_id"], f["outage_level"]) for f in found] == [
         ("a", "entity.state_unknown", "low")
     ]
+
+
+def test_the_pause_between_outage_scans_grows_with_a_slow_scan() -> None:
+    info = timedelta(minutes=15)
+    assert scan_gap(0.5, info) == info
+    assert scan_gap(5.0, info) == timedelta(minutes=37, seconds=30)
+    assert scan_gap(30.0, info) == timedelta(hours=1)
