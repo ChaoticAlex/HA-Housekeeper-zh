@@ -146,6 +146,22 @@ def test_classify_app_levels_follow_the_rights() -> None:
     assert classify_app({}) == {"access": [], "risk": "low"}
 
 
+def test_app_protection_ports_and_origin() -> None:
+    from custom_components.ha_housekeeper.access import app_origin
+
+    off = classify_app({"protected": False, "network": {"1883/tcp": 1883, "8080/tcp": None}})
+    assert off["risk"] == "high"
+    assert {"kind": "ports", "detail": "1883", "level": "medium"} in off["access"]
+    assert classify_app({"host_network": True, "network": {"80/tcp": 80}})["access"] == [
+        {"kind": "host_network", "detail": None, "level": "medium"}
+    ]
+    assert app_origin({"repository": "a0d7b954", "stage": "experimental"}) == {
+        "origin": "community",
+        "stage": "experimental",
+    }
+    assert app_origin({"repository": "core", "stage": "stable"})["origin"] == "core"
+
+
 async def test_apps_report_reads_every_app_and_marks_one_without_answer(
     hass: HomeAssistant,
 ) -> None:

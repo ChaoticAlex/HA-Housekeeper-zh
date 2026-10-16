@@ -10,7 +10,7 @@
 - **Übersicht, Inventarstatus:** Objekte mit einer Markierung (z. B. „Absichtlich offline“), auch die Entitäten eines markierten Geräts, stehen in einer eigenen Zeile „Markiert (erwartet)“ und zählen nicht mehr unter „Problematisch“ (Issue 25).
 - **Oberfläche:** Der Start-Hinweis ist eine kompakte Karte: vier Schritte als Leiste, „38 von 41 Integrationen geladen“ mit Balken und Wartezeit daneben, die Namen der noch ladenden Integrationen und beim Scan die aktuelle Phase. Er aktualisiert sich selbst (alle 3 Sekunden) und verschwindet, sobald die endgültigen Befunde da sind.
 - **Freigaben:** Als sensibel gelten jetzt auch Kameras, Sirenen, Ventile und Türen. Neue Warnung, wenn Google Assistant Schlösser, Alarmanlagen oder Tore ohne PIN öffnen darf, und ein Hinweis, wenn neue Entitäten automatisch an Alexa oder Google freigegeben werden. Ein weiterer Hinweis nennt KI-Gesprächsagenten und den MCP-Server, die Home Assistant über Assist steuern dürfen und so die Assist-Freigaben an ein Sprachmodell oder verbundene Programme geben.
-- **Zugriffe & Datenfluss:** Mehr Integrationen werden erkannt, etwa Bluetooth und Thread als Funk, Frigate und UniFi Protect als Kamera, ESPHome und Matter als Netzwerk; Ollama gilt als lokal. Integrationen aus HACS tragen „Fremdcode, volle Rechte“ und haben mindestens mittleres Risiko.
+- **Zugriffe & Datenfluss:** Mehr Integrationen werden erkannt, etwa Bluetooth und Thread als Funk, Frigate und UniFi Protect als Kamera, ESPHome und Matter als Netzwerk; Ollama gilt als lokal. Integrationen aus HACS tragen „Fremdcode, volle Rechte“ und haben mindestens mittleres Risiko. Bei den Apps: Schutzmodus aus (hohes Risiko), offene Ports am Host und eine Spalte zur Herkunft (offiziell, Community, lokal).
 
 ### Behoben
 
@@ -28,7 +28,7 @@
 - **Overview, inventory status:** Objects with a mark (e.g. “Offline on purpose”), including the entities of a marked device, sit in their own row “Marked (expected)” and no longer count as “Problematic” (issue 25).
 - **Interface:** The start notice is a compact card: four steps in one track, “38 of 41 integrations loaded” with a bar and the waiting time beside it, the names of the integrations still loading and, during the scan, the current phase. It updates by itself (every 3 seconds) and goes away as soon as the final findings are in.
 - **Exposure:** Cameras, sirens, valves and doors now count as sensitive too. New warning when Google Assistant may open locks, alarm panels or gates without a PIN, and a note when new entities are exposed to Alexa or Google automatically. Another note names AI conversation agents and the MCP server that may control Home Assistant through Assist and so hand the Assist exposure to a language model or connected programs.
-- **Access & data flow:** More integrations are recognised, such as Bluetooth and Thread as radio, Frigate and UniFi Protect as camera, ESPHome and Matter as network; Ollama counts as local. Integrations from HACS carry "custom code, full rights" and are at least medium risk.
+- **Access & data flow:** More integrations are recognised, such as Bluetooth and Thread as radio, Frigate and UniFi Protect as camera, ESPHome and Matter as network; Ollama counts as local. Integrations from HACS carry "custom code, full rights" and are at least medium risk. For apps: protection mode off (high risk), open ports on the host and a column for the origin (official, community, local).
 
 #### Fixed
 

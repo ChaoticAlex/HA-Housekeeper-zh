@@ -242,8 +242,9 @@ def classify_app(info: dict[str, Any]) -> dict[str, Any]:
     """The rights of one app (add-on) from the Supervisor's ``/addons/<slug>/info`` and a risk level.
 
     Each right has a level: "high" for what equals root on the host (full hardware access,
-    privileges, Docker, the host's process namespace, Supervisor admin), "medium" for access to
-    the host network, Home Assistant, logins or without AppArmor, "low" for the rest.
+    privileges, Docker, the host's process namespace, Supervisor admin, protection mode off),
+    "medium" for access to the host network, open ports on the host, Home Assistant, logins or
+    without AppArmor, "low" for the rest. A field the Supervisor does not send adds nothing.
     """
     access: list[dict[str, Any]] = []
 
@@ -263,8 +264,21 @@ def classify_app(info: dict[str, Any]) -> dict[str, Any]:
         add("host_ipc", "low")
     if info.get("host_dbus"):
         add("host_dbus", "low")
+    if info.get("protected") is False:
+        add("protection_off", "high")
     if info.get("host_network"):
         add("host_network", "medium")
+    else:
+        network = info.get("network")
+        ports = sorted(
+            {
+                p
+                for p in (network.values() if isinstance(network, dict) else [])
+                if isinstance(p, int)
+            }
+        )
+        if ports:
+            add("ports", "medium", ", ".join(str(p) for p in ports))
     role = info.get("hassio_role")
     if info.get("hassio_api"):
         add(
@@ -290,6 +304,17 @@ def classify_app(info: dict[str, Any]) -> dict[str, Any]:
     return {"access": access, "risk": risk}
 
 
+def app_origin(info: dict[str, Any]) -> dict[str, str | None]:
+    """Where an app comes from: "core" (official), "local" (built here) or "community", and its
+    stage when it is not stable. Unknown when the Supervisor names no repository."""
+    repository = info.get("repository")
+    origin = None
+    if isinstance(repository, str) and repository:
+        origin = repository if repository in ("core", "local") else "community"
+    stage = info.get("stage")
+    return {"origin": origin, "stage": stage if stage in ("experimental", "deprecated") else None}
+
+
 async def apps_report(hass: HomeAssistant) -> dict[str, Any]:
     """The rights of every installed app; ``available`` is False without a Supervisor."""
     if not supervisor_token():
@@ -310,6 +335,7 @@ async def apps_report(hass: HomeAssistant) -> dict[str, Any]:
             "state": (info or app).get("state"),
             "version": (info or app).get("version"),
             "checked": info is not None,
+            **app_origin(info or app),
             **result,
         }
 

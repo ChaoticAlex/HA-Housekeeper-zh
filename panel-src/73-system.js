@@ -359,6 +359,8 @@ class SystemMixin {
     const tone = { high: "red", medium: "warn", low: "mute" };
     const rights = a => `<span class="pills">${a.access.map(x => `<span class="pill ${tone[x.level] || "mute"}">${this.esc(this.accAppRight(x))}</span>`).join("") || `<span class="muted">${this.t(a.checked ? "accAppNoRights" : "accAppUnchecked")}</span>`}</span>`;
     const running = a => a.state === "started";
+    const originText = a => [a.origin ? this.t(`accOrigin_${a.origin}`) : "", a.stage ? this.t(`accStage_${a.stage}`) : ""].filter(Boolean).join(" · ");
+    const origin = a => (originText(a) ? `${this.esc(originText(a))}` : `<span class="muted">–</span>`);
     return this.sysList("accapps", apps, {
       sort: "risk", dir: "asc", cls: "acc",
       sorts: [{ ...riskSort, get: a => order[a.risk] ?? 3 }, { key: "name", label: "accColApp", dir: "asc", get: a => a.name }],
@@ -368,10 +370,11 @@ class SystemMixin {
       columns: [
         { key: "name", label: "accColApp", cell: a => this.nameCell(a.name, a.slug) },
         { key: "state", label: "sysColState", sortable: false, cell: a => `<span class="pill ${running(a) ? "ok" : "mute"}">${this.t(running(a) ? "sysAppRunning" : "sysAppStopped")}</span>` },
+        { key: "origin", label: "accColOrigin", sortable: false, cell: origin },
         { key: "rights", label: "accColRights", sortable: false, cell: rights },
         { key: "risk", label: "accColRisk", cell: a => (a.risk ? this.accRiskPill(a.risk, this.accAppWhy(a)) : `<span class="pill mute">${this.t("accAppUncheckedShort")}</span>`) },
       ],
-      exportName: "app-rights", header: [this.t("accColApp"), "Slug", this.t("sysColState"), this.t("accColRights"), this.t("accColRisk")], rows: a => [a.name, a.slug, a.state || "", a.access.map(x => this.accAppRight(x)).join("; "), a.risk ? this.t(`accRisk_${a.risk}`) : ""],
+      exportName: "app-rights", header: [this.t("accColApp"), "Slug", this.t("sysColState"), this.t("accColOrigin"), this.t("accColRights"), this.t("accColRisk")], rows: a => [a.name, a.slug, a.state || "", originText(a), a.access.map(x => this.accAppRight(x)).join("; "), a.risk ? this.t(`accRisk_${a.risk}`) : ""],
     });
   }
 
