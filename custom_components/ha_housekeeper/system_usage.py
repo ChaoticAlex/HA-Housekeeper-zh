@@ -508,17 +508,23 @@ async def _apps(hass: HomeAssistant, sizes: dict[str, dict[str, int]]) -> list[d
     return sorted(result, key=lambda app: app["name"].lower())
 
 
-async def _disk_usage(hass: HomeAssistant, fresh: bool) -> dict[str, Any] | None:
-    """Disk use by category; the Supervisor walks the whole data disk for it.
+async def _disk_usage(
+    hass: HomeAssistant, fresh: bool, quick: bool = False
+) -> tuple[dict[str, Any] | None, bool]:
+    """Disk use by category and whether it is older than it may be; the Supervisor walks the
+    whole data disk for it.
 
     Reused like the folder walk: for WALK_MAX_AGE seconds, and ``fresh`` asks again only after
-    WALK_MIN_GAP. An answer that failed is not kept, so the next visit asks again.
+    WALK_MIN_GAP. ``quick`` hands out any kept answer at once, however old. An answer that failed
+    is not kept, so the next visit asks again.
     """
     kept = hass.data.setdefault(_USAGE_KEY, _Walk())
+    if quick and kept.result is not None:
+        return kept.result, time.monotonic() - kept.at >= WALK_MAX_AGE
     async with kept.lock:
         age = time.monotonic() - kept.at
         if kept.result is not None and (age < WALK_MIN_GAP or (not fresh and age < WALK_MAX_AGE)):
-            return kept.result
+            return kept.result, False
         usage = await supervisor_get(
             hass, "/host/disks/default/usage", params={"max_depth": 2}, timeout=DISK_USAGE_TIMEOUT
         )
@@ -526,17 +532,22 @@ async def _disk_usage(hass: HomeAssistant, fresh: bool) -> dict[str, Any] | None
             usage = await supervisor_get(hass, "/host/disks/default/usage") or usage
         if usage is not None:
             kept.result, kept.at = usage, time.monotonic()
-        return usage
+        return usage, False
 
 
-async def supervisor_part(hass: HomeAssistant, fresh: bool = False) -> dict[str, Any]:
+async def supervisor_part(
+    hass: HomeAssistant, fresh: bool = False, quick: bool = False
+) -> dict[str, Any]:
     """Host disk, disk use by category and apps; empty without a Supervisor."""
     if not supervisor_token():
         return {"available": False}
-    info, usage = await asyncio.gather(supervisor_get(hass, "/host/info"), _disk_usage(hass, fresh))
+    info, (usage, stale) = await asyncio.gather(
+        supervisor_get(hass, "/host/info"), _disk_usage(hass, fresh, quick)
+    )
     categories, sizes = disk_categories(usage)
     return {
         "available": True,
+        "stale": stale,
         "disk": host_disk(info),
         "categories": categories,
         "apps": await _apps(hass, sizes),
@@ -642,17 +653,23 @@ async def _folder_walk(
     resources: list[dict[str, Any]],
     blueprints: list[dict[str, Any]],
     fresh: bool,
+    quick: bool = False,
 ) -> dict[str, Any]:
     """The sizes from the folders, reused for WALK_MAX_AGE seconds and never walked twice at once.
 
     ``fresh`` asks for a new walk, which is still refused inside WALK_MIN_GAP seconds of the last
-    one. A second page, a second browser or a pressed button then costs no disk reads.
+    one. A second page, a second browser or a pressed button then costs no disk reads. ``quick``
+    hands out the last walk at once, however old or running again; ``stale`` then says it is due.
     """
     walk = hass.data.setdefault(_WALK_KEY, _Walk())
     signature = (
         tuple(item["url"] for item in resources),
         tuple((item["domain"], item["path"]) for item in blueprints),
     )
+    if quick and walk.result is not None:
+        max_age = WALK_TRUNCATED_AGE if walk.result.get("truncated") else WALK_MAX_AGE
+        stale = walk.signature != signature or time.monotonic() - walk.at >= max_age
+        return {**walk.result, "cached": True, "stale": stale}
     async with walk.lock:
         age = time.monotonic() - walk.at
         max_age = WALK_TRUNCATED_AGE if (walk.result or {}).get("truncated") else WALK_MAX_AGE
@@ -661,7 +678,7 @@ async def _folder_walk(
             and walk.signature == signature
             and (age < WALK_MIN_GAP or (not fresh and age < max_age))
         ):
-            return {**walk.result, "cached": True}
+            return {**walk.result, "cached": True, "stale": False}
         began = time.monotonic()
         budget = _Budget(WALK_BUDGET)
         storage, sizes, bp_sizes = await asyncio.gather(
@@ -682,17 +699,22 @@ async def _folder_walk(
             "truncated": budget.cut,
         }
         walk.signature, walk.at = signature, time.monotonic()
-        return {**walk.result, "cached": False}
+        return {**walk.result, "cached": False, "stale": False}
 
 
 async def system_usage(
-    hass: HomeAssistant, used_card_types: set[str] | None = None, fresh: bool = False
+    hass: HomeAssistant,
+    used_card_types: set[str] | None = None,
+    fresh: bool = False,
+    quick: bool = False,
 ) -> dict[str, Any]:
     """Storage and system: everything the "Storage & system" page shows.
 
     ``used_card_types`` are the ``custom:`` card types of all dashboards (``None`` when unknown).
     The live values (CPU, memory, disk, apps) are read every time; the folder sizes and the disk
     use by category are reused for a few minutes (see ``_folder_walk`` and ``_disk_usage``).
+    ``quick`` (a page being opened) takes them as kept, however old, and says with ``stale`` that
+    the page should ask once more for new ones.
     """
     config_dir = hass.config.config_dir
 
@@ -704,12 +726,12 @@ async def system_usage(
         return (
             resources,
             blueprints,
-            await _folder_walk(hass, config_dir, resources, blueprints, fresh),
+            await _folder_walk(hass, config_dir, resources, blueprints, fresh, quick),
         )
 
     local, supervisor, (resources, blueprints, walked) = await asyncio.gather(
         hass.async_add_executor_job(collect_local, config_dir, False),
-        supervisor_part(hass, fresh),
+        supervisor_part(hass, fresh, quick),
         walked_part(),
     )
     sizes, bp_sizes = walked["sizes"], walked["bp_sizes"]
@@ -765,6 +787,8 @@ async def system_usage(
         "cached": walked["cached"],
         # True when the walk hit its time limit: every size is then a minimum, some may be missing.
         "truncated": walked["truncated"],
+        # True when an old result was handed out at once (``quick``): the page asks again.
+        "stale": walked["stale"] or bool(supervisor.get("stale")),
     }
 
 

@@ -5290,7 +5290,11 @@ test("the info page lists the phases of the last scan, longest first, and the re
   await el.sysLoad("storage");
   await el.sysLoad("storage", true);
   const usage = sent.filter(m => m.type === "ha_housekeeper/system_usage");
-  assert.equal(usage[0].fresh, undefined); assert.equal(usage.at(-1).fresh, true);
+  assert.equal(usage[0].fresh, undefined); assert.equal(usage[0].quick, true); assert.equal(usage.at(-1).fresh, true);
+  sent.length = 0;
+  el._hass.callWS = async msg => { sent.push(msg); return { read_at: "2026-10-12T20:00:00+00:00", stale: msg.quick === true }; };
+  await el.sysLoad("storage");
+  assert.deepEqual(sent.map(m => m.quick), [true, undefined], "kept sizes that are due are asked for once more");
   assert.equal(el.sysState("storage").at, "2026-10-12T20:00:00+00:00", "the page shows when the sizes were read");
 });
 

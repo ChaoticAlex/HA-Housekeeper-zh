@@ -10,16 +10,20 @@ class SystemMixin {
   }
 
   // `fresh` is the refresh button: the server then reads the folders and the disk use again, unless it did a moment ago.
-  async sysLoad(name, fresh = false) {
+  // `quick` (opening the storage page): the server answers at once with the sizes it kept, however old;
+  // when it says they are `stale`, the page asks once more and shows the new ones when they are in.
+  async sysLoad(name, fresh = false, quick = !fresh) {
     const st = this.sysState(name);
     st.loading = true; st.error = ""; st.requested = true; this.render();
+    const extra = name !== "storage" ? {} : fresh ? { fresh: true } : quick ? { quick: true } : {};
     try {
-      st.data = await this._hass.callWS({ type: `ha_housekeeper/${SYS_COMMANDS[name]}`, ...(fresh && name === "storage" ? { fresh: true } : {}) });
+      st.data = await this._hass.callWS({ type: `ha_housekeeper/${SYS_COMMANDS[name]}`, ...extra });
       // The sizes carry the time they were read; the rest of the page is live.
       st.at = (name === "storage" && st.data?.read_at) || new Date().toISOString();
     } catch (err) { st.error = this.errText(err); }
     st.loading = false;
     this.render();
+    if (extra.quick && st.data?.stale) return this.sysLoad(name, false, false);
   }
 
   // Loads on the first visit only; later visits show what was read until the person refreshes.
