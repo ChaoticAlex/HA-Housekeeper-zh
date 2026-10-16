@@ -24,7 +24,20 @@ SOURCES = ("data", "options")
 MAX_DEPTH = 3  # nested mappings below a field (OAuth keeps the tokens in "token")
 
 # Name parts that say a field is about a credential, not the credential itself.
-NOT_A_VALUE = {"type", "expires", "expiry", "expire", "public", "implementation", "url", "name"}
+NOT_A_VALUE = {
+    "type",
+    "expires",
+    "expiry",
+    "expire",
+    "public",
+    "implementation",
+    "url",
+    "name",
+    "timeout",
+    "interval",
+    "length",
+    "digits",
+}
 KEY_PREFIXES = {"api", "app", "private", "secret", "access", "license", "licence", "auth"}
 
 
@@ -33,11 +46,11 @@ def kind_of(name: Any) -> str | None:
     parts = set(re.split(r"[^a-z0-9]+", str(name).lower())) - {""}
     if parts & NOT_A_VALUE:
         return None
-    if parts & {"password", "passwd", "pwd", "passphrase", "psk"}:
+    if parts & {"password", "passwd", "pwd", "passphrase", "psk", "pass", "passcode"}:
         return "password"
-    if "token" in parts:
+    if "token" in parts or "cookie" in parts or ("session" in parts and parts & {"id", "key"}):
         return "token"
-    if "secret" in parts:
+    if parts & {"secret", "otp", "totp"}:
         return "secret"
     if "apikey" in parts or ("key" in parts and parts & KEY_PREFIXES):
         return "api_key"

@@ -27,6 +27,15 @@ def test_kind_follows_the_field_name() -> None:
     assert kind_of("api_key") == "api_key"
     assert kind_of("webhook_id") == "webhook"
     assert kind_of("pin") == "pin"
+    for name, kind in {
+        "user_pass": "password",
+        "passcode": "password",
+        "cookie": "token",
+        "session_id": "token",
+        "totp": "secret",
+        "otp_secret": "secret",
+    }.items():
+        assert kind_of(name) == kind, name
     for harmless in (
         "token_type",
         "expires_at",
@@ -35,6 +44,12 @@ def test_kind_follows_the_field_name() -> None:
         "host",
         "ping",
         "client_id",
+        "bypass",
+        "passive",
+        "session",
+        "session_timeout",
+        "otp_digits",
+        "token_expiry",
     ):
         assert kind_of(harmless) is None, harmless
 
