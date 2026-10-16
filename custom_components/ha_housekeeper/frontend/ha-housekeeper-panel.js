@@ -1348,8 +1348,11 @@ Object.assign(TEXT.de, {
   expoText_auto_expose: "{list} bekommt jede neue Entität von selbst freigegeben. Neue Geräte landen so ohne Zutun bei einem Cloud-Assistenten.",
   expoAdvice_google_without_pin: "Unter Einstellungen → Sprachassistenten → Entität → Google Assistant die Bestätigung per PIN wieder einschalten.",
   expoAdvice_auto_expose: "Unter Einstellungen → Sprachassistenten → Alexa bzw. Google Assistant „Neue Entitäten automatisch freigeben“ ausschalten, wenn neue Geräte erst geprüft werden sollen.",
+  expoKind_llm_exposed: "Assist-Freigaben gehen an KI-Agenten", expoColIntegration: "Integration", expoColTarget: "Ziel", expoTarget_cloud: "Anbieter des Modells", expoTarget_external: "verbundene Programme",
+  expoText_llm_exposed: "{n} Integrationen dürfen Home Assistant über Assist steuern. Namen, Bereiche und Zustände der {reach} Assist-Freigaben gehen dabei an den Anbieter des Sprachmodells oder an verbundene Programme.",
+  expoAdvice_llm_exposed: "Nur zur Kenntnis. Wer das nicht will, schaltet bei der Integration „Home Assistant steuern“ aus oder gibt weniger für Assist frei.",
   expoMore: "und {n} weitere", expoToCheck: "Zu prüfen", expoToNote: "Zur Kenntnis",
-  expoFootnote: "Housekeeper liest je Assistent, welche Entitäten Home Assistant freigibt, bei HomeKit nur den gespeicherten Entitäts-Filter der Bridge. Passwörter, Tokens, Ports und Webhook-IDs werden nie gelesen oder angezeigt. Ist Alexa oder Google Assistant in den Nabu-Casa-Einstellungen ausgeschaltet, erreicht er nichts und wird nicht bewertet. Bei Alexa und Google liest Housekeeper außerdem, ob neue Entitäten automatisch freigegeben werden, und je Entität nur, ob Google sie ohne PIN öffnen darf; die PIN selbst nie. Wenn eine Quelle nicht antwortet, steht „nicht prüfbar“, nie „nicht freigegeben“. Sprachnamen gelten als gleich, wenn sie sich nur in Groß- und Kleinschreibung, Leerzeichen oder Umlauten unterscheiden.",
+  expoFootnote: "Housekeeper liest je Assistent, welche Entitäten Home Assistant freigibt, bei HomeKit nur den gespeicherten Entitäts-Filter der Bridge. Passwörter, Tokens, Ports und Webhook-IDs werden nie gelesen oder angezeigt. Ist Alexa oder Google Assistant in den Nabu-Casa-Einstellungen ausgeschaltet, erreicht er nichts und wird nicht bewertet. Bei Alexa und Google liest Housekeeper außerdem, ob neue Entitäten automatisch freigegeben werden, und je Entität nur, ob Google sie ohne PIN öffnen darf; die PIN selbst nie. Bei KI-Gesprächsagenten und dem MCP-Server liest Housekeeper nur, ob sie Home Assistant über Assist steuern dürfen, nie Prompt, Modell oder Schlüssel; Ollama und llama.cpp gelten als lokal und werden nicht genannt. Eine Integration, die ein Modell im eigenen Netz anspricht (etwa über eine eigene Adresse), steht trotzdem unter „Anbieter des Modells“. Wenn eine Quelle nicht antwortet, steht „nicht prüfbar“, nie „nicht freigegeben“. Sprachnamen gelten als gleich, wenn sie sich nur in Groß- und Kleinschreibung, Leerzeichen oder Umlauten unterscheiden.",
 });
 Object.assign(TEXT.en, {
   expoSumEntities: "entities exposed", expoColName: "Name", expoColDomain: "Type", expoColArea: "Area", expoColAlso: "Also exposed to", expoColAssistants: "Exposed to", expoAllDomains: "All types", expoAllAlso: "All services", expoSumFindings: "Findings", expoTabFindings: "Findings", expoSourceHint: "{n} entities are exposed to {name}.", expoAlso: "also: {list}", expoCapped: "The first {n} are shown.", expoNoneFor: "Nothing is exposed to this source.", expoInactiveText: "Not set up: nothing is exposed.",
@@ -1375,8 +1378,11 @@ Object.assign(TEXT.en, {
   expoText_auto_expose: "{list} gets every new entity exposed by itself. New devices thus reach a cloud assistant without anyone acting.",
   expoAdvice_google_without_pin: "Turn the PIN confirmation back on under Settings → Voice assistants → entity → Google Assistant.",
   expoAdvice_auto_expose: "Turn off \"Expose new entities\" under Settings → Voice assistants → Alexa or Google Assistant if new devices should be checked first.",
+  expoKind_llm_exposed: "Assist exposure goes to AI agents", expoColIntegration: "Integration", expoColTarget: "Goes to", expoTarget_cloud: "provider of the model", expoTarget_external: "connected programs",
+  expoText_llm_exposed: "{n} integrations may control Home Assistant through Assist. Names, areas and states of the {reach} Assist exposures go to the provider of the language model or to connected programs.",
+  expoAdvice_llm_exposed: "For your information only. If you do not want this, turn off \"Control Home Assistant\" in the integration or expose less to Assist.",
   expoMore: "and {n} more", expoToCheck: "To check", expoToNote: "For your information",
-  expoFootnote: "Housekeeper reads, per assistant, which entities Home Assistant exposes; for HomeKit only the stored entity filter of the bridge. Passwords, tokens, ports and webhook ids are never read or shown. If Alexa or Google Assistant is switched off in the Nabu Casa settings, it reaches nothing and is not judged. For Alexa and Google, Housekeeper also reads whether new entities are exposed automatically and, per entity, only whether Google may open it without a PIN; never the PIN itself. If a source does not answer, it says \"cannot be checked\", never \"not exposed\". Voice names count as equal when they differ only in case, spaces or umlauts.",
+  expoFootnote: "Housekeeper reads, per assistant, which entities Home Assistant exposes; for HomeKit only the stored entity filter of the bridge. Passwords, tokens, ports and webhook ids are never read or shown. If Alexa or Google Assistant is switched off in the Nabu Casa settings, it reaches nothing and is not judged. For Alexa and Google, Housekeeper also reads whether new entities are exposed automatically and, per entity, only whether Google may open it without a PIN; never the PIN itself. For AI conversation agents and the MCP server, Housekeeper only reads whether they may control Home Assistant through Assist, never prompt, model or key; Ollama and llama.cpp count as local and are not named. An integration that talks to a model in your own network (for example through its own address) is still listed under \"provider of the model\". If a source does not answer, it says \"cannot be checked\", never \"not exposed\". Voice names count as equal when they differ only in case, spaces or umlauts.",
 });
 
 // StylesMixin: methods of the panel element, mixed into the class in 99-register.js.
@@ -6885,7 +6891,7 @@ class ExposureMixin {
   }
 
   expoFindingText(f) {
-    return this.t(`expoText_${f.kind}`, { n: this.formatNumber(f.count), alias: f.alias || "", assistant: f.assistant ? this.expoAssistantName(f.assistant) : "", domain: f.domain || "", list: this.expoAssistantList(f.assistants) });
+    return this.t(`expoText_${f.kind}`, { n: this.formatNumber(f.count), alias: f.alias || "", assistant: f.assistant ? this.expoAssistantName(f.assistant) : "", domain: f.domain || "", list: this.expoAssistantList(f.assistants), reach: this.formatNumber(f.reach || 0) });
   }
 
   // One finding as a fold: the head always shows, the entities (a table of their own, with search, sorting and pages) and the advice only when open.
@@ -6911,8 +6917,18 @@ class ExposureMixin {
         { key: "assistants", label: "expoColAssistants", sortable: false, cell: item => (item.assistants?.length ? this.esc(this.expoAssistantList(item.assistants)) : `<span class="muted">—</span>`) },
       ],
     }) : "";
-    const more = f.count > items.length ? `<p class="factnote">${this.t("expoMore", { n: this.formatNumber(f.count - items.length) })}</p>` : "";
-    const body = `<p class="factnote foldadvice">${this.t(`expoAdvice_${f.kind}`)}</p>${table}${more}`;
+    const agents = f.integrations?.length ? this.sysList(`expofind_${f.kind}`, f.integrations, {
+      sort: "name", tie: i => i.entry_id, empty: "expoNone",
+      sorts: [{ key: "name", label: "expoColIntegration", dir: "asc", get: i => i.title || i.domain }],
+      text: i => [i.title, i.domain].join(" "),
+      rowAttrs: i => `data-ha-path="${this.esc(`/config/integrations/integration/${encodeURIComponent(i.domain)}`)}" tabindex="0" role="link" aria-label="${this.esc(i.title || i.domain)}"`,
+      columns: [
+        { key: "name", label: "expoColIntegration", dir: "asc", cell: i => this.nameCell(i.title || i.domain, i.domain) },
+        { key: "target", label: "expoColTarget", sortable: false, cell: i => this.esc(this.t(`expoTarget_${i.target}`)) },
+      ],
+    }) : "";
+    const more = items.length && f.count > items.length ? `<p class="factnote">${this.t("expoMore", { n: this.formatNumber(f.count - items.length) })}</p>` : "";
+    const body = `<p class="factnote foldadvice">${this.t(`expoAdvice_${f.kind}`)}</p>${table}${agents}${more}`;
     const head = { tone, title: this.t(`expoKind_${f.kind}`), sub: this.expoFindingText(f), pill: this.t(f.level === "warn" ? "expoWarn" : "expoHint2") };
     return this.fold(`expo_${f.kind}`, head, body, false);
   }

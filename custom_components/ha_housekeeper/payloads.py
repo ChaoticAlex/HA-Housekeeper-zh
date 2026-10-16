@@ -39,6 +39,13 @@ class ExposureItem(TypedDict):
     assistants: NotRequired[list[str]]
 
 
+class ExposureIntegration(TypedDict):
+    entry_id: str
+    domain: str
+    title: str
+    target: str  # cloud or external
+
+
 class ExposureFinding(TypedDict):
     kind: str
     level: str
@@ -46,6 +53,8 @@ class ExposureFinding(TypedDict):
     items: NotRequired[list[ExposureItem]]
     assistant: NotRequired[str]
     assistants: NotRequired[list[str]]
+    integrations: NotRequired[list[ExposureIntegration]]
+    reach: NotRequired[int]
     alias: NotRequired[str]
     domain: NotRequired[str]
 

@@ -121,6 +121,18 @@ def test_auto_expose_names_the_working_assistants() -> None:
     assert found["assistants"] == ["cloud.alexa"] and found["level"] == "hint"
 
 
+def test_llm_agents_are_named_with_the_assist_reach() -> None:
+    agent = {
+        "entry_id": "e1",
+        "domain": "openai_conversation",
+        "title": "OpenAI",
+        "target": "cloud",
+    }
+    result = evaluate(raw(llm_agents=[agent]), {"light.a": entity("A")}, set())
+    found = next(f for f in result["findings"] if f["kind"] == "llm_exposed")
+    assert found["integrations"] == [agent] and found["reach"] == 1 and found["level"] == "hint"
+
+
 def test_stale_exposed_disabled_or_orphaned() -> None:
     entities = {
         "light.a": entity(status="disabled"),
@@ -295,6 +307,34 @@ async def test_collect_reads_expose_new_and_the_google_pin_switch(hass: HomeAssi
     data = collect(hass, ["lock.door"])
     assert data["google_without_pin"] == ["lock.door"]
     assert data["expose_new"] == {"cloud.alexa": False, "cloud.google_assistant": False}
+
+
+async def test_llm_agents_read_only_the_assist_option(hass: HomeAssistant) -> None:
+    from homeassistant.config_entries import ConfigSubentryData
+
+    cloud = MockConfigEntry(
+        domain="anthropic",
+        title="Claude",
+        data={"api_key": SECRETS[2]},
+        subentries_data=[
+            ConfigSubentryData(
+                data={"llm_hass_api": ["assist"], "prompt": SECRETS[3]},
+                subentry_type="conversation",
+                title="Agent",
+                unique_id=None,
+            )
+        ],
+    )
+    local = MockConfigEntry(domain="ollama", options={"llm_hass_api": "assist"})
+    mcp = MockConfigEntry(domain="mcp_server", title="MCP", options={"llm_hass_api": ["assist"]})
+    for entry in (cloud, local, mcp):
+        entry.add_to_hass(hass)
+    agents = collect(hass, [])["llm_agents"]
+    assert sorted((a["domain"], a["target"]) for a in agents) == [
+        ("anthropic", "cloud"),
+        ("mcp_server", "external"),
+    ]
+    assert not any(secret in json.dumps(agents) for secret in SECRETS)
 
 
 async def test_collect_runs_against_real_exposed_entities(hass: HomeAssistant) -> None:

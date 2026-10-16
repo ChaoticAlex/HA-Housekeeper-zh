@@ -3,7 +3,9 @@
 Only reads, nothing is stored and nothing is changed. Only metadata leaves this module: entity ids,
 names, the assistant and counts. Config entries are read through a whitelist (the entity filter of
 a bridge and nothing else), of Nabu Casa only whether Alexa and Google are switched on, per assistant only whether new entities
-are exposed by themselves and per entity only whether Google may open it without a PIN, webhooks are
+are exposed by themselves, per entity only whether Google may open it without a PIN, of a
+conversation agent or the MCP server only whether it may control Home Assistant (never prompt,
+model or key), webhooks are
 only counted per integration. A webhook id or url never
 appears in a result, not even shortened: whoever knows it can call the webhook.
 """
@@ -46,6 +48,11 @@ SENSITIVE_COVERS = ("garage", "gate", "door")
 # What Google Assistant only opens or disarms after a PIN, unless the entity is set to skip it.
 GOOGLE = "cloud.google_assistant"
 GOOGLE_SECURE_DOMAINS = ("lock", "alarm_control_panel", "cover")
+# The option of an LLM integration that hands it the Assist API: the Assist exposures go to the model.
+LLM_OPTION = "llm_hass_api"
+LLM_ASSIST = "assist"
+LLM_LOCAL_DOMAINS = ("ollama", "llama_cpp")  # models that run in the house
+LLM_EXTERNAL_DOMAINS = ("mcp_server",)  # programs that connect from outside
 DIAGNOSTIC_CATEGORIES = ("diagnostic", "config")
 STALE_STATUSES = ("disabled", "orphaned")
 ITEM_LIMIT = 200
@@ -154,6 +161,33 @@ def _google_without_pin(hass: HomeAssistant, assistants: dict[str, dict[str, Any
     return found
 
 
+def _uses_assist(value: Any) -> bool:
+    if isinstance(value, str):
+        return value == LLM_ASSIST
+    return isinstance(value, list | tuple) and LLM_ASSIST in value
+
+
+def _llm_agents(hass: HomeAssistant) -> list[dict[str, str]]:
+    """Enabled integrations whose agent may control Home Assistant through Assist. Only that one
+    option is read, of the entry and of its subentries; local models are left out."""
+    agents = []
+    for entry in hass.config_entries.async_entries():
+        if entry.disabled_by is not None or entry.domain in LLM_LOCAL_DOMAINS:
+            continue
+        options = [entry.options] + [sub.data for sub in getattr(entry, "subentries", {}).values()]
+        if any(isinstance(o, Mapping) and _uses_assist(o.get(LLM_OPTION)) for o in options):
+            target = "external" if entry.domain in LLM_EXTERNAL_DOMAINS else "cloud"
+            agents.append(
+                {
+                    "entry_id": entry.entry_id,
+                    "domain": entry.domain,
+                    "title": entry.title,
+                    "target": target,
+                }
+            )
+    return agents
+
+
 def _bridges(hass: HomeAssistant) -> list[dict[str, Any]]:
     bridges = []
     for entry in hass.config_entries.async_entries():
@@ -193,6 +227,7 @@ def collect(hass: HomeAssistant, entity_ids: list[str]) -> dict[str, Any]:
         "assistants": assistants,
         "expose_new": _expose_new(hass, assistants),
         "google_without_pin": _google_without_pin(hass, assistants),
+        "llm_agents": _llm_agents(hass),
         "bridges": _bridges(hass),
         "webhooks": _webhook_counts(hass),
         "live_domains": sorted(live),
@@ -296,6 +331,21 @@ def evaluate(
     if auto:
         findings.append(
             {"kind": "auto_expose", "level": "hint", "count": len(auto), "assistants": auto}
+        )
+
+    assist = next(a for a in assistants if a["id"] == "conversation")
+    agents = raw.get("llm_agents", [])
+    if agents and assist["status"] == "ok" and assist["exposed"]:
+        findings.append(
+            {
+                "kind": "llm_exposed",
+                "level": "hint",
+                "count": len(agents),
+                "reach": assist["exposed"],
+                "integrations": sorted(
+                    agents, key=lambda a: (a["title"].casefold(), a["entry_id"])
+                ),
+            }
         )
 
     for name in ASSISTANTS:
