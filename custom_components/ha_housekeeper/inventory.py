@@ -113,7 +113,7 @@ from .outage_levels import DIRECT_ENTRY_STATES, Levels, outage_level
 from .outage_scan import OutageScans, outage_start
 from .policies import KEY_PREFIX as POLICY_KEY_PREFIX
 from .policies import PolicyStore
-from .protection import ProtectionStore
+from .protection import ProtectionStore, protection_rules
 from .queries import ReplyStore
 from .refactor import RefactorStore
 from .reminders import ReminderStore
@@ -1503,6 +1503,7 @@ class InventoryScanner:
                 "version": self.version,
                 "notify": self.notify.enabled,
                 "protection": self.protection.mode,
+                "protection_rules": protection_rules(),
                 "recorder_available": self._recorder_available,
                 "orphaned_statistics": len(orphaned_statistics),
                 "quarantined": len(quarantine),
