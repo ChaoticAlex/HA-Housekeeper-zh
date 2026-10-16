@@ -57,6 +57,14 @@ def test_classify_risk_follows_access_location_and_cloud() -> None:
     assert classify("hue", "local_push", {"light"})["risk_reasons"] == []
 
 
+def test_router_trackers_are_presence_not_a_location() -> None:
+    fritz = classify("fritz", "local_polling", {"device_tracker"}, {"router"})
+    assert not fritz["gps"] and fritz["presence"] and fritz["risk"] == "low"
+    assert classify("x", "local_push", {"device_tracker"}, {"gps"})["risk"] == "high"
+    assert classify("x", "local_push", {"device_tracker"}, {"router", "unknown"})["gps"]
+    assert classify("usgs", "cloud_polling", {"geo_location"})["gps"] is False
+
+
 async def test_access_report_on_config_entries(hass: HomeAssistant) -> None:
     MockConfigEntry(domain="alexa_media", title="Alexa", data={"password": PASSWORD}).add_to_hass(
         hass

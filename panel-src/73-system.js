@@ -236,6 +236,7 @@ class SystemMixin {
     const labels = e.access.map(a => `${this.t(`accKind_${a.kind}`)}${a.detail ? ` (${a.detail})` : ""}`);
     if (e.gps && !e.access.some(a => a.kind === "location")) labels.push(this.t("accGps"));
     if (e.camera && !e.access.some(a => a.kind === "camera")) labels.push(this.t("accCamera"));
+    if (e.presence) labels.push(this.t("accPresence"));
     return labels;
   }
 
@@ -275,7 +276,7 @@ class SystemMixin {
   dataflowView() {
     return this.sysFrame("dataflow", "accLoading", (r, head) => {
       const entries = r.entries || [];
-      const sys = entries.filter(e => e.access.length || e.gps || e.camera);
+      const sys = entries.filter(e => e.access.length || e.gps || e.camera || e.presence);
       const cloud = entries.filter(e => e.external);
       const appList = r.apps || [];
       const hooks = r.webhooks || [], hooksOpen = hooks.filter(w => !w.local_only && w.enabled !== false).length;

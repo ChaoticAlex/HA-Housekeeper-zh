@@ -111,6 +111,10 @@ DATAFLOW: dict[str, frozenset[str]] = {
 
 RISK_ORDER = {"high": 0, "medium": 1, "low": 2}
 
+# Where a device tracker gets its position from (its ``source_type``). Only "gps" is a location;
+# a router or Bluetooth tracker only tells whether a device is at home.
+PRESENCE_SOURCES = frozenset({"router", "bluetooth", "bluetooth_le"})
+
 
 def matches(domain: str, token: str) -> bool:
     """Whether ``token`` is the domain or a part of it between underscores.
@@ -124,8 +128,18 @@ def matches(domain: str, token: str) -> bool:
     return f"_{token}_" in f"_{domain}_"
 
 
-def classify(domain: str, iot_class: str | None, entity_domains: set[str]) -> dict[str, Any]:
-    """System access, data flow, external reach and a risk level for one integration."""
+def classify(
+    domain: str,
+    iot_class: str | None,
+    entity_domains: set[str],
+    trackers: set[str] | None = None,
+) -> dict[str, Any]:
+    """System access, data flow, external reach and a risk level for one integration.
+
+    ``trackers`` are the sources of its device trackers ("gps", "router", ... or "unknown" for one
+    without a readable state). Without them every tracker counts as a location, as does one whose
+    source is unknown: a doubt never lowers the level.
+    """
     access: list[dict[str, Any]] = []
     for token, (kind, detail) in SYSTEM_ACCESS.items():
         item = {"kind": kind, "detail": detail}
@@ -135,7 +149,10 @@ def classify(domain: str, iot_class: str | None, entity_domains: set[str]) -> di
     for token, tags in DATAFLOW.items():
         if matches(domain, token):
             flows |= tags
-    gps = bool(entity_domains & {"device_tracker", "geo_location"}) or "gps" in flows
+    if trackers is None:
+        trackers = {"unknown"} if "device_tracker" in entity_domains else set()
+    gps = bool(trackers - PRESENCE_SOURCES) or "gps" in flows
+    presence = not gps and bool(trackers & PRESENCE_SOURCES)
     camera = "camera" in entity_domains
     cloud_class = "cloud" in (iot_class or "")
     external = cloud_class or bool(flows & {"external", "cloud"})
@@ -157,6 +174,7 @@ def classify(domain: str, iot_class: str | None, entity_domains: set[str]) -> di
         "risk_reasons": reasons,
         "flows": sorted(flows),
         "gps": gps,
+        "presence": presence,
         "camera": camera,
         "external": external,
         "cloud_class": cloud_class,
@@ -176,12 +194,21 @@ async def _iot_classes(hass: HomeAssistant, domains: set[str]) -> dict[str, str 
     }
 
 
-def _entity_domains(hass: HomeAssistant) -> dict[str, set[str]]:
+def _entity_domains(hass: HomeAssistant) -> tuple[dict[str, set[str]], dict[str, set[str]]]:
+    """Per config entry: the domains of its entities and the sources of its device trackers."""
     by_entry: dict[str, set[str]] = {}
+    trackers: dict[str, set[str]] = {}
     for entity in er.async_get(hass).entities.values():
-        if entity.config_entry_id:
-            by_entry.setdefault(entity.config_entry_id, set()).add(entity.domain)
-    return by_entry
+        if not entity.config_entry_id:
+            continue
+        by_entry.setdefault(entity.config_entry_id, set()).add(entity.domain)
+        if entity.domain == "device_tracker":
+            state = hass.states.get(entity.entity_id)
+            source = state.attributes.get("source_type") if state else None
+            trackers.setdefault(entity.config_entry_id, set()).add(
+                source if isinstance(source, str) else "unknown"
+            )
+    return by_entry, trackers
 
 
 APP_INFO_TIMEOUT = 15  # seconds per app
@@ -309,11 +336,14 @@ async def access_report(
     rights of the installed apps (only with a Supervisor)."""
     entries = [e for e in hass.config_entries.async_entries() if e.source != "ignore"]
     classes = await _iot_classes(hass, {e.domain for e in entries})
-    entity_domains = _entity_domains(hass)
+    entity_domains, trackers = _entity_domains(hass)
     items = []
     for entry in entries:
         result = classify(
-            entry.domain, classes.get(entry.domain), entity_domains.get(entry.entry_id, set())
+            entry.domain,
+            classes.get(entry.domain),
+            entity_domains.get(entry.entry_id, set()),
+            trackers.get(entry.entry_id, set()),
         )
         items.append(
             {
