@@ -14,7 +14,12 @@ pytest.importorskip("pytest_homeassistant_custom_component")
 from homeassistant.core import HomeAssistant  # noqa: E402
 
 from custom_components.ha_housekeeper.const import DOMAIN  # noqa: E402
-from custom_components.ha_housekeeper.queries import cached_query  # noqa: E402
+from custom_components.ha_housekeeper.queries import (  # noqa: E402
+    REFRESH_AGE,
+    REFRESH_TICK,
+    cached_query,
+    next_reply,
+)
 
 
 class FakeRecorder:
@@ -110,3 +115,19 @@ async def test_a_failing_job_frees_the_lock_and_is_not_cached(
     assert not hass.data[DOMAIN]["query_inflight"]
     ok = await cached_query(hass, "q", 300, lambda: {"fine": True})
     assert ok.raw == {"fine": True}
+
+
+def test_next_reply_renews_the_most_overdue_view_once_it_is_due() -> None:
+    now = 100_000.0
+    fresh = now - (REFRESH_AGE["storms"] - REFRESH_TICK) + 1
+    replies = {
+        "storms:1": {"computed_at": fresh},
+        "reliability:7:0": {"computed_at": now - REFRESH_AGE["reliability"]},
+        "db_health": {"computed_at": now - 2 * REFRESH_AGE["db_health"]},
+        "unknown": {"computed_at": 0},
+    }
+    assert next_reply(replies, now) == "db_health"
+    del replies["db_health"]
+    assert next_reply(replies, now) == "reliability:7:0"
+    del replies["reliability:7:0"]
+    assert next_reply(replies, now) is None

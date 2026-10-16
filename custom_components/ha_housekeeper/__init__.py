@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import hashlib
 import logging
 import time
@@ -58,6 +57,7 @@ from .inventory import InventoryScanner
 from .issues import async_clear_issues
 from .maintenance import recorder_costs
 from .outage_levels import thresholds_from_options
+from .queries import REFRESH_AGE, REFRESH_TICK, next_reply
 from .runs import run_key
 from .scan_coverage import RETRY_LIMIT, RETRY_MINUTES, retryable_gaps
 from .scan_trigger import ScanRefused
@@ -71,7 +71,6 @@ _LOGGER = logging.getLogger(__name__)
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 PLATFORMS = [Platform.SENSOR, Platform.EVENT, Platform.BUTTON]
-REPLY_PAUSE = 20  # seconds between two prepared views
 
 
 async def _async_initial_scan(scanner: InventoryScanner) -> None:
@@ -294,43 +293,59 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     entry.async_on_unload(async_track_time_interval(hass, _collect_runs, timedelta(minutes=15)))
 
+    failed: dict[str, float] = {}
+
     async def _prepare_replies() -> None:
         # The slow recorder views open with the last numbers; this keeps them from getting old, but
-        # only for views and windows that were opened once. One after the other with a pause, so
-        # the shared query lock is never held for long at a stretch. A busy recorder makes a run
-        # a no-op (the shared query lock), a failure only costs a log line.
+        # only for views and windows that were opened once. One view per tick, the most overdue,
+        # so the load is spread and the shared query lock is never held for long at a stretch. A
+        # busy recorder leaves the view due for the next tick; a failing one waits for its age.
         if scanner.paused or not scanner.replies.replies:
             return
+        now = time.time()
+        key = next_reply(
+            {
+                k: r
+                for k, r in scanner.replies.replies.items()
+                if now - failed.get(k, 0) >= REFRESH_AGE.get(k.split(":")[0], 0)
+            },
+            now,
+        )
+        if key is None:
+            return
+        began = time.monotonic()
         try:
             snapshot = await scanner.async_get_snapshot()
-            for key in sorted(scanner.replies.replies):
-                kind, *rest = key.split(":")
-                if kind == "reliability":
-                    await reliability_module.reliability(
-                        hass,
-                        snapshot,
-                        window_days=int(rest[0]),
-                        refresh=True,
-                        compare=rest[1] == "1",
-                        store=scanner.replies,
-                    )
-                elif kind == "storms":
-                    await storms_module.storms(
-                        hass,
-                        snapshot,
-                        window_days=int(rest[0]),
-                        refresh=True,
-                        store=scanner.replies,
-                    )
-                elif kind == "costs":
-                    await recorder_costs(hass, snapshot, refresh=True, store=scanner.replies)
-                elif kind == "db_health":
-                    await db_health_module.db_health(
-                        hass, snapshot, scanner.events, refresh=True, store=scanner.replies
-                    )
-                await asyncio.sleep(REPLY_PAUSE)
+            kind, *rest = key.split(":")
+            if kind == "reliability":
+                await reliability_module.reliability(
+                    hass,
+                    snapshot,
+                    window_days=int(rest[0]),
+                    refresh=True,
+                    compare=rest[1] == "1",
+                    store=scanner.replies,
+                )
+            elif kind == "storms":
+                await storms_module.storms(
+                    hass,
+                    snapshot,
+                    window_days=int(rest[0]),
+                    refresh=True,
+                    store=scanner.replies,
+                )
+            elif kind == "costs":
+                await recorder_costs(hass, snapshot, refresh=True, store=scanner.replies)
+            elif kind == "db_health":
+                await db_health_module.db_health(
+                    hass, snapshot, scanner.events, refresh=True, store=scanner.replies
+                )
         except Exception:
-            _LOGGER.exception("Preparing the recorder views failed")
+            failed[key] = now
+            _LOGGER.exception("Preparing the recorder view %s failed", key)
+            return
+        failed.pop(key, None)
+        _LOGGER.debug("Prepared recorder view %s in %.2f s", key, time.monotonic() - began)
 
     @callback
     def _schedule_replies(_: Any) -> None:
@@ -339,7 +354,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             hass, _prepare_replies(), "HA Housekeeper recorder views"
         )
 
-    entry.async_on_unload(async_track_time_interval(hass, _schedule_replies, timedelta(minutes=30)))
+    entry.async_on_unload(
+        async_track_time_interval(hass, _schedule_replies, timedelta(seconds=REFRESH_TICK))
+    )
     entry.async_on_unload(async_call_later(hass, WARMUP_SECONDS + 120, _schedule_replies))
 
     # A scan that never comes cannot report itself: look at the age of the last success every hour.

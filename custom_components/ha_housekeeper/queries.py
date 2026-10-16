@@ -131,6 +131,27 @@ class ReplyStore:
             self._store.async_delay_save(lambda: {"replies": self.replies}, REPLY_SAVE_DELAY)
 
 
+# How old a kept reply may get before the background renews it, per view kind.
+REFRESH_AGE = {"reliability": 30 * 60, "storms": 30 * 60, "costs": 30 * 60, "db_health": 30 * 60}
+REFRESH_TICK = 5 * 60  # the background looks this often and renews one view at most
+
+
+def next_reply(replies: dict[str, dict[str, Any]], now: float) -> str | None:
+    """The kept reply the background renews next: the most overdue one, or None.
+
+    A reply counts as due one tick before its age is reached, so it never gets older than that age.
+    """
+    due, most = None, -1.0
+    for key, reply in replies.items():
+        limit = REFRESH_AGE.get(key.split(":")[0])
+        if limit is None:
+            continue
+        over = now - reply["computed_at"] - (limit - REFRESH_TICK)
+        if over >= 0 and over > most:
+            due, most = key, over
+    return due
+
+
 def kept_reply(
     store: ReplyStore | None, key: str, now: float, ttl: float, *, stale: bool | None = None
 ) -> dict[str, Any] | None:
