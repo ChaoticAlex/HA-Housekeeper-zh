@@ -18,7 +18,7 @@ from homeassistant.util import dt as dt_util
 from .const import IGNORE_LABEL
 from .meter import recorder_ready
 from .payloads import ReliabilityResult
-from .queries import ReplyStore, cached_query, kept_reply
+from .queries import DayCache, ReplyStore, cached_query, kept_reply, pieces
 
 DAY = 86400
 WINDOWS = (1, 7)  # days
@@ -50,63 +50,29 @@ THRESHOLDS = {
 }
 
 
-def query_runs(hass: HomeAssistant, start: float, end: float) -> dict[str, Any]:
+def query_runs(
+    hass: HomeAssistant, start: float, end: float, days: DayCache | None = None
+) -> dict[str, Any]:
     """Blocking: the unavailable intervals per entity in [start, end].
 
-    Two passes: first find the entities that had any unavailable row at all, then read the rows
-    of only those entities with a window function. That is several times faster than running
-    the window function over every row of the window.
+    With ``days`` the finished days are taken from it (or read once and put there) and only the
+    rest is read; the pieces are joined so that an outage running over midnight stays one.
     """
-    from homeassistant.components.recorder.db_schema import States, StatesMeta
     from homeassistant.components.recorder.util import session_scope
-    from sqlalchemy import case, func, select
 
     started = time.monotonic()
-    seen: dict[str, float] = {}
-    intervals: dict[str, list[tuple[float, float]]] = {}
+    parts: list[tuple[float, float, dict[str, Any]]] = []
     with session_scope(hass=hass, read_only=True) as session:
-        down = func.sum(case((States.state == "unavailable", 1), else_=0))
-        rows = session.execute(
-            select(
-                States.metadata_id,
-                StatesMeta.entity_id,
-                func.min(States.last_updated_ts),
-                down,
-            )
-            .join(StatesMeta, States.metadata_id == StatesMeta.metadata_id)
-            .where(States.last_updated_ts >= start, States.last_updated_ts <= end)
-            .group_by(States.metadata_id, StatesMeta.entity_id)
-        ).all()
-        affected: dict[int, str] = {}
-        for metadata_id, entity_id, first, count in rows:
-            seen[entity_id] = float(first)
-            if count:
-                affected[metadata_id] = entity_id
-        ids = list(affected)
-        for offset in range(0, len(ids), CHUNK):
-            part = ids[offset : offset + CHUNK]
-            nxt = (
-                func.lead(States.last_updated_ts)
-                .over(partition_by=States.metadata_id, order_by=States.last_updated_ts)
-                .label("nxt")
-            )
-            inner = (
-                select(States.metadata_id, States.last_updated_ts.label("ts"), States.state, nxt)
-                .where(
-                    States.metadata_id.in_(part),
-                    States.last_updated_ts >= start,
-                    States.last_updated_ts <= end,
-                )
-                .subquery()
-            )
-            for metadata_id, ts, nxt_ts in session.execute(
-                select(inner.c.metadata_id, inner.c.ts, inner.c.nxt).where(
-                    inner.c.state == "unavailable"
-                )
-            ).all():
-                intervals.setdefault(affected[metadata_id], []).append(
-                    (float(ts), float(nxt_ts if nxt_ts is not None else end))
-                )
+        for begin, finish, keep in (
+            pieces(start, end, days.oldest) if days else [(start, end, False)]
+        ):
+            part = days.get(begin) if keep and days else None
+            if part is None:
+                part = _query_piece(session, begin, finish, last=finish >= end)
+                if keep and days:
+                    days.put(begin, part)
+            parts.append((begin, finish, part))
+    seen, intervals = join_pieces(parts)
     return {
         "start": start,
         "end": end,
@@ -114,6 +80,92 @@ def query_runs(hass: HomeAssistant, start: float, end: float) -> dict[str, Any]:
         "intervals": intervals,
         "took_ms": round((time.monotonic() - started) * 1000),
     }
+
+
+def _query_piece(session: Any, start: float, end: float, *, last: bool) -> dict[str, Any]:
+    """Blocking: first row, unavailable intervals and an outage still open at the end of a piece.
+
+    A piece is [start, end) so a row at midnight belongs to one day only; the last piece of a
+    window also takes a row at ``end``.
+
+    Two passes: first find the entities that had any unavailable row at all, then read the rows
+    of only those entities with a window function. That is several times faster than running
+    the window function over every row of the window.
+    """
+    from homeassistant.components.recorder.db_schema import States, StatesMeta
+    from sqlalchemy import case, func, select
+
+    seen: dict[str, float] = {}
+    intervals: dict[str, list[tuple[float, float]]] = {}
+    open_at_end: set[str] = set()
+    down = func.sum(case((States.state == "unavailable", 1), else_=0))
+    upto = States.last_updated_ts <= end if last else States.last_updated_ts < end
+    rows = session.execute(
+        select(
+            States.metadata_id,
+            StatesMeta.entity_id,
+            func.min(States.last_updated_ts),
+            down,
+        )
+        .join(StatesMeta, States.metadata_id == StatesMeta.metadata_id)
+        .where(States.last_updated_ts >= start, upto)
+        .group_by(States.metadata_id, StatesMeta.entity_id)
+    ).all()
+    affected: dict[int, str] = {}
+    for metadata_id, entity_id, first, count in rows:
+        seen[entity_id] = float(first)
+        if count:
+            affected[metadata_id] = entity_id
+    ids = list(affected)
+    for offset in range(0, len(ids), CHUNK):
+        part = ids[offset : offset + CHUNK]
+        nxt = (
+            func.lead(States.last_updated_ts)
+            .over(partition_by=States.metadata_id, order_by=States.last_updated_ts)
+            .label("nxt")
+        )
+        inner = (
+            select(States.metadata_id, States.last_updated_ts.label("ts"), States.state, nxt)
+            .where(
+                States.metadata_id.in_(part),
+                States.last_updated_ts >= start,
+                upto,
+            )
+            .subquery()
+        )
+        for metadata_id, ts, nxt_ts in session.execute(
+            select(inner.c.metadata_id, inner.c.ts, inner.c.nxt).where(
+                inner.c.state == "unavailable"
+            )
+        ).all():
+            entity_id = affected[metadata_id]
+            if nxt_ts is None:
+                open_at_end.add(entity_id)
+            intervals.setdefault(entity_id, []).append(
+                (float(ts), float(nxt_ts if nxt_ts is not None else end))
+            )
+    return {"seen": seen, "intervals": intervals, "open": open_at_end}
+
+
+def join_pieces(
+    parts: list[tuple[float, float, dict[str, Any]]],
+) -> tuple[dict[str, float], dict[str, list[tuple[float, float]]]]:
+    """Join consecutive pieces: an outage open at the end of one runs on to the next row of the entity."""
+    seen: dict[str, float] = {}
+    intervals: dict[str, list[tuple[float, float]]] = {}
+    running: set[str] = set()
+    for begin, finish, part in parts:
+        for entity_id in list(running):
+            first = part["seen"].get(entity_id)
+            intervals[entity_id].append((begin, finish if first is None else first))
+            if first is not None:
+                running.discard(entity_id)
+        for entity_id, first in part["seen"].items():
+            seen.setdefault(entity_id, first)
+        for entity_id, found in part["intervals"].items():
+            intervals.setdefault(entity_id, []).extend(found)
+        running |= part["open"]
+    return seen, intervals
 
 
 def _merge(intervals: list[tuple[float, float]]) -> list[tuple[float, float]]:
@@ -438,11 +490,12 @@ async def reliability(
     if kept is not None:
         # An old reply is handed out at once; the caller asks again with ``refresh`` for new numbers.
         return kept
+    days = DayCache(hass, "reliability")
     found = await cached_query(
         hass,
         f"reliability:{window_days}",
         CACHE_SECONDS,
-        lambda: query_runs(hass, now - window_days * DAY, now),
+        lambda: query_runs(hass, now - window_days * DAY, now, days),
         refresh=refresh,
     )
     if found.busy:
@@ -480,12 +533,12 @@ async def reliability(
         item["entry_title"] = (entries.get(item["entry_id"]) or {}).get("title")
     comparison = {"requested": compare, "available": False}
     if compare:
+        # The period before has ended: a day-old answer for it is good enough.
         before = await cached_query(
             hass,
             f"reliability:{window_days}:before",
-            CACHE_SECONDS,
-            lambda: query_runs(hass, now - 2 * window_days * DAY, now - window_days * DAY),
-            refresh=refresh,
+            DAY,
+            lambda: query_runs(hass, now - 2 * window_days * DAY, now - window_days * DAY, days),
         )
         if not before.busy:
             earlier = {

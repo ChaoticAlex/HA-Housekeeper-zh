@@ -131,6 +131,64 @@ class ReplyStore:
             self._store.async_delay_save(lambda: {"replies": self.replies}, REPLY_SAVE_DELAY)
 
 
+DAY = 86400
+DAY_KEEP = 24 * 3600  # a finished day is read again after this long (a purge from outside)
+
+
+def pieces(start: float, end: float, oldest: float) -> list[tuple[float, float, bool]]:
+    """Cut ``[start, end]`` into finished UTC days that may be kept and the live rest around them.
+
+    A day counts only when it lies wholly inside the window, has ended and is not older than
+    ``oldest`` (rows the recorder purges next); everything else stays one live piece per stretch.
+    """
+    today = end // DAY * DAY
+    day = -(-start // DAY) * DAY
+    found: list[tuple[float, float, bool]] = []
+    live_from = start
+    while day + DAY <= today:
+        if day >= oldest:
+            if live_from < day:
+                found.append((live_from, day, False))
+            found.append((day, day + DAY, True))
+            live_from = day + DAY
+        day += DAY
+    if live_from < end or not found:
+        found.append((live_from, end, False))
+    return found
+
+
+class DayCache:
+    """The results of finished days per query kind, beside the cached answers.
+
+    They sit in the same ``query_cache``, so whatever clears it after a purge clears these too. They
+    are read and written only by a job that holds the shared query lock.
+    """
+
+    def __init__(self, hass: HomeAssistant, kind: str) -> None:
+        from homeassistant.components.recorder import get_instance
+
+        self._cache: dict[str, tuple[float, Any]] = hass.data.setdefault(DOMAIN, {}).setdefault(
+            "query_cache", {}
+        )
+        self._kind = kind
+        keep = getattr(get_instance(hass), "keep_days", None)
+        # One day of margin: the nightly purge may already have thinned the oldest day.
+        self.oldest = (
+            time.time() - (keep - 1) * DAY
+            if isinstance(keep, int) and not isinstance(keep, bool)
+            else float("inf")
+        )
+
+    def get(self, day: float) -> Any:
+        kept = self._cache.get(f"day:{self._kind}:{int(day)}")
+        if kept is None or time.monotonic() - kept[0] >= DAY_KEEP:
+            return None
+        return kept[1]
+
+    def put(self, day: float, data: Any) -> None:
+        self._cache[f"day:{self._kind}:{int(day)}"] = (time.monotonic(), data)
+
+
 # How old a kept reply may get before the background renews it, per view kind.
 REFRESH_AGE = {
     "reliability": 30 * 60,

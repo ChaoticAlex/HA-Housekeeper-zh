@@ -512,3 +512,47 @@ async def test_cached_only_never_starts_a_query_and_hands_out_what_exists(
     )
     old = await reliability(hass, snapshot, store=store, cached_only=True)
     assert old["stale"] is True and old["cached"] is True and "missing" not in old
+
+
+async def test_kept_days_give_the_same_runs_and_loads_as_one_query_also_over_midnight(
+    recorder_mock, hass: HomeAssistant, freezer
+) -> None:
+    from datetime import UTC, datetime
+
+    from homeassistant.components.recorder import get_instance
+
+    from custom_components.ha_housekeeper.queries import DayCache, pieces
+    from custom_components.ha_housekeeper.storms import query_storms
+
+    day = 86400
+    base = (int(datetime.now(UTC).timestamp()) // day - 3) * day
+    for offset, state in (
+        (HOUR, "1"),
+        (23 * HOUR, "unavailable"),  # open over midnight into the next day
+        (day + 2 * HOUR, "2"),
+        (day + 5 * HOUR, "unavailable"),
+        (2 * day, "1"),  # a row exactly at midnight
+        (2 * day + 3 * HOUR, "unavailable"),
+    ):
+        freezer.move_to(datetime.fromtimestamp(base + offset, UTC))
+        hass.states.async_set("sensor.a", state)
+    end = base + 2 * day + 6 * HOUR
+    freezer.move_to(datetime.fromtimestamp(end, UTC))
+    await async_wait_recording_done(hass)
+
+    from custom_components.ha_housekeeper.reliability import _merge, query_runs
+
+    run = get_instance(hass).async_add_executor_job
+    whole = await run(query_runs, hass, base, end)
+    days = DayCache(hass, "reliability")
+    assert [keep for *_, keep in pieces(base, end, days.oldest)] == [True, True, False]
+    for _ in range(2):  # read once, then from the kept days
+        split = await run(query_runs, hass, base, end, days)
+        assert split["seen"] == whole["seen"]
+        assert _merge(split["intervals"]["sensor.a"]) == _merge(whole["intervals"]["sensor.a"])
+        assert _merge(split["intervals"]["sensor.a"])[0] == (base + 23 * HOUR, base + day + 2 * HOUR)
+    loads = DayCache(hass, "storms")
+    plain = await run(query_storms, hass, base, end)
+    for _ in range(2):
+        kept = await run(query_storms, hass, base, end, loads)
+        assert kept["entities"] == plain["entities"] and kept["events"] == plain["events"]
