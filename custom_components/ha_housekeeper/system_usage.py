@@ -680,13 +680,23 @@ async def system_usage(
     that is reused for a few minutes (see ``_folder_walk``).
     """
     config_dir = hass.config.config_dir
-    local, supervisor, resources, blueprints = await asyncio.gather(
+
+    async def walked_part() -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+        # The walk needs only the resources and blueprints, so it runs beside the Supervisor part.
+        resources, blueprints = await asyncio.gather(
+            dashboard_resources(hass), blueprint_list(hass)
+        )
+        return (
+            resources,
+            blueprints,
+            await _folder_walk(hass, config_dir, resources, blueprints, fresh),
+        )
+
+    local, supervisor, (resources, blueprints, walked) = await asyncio.gather(
         hass.async_add_executor_job(collect_local, config_dir, False),
         supervisor_part(hass),
-        dashboard_resources(hass),
-        blueprint_list(hass),
+        walked_part(),
     )
-    walked = await _folder_walk(hass, config_dir, resources, blueprints, fresh)
     sizes, bp_sizes = walked["sizes"], walked["bp_sizes"]
     cards = []
     for resource in resources:
