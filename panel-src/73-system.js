@@ -2,6 +2,8 @@
 // All three only read. A page loads on its first visit; its refresh button reads again.
 // A page and the WebSocket command it asks.
 const SYS_COMMANDS = { storage: "system_usage", dataflow: "access", secrets: "sensitive_fields" };
+// The tiles of the credentials page that filter the accounts instead of the integrations.
+const SEC_ACCOUNT_SHOWS = ["nomfa"];
 const SYS_WARN_PERCENT = 75, SYS_RED_PERCENT = 90;
 
 class SystemMixin {
@@ -466,18 +468,27 @@ class SystemMixin {
 
   // ---------------------------------------------------------------- Credentials
 
-  // Which integrations hold credentials, of what kind, and whether a value is set. Never a value.
+  // Which integrations hold credentials, of what kind, and whether a value is set, and the accounts. Never a value.
+  // Tiles in even rows of three; each one opens its tab with its filter.
   secretsView() {
     return this.sysFrame("secrets", "secLoading", (r, head) => {
-      const entries = r.entries || [];
+      const entries = r.entries || [], users = r.accounts || [];
       const count = (e, set) => e.fields.filter(f => f.set === set).length;
       const kinds = e => [...new Set(e.fields.map(f => f.kind))];
       const empty = entries.reduce((n, e) => n + count(e, false), 0);
-      const gap = this.lv?.seclist?.f?.state === "gap", anyFilter = Object.values(this.lv?.seclist?.f || {}).some(Boolean);
-      const tiles = this.sumTiles([
-        { label: this.t("secSumEntries"), value: this.esc(this.formatNumber(entries.length)), sub: this.esc(this.t("secSumEntriesSub", { n: this.formatNumber(entries.reduce((n, e) => n + count(e, true), 0)) })), tone: "mute", attr: ["data-sec-show", ""], active: !anyFilter },
-        { label: this.t("secSumEmpty"), value: this.esc(this.formatNumber(empty)), sub: this.esc(this.t("secSumEmptySub")), tone: empty ? "warn" : "ok", attr: ["data-sec-show", "gap"], active: gap },
-      ]);
+      const tabs = [{ id: "entries", label: this.t("secListTitle"), count: entries.length }, ...(r.accounts ? [{ id: "accounts", label: this.t("secTabAccounts"), count: users.length }] : [])];
+      const open = this.viewTabOf("secrets", tabs, "entries");
+      const on = (tab, list, value) => open === tab && (value ? this.lv?.[list]?.f?.state === value : !Object.values(this.lv?.[list]?.f || {}).some(Boolean));
+      const admins = users.filter(u => u.active && u.admin), noMfa = admins.filter(u => !u.mfa);
+      const tile = (label, value, sub, tone, show, active) => ({ label: this.t(label), value: this.esc(this.formatNumber(value)), sub: this.esc(sub), tone, attr: ["data-sec-show", show], active });
+      const rowOne = [
+        tile("secSumEntries", entries.length, this.t("secSumEntriesSub", { n: this.formatNumber(entries.reduce((n, e) => n + count(e, true), 0)) }), "mute", "", on("entries", "seclist")),
+        tile("secSumEmpty", empty, this.t("secSumEmptySub"), empty ? "warn" : "ok", "gap", on("entries", "seclist", "gap")),
+      ];
+      const rowTwo = r.accounts ? [tile("secSumNoMfa", noMfa.length, this.t("secSumNoMfaSub", { n: this.formatNumber(admins.length) }), noMfa.length ? "warn" : "ok", "nomfa", on("accounts", "secusers", "nomfa"))] : [];
+      const tiles = `<div class="tilerows"><div class="sumgrouphead">${this.t("secListTitle")}</div>${this.sumTiles(rowOne, "even")}${this.sumTiles(rowTwo, "even")}</div>`;
+      const bar = tabs.length > 1 ? this.viewTabBar("secrets", tabs, open) : "";
+      if (open === "accounts") return `<div class="stack">${head}${tiles}<div class="panel">${bar}<div class="panelhead"><div><h2>${this.t("secTabAccounts")}</h2><p>${this.t("secAccHint")}</p></div></div>${this.secAccounts(users)}${this.howCounted("secAccFootnote")}</div></div>`;
       const state = e => (count(e, false) === 0 ? "set" : count(e, true) === 0 ? "empty" : "part");
       const stateCell = e => `<span class="pill ${{ set: "ok", part: "warn", empty: "warn" }[state(e)]}">${this.esc(this.t("secState", { n: count(e, true), total: e.fields.length }))}</span>`;
       const kindNames = e => kinds(e).map(k => this.t(`secKind_${k}`));
@@ -502,7 +513,32 @@ class SystemMixin {
         exportName: "credential-fields", header: [this.t("accColIntegration"), "Domain", this.t("secColKind"), this.t("secColFields"), this.t("secColSetCount"), this.t("secColEmptyCount")],
         rows: e => [e.title, e.domain, kindNames(e).join("; "), names(e), count(e, true), count(e, false)],
       });
-      return `<div class="stack">${head}${tiles}<div class="panel"><div class="panelhead"><div><h2>${this.t("secListTitle")}</h2><p>${this.t("secListHint")}</p></div></div>${table}${this.howCounted("secFootnote")}</div></div>`;
+      return `<div class="stack">${head}${tiles}<div class="panel">${bar}<div class="panelhead"><div><h2>${this.t("secListTitle")}</h2><p>${this.t("secListHint")}</p></div></div>${table}${this.howCounted("secFootnote")}</div></div>`;
+    });
+  }
+
+  // The people of this Home Assistant: role, two-factor login and last login. A click opens the user settings.
+  secAccounts(users) {
+    const roles = u => [u.owner ? this.t("secRoleOwner") : "", this.t(u.admin ? "secRoleAdmin" : "secRoleUser"), u.local_only ? this.t("secRoleLocal") : "", u.active ? "" : this.t("secRoleOff")].filter(Boolean);
+    const mfa = u => `<span class="pill ${u.mfa ? "ok" : u.admin && u.active ? "warn" : "mute"}">${this.t(u.mfa ? "secMfaOn" : "secMfaOff")}</span>`;
+    const login = u => (!u.logins && u.token_count ? this.t("secLoginTokens") : u.last_login ? this.formatDate(u.last_login) : this.t("secLoginNever"));
+    const state = u => (u.active && u.admin && !u.mfa ? "nomfa" : u.inactive ? "inactive" : "");
+    return this.sysList("secusers", users, {
+      sort: "name", dir: "asc", cls: "acc", tie: u => u.id,
+      sorts: [{ key: "name", label: "secColAccount", dir: "asc", get: u => u.name }, { key: "login", label: "secColLogin", dir: "desc", get: u => u.last_login || "" }],
+      filters: [{ name: "state", all: this.t("secAllStates"), options: [["nomfa", this.t("secStateNoMfa")], ["inactive", this.t("secStateInactive")]] }],
+      filterFns: { state: (u, v) => state(u) === v || (v === "inactive" && u.inactive) },
+      text: u => `${u.name} ${roles(u).join(" ")}`, empty: "secNoAccounts",
+      rowAttrs: () => `data-ha-path="/config/users" tabindex="0" role="link" aria-label="${this.esc(this.t("secOpenUsers"))}"`,
+      columns: [
+        { key: "name", label: "secColAccount", cell: u => `<strong>${this.esc(u.name)}</strong>` },
+        { key: "role", label: "secColRole", sortable: false, cell: u => this.accPills(roles(u)) },
+        { key: "mfa", label: "secColMfa", sortable: false, cell: mfa },
+        { key: "login", label: "secColLogin", dir: "desc", cell: u => (u.inactive ? `<span class="pill warn">${this.esc(login(u))}</span>` : this.esc(login(u))) },
+        { key: "tokens", label: "secColTokens", sortable: false, cell: u => this.esc(this.formatNumber(u.token_count)) },
+      ],
+      exportName: "accounts", header: [this.t("secColAccount"), this.t("secColRole"), this.t("secColMfa"), this.t("secColLogin"), this.t("secColTokens")],
+      rows: u => [u.name, roles(u).join("; "), this.t(u.mfa ? "secMfaOn" : "secMfaOff"), u.last_login || "", u.token_count],
     });
   }
 
@@ -521,11 +557,13 @@ class SystemMixin {
       this._tipHide = globalThis.setTimeout?.(() => this.hideTip(), 6000);
     }));
     root.querySelectorAll("[data-detail-tab-go]").forEach(el => el.onclick = () => { this.detailTab = el.dataset.detailTabGo; this.render(); });
-    // A key figure of the credential overview sets the state filter ("gap": some field empty) or clears all filters.
+    // A key figure of the credential overview opens its tab and sets its state filter, or clears all filters.
     root.querySelectorAll("[data-sec-show]").forEach(el => el.onclick = () => {
-      const st = this.lvState("seclist", "name", "asc");
-      st.f = el.dataset.secShow ? { ...st.f, state: el.dataset.secShow } : {};
-      this.persistLv("seclist"); this.pages = {}; this.render();
+      const value = el.dataset.secShow, list = SEC_ACCOUNT_SHOWS.includes(value) ? "secusers" : "seclist";
+      (this.viewTab ||= {}).secrets = list === "secusers" ? "accounts" : "entries";
+      const st = this.lvState(list, "name", "asc");
+      st.f = value ? { ...st.f, state: value } : {};
+      this.persistLv(list); this.pages = {}; this.render();
     });
     root.querySelector("[data-ha-menu]")?.addEventListener("click", () => this.toggleHaSidebar());
     // Rows that lead into Home Assistant (apps) open with Enter and Space like the other rows.

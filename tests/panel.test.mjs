@@ -4893,6 +4893,10 @@ const ACCESS = {
 
 const SECRETS = { entries: [
   { entry_id: "c1", domain: "demo_cloud", title: "<i>Demo</i>", disabled: false, fields: [{ source: "data", key: "password", kind: "password", set: true }, { source: "data", key: "token.access_token", kind: "token", set: false }] },
+], accounts: [
+  { id: "u1", name: "Roberto", active: true, owner: true, admin: true, local_only: false, mfa: true, logins: true, last_login: "2026-10-16T08:00:00+00:00", inactive: false, token_count: 2 },
+  { id: "u2", name: "<b>Partner</b>", active: true, owner: false, admin: true, local_only: false, mfa: false, logins: true, last_login: "2026-10-13T08:00:00+00:00", inactive: false, token_count: 0 },
+  { id: "u3", name: "Gast", active: true, owner: false, admin: false, local_only: false, mfa: false, logins: true, last_login: "2026-03-01T08:00:00+00:00", inactive: true, token_count: 0 },
 ] };
 
 function systemPanel(lang = "en") {
@@ -5046,6 +5050,21 @@ test("the credential overview shows kind and set or empty, links to Home Assista
   assert.ok(!html.includes('class="filteron"'), "no filter note by default");
   el.lvState("seclist", "name", "asc").f.state = "gap"; el.render();
   assert.ok(shadow.innerHTML.includes('class="filteron"') && shadow.innerHTML.includes('data-lf-set="seclist||"') && !shadow.innerHTML.includes('class="pill warn" data-sec-show'), "the filter shows once, as the shared note of the list");
+});
+
+test("the credential page shows the accounts with role and two-factor, and its tile opens them filtered", () => {
+  const { el, shadow } = systemPanel("de");
+  el.view = "secrets";
+  el.render();
+  let html = shadow.innerHTML;
+  assert.ok(html.includes("Admins ohne Zwei-Faktor") && html.includes("von 2 Admins") && html.includes('data-sec-show="nomfa"'));
+  assert.equal((html.match(/class="sumtiles even"/g) || []).length, 2, "two even rows of tiles");
+  const tile = { dataset: { secShow: "nomfa" } };
+  el.bindSystem({ querySelectorAll: selector => (selector === "[data-sec-show]" ? [tile] : []), querySelector: () => null });
+  tile.onclick();
+  html = shadow.innerHTML;
+  assert.ok(html.includes("&lt;b&gt;Partner&lt;/b&gt;") && !html.includes("Roberto</strong>") && !html.includes("Gast</strong>"), "only the admin without two-factor, escaped");
+  assert.ok(html.includes('data-ha-path="/config/users"'), "a row opens the users in Home Assistant");
 });
 
 test("the rights of the apps show under access and data flow, or why they are missing", () => {

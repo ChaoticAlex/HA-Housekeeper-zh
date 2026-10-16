@@ -110,16 +110,17 @@ async def websocket_access(
 
 @websocket_api.require_admin
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/sensitive_fields"})
-@callback
+@websocket_api.async_response
 @with_scanner
-def websocket_sensitive_fields(
+async def websocket_sensitive_fields(
     hass: HomeAssistant,
     connection: websocket_api.ActiveConnection,
     msg: dict[str, Any],
     scanner: InventoryScanner,
 ) -> None:
-    """Which config entries hold credentials, of what kind and whether set. Never a value."""
-    connection.send_result(msg["id"], _versioned(sensitive_fields(hass)))
+    """Which config entries hold credentials, of what kind and whether set, and the accounts.
+    Never a value."""
+    connection.send_result(msg["id"], _versioned(await sensitive_fields(hass)))
 
 
 @callback

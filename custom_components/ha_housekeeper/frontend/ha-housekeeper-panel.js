@@ -1498,7 +1498,7 @@ class StylesMixin {
       .kids{margin:4px 0 6px 40px;padding-left:16px;border-left:2px solid var(--hk-border);background:color-mix(in srgb,var(--hk-soft) 45%,transparent);border-radius:0 0 8px 0}.kids .tile{width:28px;height:28px}.foldarrow{--mdc-icon-size:18px;color:var(--hk-muted);flex:none;margin-right:2px}
       .alsopill{margin-left:6px;vertical-align:1px}.corralso{display:grid;gap:6px;padding:8px 12px;border-left:3px solid var(--hk-amber);background:var(--hk-soft);border-radius:0 8px 8px 0}.corralso strong{font-size:calc(12px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted)}.corralso ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}.corralso li{display:flex;align-items:center;gap:8px}.corralso ha-icon{--mdc-icon-size:18px;color:var(--hk-amber);flex:none}
       .incidenthead{display:flex;align-items:center;gap:8px;padding-right:12px}.incidenthead .foldhead{flex:1;min-width:0}.incsec{border-left:3px solid var(--hk-border);padding:2px 0 2px 12px;margin:8px 14px 12px}.incsec.obs{border-left-color:var(--hk-amber)}.incsec h4{margin:0 0 6px;font-size:calc(12px*var(--hk-fs,1));font-weight:500;color:var(--hk-muted)}.incfilter{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 16px;border-top:1px solid var(--hk-border);background:var(--hk-soft);font-size:calc(13px*var(--hk-fs,1))}.incfilter b{font-weight:500}.incfilter .chip{margin-left:auto}.incfilter.on{background:color-mix(in srgb,var(--hk-blue) 9%,var(--hk-surface));border-color:var(--hk-blue)}
-      .sumgroups{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:14px;align-items:stretch}.sumgroup{min-width:0;display:flex;flex-direction:column}@media(min-width:1000px){.sumgroups{display:grid;grid-template-columns:repeat(var(--cols,5),minmax(0,1fr));gap:6px 10px;grid-auto-rows:1fr}.sumgroup{grid-column:span var(--n,1);flex:none}.sumgroup.row2{grid-column:1/span var(--n,1)}}.sumgroup .sumtiles{margin-bottom:0;flex:1}.sumgroup .sumtile .spark-row{margin-top:auto;padding-top:4px}.sumgrouphead{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));margin:0 0 6px 2px}
+      .sumgroups{display:flex;flex-wrap:wrap;gap:6px 18px;margin-bottom:14px;align-items:stretch}.sumgroup{min-width:0;display:flex;flex-direction:column}@media(min-width:1000px){.sumgroups{display:grid;grid-template-columns:repeat(var(--cols,5),minmax(0,1fr));gap:6px 10px;grid-auto-rows:1fr}.sumgroup{grid-column:span var(--n,1);flex:none}.sumgroup.row2{grid-column:1/span var(--n,1)}}.sumgroup .sumtiles{margin-bottom:0;flex:1}.sumgroup .sumtile .spark-row{margin-top:auto;padding-top:4px}.sumgrouphead{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));margin:0 0 6px 2px}.tilerows{display:grid;gap:10px}.tilerows .sumgrouphead{margin-bottom:-4px}.sumtiles.even{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr;margin-bottom:0}.sumtiles.even .sumlabel,.sumtiles.even small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}@media(max-width:640px){.sumtiles.even{grid-template-columns:repeat(2,minmax(0,1fr))}}
       .sumtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}.sumtile{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 14px;border:1px solid var(--hk-border);border-left:4px solid var(--hk-gray);border-radius:12px;background:var(--hk-surface);text-align:left;font:inherit;color:inherit}button.sumtile{cursor:pointer}button.sumtile:hover{background:var(--hk-soft)}.sumtile.ok{border-left-color:var(--hk-green)}.sumtile.warn{border-left-color:var(--hk-amber)}.sumtile.red{border-left-color:var(--hk-red)}.sumlabel{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.sumvalue{font-size:calc(22px*var(--hk-fs,1));font-weight:600;line-height:1.2;overflow-wrap:anywhere}.sumtile small{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));overflow-wrap:anywhere}.sumtile{position:relative}button.sumtile .sumlabel{padding-right:20px}.sumcue{position:absolute;top:10px;right:10px;--mdc-icon-size:16px;color:var(--hk-muted)}div.sumtile,div.sumtile:hover{box-shadow:none;background:var(--hk-soft)}.sumtile.filter[aria-pressed=true]{border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 9%,var(--hk-surface));box-shadow:0 0 0 1px var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumcue{color:var(--hk-blue)}.sumtile.filter[aria-pressed=true] .sumlabel{color:var(--hk-blue-text)}.sumtile.filter[aria-pressed=true] .sumlabel:before{content:"\\2713";margin-right:.4em}.filteron{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 16px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);background:color-mix(in srgb,var(--hk-blue) 7%,var(--hk-surface));border-bottom:1px solid var(--hk-border)}.filteron ha-icon{--mdc-icon-size:16px;color:var(--hk-blue)}.filteron b{color:var(--hk-text);font-weight:600}.filteron .btn{margin-left:auto}.tabdot{display:inline-block;width:8px;height:8px;margin-left:6px;border-radius:50%;background:var(--hk-gray)}.tabdot.warn{background:var(--hk-amber)}.tabdot.red{background:var(--hk-red)}
       .detailgrid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);gap:14px;align-items:start}.pad{padding:16px}.todofoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 16px}.visitline{display:inline-flex;align-items:center;gap:6px;color:var(--hk-muted)}.visitline ha-icon{--mdc-icon-size:16px}
       .facts{display:grid}.fact{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.fact:first-child{border-top:0}.fact span{color:var(--hk-muted)}.fact b{font-weight:600;text-align:right}.fact small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:400}
@@ -7368,7 +7368,8 @@ class PoliciesMixin {
 // LayoutMixin: the pieces every long view shares (a row of key figures and tabs for its sections); mixed in by 99-register.js.
 class LayoutMixin {
   // A row of key figures. tile: { label, value, sub, tone ("ok"|"warn"|"red"|"mute"), tab, filter, lf } where tab ("view|id") makes it a button; lf ([list id, filter name, value]) sets that list filter, an empty name clears them all.
-  sumTiles(tiles) {
+  // `cls` adds a class to the grid, e.g. "even" for tiles of one size in rows of three.
+  sumTiles(tiles, cls = "") {
     const cells = tiles.filter(Boolean).map(t => {
       const inner = `<span class="sumlabel">${this.esc(t.label)}</span><b class="sumvalue">${t.value}</b>${t.sub ? `<small>${t.sub}</small>` : ""}${t.spark ? `<span class="spark-row">${t.spark}</span>` : ""}`;
       const hint = t.hint ? ` title="${this.esc(t.hint)}"` : "";
@@ -7386,7 +7387,7 @@ class LayoutMixin {
       if (t.unref) return go(`data-unref-tab="${t.unref}"`);
       return t.tab ? go(`data-view-tab="${this.esc(t.tab)}"`) : `<div class="sumtile ${t.tone || "mute"}"${hint}>${inner}</div>`;
     }).join("");
-    return cells ? `<div class="sumtiles" role="group" aria-label="${this.esc(this.t("sumLabel"))}">${cells}</div>` : "";
+    return cells ? `<div class="sumtiles${cls ? ` ${cls}` : ""}" role="group" aria-label="${this.esc(this.t("sumLabel"))}">${cells}</div>` : "";
   }
 
   // When the data of a page was read last (for its "as of"), and a time given in seconds as ISO text.
@@ -13104,7 +13105,7 @@ Object.assign(TEXT.de, {
   accExternal: "extern", accGps: "Standort (Tracker)", accCamera: "Kamera-Entitäten", accDisabled: "deaktiviert",
   accNoneSys: "Keine Integration mit Systemzugriff erkannt.", accNoneCloud: "Kein Datenfluss zu externen Diensten erkannt.",
   accFootnote: "Systemzugriff und Datenfluss leitet Housekeeper aus dem Namen der Integration ab (zha → Zigbee-Funk, mobile_app → Standort), einen Cloud-Datenfluss außerdem aus der IoT-Klasse cloud_polling oder cloud_push; Tracker- und Kamera-Entitäten zählen als Standort und Kamera. Die Einordnung ist ein Hinweis, kein Beweis. Hoch: Zugriff auf System, Shell oder Funk, Kameras oder Standort. Mittel: Daten gehen nach außen oder ein anderer Zugriff. Ignorierte Funde fehlen. Die Rechte der Apps meldet der Supervisor; hoch ist, was auf dem Host Root gleichkommt (voller Hardwarezugriff, Privilegien, Docker-API, Host-Prozesse, Supervisor-Rolle admin oder manager), mittel sind Host-Netzwerk, Zugriff auf Home Assistant oder Logins und ein abgeschaltetes AppArmor. Ein Klick auf eine App öffnet sie in Home Assistant. Es wird nichts geändert und nichts gespeichert.",
-  secrets: "Zugangsdaten", secretsSubtitle: "Welche Integrationen Zugangsdaten gespeichert haben, von welcher Art und ob ein Wert hinterlegt ist. Werte zeigt Housekeeper nie. Liest nur.",
+  secrets: "Zugangsdaten", secretsSubtitle: "Welche Integrationen Zugangsdaten gespeichert haben, von welcher Art und ob ein Wert hinterlegt ist, und die Konten mit Rolle und Zwei-Faktor. Werte zeigt Housekeeper nie. Liest nur.",
   secHint: "Gespeicherte Zugangsdaten der Integrationen, ohne Werte", secLoading: "Die Integrationen werden durchgesehen …",
   secSumEntries: "Integrationen mit Zugangsdaten", secSumEntriesSub: "{n} Felder mit Wert", secSumEmpty: "Felder ohne Wert", secSumEmptySub: "Feld vorhanden, aber leer",
   secListTitle: "Integrationen", secListHint: "Art der Zugangsdaten und ob ein Wert hinterlegt ist",
@@ -13112,6 +13113,13 @@ Object.assign(TEXT.de, {
   secStateGap: "mit leeren Feldern", secState: "{n} von {total}", secStateSet: "alle hinterlegt", secStatePart: "teilweise", secStateEmpty: "nichts hinterlegt", secAllKinds: "Alle Arten", secAllStates: "Alle Zustände",
   secKind_password: "Passwort", secKind_token: "Token", secKind_api_key: "API-Schlüssel", secKind_secret: "Secret", secKind_webhook: "Webhook", secKind_pin: "PIN",
   secNone: "Keine Integration mit gespeicherten Zugangsdaten erkannt.", secOpen: "{name} in Home Assistant öffnen",
+  secTabAccounts: "Konten", secAccHint: "Benutzer dieses Home Assistant ohne Systemkonten; ein Klick öffnet die Benutzerverwaltung",
+  secSumNoMfa: "Admins ohne Zwei-Faktor", secSumNoMfaSub: "von {n} Admins",
+  secColAccount: "Konto", secColRole: "Rolle", secColMfa: "Zwei-Faktor", secColLogin: "Letzte Anmeldung", secColTokens: "Langzeit-Tokens",
+  secRoleOwner: "Besitzer", secRoleAdmin: "Admin", secRoleUser: "Benutzer", secRoleLocal: "nur lokal", secRoleOff: "abgeschaltet",
+  secMfaOn: "an", secMfaOff: "aus", secLoginNever: "nie", secLoginTokens: "nur Tokens",
+  secStateNoMfa: "Admin ohne Zwei-Faktor", secStateInactive: "lange nicht angemeldet", secNoAccounts: "Keine Konten gefunden.", secOpenUsers: "Benutzer in Home Assistant öffnen",
+  secAccFootnote: "Konten, die Home Assistant für sich selbst anlegt (Supervisor, Apps), fehlen. Die letzte Anmeldung ist die jüngste Nutzung einer Anmeldung im Browser oder in der App; gelb ist sie nach 90 Tagen ohne Anmeldung, wie in der Richtlinie „Benutzer lange nicht angemeldet“. Ein Konto, das nur Langzeit-Tokens hat, meldet sich nie an und zählt dort nicht. Zwei-Faktor heißt: mindestens ein Verfahren wie Einmalcode ist für das Konto eingerichtet. Housekeeper liest nur Namen, Rollen und Zeiten, nie einen Token oder eine Adresse.",
   secFootnote: "Housekeeper erkennt Zugangsdaten am Namen eines Feldes in der Konfiguration einer Integration (password, token, api_key, secret, webhook, pin) und prüft nur, ob es leer ist. Werte, Auszüge davon und ihre Länge werden weder gelesen noch angezeigt noch exportiert. Die Erkennung ist ein Hinweis: Zugangsdaten unter einem anderen Namen fehlen, und ein Feld mit so einem Namen kann etwas Harmloses enthalten. Ein Klick auf eine Zeile öffnet die Integration in Home Assistant, dort lassen sich die Zugangsdaten ändern. Es wird nichts geändert und nichts gespeichert.",
 });
 Object.assign(TEXT.en, {
@@ -13160,7 +13168,7 @@ Object.assign(TEXT.en, {
   accExternal: "external", accGps: "Location (trackers)", accCamera: "Camera entities", accDisabled: "disabled",
   accNoneSys: "No integration with system access found.", accNoneCloud: "No data flow to external services found.",
   accFootnote: "Housekeeper derives system access and data flow from the name of the integration (zha → Zigbee radio, mobile_app → location) and a cloud data flow also from the IoT class cloud_polling or cloud_push; tracker and camera entities count as location and camera. The classification is a hint, not a proof. High: access to the system, shell or radio, cameras or the location. Medium: data goes outside or another access. Ignored discoveries are left out. The rights of the apps come from the Supervisor; high is what equals root on the host (full hardware access, privileges, Docker API, host processes, Supervisor role admin or manager), medium is the host network, access to Home Assistant or logins, and AppArmor switched off. A click on an app opens it in Home Assistant. Nothing is changed and nothing is stored.",
-  secrets: "Credentials", secretsSubtitle: "Which integrations store credentials, of what kind, and whether a value is set. Housekeeper never shows the values. Only reads.",
+  secrets: "Credentials", secretsSubtitle: "Which integrations store credentials, of what kind, and whether a value is set, and the accounts with role and two-factor. Housekeeper never shows the values. Only reads.",
   secHint: "Stored credentials of the integrations, without values", secLoading: "Looking through the integrations …",
   secSumEntries: "Integrations with credentials", secSumEntriesSub: "{n} fields with a value", secSumEmpty: "Fields without a value", secSumEmptySub: "field exists but is empty",
   secListTitle: "Integrations", secListHint: "Kind of credentials and whether a value is set",
@@ -13168,6 +13176,13 @@ Object.assign(TEXT.en, {
   secStateGap: "with empty fields", secState: "{n} of {total}", secStateSet: "all set", secStatePart: "partly", secStateEmpty: "nothing set", secAllKinds: "All kinds", secAllStates: "All states",
   secKind_password: "Password", secKind_token: "Token", secKind_api_key: "API key", secKind_secret: "Secret", secKind_webhook: "Webhook", secKind_pin: "PIN",
   secNone: "No integration with stored credentials found.", secOpen: "Open {name} in Home Assistant",
+  secTabAccounts: "Accounts", secAccHint: "Users of this Home Assistant without system accounts; a click opens the user settings",
+  secSumNoMfa: "Admins without two-factor", secSumNoMfaSub: "of {n} admins",
+  secColAccount: "Account", secColRole: "Role", secColMfa: "Two-factor", secColLogin: "Last login", secColTokens: "Long-lived tokens",
+  secRoleOwner: "Owner", secRoleAdmin: "Admin", secRoleUser: "User", secRoleLocal: "local only", secRoleOff: "switched off",
+  secMfaOn: "on", secMfaOff: "off", secLoginNever: "never", secLoginTokens: "tokens only",
+  secStateNoMfa: "Admin without two-factor", secStateInactive: "no login for a long time", secNoAccounts: "No accounts found.", secOpenUsers: "Open the users in Home Assistant",
+  secAccFootnote: "Accounts Home Assistant makes for itself (Supervisor, apps) are left out. The last login is the latest use of a login in the browser or the app; it turns amber after 90 days without a login, as in the rule \"User not logged in for a long time\". An account that only holds long-lived tokens never logs in and does not count there. Two-factor means at least one method such as a one-time code is set up for the account. Housekeeper reads only names, roles and times, never a token or an address.",
   secFootnote: "Housekeeper recognises credentials by the name of a field in an integration's configuration (password, token, api_key, secret, webhook, pin) and only checks whether it is empty. Values, parts of them and their length are neither read nor shown nor exported. The detection is a hint: credentials under another name are missing, and a field with such a name may hold something harmless. A click on a row opens the integration in Home Assistant, where the credentials can be changed. Nothing is changed and nothing is stored.",
 });
 
@@ -13355,6 +13370,8 @@ class BatteryTableMixin {
 // All three only read. A page loads on its first visit; its refresh button reads again.
 // A page and the WebSocket command it asks.
 const SYS_COMMANDS = { storage: "system_usage", dataflow: "access", secrets: "sensitive_fields" };
+// The tiles of the credentials page that filter the accounts instead of the integrations.
+const SEC_ACCOUNT_SHOWS = ["nomfa"];
 const SYS_WARN_PERCENT = 75, SYS_RED_PERCENT = 90;
 
 class SystemMixin {
@@ -13819,18 +13836,27 @@ class SystemMixin {
 
   // ---------------------------------------------------------------- Credentials
 
-  // Which integrations hold credentials, of what kind, and whether a value is set. Never a value.
+  // Which integrations hold credentials, of what kind, and whether a value is set, and the accounts. Never a value.
+  // Tiles in even rows of three; each one opens its tab with its filter.
   secretsView() {
     return this.sysFrame("secrets", "secLoading", (r, head) => {
-      const entries = r.entries || [];
+      const entries = r.entries || [], users = r.accounts || [];
       const count = (e, set) => e.fields.filter(f => f.set === set).length;
       const kinds = e => [...new Set(e.fields.map(f => f.kind))];
       const empty = entries.reduce((n, e) => n + count(e, false), 0);
-      const gap = this.lv?.seclist?.f?.state === "gap", anyFilter = Object.values(this.lv?.seclist?.f || {}).some(Boolean);
-      const tiles = this.sumTiles([
-        { label: this.t("secSumEntries"), value: this.esc(this.formatNumber(entries.length)), sub: this.esc(this.t("secSumEntriesSub", { n: this.formatNumber(entries.reduce((n, e) => n + count(e, true), 0)) })), tone: "mute", attr: ["data-sec-show", ""], active: !anyFilter },
-        { label: this.t("secSumEmpty"), value: this.esc(this.formatNumber(empty)), sub: this.esc(this.t("secSumEmptySub")), tone: empty ? "warn" : "ok", attr: ["data-sec-show", "gap"], active: gap },
-      ]);
+      const tabs = [{ id: "entries", label: this.t("secListTitle"), count: entries.length }, ...(r.accounts ? [{ id: "accounts", label: this.t("secTabAccounts"), count: users.length }] : [])];
+      const open = this.viewTabOf("secrets", tabs, "entries");
+      const on = (tab, list, value) => open === tab && (value ? this.lv?.[list]?.f?.state === value : !Object.values(this.lv?.[list]?.f || {}).some(Boolean));
+      const admins = users.filter(u => u.active && u.admin), noMfa = admins.filter(u => !u.mfa);
+      const tile = (label, value, sub, tone, show, active) => ({ label: this.t(label), value: this.esc(this.formatNumber(value)), sub: this.esc(sub), tone, attr: ["data-sec-show", show], active });
+      const rowOne = [
+        tile("secSumEntries", entries.length, this.t("secSumEntriesSub", { n: this.formatNumber(entries.reduce((n, e) => n + count(e, true), 0)) }), "mute", "", on("entries", "seclist")),
+        tile("secSumEmpty", empty, this.t("secSumEmptySub"), empty ? "warn" : "ok", "gap", on("entries", "seclist", "gap")),
+      ];
+      const rowTwo = r.accounts ? [tile("secSumNoMfa", noMfa.length, this.t("secSumNoMfaSub", { n: this.formatNumber(admins.length) }), noMfa.length ? "warn" : "ok", "nomfa", on("accounts", "secusers", "nomfa"))] : [];
+      const tiles = `<div class="tilerows"><div class="sumgrouphead">${this.t("secListTitle")}</div>${this.sumTiles(rowOne, "even")}${this.sumTiles(rowTwo, "even")}</div>`;
+      const bar = tabs.length > 1 ? this.viewTabBar("secrets", tabs, open) : "";
+      if (open === "accounts") return `<div class="stack">${head}${tiles}<div class="panel">${bar}<div class="panelhead"><div><h2>${this.t("secTabAccounts")}</h2><p>${this.t("secAccHint")}</p></div></div>${this.secAccounts(users)}${this.howCounted("secAccFootnote")}</div></div>`;
       const state = e => (count(e, false) === 0 ? "set" : count(e, true) === 0 ? "empty" : "part");
       const stateCell = e => `<span class="pill ${{ set: "ok", part: "warn", empty: "warn" }[state(e)]}">${this.esc(this.t("secState", { n: count(e, true), total: e.fields.length }))}</span>`;
       const kindNames = e => kinds(e).map(k => this.t(`secKind_${k}`));
@@ -13855,7 +13881,32 @@ class SystemMixin {
         exportName: "credential-fields", header: [this.t("accColIntegration"), "Domain", this.t("secColKind"), this.t("secColFields"), this.t("secColSetCount"), this.t("secColEmptyCount")],
         rows: e => [e.title, e.domain, kindNames(e).join("; "), names(e), count(e, true), count(e, false)],
       });
-      return `<div class="stack">${head}${tiles}<div class="panel"><div class="panelhead"><div><h2>${this.t("secListTitle")}</h2><p>${this.t("secListHint")}</p></div></div>${table}${this.howCounted("secFootnote")}</div></div>`;
+      return `<div class="stack">${head}${tiles}<div class="panel">${bar}<div class="panelhead"><div><h2>${this.t("secListTitle")}</h2><p>${this.t("secListHint")}</p></div></div>${table}${this.howCounted("secFootnote")}</div></div>`;
+    });
+  }
+
+  // The people of this Home Assistant: role, two-factor login and last login. A click opens the user settings.
+  secAccounts(users) {
+    const roles = u => [u.owner ? this.t("secRoleOwner") : "", this.t(u.admin ? "secRoleAdmin" : "secRoleUser"), u.local_only ? this.t("secRoleLocal") : "", u.active ? "" : this.t("secRoleOff")].filter(Boolean);
+    const mfa = u => `<span class="pill ${u.mfa ? "ok" : u.admin && u.active ? "warn" : "mute"}">${this.t(u.mfa ? "secMfaOn" : "secMfaOff")}</span>`;
+    const login = u => (!u.logins && u.token_count ? this.t("secLoginTokens") : u.last_login ? this.formatDate(u.last_login) : this.t("secLoginNever"));
+    const state = u => (u.active && u.admin && !u.mfa ? "nomfa" : u.inactive ? "inactive" : "");
+    return this.sysList("secusers", users, {
+      sort: "name", dir: "asc", cls: "acc", tie: u => u.id,
+      sorts: [{ key: "name", label: "secColAccount", dir: "asc", get: u => u.name }, { key: "login", label: "secColLogin", dir: "desc", get: u => u.last_login || "" }],
+      filters: [{ name: "state", all: this.t("secAllStates"), options: [["nomfa", this.t("secStateNoMfa")], ["inactive", this.t("secStateInactive")]] }],
+      filterFns: { state: (u, v) => state(u) === v || (v === "inactive" && u.inactive) },
+      text: u => `${u.name} ${roles(u).join(" ")}`, empty: "secNoAccounts",
+      rowAttrs: () => `data-ha-path="/config/users" tabindex="0" role="link" aria-label="${this.esc(this.t("secOpenUsers"))}"`,
+      columns: [
+        { key: "name", label: "secColAccount", cell: u => `<strong>${this.esc(u.name)}</strong>` },
+        { key: "role", label: "secColRole", sortable: false, cell: u => this.accPills(roles(u)) },
+        { key: "mfa", label: "secColMfa", sortable: false, cell: mfa },
+        { key: "login", label: "secColLogin", dir: "desc", cell: u => (u.inactive ? `<span class="pill warn">${this.esc(login(u))}</span>` : this.esc(login(u))) },
+        { key: "tokens", label: "secColTokens", sortable: false, cell: u => this.esc(this.formatNumber(u.token_count)) },
+      ],
+      exportName: "accounts", header: [this.t("secColAccount"), this.t("secColRole"), this.t("secColMfa"), this.t("secColLogin"), this.t("secColTokens")],
+      rows: u => [u.name, roles(u).join("; "), this.t(u.mfa ? "secMfaOn" : "secMfaOff"), u.last_login || "", u.token_count],
     });
   }
 
@@ -13874,11 +13925,13 @@ class SystemMixin {
       this._tipHide = globalThis.setTimeout?.(() => this.hideTip(), 6000);
     }));
     root.querySelectorAll("[data-detail-tab-go]").forEach(el => el.onclick = () => { this.detailTab = el.dataset.detailTabGo; this.render(); });
-    // A key figure of the credential overview sets the state filter ("gap": some field empty) or clears all filters.
+    // A key figure of the credential overview opens its tab and sets its state filter, or clears all filters.
     root.querySelectorAll("[data-sec-show]").forEach(el => el.onclick = () => {
-      const st = this.lvState("seclist", "name", "asc");
-      st.f = el.dataset.secShow ? { ...st.f, state: el.dataset.secShow } : {};
-      this.persistLv("seclist"); this.pages = {}; this.render();
+      const value = el.dataset.secShow, list = SEC_ACCOUNT_SHOWS.includes(value) ? "secusers" : "seclist";
+      (this.viewTab ||= {}).secrets = list === "secusers" ? "accounts" : "entries";
+      const st = this.lvState(list, "name", "asc");
+      st.f = value ? { ...st.f, state: value } : {};
+      this.persistLv(list); this.pages = {}; this.render();
     });
     root.querySelector("[data-ha-menu]")?.addEventListener("click", () => this.toggleHaSidebar());
     // Rows that lead into Home Assistant (apps) open with Enter and Space like the other rows.

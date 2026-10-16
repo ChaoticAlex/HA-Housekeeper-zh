@@ -272,6 +272,9 @@ async def test_account_rules_name_age_and_logins_but_never_a_token_value() -> No
             id=uid,
             name=uid.title(),
             is_active=active,
+            is_owner=False,
+            is_admin=False,
+            local_only=False,
             system_generated=system,
             refresh_tokens={str(i): t for i, t in enumerate(tokens)},
         )
@@ -290,7 +293,14 @@ async def test_account_rules_name_age_and_logins_but_never_a_token_value() -> No
     async def async_get_users():
         return users
 
-    hass = SimpleNamespace(auth=SimpleNamespace(async_get_users=async_get_users))
+    async def async_get_enabled_mfa(_user):
+        return {}
+
+    hass = SimpleNamespace(
+        auth=SimpleNamespace(
+            async_get_users=async_get_users, async_get_enabled_mfa=async_get_enabled_mfa
+        )
+    )
     assert await auth_facts(hass, {"entity_area"}) is None
     auth = await auth_facts(hass, {"user_inactive"})
     assert "SECRET" not in str(auth) and "10.0.0.9" not in str(auth)

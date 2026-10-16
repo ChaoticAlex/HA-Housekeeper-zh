@@ -535,33 +535,14 @@ async def auth_facts(hass: HomeAssistant, enabled: Any) -> dict[str, Any] | None
     Only names, dates and the kind of a token are kept: never a token value, never an address.
     Accounts the system made for itself (Supervisor, add-ons) are left out.
     """
+    from .sensitive_fields import account_facts
+
     if not USER_RULES & set(enabled):
         return None
     try:
-        users = await hass.auth.async_get_users()
+        return {"users": await account_facts(hass)}
     except Exception:  # noqa: BLE001 - no readable accounts, no hints
         return None
-    facts = []
-    for user in users:
-        if user.system_generated:
-            continue
-        tokens = list(user.refresh_tokens.values())
-        logins = [t for t in tokens if t.token_type == "normal"]
-        facts.append(
-            {
-                "id": user.id,
-                "name": user.name or "?",
-                "active": user.is_active,
-                "tokens": [
-                    {"name": t.client_name or "?", "created": t.created_at}
-                    for t in tokens
-                    if t.token_type == "long_lived_access_token"
-                ],
-                "logins": bool(logins),
-                "last_login": max((t.last_used_at or t.created_at for t in logins), default=None),
-            }
-        )
-    return {"users": facts}
 
 
 def stored_rates(replies: Any) -> dict[str, int] | None:

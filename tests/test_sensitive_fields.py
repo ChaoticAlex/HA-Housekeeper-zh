@@ -48,7 +48,7 @@ async def test_overview_has_kind_and_set_but_no_value(hass: HomeAssistant) -> No
     ).add_to_hass(hass)
     MockConfigEntry(domain="plain", title="Plain", data={"host": "h"}).add_to_hass(hass)
 
-    result = sensitive_fields(hass)
+    result = await sensitive_fields(hass)
 
     assert [e["domain"] for e in result["entries"]] == ["demo_cloud"], (
         "entries without any are left out"
@@ -63,3 +63,23 @@ async def test_overview_has_kind_and_set_but_no_value(hass: HomeAssistant) -> No
         ("options", "pin"): ("pin", True),
     }
     assert VALUE not in json.dumps(result), "no value, no mask, nothing derived from one"
+
+
+async def test_accounts_name_role_and_two_factor_but_never_a_token(hass: HomeAssistant) -> None:
+    admin = await hass.auth.async_create_user("Admin", group_ids=["system-admin"])
+    await hass.auth.async_create_system_user("Supervisor")
+    token = await hass.auth.async_create_refresh_token(
+        admin,
+        client_name="Node-RED",
+        token_type="long_lived_access_token",
+        access_token_expiration=__import__("datetime").timedelta(days=3650),
+    )
+
+    result = await sensitive_fields(hass)
+
+    rows = {row["name"]: row for row in result["accounts"]}
+    assert "Supervisor" not in rows, "accounts the system made are left out"
+    row = rows["Admin"]
+    assert (row["admin"], row["mfa"], row["token_count"], row["logins"]) == (True, False, 1, False)
+    assert row["inactive"] is False, "only tokens: a service account, as the account rule says"
+    assert token.token not in json.dumps(result) and token.jwt_key not in json.dumps(result)
