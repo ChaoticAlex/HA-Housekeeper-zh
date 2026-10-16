@@ -3987,7 +3987,7 @@ class CleanupMixin {
       const run = this.runActions(plan);
       const blocked = this.modeBlocked(plan);
       const risky = run.some(a => REMOVAL_KINDS.includes(a.kind) || PURGE_KINDS.includes(a.kind));
-      control = `<div class="setrow planfoot planfootcol"><div>${run.length ? `<strong class="plansum">${this.confirmSummary(plan, run.length)}</strong>` : ""}${this.largeRemovalNote(plan)}<small>${this.t("cleanupDryRun")}</small>${this.purgeStatesSwitch(plan)}${blocked.length ? this.modeHint(blocked) : ""}${run.length ? "" : `<small class="dim7">${this.t("nothingToRun")}</small>`}</div><span class="planfootbtns"><button class="btn" data-plan-discard>${this.t("confirmCancel")}</button><button class="btn ${risky ? "danger" : "primary"}" data-plan-confirm data-risky="${risky}" data-count="${run.length}" ${blocked.length || !run.length ? `disabled title="${this.esc(blocked.length ? this.t("modeBlockTitle", { mode: this.modeName() }) : this.t("nothingToRun"))}"` : ""}>${this.t("confirmPlan")}</button></span></div>`;
+      control = `<div class="setrow planfoot planfootcol"><div>${run.length ? `<strong class="plansum">${this.confirmSummary(plan, run.length)}</strong>` : ""}${this.largeRemovalNote(plan)}<small>${this.t("cleanupDryRun")}</small>${this.purgeStatesSwitch(plan)}${blocked.length ? this.modeHint(blocked) : ""}${run.length ? "" : `<small class="dim7">${this.t("nothingToRun")}</small>`}</div><span class="planfootbtns"><button class="btn" data-plan-close>${this.t("planClose")}</button><button class="btn" data-plan-discard>${this.t("confirmCancel")}</button><button class="btn ${risky ? "danger" : "primary"}" data-plan-confirm data-risky="${risky}" data-count="${run.length}" ${blocked.length || !run.length ? `disabled title="${this.esc(blocked.length ? this.t("modeBlockTitle", { mode: this.modeName() }) : this.t("nothingToRun"))}"` : ""}>${this.t("confirmPlan")}</button></span></div>`;
     }
     else if (plan.status === "aborted") {
       const small = plan.actions.some(a => a.result?.reason === "backup_small_failed");
@@ -4000,6 +4000,7 @@ class CleanupMixin {
       : `<div class="setrow planfoot"><small class="u-m0">${this.esc(this.undoMessage || this.t("undoAllHint"))}</small><button class="btn accent" data-undo-all><ha-icon icon="mdi:undo-variant"></ha-icon>${this.t("undoAll")}</button></div>`;
     const checks = plan.verification ? `<details class="checkdet"><summary><b>${this.t("verification")}</b></summary><div class="checkrow">${plan.verification.checks.map(c => `<span class="pill ${c.ok ? "ok" : "red"}">${c.ok ? "✓" : "✗"} ${this.t(`check_${c.check}`)}${c.object_id ? ` (${this.esc(c.object_id)})` : ""}</span>`).join("")}</div></details>` : "";
     const stage = this.planStage(plan, Boolean(conf));
+    const footClose = open && !conf && executable && !this.planStale(plan); // the preview has its buttons in the foot
     // Nothing can run: no steps and no confirmation, one clear band and the reasons.
     if (open && !executable) {
       const blocked = plan.actions.filter(a => a.verdict === "blocked").length;
@@ -4015,7 +4016,7 @@ class CleanupMixin {
       : stage === 1 ? `${summary}${rows}${this.simulationBlock(plan)}${control}`
       : stage === 2 ? `${this.planOutcome(plan)}${control}`
       : `${this.planOutcome(plan)}${this.logSuggestCard(plan)}${summary}${rows}${this.simulationBlock(plan)}${checks}${this.followupLine(plan)}${control}`;
-    return `<section class="panel" data-plan-card><div class="panelhead"><div><h2>${this.t(plan.status === "dry_run" ? "planResult" : "planResultDone")} · <span class="pill ${plan.status === "verified" ? "ok" : plan.status === "dry_run" ? "mute" : "warn"}">${this.t(`plan_status_${plan.status}`)}</span>${this.planStale(plan) ? ` <span class="pill warn">${this.t("planStale")}</span>` : ""}</h2><p>${this.esc(this.formatDate(plan.created_at))}</p></div><button class="btn" data-plan-close>${this.t("planClose")}</button></div>
+    return `<section class="panel" data-plan-card><div class="panelhead"><div><h2>${this.t(plan.status === "dry_run" ? "planResult" : "planResultDone")} · <span class="pill ${plan.status === "verified" ? "ok" : plan.status === "dry_run" ? "mute" : "warn"}">${this.t(`plan_status_${plan.status}`)}</span>${this.planStale(plan) ? ` <span class="pill warn">${this.t("planStale")}</span>` : ""}</h2><p>${this.esc(this.formatDate(plan.created_at))}</p></div>${footClose ? "" : `<button class="btn" data-plan-close>${this.t("planClose")}</button>`}</div>
       ${this.planTrack(plan, stage, Boolean(conf))}${body}${this.reportBlock(plan)}</section>`;
   }
 
