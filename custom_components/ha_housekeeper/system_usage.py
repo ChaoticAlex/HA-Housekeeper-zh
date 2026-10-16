@@ -40,6 +40,7 @@ WALK_MIN_GAP = 30  # seconds
 WALK_BUDGET = 20  # seconds
 WALK_TRUNCATED_AGE = 60  # seconds
 _WALK_KEY = f"{DOMAIN}_folder_walk"
+_USAGE_KEY = f"{DOMAIN}_disk_usage"
 GIB = 1024**3
 
 # Known places under the configuration directory: (id, relative path, kind).
@@ -507,18 +508,32 @@ async def _apps(hass: HomeAssistant, sizes: dict[str, dict[str, int]]) -> list[d
     return sorted(result, key=lambda app: app["name"].lower())
 
 
-async def supervisor_part(hass: HomeAssistant) -> dict[str, Any]:
+async def _disk_usage(hass: HomeAssistant, fresh: bool) -> dict[str, Any] | None:
+    """Disk use by category; the Supervisor walks the whole data disk for it.
+
+    Reused like the folder walk: for WALK_MAX_AGE seconds, and ``fresh`` asks again only after
+    WALK_MIN_GAP. An answer that failed is not kept, so the next visit asks again.
+    """
+    kept = hass.data.setdefault(_USAGE_KEY, _Walk())
+    async with kept.lock:
+        age = time.monotonic() - kept.at
+        if kept.result is not None and (age < WALK_MIN_GAP or (not fresh and age < WALK_MAX_AGE)):
+            return kept.result
+        usage = await supervisor_get(
+            hass, "/host/disks/default/usage", params={"max_depth": 2}, timeout=DISK_USAGE_TIMEOUT
+        )
+        if usage is not None and not usage.get("children"):
+            usage = await supervisor_get(hass, "/host/disks/default/usage") or usage
+        if usage is not None:
+            kept.result, kept.at = usage, time.monotonic()
+        return usage
+
+
+async def supervisor_part(hass: HomeAssistant, fresh: bool = False) -> dict[str, Any]:
     """Host disk, disk use by category and apps; empty without a Supervisor."""
     if not supervisor_token():
         return {"available": False}
-    info, usage = await asyncio.gather(
-        supervisor_get(hass, "/host/info"),
-        supervisor_get(
-            hass, "/host/disks/default/usage", params={"max_depth": 2}, timeout=DISK_USAGE_TIMEOUT
-        ),
-    )
-    if usage is not None and not usage.get("children"):
-        usage = await supervisor_get(hass, "/host/disks/default/usage") or usage
+    info, usage = await asyncio.gather(supervisor_get(hass, "/host/info"), _disk_usage(hass, fresh))
     categories, sizes = disk_categories(usage)
     return {
         "available": True,
@@ -612,7 +627,7 @@ def merge_cards(
 
 
 class _Walk:
-    """The last folder walk of this instance and the lock that lets a second caller reuse it."""
+    """A kept slow result (the folder walk, the disk usage) and the lock that lets a second caller reuse it."""
 
     def __init__(self) -> None:
         self.lock = asyncio.Lock()
@@ -676,8 +691,8 @@ async def system_usage(
     """Storage and system: everything the "Storage & system" page shows.
 
     ``used_card_types`` are the ``custom:`` card types of all dashboards (``None`` when unknown).
-    The live values (CPU, memory, disk) are read every time; the folder sizes come from a walk
-    that is reused for a few minutes (see ``_folder_walk``).
+    The live values (CPU, memory, disk, apps) are read every time; the folder sizes and the disk
+    use by category are reused for a few minutes (see ``_folder_walk`` and ``_disk_usage``).
     """
     config_dir = hass.config.config_dir
 
@@ -694,7 +709,7 @@ async def system_usage(
 
     local, supervisor, (resources, blueprints, walked) = await asyncio.gather(
         hass.async_add_executor_job(collect_local, config_dir, False),
-        supervisor_part(hass),
+        supervisor_part(hass, fresh),
         walked_part(),
     )
     sizes, bp_sizes = walked["sizes"], walked["bp_sizes"]

@@ -9,7 +9,7 @@ class SystemMixin {
     return ((this._sys ||= {})[name] ||= { data: null, loading: false, error: "", requested: false, at: null });
   }
 
-  // `fresh` is the refresh button: the server then walks the folders again, unless it did a moment ago.
+  // `fresh` is the refresh button: the server then reads the folders and the disk use again, unless it did a moment ago.
   async sysLoad(name, fresh = false) {
     const st = this.sysState(name);
     st.loading = true; st.error = ""; st.requested = true; this.render();

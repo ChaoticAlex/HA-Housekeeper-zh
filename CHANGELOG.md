@@ -5,7 +5,7 @@
 ### Geändert
 
 - **Weniger CPU-Last:** Zeitsteuerung und Code der Hintergrundarbeit sind optimiert. Die Auswertungen aus der Recorder-Datenbank laufen seltener und verteilt, die Abfragen sind sparsamer (abgeschlossene Tage werden nur noch einmal gerechnet, unnötige Suchen entfallen), und Scans nach Ausfällen rücken bei langsamen Systemen weiter auseinander.
-- **Speicher & System:** Die Seite lädt schneller: der Durchlauf über die Ordner läuft neben der Abfrage beim Supervisor statt danach.
+- **Speicher & System:** Die Seite lädt schneller: der Durchlauf über die Ordner läuft neben der Abfrage beim Supervisor statt danach, und die Plattenbelegung nach Kategorien wird wie die Ordnergrößen einige Minuten wiederverwendet (Aktualisieren liest neu).
 - **Übersicht, Inventarstatus:** Objekte mit einer Markierung (z. B. „Absichtlich offline“), auch die Entitäten eines markierten Geräts, stehen in einer eigenen Zeile „Markiert (erwartet)“ und zählen nicht mehr unter „Problematisch“ (Issue 25).
 - **Oberfläche:** Der Start-Hinweis ist eine kompakte Karte: vier Schritte als Leiste, „38 von 41 Integrationen geladen“ mit Balken und Wartezeit daneben, die Namen der noch ladenden Integrationen und beim Scan die aktuelle Phase. Er aktualisiert sich selbst (alle 3 Sekunden) und verschwindet, sobald die endgültigen Befunde da sind.
 
@@ -18,7 +18,7 @@
 #### Changed
 
 - **Less CPU load:** The timing and the code of the background work are optimised. The analyses of the recorder database run less often and spread out, the queries do less work (finished days are calculated only once, needless searches are skipped), and on slow systems the scans after outages are spaced further apart.
-- **Storage & system:** The page loads faster: the walk over the folders runs beside the Supervisor query instead of after it.
+- **Storage & system:** The page loads faster: the walk over the folders runs beside the Supervisor query instead of after it, and the disk use by category is reused for a few minutes like the folder sizes (refresh reads it again).
 - **Overview, inventory status:** Objects with a mark (e.g. “Offline on purpose”), including the entities of a marked device, sit in their own row “Marked (expected)” and no longer count as “Problematic” (issue 25).
 - **Interface:** The start notice is a compact card: four steps in one track, “38 of 41 integrations loaded” with a bar and the waiting time beside it, the names of the integrations still loading and, during the scan, the current phase. It updates by itself (every 3 seconds) and goes away as soon as the final findings are in.
 
