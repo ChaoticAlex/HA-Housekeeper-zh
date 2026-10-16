@@ -45,6 +45,7 @@ class ExposureFinding(TypedDict):
     count: int
     items: NotRequired[list[ExposureItem]]
     assistant: NotRequired[str]
+    assistants: NotRequired[list[str]]
     alias: NotRequired[str]
     domain: NotRequired[str]
 

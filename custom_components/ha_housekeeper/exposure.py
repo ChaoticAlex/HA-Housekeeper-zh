@@ -2,7 +2,8 @@
 
 Only reads, nothing is stored and nothing is changed. Only metadata leaves this module: entity ids,
 names, the assistant and counts. Config entries are read through a whitelist (the entity filter of
-a bridge and nothing else), of Nabu Casa only whether Alexa and Google are switched on, webhooks are
+a bridge and nothing else), of Nabu Casa only whether Alexa and Google are switched on, per assistant only whether new entities
+are exposed by themselves and per entity only whether Google may open it without a PIN, webhooks are
 only counted per integration. A webhook id or url never
 appears in a result, not even shortened: whoever knows it can call the webhook.
 """
@@ -42,6 +43,9 @@ SENSITIVE_DOMAINS = (
     "valve",
 )
 SENSITIVE_COVERS = ("garage", "gate", "door")
+# What Google Assistant only opens or disarms after a PIN, unless the entity is set to skip it.
+GOOGLE = "cloud.google_assistant"
+GOOGLE_SECURE_DOMAINS = ("lock", "alarm_control_panel", "cover")
 DIAGNOSTIC_CATEGORIES = ("diagnostic", "config")
 STALE_STATUSES = ("disabled", "orphaned")
 ITEM_LIMIT = 200
@@ -107,6 +111,49 @@ def _assistant_exposure(hass: HomeAssistant, entity_ids: list[str]) -> dict[str,
     return result
 
 
+def _expose_new(hass: HomeAssistant, assistants: dict[str, dict[str, Any]]) -> dict[str, bool]:
+    """Per working cloud assistant: whether new entities are exposed by themselves. Unreadable is
+    left out. Assist is not asked: Home Assistant exposes new entities to it by default."""
+    result: dict[str, bool] = {}
+    try:
+        from homeassistant.components.homeassistant.const import DATA_EXPOSED_ENTITIES
+
+        store = hass.data[DATA_EXPOSED_ENTITIES]
+    except Exception:  # noqa: BLE001 - another Home Assistant version or not set up
+        return result
+    for name in CLOUD_ASSISTANTS:
+        if assistants.get(name, {}).get("status") != "ok":
+            continue
+        try:
+            result[name] = store.async_get_expose_new_entities(name) is True
+        except Exception:  # noqa: BLE001
+            continue
+    return result
+
+
+def _google_without_pin(hass: HomeAssistant, assistants: dict[str, dict[str, Any]]) -> list[str]:
+    """Entities Google may open or disarm without asking for the PIN. Only the switch is read."""
+    if assistants.get(GOOGLE, {}).get("status") != "ok":
+        return []
+    try:
+        from homeassistant.components.homeassistant.exposed_entities import (
+            async_get_entity_settings,
+        )
+    except Exception:  # noqa: BLE001
+        return []
+    found = []
+    for eid in assistants[GOOGLE]["exposed"]:
+        if eid.split(".", 1)[0] not in GOOGLE_SECURE_DOMAINS:
+            continue
+        try:
+            options = async_get_entity_settings(hass, eid).get(GOOGLE) or {}
+        except Exception:  # noqa: BLE001 - never report a failed read as "without PIN"
+            continue
+        if options.get("disable_2fa") is True:
+            found.append(eid)
+    return found
+
+
 def _bridges(hass: HomeAssistant) -> list[dict[str, Any]]:
     bridges = []
     for entry in hass.config_entries.async_entries():
@@ -141,8 +188,11 @@ def collect(hass: HomeAssistant, entity_ids: list[str]) -> dict[str, Any]:
     live = {entry.domain for entry in hass.config_entries.async_entries()} | set(
         hass.config.components
     )
+    assistants = _assistant_exposure(hass, entity_ids)
     return {
-        "assistants": _assistant_exposure(hass, entity_ids),
+        "assistants": assistants,
+        "expose_new": _expose_new(hass, assistants),
+        "google_without_pin": _google_without_pin(hass, assistants),
         "bridges": _bridges(hass),
         "webhooks": _webhook_counts(hass),
         "live_domains": sorted(live),
@@ -164,6 +214,13 @@ def _sensitive(info: dict[str, Any]) -> bool:
     if domain in SENSITIVE_DOMAINS:
         return True
     return domain == "cover" and info.get("device_class") in SENSITIVE_COVERS
+
+
+def _google_secure(info: dict[str, Any]) -> bool:
+    """Locks, alarm panels and doors, garage doors and gates: Google asks for a PIN before opening."""
+    if info["domain"] in ("lock", "alarm_control_panel"):
+        return True
+    return info["domain"] == "cover" and info.get("device_class") in SENSITIVE_COVERS
 
 
 def evaluate(
@@ -212,6 +269,34 @@ def evaluate(
         found, total = items(rule)
         if total:
             findings.append({"kind": kind, "level": level, "count": total, "items": found})
+
+    no_pin = sorted(
+        eid
+        for eid in raw.get("google_without_pin", [])
+        if eid in entities and eid not in ignored and _google_secure(entities[eid])
+    )
+    if no_pin:
+        findings.append(
+            {
+                "kind": "google_without_pin",
+                "level": "warn",
+                "count": len(no_pin),
+                "items": [
+                    {"entity_id": eid, "name": names[eid], "assistants": sorted(by_entity[eid])}
+                    for eid in no_pin[:ITEM_LIMIT]
+                ],
+            }
+        )
+    auto = [
+        name
+        for name in CLOUD_ASSISTANTS
+        if raw.get("expose_new", {}).get(name)
+        and raw["assistants"].get(name, {}).get("status") == "ok"
+    ]
+    if auto:
+        findings.append(
+            {"kind": "auto_expose", "level": "hint", "count": len(auto), "assistants": auto}
+        )
 
     for name in ASSISTANTS:
         if raw["assistants"].get(name, {}).get("status") != "ok":

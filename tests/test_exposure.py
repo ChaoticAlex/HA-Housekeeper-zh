@@ -95,6 +95,32 @@ def test_cameras_sirens_valves_and_doors_are_sensitive_too() -> None:
     assert found["count"] == 4
 
 
+def test_google_without_pin_only_for_secure_devices() -> None:
+    entities = {
+        "lock.door": entity(domain="lock"),
+        "cover.blind": entity(domain="cover", device_class="blind"),
+    }
+    data = raw(exposed=[], google_without_pin=["lock.door", "cover.blind"])
+    data["assistants"]["cloud.google_assistant"] = {"status": "ok", "exposed": list(entities)}
+    found = next(
+        f for f in evaluate(data, entities, set())["findings"] if f["kind"] == "google_without_pin"
+    )
+    assert found["level"] == "warn" and [i["entity_id"] for i in found["items"]] == ["lock.door"]
+
+
+def test_auto_expose_names_the_working_assistants() -> None:
+    data = raw(
+        expose_new={"conversation": True, "cloud.alexa": True, "cloud.google_assistant": True}
+    )
+    data["assistants"]["cloud.alexa"]["status"] = "ok"
+    found = next(
+        f
+        for f in evaluate(data, {"light.a": entity("A")}, set())["findings"]
+        if f["kind"] == "auto_expose"
+    )
+    assert found["assistants"] == ["cloud.alexa"] and found["level"] == "hint"
+
+
 def test_stale_exposed_disabled_or_orphaned() -> None:
     entities = {
         "light.a": entity(status="disabled"),
@@ -252,6 +278,23 @@ async def test_cloud_assistant_switched_off_in_nabu_casa(hass: HomeAssistant) ->
         data = collect(hass, ["light.a"])
     assert data["assistants"]["cloud.google_assistant"] == {"status": "off", "exposed": []}
     assert data["assistants"]["cloud.alexa"] == {"status": "ok", "exposed": ["light.a"]}
+
+
+async def test_collect_reads_expose_new_and_the_google_pin_switch(hass: HomeAssistant) -> None:
+    from homeassistant.components.homeassistant.exposed_entities import (
+        async_expose_entity,
+        async_set_assistant_option,
+    )
+    from homeassistant.setup import async_setup_component
+
+    assert await async_setup_component(hass, "homeassistant", {})
+    hass.config.components.add("cloud")
+    hass.states.async_set("lock.door", "locked")
+    async_expose_entity(hass, "cloud.google_assistant", "lock.door", True)
+    async_set_assistant_option(hass, "cloud.google_assistant", "lock.door", "disable_2fa", True)
+    data = collect(hass, ["lock.door"])
+    assert data["google_without_pin"] == ["lock.door"]
+    assert data["expose_new"] == {"cloud.alexa": False, "cloud.google_assistant": False}
 
 
 async def test_collect_runs_against_real_exposed_entities(hass: HomeAssistant) -> None:

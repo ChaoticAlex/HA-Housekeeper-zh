@@ -18,8 +18,13 @@ Object.assign(TEXT.de, {
   expoAdvice_stale_exposed: "Entität aufräumen oder die Freigabe zurücknehmen.",
   expoAdvice_alias_duplicate: "Einen der Namen ändern, damit die Sprachbefehle eindeutig sind.",
   expoAdvice_webhook_orphan: "Die Integration neu einrichten oder die Reste entfernen, falls sie nicht mehr gebraucht werden.",
+  expoKind_google_without_pin: "Google öffnet ohne PIN", expoKind_auto_expose: "Neue Entitäten werden automatisch freigegeben",
+  expoText_google_without_pin: "{n} Schlösser, Alarmanlagen, Garagentore, Tore oder Türen sind bei Google Assistant so eingestellt, dass er sie ohne PIN öffnet oder entschärft.",
+  expoText_auto_expose: "{list} bekommt jede neue Entität von selbst freigegeben. Neue Geräte landen so ohne Zutun bei einem Cloud-Assistenten.",
+  expoAdvice_google_without_pin: "Unter Einstellungen → Sprachassistenten → Entität → Google Assistant die Bestätigung per PIN wieder einschalten.",
+  expoAdvice_auto_expose: "Unter Einstellungen → Sprachassistenten → Alexa bzw. Google Assistant „Neue Entitäten automatisch freigeben“ ausschalten, wenn neue Geräte erst geprüft werden sollen.",
   expoMore: "und {n} weitere", expoToCheck: "Zu prüfen", expoToNote: "Zur Kenntnis",
-  expoFootnote: "Housekeeper liest je Assistent, welche Entitäten Home Assistant freigibt, bei HomeKit nur den gespeicherten Entitäts-Filter der Bridge. Passwörter, Tokens, Ports und Webhook-IDs werden nie gelesen oder angezeigt. Ist Alexa oder Google Assistant in den Nabu-Casa-Einstellungen ausgeschaltet, erreicht er nichts und wird nicht bewertet. Wenn eine Quelle nicht antwortet, steht „nicht prüfbar“, nie „nicht freigegeben“. Sprachnamen gelten als gleich, wenn sie sich nur in Groß- und Kleinschreibung, Leerzeichen oder Umlauten unterscheiden.",
+  expoFootnote: "Housekeeper liest je Assistent, welche Entitäten Home Assistant freigibt, bei HomeKit nur den gespeicherten Entitäts-Filter der Bridge. Passwörter, Tokens, Ports und Webhook-IDs werden nie gelesen oder angezeigt. Ist Alexa oder Google Assistant in den Nabu-Casa-Einstellungen ausgeschaltet, erreicht er nichts und wird nicht bewertet. Bei Alexa und Google liest Housekeeper außerdem, ob neue Entitäten automatisch freigegeben werden, und je Entität nur, ob Google sie ohne PIN öffnen darf; die PIN selbst nie. Wenn eine Quelle nicht antwortet, steht „nicht prüfbar“, nie „nicht freigegeben“. Sprachnamen gelten als gleich, wenn sie sich nur in Groß- und Kleinschreibung, Leerzeichen oder Umlauten unterscheiden.",
 });
 Object.assign(TEXT.en, {
   expoSumEntities: "entities exposed", expoColName: "Name", expoColDomain: "Type", expoColArea: "Area", expoColAlso: "Also exposed to", expoColAssistants: "Exposed to", expoAllDomains: "All types", expoAllAlso: "All services", expoSumFindings: "Findings", expoTabFindings: "Findings", expoSourceHint: "{n} entities are exposed to {name}.", expoAlso: "also: {list}", expoCapped: "The first {n} are shown.", expoNoneFor: "Nothing is exposed to this source.", expoInactiveText: "Not set up: nothing is exposed.",
@@ -40,6 +45,11 @@ Object.assign(TEXT.en, {
   expoAdvice_stale_exposed: "Clean up the entity or take the exposure back.",
   expoAdvice_alias_duplicate: "Rename one of them so voice commands are unambiguous.",
   expoAdvice_webhook_orphan: "Set the integration up again or remove the leftovers if they are no longer needed.",
+  expoKind_google_without_pin: "Google opens without PIN", expoKind_auto_expose: "New entities are exposed automatically",
+  expoText_google_without_pin: "{n} locks, alarm panels, garage doors, gates or doors are set so that Google Assistant opens or disarms them without a PIN.",
+  expoText_auto_expose: "{list} gets every new entity exposed by itself. New devices thus reach a cloud assistant without anyone acting.",
+  expoAdvice_google_without_pin: "Turn the PIN confirmation back on under Settings → Voice assistants → entity → Google Assistant.",
+  expoAdvice_auto_expose: "Turn off \"Expose new entities\" under Settings → Voice assistants → Alexa or Google Assistant if new devices should be checked first.",
   expoMore: "and {n} more", expoToCheck: "To check", expoToNote: "For your information",
-  expoFootnote: "Housekeeper reads, per assistant, which entities Home Assistant exposes; for HomeKit only the stored entity filter of the bridge. Passwords, tokens, ports and webhook ids are never read or shown. If Alexa or Google Assistant is switched off in the Nabu Casa settings, it reaches nothing and is not judged. If a source does not answer, it says \"cannot be checked\", never \"not exposed\". Voice names count as equal when they differ only in case, spaces or umlauts.",
+  expoFootnote: "Housekeeper reads, per assistant, which entities Home Assistant exposes; for HomeKit only the stored entity filter of the bridge. Passwords, tokens, ports and webhook ids are never read or shown. If Alexa or Google Assistant is switched off in the Nabu Casa settings, it reaches nothing and is not judged. For Alexa and Google, Housekeeper also reads whether new entities are exposed automatically and, per entity, only whether Google may open it without a PIN; never the PIN itself. If a source does not answer, it says \"cannot be checked\", never \"not exposed\". Voice names count as equal when they differ only in case, spaces or umlauts.",
 });

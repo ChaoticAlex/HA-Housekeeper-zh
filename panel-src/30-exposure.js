@@ -37,7 +37,7 @@ class ExposureMixin {
   }
 
   expoFindingText(f) {
-    return this.t(`expoText_${f.kind}`, { n: this.formatNumber(f.count), alias: f.alias || "", assistant: f.assistant ? this.expoAssistantName(f.assistant) : "", domain: f.domain || "" });
+    return this.t(`expoText_${f.kind}`, { n: this.formatNumber(f.count), alias: f.alias || "", assistant: f.assistant ? this.expoAssistantName(f.assistant) : "", domain: f.domain || "", list: this.expoAssistantList(f.assistants) });
   }
 
   // One finding as a fold: the head always shows, the entities (a table of their own, with search, sorting and pages) and the advice only when open.
