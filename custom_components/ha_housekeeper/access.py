@@ -145,18 +145,23 @@ def classify(
     iot_class: str | None,
     entity_domains: set[str],
     trackers: set[str] | None = None,
+    custom: bool = False,
 ) -> dict[str, Any]:
     """System access, data flow, external reach and a risk level for one integration.
 
     ``trackers`` are the sources of its device trackers ("gps", "router", ... or "unknown" for one
     without a readable state). Without them every tracker counts as a location, as does one whose
-    source is unknown: a doubt never lowers the level.
+    source is unknown: a doubt never lowers the level. ``custom`` is an integration that is not
+    part of Home Assistant (HACS or custom_components): its code runs with all the rights of Home
+    Assistant itself, so it is at least "medium".
     """
     access: list[dict[str, Any]] = []
     for token, (kind, detail) in SYSTEM_ACCESS.items():
         item = {"kind": kind, "detail": detail}
         if matches(domain, token) and item not in access:
             access.append(item)
+    if custom:
+        access.append({"kind": "custom_code", "detail": None})
     flows: set[str] = set()
     for token, tags in DATAFLOW.items():
         if matches(domain, token):
@@ -194,16 +199,23 @@ def classify(
     }
 
 
-async def _iot_classes(hass: HomeAssistant, domains: set[str]) -> dict[str, str | None]:
+async def _integration_facts(
+    hass: HomeAssistant, domains: set[str]
+) -> dict[str, tuple[str | None, bool]]:
+    """Per domain: its IoT class and whether it is custom code. One that fails to load is neither."""
     from homeassistant.loader import async_get_integrations
 
     found = await async_get_integrations(hass, domains)
-    return {
-        domain: getattr(integration, "iot_class", None)
-        if not isinstance(integration, Exception)
-        else None
-        for domain, integration in found.items()
-    }
+    facts: dict[str, tuple[str | None, bool]] = {}
+    for domain, integration in found.items():
+        if isinstance(integration, Exception):
+            facts[domain] = (None, False)
+        else:
+            facts[domain] = (
+                getattr(integration, "iot_class", None),
+                getattr(integration, "is_built_in", True) is False,
+            )
+    return facts
 
 
 def _entity_domains(hass: HomeAssistant) -> tuple[dict[str, set[str]], dict[str, set[str]]]:
@@ -347,22 +359,23 @@ async def access_report(
     """System access and data flow of every config entry (ignored discoveries left out) and the
     rights of the installed apps (only with a Supervisor)."""
     entries = [e for e in hass.config_entries.async_entries() if e.source != "ignore"]
-    classes = await _iot_classes(hass, {e.domain for e in entries})
+    facts = await _integration_facts(hass, {e.domain for e in entries})
     entity_domains, trackers = _entity_domains(hass)
     items = []
     for entry in entries:
         result = classify(
             entry.domain,
-            classes.get(entry.domain),
+            facts.get(entry.domain, (None, False))[0],
             entity_domains.get(entry.entry_id, set()),
             trackers.get(entry.entry_id, set()),
+            custom=facts.get(entry.domain, (None, False))[1],
         )
         items.append(
             {
                 "entry_id": entry.entry_id,
                 "domain": entry.domain,
                 "title": entry.title,
-                "iot_class": classes.get(entry.domain),
+                "iot_class": facts.get(entry.domain, (None, False))[0],
                 "disabled": entry.disabled_by is not None,
                 **result,
             }

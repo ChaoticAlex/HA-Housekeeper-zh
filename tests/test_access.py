@@ -71,6 +71,12 @@ def test_more_radios_cameras_and_local_models_are_known() -> None:
     assert classify("ollama", "local_polling", set())["flows"] == ["local"]
 
 
+def test_custom_code_is_at_least_medium() -> None:
+    plain = classify("my_thing", "local_push", {"light"}, custom=True)
+    assert plain["risk"] == "medium" and plain["risk_reasons"] == ["custom_code"]
+    assert classify("my_cam", "local_push", {"camera"}, custom=True)["risk"] == "high"
+
+
 async def test_access_report_on_config_entries(hass: HomeAssistant) -> None:
     MockConfigEntry(domain="alexa_media", title="Alexa", data={"password": PASSWORD}).add_to_hass(
         hass
