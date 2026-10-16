@@ -476,6 +476,21 @@ def _fallback_automation_item(state: Any) -> dict[str, Any]:
     }
 
 
+def _runtime_references(entity: Any, attr: str) -> Any:
+    """What Home Assistant extracts from an automation or script, or nothing where it fails on it."""
+    try:
+        return getattr(entity, attr, set())
+    except Exception as err:
+        # HA's extraction raises on a config it did not expect (a dict in an entity_id list).
+        _LOGGER.warning(
+            "Home Assistant could not read %s of %s (%s); only its configuration is used",
+            attr,
+            getattr(entity, "entity_id", "?"),
+            type(err).__name__,
+        )
+        return set()
+
+
 def _age(item: dict[str, Any], now: datetime) -> timedelta | None:
     since = item.get("status_since")
     return max(now - datetime.fromisoformat(since), timedelta(0)) if since else None
@@ -1791,11 +1806,14 @@ class InventoryScanner:
             # HA's runtime extraction also detects references inside templates.
             explicit_markers = {(ref["kind"], ref["object_id"]) for ref in references}
             runtime_sets = {
-                "entity": getattr(entity, "referenced_entities", set()),
-                "device": getattr(entity, "referenced_devices", set()),
-                "area": getattr(entity, "referenced_areas", set()),
-                "floor": getattr(entity, "referenced_floors", set()),
-                "label": getattr(entity, "referenced_labels", set()),
+                kind: _runtime_references(entity, attr)
+                for kind, attr in (
+                    ("entity", "referenced_entities"),
+                    ("device", "referenced_devices"),
+                    ("area", "referenced_areas"),
+                    ("floor", "referenced_floors"),
+                    ("label", "referenced_labels"),
+                )
             }
             for kind, object_ids in runtime_sets.items():
                 for object_id in object_ids:

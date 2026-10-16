@@ -203,6 +203,36 @@ def automation_scanner_state(hass: HomeAssistant, scanner, automation_id: str = 
     )
 
 
+async def test_a_script_home_assistant_cannot_read_does_not_stop_the_scan(
+    hass: HomeAssistant,
+) -> None:
+    scanner = await make_scanner(hass)
+    hass.states.async_set("script.broken", "off", {"friendly_name": "Broken"})
+
+    class Broken:  # HA raises on an entity_id list that holds a dict
+        entity_id = "script.broken"
+        unique_id = "broken"
+        name = "Broken"
+        raw_config = {"sequence": [{"service": "light.turn_on", "target": {"entity_id": OLD}}]}
+        referenced_devices = referenced_areas = referenced_floors = referenced_labels = set()
+
+        @property
+        def referenced_entities(self):
+            raise TypeError("cannot use 'dict' as a set element (unhashable type: 'dict')")
+
+    component = SimpleNamespace(entities=[Broken()])
+    with patch.object(
+        type(scanner),
+        "_runtime_component",
+        lambda self, domain: component if domain == "script" else None,
+    ):
+        snapshot = await scanner.async_scan()
+
+    script = next(o for o in snapshot["objects"] if o["object_id"] == "script.broken")
+    assert {"entity:" + OLD} <= {e["target"] for e in snapshot["edges"] if e["source"] == "script:script.broken"}
+    assert script["object_type"] == "script"
+
+
 def make_entities(hass: HomeAssistant, *, new_state: str = "21") -> None:
     registry = er.async_get(hass)
     old = registry.async_get_or_create("sensor", "test", "old", suggested_object_id="old_temp")
