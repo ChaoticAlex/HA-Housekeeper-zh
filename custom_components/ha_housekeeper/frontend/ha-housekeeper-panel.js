@@ -1646,6 +1646,12 @@ class StylesMixin {
       .wcap{display:flex;justify-content:space-between;gap:8px}.wcap b,.wline b{color:var(--hk-text);font-weight:600}
       .wbar{display:block;height:8px;border-radius:99px;background:var(--hk-soft);border:1px solid var(--hk-border);overflow:hidden;margin-top:4px}.wbar i{display:block;height:100%;background:var(--hk-amber)}.wbar i.g{background:var(--hk-green)}
       .wline{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:calc(13px*var(--hk-fs,1));color:var(--hk-muted)}.wline .pill{font-weight:500}
+      .wph{display:grid;gap:10px}.wmx .wtop ha-icon{animation:hkflip 2s ease-in-out infinite;animation-delay:var(--wt,0s)}
+      .wtr li.on i{animation:hkpulse 2s ease-out infinite;animation-delay:var(--wt,0s)}.wtr li.on::before{background:linear-gradient(90deg,var(--hk-green),var(--hk-amber))}
+      .wbar i:not(.g){background-image:linear-gradient(45deg,rgba(255,255,255,.3) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.3) 50%,rgba(255,255,255,.3) 75%,transparent 75%);background-size:16px 16px;animation:hkstripes 1s linear infinite;animation-delay:var(--wt,0s)}
+      .wbar.ind i{width:35%;animation:hkslide 2s ease-in-out infinite;animation-delay:var(--wt,0s);background-image:none}
+      @keyframes hkflip{0%,40%{transform:rotate(0)}60%,100%{transform:rotate(180deg)}}@keyframes hkpulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--hk-amber) 55%,transparent)}70%,100%{box-shadow:0 0 0 7px transparent}}
+      @keyframes hkstripes{from{background-position:0 0}to{background-position:16px 0}}@keyframes hkslide{0%{margin-left:-35%}100%{margin-left:100%}}
       .optswitch{display:flex;gap:12px;align-items:flex-start;margin:12px 0 0;padding:12px 14px;border:2px solid var(--hk-blue);border-radius:12px;background:var(--hk-soft);cursor:pointer}.optswitch .policyswitch{margin-top:2px}.optswitch span{display:grid;gap:2px}.optswitch small{color:var(--hk-muted)}
       ${this.themeCss()}
     </style>`;
@@ -2203,13 +2209,13 @@ class OverviewMixin {
     const bar = (frac, tone = "") => `<span class="wbar"><i class="${tone}" style="width:${Math.round(Math.min(1, Math.max(0, frac)) * 100)}%"></i></span>`;
     const pair = (label, value, frac, tone) => `<div><div class="wcap"><span>${label}</span><span>${value}</span></div>${bar(frac, tone)}</div>`;
     const head = `<div class="wtop"><ha-icon icon="mdi:timer-sand"></ha-icon><strong>${this.t("warmupTitle")}</strong></div>`;
-    if (!w.known && !w.booting) return `${head}<div class="wline">${this.t("warmupAsking")}</div>`;
+    if (!w.known && !w.booting) return `<div class="wph" style="--wt:-${Date.now() % 2000}ms">${head}<div class="wline">${this.t("warmupAsking")}</div></div>`;
     const scanning = !w.booting && !left;
     const at = w.booting ? 0 : scanning ? 3 : w.settling ? 2 : 1;
     const steps = ["warmupS1", "warmupS2", "warmupS3", "warmupS4"].map((k, n) => `<li class="${n < at ? "done" : n === at ? "on" : ""}"><i>${n < at ? "✓" : ""}</i>${this.t(k)}</li>`).join("");
     const total = w.total || 0, done = Math.min(w.done || 0, total);
     let body = "", line = "";
-    if (w.booting) line = this.t("warmupBootLine");
+    if (w.booting) { body = `<div class="wduo"><div><div class="wcap"><span>${this.t("warmupBooting")}</span></div><span class="wbar ind"><i></i></span></div><div></div></div>`; line = this.t("warmupBootLine"); }
     else if (scanning) {
       const order = ["registries", "devices", "automations", "finalizing"], phase = st?.running ? order.indexOf(st.phase) : -1;
       const percent = st?.running ? st.progress : 0;
@@ -2218,13 +2224,15 @@ class OverviewMixin {
     } else {
       const names = (w.names || []).map(n => `<span class="pill">${this.esc(n)}</span>`).join("");
       const more = (w.pending || 0) > (w.names || []).length ? ` +${w.pending - w.names.length}` : "";
-      const loaded = this.t("warmupLoaded", { done: this.formatNumber(done), total: this.formatNumber(total) });
-      body = `<div class="wduo">${pair(loaded, total ? `${Math.round((done / total) * 100)} %` : "", total ? done / total : 0, w.settling ? "g" : "")}${w.settling ? pair(this.t("warmupBuffer"), `<b>${clock(left)}</b>`, 1 - left / 60) : pair(this.t("warmupWait"), `<b>${clock(left)}</b>`, 1 - left / (w.total_s || 300))}</div>`;
+      // Once nothing is loading any more, what is still not set up will not be (it fails or waits for something else): the bar is full.
+      const loaded = w.settling ? this.t("warmupLoadedAll", { done: this.formatNumber(done) }) : this.t("warmupLoaded", { done: this.formatNumber(done), total: this.formatNumber(total) });
+      body = `<div class="wduo">${pair(loaded, w.settling ? "100 %" : total ? `${Math.round((done / total) * 100)} %` : "", w.settling ? 1 : total ? done / total : 0, w.settling ? "g" : "")}${w.settling ? pair(this.t("warmupBuffer"), `<b>${clock(left)}</b>`, 1 - left / 60) : pair(this.t("warmupWait"), `<b>${clock(left)}</b>`, 1 - left / (w.total_s || 300))}</div>`;
       line = w.settling
         ? ((w.pending || 0) > 0 ? this.t("warmupBlip", { name: this.esc((w.names || [])[0] || "") }) : this.t("warmupLocked"))
         : `${names ? `${this.t("warmupNames")} ${names}${more} · ` : ""}${this.t("warmupLocked")}`;
     }
-    return `${head}<ol class="wtr">${steps}</ol>${body}<div class="wline">${line}</div>`;
+    // The notice is redrawn every second; the offset keeps the animations in step with the clock instead of restarting.
+    return `<div class="wph" style="--wt:-${Date.now() % 2000}ms">${head}<ol class="wtr">${steps}</ol>${body}<div class="wline">${line}</div></div>`;
   }
 
   // Counts the warm-up down in the banner without rebuilding the page; every few seconds the backend is asked for the step.
@@ -8801,18 +8809,18 @@ class ExchangeMixin {
 
 Object.assign(TEXT.de, {
   warmupTitle: "Home Assistant startet ...", warmupS1: "Home Assistant startet", warmupS2: "Integrationen laden", warmupS3: "Puffer", warmupS4: "Befunde erheben",
-  warmupLoaded: "{done} von {total} Integrationen geladen", warmupWait: "Wartezeit, höchstens noch", warmupBuffer: "Sicherheitspuffer, noch", warmupMin: "Min.",
+  warmupLoaded: "{done} von {total} Integrationen geladen", warmupLoadedAll: "{done} Integrationen geladen", warmupWait: "Wartezeit, höchstens noch", warmupBuffer: "Sicherheitspuffer, noch", warmupMin: "Min.",
   warmupNames: "Laden noch:", warmupLocked: "Aufräumen ist bis dahin gesperrt.", warmupBlip: "{name} lädt kurz neu, der Puffer läuft weiter.",
   warmupBootLine: "Home Assistant lädt noch. Die Wartezeit beginnt danach. Aufräumen ist bis dahin gesperrt.", warmupAfter: "Danach sind die Befunde endgültig, und Aufräumen ist wieder frei.",
-  warmupAsking: "Stand wird abgefragt …", warmupDoneToast: "Die Befunde sind endgültig.",
+  warmupBooting: "Home Assistant lädt", warmupAsking: "Stand wird abgefragt …", warmupDoneToast: "Die Befunde sind endgültig.",
   warmupPhase_start: "Der Scan startet", warmupPhase_registries: "Register lesen", warmupPhase_devices: "Geräte und Entitäten", warmupPhase_automations: "Automationen und Verweise", warmupPhase_finalizing: "Befunde berechnen",
 });
 Object.assign(TEXT.en, {
   warmupTitle: "Home Assistant is starting ...", warmupS1: "Home Assistant starts", warmupS2: "Integrations load", warmupS3: "Buffer", warmupS4: "Collect findings",
-  warmupLoaded: "{done} of {total} integrations loaded", warmupWait: "Waiting time, at most", warmupBuffer: "Safety buffer, left", warmupMin: "min",
+  warmupLoaded: "{done} of {total} integrations loaded", warmupLoadedAll: "{done} integrations loaded", warmupWait: "Waiting time, at most", warmupBuffer: "Safety buffer, left", warmupMin: "min",
   warmupNames: "Still loading:", warmupLocked: "Cleanup is locked until then.", warmupBlip: "{name} is reloading briefly, the buffer keeps running.",
   warmupBootLine: "Home Assistant is still loading. The waiting time starts afterwards. Cleanup is locked until then.", warmupAfter: "After that the findings are final and cleanup is free again.",
-  warmupAsking: "Asking for the state …", warmupDoneToast: "The findings are final.",
+  warmupBooting: "Home Assistant is loading", warmupAsking: "Asking for the state …", warmupDoneToast: "The findings are final.",
   warmupPhase_start: "The scan is starting", warmupPhase_registries: "Reading registries", warmupPhase_devices: "Devices and entities", warmupPhase_automations: "Automations and references", warmupPhase_finalizing: "Working out findings",
 });
 

@@ -10,7 +10,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-from homeassistant.config_entries import ConfigEntryState
+from homeassistant.config_entries import SOURCE_IGNORE, ConfigEntryState
 from homeassistant.const import __version__ as HA_VERSION
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import UnsupportedStorageVersionError
@@ -926,7 +926,12 @@ class InventoryScanner:
             return
         entries = list(self.hass.config_entries.async_entries())
         loading = [e for e in entries if e.state is ConfigEntryState.SETUP_IN_PROGRESS]
-        enabled = [e for e in entries if getattr(e, "disabled_by", None) is None]
+        # Ignored and disabled entries are never set up, so they are no part of the progress.
+        enabled = [
+            e
+            for e in entries
+            if getattr(e, "disabled_by", None) is None and getattr(e, "source", None) != SOURCE_IGNORE
+        ]
         self.integrations_pending = len(loading)
         self.integrations_loading = [str(getattr(e, "title", "") or e.domain) for e in loading][
             :WARMUP_NAMES

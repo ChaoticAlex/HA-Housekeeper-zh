@@ -275,6 +275,12 @@ class StylesMixin {
       .wcap{display:flex;justify-content:space-between;gap:8px}.wcap b,.wline b{color:var(--hk-text);font-weight:600}
       .wbar{display:block;height:8px;border-radius:99px;background:var(--hk-soft);border:1px solid var(--hk-border);overflow:hidden;margin-top:4px}.wbar i{display:block;height:100%;background:var(--hk-amber)}.wbar i.g{background:var(--hk-green)}
       .wline{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:calc(13px*var(--hk-fs,1));color:var(--hk-muted)}.wline .pill{font-weight:500}
+      .wph{display:grid;gap:10px}.wmx .wtop ha-icon{animation:hkflip 2s ease-in-out infinite;animation-delay:var(--wt,0s)}
+      .wtr li.on i{animation:hkpulse 2s ease-out infinite;animation-delay:var(--wt,0s)}.wtr li.on::before{background:linear-gradient(90deg,var(--hk-green),var(--hk-amber))}
+      .wbar i:not(.g){background-image:linear-gradient(45deg,rgba(255,255,255,.3) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.3) 50%,rgba(255,255,255,.3) 75%,transparent 75%);background-size:16px 16px;animation:hkstripes 1s linear infinite;animation-delay:var(--wt,0s)}
+      .wbar.ind i{width:35%;animation:hkslide 2s ease-in-out infinite;animation-delay:var(--wt,0s);background-image:none}
+      @keyframes hkflip{0%,40%{transform:rotate(0)}60%,100%{transform:rotate(180deg)}}@keyframes hkpulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--hk-amber) 55%,transparent)}70%,100%{box-shadow:0 0 0 7px transparent}}
+      @keyframes hkstripes{from{background-position:0 0}to{background-position:16px 0}}@keyframes hkslide{0%{margin-left:-35%}100%{margin-left:100%}}
       .optswitch{display:flex;gap:12px;align-items:flex-start;margin:12px 0 0;padding:12px 14px;border:2px solid var(--hk-blue);border-radius:12px;background:var(--hk-soft);cursor:pointer}.optswitch .policyswitch{margin-top:2px}.optswitch span{display:grid;gap:2px}.optswitch small{color:var(--hk-muted)}
       ${this.themeCss()}
     </style>`;

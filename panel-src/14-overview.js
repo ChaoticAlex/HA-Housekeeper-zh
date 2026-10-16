@@ -44,13 +44,13 @@ class OverviewMixin {
     const bar = (frac, tone = "") => `<span class="wbar"><i class="${tone}" style="width:${Math.round(Math.min(1, Math.max(0, frac)) * 100)}%"></i></span>`;
     const pair = (label, value, frac, tone) => `<div><div class="wcap"><span>${label}</span><span>${value}</span></div>${bar(frac, tone)}</div>`;
     const head = `<div class="wtop"><ha-icon icon="mdi:timer-sand"></ha-icon><strong>${this.t("warmupTitle")}</strong></div>`;
-    if (!w.known && !w.booting) return `${head}<div class="wline">${this.t("warmupAsking")}</div>`;
+    if (!w.known && !w.booting) return `<div class="wph" style="--wt:-${Date.now() % 2000}ms">${head}<div class="wline">${this.t("warmupAsking")}</div></div>`;
     const scanning = !w.booting && !left;
     const at = w.booting ? 0 : scanning ? 3 : w.settling ? 2 : 1;
     const steps = ["warmupS1", "warmupS2", "warmupS3", "warmupS4"].map((k, n) => `<li class="${n < at ? "done" : n === at ? "on" : ""}"><i>${n < at ? "✓" : ""}</i>${this.t(k)}</li>`).join("");
     const total = w.total || 0, done = Math.min(w.done || 0, total);
     let body = "", line = "";
-    if (w.booting) line = this.t("warmupBootLine");
+    if (w.booting) { body = `<div class="wduo"><div><div class="wcap"><span>${this.t("warmupBooting")}</span></div><span class="wbar ind"><i></i></span></div><div></div></div>`; line = this.t("warmupBootLine"); }
     else if (scanning) {
       const order = ["registries", "devices", "automations", "finalizing"], phase = st?.running ? order.indexOf(st.phase) : -1;
       const percent = st?.running ? st.progress : 0;
@@ -59,13 +59,15 @@ class OverviewMixin {
     } else {
       const names = (w.names || []).map(n => `<span class="pill">${this.esc(n)}</span>`).join("");
       const more = (w.pending || 0) > (w.names || []).length ? ` +${w.pending - w.names.length}` : "";
-      const loaded = this.t("warmupLoaded", { done: this.formatNumber(done), total: this.formatNumber(total) });
-      body = `<div class="wduo">${pair(loaded, total ? `${Math.round((done / total) * 100)} %` : "", total ? done / total : 0, w.settling ? "g" : "")}${w.settling ? pair(this.t("warmupBuffer"), `<b>${clock(left)}</b>`, 1 - left / 60) : pair(this.t("warmupWait"), `<b>${clock(left)}</b>`, 1 - left / (w.total_s || 300))}</div>`;
+      // Once nothing is loading any more, what is still not set up will not be (it fails or waits for something else): the bar is full.
+      const loaded = w.settling ? this.t("warmupLoadedAll", { done: this.formatNumber(done) }) : this.t("warmupLoaded", { done: this.formatNumber(done), total: this.formatNumber(total) });
+      body = `<div class="wduo">${pair(loaded, w.settling ? "100 %" : total ? `${Math.round((done / total) * 100)} %` : "", w.settling ? 1 : total ? done / total : 0, w.settling ? "g" : "")}${w.settling ? pair(this.t("warmupBuffer"), `<b>${clock(left)}</b>`, 1 - left / 60) : pair(this.t("warmupWait"), `<b>${clock(left)}</b>`, 1 - left / (w.total_s || 300))}</div>`;
       line = w.settling
         ? ((w.pending || 0) > 0 ? this.t("warmupBlip", { name: this.esc((w.names || [])[0] || "") }) : this.t("warmupLocked"))
         : `${names ? `${this.t("warmupNames")} ${names}${more} · ` : ""}${this.t("warmupLocked")}`;
     }
-    return `${head}<ol class="wtr">${steps}</ol>${body}<div class="wline">${line}</div>`;
+    // The notice is redrawn every second; the offset keeps the animations in step with the clock instead of restarting.
+    return `<div class="wph" style="--wt:-${Date.now() % 2000}ms">${head}<ol class="wtr">${steps}</ol>${body}<div class="wline">${line}</div></div>`;
   }
 
   // Counts the warm-up down in the banner without rebuilding the page; every few seconds the backend is asked for the step.
