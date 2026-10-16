@@ -15,7 +15,7 @@ class OverviewMixin {
   // the time left of the warm-up and, once that is over, the progress of the final scan.
   warmupBanner() {
     if (!this.data?.meta?.preliminary) return "";
-    return `<div class="panel u-mb14" data-warmup><div class="row"><span class="tile warn"><ha-icon icon="mdi:timer-sand"></ha-icon></span><span class="row-text">${this.warmupInner()}</span></div></div>`;
+    return `<div class="panel u-mb14 wmx" data-warmup>${this.warmupInner()}</div>`;
   }
 
   // Said once per browser: outages are graded by how long they last, and only medium and high show on the overview.
@@ -36,44 +36,62 @@ class OverviewMixin {
     return `<div class="panel u-mb14" data-scan-health><div class="row"><span class="tile ${h.state === "failed" ? "red" : "warn"}"><ha-icon icon="mdi:heart-broken-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(text)}</strong><small class="u-m0">${this.esc(more)}</small></span></div></div>`;
   }
 
+  // The card of the start notice: the four steps, progress and time side by side, one line of names or advice.
   warmupInner() {
-    const w = this._warm || {}, left = w.until ? Math.max(0, Math.round((w.until - Date.now()) / 1000)) : null;
-    const st = this.scanStatus;
-    let step, frac = null;
-    if (w.booting) step = this.t("warmupStepBoot");
-    else if (!w.known) step = ""; // the numbers of the scan are old; they wait for the first answer of the backend
-    else if (left) {
-      const time = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
-      step = w.settling ? this.t("warmupStepSettle", { time }) : this.t("warmupStepWait", { time, count: w.pending || 0 });
-      frac = 1 - left / (w.settling ? 60 : (w.total || 300));
-    } else if (st?.running) { step = this.t("warmupStepScan", { percent: st.progress }); frac = st.progress / 100; }
-    else step = this.t("warmupStepFinal");
-    const bar = frac === null ? "" : `<span class="bar"><i class="warn" style="width:${Math.round(Math.min(1, Math.max(0, frac)) * 100)}%"></i></span>`;
-    return `<strong>${this.esc(this.t("warmupBanner"))}</strong><small class="u-m0">${this.esc(step)}</small>${bar}`;
+    const w = this._warm || {}, st = this.scanStatus;
+    const left = w.until ? Math.max(0, Math.round((w.until - Date.now()) / 1000)) : 0;
+    const clock = sec => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")} ${this.t("warmupMin")}`;
+    const bar = (frac, tone = "") => `<span class="wbar"><i class="${tone}" style="width:${Math.round(Math.min(1, Math.max(0, frac)) * 100)}%"></i></span>`;
+    const pair = (label, value, frac, tone) => `<div><div class="wcap"><span>${label}</span><span>${value}</span></div>${bar(frac, tone)}</div>`;
+    const head = `<div class="wtop"><ha-icon icon="mdi:timer-sand"></ha-icon><strong>${this.t("warmupTitle")}</strong></div>`;
+    if (!w.known && !w.booting) return `${head}<div class="wline">${this.t("warmupAsking")}</div>`;
+    const scanning = !w.booting && !left;
+    const at = w.booting ? 0 : scanning ? 3 : w.settling ? 2 : 1;
+    const steps = ["warmupS1", "warmupS2", "warmupS3", "warmupS4"].map((k, n) => `<li class="${n < at ? "done" : n === at ? "on" : ""}"><i>${n < at ? "✓" : ""}</i>${this.t(k)}</li>`).join("");
+    const total = w.total || 0, done = Math.min(w.done || 0, total);
+    let body = "", line = "";
+    if (w.booting) line = this.t("warmupBootLine");
+    else if (scanning) {
+      const order = ["registries", "devices", "automations", "finalizing"], phase = st?.running ? order.indexOf(st.phase) : -1;
+      const percent = st?.running ? st.progress : 0;
+      body = `<div class="wduo">${pair(`${this.t(phase >= 0 ? `warmupPhase_${order[phase]}` : "warmupPhase_start")}${phase >= 0 ? ` <b>${phase + 1}/${order.length}</b>` : ""}`, `${percent} %`, percent / 100)}<div></div></div>`;
+      line = this.t("warmupAfter");
+    } else {
+      const names = (w.names || []).map(n => `<span class="pill">${this.esc(n)}</span>`).join("");
+      const more = (w.pending || 0) > (w.names || []).length ? ` +${w.pending - w.names.length}` : "";
+      const loaded = this.t("warmupLoaded", { done: this.formatNumber(done), total: this.formatNumber(total) });
+      body = `<div class="wduo">${pair(loaded, total ? `${Math.round((done / total) * 100)} %` : "", total ? done / total : 0, w.settling ? "g" : "")}${w.settling ? pair(this.t("warmupBuffer"), `<b>${clock(left)}</b>`, 1 - left / 60) : pair(this.t("warmupWait"), `<b>${clock(left)}</b>`, 1 - left / (w.total_s || 300))}</div>`;
+      line = w.settling
+        ? ((w.pending || 0) > 0 ? this.t("warmupBlip", { name: this.esc((w.names || [])[0] || "") }) : this.t("warmupLocked"))
+        : `${names ? `${this.t("warmupNames")} ${names}${more} · ` : ""}${this.t("warmupLocked")}`;
+    }
+    return `${head}<ol class="wtr">${steps}</ol>${body}<div class="wline">${line}</div>`;
   }
 
   // Counts the warm-up down in the banner without rebuilding the page; every few seconds the backend is asked for the step.
   startWarmupTicker(meta) {
-    this._warm = { booting: Boolean(meta.warmup_booting), until: Date.now() + (Number(meta.warmup_seconds_left) || 0) * 1000, total: 300, pending: Number(meta.warmup_pending) || 0, settling: Boolean(meta.warmup_settling), known: false };
+    this._warm = { booting: Boolean(meta.warmup_booting), until: Date.now() + (Number(meta.warmup_seconds_left) || 0) * 1000, pending: 0, settling: false, known: false };
     if (this._warmTick) return;
     let n = 0, asking = false;
+    const draw = () => { const box = this.shadowRoot?.querySelector?.("[data-warmup]"); if (box) box.innerHTML = this.warmupInner(); };
     const ask = async () => {
-      if (asking || this.busy || !this._hass) return;
+      if (asking || this._gone || !this._hass) return;
       asking = true;
       try {
         const s = await this._hass.callWS({ type: "ha_housekeeper/status" });
         this.scanStatus = s;
-        this._warm = { ...this._warm, booting: Boolean(s.warmup?.booting), until: Date.now() + (Number(s.warmup?.seconds_left) || 0) * 1000, pending: Number(s.warmup?.pending) || 0, settling: Boolean(s.warmup?.settling), known: true };
-        const box = this.shadowRoot?.querySelector?.("[data-warmup] .row-text");
-        if (box) box.innerHTML = this.warmupInner();
+        const w = s.warmup || {};
+        this._warm = { ...this._warm, booting: Boolean(w.booting), until: Date.now() + (Number(w.seconds_left) || 0) * 1000, pending: Number(w.pending) || 0, settling: Boolean(w.settling), names: w.names || [], done: Number(w.done) || 0, total: Number(w.total) || 0, known: true };
+        draw();
+        // The final scan is in: take it at once, the notice goes away by itself.
+        if (w.preliminary === false && !s.running && !this.busy) { this.stopWarmupTicker(); await this.load(false); this.toast?.(this.t("warmupDoneToast")); }
       } catch (_) { /* the next tick asks again */ } finally { asking = false; }
     };
     ask();
-    this._warmTick = window.setInterval(async () => {
+    this._warmTick = window.setInterval(() => {
       if (this._gone || !this.data?.meta?.preliminary) { this.stopWarmupTicker(); return; }
-      if (++n % 5 === 0) ask();
-      const box = this.shadowRoot?.querySelector?.("[data-warmup] .row-text");
-      if (box) box.innerHTML = this.warmupInner();
+      if (++n % 3 === 0) ask();
+      draw();
     }, 1000);
   }
 

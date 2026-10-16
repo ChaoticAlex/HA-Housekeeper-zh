@@ -1259,26 +1259,31 @@ test("preliminary data during the Home Assistant start shows a banner on every p
   const { el } = panel("en");
   el.data = { ...DATA, meta: { ...DATA.meta, preliminary: false } };
   assert.equal(el.warmupBanner(), "");
-  assert.ok(!el.heading().includes("still starting"));
+  assert.ok(!el.heading().includes("is starting"));
   el.data = { ...DATA, meta: { ...DATA.meta, preliminary: true, warmup_seconds_left: 120 } };
-  assert.ok(el.warmupBanner().includes("still starting"));
-  assert.ok(el.heading().includes("still starting")); // part of the page heading, so on every view
+  assert.ok(el.warmupBanner().includes("is starting"));
+  assert.ok(el.heading().includes("is starting")); // part of the page heading, so on every view
 });
 
 test("the start banner names the step and counts the warm-up down", () => {
   const { el } = panel("en");
   el.data = { ...DATA, meta: { ...DATA.meta, preliminary: true } };
-  el._warm = { booting: true };
-  assert.ok(el.warmupBanner().includes("Step 1 of 3"));
-  el._warm = { until: Date.now() + 125000, total: 300, known: true };
-  assert.ok(el.warmupBanner().includes("2:0") && el.warmupBanner().includes("Step 2 of 3"));
-  el._warm = { until: Date.now() + 45000, total: 300, settling: true, known: true };
-  assert.ok(el.warmupBanner().includes("all integrations have loaded"));
+  el._warm = { booting: true, known: true };
+  assert.ok(el.warmupBanner().includes("Home Assistant starts") && el.warmupBanner().includes("still loading"));
+  el._warm = { until: Date.now() + 125000, known: true, done: 38, total: 41, pending: 3, names: ["Shelly", "HACS"] };
+  let html = el.warmupBanner();
+  assert.ok(html.includes("38 of 41 integrations loaded") && html.includes("2:0") && html.includes("Shelly") && html.includes("+1"));
+  el._warm = { until: Date.now() + 45000, settling: true, known: true, done: 41, total: 41, pending: 0 };
+  assert.ok(el.warmupBanner().includes("Safety buffer"));
+  el._warm = { until: Date.now() + 45000, settling: true, known: true, done: 41, total: 41, pending: 1, names: ["Shelly"] };
+  assert.ok(el.warmupBanner().includes("Shelly is reloading briefly"));
   el._warm = { until: Date.now() - 1000, known: true };
-  el.scanStatus = { running: true, progress: 40 };
-  assert.ok(el.warmupBanner().includes("Step 3 of 3") && el.warmupBanner().includes("40%"));
-  el._warm = { until: Date.now() + 290000, total: 300, known: false }; // numbers of an old scan are not shown
-  assert.ok(!el.warmupBanner().includes("4:5") && !el.warmupBanner().includes("Step 2 of 3"));
+  el.scanStatus = { running: true, progress: 40, phase: "devices" };
+  html = el.warmupBanner();
+  assert.ok(html.includes("Devices and entities") && html.includes("2/4") && html.includes("40 %"));
+  el._warm = { until: Date.now() + 290000, known: false }; // the figures of an old scan are not shown
+  html = el.warmupBanner();
+  assert.ok(html.includes("Asking for the state") && !html.includes("4:5"));
 });
 
 test("the recorder load header shows rows, entities and events as figures and names what was left out", () => {

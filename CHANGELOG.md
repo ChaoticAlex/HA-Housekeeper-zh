@@ -2,11 +2,19 @@
 
 ## Unreleased
 
+### Geändert
+
+- **Oberfläche:** Der Start-Hinweis ist eine kompakte Karte: vier Schritte als Leiste, „38 von 41 Integrationen geladen“ mit Balken und Wartezeit daneben, die Namen der noch ladenden Integrationen und beim Scan die aktuelle Phase. Er aktualisiert sich selbst (alle 3 Sekunden) und verschwindet, sobald die endgültigen Befunde da sind.
+
 ### Behoben
 
 - **Oberfläche, Korrekturen:** Der Start-Hinweis zeigt nach dem Neuladen der Seite nicht mehr kurz die alten „5 Minuten“, sondern wartet auf die aktuelle Angabe. Der Puffer von einer Minute fängt wegen einer kurz ladenden Integration nicht mehr mehrmals von vorn an. Die Zeile „Beobachtung nach Update“ steht auf der Übersicht unter dem Gesundheitsring statt im Seitenkopf. Der Info-Hinweis „ändert nichts von selbst“ oben auf der Befundseite entfällt.
 
 ### English
+
+#### Changed
+
+- **Interface:** The start notice is a compact card: four steps in one track, “38 of 41 integrations loaded” with a bar and the waiting time beside it, the names of the integrations still loading and, during the scan, the current phase. It updates by itself (every 3 seconds) and goes away as soon as the final findings are in.
 
 #### Fixed
 

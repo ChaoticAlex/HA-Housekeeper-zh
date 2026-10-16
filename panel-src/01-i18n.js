@@ -121,11 +121,6 @@ const TEXT = {
    
     kindSum: "Zähler (Summe)", kindMean: "Messwert (Mittelwert)", kindBoth: "Zähler und Messwert", inEnergy: "Im Energie-Dashboard", sortUnit: "Einheit", allKinds: "Alle Arten",
     warmupBanner: "Home Assistant startet noch. Die Befunde sind vorläufig und werden nach dem Start neu erhoben; Aufräumen ist bis dahin gesperrt.",
-    warmupStepBoot: "Schritt 1 von 3: Home Assistant lädt noch. Die Wartezeit beginnt danach.",
-    warmupStepWait: "Schritt 2 von 3: {count} Integrationen laden noch. Spätestens in {time} Min. geht es weiter.",
-    warmupStepSettle: "Schritt 2 von 3: alle Integrationen sind geladen. Zur Sicherheit noch ca. {time} Min. Puffer.",
-    warmupStepScan: "Schritt 3 von 3: abschließender Scan läuft ({percent} %).",
-    warmupStepFinal: "Schritt 3 von 3: der abschließende Scan startet gleich.",
     err_warming_up: "Home Assistant startet noch. Bitte in wenigen Minuten erneut versuchen.",
     staleScan: "Der letzte Scan ist {age} alt. Housekeeper scannt alle {hours} Stunden – die Daten können veraltet sein.", staleScanManual: "Der letzte Scan ist {age} alt.",
     kindDisable: "Deaktivieren (Quarantäne, umkehrbar)", kindRemove: "Entfernen (nach Quarantäne, mit Backup)", actionKind: "Aktion",
@@ -309,11 +304,6 @@ const TEXT = {
    
     kindSum: "Counter (sum)", kindMean: "Measurement (mean)", kindBoth: "Counter and measurement", inEnergy: "In the Energy dashboard", sortUnit: "Unit", allKinds: "All kinds",
     warmupBanner: "Home Assistant is still starting. The findings are preliminary and will be collected again after startup; cleanup is locked until then.",
-    warmupStepBoot: "Step 1 of 3: Home Assistant is still loading. The waiting time starts afterwards.",
-    warmupStepWait: "Step 2 of 3: {count} integrations are still loading. At the latest in {time} min it goes on.",
-    warmupStepSettle: "Step 2 of 3: all integrations have loaded. A safety buffer of about {time} min is left.",
-    warmupStepScan: "Step 3 of 3: the final scan is running ({percent}%).",
-    warmupStepFinal: "Step 3 of 3: the final scan starts in a moment.",
     err_warming_up: "Home Assistant is still starting. Please try again in a few minutes.",
     staleScan: "The last scan is {age} old. Housekeeper scans every {hours} hours – the data may be out of date.", staleScanManual: "The last scan is {age} old.",
     kindDisable: "Disable (quarantine, reversible)", kindRemove: "Remove (after quarantine, with backup)", actionKind: "Action",

@@ -147,6 +147,10 @@ def websocket_status(
         "booting": scanner.booting,
         "seconds_left": scanner.warmup_seconds_left,
         "pending": scanner.integrations_pending,
+        "names": scanner.integrations_loading,
+        "done": scanner.integrations_done,
+        "total": scanner.integrations_total,
+        "preliminary": bool(((scanner.snapshot or {}).get("meta") or {}).get("preliminary")),
         "settling": scanner.warmup_settling,
     }
     connection.send_result(

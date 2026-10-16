@@ -123,11 +123,6 @@ const TEXT = {
    
     kindSum: "Zähler (Summe)", kindMean: "Messwert (Mittelwert)", kindBoth: "Zähler und Messwert", inEnergy: "Im Energie-Dashboard", sortUnit: "Einheit", allKinds: "Alle Arten",
     warmupBanner: "Home Assistant startet noch. Die Befunde sind vorläufig und werden nach dem Start neu erhoben; Aufräumen ist bis dahin gesperrt.",
-    warmupStepBoot: "Schritt 1 von 3: Home Assistant lädt noch. Die Wartezeit beginnt danach.",
-    warmupStepWait: "Schritt 2 von 3: {count} Integrationen laden noch. Spätestens in {time} Min. geht es weiter.",
-    warmupStepSettle: "Schritt 2 von 3: alle Integrationen sind geladen. Zur Sicherheit noch ca. {time} Min. Puffer.",
-    warmupStepScan: "Schritt 3 von 3: abschließender Scan läuft ({percent} %).",
-    warmupStepFinal: "Schritt 3 von 3: der abschließende Scan startet gleich.",
     err_warming_up: "Home Assistant startet noch. Bitte in wenigen Minuten erneut versuchen.",
     staleScan: "Der letzte Scan ist {age} alt. Housekeeper scannt alle {hours} Stunden – die Daten können veraltet sein.", staleScanManual: "Der letzte Scan ist {age} alt.",
     kindDisable: "Deaktivieren (Quarantäne, umkehrbar)", kindRemove: "Entfernen (nach Quarantäne, mit Backup)", actionKind: "Aktion",
@@ -311,11 +306,6 @@ const TEXT = {
    
     kindSum: "Counter (sum)", kindMean: "Measurement (mean)", kindBoth: "Counter and measurement", inEnergy: "In the Energy dashboard", sortUnit: "Unit", allKinds: "All kinds",
     warmupBanner: "Home Assistant is still starting. The findings are preliminary and will be collected again after startup; cleanup is locked until then.",
-    warmupStepBoot: "Step 1 of 3: Home Assistant is still loading. The waiting time starts afterwards.",
-    warmupStepWait: "Step 2 of 3: {count} integrations are still loading. At the latest in {time} min it goes on.",
-    warmupStepSettle: "Step 2 of 3: all integrations have loaded. A safety buffer of about {time} min is left.",
-    warmupStepScan: "Step 3 of 3: the final scan is running ({percent}%).",
-    warmupStepFinal: "Step 3 of 3: the final scan starts in a moment.",
     err_warming_up: "Home Assistant is still starting. Please try again in a few minutes.",
     staleScan: "The last scan is {age} old. Housekeeper scans every {hours} hours – the data may be out of date.", staleScanManual: "The last scan is {age} old.",
     kindDisable: "Disable (quarantine, reversible)", kindRemove: "Remove (after quarantine, with backup)", actionKind: "Action",
@@ -1646,6 +1636,15 @@ class StylesMixin {
       .panel:has(.colpop),.panel:has(.viewform){overflow:visible}.listbar-actions{display:flex;flex:1 1 auto;justify-content:flex-end;align-items:center;gap:8px;margin-left:auto;min-height:40px}.listbar-actions:empty{display:none}.listbar-actions>.dirbtn,.listbar-actions>.colwrap>.dirbtn{min-height:40px}.listbar-actions .viewwrap{z-index:30}.viewform{position:absolute;right:0;top:calc(100% + 8px);z-index:30;display:grid;gap:10px;width:min(320px,calc(100vw - 32px));box-sizing:border-box;padding:16px;border:1px solid var(--hk-border);border-radius:12px;background:var(--hk-surface);box-shadow:0 10px 30px rgba(0,0,0,.18)}.viewform strong{font-size:calc(15px*var(--hk-fs,1))}.viewform label{font-size:calc(12px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted)}.viewform input{box-sizing:border-box;width:100%;min-width:0;height:40px;padding:8px 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:inherit;font:inherit}.viewform small{font-size:calc(11px*var(--hk-fs,1));color:var(--hk-muted)}.viewform-actions{display:flex;justify-content:flex-end;gap:8px}.viewform-actions .btn{white-space:nowrap}.findings-table .finding-name{flex:1}.findings-table .finding-cause .finding-link>.pill{flex:none;align-self:center}.findings-table .finding-detail .rowwrap{border-bottom:1px solid var(--hk-border)}.findings-table .finding-detail .rowwrap:last-child{border-bottom:0}.findings-table.dense-list .finding-detail .row{padding-top:5px;padding-bottom:5px}.findings-table.dense-list .finding-detail .row-text small{display:none}.findings-table.dense-list .finding-detail .row .tile{width:28px;height:28px}.findings-table.dense-list .finding-detail .rowmenu>summary{width:28px;height:28px}@media(max-width:860px){.listbar-actions{margin-left:auto}.findings-table tr.finding-detail{padding:0}.findings-table .finding-detail>td{padding:0}}@media(max-width:560px){.listbar-actions{margin-left:auto}.listbar .sortgroup:not(.table-sort){margin-left:0}}
       .findings-table .finding-link-group{display:flex;align-items:flex-start;gap:6px;min-width:0}.findings-table .finding-link-group .finding-link{flex:1;min-width:0}.findings-table .finding-fold{display:flex;align-items:center;justify-content:center;flex:none;width:24px;height:28px;padding:0;border:0;background:none;color:var(--hk-muted);cursor:pointer}.findings-table .finding-fold .foldarrow{margin:0}.findings-table .finding-fold:hover{color:var(--hk-text)}
       .planfootcol{flex-direction:column;align-items:stretch}.planfootcol>:first-child{flex:none}.planfootcol .planfootbtns{justify-content:flex-end;gap:10px}.planfootcol .planfootbtns .btn{min-width:150px;justify-content:center}.fold .planrow{padding:8px 16px}.fold .planrow small{margin-top:1px}
+      .wmx{padding:12px 16px 14px;display:grid;gap:10px}.wmx .wtop{display:flex;gap:10px;align-items:center;color:var(--hk-amber)}.wmx .wtop strong{font-size:calc(15px*var(--hk-fs,1));color:var(--hk-text)}
+      .wtr{display:flex;list-style:none;margin:0;padding:0}.wtr li{flex:1;position:relative;padding-top:20px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);text-align:center}
+      .wtr li::before{content:"";position:absolute;top:6px;left:0;right:0;height:3px;background:var(--hk-border)}.wtr li:first-child::before{left:50%}.wtr li:last-child::before{right:50%}
+      .wtr li i{position:absolute;top:0;left:50%;margin-left:-7px;width:14px;height:14px;border-radius:50%;background:var(--hk-border);z-index:1;font-style:normal;font-size:9px;line-height:14px;color:#fff}
+      .wtr li.done{color:var(--hk-text)}.wtr li.done i,.wtr li.done::before{background:var(--hk-green)}.wtr li.on{color:var(--hk-text);font-weight:700}.wtr li.on i{background:var(--hk-amber)}
+      .wduo{display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:calc(13px*var(--hk-fs,1));color:var(--hk-muted)}@media(max-width:640px){.wduo{grid-template-columns:1fr}}
+      .wcap{display:flex;justify-content:space-between;gap:8px}.wcap b,.wline b{color:var(--hk-text);font-weight:600}
+      .wbar{display:block;height:8px;border-radius:99px;background:var(--hk-soft);border:1px solid var(--hk-border);overflow:hidden;margin-top:4px}.wbar i{display:block;height:100%;background:var(--hk-amber)}.wbar i.g{background:var(--hk-green)}
+      .wline{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:calc(13px*var(--hk-fs,1));color:var(--hk-muted)}.wline .pill{font-weight:500}
       .optswitch{display:flex;gap:12px;align-items:flex-start;margin:12px 0 0;padding:12px 14px;border:2px solid var(--hk-blue);border-radius:12px;background:var(--hk-soft);cursor:pointer}.optswitch .policyswitch{margin-top:2px}.optswitch span{display:grid;gap:2px}.optswitch small{color:var(--hk-muted)}
       ${this.themeCss()}
     </style>`;
@@ -2174,7 +2173,7 @@ class OverviewMixin {
   // the time left of the warm-up and, once that is over, the progress of the final scan.
   warmupBanner() {
     if (!this.data?.meta?.preliminary) return "";
-    return `<div class="panel u-mb14" data-warmup><div class="row"><span class="tile warn"><ha-icon icon="mdi:timer-sand"></ha-icon></span><span class="row-text">${this.warmupInner()}</span></div></div>`;
+    return `<div class="panel u-mb14 wmx" data-warmup>${this.warmupInner()}</div>`;
   }
 
   // Said once per browser: outages are graded by how long they last, and only medium and high show on the overview.
@@ -2195,44 +2194,62 @@ class OverviewMixin {
     return `<div class="panel u-mb14" data-scan-health><div class="row"><span class="tile ${h.state === "failed" ? "red" : "warn"}"><ha-icon icon="mdi:heart-broken-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(text)}</strong><small class="u-m0">${this.esc(more)}</small></span></div></div>`;
   }
 
+  // The card of the start notice: the four steps, progress and time side by side, one line of names or advice.
   warmupInner() {
-    const w = this._warm || {}, left = w.until ? Math.max(0, Math.round((w.until - Date.now()) / 1000)) : null;
-    const st = this.scanStatus;
-    let step, frac = null;
-    if (w.booting) step = this.t("warmupStepBoot");
-    else if (!w.known) step = ""; // the numbers of the scan are old; they wait for the first answer of the backend
-    else if (left) {
-      const time = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
-      step = w.settling ? this.t("warmupStepSettle", { time }) : this.t("warmupStepWait", { time, count: w.pending || 0 });
-      frac = 1 - left / (w.settling ? 60 : (w.total || 300));
-    } else if (st?.running) { step = this.t("warmupStepScan", { percent: st.progress }); frac = st.progress / 100; }
-    else step = this.t("warmupStepFinal");
-    const bar = frac === null ? "" : `<span class="bar"><i class="warn" style="width:${Math.round(Math.min(1, Math.max(0, frac)) * 100)}%"></i></span>`;
-    return `<strong>${this.esc(this.t("warmupBanner"))}</strong><small class="u-m0">${this.esc(step)}</small>${bar}`;
+    const w = this._warm || {}, st = this.scanStatus;
+    const left = w.until ? Math.max(0, Math.round((w.until - Date.now()) / 1000)) : 0;
+    const clock = sec => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")} ${this.t("warmupMin")}`;
+    const bar = (frac, tone = "") => `<span class="wbar"><i class="${tone}" style="width:${Math.round(Math.min(1, Math.max(0, frac)) * 100)}%"></i></span>`;
+    const pair = (label, value, frac, tone) => `<div><div class="wcap"><span>${label}</span><span>${value}</span></div>${bar(frac, tone)}</div>`;
+    const head = `<div class="wtop"><ha-icon icon="mdi:timer-sand"></ha-icon><strong>${this.t("warmupTitle")}</strong></div>`;
+    if (!w.known && !w.booting) return `${head}<div class="wline">${this.t("warmupAsking")}</div>`;
+    const scanning = !w.booting && !left;
+    const at = w.booting ? 0 : scanning ? 3 : w.settling ? 2 : 1;
+    const steps = ["warmupS1", "warmupS2", "warmupS3", "warmupS4"].map((k, n) => `<li class="${n < at ? "done" : n === at ? "on" : ""}"><i>${n < at ? "✓" : ""}</i>${this.t(k)}</li>`).join("");
+    const total = w.total || 0, done = Math.min(w.done || 0, total);
+    let body = "", line = "";
+    if (w.booting) line = this.t("warmupBootLine");
+    else if (scanning) {
+      const order = ["registries", "devices", "automations", "finalizing"], phase = st?.running ? order.indexOf(st.phase) : -1;
+      const percent = st?.running ? st.progress : 0;
+      body = `<div class="wduo">${pair(`${this.t(phase >= 0 ? `warmupPhase_${order[phase]}` : "warmupPhase_start")}${phase >= 0 ? ` <b>${phase + 1}/${order.length}</b>` : ""}`, `${percent} %`, percent / 100)}<div></div></div>`;
+      line = this.t("warmupAfter");
+    } else {
+      const names = (w.names || []).map(n => `<span class="pill">${this.esc(n)}</span>`).join("");
+      const more = (w.pending || 0) > (w.names || []).length ? ` +${w.pending - w.names.length}` : "";
+      const loaded = this.t("warmupLoaded", { done: this.formatNumber(done), total: this.formatNumber(total) });
+      body = `<div class="wduo">${pair(loaded, total ? `${Math.round((done / total) * 100)} %` : "", total ? done / total : 0, w.settling ? "g" : "")}${w.settling ? pair(this.t("warmupBuffer"), `<b>${clock(left)}</b>`, 1 - left / 60) : pair(this.t("warmupWait"), `<b>${clock(left)}</b>`, 1 - left / (w.total_s || 300))}</div>`;
+      line = w.settling
+        ? ((w.pending || 0) > 0 ? this.t("warmupBlip", { name: this.esc((w.names || [])[0] || "") }) : this.t("warmupLocked"))
+        : `${names ? `${this.t("warmupNames")} ${names}${more} · ` : ""}${this.t("warmupLocked")}`;
+    }
+    return `${head}<ol class="wtr">${steps}</ol>${body}<div class="wline">${line}</div>`;
   }
 
   // Counts the warm-up down in the banner without rebuilding the page; every few seconds the backend is asked for the step.
   startWarmupTicker(meta) {
-    this._warm = { booting: Boolean(meta.warmup_booting), until: Date.now() + (Number(meta.warmup_seconds_left) || 0) * 1000, total: 300, pending: Number(meta.warmup_pending) || 0, settling: Boolean(meta.warmup_settling), known: false };
+    this._warm = { booting: Boolean(meta.warmup_booting), until: Date.now() + (Number(meta.warmup_seconds_left) || 0) * 1000, pending: 0, settling: false, known: false };
     if (this._warmTick) return;
     let n = 0, asking = false;
+    const draw = () => { const box = this.shadowRoot?.querySelector?.("[data-warmup]"); if (box) box.innerHTML = this.warmupInner(); };
     const ask = async () => {
-      if (asking || this.busy || !this._hass) return;
+      if (asking || this._gone || !this._hass) return;
       asking = true;
       try {
         const s = await this._hass.callWS({ type: "ha_housekeeper/status" });
         this.scanStatus = s;
-        this._warm = { ...this._warm, booting: Boolean(s.warmup?.booting), until: Date.now() + (Number(s.warmup?.seconds_left) || 0) * 1000, pending: Number(s.warmup?.pending) || 0, settling: Boolean(s.warmup?.settling), known: true };
-        const box = this.shadowRoot?.querySelector?.("[data-warmup] .row-text");
-        if (box) box.innerHTML = this.warmupInner();
+        const w = s.warmup || {};
+        this._warm = { ...this._warm, booting: Boolean(w.booting), until: Date.now() + (Number(w.seconds_left) || 0) * 1000, pending: Number(w.pending) || 0, settling: Boolean(w.settling), names: w.names || [], done: Number(w.done) || 0, total: Number(w.total) || 0, known: true };
+        draw();
+        // The final scan is in: take it at once, the notice goes away by itself.
+        if (w.preliminary === false && !s.running && !this.busy) { this.stopWarmupTicker(); await this.load(false); this.toast?.(this.t("warmupDoneToast")); }
       } catch (_) { /* the next tick asks again */ } finally { asking = false; }
     };
     ask();
-    this._warmTick = window.setInterval(async () => {
+    this._warmTick = window.setInterval(() => {
       if (this._gone || !this.data?.meta?.preliminary) { this.stopWarmupTicker(); return; }
-      if (++n % 5 === 0) ask();
-      const box = this.shadowRoot?.querySelector?.("[data-warmup] .row-text");
-      if (box) box.innerHTML = this.warmupInner();
+      if (++n % 3 === 0) ask();
+      draw();
     }, 1000);
   }
 
@@ -8775,6 +8792,23 @@ class ExchangeMixin {
     return `<div class="simbox"><details ${plan.status === "dry_run" ? "open" : ""}><summary>${this.t("simTitle")}</summary><ul class="simlist">${lines.map(l => `<li>${this.esc(l)}</li>`).join("")}</ul><p class="simlimits">${this.t("simLimits")}</p></details></div>`;
   }
 }
+
+Object.assign(TEXT.de, {
+  warmupTitle: "Home Assistant startet ...", warmupS1: "Home Assistant startet", warmupS2: "Integrationen laden", warmupS3: "Puffer", warmupS4: "Befunde erheben",
+  warmupLoaded: "{done} von {total} Integrationen geladen", warmupWait: "Wartezeit, höchstens noch", warmupBuffer: "Sicherheitspuffer, noch", warmupMin: "Min.",
+  warmupNames: "Laden noch:", warmupLocked: "Aufräumen ist bis dahin gesperrt.", warmupBlip: "{name} lädt kurz neu, der Puffer läuft weiter.",
+  warmupBootLine: "Home Assistant lädt noch. Die Wartezeit beginnt danach. Aufräumen ist bis dahin gesperrt.", warmupAfter: "Danach sind die Befunde endgültig, und Aufräumen ist wieder frei.",
+  warmupAsking: "Stand wird abgefragt …", warmupDoneToast: "Die Befunde sind endgültig.",
+  warmupPhase_start: "Der Scan startet", warmupPhase_registries: "Register lesen", warmupPhase_devices: "Geräte und Entitäten", warmupPhase_automations: "Automationen und Verweise", warmupPhase_finalizing: "Befunde berechnen",
+});
+Object.assign(TEXT.en, {
+  warmupTitle: "Home Assistant is starting ...", warmupS1: "Home Assistant starts", warmupS2: "Integrations load", warmupS3: "Buffer", warmupS4: "Collect findings",
+  warmupLoaded: "{done} of {total} integrations loaded", warmupWait: "Waiting time, at most", warmupBuffer: "Safety buffer, left", warmupMin: "min",
+  warmupNames: "Still loading:", warmupLocked: "Cleanup is locked until then.", warmupBlip: "{name} is reloading briefly, the buffer keeps running.",
+  warmupBootLine: "Home Assistant is still loading. The waiting time starts afterwards. Cleanup is locked until then.", warmupAfter: "After that the findings are final and cleanup is free again.",
+  warmupAsking: "Asking for the state …", warmupDoneToast: "The findings are final.",
+  warmupPhase_start: "The scan is starting", warmupPhase_registries: "Reading registries", warmupPhase_devices: "Devices and entities", warmupPhase_automations: "Automations and references", warmupPhase_finalizing: "Working out findings",
+});
 
 // Automation diagnostics: quality dimensions, success criteria, coverage, trace comparison and the dry run (see quality.py, criteria.py, coverage.py, trace_compare.py, dry_run.py); mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
