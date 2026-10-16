@@ -4,13 +4,13 @@
 
 ### Behoben
 
-- **Oberfläche, Korrekturen:** „In HA öffnen“ (Befundseite, HACS-Knöpfe) öffnet Home Assistant in einem neuen Tab statt im selben. Das Schließen des Dialogs „Mehr Infos“ lässt die Seite, auf der man ist.
+- **Oberfläche, Korrekturen:** „In HA öffnen“ (Befundseite, HACS-Knöpfe) öffnet Home Assistant in einem neuen Tab statt im selben. Das Schließen des Dialogs „Mehr Infos“ lässt die Seite, auf der man ist. „Ausgewählte zusammenführen“ ist bei mehr als 10 Plänen gesperrt (statt mit Serverfehler abzubrechen).
 
 ### English
 
 #### Fixed
 
-- **Interface, corrections:** “Open in HA” (findings page, HACS buttons) opens Home Assistant in a new tab instead of the same one. Closing the “More info” dialog keeps you on the page you were on.
+- **Interface, corrections:** “Open in HA” (findings page, HACS buttons) opens Home Assistant in a new tab instead of the same one. Closing the “More info” dialog keeps you on the page you were on. “Merge selected” is disabled for more than 10 plans (instead of failing with a server error).
 
 ## 1.8.1 - 2026-10-16
 

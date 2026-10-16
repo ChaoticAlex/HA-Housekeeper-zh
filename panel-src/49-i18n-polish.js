@@ -5,7 +5,7 @@ Object.assign(TEXT.de, {
   journalEmptyNext: "Noch kein Plan. Wähle unter „Neuer Plan“ Kandidaten aus und lege einen Plan an.",
   
   qualityNoneNext: "Keine Automationen gefunden. Sie erscheinen nach dem nächsten Scan.",
-  mergeButton: "Ausgewählte zusammenführen ({count})", mergeSelect: "Plan zum Zusammenführen auswählen", mergeDone: "{count} Pläne zu einem zusammengeführt. Bewertung und Zahlen sind frisch berechnet.", mergeConflicts: "Zusammengeführt. {count} Objekte wurden nicht übernommen, weil sie in den Plänen verschieden angefragt waren: {list}",
+  mergeTooMany: "Höchstens 10 Pläne lassen sich zusammenführen.", mergeButton: "Ausgewählte zusammenführen ({count})", mergeSelect: "Plan zum Zusammenführen auswählen", mergeDone: "{count} Pläne zu einem zusammengeführt. Bewertung und Zahlen sind frisch berechnet.", mergeConflicts: "Zusammengeführt. {count} Objekte wurden nicht übernommen, weil sie in den Plänen verschieden angefragt waren: {list}",
   diagSecDims: "Bewertung", diagSecCriteria: "Erfolgskriterien", diagSecMore: "Abdeckung, Vergleich und Testlauf",
 });
 Object.assign(TEXT.en, {
@@ -14,7 +14,7 @@ Object.assign(TEXT.en, {
   journalEmptyNext: "No plan yet. Pick candidates under “New plan” and create one.",
   
   qualityNoneNext: "No automations found. They appear after the next scan.",
-  mergeButton: "Merge selected ({count})", mergeSelect: "Select plan to merge", mergeDone: "{count} plans merged into one. Verdicts and numbers are freshly calculated.", mergeConflicts: "Merged. {count} objects were left out because the plans asked for them in different ways: {list}",
+  mergeTooMany: "At most 10 plans can be merged.", mergeButton: "Merge selected ({count})", mergeSelect: "Select plan to merge", mergeDone: "{count} plans merged into one. Verdicts and numbers are freshly calculated.", mergeConflicts: "Merged. {count} objects were left out because the plans asked for them in different ways: {list}",
   diagSecDims: "Assessment", diagSecCriteria: "Success criteria", diagSecMore: "Coverage, comparison and test run",
 });
 Object.assign(TEXT.de, {

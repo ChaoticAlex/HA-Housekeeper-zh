@@ -3853,7 +3853,7 @@ class CleanupMixin {
 
   async mergePlans() {
     const ids = [...(this.mergeSel || [])].filter(id => (this.journal || []).some(p => p.plan_id === id && this.mergeable(p)));
-    if (ids.length < 2 || this.cleanupBusy) return;
+    if (ids.length < 2 || ids.length > 10 || this.cleanupBusy) return;
     this.cleanupBusy = true; this.cleanupError = ""; this.mergeNote = ""; this.render();
     try {
       const result = await this._hass.callWS({ type: "ha_housekeeper/plan_merge", plan_ids: ids });
@@ -4297,7 +4297,7 @@ class CleanupMixin {
       text: p => `${this.formatDate(p.created_at)} ${this.t(`plan_status_${statusOf(p)}`)}`, tie: p => p.created_at,
     }) : `<div class="emptymsg mute"><ha-icon icon="mdi:clipboard-text-outline"></ha-icon><strong>${this.t("journalEmpty")}</strong>${this.t("journalEmptyNext")}<button class="btn" data-jump="repair">${this.t("repair")}</button></div>`;
     const picked = this.mergeSel?.size || 0;
-    const tools = plans.some(p => this.mergeable(p)) ? `<div class="toolbar${picked ? "" : " nosel"}"><button class="btn" data-merge ${picked >= 2 && !this.cleanupBusy ? "" : "disabled"}>${this.t("mergeButton", { count: picked })}</button><button class="btn" data-merge-delete ${picked && !this.cleanupBusy ? "" : "disabled"}>${this.t("deleteSelectedPlans", { count: picked })}</button><span class="selcount" aria-live="polite">${this.t("selectedCount", { count: picked })}</span>${this.viewCount(this.lv.journal?.shown ?? plans.length)}</div>` : "";
+    const tools = plans.some(p => this.mergeable(p)) ? `<div class="toolbar${picked ? "" : " nosel"}"><button class="btn" data-merge ${picked >= 2 && picked <= 10 && !this.cleanupBusy ? "" : "disabled"}${picked > 10 ? ` title="${this.esc(this.t("mergeTooMany"))}"` : ""}>${this.t("mergeButton", { count: picked })}</button><button class="btn" data-merge-delete ${picked && !this.cleanupBusy ? "" : "disabled"}>${this.t("deleteSelectedPlans", { count: picked })}</button><span class="selcount" aria-live="polite">${this.t("selectedCount", { count: picked })}</span>${this.viewCount(this.lv.journal?.shown ?? plans.length)}</div>` : "";
     const journalCard = `<div class="panel"><div class="panelhead"><div><h2>${this.t("journal")} (${plans.length})</h2><p>${this.t("journalHint")}</p></div></div>${this.mergeNote ? `<div class="pad"><small role="status">${this.esc(this.mergeNote)}</small></div>` : ""}${tools}${table}</div>`;
     return `<div class="stack">${this.planHeader()}${journalCard}</div>`;
   }
@@ -9216,7 +9216,7 @@ Object.assign(TEXT.de, {
   journalEmptyNext: "Noch kein Plan. Wähle unter „Neuer Plan“ Kandidaten aus und lege einen Plan an.",
   
   qualityNoneNext: "Keine Automationen gefunden. Sie erscheinen nach dem nächsten Scan.",
-  mergeButton: "Ausgewählte zusammenführen ({count})", mergeSelect: "Plan zum Zusammenführen auswählen", mergeDone: "{count} Pläne zu einem zusammengeführt. Bewertung und Zahlen sind frisch berechnet.", mergeConflicts: "Zusammengeführt. {count} Objekte wurden nicht übernommen, weil sie in den Plänen verschieden angefragt waren: {list}",
+  mergeTooMany: "Höchstens 10 Pläne lassen sich zusammenführen.", mergeButton: "Ausgewählte zusammenführen ({count})", mergeSelect: "Plan zum Zusammenführen auswählen", mergeDone: "{count} Pläne zu einem zusammengeführt. Bewertung und Zahlen sind frisch berechnet.", mergeConflicts: "Zusammengeführt. {count} Objekte wurden nicht übernommen, weil sie in den Plänen verschieden angefragt waren: {list}",
   diagSecDims: "Bewertung", diagSecCriteria: "Erfolgskriterien", diagSecMore: "Abdeckung, Vergleich und Testlauf",
 });
 Object.assign(TEXT.en, {
@@ -9225,7 +9225,7 @@ Object.assign(TEXT.en, {
   journalEmptyNext: "No plan yet. Pick candidates under “New plan” and create one.",
   
   qualityNoneNext: "No automations found. They appear after the next scan.",
-  mergeButton: "Merge selected ({count})", mergeSelect: "Select plan to merge", mergeDone: "{count} plans merged into one. Verdicts and numbers are freshly calculated.", mergeConflicts: "Merged. {count} objects were left out because the plans asked for them in different ways: {list}",
+  mergeTooMany: "At most 10 plans can be merged.", mergeButton: "Merge selected ({count})", mergeSelect: "Select plan to merge", mergeDone: "{count} plans merged into one. Verdicts and numbers are freshly calculated.", mergeConflicts: "Merged. {count} objects were left out because the plans asked for them in different ways: {list}",
   diagSecDims: "Assessment", diagSecCriteria: "Success criteria", diagSecMore: "Coverage, comparison and test run",
 });
 Object.assign(TEXT.de, {
