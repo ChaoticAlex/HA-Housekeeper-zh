@@ -269,6 +269,24 @@ async def test_the_recorder_gives_statistics_duplicates_holes_and_gaps(
     assert (await db_health(hass, snapshot, events))["cached"] is True
 
 
+async def test_a_unique_statistics_index_spares_the_duplicate_search(
+    recorder_mock, hass: HomeAssistant
+) -> None:
+    from homeassistant.components.recorder import get_instance
+    from homeassistant.components.recorder.util import session_scope
+    from sqlalchemy import text
+
+    from custom_components.ha_housekeeper.db_health import duplicates_possible
+
+    def check() -> tuple[bool, bool]:
+        with session_scope(hass=hass) as session:
+            before = duplicates_possible(session)
+            session.execute(text("DROP INDEX IF EXISTS ix_statistics_statistic_id_start_ts"))
+            return before, duplicates_possible(session)
+
+    assert await get_instance(hass).async_add_executor_job(check) == (False, True)
+
+
 async def test_a_second_query_does_not_start_while_one_runs(
     recorder_mock, hass: HomeAssistant
 ) -> None:

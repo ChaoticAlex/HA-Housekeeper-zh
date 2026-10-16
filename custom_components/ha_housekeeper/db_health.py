@@ -232,6 +232,21 @@ def with_integrity(hass: HomeAssistant, reply: Any, events: Any) -> Any:
     return out
 
 
+def duplicates_possible(session: Any) -> bool:
+    """Blocking: whether the statistics table lacks its unique index on series and hour."""
+    from homeassistant.components.recorder.db_schema import Statistics
+    from sqlalchemy import inspect
+
+    try:
+        indexes = inspect(session.connection()).get_indexes(Statistics.__tablename__)
+    except Exception:  # noqa: BLE001 - when in doubt, look for duplicates
+        return True
+    return not any(
+        index.get("unique") and list(index.get("column_names") or []) == ["metadata_id", "start_ts"]
+        for index in indexes
+    )
+
+
 def query_db(hass: HomeAssistant, now: float) -> dict[str, Any]:
     """Blocking: statistics duplicates and gaps, validation issues and gaps in the states."""
     from homeassistant.components.recorder.db_schema import (
@@ -252,12 +267,17 @@ def query_db(hass: HomeAssistant, now: float) -> dict[str, Any]:
                 select(StatisticsMeta.id, StatisticsMeta.statistic_id, StatisticsMeta.source)
             ).all()
         }
-        duplicates = session.execute(
-            select(Statistics.metadata_id, Statistics.start_ts, func.count().label("n"))
-            .group_by(Statistics.metadata_id, Statistics.start_ts)
-            .having(func.count() > 1)
-            .limit(DUPLICATE_LIMIT)
-        ).all()
+        # A unique index rules duplicates out; only a database without it is read in full.
+        duplicates = (
+            session.execute(
+                select(Statistics.metadata_id, Statistics.start_ts, func.count().label("n"))
+                .group_by(Statistics.metadata_id, Statistics.start_ts)
+                .having(func.count() > 1)
+                .limit(DUPLICATE_LIMIT)
+            ).all()
+            if duplicates_possible(session)
+            else []
+        )
         result["duplicates"] = [
             {"statistic_id": names.get(mid, ("?", ""))[0], "start": float(ts), "count": int(n)}
             for mid, ts, n in duplicates

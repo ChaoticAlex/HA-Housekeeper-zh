@@ -132,7 +132,12 @@ class ReplyStore:
 
 
 # How old a kept reply may get before the background renews it, per view kind.
-REFRESH_AGE = {"reliability": 30 * 60, "storms": 30 * 60, "costs": 30 * 60, "db_health": 30 * 60}
+REFRESH_AGE = {
+    "reliability": 30 * 60,
+    "storms": 30 * 60,
+    "costs": 24 * 3600,  # a ranking over the whole database; it moves slowly
+    "db_health": 3 * 3600,
+}
 REFRESH_TICK = 5 * 60  # the background looks this often and renews one view at most
 
 
