@@ -122,7 +122,7 @@ class MonitorMixin {
         { key: "name", label: "sortName", dir: "asc", cell: item => this.nameCell(item.name, item.description || "") },
         { key: "state", label: "sysColState", dir: "asc", cell: item => `<span class="pill ${toneOf(item)}">${this.monitorState(item)}</span>` },
         { key: "reason", label: "monitorColReason", sortable: false, cell: item => this.esc(reasonOf(item) || "—") },
-        { key: "problem", label: "monitorColLastProblem", dir: "desc", cell: item => (item.last_problem_at ? this.esc(this.agoText(item.last_problem_at)) : "—") },
+        { key: "problem", label: "monitorColLastProblem", dir: "desc", cell: item => (item.last_problem_at ? `${this.esc(this.agoText(item.last_problem_at))}<small class="agestamp">${this.esc(this.formatDate(item.last_problem_at))}</small>` : "—") },
         { key: "scan", label: "monitorColScan", dir: "desc", cell: item => (item.scanned_at ? this.esc(this.formatDate(item.scanned_at)) : "—") },
       ],
     }) : `<div class="emptymsg"><ha-icon icon="mdi:home-heart"></ha-icon>${this.t("monitorEmpty")}</div>`;

@@ -308,10 +308,10 @@ class ListsMixin {
     return `<span class="id">${this.esc(id)}</span>${extra ? `<small>${this.esc(extra)}</small>` : ""}`;
   }
 
-  // The date of a table cell: how long ago, with the exact time as a tooltip; empty when unknown.
+  // The date of a table cell: how long ago with the exact time in small type below (hidden in compact rows) and as a tooltip; empty when unknown.
   ageCell(iso) {
     if (!iso) return `<span class="muted">–</span>`;
-    return `<span title="${this.esc(this.formatDate(iso))}">${this.esc(this.relTime(iso))}</span>`;
+    return `<span title="${this.esc(this.formatDate(iso))}">${this.esc(this.relTime(iso))}</span><small class="agestamp">${this.esc(this.formatDate(iso))}</small>`;
   }
 
   // Saved list views: search text, filters and sort under a name, kept in this browser only.
