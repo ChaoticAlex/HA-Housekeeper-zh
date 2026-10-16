@@ -897,10 +897,36 @@ async def test_a_short_loading_blip_does_not_restart_the_warmup_buffer(hass: Hom
     scanner.begin_warmup(WARMUP_SECONDS)
     settled = scanner._settled_at
     assert settled is not None
-    scanner.hass = type("H", (), {"config_entries": type("C", (), {"async_entries": lambda self: [type("E", (), {"state": ConfigEntryState.SETUP_IN_PROGRESS, "domain": "shelly", "title": "Shelly", "disabled_by": None})()]})()})()
+    scanner.hass = type(
+        "H",
+        (),
+        {
+            "config_entries": type(
+                "C",
+                (),
+                {
+                    "async_entries": lambda self: [
+                        type(
+                            "E",
+                            (),
+                            {
+                                "state": ConfigEntryState.SETUP_IN_PROGRESS,
+                                "domain": "shelly",
+                                "title": "Shelly",
+                                "disabled_by": None,
+                            },
+                        )()
+                    ]
+                },
+            )()
+        },
+    )()
     scanner.check_warmup()
     assert scanner._settled_at == settled
-    assert scanner.integrations_loading == ["Shelly"] and (scanner.integrations_done, scanner.integrations_total) == (0, 1)
+    assert scanner.integrations_loading == ["Shelly"] and (
+        scanner.integrations_done,
+        scanner.integrations_total,
+    ) == (0, 1)
     scanner._pending_since = time.monotonic() - WARMUP_BLIP_SECONDS - 1
     scanner.check_warmup()
     assert scanner._settled_at is None

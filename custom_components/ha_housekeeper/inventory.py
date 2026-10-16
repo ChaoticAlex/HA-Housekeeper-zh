@@ -58,9 +58,9 @@ from .const import (
     SIGNAL_SCAN_COMPLETE,
     SIGNAL_SCAN_STARTED,
     STORAGE_VERSION,
-    WARMUP_SECONDS,
     WARMUP_BLIP_SECONDS,
     WARMUP_NAMES,
+    WARMUP_SECONDS,
     WARMUP_SETTLE_SECONDS,
     WINDOW_STORAGE_KEY,
 )
@@ -819,8 +819,12 @@ class InventoryScanner:
         self._settled_at: float | None = None  # since when no integration has been loading
         self._pending_since: float | None = None  # since when an integration has been loading again
         self.integrations_pending = 0
-        self.integrations_loading: list[str] = []  # titles of the ones being set up, for the start notice
-        self.integrations_done = 0  # of the enabled ones: not waiting to be set up and not being set up
+        self.integrations_loading: list[
+            str
+        ] = []  # titles of the ones being set up, for the start notice
+        self.integrations_done = (
+            0  # of the enabled ones: not waiting to be set up and not being set up
+        )
         self.integrations_total = 0
         self._recorder_available = False
         # What the scan in progress could not read: "dashboard", "dashboard:<id>" or "app".
@@ -903,7 +907,9 @@ class InventoryScanner:
         loading = [e for e in entries if e.state is ConfigEntryState.SETUP_IN_PROGRESS]
         enabled = [e for e in entries if getattr(e, "disabled_by", None) is None]
         self.integrations_pending = len(loading)
-        self.integrations_loading = [str(getattr(e, "title", "") or e.domain) for e in loading][:WARMUP_NAMES]
+        self.integrations_loading = [str(getattr(e, "title", "") or e.domain) for e in loading][
+            :WARMUP_NAMES
+        ]
         self.integrations_total = len(enabled)
         self.integrations_done = sum(
             1
