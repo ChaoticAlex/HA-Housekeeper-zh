@@ -183,6 +183,12 @@ def marked_keys(objects: list[dict[str, Any]]) -> frozenset[str]:
     )
 
 
+def marked_status_counts(objects: list[dict[str, Any]]) -> dict[str, int]:
+    """How many marked objects there are per status, for the inventory status card."""
+    marked = marked_keys(objects)
+    return dict(Counter(i["status"] for i in objects if f"{i['object_type']}:{i['object_id']}" in marked))
+
+
 class _DeviceIds(set):
     """The IDs of all devices; an ID Home Assistant still resolves (composite) counts as well."""
 
@@ -1508,7 +1514,6 @@ class InventoryScanner:
 
         lap("analysis")
         self.status.update(phase="finalizing", progress=90)
-        marked = marked_keys(objects)
 
         storage = await self.hass.async_add_executor_job(storage_sizes, self.hass)
         try:
@@ -1586,13 +1591,7 @@ class InventoryScanner:
                 "low_batteries": len(low_battery_ids(entities, self.low_battery_percent)),
                 "object_count": len(objects),
                 "status_counts": dict(Counter(item["status"] for item in objects)),
-                "marked_status_counts": dict(
-                    Counter(
-                        i["status"]
-                        for i in objects
-                        if f"{i['object_type']}:{i['object_id']}" in marked
-                    )
-                ),
+                "marked_status_counts": marked_status_counts(objects),
                 "type_counts": dict(Counter(item["object_type"] for item in objects)),
             },
             "objects": objects,
@@ -1801,6 +1800,7 @@ class InventoryScanner:
         for finding in snapshot["findings"]:
             self._mark_ignored(finding, registry)
         self._apply_marks(snapshot["objects"], snapshot["findings"])
+        snapshot["meta"]["marked_status_counts"] = marked_status_counts(snapshot["objects"])
         snapshot["causes"] = apply_causes(
             snapshot["objects"], snapshot["edges"], snapshot["findings"]
         )
