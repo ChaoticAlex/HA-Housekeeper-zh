@@ -65,6 +65,12 @@ def test_router_trackers_are_presence_not_a_location() -> None:
     assert classify("usgs", "cloud_polling", {"geo_location"})["gps"] is False
 
 
+def test_more_radios_cameras_and_local_models_are_known() -> None:
+    assert classify("bluetooth", "local_push", set())["risk_reasons"] == ["radio"]
+    assert classify("frigate", "local_push", set())["access"][0]["kind"] == "camera"
+    assert classify("ollama", "local_polling", set())["flows"] == ["local"]
+
+
 async def test_access_report_on_config_entries(hass: HomeAssistant) -> None:
     MockConfigEntry(domain="alexa_media", title="Alexa", data={"password": PASSWORD}).add_to_hass(
         hass

@@ -29,6 +29,9 @@ SYSTEM_ACCESS: dict[str, tuple[str, str | None]] = {
     "zwave": ("radio", "Z-Wave"),
     "zha": ("radio", "Zigbee"),
     "deconz": ("radio", "ConBee"),
+    "bluetooth": ("radio", "Bluetooth"),
+    "otbr": ("radio", "Thread"),
+    "thread": ("radio", "Thread"),
     "usb": ("hardware", "USB"),
     "serial": ("hardware", "Serial"),
     "gpio": ("hardware", "GPIO"),
@@ -43,6 +46,9 @@ SYSTEM_ACCESS: dict[str, tuple[str, str | None]] = {
     "ring": ("camera", "Ring"),
     "reolink": ("camera", "Reolink"),
     "onvif": ("camera", "ONVIF"),
+    "go2rtc": ("camera", "go2rtc"),
+    "frigate": ("camera", "Frigate"),
+    "unifiprotect": ("camera", "UniFi Protect"),
     "geo_location": ("location", None),
     "device_tracker": ("location", None),
     "mobile_app": ("location", "Companion App"),
@@ -71,6 +77,10 @@ SYSTEM_ACCESS: dict[str, tuple[str, str | None]] = {
     "spotify": ("cloud", "Spotify"),
     "sonos": ("network", "Sonos"),
     "cast": ("network", "Cast"),
+    "matter": ("network", "Matter"),
+    "esphome": ("network", "ESPHome"),
+    "homekit": ("network", "HomeKit"),
+    "emulated_hue": ("network", "Emulated Hue"),
 }
 
 # Tokens that are common words in other domains: they only match a domain of that exact name.
@@ -107,6 +117,8 @@ DATAFLOW: dict[str, frozenset[str]] = {
     "life360": frozenset({"external", "gps", "cloud"}),
     "owntracks": frozenset({"local", "gps"}),
     "nominatim": frozenset({"external", "gps"}),
+    "ollama": frozenset({"local"}),  # the model runs in the house
+    "llama_cpp": frozenset({"local"}),
 }
 
 RISK_ORDER = {"high": 0, "medium": 1, "low": 2}
