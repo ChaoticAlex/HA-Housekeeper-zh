@@ -9,7 +9,7 @@ import pytest
 
 pytest.importorskip("homeassistant")
 
-from custom_components.ha_housekeeper.hacs import hacs_by_domain  # noqa: E402
+from custom_components.ha_housekeeper.hacs import hacs_by_domain, hacs_repositories  # noqa: E402
 
 
 def repo(**data):
@@ -68,3 +68,38 @@ def test_a_commit_install_is_distinguished_from_a_release_and_dates_are_json_saf
     assert found["demo"]["installed_kind"] == "commit"
     assert found["demo"]["last_fetched"] == "2026-10-14T10:30:00+00:00"
     assert found["released"]["installed_kind"] == "release"
+
+
+def test_every_installed_repository_is_listed_with_what_hacs_removed(monkeypatch) -> None:
+    from homeassistant.helpers import issue_registry as ir
+
+    issues = {
+        ("hacs", "removed_7"): SimpleNamespace(
+            translation_placeholders={"name": "me/demo", "reason": "Repository is archived"},
+            dismissed_version=None,
+        ),
+        ("hacs", "removed_9"): SimpleNamespace(
+            translation_placeholders={"name": "me/card", "reason": "Deprecated by the owner"},
+            dismissed_version="2026.10.1",
+        ),
+        ("other", "removed_8"): SimpleNamespace(translation_placeholders={}, dismissed_version=None),
+    }
+    monkeypatch.setattr(ir, "async_get", lambda hass: SimpleNamespace(issues=issues))
+    demo = repo(installed_version="1.0", last_version="1.1")
+    card = repo(category="plugin", domain=None, id=9, full_name="me/card", installed_version="2")
+    theme = repo(category="theme", domain=None, id=10, full_name="me/theme", installed_version="3")
+    gone = repo(installed=False, id=11, full_name="me/gone")
+    hass = SimpleNamespace(
+        data={"hacs": SimpleNamespace(repositories=SimpleNamespace(list_all=[theme, card, demo, gone]))}
+    )
+    rows = hacs_repositories(hass)
+    assert [r["full_name"] for r in rows] == ["me/card", "me/demo", "me/theme"]
+    by_id = {r["id"]: r for r in rows}
+    assert by_id["7"]["removed"] == {"name": "me/demo", "reason": "Repository is archived", "ignored": False}
+    assert by_id["9"]["removed"]["ignored"] is True and by_id["9"]["category"] == "plugin"
+    assert by_id["10"]["removed"] is None
+    assert hacs_by_domain(hass)["demo"]["removed"]["reason"] == "Repository is archived"
+
+
+def test_the_repository_list_is_none_without_hacs() -> None:
+    assert hacs_repositories(SimpleNamespace(data={})) is None

@@ -11,6 +11,7 @@ from homeassistant.core import HomeAssistant, callback
 
 from .access import access_report
 from .const import DOMAIN
+from .hacs import hacs_repositories
 from .inventory import InventoryScanner
 from .open_flows import open_flows
 from .sensitive_fields import sensitive_fields
@@ -134,6 +135,19 @@ def websocket_open_flows(
     connection.send_result(msg["id"], _versioned({"flows": open_flows(hass)}))
 
 
+@websocket_api.require_admin
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/hacs_repositories"})
+@callback
+def websocket_hacs_repositories(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> None:
+    """Every installed HACS repository with its versions and whether HACS removed it. Read-only."""
+    rows = hacs_repositories(hass)
+    connection.send_result(
+        msg["id"], _versioned({"available": rows is not None, "repositories": rows or []})
+    )
+
+
 @callback
 def async_register(hass: HomeAssistant) -> None:
     """Register the storage, access and credential-overview commands."""
@@ -142,3 +156,4 @@ def async_register(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_access)
     websocket_api.async_register_command(hass, websocket_sensitive_fields)
     websocket_api.async_register_command(hass, websocket_open_flows)
+    websocket_api.async_register_command(hass, websocket_hacs_repositories)

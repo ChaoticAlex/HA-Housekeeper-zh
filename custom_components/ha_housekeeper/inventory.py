@@ -80,7 +80,7 @@ from .db_health import database_summary
 from .entry_states import EntryStateHistory
 from .events import EventLog
 from .goals import GoalStore
-from .hacs import hacs_by_domain
+from .hacs import hacs_by_domain, removed_issues
 from .history import ScanHistory
 from .hygiene import (
     automation_hygiene_findings,
@@ -1632,6 +1632,11 @@ class InventoryScanner:
                 "ha_version": HA_VERSION,
                 "hacs_available": hacs is not None,
                 "hacs_housekeeper": hacs.get(DOMAIN) if hacs is not None else None,
+                "hacs_removed": [
+                    {"id": key, **value}
+                    for key, value in sorted(removed_issues(self.hass).items())
+                    if not value["ignored"]
+                ],
                 "scan_interval_hours": self.scan_interval_hours,
                 "low_battery_percent": self.low_battery_percent,
                 "stale_hours": self.stale_hours,
