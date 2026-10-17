@@ -36,6 +36,7 @@
 ### Behoben
 
 - **Oberfläche, Korrekturen:**
+  - Die Tabelle „Alle gezählten Läufe“ nimmt wie die anderen Listen die volle Breite.
   - Auf „Zugriffe & Datenfluss“ steht „Wie wird das gezählt?“ in der Liste wie auf den anderen Sicherheitsseiten statt als eigene Karte darunter.
   - Der Start-Hinweis zeigt nach dem Neuladen der Seite nicht mehr kurz die alten „5 Minuten“, sondern wartet auf die aktuelle Angabe.
   - Der Puffer von einer Minute fängt wegen einer kurz ladenden Integration nicht mehr mehrmals von vorn an.
@@ -87,6 +88,7 @@
 #### Fixed
 
 - **Interface, corrections:**
+  - The table "All counted runs" uses the full width like the other lists.
   - On "Access & data flow", "How is this counted?" sits inside the list like on the other security pages instead of in a card of its own below.
   - After a page reload the start notice no longer shows the old “5 minutes” for a moment but waits for the current figure.
   - The one-minute buffer no longer starts over because an integration loads briefly.
