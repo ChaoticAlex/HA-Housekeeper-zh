@@ -106,7 +106,7 @@ class StormsMixin {
   stormEntitiesList(entities) {
     const num = v => (v === null || v === undefined ? "–" : this.esc(this.formatNumber(v)));
     const kb = item => (item.attr_bytes === null || item.attr_bytes === undefined ? null : Math.round(item.attr_bytes / 102.4) / 10);
-    const info = item => this.excludeInfo(item.entity_id, item.per_day, item.excluded);
+    const info = item => this.excludeInfo(item);
     const columns = [
       { key: "sel", label: "stormColSelect", sortable: false, narrow: true, allBox: rows => this.excludeAllBox(rows.map(item => item.entity_id)), cell: item => this.excludeBox(item.entity_id) },
       { key: "name", label: "utName", cell: item => this.nameCell(item.name || item.entity_id, item.name ? item.entity_id : "") },
@@ -255,9 +255,9 @@ class StormsMixin {
     ]);
     const entry = this.stormEntry && r.integrations.find(g => g.entry_id === this.stormEntry);
     const ofEntry = entry ? r.entities.filter(item => item.entry_id === entry.entry_id) : r.entities;
-    const shownEntities = this.exOnlySug ? ofEntry.filter(item => this.excludeInfo(item.entity_id, item.per_day, item.excluded).suggest) : ofEntry;
+    const shownEntities = this.exOnlySug ? ofEntry.filter(item => this.excludeInfo(item).suggest) : ofEntry;
     const entryBar = entry ? `<div class="toolbar exbar"><span class="date">${this.t("stormOnlyEntry", { title: this.esc(entry.title), shown: this.formatNumber(ofEntry.length), total: this.formatNumber(entry.entities) })}</span><button class="btn quiet" data-storm-entry-clear>${this.t("stormEntryClear")}</button></div>` : "";
-    const table = r.entities.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormLoudest")}</h2><p>${this.t("stormLoudestHint")}</p></div></div>${this.excludeCard(r.entities.filter(item => this.excludeInfo(item.entity_id, item.per_day, item.excluded).suggest).map(item => item.entity_id))}${entryBar}${this.stormEntitiesList(shownEntities)}</div>` : "";
+    const table = r.entities.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormLoudest")}</h2><p>${this.t("stormLoudestHint")}</p></div></div>${this.excludeCard(r.entities.filter(item => this.excludeInfo(item).suggest).map(item => item.entity_id))}${entryBar}${this.stormEntitiesList(shownEntities)}</div>` : "";
     const shares = r.integrations.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormShares")}</h2><p>${this.t("stormSharesHint")}</p></div></div>${this.stormSharesList(r.integrations)}</div>` : "";
     const events = r.events.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("stormEvents")}</h2><p>${this.t("stormEventsHint")}</p></div></div>${this.stormEventsList(r)}<details class="howto"><summary>${this.t("evWhenTitle")}</summary><p class="factnote">${this.t("evWhen")}</p></details><p class="factnote">${this.t("evFoot")}</p>${this.howCounted("stormFootnote")}</div>` : "";
     const ex = r.excluded || {};

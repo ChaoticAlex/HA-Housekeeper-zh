@@ -124,19 +124,34 @@ def _query_costs(hass: HomeAssistant, limit: int) -> dict[str, Any]:
     }
 
 
-def rank_costs(raw: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, Any]:
-    """Join the database counts with the inventory: what each heavy entity is used for."""
-    entities = {
-        item["object_id"]: item for item in snapshot["objects"] if item["object_type"] == "entity"
-    }
+def usage_counts(edges: list[dict[str, Any]]) -> dict[str, int]:
+    """How many automations, scripts or dashboards use each entity, over certain usage edges."""
     used: dict[str, int] = {}
-    for edge in snapshot["edges"]:
+    for edge in edges:
         if (
             edge["target"].startswith("entity:")
             and edge["relation"] in USAGE_RELATIONS
             and edge.get("confidence", "certain") == "certain"
         ):
             used[edge["target"][7:]] = used.get(edge["target"][7:], 0) + 1
+    return used
+
+
+def exclusion_suggested(*, known: bool, uses: int, has_statistics: bool, rate: float) -> bool:
+    """Whether excluding an entity from the recorder is worth suggesting: the one rule of both views.
+
+    ``rate`` is what the entity writes now (rows in the last 24 hours); an entity that something uses
+    or that feeds statistics is never suggested.
+    """
+    return known and uses == 0 and not has_statistics and rate >= SUGGEST_MIN_PER_DAY
+
+
+def rank_costs(raw: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, Any]:
+    """Join the database counts with the inventory: what each heavy entity is used for."""
+    entities = {
+        item["object_id"]: item for item in snapshot["objects"] if item["object_type"] == "entity"
+    }
+    used = usage_counts(snapshot["edges"])
     total = raw["total_states"] or 0
     entity_filter = raw.get("recorded")
     recent = raw.get("recent")
@@ -166,10 +181,9 @@ def rank_costs(raw: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, Any]:
                 "has_statistics": has_statistics,
                 "known": item is not None,
                 "excluded": bool(entity_filter) and not entity_filter(entity_id),
-                "suggest_exclude": item is not None
-                and uses == 0
-                and not has_statistics
-                and current >= SUGGEST_MIN_PER_DAY,
+                "suggest_exclude": exclusion_suggested(
+                    known=item is not None, uses=uses, has_statistics=has_statistics, rate=current
+                ),
             }
         )
     return {

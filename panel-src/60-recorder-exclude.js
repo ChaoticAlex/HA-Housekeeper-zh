@@ -6,7 +6,7 @@ Object.assign(TEXT.de, {
   exCount: "{count} ausgewählt", exNone: "Nichts ausgewählt", exNoneSug: "Nichts ausgewählt · {count} Vorschläge", exPickSuggested: "Alle Vorgeschlagenen wählen", exClear: "Leeren", exCopy: "YAML kopieren",
   exStepsTitle: "So geht es weiter", exStep1: "Einfügen in die configuration.yaml. Gibt es dort schon einen recorder:-Abschnitt, trage nur die Zeilen unter entities: in dessen exclude:-Liste ein, nicht noch einmal recorder:.",
   exStep2: "Prüfen unter Entwicklerwerkzeuge → YAML → Konfiguration prüfen.", exStep3: "Neu starten. Der Recorder liest den Ausschluss nur beim Start. Danach steht die Entität hier als „bereits ausgeschlossen“.",
-  exSuggest: "Empfohlen", exOnlySug: "Nur Vorschläge", exWhy: "Nicht verwendet, keine Statistik, {perDay} Zeilen pro Tag", exRule: "Empfohlen ist, was nirgends verwendet wird, keine Statistik hat und mindestens {min} Zeilen pro Tag schreibt.", exHasStats: "Statistik vorhanden", exUsedBy: "{count} Verwendungen",
+  exSuggest: "Empfohlen", exOnlySug: "Nur Vorschläge", exWhy: "Nicht verwendet, keine Statistik, {perDay} Zeilen in den letzten 24 Stunden", exRule: "Empfohlen ist, was nirgends verwendet wird, keine Statistik hat und in den letzten 24 Stunden mindestens {min} Zeilen schreibt.", exHasStats: "Statistik vorhanden", exUsedBy: "{count} Verwendungen",
   trimTitle: "Alten Verlauf kürzen", trimHint: "Der Ausschluss gilt nur für neue Daten. Schon gespeicherte Zustände bleiben, bis du sie hier löschst.", trimChosen: "{count} Entitäten ausgewählt", trimChosenOne: "1 Entität ausgewählt",
   trimKeep: "Zustände behalten, die jünger sind als", trimDays: "{days} Tage", trimGone: "Wird gelöscht", trimGoneSub: "Zustände älter als {days} Tage", trimStay: "Bleibt", trimStaySub: "die letzten {days} Tage", trimEarlier: "früher", trimAgo: "vor {days} Tagen", trimToday: "heute",
   trimFactStats: "Statistiken bleiben", trimFactStatsSub: "Energie-Dashboard und Langzeitdiagramme ändern sich nicht.", trimFactRows: "Zeilenzahl erst in der Vorschau", trimFactRowsSub: "Du siehst pro Entität, wie viele Zeilen wegfallen, bevor etwas passiert.",
@@ -21,7 +21,7 @@ Object.assign(TEXT.en, {
   exCount: "{count} selected", exNone: "Nothing selected", exNoneSug: "Nothing selected · {count} suggestions", exPickSuggested: "Select all suggested", exClear: "Clear", exCopy: "Copy YAML",
   exStepsTitle: "What to do next", exStep1: "Paste it into configuration.yaml. If there is a recorder: section already, add only the lines under entities: to its exclude: list, not recorder: again.",
   exStep2: "Check under Developer tools → YAML → Check configuration.", exStep3: "Restart. The recorder reads the exclusion only at start. Afterwards the entity shows here as “already excluded”.",
-  exSuggest: "Recommended", exOnlySug: "Only suggestions", exWhy: "Not used, no statistics, {perDay} rows per day", exRule: "Recommended means: used nowhere, no statistics and at least {min} rows per day.", exHasStats: "has statistics", exUsedBy: "{count} uses",
+  exSuggest: "Recommended", exOnlySug: "Only suggestions", exWhy: "Not used, no statistics, {perDay} rows in the last 24 hours", exRule: "Recommended means: used nowhere, no statistics and wrote at least {min} rows in the last 24 hours.", exHasStats: "has statistics", exUsedBy: "{count} uses",
   trimTitle: "Trim the old history", trimHint: "The exclusion only applies to new data. States already stored stay until you delete them here.", trimChosen: "{count} entities selected", trimChosenOne: "1 entity selected",
   trimKeep: "Keep states that are younger than", trimDays: "{days} days", trimGone: "Will be deleted", trimGoneSub: "States older than {days} days", trimStay: "Stays", trimStaySub: "the last {days} days", trimEarlier: "earlier", trimAgo: "{days} days ago", trimToday: "today",
   trimFactStats: "Statistics stay", trimFactStatsSub: "The Energy dashboard and long-term charts do not change.", trimFactRows: "Row count comes with the preview", trimFactRowsSub: "You see per entity how many rows go before anything happens.",
@@ -31,19 +31,19 @@ Object.assign(TEXT.en, {
   confirmedSummaryTrim: "The old history of {count} entities will be deleted. Housekeeper creates a Home Assistant backup first, including the database. It can only be taken back with that backup.",
 });
 
-const EXCLUDE_MIN_PER_DAY = 100; // rows per day from which an unused entity is worth excluding
+const EXCLUDE_MIN_PER_DAY = 100; // only for the text of the rule: the backend decides (SUGGEST_MIN_PER_DAY in maintenance.py)
 
 class ExcludeMixin {
-  // What speaks for or against excluding one entity, from the inventory. `excluded` is what the recorder reports.
-  excludeInfo(entityId, perDay, excluded = false) {
+  // What speaks for or against excluding one entity. The backend decides (`suggest_exclude`, one rule for both views);
+  // this only words it. `item` is a row of the write load or of the storage use.
+  excludeInfo(item) {
     const tag = (cls, text) => `<span class="pill ${cls}">${text}</span>`;
-    if (excluded) return { suggest: false, tags: tag("ok", this.t("recorderExcluded")) };
-    const obj = this.findObject(`entity:${entityId}`);
-    if (!obj) return { suggest: false, tags: "" };
-    const uses = this.edgesTo(`entity:${entityId}`).filter(e => USAGE_RELATIONS.includes(e.relation)).length;
-    const suggest = !uses && !obj.has_statistics && perDay >= EXCLUDE_MIN_PER_DAY;
-    const tags = suggest ? tag("warn", this.t("exSuggest")) : [obj.has_statistics ? tag("mute", this.t("exHasStats")) : "", uses ? tag("mute", this.t("exUsedBy", { count: uses })) : ""].join("");
-    return { suggest, tags, why: suggest ? this.t("exWhy", { perDay: this.formatNumber(Math.round(perDay)) }) : "" };
+    if (item.excluded) return { suggest: false, tags: tag("ok", this.t("recorderExcluded")) };
+    if (!this.findObject(`entity:${item.entity_id}`)) return { suggest: false, tags: "" };
+    const suggest = Boolean(item.suggest_exclude), uses = item.used || 0;
+    const rate = item.states_24h ?? item.rows_24h ?? 0;
+    const tags = suggest ? tag("warn", this.t("exSuggest")) : [item.has_statistics ? tag("mute", this.t("exHasStats")) : "", uses ? tag("mute", this.t("exUsedBy", { count: uses })) : ""].join("");
+    return { suggest, tags, why: suggest ? this.t("exWhy", { perDay: this.formatNumber(Math.round(rate)) }) : "" };
   }
 
   // What the recorder keeps out already, from the lists in view.

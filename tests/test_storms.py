@@ -296,3 +296,25 @@ async def test_mark_excluded_follows_the_recorder_filter(hass: HomeAssistant, mo
     assert "excluded" not in result["entities"][0], "the kept reply is not changed"
     Instance.entity_filter = None
     assert mark_excluded(hass, result) is result
+
+
+def test_a_loud_entity_is_suggested_for_exclusion_by_the_same_rule_as_in_the_costs() -> None:
+    from custom_components.ha_housekeeper.maintenance import exclusion_suggested
+
+    assert exclusion_suggested(known=True, uses=0, has_statistics=False, rate=150)
+    assert not exclusion_suggested(known=True, uses=1, has_statistics=False, rate=150)
+    assert not exclusion_suggested(known=True, uses=0, has_statistics=True, rate=150)
+    assert not exclusion_suggested(known=True, uses=0, has_statistics=False, rate=99)
+    assert not exclusion_suggested(known=False, uses=0, has_statistics=False, rate=150)
+
+
+def test_the_loud_entities_carry_the_exclusion_suggestion_of_the_last_24_hours() -> None:
+    edges = [
+        {"source": "automation:a", "target": "entity:used", "relation": "TRIGGERS_ON"}
+    ]
+    result = evaluate(
+        {"free": counts(7000, day_rows=150), "used": counts(7000, day_rows=150)}, edges=edges, days=7
+    )
+    rows = {row["entity_id"]: row for row in result["entities"]}
+    assert rows["free"]["suggest_exclude"] and rows["free"]["rows_24h"] == 150
+    assert not rows["used"]["suggest_exclude"] and rows["used"]["used"] == 1

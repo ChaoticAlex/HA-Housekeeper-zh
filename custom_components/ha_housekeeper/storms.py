@@ -19,6 +19,7 @@ from homeassistant.core import HomeAssistant
 
 from .cleanup import USAGE_RELATIONS
 from .const import IGNORE_LABEL
+from .maintenance import exclusion_suggested, usage_counts
 from .meter import recorder_ready
 from .payloads import StormsResult
 from .queries import DayCache, ReplyStore, cached_query, kept_reply, pieces
@@ -230,6 +231,7 @@ def evaluate_storms(
 ) -> dict[str, Any]:
     """Judge the counts. ``entities`` maps entity_id to name, config entry and platform."""
     counts = raw["entities"]
+    used = usage_counts(edges)
     days = max(window_days, 1)
     total_rows = sum(item["rows"] for item in counts.values())
     known_bytes = sum(item.get("day_bytes", 0) for item in counts.values())
@@ -253,6 +255,15 @@ def evaluate_storms(
             "no_new_state": round(item["attr_rows"] / rows, 3) if rows else 0.0,
             "attr_bytes": round(mean_len) if mean_len is not None else None,
             "peak_hour": item.get("peak_hour"),
+            "rows_24h": day_rows,
+            "used": used.get(entity_id, 0),
+            "has_statistics": bool(info.get("has_statistics")),
+            "suggest_exclude": exclusion_suggested(
+                known=entity_id in entities,
+                uses=used.get(entity_id, 0),
+                has_statistics=bool(info.get("has_statistics")),
+                rate=day_rows,
+            ),
         }
         rows_list.append(row)
         entry = entries.get(info.get("config_entry_id") or "")
@@ -431,6 +442,7 @@ async def storms(
             "name": item.get("name"),
             "config_entry_id": item.get("config_entry_id"),
             "platform": item.get("platform"),
+            "has_statistics": item.get("has_statistics"),
         }
         for item in snapshot["objects"]
         if item["object_type"] == "entity"

@@ -4185,8 +4185,8 @@ test("the loudest entities offer ticks, mark what can be excluded and share the 
   el.data = { ...DATA, meta: { ...DATA.meta, recorder_available: true }, objects: [ent("light.a", false), ent("sensor.s", true)], edges: [] };
   el._edgeIndex = null;
   el.storms = { available: true, busy: false, findings: [], integrations: [], events: [], entities: [
-    { entity_id: "light.a", name: "A", rows: 5000, per_day: 5000, no_new_state: 1, attr_bytes: 100 },
-    { entity_id: "sensor.s", name: "S", rows: 4000, per_day: 4000, no_new_state: 0, attr_bytes: 100 },
+    { entity_id: "light.a", name: "A", rows: 5000, per_day: 5000, rows_24h: 5000, used: 0, has_statistics: false, suggest_exclude: true, no_new_state: 1, attr_bytes: 100 },
+    { entity_id: "sensor.s", name: "S", rows: 4000, per_day: 4000, rows_24h: 4000, used: 0, has_statistics: true, suggest_exclude: false, no_new_state: 0, attr_bytes: 100 },
   ], total_rows: 9000, per_day: 9000, entity_count: 2, event_total: 0 };
   el.view = "recorder"; el.viewTab = { recorder: "entities" };
   el.render();
@@ -4799,7 +4799,7 @@ test("what the recorder already excludes stays pickable for trimming but never r
   assert.equal(el.excludeSnippet(), "recorder:\n  exclude:\n    entities:\n      - sensor.open\n");
   assert.ok(el.excludeBox("sensor.done").includes("checked") && !el.excludeBox("sensor.done").includes("disabled"));
   assert.equal(el.t("exTitle"), "Exchange device", "the exchange card keeps its own title");
-  assert.ok(el.excludeInfo("sensor.done", 5000, true).tags.includes("already excluded") && !el.excludeInfo("sensor.done", 5000, true).suggest);
+  assert.ok(el.excludeInfo({ entity_id: "sensor.done", excluded: true }).tags.includes("already excluded") && !el.excludeInfo({ entity_id: "sensor.done", excluded: true }).suggest);
   let html = el.excludeCard([]);
   assert.ok(html.includes("1 selected · 1 to trim") && html.includes("Trim the old history"), "one for the block, one to trim");
   el.excludeSel.clear();
