@@ -246,9 +246,14 @@ class MonitorMixin {
       a.unstable_seconds ? tile(this.monitorDuration(a.unstable_seconds), this.t("monitorAvailUnstable")) : "",
     ].filter(Boolean).join("");
     const labels = { ok: "monitorOk", problem: "monitorProblem", unverified: "monitorUnverified", flapping: "monitorHist_flapping" };
-    const days = a.days.map(day => `<i class="${day.state || "none"}" title="${this.esc(`${day.date}: ${day.state ? this.t(labels[day.state]) : this.t("monitorAvailNoData")}`)}"></i>`).join("");
+    // A day with less than 1 % of impaired time reads amber, not red; unknown and unstable days are amber too.
+    const dayClass = day => (day.state === "problem" && (day.problem_seconds || 0) < 864 ? "problem short" : day.state || "none");
+    const dayTitle = day => `${day.date}: ${day.state ? (day.state === "problem" && day.problem_seconds ? this.t("monitorAvailDayProblem", { state: this.t(labels.problem), time: this.monitorDuration(day.problem_seconds) }) : this.t(labels[day.state])) : this.t("monitorAvailNoData")}`;
+    const days = a.days.map(day => `<i class="${dayClass(day)}" title="${this.esc(dayTitle(day))}"></i>`).join("");
+    const swatch = (cls, key) => `<span><i class="${cls}"></i>${this.esc(this.t(key))}</span>`;
+    const legend = `<div class="monitor-legend">${swatch("ok", "monitorAvailOk")}${swatch("problem short", "monitorAvailShort")}${swatch("problem", "monitorAvailLong")}${swatch("none", "monitorAvailUnobserved")}</div>`;
     const axis = `<div class="monitor-axis"><span>${this.t("monitorAvailFrom", { days: a.window_days })}</span><span>${this.t("monitorAvailToday")}</span></div>`;
-    return `<section class="panel u-mb14">${head}<div class="avail-tiles">${tiles}</div><div class="monitor-days" role="img" aria-label="${this.esc(this.t("monitorAvail"))}">${days}</div>${axis}<div class="avail-since">${this.esc(this.t("monitorAvailSince", { date: this.formatDate(a.since) }))}</div></section>`;
+    return `<section class="panel u-mb14">${head}<div class="avail-tiles">${tiles}</div><div class="monitor-days" role="img" aria-label="${this.esc(this.t("monitorAvail"))}">${days}</div>${axis}${legend}<div class="avail-since">${this.esc(this.t("monitorAvailSince", { date: this.formatDate(a.since) }))}</div></section>`;
   }
 
   async loadMonitorHistory(id, sig) {

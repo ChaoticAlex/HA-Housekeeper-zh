@@ -108,9 +108,11 @@ test("the home functions history shows a flapping run as one line and filters by
   el.monitorHistory = { one: { sig: "ok|" + at + "|undefined", retention_days: 30, entries: [
     { at, until: at, kind: "flapping", count: 7, state: "ok" }, { at, kind: "edited", added: ["entity:sensor.x"] },
   ] } };
-  el.monitorHistory.one.availability = { window_days: 30, since: at, observed_seconds: 1000, ok_seconds: 999, problem_seconds: 1, unknown_seconds: 0, unstable_seconds: 0, incidents: 1, longest_seconds: 1, days: [{ date: "2026-10-14", state: "problem" }] };
+  el.monitorHistory.one.availability = { window_days: 30, since: at, observed_seconds: 1000, ok_seconds: 999, problem_seconds: 1, unknown_seconds: 0, unstable_seconds: 0, incidents: 1, longest_seconds: 1, days: [{ date: "2026-10-13", state: "problem", problem_seconds: 3600 }, { date: "2026-10-14", state: "problem", problem_seconds: 540 }] };
   const html = el.monitorDetail();
   assert.match(html, /<b class="ok">99,9 %<\/b><span>Unauffällig<\/span>/);
+  assert.match(html, /<i class="problem" title="2026-10-13: Beeinträchtigt, 1 Std\./);
+  assert.match(html, /<i class="problem short" title="2026-10-14: Beeinträchtigt, 9 Min\./);
   assert.match(html, /data-plan-open="p1"/);
   assert.ok(html.includes('data-lsort="monitor-history|time|desc"') && html.includes('data-lsort="monitor-members|state|asc"') && html.includes('data-object="entity:sensor.x"') === false, "history and objects are tables (the object is not in the inventory here, so its row opens nothing)");
   el.data.monitor[0].last_problem_at = new Date(Date.now() - 2 * 86400000).toISOString();
