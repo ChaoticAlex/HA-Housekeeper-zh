@@ -8,6 +8,7 @@
   - „Backup-Schutz“ und „Backups aufräumen“ sind ein Reiter „Backups“; das Aufräumen steht eingeklappt ganz unten, die Zeile „Housekeeper-Backups“ führt dorthin.
   - Oben stehen ein Urteil (Belastbar, Erst ansehen, Problem) und vier Kennzahlen; die Prüfzeilen sind in vier Gruppen geordnet.
   - Neue Prüfungen: Inhalt des neuesten Backups (fehlgeschlagene Apps oder Ordner, fehlende Datenbank), Alter der Kopie je externem Ablageort und Platz fürs nächste Backup.
+  - Eine Leiste zeigt die Größe der letzten Backups, so fällt Wachstum früh auf.
 - **Journal:**
   - Das Journal hat Reiter: „Pläne“ und „Entfernte Geräte“ (bisher unter Wartung, jetzt mit einem Sprung zum Plan); ältere Löschungen von Statistiken stehen als dritter Reiter dort, wenn es sie gibt.
   - Ein Fehler beim Laden wird angezeigt statt „Noch keine Vorschau“, und die Seite hat „Aktualisieren“ und einen Zeitstempel.
@@ -86,6 +87,7 @@
   - "Backup protection" and "Tidy up backups" are one "Backups" tab; the tidy-up is folded at the bottom, and the "Housekeeper backups" line leads there.
   - On top are a verdict (Reliable, Look first, Problem) and four figures; the check lines are sorted into four groups.
   - New checks: the content of the newest backup (failed apps or folders, missing database), the age of the copy on each external target and room for the next backup.
+  - A strip shows the size of the last backups, so growth shows early.
 - **Journal:**
   - The Journal has tabs: "Plans" and "Removed devices" (so far under Maintenance, now with a jump to the plan); older deletions of statistics are a third tab there when there are any.
   - A load error is shown instead of "No preview yet", and the page has "Refresh" and a time stamp.

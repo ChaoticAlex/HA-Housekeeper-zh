@@ -5848,3 +5848,12 @@ test("the new backup checks say what failed, which target is stale and how much 
   assert.ok(html.includes("Parts of the newest backup failed: Cloudflared, ssl") && html.includes("Too old (limit 36 h): cloud.cloud: 9 days") && html.includes("Only 800 MB free, the last backup was 1 GB"));
   assert.ok(html.includes("Storage and content") && html.includes("Content") && html.includes("Room for the next backup"));
 });
+
+test("the Backups tab draws the sizes of the last backups and marks the newest, left out below three", () => {
+  const { el } = panel("en");
+  const row = (n, size, extra = {}) => ({ date: `2026-10-${10 + n}T03:00:00+00:00`, size, ...extra });
+  el.backup = { available: true, overall: "ok", checks: [{ id: "size", level: "note", values: {} }], backups: [row(3, 4 * 1024 ** 3), row(2, 2 * 1024 ** 3), row(1, 2 * 1024 ** 3), row(0, 1024 ** 3, { own: true })] };
+  const html = el.bhSizes(el.backup);
+  assert.ok(html.includes("Size of the last backups") && (html.match(/<i /g) || []).length === 3 && html.includes('class="last warn"') && html.includes("from 2 GB to 4 GB"), "own backups stay out");
+  assert.equal(el.bhSizes({ ...el.backup, backups: el.backup.backups.slice(0, 2) }), "");
+});
