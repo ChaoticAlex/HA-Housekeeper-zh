@@ -1,7 +1,7 @@
 // SystemMixin: the pages "Storage & system", "Access & data flow" and "Credentials" under Operation and Security; mixed in by 99-register.js.
 // All three only read. A page loads on its first visit; its refresh button reads again.
 // A page and the WebSocket command it asks.
-const SYS_COMMANDS = { storage: "system_usage", dataflow: "access", secrets: "sensitive_fields", flows: "open_flows" };
+const SYS_COMMANDS = { storage: "system_usage", dataflow: "access", secrets: "sensitive_fields", flows: "open_flows", hacs: "hacs_repositories" };
 // What a tile of the credentials page opens: [tab, list, state filter]; "" clears the filters.
 const SEC_SHOWS = { "": ["entries", "seclist", ""], gap: ["entries", "seclist", "gap"], reauth: ["entries", "seclist", "reauth"], disabled: ["entries", "seclist", "disabled"], nomfa: ["accounts", "secusers", "nomfa"], tokens: ["tokens", "sectokens", ""] };
 const SYS_WARN_PERCENT = 75, SYS_RED_PERCENT = 90;

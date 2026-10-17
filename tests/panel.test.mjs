@@ -4988,6 +4988,28 @@ test("apps and integrations groups config entries by domain and opens the page o
   assert.ok(shadow.innerHTML.includes("1.7") && shadow.innerHTML.includes(el.t("compSumAppUpdates")), "the newest version and the number of app updates show");
 });
 
+test("the HACS tab lists every repository, puts what HACS removed first and opens the repository in HACS", () => {
+  const { el, shadow } = systemPanel("en");
+  el.data = { ...DATA, meta: { ...DATA.meta, hacs_available: true } };
+  el.view = "components"; el.viewTab = { components: "hacs" };
+  el.sysState("hacs").data = { available: true, repositories: [
+    { id: "1", name: "Mushroom", full_name: "piitaya/lovelace-mushroom", category: "plugin", installed_version: "v5", available_version: "v5", pending_update: false, archived: false, removed: null },
+    { id: "2", name: "Old icons", full_name: "me/old-icons", category: "plugin", installed_version: "v1", available_version: "v1", pending_update: false, archived: true, removed: { name: "me/old-icons", reason: "Repository is archived", ignored: false } },
+    { id: "3", name: "Demo", full_name: "me/demo", category: "integration", installed_version: "1.0", available_version: "1.1", pending_update: true, archived: false, removed: null },
+    { id: "4", name: "Seen", full_name: "me/seen", category: "theme", installed_version: "2", available_version: "2", pending_update: false, archived: false, removed: { name: "me/seen", reason: "x", ignored: true } },
+  ] };
+  el.sysState("hacs").requested = true;
+  el.render();
+  const html = shadow.innerHTML;
+  assert.ok(html.includes("Removed from HACS") && html.includes("Repository is archived") && html.includes("(ignored)"), "removed repositories show with the reason");
+  assert.ok(html.indexOf("Old icons") < html.indexOf("Demo") && html.indexOf("Demo") < html.indexOf("Mushroom"), "removed first, then updates, then the rest");
+  assert.ok(html.includes('data-ha-path="/hacs/repository/2"') && html.includes("Card") && html.includes("Theme"), "a row opens HACS; cards and themes are listed");
+  assert.ok(html.includes('data-sys-refresh="hacs"'), "the refresh bar reloads the list");
+  el.data = { ...DATA, meta: { ...DATA.meta, hacs_available: false } };
+  el.render();
+  assert.ok(!shadow.innerHTML.includes("every installed repository"), "without HACS there is no tab");
+});
+
 test("the page of an integration covers all its entries for core and custom and every tab renders", async () => {
   for (const custom of [true, false]) {
     const { el, shadow } = systemPanel("en");
