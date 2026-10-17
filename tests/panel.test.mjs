@@ -4976,6 +4976,7 @@ test("apps and integrations groups config entries by domain and opens the page o
   el.viewTab = { components: "custom" };
   el.render();
   assert.ok(shadow.innerHTML.includes('data-comp-open="demo"') && !shadow.innerHTML.includes('class="compentry"'), "an integration with two entries folds out; closed it shows none");
+  assert.ok(/<div class="compname"><span class="tile mute"><button[^>]*data-comp-open="demo"[\s\S]*?<\/span><div class="namecell"/.test(shadow.innerHTML), "arrow and name share one row");
   el.compOpen = ["demo"];
   el.render();
   assert.equal((shadow.innerHTML.match(/class="compentry"/g) || []).length, 2, "opened, one row per entry");

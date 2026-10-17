@@ -52,7 +52,8 @@ class ComponentsMixin {
   compNameCell(g) {
     const sub = [g.domain, g.entries.length > 1 ? this.t("compEntries", { n: g.entries.length }) : ""].filter(Boolean).join(" · ");
     const open = (this.compOpen || []).includes(g.domain);
-    return `${g.entries.length > 1 ? this.expandBtn("data-comp-open", g.domain, open, this.t(open ? "compCloseEntries" : "compOpenEntries")) : ""}${this.nameCell(g.name, sub)}`;
+    const lead = g.entries.length > 1 ? this.expandBtn("data-comp-open", g.domain, open, this.t(open ? "compCloseEntries" : "compOpenEntries")) : `<span class="tile compgap" aria-hidden="true"></span>`;
+    return `<div class="compname">${lead}${this.nameCell(g.name, sub)}</div>`;
   }
 
   // The entries of an opened integration: one line each, a click opens the entry.

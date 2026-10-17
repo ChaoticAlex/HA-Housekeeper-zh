@@ -57,6 +57,7 @@
   - Läufe: Die Fußnote „So wird gezählt“ nennt jetzt die Grenzen der Hinweise (Fehler, nie erfolgreich, Überschneidung, ohne Wirkung, sehr oft, lange Läufe) mit den Zahlen aus dem Backend.
   - Der Kurzüberblick einer Integration („Bekannt“) zeigt „Neue Anmeldung offen“ statt „Geladen“, wenn Home Assistant eine neue Anmeldung verlangt.
   - Zuverlässigkeit und Schreiblast: Behält der Recorder weniger Tage, als das gewählte Fenster umfasst, steht ein Hinweis, dass die Zahlen nicht weiter zurückreichen.
+  - Apps & Integrationen: Der Pfeil zum Aufklappen steht neben dem Namen statt darüber; alle Namen beginnen auf einer Linie.
 - **Zugriffe & Datenfluss:** Integrationen, deren Tracker nur die Anwesenheit über Router oder Bluetooth melden (etwa die FRITZ!Box), gelten nicht mehr als „Standort“ mit hohem Risiko, sondern zeigen „Anwesenheit im Netz“.
 - **Freigaben:** Alexa und Google Assistant, die in den Nabu-Casa-Einstellungen ausgeschaltet sind, zählen nicht mehr als „freigegeben“ und erzeugen keine Befunde; ihre Kachel zeigt „in Nabu Casa ausgeschaltet“.
 
@@ -117,6 +118,7 @@
   - Runs: the “How this is counted” footnote now names the limits of the notes (errors, never succeeds, overlap, no effect, very often, long runs) with the numbers from the backend.
   - The short overview of an integration (“Known”) shows “New login open” instead of “Loaded” when Home Assistant asks for a new login.
   - Reliability and write load: if the recorder keeps fewer days than the chosen window, a note says the numbers reach back no further.
+  - Apps & integrations: the arrow that unfolds a row sits beside the name instead of above it; all names start on one line.
 - **Access & data flow:** Integrations whose trackers only report presence through a router or Bluetooth (such as the FRITZ!Box) no longer count as "location" with a high risk but show "presence on the network".
 - **Exposure:** Alexa and Google Assistant switched off in the Nabu Casa settings no longer count as "exposed" and raise no findings; their tile says "switched off in Nabu Casa".
 
