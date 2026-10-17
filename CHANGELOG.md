@@ -51,6 +51,7 @@
   - Das Bearbeiten einer Hausfunktion ist aufgeräumter: Allgemeines, Objekte, Suche und Vorschläge stehen in einer Karte, Vorschläge sind „+“-Knöpfe, Entfernen ein X. „Löschen“ ist wie überall der weich rote Knopf (auch bei Notizen). „Speichern“ bleibt aktiv und sagt, was fehlt.
   - Recorder: Die Reiter heißen „Schreiblast“ (wie oft etwas geschrieben wird), „Speicherbedarf“ (wie viel Platz jede Entität belegt) und „Datenbank“.
   - Recorder: „Empfohlen“ zum Ausschließen entscheidet in Schreiblast und Speicherbedarf dieselbe Regel (nirgends verwendet, keine Statistik, mindestens 100 Zeilen in den letzten 24 Stunden); vorher konnte eine Entität im einen Reiter empfohlen sein und im anderen nicht.
+  - Recorder, Datenbank: Größe, Zuwachs pro Tag, Aufbewahrung und „Automatisch löschen“ stehen als Kacheln über der Liste statt in einer Textzeile darunter; was sich nicht messen lässt (etwa bei MySQL), steht weiter als kurzer Hinweis.
 - **Zugriffe & Datenfluss:** Integrationen, deren Tracker nur die Anwesenheit über Router oder Bluetooth melden (etwa die FRITZ!Box), gelten nicht mehr als „Standort“ mit hohem Risiko, sondern zeigen „Anwesenheit im Netz“.
 - **Freigaben:** Alexa und Google Assistant, die in den Nabu-Casa-Einstellungen ausgeschaltet sind, zählen nicht mehr als „freigegeben“ und erzeugen keine Befunde; ihre Kachel zeigt „in Nabu Casa ausgeschaltet“.
 
@@ -105,6 +106,7 @@
   - Editing a house function is tidier: general settings, objects, search and suggestions share one card, suggestions are “+” buttons, remove is an X. “Delete” is the soft red button as everywhere else (notes too). “Save” stays enabled and says what is missing.
   - Recorder: the tabs are called "Write load" (how often things are written), "Storage use" (how much space each entity takes) and "Database".
   - Recorder: "Recommended" for exclusion is decided by the same rule in write load and storage use (used nowhere, no statistics, at least 100 rows in the last 24 hours); before, an entity could be recommended in one tab and not in the other.
+  - Recorder, database: size, growth per day, retention and "Purge automatically" are tiles above the list instead of a line of text below; what cannot be measured (for example with MySQL) stays as a short note.
 - **Access & data flow:** Integrations whose trackers only report presence through a router or Bluetooth (such as the FRITZ!Box) no longer count as "location" with a high risk but show "presence on the network".
 - **Exposure:** Alexa and Google Assistant switched off in the Nabu Casa settings no longer count as "exposed" and raise no findings; their tile says "switched off in Nabu Casa".
 

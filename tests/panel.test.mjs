@@ -5718,3 +5718,15 @@ test("an integration with too few entities for a shared outage says so instead o
   const html = el.reliabilityView();
   assert.ok(html.includes("too small") && html.includes("Shared outages need at least 3 entities."));
 });
+
+test("the database tab shows size, growth, retention and purge as tiles and keeps notes for what is unknown", () => {
+  const { el } = panel("en");
+  el.data = DATA; el._dbRequested = true;
+  el.dbHealth = { ...DBH, keep_days: 10, auto_purge: false };
+  let html = el.dbCard();
+  assert.ok(html.includes("Size") && html.includes("11 GB") && html.includes("WAL 3 GB") && html.includes("Growth per day") && html.includes("+80 MB") && html.includes("10 days") && html.includes("Purge automatically") && html.includes("Off"));
+  assert.ok(html.includes("Automatic purging is off") && html.includes("2 gaps from restarts (normal)"), "the sentences stay as notes");
+  el.dbHealth = { ...DBH, supported: false, dialect: "mysql", db_bytes: null, growth: { known: false } };
+  html = el.dbCard();
+  assert.ok(!html.includes("Growth per day") && html.includes("Size not measurable (database: mysql)") && html.includes("Growth is being observed"));
+});
