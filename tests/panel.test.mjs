@@ -5005,6 +5005,11 @@ test("the HACS tab lists every repository, puts what HACS removed first and open
   assert.ok(html.indexOf("Old icons") < html.indexOf("Demo") && html.indexOf("Demo") < html.indexOf("Mushroom"), "removed first, then updates, then the rest");
   assert.ok(html.includes('data-ha-path="/hacs/repository/2"') && html.includes("Card") && html.includes("Theme"), "a row opens HACS; cards and themes are listed");
   assert.ok(html.includes('data-sys-refresh="hacs"'), "the refresh bar reloads the list");
+  assert.ok(html.includes("Removed from HACS: what to do?") && html.includes('data-ha-path="/config/repairs"'), "the advice and the link to the repairs show above the list");
+  el.data = { ...el.data, meta: { ...el.data.meta, hacs_removed: [{ id: "2", name: "me/old-icons", reason: "Repository is archived", ignored: false }] } };
+  const row = el.todoItems().find(i => i.key === "hacs_removed");
+  assert.ok(row && row.text.includes("me/old-icons") && row.jump.includes('data-jump-tab="hacs"') && row.jump.includes("hacsrepos|state|removed"), "the to-do card has a row that opens the filtered list");
+  assert.ok(el.intHacsCard({ id: "2", full_name: "me/old-icons", installed_version: "1", removed: { reason: "Repository is archived", ignored: false } }).includes("took this repository out of its list: Repository is archived"), "the page of the integration says why");
   el.data = { ...DATA, meta: { ...DATA.meta, hacs_available: false } };
   el.render();
   assert.ok(!shadow.innerHTML.includes("every installed repository"), "without HACS there is no tab");

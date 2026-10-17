@@ -1522,7 +1522,7 @@ class StylesMixin {
       .facts{display:grid}.fact{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.fact:first-child{border-top:0}.fact span{color:var(--hk-muted)}.fact b{font-weight:600;text-align:right}.fact small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:400}
       .rangechart{display:block;max-width:640px;margin:6px 0}.rangechart.rc-small{max-width:360px}.lg-red{color:var(--hk-red)}.lg-green{color:var(--hk-green)}.rangesample{width:100%;font-size:12px;border-collapse:collapse;margin:4px 0}.rangeslide{width:100%;max-width:640px;display:block}.rangehead{margin-top:12px}.rangewin{display:flex;gap:8px;flex-wrap:wrap}.w140{max-width:140px}
 .w160{max-width:160px}.w260{max-width:260px}
-.w300{max-width:300px}.w460{max-width:460px}.reportextra{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.code.codefull{max-height:none}.panelhead.topline{border-top:1px solid var(--hk-border)}.planchips{padding:6px 0 0;border:0}.planresult{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.planfootbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.panel.ovvis{overflow:visible}.compentry td{padding-left:62px;cursor:pointer}.compname{display:flex;align-items:center;gap:8px}.compname>.namecell{flex:1;min-width:0}.compgap{visibility:hidden}.compentrymeta{display:block;color:var(--hk-muted);font-size:12px}.invsubrow td:first-child{padding-left:28px}.invsubrow .invsub{color:var(--hk-muted)}.hist-bar{margin-top:4px}.hist-hint{margin:10px 16px}.hist-hint0{margin:10px 0 0}.changes-pick{grid-template-columns:auto minmax(220px,360px)}.baselbl{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.u-m0{margin:0!important}.u-block{display:block!important}.u-mb14{margin-bottom:14px!important}.u-pt6{padding:6px 0 0!important}.u-dim{opacity:.8!important}.u-ic14{--mdc-icon-size:14px!important}.u-amber{color:var(--hk-amber)!important}
+.w300{max-width:300px}.w460{max-width:460px}.reportextra{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.code.codefull{max-height:none}.panelhead.topline{border-top:1px solid var(--hk-border)}.planchips{padding:6px 0 0;border:0}.planresult{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.planfootbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.panel.ovvis{overflow:visible}.compentry td{padding-left:62px;cursor:pointer}.hacsadvice ol{margin:0;padding:0 16px 12px 40px}.hacsadvice li{margin:2px 0}.compname{display:flex;align-items:center;gap:8px}.compname>.namecell{flex:1;min-width:0}.compgap{visibility:hidden}.compentrymeta{display:block;color:var(--hk-muted);font-size:12px}.invsubrow td:first-child{padding-left:28px}.invsubrow .invsub{color:var(--hk-muted)}.hist-bar{margin-top:4px}.hist-hint{margin:10px 16px}.hist-hint0{margin:10px 0 0}.changes-pick{grid-template-columns:auto minmax(220px,360px)}.baselbl{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.u-m0{margin:0!important}.u-block{display:block!important}.u-mb14{margin-bottom:14px!important}.u-pt6{padding:6px 0 0!important}.u-dim{opacity:.8!important}.u-ic14{--mdc-icon-size:14px!important}.u-amber{color:var(--hk-amber)!important}
       .factnote{padding:12px 16px;border-top:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));line-height:1.5}:where(:not(.panel))>.factnote{border-top:0;padding:0}.panel>.factnote:first-child{border-top:0}
       .diagcard{display:grid;gap:12px;padding:16px}.checks{display:grid;gap:8px}
       .check{display:grid;grid-template-columns:22px minmax(100px,150px) minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-soft);font-size:calc(13px*var(--hk-fs,1))}.check b{font-weight:600}.check .val{color:var(--hk-muted);overflow-wrap:anywhere}
@@ -2316,6 +2316,8 @@ class OverviewMixin {
       const followers = this.causeList().filter(c => c.kind === "integration_down" && reauth.some(f => f.object_id === c.object_id)).reduce((sum, c) => sum + (c.follower_count || 0), 0);
       items.push({ key: "reauth", area: "findings", tone: "red", icon: "mdi:key-alert-outline", text: reauth.length === 1 ? this.t("todoReauthOne", { name: names[0] }) : this.t("todoReauthMany", { n: reauth.length }), hintText: [reauth.length > 1 ? names.slice(0, 3).join(", ") + (names.length > 3 ? ", …" : "") : "", followers ? this.t("todoReauthFollowers", { n: this.formatNumber(followers) }) : ""].filter(Boolean).join(" · ") || this.t("secSumReauthSub"), pill: this.t("todoReauthPill"), view: "findingsNav", filter: "config_entry.reauth" });
     }
+    const hacsGone = this.data.meta?.hacs_removed || [];
+    if (hacsGone.length) items.push({ key: "hacs_removed", area: "care", tone: "warn", icon: "mdi:store-alert-outline", text: hacsGone.length === 1 ? this.t("hacsTodoOne", { name: hacsGone[0].name || hacsGone[0].id }) : this.t("hacsTodoMany", { n: hacsGone.length }), hintText: [hacsGone.length > 1 ? hacsGone.slice(0, 3).map(r => r.name || r.id).join(", ") + (hacsGone.length > 3 ? ", …" : "") : hacsGone[0].reason, this.t("hacsTodoHint")].filter(Boolean).join(" · "), pill: this.t("hacsTodoPill"), jump: 'data-jump="components" data-jump-tab="hacs" data-jump-lf="hacsrepos|state|removed"' });
     const outages = this.causeList().filter(c => !this.quietCause(c));
     if (outages.length) items.push({ key: "outages", area: "findings", tone: "red", icon: "mdi:source-branch", label: "actOutages", hintText: this.outagesHint(outages), count: outages.length, view: "findingsNav", filter: "" });
     const regressions = (this.data.regressions || []).length;
@@ -14551,6 +14553,11 @@ Object.assign(TEXT.de, {
   hacsColRepo: "Repository", hacsColKind: "Art", hacsColInstalled: "Installiert", hacsColLatest: "Neueste", hacsColState: "Zustand",
   hacsKind_integration: "Integration", hacsKind_plugin: "Karte", hacsKind_theme: "Theme", hacsKind_python_script: "Python-Skript", hacsKind_appdaemon: "AppDaemon", hacsKind_template: "Vorlage", hacsFilterKind: "Art", hacsFilterState: "Zustand",
   hacsStateRemoved: "Aus HACS entfernt", hacsStateRemovedIgnored: "Aus HACS entfernt (ignoriert)", hacsStateArchived: "Archiviert", hacsStateUpdate: "Update", hacsStateCurrent: "Aktuell",
+  hacsTodoOne: "{name} wurde von HACS entfernt", hacsTodoMany: "{n} Repositories wurden von HACS entfernt", hacsTodoPill: "Prüfen",
+  hacsTodoHint: "Sie laufen weiter, bekommen aber keine Updates mehr.", hacsWhatTitle: "Aus HACS entfernt: was tun?",
+  hacsStep1: "Den Grund in HACS ansehen (Zeile öffnen).", hacsStep2: "Prüfen, was daran hängt: bei einer Integration die Entitäten und Automationen, bei einer Karte die Dashboards.",
+  hacsStep3: "Je nach Grund zu einem Nachfolger wechseln, weiter nutzen oder in HACS entfernen. Housekeeper ändert in HACS nichts.", hacsStep4: "Wer es bewusst weiter nutzt, ignoriert die Reparatur in Home Assistant. Sie steht dann hier als „ignoriert“.",
+  hacsOpenRepairs: "Reparaturen in Home Assistant", hacsRemovedNote: "HACS hat dieses Repository aus seiner Liste genommen: {reason}. Es läuft weiter, bekommt aber keine Updates mehr. Was zu tun ist, steht unter Apps & Integrationen → HACS.",
   hacsNone: "Keine installierten Repositories gefunden.", hacsLoading: "Die Repositories werden gelesen …", hacsOpenInHacs: "In HACS öffnen",
 });
 Object.assign(TEXT.en, {
@@ -14565,6 +14572,11 @@ Object.assign(TEXT.en, {
   hacsColRepo: "Repository", hacsColKind: "Kind", hacsColInstalled: "Installed", hacsColLatest: "Latest", hacsColState: "State",
   hacsKind_integration: "Integration", hacsKind_plugin: "Card", hacsKind_theme: "Theme", hacsKind_python_script: "Python script", hacsKind_appdaemon: "AppDaemon", hacsKind_template: "Template", hacsFilterKind: "Kind", hacsFilterState: "State",
   hacsStateRemoved: "Removed from HACS", hacsStateRemovedIgnored: "Removed from HACS (ignored)", hacsStateArchived: "Archived", hacsStateUpdate: "Update", hacsStateCurrent: "Up to date",
+  hacsTodoOne: "{name} was removed from HACS", hacsTodoMany: "{n} repositories were removed from HACS", hacsTodoPill: "Review",
+  hacsTodoHint: "They keep running but get no more updates.", hacsWhatTitle: "Removed from HACS: what to do?",
+  hacsStep1: "Look up the reason in HACS (open the row).", hacsStep2: "Check what depends on it: for an integration the entities and automations, for a card the dashboards.",
+  hacsStep3: "Depending on the reason, switch to a successor, keep using it or remove it in HACS. Housekeeper changes nothing in HACS.", hacsStep4: "If you keep using it on purpose, ignore the repair in Home Assistant. It then shows here as “ignored”.",
+  hacsOpenRepairs: "Repairs in Home Assistant", hacsRemovedNote: "HACS took this repository out of its list: {reason}. It keeps running but gets no more updates. What to do is under Apps & integrations → HACS.",
   hacsNone: "No installed repositories found.", hacsLoading: "Reading the repositories …", hacsOpenInHacs: "Open in HACS",
 });
 
@@ -14659,6 +14671,13 @@ class ComponentsMixin {
   hacsKind(r) {
     const key = `hacsKind_${r.category}`;
     return TEXT[this.lang]?.[key] ? this.t(key) : r.category || "–";
+  }
+
+  // What to do about a repository that HACS took out of its list; shown above the list while one is not ignored.
+  hacsAdvice(rows) {
+    const open = rows.filter(r => r.removed && !r.removed.ignored);
+    if (!open.length) return "";
+    return `<div class="hacsadvice"><div class="panelhead"><h2>${this.t("hacsWhatTitle")}</h2><div class="actions"><button class="btn" data-ha-path="/config/repairs" data-ha-tab><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("hacsOpenRepairs")}</button></div></div><ol class="factnote">${[1, 2, 3, 4].map(n => `<li>${this.t(`hacsStep${n}`)}</li>`).join("")}</ol></div>`;
   }
 
   compHacsList(rows) {
@@ -14770,7 +14789,7 @@ class ComponentsMixin {
     const open = this.viewTabOf("components", tabs, "core");
     if (apps.length || custom.length) this.sysEnsure("storage"); // CPU, RAM and data of the apps, folder sizes of custom integrations
     this.sysEnsure("flows");
-    const hacsBody = !hacsSt?.data ? (hacsSt?.error ? `<div class="error">${this.esc(hacsSt.error)}</div>` : this.skeleton("hacsLoading")) : this.compHacsList(repos);
+    const hacsBody = !hacsSt?.data ? (hacsSt?.error ? `<div class="error">${this.esc(hacsSt.error)}</div>` : this.skeleton("hacsLoading")) : `${this.hacsAdvice(repos)}${this.compHacsList(repos)}`;
     const body = open === "apps" ? this.compAppsList(apps) : open === "hacs" ? hacsBody : this.compIntegrationsList(open === "custom" ? custom : core, open);
     const st = this.sysState(open === "hacs" ? "hacs" : "storage");
     const bar = this.pageBar({ at: st.at, loading: st.loading, attr: `data-sys-refresh="${open === "hacs" ? "hacs" : "storage"}"` });
@@ -14905,10 +14924,11 @@ class IntegrationPageMixin {
   // What HACS says about the integration, for custom integrations that HACS installed.
   intHacsCard(h) {
     const fact = (label, value) => `<div class="fact"><span>${this.t(label)}</span><b>${value}</b></div>`;
-    const status = `<span class="pill ${h.pending_update ? "warn" : "ok"}">${this.t(h.pending_update ? "intHacsUpdate" : "intHacsCurrent")}</span>${h.blocked ? ` <span class="pill warn">${this.t("intHacsBlocked")}</span>` : ""}${h.archived ? ` <span class="pill warn">${this.t("intHacsArchived")}</span>` : ""}`;
+    const status = `<span class="pill ${h.pending_update ? "warn" : "ok"}">${this.t(h.pending_update ? "intHacsUpdate" : "intHacsCurrent")}</span>${h.blocked ? ` <span class="pill warn">${this.t("intHacsBlocked")}</span>` : ""}${h.archived ? ` <span class="pill warn">${this.t("intHacsArchived")}</span>` : ""}${h.removed ? ` <span class="pill ${h.removed.ignored ? "mute" : "warn"}">${this.t("hacsStateRemoved")}</span>` : ""}`;
+    const gone = h.removed ? `<p class="factnote">${this.t("hacsRemovedNote", { reason: this.esc(h.removed.reason || "–") })}</p>` : "";
     const open = h.id ? `<button class="btn" data-ha-path="${this.esc(`/hacs/repository/${encodeURIComponent(h.id)}`)}" data-ha-tab><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("intHacsOpen")}</button>` : "";
     const github = h.full_name ? `<a class="btn" href="${this.esc(`https://github.com/${h.full_name}`)}" target="_blank" rel="noopener noreferrer"><ha-icon icon="mdi:github"></ha-icon>${this.t("intHacsGitHub")}</a>` : "";
-    return `<section class="panel"><div class="panelhead"><h2>${this.t("intHacsTitle")}</h2>${open || github ? `<div class="actions">${open}${github}</div>` : ""}</div><div class="facts">${fact("intHacsInstalled", this.esc(h.installed_version || "–"))}${fact("intHacsAvailable", this.esc(h.available_version || "–"))}${fact("sysColState", status)}</div><p class="factnote">${this.t("intHacsNote")}</p></section>`;
+    return `<section class="panel"><div class="panelhead"><h2>${this.t("intHacsTitle")}</h2>${open || github ? `<div class="actions">${open}${github}</div>` : ""}</div><div class="facts">${fact("intHacsInstalled", this.esc(h.installed_version || "–"))}${fact("intHacsAvailable", this.esc(h.available_version || "–"))}${fact("sysColState", status)}</div><p class="factnote">${this.t("intHacsNote")}</p>${gone}</section>`;
   }
 
   intMembersCard(item) {

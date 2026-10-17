@@ -12,6 +12,11 @@ Object.assign(TEXT.de, {
   hacsColRepo: "Repository", hacsColKind: "Art", hacsColInstalled: "Installiert", hacsColLatest: "Neueste", hacsColState: "Zustand",
   hacsKind_integration: "Integration", hacsKind_plugin: "Karte", hacsKind_theme: "Theme", hacsKind_python_script: "Python-Skript", hacsKind_appdaemon: "AppDaemon", hacsKind_template: "Vorlage", hacsFilterKind: "Art", hacsFilterState: "Zustand",
   hacsStateRemoved: "Aus HACS entfernt", hacsStateRemovedIgnored: "Aus HACS entfernt (ignoriert)", hacsStateArchived: "Archiviert", hacsStateUpdate: "Update", hacsStateCurrent: "Aktuell",
+  hacsTodoOne: "{name} wurde von HACS entfernt", hacsTodoMany: "{n} Repositories wurden von HACS entfernt", hacsTodoPill: "Prüfen",
+  hacsTodoHint: "Sie laufen weiter, bekommen aber keine Updates mehr.", hacsWhatTitle: "Aus HACS entfernt: was tun?",
+  hacsStep1: "Den Grund in HACS ansehen (Zeile öffnen).", hacsStep2: "Prüfen, was daran hängt: bei einer Integration die Entitäten und Automationen, bei einer Karte die Dashboards.",
+  hacsStep3: "Je nach Grund zu einem Nachfolger wechseln, weiter nutzen oder in HACS entfernen. Housekeeper ändert in HACS nichts.", hacsStep4: "Wer es bewusst weiter nutzt, ignoriert die Reparatur in Home Assistant. Sie steht dann hier als „ignoriert“.",
+  hacsOpenRepairs: "Reparaturen in Home Assistant", hacsRemovedNote: "HACS hat dieses Repository aus seiner Liste genommen: {reason}. Es läuft weiter, bekommt aber keine Updates mehr. Was zu tun ist, steht unter Apps & Integrationen → HACS.",
   hacsNone: "Keine installierten Repositories gefunden.", hacsLoading: "Die Repositories werden gelesen …", hacsOpenInHacs: "In HACS öffnen",
 });
 Object.assign(TEXT.en, {
@@ -26,6 +31,11 @@ Object.assign(TEXT.en, {
   hacsColRepo: "Repository", hacsColKind: "Kind", hacsColInstalled: "Installed", hacsColLatest: "Latest", hacsColState: "State",
   hacsKind_integration: "Integration", hacsKind_plugin: "Card", hacsKind_theme: "Theme", hacsKind_python_script: "Python script", hacsKind_appdaemon: "AppDaemon", hacsKind_template: "Template", hacsFilterKind: "Kind", hacsFilterState: "State",
   hacsStateRemoved: "Removed from HACS", hacsStateRemovedIgnored: "Removed from HACS (ignored)", hacsStateArchived: "Archived", hacsStateUpdate: "Update", hacsStateCurrent: "Up to date",
+  hacsTodoOne: "{name} was removed from HACS", hacsTodoMany: "{n} repositories were removed from HACS", hacsTodoPill: "Review",
+  hacsTodoHint: "They keep running but get no more updates.", hacsWhatTitle: "Removed from HACS: what to do?",
+  hacsStep1: "Look up the reason in HACS (open the row).", hacsStep2: "Check what depends on it: for an integration the entities and automations, for a card the dashboards.",
+  hacsStep3: "Depending on the reason, switch to a successor, keep using it or remove it in HACS. Housekeeper changes nothing in HACS.", hacsStep4: "If you keep using it on purpose, ignore the repair in Home Assistant. It then shows here as “ignored”.",
+  hacsOpenRepairs: "Repairs in Home Assistant", hacsRemovedNote: "HACS took this repository out of its list: {reason}. It keeps running but gets no more updates. What to do is under Apps & integrations → HACS.",
   hacsNone: "No installed repositories found.", hacsLoading: "Reading the repositories …", hacsOpenInHacs: "Open in HACS",
 });
 
@@ -120,6 +130,13 @@ class ComponentsMixin {
   hacsKind(r) {
     const key = `hacsKind_${r.category}`;
     return TEXT[this.lang]?.[key] ? this.t(key) : r.category || "–";
+  }
+
+  // What to do about a repository that HACS took out of its list; shown above the list while one is not ignored.
+  hacsAdvice(rows) {
+    const open = rows.filter(r => r.removed && !r.removed.ignored);
+    if (!open.length) return "";
+    return `<div class="hacsadvice"><div class="panelhead"><h2>${this.t("hacsWhatTitle")}</h2><div class="actions"><button class="btn" data-ha-path="/config/repairs" data-ha-tab><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("hacsOpenRepairs")}</button></div></div><ol class="factnote">${[1, 2, 3, 4].map(n => `<li>${this.t(`hacsStep${n}`)}</li>`).join("")}</ol></div>`;
   }
 
   compHacsList(rows) {
@@ -231,7 +248,7 @@ class ComponentsMixin {
     const open = this.viewTabOf("components", tabs, "core");
     if (apps.length || custom.length) this.sysEnsure("storage"); // CPU, RAM and data of the apps, folder sizes of custom integrations
     this.sysEnsure("flows");
-    const hacsBody = !hacsSt?.data ? (hacsSt?.error ? `<div class="error">${this.esc(hacsSt.error)}</div>` : this.skeleton("hacsLoading")) : this.compHacsList(repos);
+    const hacsBody = !hacsSt?.data ? (hacsSt?.error ? `<div class="error">${this.esc(hacsSt.error)}</div>` : this.skeleton("hacsLoading")) : `${this.hacsAdvice(repos)}${this.compHacsList(repos)}`;
     const body = open === "apps" ? this.compAppsList(apps) : open === "hacs" ? hacsBody : this.compIntegrationsList(open === "custom" ? custom : core, open);
     const st = this.sysState(open === "hacs" ? "hacs" : "storage");
     const bar = this.pageBar({ at: st.at, loading: st.loading, attr: `data-sys-refresh="${open === "hacs" ? "hacs" : "storage"}"` });
