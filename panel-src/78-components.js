@@ -136,7 +136,7 @@ class ComponentsMixin {
   hacsAdvice(rows) {
     const open = rows.filter(r => r.removed && !r.removed.ignored);
     if (!open.length) return "";
-    return `<div class="hacsadvice"><div class="panelhead"><h2>${this.t("hacsWhatTitle")}</h2><div class="actions"><button class="btn" data-ha-path="/config/repairs" data-ha-tab><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("hacsOpenRepairs")}</button></div></div><ol class="factnote">${[1, 2, 3, 4].map(n => `<li>${this.t(`hacsStep${n}`)}</li>`).join("")}</ol></div>`;
+    return `<div class="hacsadvice"><div class="panelhead"><h2>${this.t("hacsWhatTitle")}</h2><div class="actions"><button class="btn" data-ha-path="/config/repairs"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("hacsOpenRepairs")}</button></div></div><ol class="factnote">${[1, 2, 3, 4].map(n => `<li>${this.t(`hacsStep${n}`)}</li>`).join("")}</ol></div>`;
   }
 
   compHacsList(rows) {
@@ -162,7 +162,7 @@ class ComponentsMixin {
       ],
       filterFns: { kind: (r, v) => r.category === v, state: (r, v) => (v === "removed" ? Boolean(r.removed) : v === "update" ? Boolean(r.pending_update) : r.archived) },
       text: r => `${r.name} ${r.full_name}`, tie: r => r.id, empty: "hacsNone",
-      rowAttrs: r => `data-ha-path="${this.esc(`/hacs/repository/${encodeURIComponent(r.id)}`)}" data-ha-tab tabindex="0" role="link" aria-label="${this.esc(`${r.name} · ${this.t("hacsOpenInHacs")}`)}"`,
+      rowAttrs: r => `data-ha-path="${this.esc(`/hacs/repository/${encodeURIComponent(r.id)}`)}" tabindex="0" role="link" aria-label="${this.esc(`${r.name} · ${this.t("hacsOpenInHacs")}`)}"`,
       columns, exportName: "hacs", header: [this.t("hacsColRepo"), "ID", this.t("hacsColKind"), this.t("hacsColInstalled"), this.t("hacsColLatest"), this.t("hacsColState")],
       rows: r => [r.full_name, r.id, r.category || "", r.installed_version || "", r.available_version || "", this.t(st(r).key)],
     });

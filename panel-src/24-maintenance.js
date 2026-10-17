@@ -167,16 +167,36 @@ class MaintenanceMixin {
     return ok ? `<img class="updpic" src="${this.esc(u.picture)}" alt="" loading="lazy" data-fallback-icon="${icon}">` : `<ha-icon icon="${icon}"></ha-icon>`;
   }
 
-  updateRow(u, watching) {
-    const pills = [
+  // The pending updates as one standard list: name, versions, group, state and the buttons.
+  updatesList(updates, watching) {
+    const id = "updates";
+    this.lvState(id, "group", "asc");
+    const groups = ["system", "app", "hacs", "device"];
+    const sorts = [
+      { key: "group", label: "updColGroup", get: u => groups.indexOf(u.group) },
+      { key: "name", label: "updColName", get: u => u.name },
+    ];
+    const bar = this.listBar(id, { table: true, dense: true, sorts, filters: [
+      { name: "group", all: this.t("updAllGroups"), options: groups.filter(g => updates.some(u => u.group === g)).map(g => [g, this.t(`updGroup_${g}`)]) },
+    ] });
+    const rows = this.refine(id, updates, { text: u => [u.name, u.installed, u.latest, u.release_summary].join(" "), filters: { group: (u, v) => u.group === v }, sorts, tie: u => u.name });
+    const pg = this.paginate(id, rows, [10, 20]);
+    const pills = u => [
       u.blocked ? `<span class="pill red">${this.t("updBlocked")}</span>` : "",
       u.in_progress ? `<span class="pill blue">${this.t("updRunning")}</span>` : "",
       u.auto_update ? `<span class="pill mute">${this.t("updAuto")}</span>` : "",
       u.group === "system" && watching ? `<span class="pill blue">${this.t("updWatch")}</span>` : "",
     ].join("");
-    const notes = typeof u.release_url === "string" && u.release_url.startsWith("https://") ? `<a class="btn quiet" href="${this.esc(u.release_url)}" target="_blank" rel="noopener noreferrer">${this.t("updNotes")}</a>` : "";
-    const versions = `<span class="verchip">${this.esc(u.installed ?? "–")} → ${this.esc(u.latest ?? "–")}</span>`;
-    return `<div class="row rel updrow"><span class="tile mute">${this.updatePicture(u)}</span><span class="row-text"><strong>${this.esc(u.name)}</strong><small>${versions}${u.release_summary ? ` ${this.esc(u.release_summary)}` : ""}</small></span><span class="updact">${pills}${notes}<button class="btn quiet" data-ha-path="/config/updates" title="${this.esc(this.t("updOpenHa"))}">${this.t("updOpen")}</button></span></div>`;
+    const columns = [
+      { key: "name", label: "updColName", cell: u => `<div class="statcell"><span class="tile mute">${this.updatePicture(u)}</span><div><strong>${this.esc(u.name)}</strong>${u.release_summary ? `<small>${this.esc(u.release_summary)}</small>` : ""}</div></div>` },
+      { key: "version", label: "updColVersion", sortable: false, cell: u => `<span class="verchip">${this.esc(u.installed ?? "–")} → ${this.esc(u.latest ?? "–")}</span>` },
+      { key: "group", label: "updColGroup", cell: u => `<span class="pill mute">${this.t(`updGroup_${u.group}`)}</span>` },
+      { key: "state", label: "updColState", sortable: false, cell: u => pills(u) || "–" },
+      { key: "actions", label: "updColActions", sortable: false, cell: u => `<span class="updact">${typeof u.release_url === "string" && u.release_url.startsWith("https://") ? `<a class="btn quiet" href="${this.esc(u.release_url)}" target="_blank" rel="noopener noreferrer">${this.t("updNotes")}</a>` : ""}<button class="btn quiet" data-ha-path="/config/updates" title="${this.esc(this.t("updOpenHa"))}">${this.t("updOpen")}</button></span>` },
+    ];
+    const table = rows.length ? this.listTable(id, columns, pg.rows, { cls: "upds", rowAttrs: () => 'class="static"' }) : `<div class="emptymsg">${this.noMatches(id)}</div>`;
+    const current = groups.filter(g => !updates.some(u => u.group === g)).map(g => `<div class="row rel"><span class="tile ok"><ha-icon icon="mdi:check"></ha-icon></span><span class="row-text"><strong>${this.t(`updCurrent_${g}`)}</strong></span></div>`).join("");
+    return `<div class="panel"><div class="sectionlabel">${this.t("updListTitle")} · ${this.formatNumber(updates.length)}</div>${bar}${table}${pg.footer}</div>${current ? `<div class="panel">${current}</div>` : ""}`;
   }
 
   updatesCard() {
@@ -201,12 +221,7 @@ class MaintenanceMixin {
       { label: this.t("updSumBlocked"), value: this.formatNumber(counts.blocked ?? 0), tone: counts.blocked ? "red" : "ok" },
     ]);
     const watching = p.watch?.hours > 0;
-    const groups = ["system", "app", "hacs", "device"].map(g => {
-      const rows = updates.filter(u => u.group === g);
-      const body = rows.length ? rows.map(u => this.updateRow(u, watching)).join("") : `<div class="row rel"><span class="tile ok"><ha-icon icon="mdi:check"></ha-icon></span><span class="row-text"><strong>${this.t(`updCurrent_${g}`)}</strong></span></div>`;
-      return `<div class="panel updgroup"><div class="sectionlabel">${this.t(`updGroup_${g}`)}${rows.length ? ` · ${this.formatNumber(rows.length)}` : ""}</div>${body}</div>`;
-    }).join("");
-    const list = total ? groups : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("updAllCurrent")}</div></div>`;
+    const list = total ? this.updatesList(updates, watching) : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("updAllCurrent")}</div></div>`;
     return `<div class="stack">${head}${tiles}<div class="panel">${verdict}${this.preflightRows(p.state, p.checks)}${this.configRow()}</div>${list}<div class="panel">${this.preflightAfter(p.watch)}</div></div>`;
   }
 

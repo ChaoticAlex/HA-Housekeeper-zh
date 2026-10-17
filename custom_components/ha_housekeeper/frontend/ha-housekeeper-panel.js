@@ -731,7 +731,7 @@ Object.assign(TEXT.de, {
   updVerdict_ready: "Bereit", updVerdict_look: "Erst ansehen", updVerdict_stop: "Stopp", updVerdictNone: "Keine Updates offen",
   updPending_1: "1 Update offen", updPending_n: "{n} Updates offen", updCheckFirst: "Zu prüfen: {items}",
   updSumOpen: "Offen", updSumBlocked: "Blockiert",
-  updGroup_system: "System", updGroup_app: "Apps", updGroup_hacs: "Integrationen und Karten über HACS", updGroup_device: "Geräte",
+  updListTitle: "Ausstehende Updates", updAllGroups: "Alle Bereiche", updColName: "Name", updColVersion: "Version", updColGroup: "Bereich", updColState: "Status", updColActions: "Aktionen", updGroup_system: "System", updGroup_app: "Apps", updGroup_hacs: "Integrationen und Karten über HACS", updGroup_device: "Geräte",
   updCurrent_system: "Home Assistant, Betriebssystem und Supervisor sind aktuell.", updCurrent_app: "Alle Apps sind aktuell.", updCurrent_hacs: "Alle HACS-Einträge sind aktuell.", updCurrent_device: "Alle Geräte-Firmwares sind aktuell.",
   updAllCurrent: "Alles ist aktuell.", todoUpdates_1: "1 Update offen", todoUpdates_n: "{n} Updates offen",
   pfAfterTitle: "Danach", pfAfterOn: "Nach einem Update von Home Assistant, Betriebssystem oder Supervisor beobachtet Housekeeper {hours} Stunden lang, ob etwas ausfällt oder neue Reparaturen auftauchen. Beim Start des Updates hält es den Stand fest, die Auswertung steht auf der Befundseite.", pfAfterRunning: "Beobachtung nach {what} läuft, noch {hours} Std., bisher {n} Auffälligkeiten.", pfAfterOff: "Die Beobachtung nach Updates ist ausgeschaltet. Unter Einstellungen → Scan und Schwellen stellst du ein, wie lange sie läuft.",
@@ -776,7 +776,7 @@ Object.assign(TEXT.en, {
   updVerdict_ready: "Ready", updVerdict_look: "Look first", updVerdict_stop: "Stop", updVerdictNone: "No updates open",
   updPending_1: "1 update open", updPending_n: "{n} updates open", updCheckFirst: "To check: {items}",
   updSumOpen: "Open", updSumBlocked: "Blocked",
-  updGroup_system: "System", updGroup_app: "Apps", updGroup_hacs: "Integrations and cards via HACS", updGroup_device: "Devices",
+  updListTitle: "Pending updates", updAllGroups: "All areas", updColName: "Name", updColVersion: "Version", updColGroup: "Area", updColState: "Status", updColActions: "Actions", updGroup_system: "System", updGroup_app: "Apps", updGroup_hacs: "Integrations and cards via HACS", updGroup_device: "Devices",
   updCurrent_system: "Home Assistant, the operating system and the Supervisor are up to date.", updCurrent_app: "All apps are up to date.", updCurrent_hacs: "All HACS items are up to date.", updCurrent_device: "All device firmware is up to date.",
   updAllCurrent: "Everything is up to date.", todoUpdates_1: "1 update open", todoUpdates_n: "{n} updates open",
   pfAfterTitle: "Afterwards", pfAfterOn: "After an update of Home Assistant, the operating system or the Supervisor, Housekeeper watches for {hours} hours whether something fails or new repairs appear. When the update starts it keeps the state, the results are on the findings page.", pfAfterRunning: "Watching after {what}, {hours} h left, {n} findings so far.", pfAfterOff: "The watch after updates is switched off. Under Settings → Scan and thresholds you set how long it runs.",
@@ -1520,8 +1520,7 @@ class StylesMixin {
       .node.current{border:2px solid var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 8%,var(--hk-surface))}.node .tile{width:34px;height:34px}.node small{display:block;color:var(--hk-blue-text);font-size:calc(11px*var(--hk-fs,1));font-weight:600;letter-spacing:.06em;text-transform:uppercase}.node strong{display:block;font-size:calc(13px*var(--hk-fs,1));font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.node span.meta{display:block;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}
       .link-label{margin:0 0 0 22px;padding:3px 0 3px 14px;border-left:2px solid var(--hk-border);color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));min-height:26px;display:flex;align-items:center;gap:8px}
       .branch{margin:0 0 0 22px;padding:6px 0 0 18px;border-left:2px solid var(--hk-border);display:grid;gap:8px}
-      .updact{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:8px}.updrow .row-text small{white-space:normal}.verchip{display:inline-block;margin-right:4px;padding:1px 8px;border-radius:999px;background:var(--hk-soft);border:1px solid var(--hk-border);color:var(--hk-text);font-variant-numeric:tabular-nums}.updgroup .sectionlabel{padding-bottom:6px}.updgroup .row-text strong{white-space:normal}
-      @media(max-width:860px){.updrow:has(>.updact){grid-template-columns:auto minmax(0,1fr)}.updrow .updact{grid-column:1/-1;justify-content:flex-start}}
+      .updact{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:8px}.verchip{display:inline-block;margin-right:4px;padding:1px 8px;border-radius:999px;background:var(--hk-soft);border:1px solid var(--hk-border);color:var(--hk-text);font-variant-numeric:tabular-nums}.tablewrap.upds .statcell strong{display:block}.tablewrap.upds .statcell small{display:block;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.tablewrap.upds td:last-child{text-align:right}
       .sectionlabel{padding:14px 16px 0;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:600;letter-spacing:.07em;text-transform:uppercase}
       .search{padding:14px;border-bottom:1px solid var(--hk-border)}.search input{width:100%}.hits{display:grid;max-height:280px;overflow:auto}.hit{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;padding:9px 16px;border:0;border-top:1px solid var(--hk-border);background:transparent;text-align:left}.hit:hover{background:var(--hk-soft)}.hit .tile{width:30px;height:30px}
       .crumbs{display:flex;align-items:center;gap:12px;margin-bottom:14px}.crumbs .trail{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));text-transform:uppercase;letter-spacing:.07em}
@@ -3469,7 +3468,7 @@ class SettingsMixin {
     else if (m.version && h.installed_version && !sameVersion(m.version, h.installed_version)) [tone, title, hint] = ["warn", "hkUpdateMismatch", "hkUpdateMismatchHint"];
     else if (sameVersion(m.version, h.available_version)) [tone, title, hint] = ["ok", "hkUpdateCurrent", "hkUpdateCurrentHint"];
     const facts = [fact("hkUpdateLoaded", m.version), h ? fact("hkUpdateHacsInstalled", h.installed_version) : "", h ? fact("hkUpdateLatest", h.available_version) : "", h?.last_fetched ? fact("hkUpdateChecked", this.formatDate(h.last_fetched)) : ""].join("");
-    const open = h?.id ? `<button class="btn" data-ha-path="${this.esc(`/hacs/repository/${encodeURIComponent(h.id)}`)}" data-ha-tab><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("intHacsOpen")}</button>` : "";
+    const open = h?.id ? `<button class="btn" data-ha-path="${this.esc(`/hacs/repository/${encodeURIComponent(h.id)}`)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("intHacsOpen")}</button>` : "";
     return `<section class="panel"><div class="panelhead"><div><h2>${this.t("hkUpdateTitle")}</h2><p>${this.t("hkUpdateHint")}</p></div>${open}</div><div class="facts">${facts}</div><div class="row"><span class="tile ${tone}"><ha-icon icon="${tone === "ok" ? "mdi:check-circle-outline" : tone === "warn" ? "mdi:alert-outline" : "mdi:information-outline"}"></ha-icon></span><span class="row-text"><strong>${this.t(title)}</strong><small>${this.t(hint)}</small></span></div></section>`;
   }
 
@@ -5599,7 +5598,7 @@ class DiagnosisMixin {
     const tablist = tabs.map(([id, label, count, tone]) => `<button class="tab" role="tab" id="hk-tab-${id}" aria-selected="${id === tab}" aria-controls="hk-tabpanel" tabindex="${id === tab ? 0 : -1}" data-detail-tab="${id}">${this.t(label)}${count ? ` <em>${this.formatNumber(count)}</em>` : ""}${tone ? `<i class="tabdot ${tone}" aria-hidden="true"></i>` : ""}</button>`).join("");
     return `<div class="crumbs"><button class="btn" data-action="back"><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("backTo")} ${this.esc(back)}</button><span class="trail">${this.t(this.view)} › ${this.t(item.object_type)}</span></div>
       <div class="panel detailhead">${this.tile(item.object_type, tone)}<div><div class="headpills">${this.pill(item.status)}<span class="pill mute">${this.t(item.object_type)}</span></div><h1>${this.esc(item.name)}</h1><span class="id">${this.esc(item.object_id)}</span></div>
-      <div class="actions">${item.object_type === "entity" && this.canMoreInfo(item.object_id) ? `<button class="btn primary" data-more-info="${this.esc(item.object_id)}"><ha-icon icon="mdi:information-outline"></ha-icon>${this.t("openEntity")}</button>` : ""}${path ? `<button class="btn" data-ha-path="${this.esc(path)}" data-ha-tab><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("openInHA")}</button>` : ""}<button class="btn" data-graph-open="${this.esc(item.object_type === "integration" ? this.objectKey(item.entries[0]) : key)}"><ha-icon icon="mdi:source-fork"></ha-icon>${this.t("showInGraph")}</button>${["entity", "device", "area", "automation", "script", "scene", "dashboard"].includes(item.object_type) ? `<button class="btn" data-xp-from="${this.esc(key)}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button>` : ""}</div></div>
+      <div class="actions">${item.object_type === "entity" && this.canMoreInfo(item.object_id) ? `<button class="btn primary" data-more-info="${this.esc(item.object_id)}"><ha-icon icon="mdi:information-outline"></ha-icon>${this.t("openEntity")}</button>` : ""}${path ? `<button class="btn" data-ha-path="${this.esc(path)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("openInHA")}</button>` : ""}<button class="btn" data-graph-open="${this.esc(item.object_type === "integration" ? this.objectKey(item.entries[0]) : key)}"><ha-icon icon="mdi:source-fork"></ha-icon>${this.t("showInGraph")}</button>${["entity", "device", "area", "automation", "script", "scene", "dashboard"].includes(item.object_type) ? `<button class="btn" data-xp-from="${this.esc(key)}"><ha-icon icon="mdi:export-variant"></ha-icon>${this.t("xpButton")}</button>` : ""}</div></div>
       <div class="panel sumline">${summary}</div>
       ${this.statusBand(item, key)}
       <div class="tabs" role="tablist" aria-label="${this.esc(this.t("tabsLabel"))}">${tablist}</div>
@@ -5934,16 +5933,36 @@ class MaintenanceMixin {
     return ok ? `<img class="updpic" src="${this.esc(u.picture)}" alt="" loading="lazy" data-fallback-icon="${icon}">` : `<ha-icon icon="${icon}"></ha-icon>`;
   }
 
-  updateRow(u, watching) {
-    const pills = [
+  // The pending updates as one standard list: name, versions, group, state and the buttons.
+  updatesList(updates, watching) {
+    const id = "updates";
+    this.lvState(id, "group", "asc");
+    const groups = ["system", "app", "hacs", "device"];
+    const sorts = [
+      { key: "group", label: "updColGroup", get: u => groups.indexOf(u.group) },
+      { key: "name", label: "updColName", get: u => u.name },
+    ];
+    const bar = this.listBar(id, { table: true, dense: true, sorts, filters: [
+      { name: "group", all: this.t("updAllGroups"), options: groups.filter(g => updates.some(u => u.group === g)).map(g => [g, this.t(`updGroup_${g}`)]) },
+    ] });
+    const rows = this.refine(id, updates, { text: u => [u.name, u.installed, u.latest, u.release_summary].join(" "), filters: { group: (u, v) => u.group === v }, sorts, tie: u => u.name });
+    const pg = this.paginate(id, rows, [10, 20]);
+    const pills = u => [
       u.blocked ? `<span class="pill red">${this.t("updBlocked")}</span>` : "",
       u.in_progress ? `<span class="pill blue">${this.t("updRunning")}</span>` : "",
       u.auto_update ? `<span class="pill mute">${this.t("updAuto")}</span>` : "",
       u.group === "system" && watching ? `<span class="pill blue">${this.t("updWatch")}</span>` : "",
     ].join("");
-    const notes = typeof u.release_url === "string" && u.release_url.startsWith("https://") ? `<a class="btn quiet" href="${this.esc(u.release_url)}" target="_blank" rel="noopener noreferrer">${this.t("updNotes")}</a>` : "";
-    const versions = `<span class="verchip">${this.esc(u.installed ?? "–")} → ${this.esc(u.latest ?? "–")}</span>`;
-    return `<div class="row rel updrow"><span class="tile mute">${this.updatePicture(u)}</span><span class="row-text"><strong>${this.esc(u.name)}</strong><small>${versions}${u.release_summary ? ` ${this.esc(u.release_summary)}` : ""}</small></span><span class="updact">${pills}${notes}<button class="btn quiet" data-ha-path="/config/updates" title="${this.esc(this.t("updOpenHa"))}">${this.t("updOpen")}</button></span></div>`;
+    const columns = [
+      { key: "name", label: "updColName", cell: u => `<div class="statcell"><span class="tile mute">${this.updatePicture(u)}</span><div><strong>${this.esc(u.name)}</strong>${u.release_summary ? `<small>${this.esc(u.release_summary)}</small>` : ""}</div></div>` },
+      { key: "version", label: "updColVersion", sortable: false, cell: u => `<span class="verchip">${this.esc(u.installed ?? "–")} → ${this.esc(u.latest ?? "–")}</span>` },
+      { key: "group", label: "updColGroup", cell: u => `<span class="pill mute">${this.t(`updGroup_${u.group}`)}</span>` },
+      { key: "state", label: "updColState", sortable: false, cell: u => pills(u) || "–" },
+      { key: "actions", label: "updColActions", sortable: false, cell: u => `<span class="updact">${typeof u.release_url === "string" && u.release_url.startsWith("https://") ? `<a class="btn quiet" href="${this.esc(u.release_url)}" target="_blank" rel="noopener noreferrer">${this.t("updNotes")}</a>` : ""}<button class="btn quiet" data-ha-path="/config/updates" title="${this.esc(this.t("updOpenHa"))}">${this.t("updOpen")}</button></span>` },
+    ];
+    const table = rows.length ? this.listTable(id, columns, pg.rows, { cls: "upds", rowAttrs: () => 'class="static"' }) : `<div class="emptymsg">${this.noMatches(id)}</div>`;
+    const current = groups.filter(g => !updates.some(u => u.group === g)).map(g => `<div class="row rel"><span class="tile ok"><ha-icon icon="mdi:check"></ha-icon></span><span class="row-text"><strong>${this.t(`updCurrent_${g}`)}</strong></span></div>`).join("");
+    return `<div class="panel"><div class="sectionlabel">${this.t("updListTitle")} · ${this.formatNumber(updates.length)}</div>${bar}${table}${pg.footer}</div>${current ? `<div class="panel">${current}</div>` : ""}`;
   }
 
   updatesCard() {
@@ -5968,12 +5987,7 @@ class MaintenanceMixin {
       { label: this.t("updSumBlocked"), value: this.formatNumber(counts.blocked ?? 0), tone: counts.blocked ? "red" : "ok" },
     ]);
     const watching = p.watch?.hours > 0;
-    const groups = ["system", "app", "hacs", "device"].map(g => {
-      const rows = updates.filter(u => u.group === g);
-      const body = rows.length ? rows.map(u => this.updateRow(u, watching)).join("") : `<div class="row rel"><span class="tile ok"><ha-icon icon="mdi:check"></ha-icon></span><span class="row-text"><strong>${this.t(`updCurrent_${g}`)}</strong></span></div>`;
-      return `<div class="panel updgroup"><div class="sectionlabel">${this.t(`updGroup_${g}`)}${rows.length ? ` · ${this.formatNumber(rows.length)}` : ""}</div>${body}</div>`;
-    }).join("");
-    const list = total ? groups : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("updAllCurrent")}</div></div>`;
+    const list = total ? this.updatesList(updates, watching) : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("updAllCurrent")}</div></div>`;
     return `<div class="stack">${head}${tiles}<div class="panel">${verdict}${this.preflightRows(p.state, p.checks)}${this.configRow()}</div>${list}<div class="panel">${this.preflightAfter(p.watch)}</div></div>`;
   }
 
@@ -14888,7 +14902,7 @@ class ComponentsMixin {
   hacsAdvice(rows) {
     const open = rows.filter(r => r.removed && !r.removed.ignored);
     if (!open.length) return "";
-    return `<div class="hacsadvice"><div class="panelhead"><h2>${this.t("hacsWhatTitle")}</h2><div class="actions"><button class="btn" data-ha-path="/config/repairs" data-ha-tab><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("hacsOpenRepairs")}</button></div></div><ol class="factnote">${[1, 2, 3, 4].map(n => `<li>${this.t(`hacsStep${n}`)}</li>`).join("")}</ol></div>`;
+    return `<div class="hacsadvice"><div class="panelhead"><h2>${this.t("hacsWhatTitle")}</h2><div class="actions"><button class="btn" data-ha-path="/config/repairs"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("hacsOpenRepairs")}</button></div></div><ol class="factnote">${[1, 2, 3, 4].map(n => `<li>${this.t(`hacsStep${n}`)}</li>`).join("")}</ol></div>`;
   }
 
   compHacsList(rows) {
@@ -14914,7 +14928,7 @@ class ComponentsMixin {
       ],
       filterFns: { kind: (r, v) => r.category === v, state: (r, v) => (v === "removed" ? Boolean(r.removed) : v === "update" ? Boolean(r.pending_update) : r.archived) },
       text: r => `${r.name} ${r.full_name}`, tie: r => r.id, empty: "hacsNone",
-      rowAttrs: r => `data-ha-path="${this.esc(`/hacs/repository/${encodeURIComponent(r.id)}`)}" data-ha-tab tabindex="0" role="link" aria-label="${this.esc(`${r.name} · ${this.t("hacsOpenInHacs")}`)}"`,
+      rowAttrs: r => `data-ha-path="${this.esc(`/hacs/repository/${encodeURIComponent(r.id)}`)}" tabindex="0" role="link" aria-label="${this.esc(`${r.name} · ${this.t("hacsOpenInHacs")}`)}"`,
       columns, exportName: "hacs", header: [this.t("hacsColRepo"), "ID", this.t("hacsColKind"), this.t("hacsColInstalled"), this.t("hacsColLatest"), this.t("hacsColState")],
       rows: r => [r.full_name, r.id, r.category || "", r.installed_version || "", r.available_version || "", this.t(st(r).key)],
     });
@@ -15137,7 +15151,7 @@ class IntegrationPageMixin {
     const fact = (label, value) => `<div class="fact"><span>${this.t(label)}</span><b>${value}</b></div>`;
     const status = `<span class="pill ${h.pending_update ? "warn" : "ok"}">${this.t(h.pending_update ? "intHacsUpdate" : "intHacsCurrent")}</span>${h.blocked ? ` <span class="pill warn">${this.t("intHacsBlocked")}</span>` : ""}${h.archived ? ` <span class="pill warn">${this.t("intHacsArchived")}</span>` : ""}${h.removed ? ` <span class="pill ${h.removed.ignored ? "mute" : "warn"}">${this.t("hacsStateRemoved")}</span>` : ""}`;
     const gone = h.removed ? `<p class="factnote">${this.t("hacsRemovedNote", { reason: this.esc(h.removed.reason || "–") })}</p>` : "";
-    const open = h.id ? `<button class="btn" data-ha-path="${this.esc(`/hacs/repository/${encodeURIComponent(h.id)}`)}" data-ha-tab><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("intHacsOpen")}</button>` : "";
+    const open = h.id ? `<button class="btn" data-ha-path="${this.esc(`/hacs/repository/${encodeURIComponent(h.id)}`)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("intHacsOpen")}</button>` : "";
     const github = h.full_name ? `<a class="btn" href="${this.esc(`https://github.com/${h.full_name}`)}" target="_blank" rel="noopener noreferrer"><ha-icon icon="mdi:github"></ha-icon>${this.t("intHacsGitHub")}</a>` : "";
     return `<section class="panel"><div class="panelhead"><h2>${this.t("intHacsTitle")}</h2>${open || github ? `<div class="actions">${open}${github}</div>` : ""}</div><div class="facts">${fact("intHacsInstalled", this.esc(h.installed_version || "–"))}${fact("intHacsAvailable", this.esc(h.available_version || "–"))}${fact("sysColState", status)}</div><p class="factnote">${this.t("intHacsNote")}</p>${gone}</section>`;
   }
@@ -16135,10 +16149,8 @@ class HAHousekeeperPanel extends HTMLElement {
     this.dispatchEvent(new CustomEvent("hass-more-info", { detail: { entityId }, bubbles: true, composed: true }));
   }
 
-  navigateHA(path, newTab = false) {
-    if (newTab) { window.open(new URL(path, window.location.origin).href, "_blank", "noopener"); return; }
-    window.history.pushState(null, "", path);
-    window.dispatchEvent(new CustomEvent("location-changed"));
+  navigateHA(path) {
+    window.open(new URL(path, window.location.origin).href, "_blank", "noopener");
   }
 
   // What a screen reader announces: scan, backup and plan progress, nothing while idle.
@@ -16754,7 +16766,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-graph-regroup]")?.addEventListener("click", () => { this.graphOpen = new Set(); this.render(); });
     root.querySelectorAll("[data-graph]").forEach(el => el.onclick = () => { const obj = this.findObject(el.dataset.graph); if (obj) { this.noteGraphStep(obj); this.graphSelected = obj; this.graphQuery = ""; this.graphLimit = GRAPH_NODE_STEP; this.render(); } });
     root.querySelectorAll("[data-more-info]").forEach(el => el.onclick = () => this.moreInfo(el.dataset.moreInfo));
-    root.querySelectorAll("[data-ha-path]").forEach(el => el.onclick = () => this.navigateHA(el.dataset.haPath, "haTab" in el.dataset));
+    root.querySelectorAll("[data-ha-path]").forEach(el => el.onclick = () => this.navigateHA(el.dataset.haPath));
     root.querySelectorAll("[data-pref]").forEach(el => el.onclick = () => { const [key, value] = el.dataset.pref.split("|"); this.setPref(key, value); });
     root.querySelectorAll("[data-pref-select]").forEach(el => el.onchange = () => this.setPref(el.dataset.prefSelect, el.value));
     root.querySelectorAll("[data-unref-tab]").forEach(el => el.onclick = () => { this.unrefTab = el.dataset.unrefTab; if (this.view === "cleanup") (this.viewTab ||= {}).cleanup = this.unrefTab === "statistics" ? "stats" : "unused"; this.retryOrphanLast(); this.pages = {}; this.render(); });

@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### Geändert
+
+- **Links nach Home Assistant:** Alle Sprünge nach Home Assistant (Apps, Integrationen, HACS, Benutzer, Cloud) öffnen in einem neuen Tab statt im selben.
+- **Updates:** Die ausstehenden Updates stehen in der gewohnten Tabelle mit Suche, Sortierung, Filter nach Bereich und Seiten.
+
+### English
+
+#### Changed
+
+- **Links into Home Assistant:** All jumps into Home Assistant (apps, integrations, HACS, users, cloud) now open in a new tab instead of the current one.
+- **Updates:** Pending updates are shown in the usual table with search, sorting, an area filter and pages.
+
 ## 1.9.0 - 2026-10-17
 
 ### Geändert
