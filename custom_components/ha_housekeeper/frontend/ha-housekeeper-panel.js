@@ -1740,7 +1740,9 @@ class ListsMixin {
     if (this.lv[id]) return this.lv[id];
     const kept = this.lvStored()[id];
     const ok = kept && typeof kept.sort === "string" && (kept.dir === "asc" || kept.dir === "desc");
-    return (this.lv[id] = { q: "", sort: ok ? kept.sort : sort, dir: ok ? kept.dir : dir, f: ok && kept.f && typeof kept.f === "object" ? Object.fromEntries(Object.entries(kept.f).filter(([, v]) => typeof v === "string")) : {}, view: "", base: { sort, dir } });
+    const pending = this._lfPending?.[id];
+    if (pending) delete this._lfPending[id];
+    return (this.lv[id] = { q: "", sort: ok ? kept.sort : sort, dir: ok ? kept.dir : dir, f: pending ? pending : ok && kept.f && typeof kept.f === "object" ? Object.fromEntries(Object.entries(kept.f).filter(([, v]) => typeof v === "string")) : {}, view: "", base: { sort, dir } });
   }
 
   lvStored() {
@@ -1748,6 +1750,15 @@ class ListsMixin {
     let stored = {};
     try { stored = JSON.parse(globalThis.localStorage?.getItem("ha_housekeeper.lv") || "{}"); } catch (_) { stored = {}; }
     return (this._lvStored = stored && typeof stored === "object" && !Array.isArray(stored) ? stored : {});
+  }
+
+  // A jump to a list with one filter set: the search and the other filters of that list are cleared.
+  // A list not shown yet takes it when it is first built (lvState).
+  setListFilter(id, name, value) {
+    const st = this.lv[id];
+    if (!st) { (this._lfPending ||= {})[id] = { [name]: value }; return; }
+    st.q = ""; st.f = { [name]: value };
+    this.persistLv(id);
   }
 
   persistLv(id) {
@@ -2330,7 +2341,7 @@ class OverviewMixin {
     this.ensureGoals();
     this.ensurePolicies(); // the menu counts need both
     for (const g of (this.goals?.goals || []).filter(x => x.state === "missed")) {
-      items.push({ key: `goal_${g.id}`, area: "care", tone: "warn", icon: "mdi:target", text: this.t(`goal_${g.id}`), hintText: `${this.goalNow(g)} · ${g.limit === 0 && g.unit === "count" ? this.t("goalAllowedNone") : this.t("goalAllowed", { limit: this.goalAmount(g, g.limit) })}`, pill: this.t("goalMissedPill"), view: GOAL_VIEWS[g.id] });
+      items.push({ key: `goal_${g.id}`, area: "care", tone: "warn", icon: "mdi:target", text: this.t(`goal_${g.id}`), hintText: `${this.goalNow(g)} · ${g.limit === 0 && g.unit === "count" ? this.t("goalAllowedNone") : this.t("goalAllowed", { limit: this.goalAmount(g, g.limit) })}`, pill: this.t("goalMissedPill"), view: GOAL_JUMPS[g.id].view, jump: this.goalJump(g.id) });
     }
     return items;
   }
@@ -2396,7 +2407,7 @@ class OverviewMixin {
     const row = it => {
       const inner = `<span class="tile ${it.tone}"><ha-icon icon="${it.icon}"></ha-icon></span><span class="row-text"><strong>${this.esc(it.text || this.t(it.label))}</strong>${it.hint || it.hintText ? `<small>${this.esc(it.hintText || this.t(it.hint))}</small>` : ""}</span>`;
       if (it.scan) return `<div class="row todo" data-todo="${it.key}">${inner}<button class="btn" data-action="scan">${this.t("scan")}</button></div>`;
-      const target = `data-jump="${it.view}"${it.filter !== undefined ? ` data-filter="${it.filter}"` : ""}${it.type ? ` data-type="${it.type}"` : ""}${it.status ? ` data-status="${it.status}"` : ""}`;
+      const target = it.jump || `data-jump="${it.view}"${it.filter !== undefined ? ` data-filter="${it.filter}"` : ""}${it.type ? ` data-type="${it.type}"` : ""}${it.status ? ` data-status="${it.status}"` : ""}`;
       const pill = it.count !== undefined ? this.todoCount(it) : it.pill;
       return `<button class="row todo" data-todo="${it.key}" ${target}>${inner}${pill ? `<span class="pill ${it.tone}">${this.esc(pill)}</span>` : ""}</button>`;
     };
@@ -2782,7 +2793,7 @@ class FindingsMixin {
   // The findings as shown (classification chip, search, type filter, sort); the export uses the same list.
   visibleFindings() {
     const all = this.sortedFindings(true).filter(f => this.statusMatch(f));
-    const classed = this.findingFilter ? all.filter(f => this.findingReason(f) === this.findingFilter) : all;
+    const classed = this.findingFilter ? all.filter(f => this.findingReason(f) === this.findingFilter || f.rule_id === this.findingFilter) : all;
     const afterOnly = this.findingAfter ? classed.filter(f => this.corr?.by_key?.[f.key]) : classed;
     const byClass = this.findingDue ? afterOnly.filter(f => f.resurfaced) : afterOnly;
     this.lvState("findings", "impact", "desc");
@@ -8501,7 +8512,21 @@ Object.assign(TEXT.en, {
   goalUnit_mb_per_day: "{n} MB per day", goalEdit: "Adjust", goalLimitLabel: "Limit", goalEnabled: "Watch this goal", goalDefault: "Default: {n}", goalFailed: "Not saved: {reason}", goalSave: "Save", goalsAdjust: "Adjust limits", goalsAllMet: "All {n} watched goals are met.",
 });
 
-const GOAL_VIEWS = { broken_references: "findingsNav", unavailable: "findingsNav", backup_age: "maintenance", restore_test_age: "maintenance", recorder_growth: "recorder", weak_batteries: "batteries", devices_without_area: "policies", stale_sensors: "findingsNav", recurring_devices: "cleanup", automation_errors: "runs", blocked_automations: "findingsNav", orphaned_statistics: "cleanup" };
+// Where a goal leads: the page, its tab, and the filter that leaves only what the goal counts (lf: "list|name|value").
+const GOAL_JUMPS = {
+  broken_references: { view: "findingsNav", filter: "broken_reference" },
+  unavailable: { view: "findingsNav", filter: "unavailable" },
+  stale_sensors: { view: "findingsNav", filter: "stale" },
+  blocked_automations: { view: "findingsNav", filter: "automation.blocked" },
+  backup_age: { view: "maintenance", tab: "backup" },
+  restore_test_age: { view: "maintenance", tab: "backup" },
+  recorder_growth: { view: "recorder", tab: "db" },
+  weak_batteries: { view: "batteries", battery: "low" },
+  devices_without_area: { view: "policies", tab: "violations", lf: "polviol|rule|device_area" },
+  recurring_devices: { view: "cleanup", tab: "devices" },
+  orphaned_statistics: { view: "cleanup", tab: "stats" },
+  automation_errors: { view: "runs", tab: "overview", lf: "overview|runs|errors" },
+};
 const GOAL_TONES = { met: "ok", missed: "red", unknown: "mute", off: "mute" };
 
 class GoalsMixin {
@@ -8532,9 +8557,14 @@ class GoalsMixin {
     return g.value === null ? this.t("goalUnknownHint") : this.t("goalNow", { value: this.goalAmount(g, g.value) });
   }
 
+  goalJump(id) {
+    const j = GOAL_JUMPS[id];
+    return `data-jump="${j.view}"${j.tab ? ` data-jump-tab="${j.tab}"` : ""}${j.filter ? ` data-filter="${j.filter}" data-jump-fresh` : ""}${j.lf ? ` data-jump-lf="${j.lf}"` : ""}${j.battery ? ` data-jump-battery="${j.battery}"` : ""}`;
+  }
+
   goalRow(g, editable = true) {
     const form = editable && this.goalForm?.id === g.id ? this.goalFormHtml(g) : "";
-    const title = `<button class="linklike" data-jump="${GOAL_VIEWS[g.id]}"><strong>${this.t(`goal_${g.id}`)}</strong></button>`;
+    const title = `<button class="linklike" ${this.goalJump(g.id)}><strong>${this.t(`goal_${g.id}`)}</strong></button>`;
     return `<div class="row"><span class="tile ${GOAL_TONES[g.state]}"><ha-icon icon="${g.state === "met" ? "mdi:check-circle-outline" : g.state === "missed" ? "mdi:alert-circle-outline" : "mdi:help-circle-outline"}"></ha-icon></span><span class="row-text">${title}<small>${this.esc(this.goalNow(g))} · ${this.esc(this.t("goalLimit", { limit: this.goalAmount(g, g.limit) }))}</small></span><span class="pill ${GOAL_TONES[g.state]}">${this.t(`goalState_${g.state}`)}</span>${editable ? `<button class="btn quiet" data-goal-open="${g.id}">${this.t("goalEdit")}</button>` : ""}</div>${form}`;
   }
 
@@ -16166,6 +16196,9 @@ class HAHousekeeperPanel extends HTMLElement {
       this.noteJump(el.dataset.jump);
       this.view = el.dataset.jump; this.pages = {};
       if (el.dataset.jumpTab) (this.viewTab ||= {})[this.view] = el.dataset.jumpTab;
+      if (el.dataset.jumpFresh !== undefined) { this.findingStatus = ""; this.findingAfter = false; this.findingDue = false; }
+      if (el.dataset.jumpLf) { const [id, name, value] = el.dataset.jumpLf.split("|"); this.setListFilter(id, name, value); }
+      if (el.dataset.jumpBattery) this.batteryFilter = el.dataset.jumpBattery;
       if (el.dataset.filter !== undefined) { if (el.dataset.jump === "monitor") this.monitorFilter = el.dataset.filter; else this.findingFilter = el.dataset.filter; }
       if (el.dataset.jump === "inventory") { this.statusFilter = el.dataset.status || ""; this.typeFilter = el.dataset.type || ""; this.originFilter = ""; this.pages = {}; }
       this.render();

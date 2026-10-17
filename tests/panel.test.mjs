@@ -3542,6 +3542,16 @@ test("a policy violation takes the same decisions as a finding and reloads the r
   assert.ok(shadow.innerHTML.includes("Reserve") && el.decide === null);
 });
 
+test("a goal leads to the list it counts, with the filter set", () => {
+  const { el } = panel("en");
+  assert.ok(el.goalJump("broken_references").includes('data-jump="findingsNav"') && el.goalJump("broken_references").includes('data-filter="broken_reference"'));
+  assert.ok(el.goalJump("devices_without_area").includes('data-jump-tab="violations"') && el.goalJump("devices_without_area").includes('data-jump-lf="polviol|rule|device_area"'));
+  el.setListFilter("polviol", "rule", "device_area");
+  assert.deepEqual(JSON.parse(JSON.stringify(el.lvState("polviol", "name", "asc").f)), { rule: "device_area" });
+  el.setListFilter("polviol", "rule", "other");
+  assert.equal(el.lv.polviol.f.rule, "other");
+});
+
 test("maintenance goals show state and values, and a limit is saved through goal_set", async () => {
   const calls = [];
   const { el, shadow } = panel("en", { setTimeout: () => 0 });

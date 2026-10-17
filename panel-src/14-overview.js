@@ -149,7 +149,7 @@ class OverviewMixin {
     this.ensureGoals();
     this.ensurePolicies(); // the menu counts need both
     for (const g of (this.goals?.goals || []).filter(x => x.state === "missed")) {
-      items.push({ key: `goal_${g.id}`, area: "care", tone: "warn", icon: "mdi:target", text: this.t(`goal_${g.id}`), hintText: `${this.goalNow(g)} · ${g.limit === 0 && g.unit === "count" ? this.t("goalAllowedNone") : this.t("goalAllowed", { limit: this.goalAmount(g, g.limit) })}`, pill: this.t("goalMissedPill"), view: GOAL_VIEWS[g.id] });
+      items.push({ key: `goal_${g.id}`, area: "care", tone: "warn", icon: "mdi:target", text: this.t(`goal_${g.id}`), hintText: `${this.goalNow(g)} · ${g.limit === 0 && g.unit === "count" ? this.t("goalAllowedNone") : this.t("goalAllowed", { limit: this.goalAmount(g, g.limit) })}`, pill: this.t("goalMissedPill"), view: GOAL_JUMPS[g.id].view, jump: this.goalJump(g.id) });
     }
     return items;
   }
@@ -215,7 +215,7 @@ class OverviewMixin {
     const row = it => {
       const inner = `<span class="tile ${it.tone}"><ha-icon icon="${it.icon}"></ha-icon></span><span class="row-text"><strong>${this.esc(it.text || this.t(it.label))}</strong>${it.hint || it.hintText ? `<small>${this.esc(it.hintText || this.t(it.hint))}</small>` : ""}</span>`;
       if (it.scan) return `<div class="row todo" data-todo="${it.key}">${inner}<button class="btn" data-action="scan">${this.t("scan")}</button></div>`;
-      const target = `data-jump="${it.view}"${it.filter !== undefined ? ` data-filter="${it.filter}"` : ""}${it.type ? ` data-type="${it.type}"` : ""}${it.status ? ` data-status="${it.status}"` : ""}`;
+      const target = it.jump || `data-jump="${it.view}"${it.filter !== undefined ? ` data-filter="${it.filter}"` : ""}${it.type ? ` data-type="${it.type}"` : ""}${it.status ? ` data-status="${it.status}"` : ""}`;
       const pill = it.count !== undefined ? this.todoCount(it) : it.pill;
       return `<button class="row todo" data-todo="${it.key}" ${target}>${inner}${pill ? `<span class="pill ${it.tone}">${this.esc(pill)}</span>` : ""}</button>`;
     };

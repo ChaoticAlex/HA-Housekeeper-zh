@@ -170,7 +170,7 @@ class FindingsMixin {
   // The findings as shown (classification chip, search, type filter, sort); the export uses the same list.
   visibleFindings() {
     const all = this.sortedFindings(true).filter(f => this.statusMatch(f));
-    const classed = this.findingFilter ? all.filter(f => this.findingReason(f) === this.findingFilter) : all;
+    const classed = this.findingFilter ? all.filter(f => this.findingReason(f) === this.findingFilter || f.rule_id === this.findingFilter) : all;
     const afterOnly = this.findingAfter ? classed.filter(f => this.corr?.by_key?.[f.key]) : classed;
     const byClass = this.findingDue ? afterOnly.filter(f => f.resurfaced) : afterOnly;
     this.lvState("findings", "impact", "desc");

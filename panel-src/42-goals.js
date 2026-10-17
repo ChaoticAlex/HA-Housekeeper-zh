@@ -14,7 +14,21 @@ Object.assign(TEXT.en, {
   goalUnit_mb_per_day: "{n} MB per day", goalEdit: "Adjust", goalLimitLabel: "Limit", goalEnabled: "Watch this goal", goalDefault: "Default: {n}", goalFailed: "Not saved: {reason}", goalSave: "Save", goalsAdjust: "Adjust limits", goalsAllMet: "All {n} watched goals are met.",
 });
 
-const GOAL_VIEWS = { broken_references: "findingsNav", unavailable: "findingsNav", backup_age: "maintenance", restore_test_age: "maintenance", recorder_growth: "recorder", weak_batteries: "batteries", devices_without_area: "policies", stale_sensors: "findingsNav", recurring_devices: "cleanup", automation_errors: "runs", blocked_automations: "findingsNav", orphaned_statistics: "cleanup" };
+// Where a goal leads: the page, its tab, and the filter that leaves only what the goal counts (lf: "list|name|value").
+const GOAL_JUMPS = {
+  broken_references: { view: "findingsNav", filter: "broken_reference" },
+  unavailable: { view: "findingsNav", filter: "unavailable" },
+  stale_sensors: { view: "findingsNav", filter: "stale" },
+  blocked_automations: { view: "findingsNav", filter: "automation.blocked" },
+  backup_age: { view: "maintenance", tab: "backup" },
+  restore_test_age: { view: "maintenance", tab: "backup" },
+  recorder_growth: { view: "recorder", tab: "db" },
+  weak_batteries: { view: "batteries", battery: "low" },
+  devices_without_area: { view: "policies", tab: "violations", lf: "polviol|rule|device_area" },
+  recurring_devices: { view: "cleanup", tab: "devices" },
+  orphaned_statistics: { view: "cleanup", tab: "stats" },
+  automation_errors: { view: "runs", tab: "overview", lf: "overview|runs|errors" },
+};
 const GOAL_TONES = { met: "ok", missed: "red", unknown: "mute", off: "mute" };
 
 class GoalsMixin {
@@ -45,9 +59,14 @@ class GoalsMixin {
     return g.value === null ? this.t("goalUnknownHint") : this.t("goalNow", { value: this.goalAmount(g, g.value) });
   }
 
+  goalJump(id) {
+    const j = GOAL_JUMPS[id];
+    return `data-jump="${j.view}"${j.tab ? ` data-jump-tab="${j.tab}"` : ""}${j.filter ? ` data-filter="${j.filter}" data-jump-fresh` : ""}${j.lf ? ` data-jump-lf="${j.lf}"` : ""}${j.battery ? ` data-jump-battery="${j.battery}"` : ""}`;
+  }
+
   goalRow(g, editable = true) {
     const form = editable && this.goalForm?.id === g.id ? this.goalFormHtml(g) : "";
-    const title = `<button class="linklike" data-jump="${GOAL_VIEWS[g.id]}"><strong>${this.t(`goal_${g.id}`)}</strong></button>`;
+    const title = `<button class="linklike" ${this.goalJump(g.id)}><strong>${this.t(`goal_${g.id}`)}</strong></button>`;
     return `<div class="row"><span class="tile ${GOAL_TONES[g.state]}"><ha-icon icon="${g.state === "met" ? "mdi:check-circle-outline" : g.state === "missed" ? "mdi:alert-circle-outline" : "mdi:help-circle-outline"}"></ha-icon></span><span class="row-text">${title}<small>${this.esc(this.goalNow(g))} · ${this.esc(this.t("goalLimit", { limit: this.goalAmount(g, g.limit) }))}</small></span><span class="pill ${GOAL_TONES[g.state]}">${this.t(`goalState_${g.state}`)}</span>${editable ? `<button class="btn quiet" data-goal-open="${g.id}">${this.t("goalEdit")}</button>` : ""}</div>${form}`;
   }
 

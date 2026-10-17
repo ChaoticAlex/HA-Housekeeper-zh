@@ -16,7 +16,9 @@ class ListsMixin {
     if (this.lv[id]) return this.lv[id];
     const kept = this.lvStored()[id];
     const ok = kept && typeof kept.sort === "string" && (kept.dir === "asc" || kept.dir === "desc");
-    return (this.lv[id] = { q: "", sort: ok ? kept.sort : sort, dir: ok ? kept.dir : dir, f: ok && kept.f && typeof kept.f === "object" ? Object.fromEntries(Object.entries(kept.f).filter(([, v]) => typeof v === "string")) : {}, view: "", base: { sort, dir } });
+    const pending = this._lfPending?.[id];
+    if (pending) delete this._lfPending[id];
+    return (this.lv[id] = { q: "", sort: ok ? kept.sort : sort, dir: ok ? kept.dir : dir, f: pending ? pending : ok && kept.f && typeof kept.f === "object" ? Object.fromEntries(Object.entries(kept.f).filter(([, v]) => typeof v === "string")) : {}, view: "", base: { sort, dir } });
   }
 
   lvStored() {
@@ -24,6 +26,15 @@ class ListsMixin {
     let stored = {};
     try { stored = JSON.parse(globalThis.localStorage?.getItem("ha_housekeeper.lv") || "{}"); } catch (_) { stored = {}; }
     return (this._lvStored = stored && typeof stored === "object" && !Array.isArray(stored) ? stored : {});
+  }
+
+  // A jump to a list with one filter set: the search and the other filters of that list are cleared.
+  // A list not shown yet takes it when it is first built (lvState).
+  setListFilter(id, name, value) {
+    const st = this.lv[id];
+    if (!st) { (this._lfPending ||= {})[id] = { [name]: value }; return; }
+    st.q = ""; st.f = { [name]: value };
+    this.persistLv(id);
   }
 
   persistLv(id) {
