@@ -826,7 +826,10 @@ Object.assign(TEXT.de, {
   backupRefresh: "Neu prüfen", backupLoading: "Backups werden geprüft …", backupUnavailable: "Die Backup-Komponente von Home Assistant ist nicht verfügbar.",
   bhLevel_ok: "In Ordnung", bhLevel_note: "Hinweis", bhLevel_problem: "Problem", bhLevel_unknown: "Unbekannt",
   bh_setup: "Ziele und Zeitplan", bh_newest: "Letztes Backup", bh_last_run: "Letzter automatischer Lauf", bh_targets: "Ablageorte", bh_size: "Größe",
-  bh_retention: "Aufbewahrung", bh_encryption: "Verschlüsselung", bh_emergency_kit: "Emergency Kit", bh_restore_test: "Restore-Test", bh_plan_backups: "Backups vor Bereinigungen", bh_own_backups: "Housekeeper-Backups", bhOwnOpen: "Aufräumen", bhVerdict_ok: "Belastbar", bhVerdict_note: "Erst ansehen", bhVerdict_problem: "Problem", bhVerdict_unknown: "Unbekannt", bhCheckFirst: "Zu prüfen: {items}", bhTileLast: "Letztes Backup", bhTileCount: "Backups", bhTileRemote: "Externe Kopie", bhTileOpen: "Zu prüfen", bhGroup_running: "Sicherung läuft", bhGroup_storage: "Ablage", bhGroup_restore: "Wiederherstellbarkeit", bhGroup_house: "Housekeeper", backupsTab: "Backups",
+  bh_retention: "Aufbewahrung", bh_encryption: "Verschlüsselung", bh_emergency_kit: "Emergency Kit", bh_restore_test: "Restore-Test", bh_plan_backups: "Backups vor Bereinigungen", bh_own_backups: "Housekeeper-Backups", bh_content: "Inhalt", bh_remote_age: "Alter pro Ablageort", bh_space: "Platz fürs nächste Backup", bhOwnOpen: "Aufräumen",
+  bhContentOk: "Datenbank enthalten, {apps} Apps, {folders} Ordner, keine Fehler", bhContentFailed: "Beim neuesten Backup sind Teile fehlgeschlagen: {items}", bhContentNoDb: "Die Datenbank fehlt im neuesten Backup, obwohl sie vorgesehen ist", bhContentNoDbSet: "Der Zeitplan nimmt die Datenbank nicht mit: eine Wiederherstellung hätte keinen Verlauf", bhContentUnknown: "Der Inhalt des neuesten Backups ist nicht zu lesen",
+  bhRemoteOk: "Neueste Kopie: {items}", bhRemoteStale: "Zu alt (Grenze {limit}): {items}",
+  bhSpaceOk: "{free} frei, das nächste Backup braucht etwa {need}", bhSpaceNote: "{free} frei, das nächste Backup braucht etwa {need}", bhSpaceProblem: "Nur {free} frei, das letzte Backup war {size} groß", bhSpaceUnknown: "Freier Platz oder Backup-Größe nicht bekannt", bhVerdict_ok: "Belastbar", bhVerdict_note: "Erst ansehen", bhVerdict_problem: "Problem", bhVerdict_unknown: "Unbekannt", bhCheckFirst: "Zu prüfen: {items}", bhTileLast: "Letztes Backup", bhTileCount: "Backups", bhTileRemote: "Externe Kopie", bhTileOpen: "Zu prüfen", bhGroup_running: "Sicherung läuft", bhGroup_storage: "Ablage und Inhalt", bhGroup_restore: "Wiederherstellbarkeit", bhGroup_house: "Housekeeper", backupsTab: "Backups",
   bhRec_daily: "täglich", bhRec_custom_days: "an bestimmten Tagen", bhRec_never: "ohne Zeitplan", bhNone: "keine", bhNever: "nie",
   bhAgeHours: "{n} Std.", bhAgeDays: "{n} Tagen",
   bhSetupOk: "Ziele: {agents} · Zeitplan: {recurrence}", bhSetupNote: "Kein Ziel für automatische Backups gewählt, ältere Backups sind aber vorhanden.", bhSetupProblem: "Weder ein Backup-Ziel noch ein vorhandenes Backup.",
@@ -855,7 +858,10 @@ Object.assign(TEXT.en, {
   backupRefresh: "Check again", backupLoading: "Checking backups …", backupUnavailable: "The backup component of Home Assistant is not available.",
   bhLevel_ok: "OK", bhLevel_note: "Note", bhLevel_problem: "Problem", bhLevel_unknown: "Unknown",
   bh_setup: "Targets and schedule", bh_newest: "Latest backup", bh_last_run: "Last automatic run", bh_targets: "Storage locations", bh_size: "Size",
-  bh_retention: "Retention", bh_encryption: "Encryption", bh_emergency_kit: "Emergency kit", bh_restore_test: "Restore test", bh_plan_backups: "Backups before cleanups", bh_own_backups: "Housekeeper backups", bhOwnOpen: "Tidy up", bhVerdict_ok: "Reliable", bhVerdict_note: "Look first", bhVerdict_problem: "Problem", bhVerdict_unknown: "Unknown", bhCheckFirst: "To check: {items}", bhTileLast: "Latest backup", bhTileCount: "Backups", bhTileRemote: "External copy", bhTileOpen: "To check", bhGroup_running: "Backup runs", bhGroup_storage: "Storage", bhGroup_restore: "Restorability", bhGroup_house: "Housekeeper", backupsTab: "Backups",
+  bh_retention: "Retention", bh_encryption: "Encryption", bh_emergency_kit: "Emergency kit", bh_restore_test: "Restore test", bh_plan_backups: "Backups before cleanups", bh_own_backups: "Housekeeper backups", bh_content: "Content", bh_remote_age: "Age per target", bh_space: "Room for the next backup", bhOwnOpen: "Tidy up",
+  bhContentOk: "Database included, {apps} apps, {folders} folders, no errors", bhContentFailed: "Parts of the newest backup failed: {items}", bhContentNoDb: "The database is missing in the newest backup although it is planned", bhContentNoDbSet: "The schedule leaves the database out: a restore would have no history", bhContentUnknown: "The content of the newest backup cannot be read",
+  bhRemoteOk: "Newest copy: {items}", bhRemoteStale: "Too old (limit {limit}): {items}",
+  bhSpaceOk: "{free} free, the next backup needs about {need}", bhSpaceNote: "{free} free, the next backup needs about {need}", bhSpaceProblem: "Only {free} free, the last backup was {size}", bhSpaceUnknown: "Free space or backup size not known", bhVerdict_ok: "Reliable", bhVerdict_note: "Look first", bhVerdict_problem: "Problem", bhVerdict_unknown: "Unknown", bhCheckFirst: "To check: {items}", bhTileLast: "Latest backup", bhTileCount: "Backups", bhTileRemote: "External copy", bhTileOpen: "To check", bhGroup_running: "Backup runs", bhGroup_storage: "Storage and content", bhGroup_restore: "Restorability", bhGroup_house: "Housekeeper", backupsTab: "Backups",
   bhRec_daily: "daily", bhRec_custom_days: "on chosen days", bhRec_never: "no schedule", bhNone: "none", bhNever: "never",
   bhAgeHours: "{n} h", bhAgeDays: "{n} days",
   bhSetupOk: "Targets: {agents} · schedule: {recurrence}", bhSetupNote: "No target chosen for automatic backups, but older backups exist.", bhSetupProblem: "Neither a backup target nor an existing backup.",
@@ -6030,6 +6036,20 @@ class BackupMixin {
       case "restore_test":
         if (!v.at) return t("bhRestoreNone");
         return t(c.level === "ok" ? "bhRestoreOk" : "bhRestoreOld", { date: this.bhDay(v.at), days: v.age_days, limit: 180 });
+      case "content":
+        if (c.level === "unknown") return t("bhContentUnknown");
+        if (c.level === "problem") return t("bhContentFailed", { items: this.bhList(v.failed) });
+        if (c.level === "note") return t(v.scheduled === false ? "bhContentNoDbSet" : "bhContentNoDb");
+        return t("bhContentOk", { apps: this.formatNumber(v.apps ?? 0), folders: this.formatNumber(v.folders ?? 0) });
+      case "remote_age": {
+        const row = a => `${this.esc(a.agent)}: ${this.bhAge(a.age_hours)}`;
+        return c.level === "note"
+          ? t("bhRemoteStale", { items: (v.agents || []).filter(a => (v.stale || []).includes(a.agent)).map(row).join(", "), limit: this.bhAge(v.limit_hours) })
+          : t("bhRemoteOk", { items: (v.agents || []).map(row).join(", ") });
+      }
+      case "space":
+        if (c.level === "unknown") return t("bhSpaceUnknown");
+        return t({ ok: "bhSpaceOk", note: "bhSpaceNote", problem: "bhSpaceProblem" }[c.level], { free: this.formatBytes(v.free), size: this.formatBytes(v.size), need: this.formatBytes(v.need) });
       case "own_backups":
         return t("bhOwnNote", { count: v.count, size: this.formatBytes(v.size) });
       case "plan_backups":
@@ -6114,7 +6134,7 @@ class BackupMixin {
   bhGroups(checks) {
     const groups = [
       ["running", ["setup", "newest", "last_run"]],
-      ["storage", ["targets", "size", "retention"]],
+      ["storage", ["targets", "remote_age", "content", "size", "retention", "space"]],
       ["restore", ["encryption", "emergency_kit", "restore_test"]],
       ["house", ["plan_backups", "own_backups"]],
     ];

@@ -63,6 +63,20 @@ class BackupMixin {
       case "restore_test":
         if (!v.at) return t("bhRestoreNone");
         return t(c.level === "ok" ? "bhRestoreOk" : "bhRestoreOld", { date: this.bhDay(v.at), days: v.age_days, limit: 180 });
+      case "content":
+        if (c.level === "unknown") return t("bhContentUnknown");
+        if (c.level === "problem") return t("bhContentFailed", { items: this.bhList(v.failed) });
+        if (c.level === "note") return t(v.scheduled === false ? "bhContentNoDbSet" : "bhContentNoDb");
+        return t("bhContentOk", { apps: this.formatNumber(v.apps ?? 0), folders: this.formatNumber(v.folders ?? 0) });
+      case "remote_age": {
+        const row = a => `${this.esc(a.agent)}: ${this.bhAge(a.age_hours)}`;
+        return c.level === "note"
+          ? t("bhRemoteStale", { items: (v.agents || []).filter(a => (v.stale || []).includes(a.agent)).map(row).join(", "), limit: this.bhAge(v.limit_hours) })
+          : t("bhRemoteOk", { items: (v.agents || []).map(row).join(", ") });
+      }
+      case "space":
+        if (c.level === "unknown") return t("bhSpaceUnknown");
+        return t({ ok: "bhSpaceOk", note: "bhSpaceNote", problem: "bhSpaceProblem" }[c.level], { free: this.formatBytes(v.free), size: this.formatBytes(v.size), need: this.formatBytes(v.need) });
       case "own_backups":
         return t("bhOwnNote", { count: v.count, size: this.formatBytes(v.size) });
       case "plan_backups":
@@ -147,7 +161,7 @@ class BackupMixin {
   bhGroups(checks) {
     const groups = [
       ["running", ["setup", "newest", "last_run"]],
-      ["storage", ["targets", "size", "retention"]],
+      ["storage", ["targets", "remote_age", "content", "size", "retention", "space"]],
       ["restore", ["encryption", "emergency_kit", "restore_test"]],
       ["house", ["plan_backups", "own_backups"]],
     ];

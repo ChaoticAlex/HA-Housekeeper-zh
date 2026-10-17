@@ -35,6 +35,7 @@ def backup(hours: float = 5, size: int = 1000, agents=("hassio.local", "cloud.cl
         "failed_agents": [],
         "protected": True,
         "automatic": True,
+        "database": True,
         **extra,
     }
 
@@ -58,6 +59,7 @@ def state(backups=None, **extra):
         "config": config(),
         "backups": [backup()] if backups is None else backups,
         "agent_errors": [],
+        "disk_free": 10_000,
         **extra,
     }
 
@@ -82,6 +84,9 @@ def test_a_sound_setup_is_all_ok() -> None:
         "size",
         "retention",
         "encryption",
+        "content",
+        "remote_age",
+        "space",
         "emergency_kit",
         "restore_test",
     }
@@ -403,3 +408,30 @@ async def test_the_attestations_survive_a_restart_and_reject_unknown_kinds(
     broken = AttestStore(hass)
     await broken.async_load()
     assert broken.record == {"targets": None, "emergency_kit": None, "restore_test": None}
+
+
+def test_the_content_of_the_newest_backup_is_judged() -> None:
+    assert judge(state())[1]["content"]["level"] == "ok"
+    failed = judge(state([backup(failed_apps=["Cloudflared"])]))[1]["content"]
+    assert failed["level"] == "problem" and failed["values"]["failed"] == ["Cloudflared"]
+    assert judge(state([backup(database=False)]))[1]["content"]["level"] == "note"
+    assert judge(state([backup(database=None)]))[1]["content"]["level"] == "unknown"
+
+
+def test_the_newest_copy_on_each_external_target_must_not_be_old() -> None:
+    both = [backup(5, agents=("hassio.local",)), backup(29, agents=("hassio.local", "cloud.cloud"))]
+    check = judge(state(both))[1]["remote_age"]
+    assert check["level"] == "ok" and check["values"]["agents"][0]["agent"] == "cloud.cloud"
+    old = [backup(5, agents=("hassio.local",)), backup(24 * 9, agents=("hassio.local", "cloud.cloud"))]
+    stale = judge(state(old))[1]["remote_age"]
+    assert stale["level"] == "note" and stale["values"]["stale"] == ["cloud.cloud"]
+    assert "remote_age" not in judge(state([backup(agents=("hassio.local",))]))[1]
+
+
+def test_the_next_backup_must_fit_on_the_local_target() -> None:
+    newest = [backup(5, size=1000)]
+    assert judge(state(newest, disk_free=2000))[1]["space"]["level"] == "ok"
+    assert judge(state(newest, disk_free=1200))[1]["space"]["level"] == "note"
+    assert judge(state(newest, disk_free=900))[1]["space"]["level"] == "problem"
+    assert judge(state(newest, disk_free=None))[1]["space"]["level"] == "unknown"
+    assert "space" not in judge(state([backup(5, agents=("cloud.cloud",))]))[1]

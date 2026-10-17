@@ -5836,3 +5836,15 @@ test("the Backups tab holds the protection and, folded at the foot, the tidy-up 
   html = el.backupCard();
   assert.ok(html.includes("data-bkc-plan") && html.includes("Housekeeper bbbb2222"));
 });
+
+test("the new backup checks say what failed, which target is stale and how much room is left", () => {
+  const { el } = panel("en");
+  el.backup = { available: true, overall: "problem", counts: { note: 1, problem: 1 }, backup_count: 3, backups: [], checks: [
+    { id: "content", level: "problem", values: { failed: ["Cloudflared", "ssl"] } },
+    { id: "remote_age", level: "note", values: { agents: [{ agent: "cloud.cloud", age_hours: 216 }, { agent: "hassio.local", age_hours: 5 }], stale: ["cloud.cloud"], limit_hours: 36 } },
+    { id: "space", level: "problem", values: { free: 800 * 1024 ** 2, size: 1024 ** 3, need: 1.5 * 1024 ** 3 } },
+  ] };
+  const html = el.backupCard();
+  assert.ok(html.includes("Parts of the newest backup failed: Cloudflared, ssl") && html.includes("Too old (limit 36 h): cloud.cloud: 9 days") && html.includes("Only 800 MB free, the last backup was 1 GB"));
+  assert.ok(html.includes("Storage and content") && html.includes("Content") && html.includes("Room for the next backup"));
+});
