@@ -38,6 +38,7 @@
   - Ein Wartungsziel führt zur passenden Liste mit gesetztem Filter (etwa „Defekte Referenzen“ zu den Befunden dieser Art).
   - Die Verfügbarkeit einer Hausfunktion zeigt Kennzahlen als Kacheln und eine Tagesleiste über die ganze Breite mit Achse; „1 Vorfälle“ heißt jetzt „1 Vorfall“.
   - In der Tagesleiste der Verfügbarkeit ist ein Tag mit weniger als 1 % Ausfallzeit bernsteinfarben statt rot; der Hinweis am Balken nennt die Dauer, darunter steht eine Legende.
+  - Die Seite einer Hausfunktion ist kompakter: Kopf, Kennzahlen, Tagesleiste und die zugeordneten Objekte stehen in einer Karte, Scan und Prüfung in einer Zeile unter dem Namen. Die Objekte sind eine Tabelle mit Seiten (zunächst 10 pro Seite).
 - **Zugriffe & Datenfluss:** Integrationen, deren Tracker nur die Anwesenheit über Router oder Bluetooth melden (etwa die FRITZ!Box), gelten nicht mehr als „Standort“ mit hohem Risiko, sondern zeigen „Anwesenheit im Netz“.
 - **Freigaben:** Alexa und Google Assistant, die in den Nabu-Casa-Einstellungen ausgeschaltet sind, zählen nicht mehr als „freigegeben“ und erzeugen keine Befunde; ihre Kachel zeigt „in Nabu Casa ausgeschaltet“.
 
@@ -79,6 +80,7 @@
   - A maintenance goal leads to the matching list with the filter set (for example "Broken references" to the findings of that kind).
   - The availability of a house function shows its figures as tiles and a day strip across the full width with an axis; "1 incidents" now reads "1 incident".
   - In the day strip of the availability, a day with less than 1 % of impaired time is amber instead of red; the tooltip names the duration and a legend sits below.
+  - The page of a house function is more compact: header, figures, day strip and the assigned objects share one card, scan and check sit in one line under the name. The objects are a table with pages (10 per page to begin with).
 - **Access & data flow:** Integrations whose trackers only report presence through a router or Bluetooth (such as the FRITZ!Box) no longer count as "location" with a high risk but show "presence on the network".
 - **Exposure:** Alexa and Google Assistant switched off in the Nabu Casa settings no longer count as "exposed" and raise no findings; their tile says "switched off in Nabu Casa".
 

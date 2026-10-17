@@ -110,7 +110,7 @@ test("the home functions history shows a flapping run as one line and filters by
   ] } };
   el.monitorHistory.one.availability = { window_days: 30, since: at, observed_seconds: 1000, ok_seconds: 999, problem_seconds: 1, unknown_seconds: 0, unstable_seconds: 0, incidents: 1, longest_seconds: 1, days: [{ date: "2026-10-13", state: "problem", problem_seconds: 3600 }, { date: "2026-10-14", state: "problem", problem_seconds: 540 }] };
   const html = el.monitorDetail();
-  assert.match(html, /<b class="ok">99,9 %<\/b><span>Unauffällig<\/span>/);
+  assert.match(html, /<b class="ok">99,9 %<\/b><span>Unauffällig, 30 Tage<\/span>/);
   assert.match(html, /<i class="problem" title="2026-10-13: Beeinträchtigt, 1 Std\./);
   assert.match(html, /<i class="problem short" title="2026-10-14: Beeinträchtigt, 9 Min\./);
   assert.match(html, /data-plan-open="p1"/);
