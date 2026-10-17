@@ -12,7 +12,7 @@ from homeassistant.core import HomeAssistant
 
 from . import counter_repair
 from .const import DOMAIN
-from .db_health import database_first, db_health, start_check
+from .db_health import database_first, db_health, recorder_retention, start_check
 from .entity_recorder import entity_recorder
 from .inventory import InventoryScanner
 from .maintenance import recorder_costs
@@ -90,6 +90,7 @@ async def websocket_reliability(
     now = datetime.now(UTC)
     for row in result.get("entries", []):
         row["setup"] = scanner.entry_states.summary(row["entry_id"], now)
+    result["keep_days"] = _keep_days(hass)
     connection.send_result(msg["id"], _versioned(result))
 
 
@@ -307,7 +308,17 @@ async def websocket_storms(
     except Exception as err:
         connection.send_error(msg["id"], "storms_failed", f"{type(err).__name__}: {err}")
         return
-    connection.send_result(msg["id"], _versioned(mark_excluded(hass, dict(result))))
+    reply = mark_excluded(hass, dict(result))
+    reply["keep_days"] = _keep_days(hass)
+    connection.send_result(msg["id"], _versioned(reply))
+
+
+def _keep_days(hass: HomeAssistant) -> int | None:
+    """How many days the recorder keeps; the panel notes a window that reaches further back."""
+    try:
+        return recorder_retention(hass)["keep_days"]
+    except Exception:  # no recorder instance: the window stands as asked
+        return None
 
 
 def async_register(hass: HomeAssistant) -> None:

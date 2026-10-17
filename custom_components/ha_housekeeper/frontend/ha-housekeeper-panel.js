@@ -868,7 +868,7 @@ Object.assign(TEXT.en, {
 Object.assign(TEXT.de, {
   reliability: "Zuverlässigkeit", reliabilitySubtitle: "Wie verfügbar die Entitäten jeder Integration waren und wann sie gemeinsam ausfielen. Liest nur den Recorder.",
   relHint: "Schlechteste zuerst. Gerechnet aus den Zuständen im Recorder",
-  relWindow1: "24 Stunden", relWindow7: "7 Tage", relWindow30: "30 Tage", relLoading: "Der Recorder wird ausgewertet. Das kann bei einer großen Datenbank einige Sekunden dauern …",
+  relWindow1: "24 Stunden", relWindow7: "7 Tage", relWindow30: "30 Tage", relKeepShort: "Der Recorder behält nur {keep} Tage. Die Zahlen für {days} Tage reichen deshalb nicht weiter zurück.", relLoading: "Der Recorder wird ausgewertet. Das kann bei einer großen Datenbank einige Sekunden dauern …",
   relTab: "Zuverlässigkeit", relAllStates: "Alle Zustände", relOnlyOutages: "Mit gemeinsamen Ausfällen", relDeltaPoints: "Prozentpunkte zum Zeitraum davor", relStrip: "Ausfall je Tag", relPeriods: "Ausfallzeiträume ({n})", relPeriodsMore: "Gezeigt werden die letzten {shown} von {total}.", relColStart: "Beginn", relColDuration: "Dauer", relColAffected: "Betroffen", relColKind: "Art", relOfEntities: "{n} von {m} Entitäten", relKindShared: "Gemeinsam", relKindSingle: "Einzeln", relKindDown: "Ganzer Zeitraum", relCarries: "Trägt die Hausfunktionen",
   relOnlyDead: "Dauerhaft ausgefallen", relDead: "Ausgefallen", relDeadSub: "{n} Entitäten, ganzes Fenster", relSumAvg: "Ø je Integration", relSumAvgHint: "Mittelwert der Integrationen, jede zählt einmal. Dauerhaft ausgefallene sind nicht eingerechnet.", relTooSmall: "zu klein", relTooSmallHint: "Gemeinsame Ausfälle gibt es erst ab {n} Entitäten.", relReauthOpen: "Zum Befund", relSortAvail: "Verfügbarkeit", relSortOutages: "Gemeinsame Ausfälle", relAgeNote: "Stand: {when}", relFactAvail: "Verfügbarkeit ({days} Tage)", relAffected: "Entitäten mit Ausfallzeit ({n})", relAffectedMore: "Gezeigt werden die {shown} mit der niedrigsten Verfügbarkeit von {total}.", relNoAffected: "Keine Entität dieses Eintrags war im Zeitraum nicht verfügbar.", relOpenEntry: "Integration öffnen",
   stability: "Stabilität", stabilityOk: "Stabil im Zeitraum", stabilityMissing: "Noch nicht berechnet. Die Ansicht Zuverlässigkeit rechnet es aus.", cause_unstable: "Die Entität fällt immer wieder aus: {level}.", hint_unstable: "Prüfe Verbindung, Netz und Integration des Geräts; die Zahlen stehen in der Ansicht Zuverlässigkeit.",
@@ -897,7 +897,7 @@ Object.assign(TEXT.de, {
 Object.assign(TEXT.en, {
   reliability: "Reliability", reliabilitySubtitle: "How available each integration's entities were and when they failed together. Only reads the recorder.",
   relHint: "Worst first. Calculated from the states in the recorder",
-  relWindow1: "24 hours", relWindow7: "7 days", relWindow30: "30 days", relLoading: "Evaluating the recorder. On a large database this can take a few seconds …",
+  relWindow1: "24 hours", relWindow7: "7 days", relWindow30: "30 days", relKeepShort: "The recorder keeps only {keep} days. The numbers for {days} days therefore reach back no further.", relLoading: "Evaluating the recorder. On a large database this can take a few seconds …",
   relTab: "Reliability", relAllStates: "All states", relOnlyOutages: "With shared outages", relDeltaPoints: "percentage points against the period before", relStrip: "Outage per day", relPeriods: "Outage periods ({n})", relPeriodsMore: "Showing the last {shown} of {total}.", relColStart: "Start", relColDuration: "Duration", relColAffected: "Affected", relColKind: "Kind", relOfEntities: "{n} of {m} entities", relKindShared: "Shared", relKindSingle: "Single", relKindDown: "Whole period", relCarries: "Carries the house functions",
   relOnlyDead: "Down all the time", relDead: "Down", relDeadSub: "{n} entities, the whole window", relSumAvg: "Avg per integration", relSumAvgHint: "Mean of the integrations, each counts once. Those down all the time are not included.", relTooSmall: "too small", relTooSmallHint: "Shared outages need at least {n} entities.", relReauthOpen: "Open the finding", relSortAvail: "Availability", relSortOutages: "Shared outages", relAgeNote: "As of {when}", relFactAvail: "Availability ({days} days)", relAffected: "Entities with downtime ({n})", relAffectedMore: "Showing the {shown} with the lowest availability of {total}.", relNoAffected: "No entity of this entry was unavailable in the period.", relOpenEntry: "Open integration",
   stability: "Stability", stabilityOk: "Stable in the period", stabilityMissing: "Not calculated yet. The Reliability view calculates it.", cause_unstable: "The entity keeps failing: {level}.", hint_unstable: "Check the connection, network and integration of the device; the numbers are in the Reliability view.",
@@ -6111,6 +6111,11 @@ class ReliabilityMixin {
   }
 
   // The house functions that rely on the integration: a member is one of its entities, or one of its devices.
+  // The recorder keeps less than the window asks for: the numbers reach back only that far.
+  keepNote(r) {
+    return r?.keep_days && r.window_days > r.keep_days ? `<p class="factnote">${this.t("relKeepShort", { keep: this.formatNumber(r.keep_days), days: r.window_days })}</p>` : "";
+  }
+
   relHouseFunctions(entryId) {
     return this.monitorFunctions().filter(fn => (fn.members || []).some(m => {
       const object = this.findObject(m.object_key);
@@ -6207,7 +6212,7 @@ class ReliabilityMixin {
     if (!r.available) return alone(`<p class="factnote">${this.t("relNoRecorder")}</p>`);
     if (r.busy) return alone(`${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p>`);
     if (!r.entries.length) return alone(`<div class="emptymsg">${this.t("relEmpty")}</div>`);
-    const loading = this.relLoading ? `<p class="factnote">${this.t("relLoading")}</p>` : "";
+    const loading = (this.relLoading ? `<p class="factnote">${this.t("relLoading")}</p>` : "") + this.keepNote(r);
     const th = r.thresholds || {};
     const cov = r.coverage;
     const coverage = cov && cov.observed_share !== null && cov.observed_share !== undefined ? this.coverageNote(this.t("relCoverage", { days: r.window_days, withData: this.formatNumber(cov.with_data), known: this.formatNumber(cov.known), share: cov.observed_share })) : "";
@@ -6753,7 +6758,7 @@ class StormsMixin {
     if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("stormLoading")}</div></div>`;
     if (!r.available) return `<div class="stack">${head}<div class="panel"><p class="factnote">${this.t("relNoRecorder")}</p></div></div>`;
     if (r.busy) return `<div class="stack">${head}<div class="panel">${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p></div></div>`;
-    const loading = this.stormsLoading ? `<p class="factnote">${this.t("stormLoading")}</p>` : "";
+    const loading = (this.stormsLoading ? `<p class="factnote">${this.t("stormLoading")}</p>` : "") + this.keepNote(r);
     const groups = this.stormGroups(r);
     const tiles = groups.length ? this.sumTiles([
       { label: this.t("stormFilterAll"), value: this.formatNumber(groups.length), tone: "mute", lf: ["stormfind", "", ""] },

@@ -2497,6 +2497,13 @@ test("reliability rows open the integration, and its detail page shows the numbe
   assert.ok(!shadow.innerHTML.includes('data-detail-tab="reliability"'), "no tab without numbers");
 });
 
+test("a window longer than the recorder keeps gets a note, in reliability and in the write load", () => {
+  const { el } = panel("en");
+  assert.ok(el.keepNote({ keep_days: 10, window_days: 30 }).includes("keeps only 10 days"));
+  assert.equal(el.keepNote({ keep_days: 10, window_days: 7 }), "");
+  assert.equal(el.keepNote({ keep_days: null, window_days: 30 }), "");
+});
+
 test("an old reliability reply is shown at once and renewed once in the background", async () => {
   const calls = [];
   const { el, shadow } = panel("en");

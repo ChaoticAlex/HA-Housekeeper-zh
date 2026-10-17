@@ -240,7 +240,7 @@ class StormsMixin {
     if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("stormLoading")}</div></div>`;
     if (!r.available) return `<div class="stack">${head}<div class="panel"><p class="factnote">${this.t("relNoRecorder")}</p></div></div>`;
     if (r.busy) return `<div class="stack">${head}<div class="panel">${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p></div></div>`;
-    const loading = this.stormsLoading ? `<p class="factnote">${this.t("stormLoading")}</p>` : "";
+    const loading = (this.stormsLoading ? `<p class="factnote">${this.t("stormLoading")}</p>` : "") + this.keepNote(r);
     const groups = this.stormGroups(r);
     const tiles = groups.length ? this.sumTiles([
       { label: this.t("stormFilterAll"), value: this.formatNumber(groups.length), tone: "mute", lf: ["stormfind", "", ""] },

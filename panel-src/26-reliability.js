@@ -83,6 +83,11 @@ class ReliabilityMixin {
   }
 
   // The house functions that rely on the integration: a member is one of its entities, or one of its devices.
+  // The recorder keeps less than the window asks for: the numbers reach back only that far.
+  keepNote(r) {
+    return r?.keep_days && r.window_days > r.keep_days ? `<p class="factnote">${this.t("relKeepShort", { keep: this.formatNumber(r.keep_days), days: r.window_days })}</p>` : "";
+  }
+
   relHouseFunctions(entryId) {
     return this.monitorFunctions().filter(fn => (fn.members || []).some(m => {
       const object = this.findObject(m.object_key);
@@ -179,7 +184,7 @@ class ReliabilityMixin {
     if (!r.available) return alone(`<p class="factnote">${this.t("relNoRecorder")}</p>`);
     if (r.busy) return alone(`${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p>`);
     if (!r.entries.length) return alone(`<div class="emptymsg">${this.t("relEmpty")}</div>`);
-    const loading = this.relLoading ? `<p class="factnote">${this.t("relLoading")}</p>` : "";
+    const loading = (this.relLoading ? `<p class="factnote">${this.t("relLoading")}</p>` : "") + this.keepNote(r);
     const th = r.thresholds || {};
     const cov = r.coverage;
     const coverage = cov && cov.observed_share !== null && cov.observed_share !== undefined ? this.coverageNote(this.t("relCoverage", { days: r.window_days, withData: this.formatNumber(cov.with_data), known: this.formatNumber(cov.known), share: cov.observed_share })) : "";

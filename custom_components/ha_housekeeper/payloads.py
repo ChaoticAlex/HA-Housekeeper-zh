@@ -106,6 +106,7 @@ class ReliabilityResult(Reply):
     window_days: int
     coverage: ReliabilityCoverage
     comparison: dict[str, bool]
+    keep_days: int | None
     stale: bool
     age_seconds: int
     computed_at: float
@@ -139,6 +140,7 @@ class RunsResult(TypedDict, total=False):
 
 
 class StormsResult(Reply, total=False):
+    keep_days: int | None
     stale: bool
     age_seconds: int
     computed_at: float
