@@ -110,7 +110,7 @@ test("the home functions history shows a flapping run as one line and filters by
   ] } };
   el.monitorHistory.one.availability = { window_days: 30, since: at, observed_seconds: 1000, ok_seconds: 999, problem_seconds: 1, unknown_seconds: 0, unstable_seconds: 0, incidents: 1, longest_seconds: 1, days: [{ date: "2026-10-14", state: "problem" }] };
   const html = el.monitorDetail();
-  assert.match(html, /Unauffällig: 99,9 %/);
+  assert.match(html, /<b class="ok">99,9 %<\/b><span>Unauffällig<\/span>/);
   assert.match(html, /data-plan-open="p1"/);
   assert.ok(html.includes('data-lsort="monitor-history|time|desc"') && html.includes('data-lsort="monitor-members|state|asc"') && html.includes('data-object="entity:sensor.x"') === false, "history and objects are tables (the object is not in the inventory here, so its row opens nothing)");
   el.data.monitor[0].last_problem_at = new Date(Date.now() - 2 * 86400000).toISOString();

@@ -231,20 +231,24 @@ class MonitorMixin {
   // The shares of time in each state over the last days and one square per day (the worst state of that day).
   monitorAvailabilityHtml(a) {
     if (!a) return "";
-    const head = `<div class="panelhead"><div><h2>${this.t("monitorAvail")}</h2><p>${this.t("monitorAvailHint", { days: a.window_days })}</p></div></div>`;
+    const head = `<div class="panelhead"><div><h2>${this.t("monitorAvail")} <ha-icon class="avail-info" icon="mdi:information-outline" title="${this.esc(this.t("monitorAvailInfo"))}"></ha-icon></h2><p>${this.t("monitorAvailHint", { days: a.window_days })}</p></div></div>`;
     if (!a.observed_seconds) return `<section class="panel u-mb14">${head}<div class="emptymsg"><ha-icon icon="mdi:chart-timeline-variant"></ha-icon>${this.t("monitorAvailNone")}</div></section>`;
     const pct = Math.floor((a.ok_seconds / a.observed_seconds) * 1000) / 10; // a fault never rounds up to 100 %
     const percent = new Intl.NumberFormat(this.lang, { maximumFractionDigits: 1, minimumFractionDigits: 1 }).format(pct);
-    const facts = [
-      this.t("monitorAvailOk", { pct: percent }),
-      a.problem_seconds ? this.t("monitorAvailProblem", { time: this.monitorDuration(a.problem_seconds), n: a.incidents, longest: this.monitorDuration(a.longest_seconds) }) : this.t("monitorAvailNoProblem"),
-      a.unknown_seconds ? this.t("monitorAvailUnknown", { time: this.monitorDuration(a.unknown_seconds) }) : "",
-      a.unstable_seconds ? this.t("monitorAvailUnstable", { time: this.monitorDuration(a.unstable_seconds) }) : "",
-      this.t("monitorAvailSince", { date: this.formatDate(a.since) }),
-    ].filter(Boolean).map(text => `<div class="fact"><span>${this.esc(text)}</span></div>`).join("");
+    const tile = (value, label, tone = "") => `<div class="avail-tile"><b class="${tone}">${this.esc(value)}</b><span>${this.esc(label)}</span></div>`;
+    const tiles = [
+      tile(`${percent} %`, this.t("monitorAvailOk"), "ok"),
+      a.problem_seconds
+        ? tile(this.monitorDuration(a.problem_seconds), `${this.t("monitorAvailProblem")} · ${this.t(a.incidents === 1 ? "monitorAvailIncidents" : "monitorAvailIncidentsN", { n: a.incidents })}`)
+        : tile("–", this.t("monitorAvailNoProblem")),
+      a.problem_seconds ? tile(this.monitorDuration(a.longest_seconds), this.t("monitorAvailLongest")) : "",
+      a.unknown_seconds ? tile(this.monitorDuration(a.unknown_seconds), this.t("monitorAvailUnknown")) : "",
+      a.unstable_seconds ? tile(this.monitorDuration(a.unstable_seconds), this.t("monitorAvailUnstable")) : "",
+    ].filter(Boolean).join("");
     const labels = { ok: "monitorOk", problem: "monitorProblem", unverified: "monitorUnverified", flapping: "monitorHist_flapping" };
     const days = a.days.map(day => `<i class="${day.state || "none"}" title="${this.esc(`${day.date}: ${day.state ? this.t(labels[day.state]) : this.t("monitorAvailNoData")}`)}"></i>`).join("");
-    return `<section class="panel u-mb14">${head}<div class="facts">${facts}</div><div class="monitor-days" role="img" aria-label="${this.esc(this.t("monitorAvail"))}">${days}</div></section>`;
+    const axis = `<div class="monitor-axis"><span>${this.t("monitorAvailFrom", { days: a.window_days })}</span><span>${this.t("monitorAvailToday")}</span></div>`;
+    return `<section class="panel u-mb14">${head}<div class="avail-tiles">${tiles}</div><div class="monitor-days" role="img" aria-label="${this.esc(this.t("monitorAvail"))}">${days}</div>${axis}<div class="avail-since">${this.esc(this.t("monitorAvailSince", { date: this.formatDate(a.since) }))}</div></section>`;
   }
 
   async loadMonitorHistory(id, sig) {

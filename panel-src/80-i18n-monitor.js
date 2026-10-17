@@ -82,8 +82,8 @@ Object.assign(TEXT.en, {
   monitorReason_unknown: "State unknown", monitorReason_status_unknown: "State unreadable",
 });
 Object.assign(TEXT.de, {
-  monitorAvail: "Verfügbarkeit", monitorAvailHint: "Letzte {days} Tage, soweit beobachtet. Zeiten ohne Bewertung (deaktiviert, nach Änderungen an den Objekten, vor der ersten Prüfung) zählen nicht. Jedes Feld ist ein Tag mit dem schlechtesten Zustand.", monitorAvailNone: "Noch keine Bewertung in diesem Zeitraum.",
-  monitorAvailOk: "Unauffällig: {pct} %", monitorAvailProblem: "Beeinträchtigt: {time} · {n} Vorfälle · längster {longest}", monitorAvailNoProblem: "Kein Defekt belegt", monitorAvailUnknown: "Unbekannt: {time}", monitorAvailUnstable: "Instabil: {time}", monitorAvailSince: "Beobachtet seit {date}", monitorAvailNoData: "keine Bewertung",
+  monitorAvail: "Verfügbarkeit", monitorAvailHint: "Letzte {days} Tage, soweit beobachtet. Jeder Balken ist ein Tag mit dem schlechtesten Zustand.", monitorAvailInfo: "Zeiten ohne Bewertung zählen nicht: deaktiviert, nach Änderungen an den Objekten, vor der ersten Prüfung.", monitorAvailNone: "Noch keine Bewertung in diesem Zeitraum.",
+  monitorAvailOk: "Unauffällig", monitorAvailProblem: "Beeinträchtigt", monitorAvailIncidents: "{n} Vorfall", monitorAvailIncidentsN: "{n} Vorfälle", monitorAvailLongest: "Längster Vorfall", monitorAvailNoProblem: "Kein Defekt belegt", monitorAvailUnknown: "Unbekannt", monitorAvailUnstable: "Instabil", monitorAvailFrom: "vor {days} Tagen", monitorAvailToday: "Heute", monitorAvailSince: "Beobachtet seit {date}", monitorAvailNoData: "keine Bewertung",
   monitorDurLess: "unter 1 Min.", monitorDurMinutes: "{n} Min.", monitorDurHours: "{h} Std. {m} Min.", monitorDurDays: "{d} T. {h} Std.",
   monitorLastProblem: "zuletzt beeinträchtigt {when}", monitorLastProblemLine: "Zuletzt beeinträchtigt",
   monitorHistory: "Verlauf", monitorHistoryHint: "Zustandswechsel, Änderungen und Pläne zu diesen Objekten der letzten {days} Tage, neueste zuerst. Die Dauer ist unter Einstellungen einstellbar.", monitorHistoryEmpty: "Noch keine Einträge.", monitorHistoryLoading: "Verlauf wird geladen …",
@@ -92,8 +92,8 @@ Object.assign(TEXT.de, {
   monitorHistField_name: "Name", monitorHistField_description: "Beschreibung", monitorHistField_notify: "Benachrichtigung",
 });
 Object.assign(TEXT.en, {
-  monitorAvail: "Availability", monitorAvailHint: "Last {days} days, as far as observed. Times without an evaluation (disabled, after edits to the objects, before the first check) do not count. Each square is one day with its worst state.", monitorAvailNone: "No evaluation in this period yet.",
-  monitorAvailOk: "No known fault: {pct} %", monitorAvailProblem: "Impaired: {time} · {n} incidents · longest {longest}", monitorAvailNoProblem: "No fault confirmed", monitorAvailUnknown: "Unknown: {time}", monitorAvailUnstable: "Unstable: {time}", monitorAvailSince: "Observed since {date}", monitorAvailNoData: "no evaluation",
+  monitorAvail: "Availability", monitorAvailHint: "Last {days} days, as far as observed. Each bar is one day with its worst state.", monitorAvailInfo: "Times without an evaluation do not count: disabled, after edits to the objects, before the first check.", monitorAvailNone: "No evaluation in this period yet.",
+  monitorAvailOk: "No known fault", monitorAvailProblem: "Impaired", monitorAvailIncidents: "{n} incident", monitorAvailIncidentsN: "{n} incidents", monitorAvailLongest: "Longest incident", monitorAvailNoProblem: "No fault confirmed", monitorAvailUnknown: "Unknown", monitorAvailUnstable: "Unstable", monitorAvailFrom: "{days} days ago", monitorAvailToday: "Today", monitorAvailSince: "Observed since {date}", monitorAvailNoData: "no evaluation",
   monitorDurLess: "under 1 min", monitorDurMinutes: "{n} min", monitorDurHours: "{h} h {m} min", monitorDurDays: "{d} d {h} h",
   monitorLastProblem: "last impaired {when}", monitorLastProblemLine: "Last impaired",
   monitorHistory: "History", monitorHistoryHint: "State changes, edits and plans for these objects of the last {days} days, newest first. The period is set in Settings.", monitorHistoryEmpty: "No entries yet.", monitorHistoryLoading: "Loading the history …",
