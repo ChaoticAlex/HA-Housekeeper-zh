@@ -2669,6 +2669,7 @@ test("the runs view searches and filters the table and the list of what stands o
   html = el.runsView();
   assert.ok(html.indexOf("automation.flur") < html.indexOf("script.nacht") && html.indexOf("script.nacht") < html.indexOf("automation.heizung"));
   assert.ok(html.includes('data-lsort="runs|errors|desc"'));
+  assert.ok(html.includes("from 3 errors and 20 % of the runs") && html.includes("5 times its own normal (28 days before) and at least 100 runs a day"), "the footnote names the limits");
 });
 
 test("reliability and the unstable entities can be searched and filtered", () => {

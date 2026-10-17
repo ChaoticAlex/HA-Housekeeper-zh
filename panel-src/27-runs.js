@@ -151,7 +151,7 @@ class RunsMixin {
     const c = row.change;
     const side = s => this.t("runsChangeSide", { errors: this.formatNumber(s.errors), runs: this.formatNumber(s.runs) });
     const change = c ? `<div class="pad"><p class="factnote"><ha-icon icon="mdi:source-commit"></ha-icon> ${this.esc(this.t("runsChange", { date: this.formatDate(c.at), after: side(c.after), before: side(c.before) }))}</p></div>` : "";
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("runsTab")}</h2><p>${since}</p></div></div><div class="pad"><dl class="kv">${facts}<dt>${this.t("runsTrend30")}</dt><dd>${this.runsTrend(row, row.per_day_30 || row.per_day)}</dd></dl></div>${change}${notes}${this.howCounted("runsFootnote")}</section>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("runsTab")}</h2><p>${since}</p></div></div><div class="pad"><dl class="kv">${facts}<dt>${this.t("runsTrend30")}</dt><dd>${this.runsTrend(row, row.per_day_30 || row.per_day)}</dd></dl></div>${change}${notes}${this.howCounted("runsFootnote", this.runsLimits(this.runs || {}))}</section>`;
   }
 
   // Two tabs: the counted runs, and the quality of each automation (46-diagnostics.js).
@@ -165,6 +165,11 @@ class RunsMixin {
     if (open === "overview") return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${this.qualityView()}</div>`;
     const body = open === "scripts" ? this.scriptsView() : this.runsListView();
     return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${body}</div>`;
+  }
+
+  runsLimits(r) {
+    const th = r.thresholds || {};
+    return { days: r.window_days, errors: th.failing_min_errors ?? 3, rate: Math.round((th.failing_min_rate ?? 0.2) * 100), neverOk: th.never_ok_min_runs ?? 5, overlap: th.overlap_min ?? 3, idle: th.no_effect_min_runs ?? 20, idleShare: Math.round((th.no_effect_share ?? 0.9) * 100), burst: th.burst_factor ?? 5, baseline: th.baseline_days ?? 28, burstMin: th.burst_min_per_day ?? 100, longFactor: th.long_run_factor ?? 10, longSeconds: Math.round((th.long_run_min_ms ?? 60000) / 1000) };
   }
 
   runsListView() {
@@ -181,7 +186,7 @@ class RunsMixin {
     const counted = this.refine("runs", everyCounted.filter(row => this.runsMatch(row)), { text: row => [row.name, row.entity_id].join(" "), sorts: this.runsSorts(), tie: row => row.entity_id });
     const bar = everyCounted.length > 5 || this.lv.runs.q ? this.runsBar(counted) : "";
     const more = r.total > r.items.length ? `<p class="factnote">${this.t("runsMore", { shown: r.items.length, total: r.total })}</p>` : "";
-    const all = everyCounted.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("runsAll")}</h2></div></div>${bar}${counted.length ? this.runsTable(counted) : `<div class="emptymsg">${this.t("noMatches")}</div>`}${more}${this.howCounted("runsFootnote")}</div>` : "";
+    const all = everyCounted.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("runsAll")}</h2></div></div>${bar}${counted.length ? this.runsTable(counted) : `<div class="emptymsg">${this.t("noMatches")}</div>`}${more}${this.howCounted("runsFootnote", this.runsLimits(r))}</div>` : "";
     const runTotal = r.items.reduce((n, row) => n + row.runs, 0), errorTotal = r.items.reduce((n, row) => n + row.errors, 0);
     const neverOk = r.items.filter(row => row.findings.some(f => f.kind === "never_ok")).length;
     const allFlagged = r.items.filter(row => row.findings.length).length;

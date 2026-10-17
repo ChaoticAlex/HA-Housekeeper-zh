@@ -936,7 +936,7 @@ Object.assign(TEXT.de, {
   rfHint_failing: "Prüfe die Ablaufverfolgung der Automation an der genannten Stelle.", rfHint_overlap: "Modus oder maximale Läufe anpassen oder die Auslöser entflechten.", rfHint_never_ok: "Ein Schritt oder eine Bedingung verhindert jeden Erfolg; die Ablaufverfolgung zeigt wo.", rfHint_no_effect: "Die Bedingung stoppt fast jeden Lauf; prüfe, ob sie noch passt oder der Auslöser zu breit ist.", rfHint_burst: "Prüfe, was die Automation so oft auslöst.", rfHint_long_run: "Prüfe Wartezeiten und Aktionen, die lange dauern.", rfHint_after_update: "Prüfe die Änderungen der neuen Version.", rfHint_long_wait: "Ein Neustart verwirft die Wartezeit; erwäge einen Zeitplan oder Auslöser statt Warten.", rfHint_wait_no_timeout: "Setze ein Zeitlimit, damit ein Lauf nicht ewig hängt.", rfHint_continue_on_error: "Fehler werden still übergangen; prüfe, ob das gewollt ist.",
   runsLowerBound: "mindestens, Läufe können fehlen", runsMore: "{shown} von {total} Zeilen gezeigt.", runsTrend30: "30 Tage", runsTrendLabel: "Läufe je Tag, ältester zuerst: {values}",
   runsMs: "{n} ms", runsSec: "{n} s", runsChange: "Seit der Änderung der Konfiguration am {date}: {after}. In der Woche davor: {before}.", runsChangeSide: "{errors} Fehler in {runs} Läufen", runsTab: "Läufe", runsTabHint: "Letzte 7 Tage, gezählt seit {date}",
-  runsFootnote: "Gezählt wird, was Home Assistant je Automation kurz vorhält (standardmäßig 5 Läufe), alle 15 Minuten. Gespeichert werden nur Zähler je Tag und die Stelle eines Fehlers, keine Variablen, Daten oder Fehlertexte. Die Hinweise sind Anlässe, genauer hinzusehen, kein Urteil.",
+  runsFootnote: "Gezählt wird, was Home Assistant je Automation kurz vorhält (standardmäßig 5 Läufe), alle 15 Minuten. Gespeichert werden nur Zähler je Tag und die Stelle eines Fehlers, keine Variablen, Daten oder Fehlertexte. Die Hinweise sind Anlässe, genauer hinzusehen, kein Urteil. Grenzen der letzten {days} Tage: „Fehler“ ab {errors} Fehlern und {rate} % der Läufe, „nie erfolgreich“ ab {neverOk} Läufen ohne Erfolg, „Überschneidung“ ab {overlap} abgewiesenen oder überschrittenen Läufen, „ohne Wirkung“ ab {idle} Läufen mit {idleShare} % Bedingungs-Stopps, „sehr oft“ ab {burst}-fach über dem eigenen Normal ({baseline} Tage davor) und mindestens {burstMin} Läufen pro Tag, „lange Läufe“ ab {longFactor}-fach und {longSeconds} Sekunden.",
   rfLabelFailing: "Fehler", rfLabelOverlap: "Überschneidung", rfLabelNeverOk: "nie erfolgreich", rfLabelNoEffect: "ohne Wirkung", rfLabelBurst: "sehr oft", rfLabelLongRun: "lange Läufe", rfLabelAfterUpdate: "nach Update", rfLabelLongWait: "lange Wartezeit", rfLabelWaitNoTimeout: "ohne Timeout", rfLabelContinue: "Fehler verdeckt",
   rfFailing: "{errors} von {runs} Läufen endeten mit einem Fehler.", rfFailingStep: " Meist an Stelle {step} ({count}-mal).",
   rfOverlap: "{n} Läufe wurden abgewiesen oder überschritten das Maximum, weil noch ein Lauf aktiv war (Modus {mode}).", rfNeverOk: "Kein Lauf war erfolgreich ({runs} Läufe).",
@@ -964,7 +964,7 @@ Object.assign(TEXT.en, {
   rfHint_failing: "Check the automation's trace at the named step.", rfHint_overlap: "Adjust the mode or max runs, or untangle the triggers.", rfHint_never_ok: "A step or condition prevents every success; the trace shows where.", rfHint_no_effect: "The condition stops almost every run; check whether it still fits or the trigger is too broad.", rfHint_burst: "Check what fires the automation so often.", rfHint_long_run: "Check waits and actions that take long.", rfHint_after_update: "Check the changes of the new version.", rfHint_long_wait: "A restart discards the wait; consider a schedule or trigger instead of waiting.", rfHint_wait_no_timeout: "Set a timeout so a run cannot hang forever.", rfHint_continue_on_error: "Errors are passed over silently; check whether that is intended.",
   runsLowerBound: "at least, runs may be missing", runsMore: "{shown} of {total} rows shown.", runsTrend30: "30 days", runsTrendLabel: "Runs per day, oldest first: {values}",
   runsMs: "{n} ms", runsSec: "{n} s", runsChange: "Since the configuration changed on {date}: {after}. The week before: {before}.", runsChangeSide: "{errors} errors in {runs} runs", runsTab: "Runs", runsTabHint: "Last 7 days, counted since {date}",
-  runsFootnote: "What is counted is what Home Assistant keeps for each automation for a short time (5 runs by default), read every 15 minutes. Only counters per day and the place of a failure are stored, no variables, data or error texts. The notes are reasons to look closer, not a verdict.",
+  runsFootnote: "What is counted is what Home Assistant keeps for each automation for a short time (5 runs by default), read every 15 minutes. Only counters per day and the place of a failure are stored, no variables, data or error texts. The notes are reasons to look closer, not a verdict. Limits over the last {days} days: “errors” from {errors} errors and {rate} % of the runs, “never succeeds” from {neverOk} runs without success, “overlap” from {overlap} rejected or exceeded runs, “no effect” from {idle} runs with {idleShare} % stopped by conditions, “very often” from {burst} times its own normal ({baseline} days before) and at least {burstMin} runs a day, “long runs” from {longFactor} times and {longSeconds} seconds.",
   rfLabelFailing: "failing", rfLabelOverlap: "overlap", rfLabelNeverOk: "never succeeds", rfLabelNoEffect: "no effect", rfLabelBurst: "very often", rfLabelLongRun: "long runs", rfLabelAfterUpdate: "after update", rfLabelLongWait: "long wait", rfLabelWaitNoTimeout: "no timeout", rfLabelContinue: "errors hidden",
   rfFailing: "{errors} of {runs} runs ended with an error.", rfFailingStep: " Mostly at step {step} ({count} times).",
   rfOverlap: "{n} runs were rejected or exceeded the maximum because a run was still active (mode {mode}).", rfNeverOk: "No run succeeded ({runs} runs).",
@@ -6462,7 +6462,7 @@ class RunsMixin {
     const c = row.change;
     const side = s => this.t("runsChangeSide", { errors: this.formatNumber(s.errors), runs: this.formatNumber(s.runs) });
     const change = c ? `<div class="pad"><p class="factnote"><ha-icon icon="mdi:source-commit"></ha-icon> ${this.esc(this.t("runsChange", { date: this.formatDate(c.at), after: side(c.after), before: side(c.before) }))}</p></div>` : "";
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("runsTab")}</h2><p>${since}</p></div></div><div class="pad"><dl class="kv">${facts}<dt>${this.t("runsTrend30")}</dt><dd>${this.runsTrend(row, row.per_day_30 || row.per_day)}</dd></dl></div>${change}${notes}${this.howCounted("runsFootnote")}</section>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("runsTab")}</h2><p>${since}</p></div></div><div class="pad"><dl class="kv">${facts}<dt>${this.t("runsTrend30")}</dt><dd>${this.runsTrend(row, row.per_day_30 || row.per_day)}</dd></dl></div>${change}${notes}${this.howCounted("runsFootnote", this.runsLimits(this.runs || {}))}</section>`;
   }
 
   // Two tabs: the counted runs, and the quality of each automation (46-diagnostics.js).
@@ -6476,6 +6476,11 @@ class RunsMixin {
     if (open === "overview") return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${this.qualityView()}</div>`;
     const body = open === "scripts" ? this.scriptsView() : this.runsListView();
     return `<div class="stack">${this.navTiles("runs", tabs, open, this.t("runs"), true)}${body}</div>`;
+  }
+
+  runsLimits(r) {
+    const th = r.thresholds || {};
+    return { days: r.window_days, errors: th.failing_min_errors ?? 3, rate: Math.round((th.failing_min_rate ?? 0.2) * 100), neverOk: th.never_ok_min_runs ?? 5, overlap: th.overlap_min ?? 3, idle: th.no_effect_min_runs ?? 20, idleShare: Math.round((th.no_effect_share ?? 0.9) * 100), burst: th.burst_factor ?? 5, baseline: th.baseline_days ?? 28, burstMin: th.burst_min_per_day ?? 100, longFactor: th.long_run_factor ?? 10, longSeconds: Math.round((th.long_run_min_ms ?? 60000) / 1000) };
   }
 
   runsListView() {
@@ -6492,7 +6497,7 @@ class RunsMixin {
     const counted = this.refine("runs", everyCounted.filter(row => this.runsMatch(row)), { text: row => [row.name, row.entity_id].join(" "), sorts: this.runsSorts(), tie: row => row.entity_id });
     const bar = everyCounted.length > 5 || this.lv.runs.q ? this.runsBar(counted) : "";
     const more = r.total > r.items.length ? `<p class="factnote">${this.t("runsMore", { shown: r.items.length, total: r.total })}</p>` : "";
-    const all = everyCounted.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("runsAll")}</h2></div></div>${bar}${counted.length ? this.runsTable(counted) : `<div class="emptymsg">${this.t("noMatches")}</div>`}${more}${this.howCounted("runsFootnote")}</div>` : "";
+    const all = everyCounted.length ? `<div class="panel"><div class="panelhead"><div><h2>${this.t("runsAll")}</h2></div></div>${bar}${counted.length ? this.runsTable(counted) : `<div class="emptymsg">${this.t("noMatches")}</div>`}${more}${this.howCounted("runsFootnote", this.runsLimits(r))}</div>` : "";
     const runTotal = r.items.reduce((n, row) => n + row.runs, 0), errorTotal = r.items.reduce((n, row) => n + row.errors, 0);
     const neverOk = r.items.filter(row => row.findings.some(f => f.kind === "never_ok")).length;
     const allFlagged = r.items.filter(row => row.findings.length).length;

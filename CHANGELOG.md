@@ -54,6 +54,7 @@
   - Recorder, Datenbank: Größe, Zuwachs pro Tag, Aufbewahrung und „Automatisch löschen“ stehen als Kacheln über der Liste statt in einer Textzeile darunter; was sich nicht messen lässt (etwa bei MySQL), steht weiter als kurzer Hinweis.
   - Recorder, Schreiblast: neues Fenster „30 Tage“ neben 24 Stunden und 7 Tagen.
   - Hinweistexte zu Konflikten, Backup-Zielen und Statistik-Nachfolgern sagen nicht mehr „Vermutung“, wo „mögliche“ schon dasteht.
+  - Läufe: Die Fußnote „So wird gezählt“ nennt jetzt die Grenzen der Hinweise (Fehler, nie erfolgreich, Überschneidung, ohne Wirkung, sehr oft, lange Läufe) mit den Zahlen aus dem Backend.
 - **Zugriffe & Datenfluss:** Integrationen, deren Tracker nur die Anwesenheit über Router oder Bluetooth melden (etwa die FRITZ!Box), gelten nicht mehr als „Standort“ mit hohem Risiko, sondern zeigen „Anwesenheit im Netz“.
 - **Freigaben:** Alexa und Google Assistant, die in den Nabu-Casa-Einstellungen ausgeschaltet sind, zählen nicht mehr als „freigegeben“ und erzeugen keine Befunde; ihre Kachel zeigt „in Nabu Casa ausgeschaltet“.
 
@@ -111,6 +112,7 @@
   - Recorder, database: size, growth per day, retention and "Purge automatically" are tiles above the list instead of a line of text below; what cannot be measured (for example with MySQL) stays as a short note.
   - Recorder, write load: new window "30 days" next to 24 hours and 7 days.
   - Hint texts on conflicts, backup targets and statistics successors no longer say “guess” where “possible” already says it.
+  - Runs: the “How this is counted” footnote now names the limits of the notes (errors, never succeeds, overlap, no effect, very often, long runs) with the numbers from the backend.
 - **Access & data flow:** Integrations whose trackers only report presence through a router or Bluetooth (such as the FRITZ!Box) no longer count as "location" with a high risk but show "presence on the network".
 - **Exposure:** Alexa and Google Assistant switched off in the Nabu Casa settings no longer count as "exposed" and raise no findings; their tile says "switched off in Nabu Casa".
 
