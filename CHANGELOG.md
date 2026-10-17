@@ -14,6 +14,7 @@
   - Das Journal hat Reiter: „Pläne“ und „Entfernte Geräte“ (bisher unter Wartung, jetzt mit einem Sprung zum Plan); ältere Löschungen von Statistiken stehen als dritter Reiter dort, wenn es sie gibt.
   - Ein Fehler beim Laden wird angezeigt statt „Noch keine Vorschau“, und die Seite hat „Aktualisieren“ und einen Zeitstempel.
   - Der Hinweis nennt die richtigen Grenzen (ausgeführte Pläne bis zu einem Jahr, höchstens 300).
+  - Der Reiter „Entfernte Geräte“ heißt „Entfernt und gelöscht“ und zeigt auch entfernte Entitäten, gelöschte Automationen, Statistiken und Backups, mit Filter nach Art und dem Hinweis, was sich nicht rückgängig machen lässt.
 - **Wartung, Updates:**
   - Der Reiter „Update-Preflight“ heißt jetzt „Updates“: ein Gesamturteil (Bereit, Erst ansehen, Stopp), die Prüfzeilen und die Liste der offenen Updates, gruppiert nach System, Apps, HACS und Geräten, mit Sprung nach Home Assistant.
   - Das Backup wird nach dem Backup-Schutz beurteilt (Zeitplan, letzter Lauf); neu ist die Zeile „Freier Speicher“; HACS-Updates, die HACS nicht installieren kann, sind gekennzeichnet.

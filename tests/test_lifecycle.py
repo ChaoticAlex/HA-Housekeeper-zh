@@ -8,7 +8,7 @@ pytest.importorskip("homeassistant")
 pytest.importorskip("pytest_homeassistant_custom_component")
 
 from custom_components.ha_housekeeper.lifecycle import (  # noqa: E402
-    removed_devices,
+    removed_objects,
     timeline,
 )
 
@@ -76,4 +76,4 @@ def test_the_timeline_holds_only_what_the_data_says_and_the_removed_list_is_newe
     ]
     assert result["unstable"] == "flapping" and result["steps"][-1]["to"] == "light.new"
     assert timeline(device, snapshot, plans, None)["unstable"] is None
-    assert [d["object_id"] for d in removed_devices(plans)] == ["d8", "d9"]
+    assert [d["object_id"] for d in removed_objects(plans) if d["group"] == "device"] == ["d8", "d9"]

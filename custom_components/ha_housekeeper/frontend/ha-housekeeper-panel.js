@@ -3269,12 +3269,18 @@ class ChangesMixin {
 Object.assign(TEXT.de, {
   lifeTab: "Verlauf", lifeHint: "Was sich aus der Geräte-Registry, dem Journal und der Zuverlässigkeit über dieses Gerät sagen lässt.", lifeNow: "Jetzt", lifeNone: "Noch keine Schritte bekannt.",
   life_discovered: "Entdeckt", life_quarantine: "In Quarantäne", life_disabled: "Durch einen Plan deaktiviert", life_removed: "Durch einen Plan entfernt", life_replaced: "Ersetzung: {from} → {to}", lifeForgotten: "Durch einen Plan vergessen",
-  lifeRemovedTab: "Entfernte Geräte", lifeRemovedTitle: "Entfernte Geräte", lifeRemovedHint: "Geräte, die ein Plan von Housekeeper entfernt oder vergessen hat, nach dem Journal. Pläne, die länger als ein Jahr zurückliegen oder über die 300 jüngsten hinausgehen, fallen aus dem Journal und damit aus dieser Liste.", lifeColPlan: "Plan", lifeOpenPlan: "Plan öffnen", lifeRemovedNone: "Housekeeper hat noch kein Gerät entfernt.",
+  lifeRemovedTab: "Entfernt und gelöscht", lifeRemovedTitle: "Entfernt und gelöscht", lifeRemovedHint: "Alles, was ein Plan von Housekeeper entfernt, vergessen oder gelöscht hat, nach dem Journal. Pläne, die länger als ein Jahr zurückliegen oder über die 300 jüngsten hinausgehen, fallen aus dem Journal und damit aus dieser Liste. Zurücknehmen geht im Plan.", lifeColPlan: "Plan", lifeOpenPlan: "Plan öffnen", lifeRemovedNone: "Housekeeper hat noch nichts entfernt oder gelöscht.",
+  goneColObject: "Objekt", goneColUndo: "Stand", goneIrreversible: "Nicht rückgängig", goneUndoInPlan: "Rückgängig im Plan",
+  goneKind_remove_device: "Gerät entfernt", goneKind_forget_device: "Gerät vergessen", goneKind_remove_entity: "Entität entfernt", goneKind_delete_automation: "Automation gelöscht", goneKind_purge_statistics: "Statistik gelöscht", goneKind_trim_history: "Verlauf gekürzt", goneKind_delete_backup: "Backup gelöscht",
+  goneGroup_device: "Geräte", goneGroup_entity: "Entitäten", goneGroup_automation: "Automationen", goneGroup_statistics: "Statistiken", goneGroup_backup: "Backups",
 });
 Object.assign(TEXT.en, {
   lifeTab: "History", lifeHint: "What the device registry, the journal and the reliability say about this device.", lifeNow: "Now", lifeNone: "No steps known yet.",
   life_discovered: "Discovered", life_quarantine: "In quarantine", life_disabled: "Disabled by a plan", life_removed: "Removed by a plan", life_replaced: "Replacement: {from} → {to}", lifeForgotten: "Forgotten by a plan",
-  lifeRemovedTab: "Removed devices", lifeRemovedTitle: "Removed devices", lifeRemovedHint: "Devices that a Housekeeper plan removed or forgot, from the journal. Plans older than a year or beyond the 300 newest leave the journal and so this list.", lifeColPlan: "Plan", lifeOpenPlan: "Open plan", lifeRemovedNone: "Housekeeper has not removed a device yet.",
+  lifeRemovedTab: "Removed and deleted", lifeRemovedTitle: "Removed and deleted", lifeRemovedHint: "Everything a Housekeeper plan removed, forgot or deleted, from the journal. Plans older than a year or beyond the 300 newest leave the journal and so this list. Undo is in the plan.", lifeColPlan: "Plan", lifeOpenPlan: "Open plan", lifeRemovedNone: "Housekeeper has not removed or deleted anything yet.",
+  goneColObject: "Object", goneColUndo: "Status", goneIrreversible: "Cannot be undone", goneUndoInPlan: "Undo in the plan",
+  goneKind_remove_device: "Device removed", goneKind_forget_device: "Device forgotten", goneKind_remove_entity: "Entity removed", goneKind_delete_automation: "Automation deleted", goneKind_purge_statistics: "Statistics deleted", goneKind_trim_history: "History trimmed", goneKind_delete_backup: "Backup deleted",
+  goneGroup_device: "Devices", goneGroup_entity: "Entities", goneGroup_automation: "Automations", goneGroup_statistics: "Statistics", goneGroup_backup: "Backups",
 });
 
 // SettingsMixin: methods of the panel element, mixed into the class in 99-register.js.
@@ -7271,7 +7277,7 @@ const SEARCH_WORDS = {
   cleanup: "aufräumen bereinigen löschen entfernen quarantäne cleanup delete remove quarantine",
   repair: "reparieren zähler umziehen ersetzen austauschen repair counter meter replace exchange",
   journal: "journal pläne rückgängig verlauf plans undo history",
-  removedDevices: "entfernte geräte gelöscht vergessen removed devices forgotten",
+  removedDevices: "entfernt gelöscht vergessen entfernte geräte removed deleted forgotten devices",
   maintenance: "wartung backup sicherung wiederherstellung update ziele maintenance restore goals",
   batteries: "batterien batterie akku schwach batteries battery low",
   reminders: "erinnerungen wartung filter reminders due",
@@ -7998,7 +8004,7 @@ Object.assign(TEXT.en, {
   optWatchTitle: "Watch after a system update", optWatchHint: "For how many hours after an update of Home Assistant, the operating system or the Supervisor Housekeeper scans extra and compares with the state before. 0 switches the watch off.",
 });
 
-// LifecycleMixin: the "Verlauf" tab of a device and the list of removed devices in the Journal; mixed in by 99-register.js.
+// LifecycleMixin: the "Verlauf" tab of a device and the list of what plans removed in the Journal; mixed in by 99-register.js.
 // The steps come from the device registry, the journal and the last reliability numbers; the logbook entry of a removed device is shown in the list of removed devices.
 class LifecycleMixin {
   async loadLifecycle(deviceId) {
@@ -8033,22 +8039,24 @@ class LifecycleMixin {
     const head = `<p class="factnote pad">${this.t("lifeRemovedHint")}</p>`;
     if (!this.removed) return `<div class="panel">${head}${this.skeleton("loading")}</div>`;
     // The logbook entry that was written when the device was removed (or one the person added to it).
-    const noteOf = d => this.notesList().find(x => x.target === `device:${d.object_id}`);
-    const kindText = d => this.t(d.kind === "forget_device" ? "lifeForgotten" : "life_removed");
+    const noteOf = d => d.group === "device" ? this.notesList().find(x => x.target === `device:${d.object_id}`) : null;
+    const kindText = d => this.t(`goneKind_${d.kind}`);
+    const groups = ["device", "entity", "automation", "statistics", "backup"].filter(g => this.removed.some(d => d.group === g));
     const table = this.removed.length ? this.sysList("removed", this.removed, {
       sort: "when", dir: "desc", empty: "lifeRemovedNone", cls: "removed",
       sorts: [
         { key: "when", label: "lifeColWhen", dir: "desc", get: d => d.at },
-        { key: "name", label: "lifeColDevice", dir: "asc", get: d => d.name || d.object_id },
+        { key: "name", label: "goneColObject", dir: "asc", get: d => d.name || d.object_id },
       ],
-      filters: [{ name: "kind", all: this.t("lifeAllKinds"), options: [["remove_device", this.t("life_removed")], ["forget_device", this.t("lifeForgotten")]] }],
-      filterFns: { kind: (d, v) => (v === "forget_device") === (d.kind === "forget_device") },
+      filters: [{ name: "kind", all: this.t("lifeAllKinds"), options: groups.map(g => [g, this.t(`goneGroup_${g}`)]) }],
+      filterFns: { kind: (d, v) => d.group === v },
       text: d => [d.name, d.object_id].join(" "), tie: d => d.object_id,
       rowAttrs: d => { const n = noteOf(d); return n ? `data-note-edit="${this.esc(n.id)}" tabindex="0" role="button" title="${this.esc(this.t("noteEdit"))}"` : 'class="static"'; },
       columns: [
-        { key: "name", label: "lifeColDevice", dir: "asc", cell: d => `<div class="statcell"><span class="tile red"><ha-icon icon="mdi:delete-outline"></ha-icon></span><div>${this.nameCell(d.name || d.object_id, d.object_id)}</div></div>` },
+        { key: "name", label: "goneColObject", dir: "asc", cell: d => `<div class="statcell"><span class="tile red"><ha-icon icon="mdi:delete-outline"></ha-icon></span><div>${this.nameCell(d.name || d.object_id, d.object_id)}</div></div>` },
         { key: "kind", label: "lifeColKind", sortable: false, cell: kindText },
         { key: "when", label: "lifeColWhen", dir: "desc", cell: d => this.esc(this.formatDate(d.at)) },
+        { key: "undo", label: "goneColUndo", sortable: false, cell: d => `<span class="pill ${d.irreversible ? "warn" : "mute"}">${this.t(d.irreversible ? "goneIrreversible" : "goneUndoInPlan")}</span>` },
         { key: "note", label: "lifeColNote", sortable: false, cell: d => { const n = noteOf(d); return n ? `${this.esc(n.title)}${n.note ? `<small class="u-block">${this.esc(n.note)}</small>` : ""}` : "–"; } },
         { key: "plan", label: "lifeColPlan", sortable: false, cell: d => ((this.journal || []).some(p => p.plan_id === d.plan_id) ? `<button type="button" class="btn small" data-plan-open="${this.esc(d.plan_id)}">${this.t("lifeOpenPlan")}</button>` : "–") },
       ],
@@ -9661,7 +9669,7 @@ class DryRunMixin {
 // Texts of the panel polish: folds, groups and tabs in the cleanup view, filters of the quality view.
 Object.assign(TEXT.de, {
  
-  journalPlans: "Pläne", journalTabPlansHint: "Alle Pläne mit Ergebnis und Rückgängig.", journalTabDevicesHint: "Was ein Plan entfernt hat.", journalTabPurgesHint: "Ältere Löschungen, vor den Plänen.", purgesInJournal: "{n} ältere Löschungen von Statistiken stehen im Journal.", purgesInJournalLink: "Im Journal ansehen",
+  journalPlans: "Pläne", journalTabPlansHint: "Alle Pläne mit Ergebnis und Rückgängig.", journalTabDevicesHint: "Was Pläne entfernt oder gelöscht haben.", journalTabPurgesHint: "Ältere Löschungen, vor den Plänen.", purgesInJournal: "{n} ältere Löschungen von Statistiken stehen im Journal.", purgesInJournalLink: "Im Journal ansehen",
   cleanupTabNew: "Neuer Plan", cleanupTabJournal: "Pläne und Journal", cleanupTabPurges: "Gelöschte Statistiken",
   journalEmptyNext: "Noch kein Plan. Wähle unter „Neuer Plan“ Kandidaten aus und lege einen Plan an.",
   
@@ -9671,7 +9679,7 @@ Object.assign(TEXT.de, {
 });
 Object.assign(TEXT.en, {
  
-  journalPlans: "Plans", journalTabPlansHint: "Every plan with result and undo.", journalTabDevicesHint: "What a plan removed.", journalTabPurgesHint: "Older deletions, from before plans.", purgesInJournal: "{n} older deletions of statistics are noted in the Journal.", purgesInJournalLink: "See in the Journal",
+  journalPlans: "Plans", journalTabPlansHint: "Every plan with result and undo.", journalTabDevicesHint: "What plans removed or deleted.", journalTabPurgesHint: "Older deletions, from before plans.", purgesInJournal: "{n} older deletions of statistics are noted in the Journal.", purgesInJournalLink: "See in the Journal",
   cleanupTabNew: "New plan", cleanupTabJournal: "Plans and journal", cleanupTabPurges: "Deleted statistics",
   journalEmptyNext: "No plan yet. Pick candidates under “New plan” and create one.",
   
@@ -11029,7 +11037,7 @@ Object.assign(TEXT.de, {
   goalsLine: "Wartungsziele: {met} von {total} erfüllt", hintsTitle: "Hinweise",
   healthScore: "Zustand {percent} %", healthTasks: "{count} Aufgaben offen", healthNoTasks: "keine offenen Aufgaben", healthTip: "Anteil der Objekte in Ordnung: Jedes Objekt mit Befund nimmt je nach Auswirkung ganz, halb oder zu einem Fünftel ab. {affected} von {base} Objekten haben einen Befund; das ist nur die Begleitzahl. Mehr per Klick auf den Ring.",
   repair: "Reparieren", repairSubtitle: "Bestehende Daten und Verweise korrigieren oder auf etwas Neues umstellen. Housekeeper zeigt erst eine Vorschau; geschrieben wird erst nach deiner Bestätigung.", repairDryRun: "Nichts wird geändert, bis du die Vorschau bestätigst.",
-  journalSubtitle: "Alle Pläne aus Aufräumen und Reparieren: was geändert wurde, was geprüft wurde und was sich rückgängig machen lässt, dazu die entfernten Geräte.",
+  journalSubtitle: "Alle Pläne aus Aufräumen und Reparieren: was geändert wurde, was geprüft wurde und was sich rückgängig machen lässt, dazu, was entfernt oder gelöscht wurde.",
  relTileIntHint: "Verfügbarkeit {avail} in {window}", relTilePill: "{n} auffällig", relTileUnstableHint: "Entitäten, die oft zwischen Zuständen wechseln", recTileLoadRows: "{n} Einträge pro Tag ({window})", recTileLoadHint: "Wie oft etwas geschrieben wird", recTileCostsTop: "Größter Posten: {name} ({share} %)", recTileCostsHint: "Wie viel Platz jede Entität belegt", recTileDbHint: "Größe, Wachstum und Aufbewahrung", polTileRulesHint: "{on} eingeschaltet", polTileViolationsHint: "Verstöße gegen eingeschaltete Regeln", polTileHidden: "{n} ausgeblendet", expoTileFindingsHint: "Was du prüfen oder wissen solltest", expoTileSourceHint: "{n} Entitäten freigegeben", runsTileRunsHint: "Gezählte Läufe von Automationen und Skripten", runsTileQualityHint: "Alle Automationen auf einen Blick",
   cleanupTabEntities: "Entitäten deaktivieren", cleanupTabDevices: "Geräte deaktivieren", cleanupTabQuarantine: "Quarantäne und Entfernen", cleanupReadyCount: "{count} bereit", cleanupNothing: "nichts zu tun", unrefFactStats: "{n} mit Statistik", unrefFactDomain: "häufigste: {name}", cleanupTileEntitiesHint: "Verwaist oder lange nicht verfügbar", cleanupTileDevicesHint: "Geräte ohne funktionierende Entität", cleanupTileQuarantineHint: "Frühestens nach {days} Tagen entfernbar", cleanupTileUnusedHint: "Ohne bekannte Verwendung, nur ein Hinweis", cleanupTileStatsHint: "Reste in der Datenbank löschen", cleanupTilePurgesHint: "Was schon gelöscht wurde", qTypeEntities: "Entitäten ({count})", qTypeDevices: "Geräte ({count})",
   repairTitle: "Was möchtest du reparieren?", repairHint: "Wähle eine Aufgabe. Jede führt in Schritten durch, mit Vorschau und Bestätigung.", repairBack: "Alle Aufgaben", repairFound: "{count} Funde", repairNotChecked: "nicht geprüft", repairNoneFound: "keine Funde",
@@ -11072,7 +11080,7 @@ Object.assign(TEXT.en, {
   goalsLine: "Maintenance goals: {met} of {total} met", hintsTitle: "Hints",
   healthScore: "State {percent} %", healthTasks: "{count} tasks open", healthNoTasks: "no open tasks", healthTip: "Share of the objects in order: every object with a finding takes off fully, by half or by a fifth, by its impact. {affected} of {base} objects have a finding; that is only the number beside it. More with a click on the ring.",
   repair: "Repair", repairSubtitle: "Correct existing data and references, or switch them over to something new. Housekeeper shows a preview first; nothing is written until you confirm.", repairDryRun: "Nothing is changed until you confirm the preview.",
-  journalSubtitle: "Every plan from Tidy up and Repair: what changed, what was checked and what can be undone, plus the removed devices.",
+  journalSubtitle: "Every plan from Tidy up and Repair: what changed, what was checked and what can be undone, plus what was removed or deleted.",
  relTileIntHint: "Availability {avail} over {window}", relTilePill: "{n} need a look", relTileUnstableHint: "Entities that often change between states", recTileLoadRows: "{n} rows a day ({window})", recTileLoadHint: "How often things are written", recTileCostsTop: "Biggest item: {name} ({share} %)", recTileCostsHint: "How much space each entity takes", recTileDbHint: "Size, growth and retention", polTileRulesHint: "{on} switched on", polTileViolationsHint: "Violations of the rules that are on", polTileHidden: "{n} hidden", expoTileFindingsHint: "What you should check or know", expoTileSourceHint: "{n} entities exposed", runsTileRunsHint: "Counted runs of automations and scripts", runsTileQualityHint: "All automations at a glance",
   cleanupTabEntities: "Disable entities", cleanupTabDevices: "Disable devices", cleanupTabQuarantine: "Quarantine and removal", cleanupReadyCount: "{count} ready", cleanupNothing: "nothing to do", unrefFactStats: "{n} with statistics", unrefFactDomain: "most: {name}", cleanupTileEntitiesHint: "Orphaned or unavailable for a long time", cleanupTileDevicesHint: "Devices without a working entity", cleanupTileQuarantineHint: "Removable after {days} days at the earliest", cleanupTileUnusedHint: "No known use, a hint only", cleanupTileStatsHint: "Delete leftovers in the database", cleanupTilePurgesHint: "What has been deleted already", qTypeEntities: "Entities ({count})", qTypeDevices: "Devices ({count})",
   repairTitle: "What would you like to repair?", repairHint: "Pick a task. Each one leads through the steps, with a preview and a confirmation.", repairBack: "All tasks", repairFound: "{count} found", repairNotChecked: "not checked", repairNoneFound: "none found",

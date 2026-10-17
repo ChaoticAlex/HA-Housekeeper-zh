@@ -9,7 +9,7 @@ const SEARCH_WORDS = {
   cleanup: "aufräumen bereinigen löschen entfernen quarantäne cleanup delete remove quarantine",
   repair: "reparieren zähler umziehen ersetzen austauschen repair counter meter replace exchange",
   journal: "journal pläne rückgängig verlauf plans undo history",
-  removedDevices: "entfernte geräte gelöscht vergessen removed devices forgotten",
+  removedDevices: "entfernt gelöscht vergessen entfernte geräte removed deleted forgotten devices",
   maintenance: "wartung backup sicherung wiederherstellung update ziele maintenance restore goals",
   batteries: "batterien batterie akku schwach batteries battery low",
   reminders: "erinnerungen wartung filter reminders due",

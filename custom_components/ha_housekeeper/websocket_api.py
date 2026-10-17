@@ -56,7 +56,7 @@ from .cleanup import (
     trim_is_plain,
 )
 from .cleanup_exec import CleanupError, backup_is_local_only, entity_restorable
-from .lifecycle import removed_devices
+from .lifecycle import removed_objects
 from .const import DOMAIN, OPTION_LIMITS
 from .device_pairs import pair_devices
 from .history import PinError
@@ -731,8 +731,8 @@ def websocket_plan_list(
             {
                 "plans": [plan_summary(p) for p in scanner.journal.plans],
                 "purges": scanner.journal.purges,
-                # Devices a plan removed or forgot: the journal is the only place that knows them.
-                "removed": removed_devices(scanner.journal.plans),
+                # What a plan removed, forgot or deleted: the journal is the only place that knows it.
+                "removed": removed_objects(scanner.journal.plans),
             }
         ),
     )

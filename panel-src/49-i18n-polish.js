@@ -1,7 +1,7 @@
 // Texts of the panel polish: folds, groups and tabs in the cleanup view, filters of the quality view.
 Object.assign(TEXT.de, {
  
-  journalPlans: "Pläne", journalTabPlansHint: "Alle Pläne mit Ergebnis und Rückgängig.", journalTabDevicesHint: "Was ein Plan entfernt hat.", journalTabPurgesHint: "Ältere Löschungen, vor den Plänen.", purgesInJournal: "{n} ältere Löschungen von Statistiken stehen im Journal.", purgesInJournalLink: "Im Journal ansehen",
+  journalPlans: "Pläne", journalTabPlansHint: "Alle Pläne mit Ergebnis und Rückgängig.", journalTabDevicesHint: "Was Pläne entfernt oder gelöscht haben.", journalTabPurgesHint: "Ältere Löschungen, vor den Plänen.", purgesInJournal: "{n} ältere Löschungen von Statistiken stehen im Journal.", purgesInJournalLink: "Im Journal ansehen",
   cleanupTabNew: "Neuer Plan", cleanupTabJournal: "Pläne und Journal", cleanupTabPurges: "Gelöschte Statistiken",
   journalEmptyNext: "Noch kein Plan. Wähle unter „Neuer Plan“ Kandidaten aus und lege einen Plan an.",
   
@@ -11,7 +11,7 @@ Object.assign(TEXT.de, {
 });
 Object.assign(TEXT.en, {
  
-  journalPlans: "Plans", journalTabPlansHint: "Every plan with result and undo.", journalTabDevicesHint: "What a plan removed.", journalTabPurgesHint: "Older deletions, from before plans.", purgesInJournal: "{n} older deletions of statistics are noted in the Journal.", purgesInJournalLink: "See in the Journal",
+  journalPlans: "Plans", journalTabPlansHint: "Every plan with result and undo.", journalTabDevicesHint: "What plans removed or deleted.", journalTabPurgesHint: "Older deletions, from before plans.", purgesInJournal: "{n} older deletions of statistics are noted in the Journal.", purgesInJournalLink: "See in the Journal",
   cleanupTabNew: "New plan", cleanupTabJournal: "Plans and journal", cleanupTabPurges: "Deleted statistics",
   journalEmptyNext: "No plan yet. Pick candidates under “New plan” and create one.",
   

@@ -1,4 +1,4 @@
-// LifecycleMixin: the "Verlauf" tab of a device and the list of removed devices in the Journal; mixed in by 99-register.js.
+// LifecycleMixin: the "Verlauf" tab of a device and the list of what plans removed in the Journal; mixed in by 99-register.js.
 // The steps come from the device registry, the journal and the last reliability numbers; the logbook entry of a removed device is shown in the list of removed devices.
 class LifecycleMixin {
   async loadLifecycle(deviceId) {
@@ -33,22 +33,24 @@ class LifecycleMixin {
     const head = `<p class="factnote pad">${this.t("lifeRemovedHint")}</p>`;
     if (!this.removed) return `<div class="panel">${head}${this.skeleton("loading")}</div>`;
     // The logbook entry that was written when the device was removed (or one the person added to it).
-    const noteOf = d => this.notesList().find(x => x.target === `device:${d.object_id}`);
-    const kindText = d => this.t(d.kind === "forget_device" ? "lifeForgotten" : "life_removed");
+    const noteOf = d => d.group === "device" ? this.notesList().find(x => x.target === `device:${d.object_id}`) : null;
+    const kindText = d => this.t(`goneKind_${d.kind}`);
+    const groups = ["device", "entity", "automation", "statistics", "backup"].filter(g => this.removed.some(d => d.group === g));
     const table = this.removed.length ? this.sysList("removed", this.removed, {
       sort: "when", dir: "desc", empty: "lifeRemovedNone", cls: "removed",
       sorts: [
         { key: "when", label: "lifeColWhen", dir: "desc", get: d => d.at },
-        { key: "name", label: "lifeColDevice", dir: "asc", get: d => d.name || d.object_id },
+        { key: "name", label: "goneColObject", dir: "asc", get: d => d.name || d.object_id },
       ],
-      filters: [{ name: "kind", all: this.t("lifeAllKinds"), options: [["remove_device", this.t("life_removed")], ["forget_device", this.t("lifeForgotten")]] }],
-      filterFns: { kind: (d, v) => (v === "forget_device") === (d.kind === "forget_device") },
+      filters: [{ name: "kind", all: this.t("lifeAllKinds"), options: groups.map(g => [g, this.t(`goneGroup_${g}`)]) }],
+      filterFns: { kind: (d, v) => d.group === v },
       text: d => [d.name, d.object_id].join(" "), tie: d => d.object_id,
       rowAttrs: d => { const n = noteOf(d); return n ? `data-note-edit="${this.esc(n.id)}" tabindex="0" role="button" title="${this.esc(this.t("noteEdit"))}"` : 'class="static"'; },
       columns: [
-        { key: "name", label: "lifeColDevice", dir: "asc", cell: d => `<div class="statcell"><span class="tile red"><ha-icon icon="mdi:delete-outline"></ha-icon></span><div>${this.nameCell(d.name || d.object_id, d.object_id)}</div></div>` },
+        { key: "name", label: "goneColObject", dir: "asc", cell: d => `<div class="statcell"><span class="tile red"><ha-icon icon="mdi:delete-outline"></ha-icon></span><div>${this.nameCell(d.name || d.object_id, d.object_id)}</div></div>` },
         { key: "kind", label: "lifeColKind", sortable: false, cell: kindText },
         { key: "when", label: "lifeColWhen", dir: "desc", cell: d => this.esc(this.formatDate(d.at)) },
+        { key: "undo", label: "goneColUndo", sortable: false, cell: d => `<span class="pill ${d.irreversible ? "warn" : "mute"}">${this.t(d.irreversible ? "goneIrreversible" : "goneUndoInPlan")}</span>` },
         { key: "note", label: "lifeColNote", sortable: false, cell: d => { const n = noteOf(d); return n ? `${this.esc(n.title)}${n.note ? `<small class="u-block">${this.esc(n.note)}</small>` : ""}` : "–"; } },
         { key: "plan", label: "lifeColPlan", sortable: false, cell: d => ((this.journal || []).some(p => p.plan_id === d.plan_id) ? `<button type="button" class="btn small" data-plan-open="${this.esc(d.plan_id)}">${this.t("lifeOpenPlan")}</button>` : "–") },
       ],

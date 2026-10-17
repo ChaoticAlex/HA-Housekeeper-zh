@@ -3398,10 +3398,10 @@ test("a device has a history tab with its steps and no note; removed devices sho
   const html = el.lifeCard(device);
   assert.ok(html.includes("Discovered") && html.includes("light.old → light.new") && html.includes("flapping") && !html.includes("<textarea") && !html.includes("data-life-save"));
   el.journal = [{ plan_id: "p1", created_at: "2026-03-01T00:00:00+00:00", status: "verified", summary: { total: 1, ok: 1, review: 0, blocked: 0 } }];
-  el.removed = [{ object_id: "d9", name: "Old hub", kind: "remove_device", at: "2026-03-01T00:00:00+00:00", plan_id: "p1" }, { object_id: "d8", name: "Old plug", kind: "forget_device", at: "2026-03-02T00:00:00+00:00" }];
+  el.removed = [{ object_id: "d9", name: "Old hub", kind: "remove_device", group: "device", at: "2026-03-01T00:00:00+00:00", plan_id: "p1" }, { object_id: "d8", name: "Old plug", kind: "forget_device", group: "device", at: "2026-03-02T00:00:00+00:00" }];
   el.data = { ...DATA, notes: [{ id: "n1", title: "Device “Old plug” forgotten", at: "2026-03-02T00:00:00+00:00", target: "device:d8", note: "broken <b>", source: "housekeeper", ref: "forget_device:d8" }] };
   const list = el.removedCard();
-  assert.ok(list.includes("Old hub") && list.includes("Removed by a plan") && list.includes("Device “Old plug” forgotten") && list.includes('data-note-edit="n1"') && list.includes("broken &lt;b&gt;") && !list.includes("<b>"));
+  assert.ok(list.includes("Old hub") && list.includes("Device removed") && list.includes("Device “Old plug” forgotten") && list.includes('data-note-edit="n1"') && list.includes("broken &lt;b&gt;") && !list.includes("<b>"));
   assert.ok(list.includes('<button type="button" class="btn small" data-plan-open="p1">Open plan</button>') && list.includes("beyond the 300 newest"), "the plan is one click away, and the list says how far back it reaches");
 });
 
@@ -5810,7 +5810,7 @@ test("every tab of Maintenance can be found by search, and the goals tab says wh
 test("the journal has tabs for plans and removed devices, shows a load error and points to older purges from tidy up", () => {
   const { el, shadow } = panel("en");
   el.data = { ...DATA, objects: [], edges: [], findings: [], quarantine: [], notes: [] };
-  el.journal = []; el._journalRequested = true; el.removed = [{ object_id: "d9", name: "Old hub", kind: "remove_device", at: "2026-03-01T00:00:00+00:00", plan_id: "gone" }]; el.purges = [];
+  el.journal = []; el._journalRequested = true; el.removed = [{ object_id: "d9", name: "Old hub", kind: "remove_device", group: "device", at: "2026-03-01T00:00:00+00:00", plan_id: "gone" }]; el.purges = [];
   el.view = "journal"; el.render();
   let html = shadow.innerHTML;
   assert.ok(html.includes('data-view-tab="journal|plans"') && html.includes('data-view-tab="journal|devices"') && !html.includes('data-view-tab="journal|purges"') && html.includes("data-journal-refresh"));
