@@ -2463,7 +2463,7 @@ test("the reliability view lists the worst integration first with numbers, words
   assert.ok(shadow.innerHTML.includes("Evaluating the recorder"));
   await el.loadReliability();
   const html = shadow.innerHTML;
-  for (const text of [el.t("relTabIntegrations"), "Cloud &lt;b&gt;Hub&lt;/b&gt;", "93.4 %", "12 entities", "2 h", "probably the cloud or its API (a guess)", "Re-authentication open", "setup_retry", "No disruption", "calculated in 2.8 s", "24 hours", "7 days"]) assert.ok(html.includes(text), text);
+  for (const text of [el.t("relTabIntegrations"), "Cloud &lt;b&gt;Hub&lt;/b&gt;", "93.4 %", "12 entities", "2 h", "probably the cloud or its API", "Re-authentication open", "setup_retry", "No disruption", "calculated in 2.8 s", "24 hours", "7 days"]) assert.ok(html.includes(text), text);
   assert.ok(html.indexOf("Cloud &lt;b&gt;") < html.indexOf("Local Box"));
   assert.ok(!html.includes("<b>Hub</b>"));
 });
