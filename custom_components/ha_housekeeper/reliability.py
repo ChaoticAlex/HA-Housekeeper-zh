@@ -9,7 +9,7 @@ new calculation runs. A regular background run keeps that reply from getting old
 from __future__ import annotations
 
 import time
-from datetime import UTC, datetime, tzinfo
+from datetime import UTC, datetime, time as clock, timedelta, tzinfo
 from typing import Any
 
 from homeassistant.core import HomeAssistant
@@ -38,6 +38,7 @@ PATTERN_SHARE = 0.6
 PATTERN_MIN_DAYS = 3
 PATTERN_MIN_WINDOW_DAYS = 6
 UNSTABLE_LIMIT = 30
+PERIOD_LIMIT = 15  # outage periods listed per config entry, the latest first
 STABILITY_LIMIT = 500  # entities whose stability the detail pages can name
 THRESHOLDS = {
     "shared_share_percent": SHARED_SHARE,
@@ -178,6 +179,27 @@ def _merge(intervals: list[tuple[float, float]]) -> list[tuple[float, float]]:
     return [(a, b) for a, b in merged]
 
 
+def _overlaps(members: list[list[tuple[float, float]]], begin: float, finish: float) -> int:
+    """How many members were down at some time in the period."""
+    return sum(any(a < finish and b > begin for a, b in intervals) for intervals in members)
+
+
+def _day_seconds(
+    spans: list[tuple[float, float, str]], start: float, end: float, zone: tzinfo
+) -> list[dict[str, Any]]:
+    """The seconds of outage on each local day of the window; the spans do not overlap."""
+    day = datetime.fromtimestamp(start, zone).date()
+    last = datetime.fromtimestamp(end, zone).date()
+    result = []
+    while day <= last:
+        begin = datetime.combine(day, clock.min, zone).timestamp()
+        finish = datetime.combine(day + timedelta(days=1), clock.min, zone).timestamp()
+        seconds = sum(max(0.0, min(b, finish) - max(a, begin)) for a, b, _ in spans)
+        result.append({"date": day.isoformat(), "seconds": round(seconds)})
+        day += timedelta(days=1)
+    return result
+
+
 def shared_outages(
     members: list[list[tuple[float, float]]],
     *,
@@ -215,6 +237,7 @@ def compute(
     runs: dict[str, Any],
     entities: list[dict[str, Any]],
     entries: dict[str, dict[str, Any]],
+    zone: tzinfo | None = None,
 ) -> dict[str, Any]:
     """Join the recorder intervals with the registries into one row per config entry.
 
@@ -223,6 +246,7 @@ def compute(
     """
     start, end = runs["start"], runs["end"]
     window = max(end - start, 1.0)
+    zone = zone or dt_util.get_default_time_zone()
     per_entry: dict[str, list[dict[str, Any]]] = {}
     for item in entities:
         if item.get("config_entry_id") in entries:
@@ -284,6 +308,16 @@ def compute(
         if outages:
             layer = "cloud" if info.get("iot_class") in CLOUD_CLASSES else "local"
         last = outages[-1] if outages else last_single
+        if len(counted) >= SHARED_MIN_ENTITIES:
+            spans = [(a, b, "shared") for a, b in outages]
+        elif counted:  # too few entities for a shared outage: any entity down for long enough counts
+            spans = [
+                (a, b, "single")
+                for a, b in _merge([i for member in counted for i in member])
+                if b - a >= SHARED_MIN_SECONDS
+            ]
+        else:  # down the whole window
+            spans = [(start, end, "down")]
         rows.append(
             {
                 "entry_id": entry_id,
@@ -300,6 +334,18 @@ def compute(
                 "shared_outages": len(outages),
                 "longest_outage": round(max((b - a for a, b in outages), default=0)),
                 "layer": layer,
+                "period_total": len(spans),
+                "periods": [
+                    {
+                        "start": a,
+                        "end": b,
+                        "seconds": round(b - a),
+                        "kind": kind,
+                        "affected": permanent if kind == "down" else _overlaps(counted, a, b),
+                    }
+                    for a, b, kind in spans[::-1][:PERIOD_LIMIT]
+                ],
+                "days": _day_seconds(spans, start, end, zone),
                 "affected_total": len(affected),
                 "affected": sorted(affected, key=lambda m: (m["availability"], m["entity_id"]))[
                     :MEMBER_LIMIT

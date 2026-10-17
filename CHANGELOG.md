@@ -15,6 +15,7 @@
   - Die Kachel „Ø je Integration“ zählt jede Integration einmal und lässt dauerhaft Ausgefallene weg; die Spalte heißt „Gemeinsame Ausfälle“, bei Integrationen mit weniger als drei Entitäten steht „zu klein“ statt einer 0.
   - Die Kacheln und Filter „Neue Anmeldung nötig“ und „Nicht geladen“ entfallen, die Anmeldung bleibt als Hinweis in der Zeile und führt zum Befund.
   - Neues Fenster „30 Tage“ (wie bei den Hausfunktionen); die Fußnote nennt die Farbgrenzen (grün ab 99,5 %, gelb ab 95 %) und dass die Tagesleiste einer Hausfunktion nach der Dauer färbt.
+  - Die Detailseite einer Integration zeigt Kennzahlen, eine Tagesleiste mit den Ausfalltagen (wie bei den Hausfunktionen), die Ausfallzeiträume mit Beginn, Dauer und Zahl der betroffenen Entitäten und nennt die Hausfunktionen, die sich auf die Integration stützen; der Vergleich nennt seine Einheit (Prozentpunkte).
 - **Zugangsdaten:**
   - Integrationen, die eine neue Anmeldung verlangen, tragen die Marke „Anmeldung nötig“ und haben eine eigene Kachel, ebenso deaktivierte Integrationen, die noch Zugangsdaten halten; mehr Feldnamen werden als Zugangsdaten erkannt (etwa Cookie, Session-ID, Einmalcode).
   - Neuer Reiter „Konten“ mit Rolle, Zwei-Faktor und letzter Anmeldung jedes Benutzers und eine Kachel „Admins ohne Zwei-Faktor“, ein Reiter „Langzeit-Tokens“ mit Name, Konto und Alter; die Kacheln stehen in gleich großen Reihen.
@@ -65,6 +66,7 @@
   - The tile "Avg per integration" counts each integration once and leaves out those down all the time; the column is called "Shared outages", and integrations with fewer than three entities say "too small" instead of 0.
   - The tiles and filters "Login needed" and "Not loaded" are gone; the login request stays a hint in the row and leads to the finding.
   - New window "30 days" (as with the house functions); the footnote names the color limits (green from 99.5 %, yellow from 95 %) and says that the day strip of a house function colors by duration.
+  - The detail page of an integration shows figures, a day strip of the outage days (as with the house functions), the outage periods with start, duration and number of affected entities, and names the house functions that rely on the integration; the comparison names its unit (percentage points).
 - **Credentials:**
   - Integrations that ask to sign in again carry a "Login needed" mark and have a tile of their own, as do disabled integrations that still hold credentials; more field names are recognised as credentials (such as cookie, session id, one-time code).
   - New "Accounts" tab with each user's role, two-factor and last login, an "Admins without two-factor" tile, and a "Long-lived tokens" tab with name, account and age; the tiles sit in rows of equal size.

@@ -2474,9 +2474,11 @@ test("the reliability view lists the worst integration first with numbers, words
 test("reliability rows open the integration, and its detail page shows the numbers with the affected entities", async () => {
   const { el, shadow } = panel("en");
   const entry = { object_type: "config_entry", object_id: "e1", name: "Hue", status: "active", state: "loaded", domain: "hue" };
-  el.data = { ...DATA, objects: [...DATA.objects.filter(o => o.object_type !== "config_entry"), entry] };
+  el.data = { ...DATA, monitor: [{ id: "m1", name: "Light <b>function</b>", enabled: true, members: [{ object_key: "entity:light.a" }] }], objects: [...DATA.objects.filter(o => o.object_type !== "config_entry"), entry, { object_type: "entity", object_id: "light.a", name: "Lamp A", config_entry_id: "e1", status: "active" }] };
   el.view = "reliability";
-  const withEntities = { ...RELIABILITY, computed_at: 1791470000, entries: [{ ...RELIABILITY.entries[0], affected_total: 20, affected: [{ entity_id: "light.a", name: "Lamp <i>A</i>", availability: 91.2 }] }, RELIABILITY.entries[1]] };
+  const days = Array.from({ length: 8 }, (_, i) => ({ date: `2026-10-0${i + 1}`, seconds: i === 2 ? 7200 : i === 5 ? 300 : 0 }));
+  const periods = [{ start: 1791470000, end: 1791477200, seconds: 7200, kind: "shared", affected: 9 }];
+  const withEntities = { ...RELIABILITY, computed_at: 1791470000, entries: [{ ...RELIABILITY.entries[0], days, periods, period_total: 3, affected_total: 20, affected: [{ entity_id: "light.a", name: "Lamp <i>A</i>", availability: 91.2 }] }, RELIABILITY.entries[1]] };
   el._hass = { language: "en", callWS: async () => withEntities };
   await el.loadReliability();
   const list = shadow.innerHTML;
@@ -2487,6 +2489,7 @@ test("reliability rows open the integration, and its detail page shows the numbe
   const html = shadow.innerHTML;
   assert.ok(html.includes('data-detail-tab="reliability"'));
   for (const text of ["Entities with downtime (20)", "Lamp &lt;i&gt;A&lt;/i&gt;", "91.2 %", 'data-object="entity:light.a"', "Showing the 1 with the lowest availability of 20"]) assert.ok(html.includes(text), text);
+  for (const text of ["Outage periods (3)", "9 of 14 entities", ">Shared<", 'class="problem short"', 'class="problem"', "Showing the last 1 of 3.", "Carries the house functions", 'data-monitor-last="m1"', "Light &lt;b&gt;function&lt;/b&gt;"]) assert.ok(html.includes(text), text);
   const facts = el.knownCard(entry, "config_entry:e1");
   assert.ok(facts.includes("Availability (7 days)") && facts.includes("93.4 %"));
   el.selected = { ...entry, object_id: "e3" }; el.detailTab = "reliability"; el.render();

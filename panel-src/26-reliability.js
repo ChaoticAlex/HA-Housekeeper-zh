@@ -53,19 +53,12 @@ class ReliabilityMixin {
     const percent = item.availability;
     const tone = item.dead ? "red" : percent === null ? "mute" : percent >= REL_GREEN ? "ok" : percent >= REL_YELLOW ? "warn" : "red";
     const lines = [`${this.esc(item.domain || "")} · ${this.t("relEntities", { n: item.entities })}${item.permanent ? ` · ${this.t("relPermanent", { n: item.permanent })}` : ""}`];
-    if (item.shared_outages) {
-      const layer = item.layer === "cloud" ? this.t("relLayerCloud") : this.t("relLayerLocal");
-      lines.push(`${this.t(item.shared_outages === 1 ? "relSharedOne" : "relShared", { n: item.shared_outages, longest: this.relDuration(item.longest_outage) })} · ${layer}`);
-    }
+    const layer = item.shared_outages ? (item.layer === "cloud" ? this.t("relLayerCloud") : this.t("relLayerLocal")) : "";
+    if (layer) lines.push(layer);
     const flags = [];
     if (item.reauth) flags.push(`<span class="pill red">${this.t("relReauth")}</span>`);
     if (item.state && item.state !== "loaded") flags.push(`<span class="pill warn">${this.esc(item.state)}</span>`);
     if (item.setup) lines.push(`${item.setup.count ? this.t("relSetup", { n: item.setup.count, days: item.setup.days, last: this.formatDate(item.setup.last) }) : ""}${item.setup.state ? `${item.setup.count ? " · " : ""}${this.t("relSetupNow", { state: item.setup.state })}` : ""}`);
-    lines.push(item.last_disruption
-      ? this.t(item.last_disruption.shared ? "relLastShared" : "relLastSingle", { date: this.formatDate(new Date(item.last_disruption.end * 1000).toISOString()), duration: this.relDuration(item.last_disruption.seconds) })
-      : this.t("relNoDisruption"));
-    if (item.delta !== null && item.delta !== undefined) lines.push(this.t("relDelta", { delta: `${item.delta > 0 ? "+" : item.delta < 0 ? "−" : "±"}${this.formatNumber(Math.abs(item.delta))}`, before: this.formatNumber(item.previous_availability) }));
-    else if (this.reliability?.comparison?.available) lines.push(this.t("relDeltaNone"));
     return `<span class="tile ${tone}"><ha-icon icon="mdi:lan-connect"></ha-icon></span><span class="row-text"><strong>${this.esc(item.title)}</strong>${lines.map(line => `<small>${line}</small>`).join("")}${flags.length ? `<span class="relflags">${flags.join(" ")}</span>` : ""}</span><span class="pill ${tone}">${item.dead ? this.t("relDead") : percent === null ? "—" : `${this.formatNumber(percent)} %`}</span>`;
   }
 
@@ -86,7 +79,39 @@ class ReliabilityMixin {
     const hintKey = this.relSetupHint(row);
     const hint = hintKey ? `<div class="factnote"><strong>${this.t("relHintTitle")}</strong> ${this.t(hintKey, { n: row.setup.count, days: row.setup.days })}</div>` : "";
     const summary = `<div class="row">${this.relRowBody(row)}</div>${hint}`;
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("relTab")}</h2><p>${this.t(`relWindow${r.window_days}`)}${r.stale || r.age_seconds ? ` · ${this.t("relAgeNote", { when: this.relTime(new Date(r.computed_at * 1000).toISOString()) })}` : ""}</p></div></div>${summary}<div class="sectionlabel">${this.t("relAffected", { n: this.formatNumber(row.affected_total || 0) })}</div>${list || `<p class="factnote">${this.t("relNoAffected")}</p>`}${more}</section>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("relTab")}</h2><p>${this.t(`relWindow${r.window_days}`)}${r.stale || r.age_seconds ? ` · ${this.t("relAgeNote", { when: this.relTime(new Date(r.computed_at * 1000).toISOString()) })}` : ""}</p></div></div>${summary}${this.relDetailExtras(row)}<div class="sectionlabel">${this.t("relAffected", { n: this.formatNumber(row.affected_total || 0) })}</div>${list || `<p class="factnote">${this.t("relNoAffected")}</p>`}${more}</section>`;
+  }
+
+  // The house functions that rely on the integration: a member is one of its entities, or one of its devices.
+  relHouseFunctions(entryId) {
+    return this.monitorFunctions().filter(fn => (fn.members || []).some(m => {
+      const object = this.findObject(m.object_key);
+      return object && (object.config_entry_id === entryId || (object.config_entry_ids || []).includes(entryId));
+    }));
+  }
+
+  // Figures, day strip and outage periods of one integration, from the periods the backend found in the window.
+  relDetailExtras(row) {
+    const r = this.reliability, days = row.days || [], periods = row.periods || [];
+    const tile = (value, label) => `<div class="avail-tile"><b>${this.esc(value)}</b><span>${this.esc(label)}</span></div>`;
+    const comparing = row.delta !== null && row.delta !== undefined;
+    const tiles = [
+      tile(row.dead ? "–" : this.formatNumber(row.shared_outages || 0), this.t("relSortOutages")),
+      row.shared_outages ? tile(this.relDuration(row.longest_outage), this.t("relColLongest")) : "",
+      comparing ? tile(`${row.delta > 0 ? "+" : row.delta < 0 ? "−" : "±"}${this.formatNumber(Math.abs(row.delta))}`, this.t("relDeltaPoints")) : "",
+    ].filter(Boolean).join("");
+    const dayClass = d => (!d.seconds ? "ok" : d.seconds < 864 ? "problem short" : "problem");
+    const strip = days.length >= 7
+      ? `<div class="monitor-days" role="img" aria-label="${this.esc(this.t("relStrip"))}">${days.map(d => `<i class="${dayClass(d)}" title="${this.esc(`${d.date}: ${d.seconds ? this.relDuration(d.seconds) : this.t("monitorAvailOk")}`)}"></i>`).join("")}</div><div class="monitor-axis"><span>${this.t("monitorAvailFrom", { days: days.length - 1 })}</span><span>${this.t("monitorAvailToday")}</span></div><div class="monitor-legend"><span><i class="ok"></i>${this.t("monitorAvailOk")}</span><span><i class="problem short"></i>${this.t("monitorAvailShort")}</span><span><i class="problem"></i>${this.t("monitorAvailLong")}</span></div>`
+      : "";
+    const kinds = { shared: "relKindShared", single: "relKindSingle", down: "relKindDown" };
+    const when = p => this.formatDate(new Date(p.start * 1000).toISOString());
+    const table = periods.length
+      ? `<div class="sectionlabel">${this.t("relPeriods", { n: this.formatNumber(row.period_total ?? periods.length) })}</div><div class="tablewrap"><table class="evtable"><thead><tr><th>${this.t("relColStart")}</th><th>${this.t("relColDuration")}</th><th>${this.t("relColAffected")}</th><th>${this.t("relColKind")}</th></tr></thead><tbody>${periods.map(p => `<tr><td>${this.esc(when(p))}</td><td>${this.esc(this.relDuration(p.seconds))}</td><td>${this.esc(this.t("relOfEntities", { n: p.affected, m: row.entities + row.permanent }))}</td><td><span class="pill ${p.kind === "shared" || p.kind === "down" ? "warn" : "mute"}">${this.t(kinds[p.kind] || "relKindSingle")}</span></td></tr>`).join("")}</tbody></table></div>${(row.period_total || 0) > periods.length ? `<p class="factnote">${this.t("relPeriodsMore", { shown: periods.length, total: row.period_total })}</p>` : ""}`
+      : "";
+    const functions = this.relHouseFunctions(row.entry_id);
+    const carries = functions.length ? `<p class="factnote">${this.t("relCarries")}: ${functions.map(fn => `<button class="link" data-monitor-last="${this.esc(fn.id)}">${this.esc(fn.name)}</button>`).join(", ")}</p>` : "";
+    return `<div class="avail-tiles">${tiles}</div>${strip}${table}${carries}`;
   }
 
   // A guess at the cause from the setup failures and the availability, worded as a possibility.

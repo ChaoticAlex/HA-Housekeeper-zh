@@ -92,6 +92,9 @@ class ReliabilityRow(TypedDict):
     last_disruption: dict[str, Any] | None
     affected_total: int
     affected: list[dict[str, Any]]
+    period_total: int
+    periods: list[dict[str, Any]]
+    days: list[dict[str, Any]]
     previous_availability: NotRequired[float | None]
     delta: NotRequired[float | None]
 
