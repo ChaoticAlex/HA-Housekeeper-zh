@@ -5689,3 +5689,17 @@ test("an open request for a new login is a pinned row of the to-do card", () => 
   el.data = { ...el.data, findings: [finding("e1"), finding("e2")] };
   assert.equal(el.todoItems().find(i => i.key === "reauth").text, "Anmeldung nötig: 2 Integrationen");
 });
+
+test("the components page lists what Home Assistant still waits for as information", () => {
+  const { el } = panel("de");
+  el.sysState("flows").data = { flows: [
+    { flow_id: "a", domain: "hue", name: "Hue Bridge", source: "zeroconf", kind: "discovered" },
+    { flow_id: "b", domain: "fritz", name: "Fritz!Box", source: "reconfigure", kind: "reconfigure" },
+  ] };
+  const html = el.openFlowsFold();
+  assert.ok(html.includes("Offen in Home Assistant") && html.includes("1 gefundene Geräte") && html.includes("1 Neukonfiguration"));
+  el.folds = { open_flows: true };
+  assert.ok(el.openFlowsFold().includes("Hue Bridge") && el.openFlowsFold().includes("Gefunden über zeroconf"));
+  el.sysState("flows").data = { flows: [] };
+  assert.equal(el.openFlowsFold(), "");
+});

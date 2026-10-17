@@ -13254,6 +13254,7 @@ Object.assign(TEXT.de, {
   secSumDisabled: "Deaktivierte Integrationen", secSumDisabledSub: "Zugangsdaten bleiben gespeichert", secStateDisabled: "deaktiviert, mit Wert",
   secSumReauth: "Anmeldung nötig", secSumReauthSub: "Integration verlangt neuen Login", secReauth: "Anmeldung nötig",
   todoReauthOne: "Anmeldung nötig: {name}", todoReauthMany: "Anmeldung nötig: {n} Integrationen", todoReauthFollowers: "{n} Entitäten fallen aus", todoReauthPill: "Neu anmelden",
+  flowsTitle: "Offen in Home Assistant", flowsNote: "Information, kein Befund", flowsOpenHa: "In Home Assistant öffnen", flowsCount_discovered: "{n} gefundene Geräte", flowsCount_reconfigure: "{n} Neukonfiguration", flowDiscovered: "Gefunden über {source}", flowReconfigure: "Möchte neu konfiguriert werden", flowPillDiscovered: "Entdeckt", flowPillReconfigure: "Neu konfigurieren",
   entryReauth: "Neue Anmeldung offen", cause_entry_reauth: "Die Integration hat Home Assistant um eine neue Anmeldung gebeten. Bis sie erledigt ist, liefert sie keine Daten.", hint_entry_reauth: "In den Integrationen bei diesem Eintrag „Neu authentifizieren“ wählen und die Zugangsdaten eingeben.",
   secTabAccounts: "Konten", secAccHint: "Benutzer dieses Home Assistant ohne Systemkonten; ein Klick öffnet die Benutzerverwaltung",
   secSumNoMfa: "Admins ohne Zwei-Faktor", secSumNoMfaSub: "von {n} Admins",
@@ -13331,6 +13332,7 @@ Object.assign(TEXT.en, {
   secSumDisabled: "Disabled integrations", secSumDisabledSub: "credentials stay stored", secStateDisabled: "disabled, with a value",
   secSumReauth: "Login needed", secSumReauthSub: "integration asks to sign in again", secReauth: "login needed",
   todoReauthOne: "Login needed: {name}", todoReauthMany: "Login needed: {n} integrations", todoReauthFollowers: "{n} entities are down", todoReauthPill: "Sign in again",
+  flowsTitle: "Open in Home Assistant", flowsNote: "information, not a finding", flowsOpenHa: "Open in Home Assistant", flowsCount_discovered: "{n} devices found", flowsCount_reconfigure: "{n} to reconfigure", flowDiscovered: "Found via {source}", flowReconfigure: "Wants to be set up again", flowPillDiscovered: "Discovered", flowPillReconfigure: "Reconfigure",
   entryReauth: "New login open", cause_entry_reauth: "The integration has asked Home Assistant for a new login. Until it is done, it delivers no data.", hint_entry_reauth: "Under integrations, choose “Reauthenticate” on this entry and enter the credentials.",
   secTabAccounts: "Accounts", secAccHint: "Users of this Home Assistant without system accounts; a click opens the user settings",
   secSumNoMfa: "Admins without two-factor", secSumNoMfaSub: "of {n} admins",
@@ -13530,7 +13532,7 @@ class BatteryTableMixin {
 // SystemMixin: the pages "Storage & system", "Access & data flow" and "Credentials" under Operation and Security; mixed in by 99-register.js.
 // All three only read. A page loads on its first visit; its refresh button reads again.
 // A page and the WebSocket command it asks.
-const SYS_COMMANDS = { storage: "system_usage", dataflow: "access", secrets: "sensitive_fields" };
+const SYS_COMMANDS = { storage: "system_usage", dataflow: "access", secrets: "sensitive_fields", flows: "open_flows" };
 // What a tile of the credentials page opens: [tab, list, state filter]; "" clears the filters.
 const SEC_SHOWS = { "": ["entries", "seclist", ""], gap: ["entries", "seclist", "gap"], reauth: ["entries", "seclist", "reauth"], disabled: ["entries", "seclist", "disabled"], nomfa: ["accounts", "secusers", "nomfa"], tokens: ["tokens", "sectokens", ""] };
 const SYS_WARN_PERCENT = 75, SYS_RED_PERCENT = 90;
@@ -14623,6 +14625,16 @@ class ComponentsMixin {
     });
   }
 
+  // What Home Assistant still waits for (discoveries, set-up requests): information only, no finding; it is left out when there is none.
+  openFlowsFold() {
+    const flows = this.sysState("flows").data?.flows || [];
+    if (!flows.length) return "";
+    const kinds = ["discovered", "reconfigure"].map(kind => [kind, flows.filter(f => f.kind === kind).length]).filter(([, n]) => n);
+    const row = f => `<div class="row" data-ha-path="/config/integrations" tabindex="0" role="link" aria-label="${this.esc(this.t("flowsOpenHa"))}"><span class="tile mute"><ha-icon icon="${f.kind === "reconfigure" ? "mdi:cog-outline" : "mdi:radar"}"></ha-icon></span><span class="row-text"><strong>${this.esc(f.name)}</strong><small>${this.esc(f.kind === "reconfigure" ? this.t("flowReconfigure") : this.t("flowDiscovered", { source: f.source }))}</small></span><span class="pill mute">${this.t(f.kind === "reconfigure" ? "flowPillReconfigure" : "flowPillDiscovered")}</span></div>`;
+    const sub = kinds.map(([kind, n]) => this.t(`flowsCount_${kind}`, { n: this.formatNumber(n) })).join(" · ");
+    return `<div class="panel">${this.fold("open_flows", { tone: "mute", title: this.t("flowsTitle"), sub: `${sub} · ${this.t("flowsNote")}`, pill: this.formatNumber(flows.length) }, flows.map(row).join(""), false)}</div>`;
+  }
+
   componentsView() {
     const apps = (this.data?.objects || []).filter(o => o.object_type === "app");
     const ints = this.compIntegrations();
@@ -14647,10 +14659,11 @@ class ComponentsMixin {
     ].map(t => ({ ...t, facts: t.facts.filter(Boolean), tone: t.facts.some(f => f?.tone === "red") ? "red" : "mute" }));
     const open = this.viewTabOf("components", tabs, "core");
     if (apps.length || custom.length) this.sysEnsure("storage"); // CPU, RAM and data of the apps, folder sizes of custom integrations
+    this.sysEnsure("flows");
     const body = open === "apps" ? this.compAppsList(apps) : this.compIntegrationsList(open === "custom" ? custom : core, open);
     const st = this.sysState("storage");
     const bar = this.pageBar({ at: st.at, loading: st.loading, attr: 'data-sys-refresh="storage"' });
-    return `<div class="stack">${bar}${this.navTiles("components", tabs, open, this.t("components"), true)}<div class="panel">${body}</div></div>`;
+    return `<div class="stack">${bar}${this.openFlowsFold()}${this.navTiles("components", tabs, open, this.t("components"), true)}<div class="panel">${body}</div></div>`;
   }
 }
 

@@ -12,6 +12,7 @@ from homeassistant.core import HomeAssistant, callback
 from .access import access_report
 from .const import DOMAIN
 from .inventory import InventoryScanner
+from .open_flows import open_flows
 from .sensitive_fields import sensitive_fields
 from .system_usage import system_light, system_usage
 from .ws_common import _versioned, with_scanner
@@ -123,6 +124,16 @@ async def websocket_sensitive_fields(
     connection.send_result(msg["id"], _versioned(await sensitive_fields(hass)))
 
 
+@websocket_api.require_admin
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/open_flows"})
+@callback
+def websocket_open_flows(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> None:
+    """The discoveries and set-up requests that wait in Home Assistant. Read-only."""
+    connection.send_result(msg["id"], _versioned({"flows": open_flows(hass)}))
+
+
 @callback
 def async_register(hass: HomeAssistant) -> None:
     """Register the storage, access and credential-overview commands."""
@@ -130,3 +141,4 @@ def async_register(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_system_light)
     websocket_api.async_register_command(hass, websocket_access)
     websocket_api.async_register_command(hass, websocket_sensitive_fields)
+    websocket_api.async_register_command(hass, websocket_open_flows)
