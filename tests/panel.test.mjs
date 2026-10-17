@@ -2492,6 +2492,7 @@ test("reliability rows open the integration, and its detail page shows the numbe
   for (const text of ["Outage periods (3)", "9 of 14 entities", ">Shared<", 'class="problem short"', 'class="problem"', "Showing the last 1 of 3.", "Carries the house functions", 'data-monitor-last="m1"', "Light &lt;b&gt;function&lt;/b&gt;"]) assert.ok(html.includes(text), text);
   const facts = el.knownCard(entry, "config_entry:e1");
   assert.ok(facts.includes("Availability (7 days)") && facts.includes("93.4 %"));
+  assert.ok(el.knownCard({ ...entry, status: "problem", reauth: true }, "config_entry:e1").includes("New login open"), "a loaded entry that wants a login says so");
   el.selected = { ...entry, object_id: "e3" }; el.detailTab = "reliability"; el.render();
   assert.ok(!shadow.innerHTML.includes('data-detail-tab="reliability"'), "no tab without numbers");
 });

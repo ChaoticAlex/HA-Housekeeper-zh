@@ -12261,8 +12261,9 @@ class KnownMixin {
     const ents = (this.data.objects || []).filter(o => o.object_type === "entity" && o.config_entry_id === id);
     const bad = ents.filter(o => ["unavailable", "orphaned"].includes(o.status)).length;
     const st = item.disabled_by ? "disabled" : item.state || "not_loaded";
-    const tone = st === "loaded" ? "ok" : st === "disabled" ? "mute" : ["setup_error", "migration_error", "failed_unload"].includes(st) ? "red" : "warn";
-    const state = [this.knownLine(tone, t("knownLoaded"), `${st === "disabled" ? t("disabled") : t(`cs_${st}`)}${item.error ? `<small>${this.esc(item.error)}</small>` : ""}`, "knownSrcScan")];
+    const reauth = item.reauth && st === "loaded";
+    const tone = reauth ? "red" : st === "loaded" ? "ok" : st === "disabled" ? "mute" : ["setup_error", "migration_error", "failed_unload"].includes(st) ? "red" : "warn";
+    const state = [this.knownLine(tone, t("knownLoaded"), `${st === "disabled" ? t("disabled") : reauth ? t("entryReauth") : t(`cs_${st}`)}${item.error ? `<small>${this.esc(item.error)}</small>` : ""}`, "knownSrcScan")];
     const row = this.reliability?.available ? this.reliabilityRow(item) : null;
     if (row && row.availability !== null && row.availability !== undefined) {
       const rtone = row.availability >= 99.5 ? "ok" : row.availability >= 95 ? "warn" : "red";
