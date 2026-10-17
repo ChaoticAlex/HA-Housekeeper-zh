@@ -49,6 +49,7 @@
   - In der Tagesleiste der Verfügbarkeit ist ein Tag mit weniger als 1 % Ausfallzeit bernsteinfarben statt rot; der Hinweis am Balken nennt die Dauer, darunter steht eine Legende.
   - Die Seite einer Hausfunktion ist kompakter: Kopf, Kennzahlen, Tagesleiste und die zugeordneten Objekte stehen in einer Karte, Scan und Prüfung in einer Zeile unter dem Namen. Die Objekte sind eine Tabelle mit Seiten (zunächst 10 pro Seite).
   - Das Bearbeiten einer Hausfunktion ist aufgeräumter: Allgemeines, Objekte, Suche und Vorschläge stehen in einer Karte, Vorschläge sind „+“-Knöpfe, Entfernen ein X. „Löschen“ ist wie überall der weich rote Knopf (auch bei Notizen). „Speichern“ bleibt aktiv und sagt, was fehlt.
+  - Recorder: Die Reiter heißen „Schreiblast“ (wie oft etwas geschrieben wird), „Speicherbedarf“ (wie viel Platz jede Entität belegt) und „Datenbank“.
 - **Zugriffe & Datenfluss:** Integrationen, deren Tracker nur die Anwesenheit über Router oder Bluetooth melden (etwa die FRITZ!Box), gelten nicht mehr als „Standort“ mit hohem Risiko, sondern zeigen „Anwesenheit im Netz“.
 - **Freigaben:** Alexa und Google Assistant, die in den Nabu-Casa-Einstellungen ausgeschaltet sind, zählen nicht mehr als „freigegeben“ und erzeugen keine Befunde; ihre Kachel zeigt „in Nabu Casa ausgeschaltet“.
 
@@ -101,6 +102,7 @@
   - In the day strip of the availability, a day with less than 1 % of impaired time is amber instead of red; the tooltip names the duration and a legend sits below.
   - The page of a house function is more compact: header, figures, day strip and the assigned objects share one card, scan and check sit in one line under the name. The objects are a table with pages (10 per page to begin with).
   - Editing a house function is tidier: general settings, objects, search and suggestions share one card, suggestions are “+” buttons, remove is an X. “Delete” is the soft red button as everywhere else (notes too). “Save” stays enabled and says what is missing.
+  - Recorder: the tabs are called "Write load" (how often things are written), "Storage use" (how much space each entity takes) and "Database".
 - **Access & data flow:** Integrations whose trackers only report presence through a router or Bluetooth (such as the FRITZ!Box) no longer count as "location" with a high risk but show "presence on the network".
 - **Exposure:** Alexa and Google Assistant switched off in the Nabu Casa settings no longer count as "exposed" and raise no findings; their tile says "switched off in Nabu Casa".
 

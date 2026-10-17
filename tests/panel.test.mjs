@@ -1577,7 +1577,7 @@ test("the maintenance view loads the preflight; the recorder view offers the cos
   el.view = "maintenance"; el.viewTab = { maintenance: "preflight" };
   el.render();
   assert.ok(shadow.innerHTML.includes("Update preflight") && shadow.innerHTML.includes("Checking"));
-  assert.ok(!shadow.innerHTML.includes("Start analysis") && !shadow.innerHTML.includes("Recorder costs"), "the recorder topics moved to the Recorder view");
+  assert.ok(!shadow.innerHTML.includes("Start analysis") && !shadow.innerHTML.includes("Storage use"), "the recorder topics moved to the Recorder view");
   await el.loadPreflight();
   let html = shadow.innerHTML;
   assert.deepEqual(sent, ["ha_housekeeper/preflight"]);
@@ -3154,12 +3154,12 @@ test("the Recorder view holds the load, the costs and the database, and starts t
   el._hass = { language: "en", callWS: async msg => (msg.type.endsWith("/storms") ? STORMS : msg.type.endsWith("/db_health") ? DBH : COSTS) };
   el.render();
   let html = shadow.innerHTML;
-  assert.ok(html.includes("Recorder load") && html.includes("Recorder costs") && html.includes("Database"));
+  assert.ok(html.includes("Write load") && html.includes("Storage use") && html.includes("Database"));
   assert.equal(queue.length, 1, "only the load query is started at first");
   assert.ok(!el._dbRequested);
   await el.loadStorms();
   assert.equal(el._dbRequested, true, "the database check follows once the load is there");
-  assert.ok(el.maintenanceView && !el.maintenanceView().includes("Recorder costs"));
+  assert.ok(el.maintenanceView && !el.maintenanceView().includes("Storage use"));
 });
 
 test("the old load link opens the Recorder view", () => {
