@@ -12,25 +12,35 @@ class BlueprintsMixin {
 
   blueprintsCount() { const b = this.blueprints; return b ? b.unused + b.missing + b.broken : null; }
 
+  bpItems() {
+    const users = (b) => (b.users || []).map(u => {
+      const obj = this.findObject(`${u.id.split(".")[0]}:${u.id}`);
+      return obj ? `<button class="linklike" data-object="${this.esc(this.objectKey(obj))}">${this.esc(u.name)}</button>` : this.esc(u.name);
+    }).join(", ") + (b.count > (b.users || []).length ? ` +${b.count - b.users.length}` : "");
+    return this.blueprints.domains.flatMap(d => [
+      ...d.missing.map(b => ({ kind: "missing", domain: d.domain, path: b.path, title: b.path, users: users(b), raw: b })),
+      ...d.broken.map(b => ({ kind: "broken", domain: d.domain, path: b.path, title: b.path, users: b.count ? users(b) : "", raw: b })),
+      ...d.unused.map(b => ({ kind: "unused", domain: d.domain, path: b.path, title: b.name === b.path ? b.path : b.name, users: "", raw: b })),
+    ]);
+  }
+
+  // The page of one blueprint takes over the whole view like the page of any other object.
+  blueprintPage() {
+    this.ensureBlueprints();
+    const back = `<div class="crumbs"><button class="btn" data-bp-back><ha-icon icon="mdi:arrow-left"></ha-icon>${this.t("backTo")} ${this.t("maintenance")}</button><span class="trail">${this.t("maintenance")} › ${this.t("bpTab")}</span></div>`;
+    if (!this.blueprints) return `${back}${this.skeleton("loading")}`;
+    const item = this.bpItems().find(i => `${i.domain}/${i.path}` === this.bpOpen);
+    if (item) return `${back}${this.blueprintDetail(item)}`;
+    this.bpOpen = "";
+    return `${this.heading()}${this.content()}`;
+  }
+
   blueprintsCard() {
     this.ensureBlueprints();
     const head = this.pageBar({ at: this.loadedAt("blueprints"), loading: !this.blueprints && !this.blueprintsError, attr: "data-bp-refresh" });
     if (this.blueprintsError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.blueprintsError)}</div></div></div>`;
     if (!this.blueprints) return `<div class="stack">${head}<div class="panel">${this.skeleton("loading")}</div></div>`;
-    const users = (b) => (b.users || []).map(u => {
-      const obj = this.findObject(`${u.id.split(".")[0]}:${u.id}`);
-      return obj ? `<button class="linklike" data-object="${this.esc(this.objectKey(obj))}">${this.esc(u.name)}</button>` : this.esc(u.name);
-    }).join(", ") + (b.count > (b.users || []).length ? ` +${b.count - b.users.length}` : "");
-    const items = this.blueprints.domains.flatMap(d => [
-      ...d.missing.map(b => ({ kind: "missing", domain: d.domain, path: b.path, title: b.path, users: users(b), raw: b })),
-      ...d.broken.map(b => ({ kind: "broken", domain: d.domain, path: b.path, title: b.path, users: b.count ? users(b) : "", raw: b })),
-      ...d.unused.map(b => ({ kind: "unused", domain: d.domain, path: b.path, title: b.name === b.path ? b.path : b.name, users: "", raw: b })),
-    ]);
-    if (this.bpOpen) {
-      const item = items.find(i => `${i.domain}/${i.path}` === this.bpOpen);
-      if (item) return `<div class="stack">${head}${this.blueprintDetail(item)}</div>`;
-      this.bpOpen = "";
-    }
+    const items = this.bpItems();
     const rank = { missing: 0, broken: 1, unused: 2 }, label = { missing: "bpMissing", broken: "bpBroken", unused: "bpUnused" }, tone = { missing: "red", broken: "red", unused: "mute" };
     const domains = this.blueprints.domains.filter(d => items.some(i => i.domain === d.domain));
     const files = this.blueprints.domains.map(d => `${this.t(d.domain)}: ${this.formatNumber(d.total)} ${this.t("bpFiles")}`).join(" · ");
@@ -77,7 +87,7 @@ class BlueprintsMixin {
     const nUsers = d ? d.user_count : (b.count ?? 0);
     const tabs = [{ id: "overview", label: this.t("tabOverview") }, { id: "inputs", label: this.t("bpTabInputs"), count: d ? d.inputs.length : null }, { id: "users", label: this.t("bpColUsers"), count: d ? nUsers : null }, { id: "technical", label: this.t("tabTechnical") }];
     const open = this.viewTabOf("blueprint", tabs, "overview");
-    const head = `<div class="panelhead"><div><h2>${this.esc(i.title)}</h2><p><span class="pill ${tone}">${this.t({ missing: "bpMissing", broken: "bpBroken", unused: "bpUnused" }[i.kind])}</span></p></div><button class="link" data-bp-back><ha-icon icon="mdi:arrow-left"></ha-icon> ${this.t("bpBack")}</button></div>`;
+    const head = `<div class="panel detailhead"><span class="tile ${tone}"><ha-icon icon="mdi:file-code-outline"></ha-icon></span><div><div class="headpills"><span class="pill ${tone}">${this.t({ missing: "bpMissing", broken: "bpBroken", unused: "bpUnused" }[i.kind])}</span><span class="pill mute">${this.t(i.domain)}</span></div><h1>${this.esc(i.title)}</h1><span class="id">${this.esc(i.path)}</span></div></div>`;
     const fact = (label, value) => value ? `<div class="fact"><span>${this.t(label)}</span><b>${value}</b></div>` : "";
     const url = typeof b.source_url === "string" && /^https?:\/\//.test(b.source_url) ? `<a href="${this.esc(b.source_url)}" target="_blank" rel="noopener noreferrer">${this.esc(b.source_url)}</a>` : "";
     let body;
@@ -92,7 +102,7 @@ class BlueprintsMixin {
     } else {
       body = this.blueprintUsers(d, nUsers);
     }
-    return `<section class="panel">${head}${this.viewTabBar("blueprint", tabs, open)}${body}</section>`;
+    return `${head}<section class="panel">${this.viewTabBar("blueprint", tabs, open)}${body}</section>`;
   }
 
   bpLoading() { return this.bpDetailError ? `<div class="error pad">${this.esc(this.bpDetailError)}</div>` : this.skeleton("loading"); }

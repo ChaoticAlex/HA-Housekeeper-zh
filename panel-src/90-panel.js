@@ -136,7 +136,7 @@ class HAHousekeeperPanel extends HTMLElement {
   // The browser's back button steps back inside the panel. One history entry is kept in front of
   // the panel's own back steps while there is somewhere to go back to.
   canGoBack() {
-    return Boolean(this.view === "graph" ? this.graphTrail?.length || this.graphOrigin : this.selected || this.viewTrail?.length);
+    return Boolean(this.view === "graph" ? this.graphTrail?.length || this.graphOrigin : this.selected || this.bpOpen || this.viewTrail?.length);
   }
 
   onPopState() {
@@ -146,6 +146,7 @@ class HAHousekeeperPanel extends HTMLElement {
     if (this._gone || window.location.pathname !== this._basePath || !this.canGoBack()) return;
     if (this.view === "graph") this.graphBack();
     else if (this.selected) this.goBack();
+    else if (this.bpOpen) { this.bpOpen = ""; this.render(); }
     else this.viewBack();
   }
 
@@ -561,7 +562,8 @@ class HAHousekeeperPanel extends HTMLElement {
     const previousModal = this.modalKey(this.activeModal());
     // A view that throws shows a message under the top bar instead of freezing the panel on the last page.
     let page;
-    try { page = this.selected && this.data ? this.detail() : `${this.heading()}${this.content()}`; } catch (err) { page = this.renderFailed(err); }
+    if (this.view !== "maintenance") this.bpOpen = "";
+    try { page = this.selected && this.data ? this.detail() : this.bpOpen ? this.blueprintPage() : `${this.heading()}${this.content()}`; } catch (err) { page = this.renderFailed(err); }
     const shell = `<div class="shell"><div class="stickyhead">${this.topbar()}${this.safetyBar()}</div><main class="main">${page}</main>${this.confirmDialog()}<div class="sr-only" role="status" aria-live="polite">${this.esc(this.liveStatus())}</div></div>`;
     // The style sheet is only parsed again when the theme changed; otherwise just the page is replaced.
     const root = this.shadowRoot, css = this.themeCss(), current = root.querySelector?.(".shell");
