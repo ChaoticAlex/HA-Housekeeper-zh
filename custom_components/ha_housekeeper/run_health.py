@@ -373,10 +373,15 @@ def evaluate(
     }
 
 
-async def report(scanner: Any) -> RunsResult:
-    """Collect the newest runs, then rate everything; reads traces and the snapshot only."""
-    await scanner.runs.async_collect()
-    snapshot = await scanner.async_get_snapshot()
+async def report(scanner: Any, snapshot: dict[str, Any] | None = None) -> RunsResult:
+    """Collect the newest runs, then rate everything; reads traces and the snapshot only.
+
+    With a ``snapshot`` (the scan that has just built it) nothing is collected or awaited: the
+    runs are those the daily collection kept.
+    """
+    if snapshot is None:
+        await scanner.runs.async_collect()
+        snapshot = await scanner.async_get_snapshot()
     ignored = {f["object_id"] for f in snapshot.get("findings", []) if f.get("ignored")} | {
         item["object_id"]
         for item in snapshot["objects"]

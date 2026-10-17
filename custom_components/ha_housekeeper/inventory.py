@@ -131,6 +131,7 @@ from .signals import SignalStore, situations
 from .signals import fire as signal_fire
 from .stale import StaleStore
 from .system_usage import supervisor_get, supervisor_token
+from .view_counts import view_counts
 from .watch import WATCH_KINDS, WatchStore, evaluate, make_before, next_due
 
 _LOGGER = logging.getLogger(__name__)
@@ -1039,6 +1040,7 @@ class InventoryScanner:
                     )
                     await self._observe_versions(snapshot)
                     self._observe_watch(snapshot)
+                    snapshot["meta"]["view_counts"] = await view_counts(self, self.hass, snapshot)
                     if followup.check(
                         self.journal.plans, snapshot, datetime.now(UTC), self.runs.errors_since
                     ):

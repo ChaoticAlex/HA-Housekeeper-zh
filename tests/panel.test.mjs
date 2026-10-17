@@ -5511,6 +5511,16 @@ test("the search finds pages, settings tabs and finding filters, puts the better
   assert.ok(bar.includes('class="brand') && bar.includes("brandtext") && !bar.includes('class="nav  active" data-view="overview"') && !bar.includes('class="nav " data-view="overview"'), "the brand carries the overview");
 });
 
+test("the bar shows what the scan counted for the security and runs views, and nothing for one it could not read", () => {
+  const { el } = panel("en");
+  el.data = { ...el.data, meta: { ...el.data.meta, view_counts: { exposure: 2, secrets: 3, runs: 4 } } };
+  const bar = el.topbar();
+  const num = view => (bar.match(new RegExp(`data-view="${view}"[^>]*>.*?(?:<em>(\\d+)</em>)?</button>`)) || [])[1];
+  assert.equal(num("exposure"), "2"); assert.equal(num("secrets"), "3"); assert.equal(num("runs"), "4");
+  assert.equal(num("dataflow"), undefined, "a view left out has no number");
+  assert.equal(num("inventory"), undefined, "the stock has none");
+});
+
 test("a finding row ends in an impact chip and a menu with the decisions; a hidden one has no menu", () => {
   const { el } = panel("en");
   const f = { key: "k1", rule_id: "automation.stale", object_id: "automation.a", impact: "info" };

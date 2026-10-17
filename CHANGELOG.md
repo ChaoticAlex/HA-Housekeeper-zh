@@ -61,6 +61,7 @@
   - HACS: Housekeeper liest jetzt alle installierten Repositories (auch Karten und Themes) und erfährt aus den Reparaturen von Home Assistant, welche HACS aus seiner Liste genommen hat.
   - Apps & Integrationen: Neuer Reiter „HACS“ mit allen installierten Repositories (Integrationen, Karten, Themes), Version, offenem Update und dem Hinweis, wenn HACS ein Repository aus seiner Liste genommen hat oder es archiviert ist. Eine Zeile öffnet das Repository in HACS.
   - HACS: Wurde ein Repository aus HACS entfernt, steht in „Was muss ich tun?“ eine Zeile dazu, auf der Integrationsseite der Grund und im Reiter HACS eine Anleitung mit Link zu den Reparaturen. Eine ignorierte Reparatur zeigt der Reiter als „ignoriert“.
+  - Freigaben, Datenfluss, Zugangsdaten und Läufe zeigen im Menü eine Zahl, wenn dort etwas anzusehen ist (der Scan zählt sie).
 - **Zugriffe & Datenfluss:** Integrationen, deren Tracker nur die Anwesenheit über Router oder Bluetooth melden (etwa die FRITZ!Box), gelten nicht mehr als „Standort“ mit hohem Risiko, sondern zeigen „Anwesenheit im Netz“.
 - **Freigaben:** Alexa und Google Assistant, die in den Nabu-Casa-Einstellungen ausgeschaltet sind, zählen nicht mehr als „freigegeben“ und erzeugen keine Befunde; ihre Kachel zeigt „in Nabu Casa ausgeschaltet“.
 
@@ -125,6 +126,7 @@
   - HACS: Housekeeper now reads every installed repository (cards and themes too) and learns from Home Assistant's repairs which ones HACS took out of its list.
   - Apps & integrations: new “HACS” tab with every installed repository (integrations, cards, themes), version, open update and a note when HACS took a repository out of its list or it is archived. A row opens the repository in HACS.
   - HACS: if a repository was removed from HACS, “What do I need to do?” gets a row for it, the integration page shows the reason and the HACS tab has a guide with a link to the repairs. An ignored repair shows as “ignored” in the tab.
+  - Exposure, data flow, credentials and runs show a number in the menu when there is something to look at (the scan counts it).
 - **Access & data flow:** Integrations whose trackers only report presence through a router or Bluetooth (such as the FRITZ!Box) no longer count as "location" with a high risk but show "presence on the network".
 - **Exposure:** Alexa and Google Assistant switched off in the Nabu Casa settings no longer count as "exposed" and raise no findings; their tile says "switched off in Nabu Casa".
 
