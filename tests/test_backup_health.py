@@ -14,6 +14,7 @@ pytest.importorskip("pytest_homeassistant_custom_component")
 from homeassistant.core import HomeAssistant  # noqa: E402
 
 from custom_components.ha_housekeeper.backup_health import (  # noqa: E402
+    ATTEST_KINDS,
     AttestStore,
     collect,
     evaluate,
@@ -229,6 +230,10 @@ def test_encryption_needs_the_password_and_a_protected_newest_backup() -> None:
         checks["encryption"]["level"] == "note"
         and checks["encryption"]["values"]["newest_protected"] is False
     )
+    _, checks = judge(
+        {**state(), "config": config(encrypted=False)}, attest={**ATTEST, "encryption": ago(days=2)}
+    )
+    assert checks["encryption"]["level"] == "ok" and checks["encryption"]["values"]["at"]
 
 
 def test_what_only_the_person_knows_is_a_note_until_confirmed() -> None:
@@ -385,7 +390,12 @@ async def test_the_attestations_survive_a_restart_and_reject_unknown_kinds(
 ) -> None:
     store = AttestStore(hass)
     await store.async_load()
-    assert store.record == {"targets": None, "emergency_kit": None, "restore_test": None}
+    assert store.record == {
+        "targets": None,
+        "emergency_kit": None,
+        "restore_test": None,
+        "encryption": None,
+    }
     store.set("emergency_kit")
     store.set("restore_test", date(2026, 9, 1))
     store.set("targets", date(2026, 9, 2))
@@ -407,7 +417,7 @@ async def test_the_attestations_survive_a_restart_and_reject_unknown_kinds(
     }
     broken = AttestStore(hass)
     await broken.async_load()
-    assert broken.record == {"targets": None, "emergency_kit": None, "restore_test": None}
+    assert broken.record == dict.fromkeys(ATTEST_KINDS)
 
 
 def test_the_content_of_the_newest_backup_is_judged() -> None:

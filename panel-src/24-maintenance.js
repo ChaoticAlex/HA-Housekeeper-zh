@@ -163,7 +163,8 @@ class MaintenanceMixin {
   // The icon of an update: the picture Home Assistant knows, if it is a same-origin or https address.
   updatePicture(u) {
     const ok = typeof u.picture === "string" && (u.picture.startsWith("/") && !u.picture.startsWith("//") || u.picture.startsWith("https://"));
-    return ok ? `<img class="updpic" src="${this.esc(u.picture)}" alt="" loading="lazy">` : `<ha-icon icon="mdi:package-up"></ha-icon>`;
+    const icon = u.group === "system" ? "mdi:home-assistant" : "mdi:package-up";
+    return ok ? `<img class="updpic" src="${this.esc(u.picture)}" alt="" loading="lazy" data-fallback-icon="${icon}">` : `<ha-icon icon="${icon}"></ha-icon>`;
   }
 
   updateRow(u, watching) {
@@ -174,8 +175,8 @@ class MaintenanceMixin {
       u.group === "system" && watching ? `<span class="pill blue">${this.t("updWatch")}</span>` : "",
     ].join("");
     const notes = typeof u.release_url === "string" && u.release_url.startsWith("https://") ? `<a class="btn quiet" href="${this.esc(u.release_url)}" target="_blank" rel="noopener noreferrer">${this.t("updNotes")}</a>` : "";
-    const versions = `${this.esc(u.installed ?? "–")} → ${this.esc(u.latest ?? "–")}`;
-    return `<div class="row rel"><span class="tile mute">${this.updatePicture(u)}</span><span class="row-text"><strong>${this.esc(u.name)}</strong><small>${versions}${u.release_summary ? ` · ${this.esc(u.release_summary)}` : ""}</small></span>${pills}${notes}<button class="btn" data-ha-path="/config/updates">${this.t("updOpenHa")}</button></div>`;
+    const versions = `<span class="verchip">${this.esc(u.installed ?? "–")} → ${this.esc(u.latest ?? "–")}</span>`;
+    return `<div class="row rel updrow"><span class="tile mute">${this.updatePicture(u)}</span><span class="row-text"><strong>${this.esc(u.name)}</strong><small>${versions}${u.release_summary ? ` ${this.esc(u.release_summary)}` : ""}</small></span><span class="updact">${pills}${notes}<button class="btn quiet" data-ha-path="/config/updates" title="${this.esc(this.t("updOpenHa"))}">${this.t("updOpen")}</button></span></div>`;
   }
 
   updatesCard() {
@@ -202,10 +203,10 @@ class MaintenanceMixin {
     const watching = p.watch?.hours > 0;
     const groups = ["system", "app", "hacs", "device"].map(g => {
       const rows = updates.filter(u => u.group === g);
-      const body = rows.length ? rows.map(u => this.updateRow(u, watching)).join("") : `<div class="row rel"><span class="tile ok"><ha-icon icon="mdi:check"></ha-icon></span><span class="row-text"><small>${this.t(`updCurrent_${g}`)}</small></span></div>`;
-      return `<div class="sectionlabel">${this.t(`updGroup_${g}`)}</div>${body}`;
+      const body = rows.length ? rows.map(u => this.updateRow(u, watching)).join("") : `<div class="row rel"><span class="tile ok"><ha-icon icon="mdi:check"></ha-icon></span><span class="row-text"><strong>${this.t(`updCurrent_${g}`)}</strong></span></div>`;
+      return `<div class="panel updgroup"><div class="sectionlabel">${this.t(`updGroup_${g}`)}${rows.length ? ` · ${this.formatNumber(rows.length)}` : ""}</div>${body}</div>`;
     }).join("");
-    const list = total ? `<div class="panel">${groups}</div>` : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("updAllCurrent")}</div></div>`;
+    const list = total ? groups : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("updAllCurrent")}</div></div>`;
     return `<div class="stack">${head}${tiles}<div class="panel">${verdict}${this.preflightRows(p.state, p.checks)}${this.configRow()}</div>${list}<div class="panel">${this.preflightAfter(p.watch)}</div></div>`;
   }
 

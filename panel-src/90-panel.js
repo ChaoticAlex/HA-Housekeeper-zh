@@ -1101,6 +1101,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-watch-go]").forEach(el => el.onclick = () => { this.noteJump?.("findingsNav"); this.view = "findingsNav"; this.pages = {}; this.selected = null; this.trail = []; this.folds = { ...this.folds, corr: true, [this.incidentFoldId(el.dataset.watchGo)]: true }; this.render(); });
     root.querySelectorAll("[data-fold]").forEach(el => el.onclick = () => { if (el.dataset.fold.startsWith("chg_")) this.changesCat = ""; this.folds = { ...this.folds, [el.dataset.fold]: el.getAttribute("aria-expanded") !== "true" }; this.render(); });
     root.querySelectorAll("[data-bh-clear]").forEach(el => el.onclick = () => this.loadBackup({ type: "ha_housekeeper/backup_attest", kind: el.dataset.bhClear, clear: true }));
+    root.querySelectorAll("img[data-fallback-icon]").forEach(img => img.addEventListener("error", () => { const i = document.createElement("ha-icon"); i.setAttribute("icon", img.dataset.fallbackIcon); img.replaceWith(i); }, { once: true }));
     root.querySelector("[data-pf-refresh]")?.addEventListener("click", () => this.loadPreflight());
     root.querySelector("[data-config-check]")?.addEventListener("click", () => this.runConfigCheck());
     root.querySelectorAll("[data-plan-close]").forEach(el => el.addEventListener("click", () => this.leavePlan()));

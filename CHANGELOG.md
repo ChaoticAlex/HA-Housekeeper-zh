@@ -9,6 +9,7 @@
   - Oben stehen ein Urteil (Belastbar, Erst ansehen, Problem) und vier Kennzahlen; die Prüfzeilen sind in vier Gruppen geordnet.
   - Neue Prüfungen: Inhalt des neuesten Backups (fehlgeschlagene Apps oder Ordner, fehlende Datenbank), Alter der Kopie je externem Ablageort und Platz fürs nächste Backup.
   - Eine Leiste zeigt die Größe der letzten Backups, so fällt Wachstum früh auf.
+  - Fehlende Verschlüsselung lässt sich als gewollt bestätigen; die Zeile steht dann auf „In Ordnung“.
 - **Journal:**
   - Das Journal hat Reiter: „Pläne“ und „Entfernte Geräte“ (bisher unter Wartung, jetzt mit einem Sprung zum Plan); ältere Löschungen von Statistiken stehen als dritter Reiter dort, wenn es sie gibt.
   - Ein Fehler beim Laden wird angezeigt statt „Noch keine Vorschau“, und die Seite hat „Aktualisieren“ und einen Zeitstempel.
@@ -18,6 +19,7 @@
   - Das Backup wird nach dem Backup-Schutz beurteilt (Zeitplan, letzter Lauf); neu ist die Zeile „Freier Speicher“; HACS-Updates, die HACS nicht installieren kann, sind gekennzeichnet.
   - Auf der Übersicht steht eine Zeile „n Updates offen“ (ohne Einfluss auf den Ring).
   - Ein Knopf prüft die Konfiguration (die Prüfung von Home Assistant, nur auf Knopfdruck); ist sie ungültig, steht das Urteil auf „Stopp“.
+  - Die Liste ist übersichtlicher: jede Gruppe eine eigene Karte mit Anzahl, die Versionen als Chip, ruhige Knöpfe rechts, ein Ersatzsymbol, wenn Home Assistant kein Bild liefert.
 - **Weniger CPU-Last:**
   - Zeitsteuerung und Code der Hintergrundarbeit sind optimiert.
   - Die Auswertungen aus der Recorder-Datenbank laufen seltener und verteilt, die Abfragen sind sparsamer (abgeschlossene Tage werden nur noch einmal gerechnet, unnötige Suchen entfallen), und Scans nach Ausfällen rücken bei langsamen Systemen weiter auseinander.

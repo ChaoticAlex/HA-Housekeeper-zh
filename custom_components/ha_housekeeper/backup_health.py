@@ -35,7 +35,7 @@ SPACE_FACTOR = 1.5  # a guess: the next backup needs about this much room, measu
 OWN_BACKUPS_NOTE = 10  # Housekeeper's own backups: this many ...
 OWN_BACKUPS_BYTES = 5 * 1024**3  # ... or this much space in total is a hint to clean up
 PLAN_BACKUP_WINDOW_SECONDS = 2 * 3600  # the backup started up to this long before it was recorded
-ATTEST_KINDS = ("targets", "emergency_kit", "restore_test")
+ATTEST_KINDS = ("targets", "emergency_kit", "restore_test", "encryption")
 _SEVERITY = {"ok": 0, "unknown": 1, "note": 2, "problem": 3}
 
 
@@ -274,13 +274,21 @@ def _retention_check(
 
 
 def _encryption_check(
-    config: dict[str, Any] | None, newest: dict[str, Any] | None
+    config: dict[str, Any] | None, newest: dict[str, Any] | None, recorded: str | None
 ) -> dict[str, Any]:
     if config is None:
         return _check("encryption", "unknown")
     protected = None if newest is None else newest["protected"]
-    level = "ok" if config["encrypted"] and protected is not False else "note"
-    return _check("encryption", level, configured=config["encrypted"], newest_protected=protected)
+    sound = config["encrypted"] and protected is not False
+    # Someone who keeps backups unencrypted on purpose can say so; the line then stays quiet.
+    at = None if sound else _iso(recorded)
+    return _check(
+        "encryption",
+        "ok" if sound or at else "note",
+        configured=config["encrypted"],
+        newest_protected=protected,
+        at=at,
+    )
 
 
 def _content_check(config: dict[str, Any] | None, newest: dict[str, Any] | None) -> dict[str, Any]:
@@ -413,7 +421,7 @@ def evaluate(
         checks.append(_targets_check(newest, attest.get("targets")))
         checks.append(_size_check(listing))
         checks.append(_retention_check(config, listing, now))
-        checks.append(_encryption_check(config, newest))
+        checks.append(_encryption_check(config, newest, attest.get("encryption")))
         checks.append(_content_check(config, newest))
         if (remote_check := _remote_age_check(config, listing, now)) is not None:
             checks.append(remote_check)

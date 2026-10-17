@@ -727,7 +727,7 @@ Object.assign(TEXT.de, {
   pf_backup_ok: "Letztes Backup vor {hours} h", pf_backup_old: "Letztes Backup vor {hours} h – ein neues ist ratsam", pf_backup_none: "Kein Backup eingerichtet oder vorhanden", pf_backup_unavailable: "Backup-Komponente nicht verfügbar",
   pf_count_none: "keine", pf_updates: "Verfügbare Updates", pf_updates_none: "keine",
   updatesTab: "Updates", pfOpenBackup: "Backup-Schutz",
-  updBlocked: "HACS kann es nicht installieren", updRunning: "läuft", updAuto: "automatisch", updWatch: "Beobachtung startet", updNotes: "Änderungen", updOpenHa: "In Home Assistant öffnen",
+  updBlocked: "HACS kann es nicht installieren", updRunning: "läuft", updAuto: "automatisch", updWatch: "Beobachtung startet", updNotes: "Änderungen", updOpenHa: "In Home Assistant öffnen", updOpen: "Öffnen",
   updVerdict_ready: "Bereit", updVerdict_look: "Erst ansehen", updVerdict_stop: "Stopp", updVerdictNone: "Keine Updates offen",
   updPending_1: "1 Update offen", updPending_n: "{n} Updates offen", updCheckFirst: "Zu prüfen: {items}",
   updSumOpen: "Offen", updSumBlocked: "Blockiert",
@@ -772,7 +772,7 @@ Object.assign(TEXT.en, {
   pf_backup_ok: "Last backup {hours} h ago", pf_backup_old: "Last backup {hours} h ago – a new one is advisable", pf_backup_none: "No backup set up or available", pf_backup_unavailable: "Backup component not available",
   pf_count_none: "none", pf_updates: "Available updates", pf_updates_none: "none",
   updatesTab: "Updates", pfOpenBackup: "Backup protection",
-  updBlocked: "HACS cannot install it", updRunning: "running", updAuto: "automatic", updWatch: "Watch starts", updNotes: "Changes", updOpenHa: "Open in Home Assistant",
+  updBlocked: "HACS cannot install it", updRunning: "running", updAuto: "automatic", updWatch: "Watch starts", updNotes: "Changes", updOpenHa: "Open in Home Assistant", updOpen: "Open",
   updVerdict_ready: "Ready", updVerdict_look: "Look first", updVerdict_stop: "Stop", updVerdictNone: "No updates open",
   updPending_1: "1 update open", updPending_n: "{n} updates open", updCheckFirst: "To check: {items}",
   updSumOpen: "Open", updSumBlocked: "Blocked",
@@ -845,7 +845,7 @@ Object.assign(TEXT.de, {
   bhRestoreNone: "Noch nie dokumentiert. Ein Backup gilt erst als sicher, wenn eine Wiederherstellung einmal geklappt hat.", bhRestoreOk: "Zuletzt am {date} (vor {days} Tagen).", bhRestoreOld: "Zuletzt am {date}, das ist {days} Tage her (empfohlen: höchstens {limit}).",
   bhOwnNote: "{count} Backups von Housekeeper belegen {size}. Home Assistant löscht sie nicht von selbst; unter Wartung → Backups ganz unten kannst du ältere löschen.",
   bhPlansOk: "Für die {checked} zuletzt ausgeführten Pläne ist das Backup noch vorhanden.", bhPlansNote: "Für {missing} von {checked} zuletzt ausgeführten Plänen wurde das Backup nicht mehr gefunden (vermutlich durch die Aufbewahrung gelöscht).",
-  bhAttestDate: "Datum", bhAttestSave: "Speichern", bhAttestClear: "Bestätigung zurücknehmen", bhAttestMark: "Als erledigt markieren", bhAttestTargets: "Externen Ablageort bestätigen", bhAttestAgain: "Erneut bestätigen", bhAttestCancel: "Abbrechen",
+  bhAttestDate: "Datum", bhAttestSave: "Speichern", bhAttestClear: "Bestätigung zurücknehmen", bhAttestMark: "Als erledigt markieren", bhAttestTargets: "Externen Ablageort bestätigen", bhAttestEnc: "Als gewollt bestätigen", bhEncConfirmed: "Ohne Verschlüsselung, am {date} als gewollt bestätigt.", bhAttestAgain: "Erneut bestätigen", bhAttestCancel: "Abbrechen",
   bhListTitle: "Letzte Backups", bhAllProtected: "Alle (geschützt oder nicht)", bhColDate: "Datum", bhColSize: "Größe", bhColTargets: "Ziele", bhColProtected: "Verschlüsselt", bhYes: "Ja", bhNo: "Nein",
   bhColKind: "Art", bhColContent: "Inhalt", bhAllKinds: "Alle Arten", bhKind_auto: "Automatisch", bhKind_manual: "Manuell", bhKind_own: "Housekeeper", bhContent_full: "Voll", bhContent_config: "Nur Konfiguration", bhContent_apps: "Nur Apps", bhFailedPill: "Teil fehlgeschlagen", bhOpen: "Details aufklappen", bhClose: "Details zuklappen",
   bhName: "Name", bhVersion: "HA-Version", bhDatabase: "Datenbank", bhApps: "Apps", bhFolders: "Ordner", bhSizes: "Größe je Ziel", bhFailed: "Fehlgeschlagen", bhId: "Backup-ID",
@@ -877,7 +877,7 @@ Object.assign(TEXT.en, {
   bhRestoreNone: "Never documented. A backup counts as safe only once a restore has worked.", bhRestoreOk: "Last on {date} ({days} days ago).", bhRestoreOld: "Last on {date}, {days} days ago (recommended: at most {limit}).",
   bhOwnNote: "{count} Housekeeper backups take up {size}. Home Assistant does not delete them on its own; under Maintenance → Backups, at the bottom, you can delete older ones.",
   bhPlansOk: "The backup of the {checked} most recently executed plans still exists.", bhPlansNote: "The backup of {missing} of the {checked} most recently executed plans was not found any more (probably deleted by the retention).",
-  bhAttestDate: "Date", bhAttestSave: "Save", bhAttestClear: "Take back confirmation", bhAttestMark: "Mark as done", bhAttestTargets: "Confirm remote storage", bhAttestAgain: "Confirm again", bhAttestCancel: "Cancel",
+  bhAttestDate: "Date", bhAttestSave: "Save", bhAttestClear: "Take back confirmation", bhAttestMark: "Mark as done", bhAttestTargets: "Confirm remote storage", bhAttestEnc: "Confirm as intended", bhEncConfirmed: "Without encryption, confirmed as intended on {date}.", bhAttestAgain: "Confirm again", bhAttestCancel: "Cancel",
   bhListTitle: "Latest backups", bhAllProtected: "All (protected or not)", bhColDate: "Date", bhColSize: "Size", bhColTargets: "Targets", bhColProtected: "Encrypted", bhYes: "Yes", bhNo: "No",
   bhColKind: "Type", bhColContent: "Contents", bhAllKinds: "All types", bhKind_auto: "Automatic", bhKind_manual: "Manual", bhKind_own: "Housekeeper", bhContent_full: "Full", bhContent_config: "Configuration only", bhContent_apps: "Apps only", bhFailedPill: "Part failed", bhOpen: "Show details", bhClose: "Hide details",
   bhName: "Name", bhVersion: "HA version", bhDatabase: "Database", bhApps: "Apps", bhFolders: "Folders", bhSizes: "Size per target", bhFailed: "Failed", bhId: "Backup ID",
@@ -1520,6 +1520,8 @@ class StylesMixin {
       .node.current{border:2px solid var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 8%,var(--hk-surface))}.node .tile{width:34px;height:34px}.node small{display:block;color:var(--hk-blue-text);font-size:calc(11px*var(--hk-fs,1));font-weight:600;letter-spacing:.06em;text-transform:uppercase}.node strong{display:block;font-size:calc(13px*var(--hk-fs,1));font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.node span.meta{display:block;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}
       .link-label{margin:0 0 0 22px;padding:3px 0 3px 14px;border-left:2px solid var(--hk-border);color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));min-height:26px;display:flex;align-items:center;gap:8px}
       .branch{margin:0 0 0 22px;padding:6px 0 0 18px;border-left:2px solid var(--hk-border);display:grid;gap:8px}
+      .updact{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:8px}.updrow .row-text small{white-space:normal}.verchip{display:inline-block;margin-right:4px;padding:1px 8px;border-radius:999px;background:var(--hk-soft);border:1px solid var(--hk-border);color:var(--hk-text);font-variant-numeric:tabular-nums}.updgroup .sectionlabel{padding-bottom:6px}.updgroup .row-text strong{white-space:normal}
+      @media(max-width:860px){.updrow:has(>.updact){grid-template-columns:auto minmax(0,1fr)}.updrow .updact{grid-column:1/-1;justify-content:flex-start}}
       .sectionlabel{padding:14px 16px 0;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:600;letter-spacing:.07em;text-transform:uppercase}
       .search{padding:14px;border-bottom:1px solid var(--hk-border)}.search input{width:100%}.hits{display:grid;max-height:280px;overflow:auto}.hit{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;padding:9px 16px;border:0;border-top:1px solid var(--hk-border);background:transparent;text-align:left}.hit:hover{background:var(--hk-soft)}.hit .tile{width:30px;height:30px}
       .crumbs{display:flex;align-items:center;gap:12px;margin-bottom:14px}.crumbs .trail{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));text-transform:uppercase;letter-spacing:.07em}
@@ -5922,7 +5924,8 @@ class MaintenanceMixin {
   // The icon of an update: the picture Home Assistant knows, if it is a same-origin or https address.
   updatePicture(u) {
     const ok = typeof u.picture === "string" && (u.picture.startsWith("/") && !u.picture.startsWith("//") || u.picture.startsWith("https://"));
-    return ok ? `<img class="updpic" src="${this.esc(u.picture)}" alt="" loading="lazy">` : `<ha-icon icon="mdi:package-up"></ha-icon>`;
+    const icon = u.group === "system" ? "mdi:home-assistant" : "mdi:package-up";
+    return ok ? `<img class="updpic" src="${this.esc(u.picture)}" alt="" loading="lazy" data-fallback-icon="${icon}">` : `<ha-icon icon="${icon}"></ha-icon>`;
   }
 
   updateRow(u, watching) {
@@ -5933,8 +5936,8 @@ class MaintenanceMixin {
       u.group === "system" && watching ? `<span class="pill blue">${this.t("updWatch")}</span>` : "",
     ].join("");
     const notes = typeof u.release_url === "string" && u.release_url.startsWith("https://") ? `<a class="btn quiet" href="${this.esc(u.release_url)}" target="_blank" rel="noopener noreferrer">${this.t("updNotes")}</a>` : "";
-    const versions = `${this.esc(u.installed ?? "–")} → ${this.esc(u.latest ?? "–")}`;
-    return `<div class="row rel"><span class="tile mute">${this.updatePicture(u)}</span><span class="row-text"><strong>${this.esc(u.name)}</strong><small>${versions}${u.release_summary ? ` · ${this.esc(u.release_summary)}` : ""}</small></span>${pills}${notes}<button class="btn" data-ha-path="/config/updates">${this.t("updOpenHa")}</button></div>`;
+    const versions = `<span class="verchip">${this.esc(u.installed ?? "–")} → ${this.esc(u.latest ?? "–")}</span>`;
+    return `<div class="row rel updrow"><span class="tile mute">${this.updatePicture(u)}</span><span class="row-text"><strong>${this.esc(u.name)}</strong><small>${versions}${u.release_summary ? ` ${this.esc(u.release_summary)}` : ""}</small></span><span class="updact">${pills}${notes}<button class="btn quiet" data-ha-path="/config/updates" title="${this.esc(this.t("updOpenHa"))}">${this.t("updOpen")}</button></span></div>`;
   }
 
   updatesCard() {
@@ -5961,10 +5964,10 @@ class MaintenanceMixin {
     const watching = p.watch?.hours > 0;
     const groups = ["system", "app", "hacs", "device"].map(g => {
       const rows = updates.filter(u => u.group === g);
-      const body = rows.length ? rows.map(u => this.updateRow(u, watching)).join("") : `<div class="row rel"><span class="tile ok"><ha-icon icon="mdi:check"></ha-icon></span><span class="row-text"><small>${this.t(`updCurrent_${g}`)}</small></span></div>`;
-      return `<div class="sectionlabel">${this.t(`updGroup_${g}`)}</div>${body}`;
+      const body = rows.length ? rows.map(u => this.updateRow(u, watching)).join("") : `<div class="row rel"><span class="tile ok"><ha-icon icon="mdi:check"></ha-icon></span><span class="row-text"><strong>${this.t(`updCurrent_${g}`)}</strong></span></div>`;
+      return `<div class="panel updgroup"><div class="sectionlabel">${this.t(`updGroup_${g}`)}${rows.length ? ` · ${this.formatNumber(rows.length)}` : ""}</div>${body}</div>`;
     }).join("");
-    const list = total ? `<div class="panel">${groups}</div>` : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("updAllCurrent")}</div></div>`;
+    const list = total ? groups : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("updAllCurrent")}</div></div>`;
     return `<div class="stack">${head}${tiles}<div class="panel">${verdict}${this.preflightRows(p.state, p.checks)}${this.configRow()}</div>${list}<div class="panel">${this.preflightAfter(p.watch)}</div></div>`;
   }
 
@@ -6052,6 +6055,7 @@ class BackupMixin {
         return t("bhRetentionOk", { limit, count: v.count, oldest: v.oldest_days === null ? "—" : Math.round(v.oldest_days) });
       }
       case "encryption":
+        if (v.at) return t("bhEncConfirmed", { date: this.bhDay(v.at) });
         if (c.level === "ok") return t("bhEncOk");
         return t(v.configured ? "bhEncNotProtected" : "bhEncNoPassword");
       case "emergency_kit":
@@ -6085,10 +6089,10 @@ class BackupMixin {
   bhRow(c) {
     const tone = { ok: "ok", note: "warn", problem: "red", unknown: "mute" }[c.level] || "mute";
     const icon = { ok: "mdi:check", note: "mdi:alert-outline", problem: "mdi:close-octagon-outline", unknown: "mdi:help-circle-outline" }[c.level] || "mdi:help-circle-outline";
-    const attest = c.id === "targets" || c.id === "emergency_kit" || c.id === "restore_test";
+    const attest = c.id === "targets" || c.id === "emergency_kit" || c.id === "restore_test" || c.id === "encryption";
     const tidy = c.id === "own_backups" ? `<button class="bhopen" data-bkc-open>${this.t("bhOwnOpen")}</button>` : "";
     const open = attest && c.level !== "unknown" && this.bhForm === c.id;
-    const opener = attest && c.level !== "unknown" ? `<button class="bhopen" data-bh-open="${c.id}" aria-expanded="${open}">${this.t(c.values?.at ? "bhAttestAgain" : c.id === "targets" ? "bhAttestTargets" : "bhAttestMark")}</button>` : "";
+    const opener = attest && c.level !== "unknown" ? `<button class="bhopen" data-bh-open="${c.id}" aria-expanded="${open}">${this.t(c.values?.at ? "bhAttestAgain" : c.id === "targets" ? "bhAttestTargets" : c.id === "encryption" ? "bhAttestEnc" : "bhAttestMark")}</button>` : "";
     const row = `<div class="row rel bh${open ? " open" : ""}"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`bh_${c.id}`)}</strong><small>${this.bhText(c)}</small></span><span class="bhactions">${opener}${tidy}<span class="pill ${tone}">${this.t(`bhLevel_${c.level}`)}</span></span></div>`;
     if (!open) return row;
     const today = new Date().toISOString().slice(0, 10);
@@ -16827,6 +16831,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-watch-go]").forEach(el => el.onclick = () => { this.noteJump?.("findingsNav"); this.view = "findingsNav"; this.pages = {}; this.selected = null; this.trail = []; this.folds = { ...this.folds, corr: true, [this.incidentFoldId(el.dataset.watchGo)]: true }; this.render(); });
     root.querySelectorAll("[data-fold]").forEach(el => el.onclick = () => { if (el.dataset.fold.startsWith("chg_")) this.changesCat = ""; this.folds = { ...this.folds, [el.dataset.fold]: el.getAttribute("aria-expanded") !== "true" }; this.render(); });
     root.querySelectorAll("[data-bh-clear]").forEach(el => el.onclick = () => this.loadBackup({ type: "ha_housekeeper/backup_attest", kind: el.dataset.bhClear, clear: true }));
+    root.querySelectorAll("img[data-fallback-icon]").forEach(img => img.addEventListener("error", () => { const i = document.createElement("ha-icon"); i.setAttribute("icon", img.dataset.fallbackIcon); img.replaceWith(i); }, { once: true }));
     root.querySelector("[data-pf-refresh]")?.addEventListener("click", () => this.loadPreflight());
     root.querySelector("[data-config-check]")?.addEventListener("click", () => this.runConfigCheck());
     root.querySelectorAll("[data-plan-close]").forEach(el => el.addEventListener("click", () => this.leavePlan()));

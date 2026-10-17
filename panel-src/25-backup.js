@@ -56,6 +56,7 @@ class BackupMixin {
         return t("bhRetentionOk", { limit, count: v.count, oldest: v.oldest_days === null ? "—" : Math.round(v.oldest_days) });
       }
       case "encryption":
+        if (v.at) return t("bhEncConfirmed", { date: this.bhDay(v.at) });
         if (c.level === "ok") return t("bhEncOk");
         return t(v.configured ? "bhEncNotProtected" : "bhEncNoPassword");
       case "emergency_kit":
@@ -89,10 +90,10 @@ class BackupMixin {
   bhRow(c) {
     const tone = { ok: "ok", note: "warn", problem: "red", unknown: "mute" }[c.level] || "mute";
     const icon = { ok: "mdi:check", note: "mdi:alert-outline", problem: "mdi:close-octagon-outline", unknown: "mdi:help-circle-outline" }[c.level] || "mdi:help-circle-outline";
-    const attest = c.id === "targets" || c.id === "emergency_kit" || c.id === "restore_test";
+    const attest = c.id === "targets" || c.id === "emergency_kit" || c.id === "restore_test" || c.id === "encryption";
     const tidy = c.id === "own_backups" ? `<button class="bhopen" data-bkc-open>${this.t("bhOwnOpen")}</button>` : "";
     const open = attest && c.level !== "unknown" && this.bhForm === c.id;
-    const opener = attest && c.level !== "unknown" ? `<button class="bhopen" data-bh-open="${c.id}" aria-expanded="${open}">${this.t(c.values?.at ? "bhAttestAgain" : c.id === "targets" ? "bhAttestTargets" : "bhAttestMark")}</button>` : "";
+    const opener = attest && c.level !== "unknown" ? `<button class="bhopen" data-bh-open="${c.id}" aria-expanded="${open}">${this.t(c.values?.at ? "bhAttestAgain" : c.id === "targets" ? "bhAttestTargets" : c.id === "encryption" ? "bhAttestEnc" : "bhAttestMark")}</button>` : "";
     const row = `<div class="row rel bh${open ? " open" : ""}"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`bh_${c.id}`)}</strong><small>${this.bhText(c)}</small></span><span class="bhactions">${opener}${tidy}<span class="pill ${tone}">${this.t(`bhLevel_${c.level}`)}</span></span></div>`;
     if (!open) return row;
     const today = new Date().toISOString().slice(0, 10);
