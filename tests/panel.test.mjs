@@ -2928,7 +2928,11 @@ test("the load view loads once per window, asks the backend with the right argum
   el.stormsWindow = 7; el.storms = null;
   await el.loadStorms(true);
   assert.equal(JSON.stringify(calls[1]), JSON.stringify({ type: "ha_housekeeper/storms", window_days: 7, refresh: true }));
-  el._stormsRequested = 7;
+  el.stormsWindow = 30; el.storms = null;
+  await el.loadStorms();
+  assert.equal(calls[2].window_days, 30);
+  assert.ok(el.stormsView().includes('data-storm-window="30"') && el.stormsView().includes("30 days"));
+  el._stormsRequested = 30;
   const before = calls.length; el.stormsView();
   assert.equal(calls.length, before, "no repeated load");
 });

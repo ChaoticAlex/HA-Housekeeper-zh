@@ -26,7 +26,7 @@ from .queries import DayCache, ReplyStore, cached_query, kept_reply, pieces
 from .reliability import entry_info
 
 DAY = 86400
-WINDOWS = (1, 7)  # days
+WINDOWS = (1, 7, 30)  # days; the finished days of a long window come from the day cache
 CACHE_SECONDS = 600
 PEAK_ENTITIES = 30  # entities whose peak hour is measured
 EVENT_TYPES = 15
