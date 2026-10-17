@@ -387,7 +387,7 @@ async def test_the_panel_commands_plan_a_meter_change_and_report_maintenance(
 
     await client.send_json_auto_id({"type": "ha_housekeeper/preflight"})
     report = (await client.receive_json())["result"]
-    assert {c["check"] for c in report["checks"]} == {
+    assert {c["check"] for c in report["checks"]} >= {
         "backup",
         "repairs",
         "failed_entries",

@@ -105,14 +105,15 @@ class MaintenanceMixin {
       backup: () => {
         const b = state.backup || {};
         if (!b.available) return this.t("pf_backup_unavailable");
-        if (!b.configured || b.newest === null) return this.t("pf_backup_none");
-        return this.t(b.age_hours > 48 ? "pf_backup_old" : "pf_backup_ok", { hours: Math.round(b.age_hours) });
+        if (b.age_hours === null || b.age_hours === undefined) return this.t("pf_backup_none");
+        return this.t(b.level === "ok" ? "pf_backup_ok" : "pf_backup_old", { hours: Math.round(b.age_hours) });
       },
+      disk: () => this.t("pf_disk_text", { free: this.formatBytes(state.disk?.free) }),
     };
     return checks.map(c => {
       const items = { repairs: state.repairs, failed_entries: state.failed_entries, broken: state.broken }[c.check];
       const names = (items || []).slice(0, 5).map(i => i.title || i.name || i.issue_id || i.object_id).filter(Boolean).map(n => this.esc(n)).join(", ");
-      const text = c.check === "backup" ? detail.backup() : c.count ? `${c.count}${names ? ` · ${names}` : ""}` : this.t("pf_count_none");
+      const text = detail[c.check] ? detail[c.check]() : c.count ? `${c.count}${names ? ` · ${names}` : ""}` : this.t("pf_count_none");
       const tone = { ok: "ok", warn: "warn", red: "red" }[c.level] || "mute";
       const icon = c.level === "ok" ? "mdi:check" : c.level === "red" ? "mdi:close-octagon-outline" : "mdi:alert-outline";
       return `<div class="row rel"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`pf_${c.check}`)}</strong><small>${text}</small></span></div>`;
@@ -135,7 +136,7 @@ class MaintenanceMixin {
     const head = this.pageBar({ at: this.loadedAt("preflight"), loading: this.preflightLoading, attr: "data-pf-refresh" });
     if (this.preflightError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.preflightError)}</div></div></div>`;
     if (!p) return `<div class="stack">${head}<div class="panel">${this.skeleton("preflightLoading")}</div></div>`;
-    const updates = p.state.pending_updates || [];
+    const updates = p.state.updates || [];
     const updateRow = `<div class="row rel"><span class="tile ${updates.length ? "warn" : "ok"}"><ha-icon icon="mdi:package-up"></ha-icon></span><span class="row-text"><strong>${this.t("pf_updates")}</strong><small>${updates.length ? updates.slice(0, 6).map(u => `${this.esc(u.name)} ${this.esc(u.installed ?? "")} → ${this.esc(u.latest ?? "")}`).join(" · ") : this.t("pf_updates_none")}</small></span></div>`;
     return `<div class="stack">${head}<div class="panel">${this.preflightRows(p.state, p.checks)}${updateRow}${this.preflightAfter(p.watch)}</div></div>`;
   }
@@ -147,7 +148,7 @@ class MaintenanceMixin {
     const problems = checks.filter(c => c.level === "problem").length, notes = checks.filter(c => c.level === "note").length;
     const pf = this.preflight, pfChecks = pf?.checks || [];
     const pfRed = pfChecks.filter(c => c.level === "red").length, pfWarn = pfChecks.filter(c => c.level === "warn").length;
-    const updates = pf?.state?.pending_updates?.length || 0;
+    const updates = pf?.state?.updates?.length || 0;
     const backupTone = !this.backup?.available ? "mute" : problems ? "red" : notes ? "warn" : "ok";
     const pfTone = !pf ? "mute" : pfRed ? "red" : pfWarn ? "warn" : "ok";
     const goalsMissed = (this.goals?.goals || []).filter(g => g.state === "missed").length;

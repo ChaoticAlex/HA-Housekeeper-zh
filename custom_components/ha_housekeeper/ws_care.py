@@ -53,10 +53,15 @@ async def websocket_preflight(
     msg: dict[str, Any],
     scanner: InventoryScanner,
 ) -> None:
-    """Check backup, repairs, failing integrations and broken references before an update."""
+    """The updates that are open and what to check before them: backup, space, repairs, integrations."""
     try:
         snapshot = await scanner.async_get_snapshot()
-        result = await preflight_report(hass, snapshot)
+        try:
+            async with asyncio.timeout(BACKUP_HEALTH_TIMEOUT):
+                backup = await backup_health(hass, scanner.attest, scanner.journal.plans)
+        except Exception:  # noqa: BLE001 - without the report the backup line only says "unknown"
+            backup = None
+        result = await preflight_report(hass, snapshot, backup)
         # What follows an update: whether the watch is on, and the one that runs now.
         result["watch"] = {"hours": scanner.watch_hours, "active": scanner.watch_summary()}
     except Exception as err:

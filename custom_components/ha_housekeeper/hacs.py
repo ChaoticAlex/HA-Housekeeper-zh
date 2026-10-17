@@ -166,3 +166,28 @@ def hacs_repositories(hass: HomeAssistant) -> list[dict[str, Any]] | None:
         if row:
             rows.append(row)
     return sorted(rows, key=lambda r: (r["name"].lower(), r["id"]))
+
+
+def blocked_repository_ids(hass: HomeAssistant) -> set[str]:
+    """Ids of the installed repositories whose pending update HACS cannot install; empty without HACS."""
+    hacs = hass.data.get(HACS_KEY)
+    if hacs is None:
+        return set()
+    try:
+        repositories = list(hacs.repositories.list_all)
+    except Exception:  # noqa: BLE001 - a layout this code does not know is not an error of ours
+        return set()
+    found = set()
+    for repository in repositories:
+        try:
+            data = repository.data
+            if (
+                getattr(data, "installed", False)
+                and getattr(repository, "can_download", True) is False
+                and _versions(repository, data)["pending_update"]
+                and (repo_id := _text(getattr(data, "id", None)))
+            ):
+                found.add(repo_id)
+        except Exception:  # noqa: BLE001 - one odd repository must not hide the others
+            continue
+    return found

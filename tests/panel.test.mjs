@@ -1571,7 +1571,7 @@ const COSTS = {
 test("the maintenance view loads the preflight; the recorder view offers the cost analysis on request", async () => {
   const { el, shadow } = panel("en", { setTimeout: () => 0 });
   const sent = [];
-  const state = { ha_version: "2026.2.3", backup: { available: true, configured: true, newest: "x", age_hours: 5 }, repairs: [{ issue_id: "old", domain: "demo" }], failed_entries: [], broken: [], pending_updates: [{ entity_id: "update.core", name: "Core", installed: "2026.2.3", latest: "2026.3.0" }] };
+  const state = { ha_version: "2026.2.3", backup: { available: true, level: "ok", age_hours: 5 }, disk: { free: 41e9 }, repairs: [{ issue_id: "old", domain: "demo" }], failed_entries: [], broken: [], updates: [{ entity_id: "update.core", name: "Core", installed: "2026.2.3", latest: "2026.3.0" }] };
   const report = { state, checks: [{ check: "backup", level: "ok" }, { check: "repairs", level: "warn", count: 1 }, { check: "failed_entries", level: "ok", count: 0 }, { check: "broken", level: "ok", count: 0 }], watch: { hours: 24, active: null } };
   el._hass = { language: "en", callWS: async msg => { sent.push(msg.type); return msg.type.endsWith("recorder_costs") ? COSTS : report; } };
   el.view = "maintenance"; el.viewTab = { maintenance: "preflight" };

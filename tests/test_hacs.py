@@ -9,7 +9,11 @@ import pytest
 
 pytest.importorskip("homeassistant")
 
-from custom_components.ha_housekeeper.hacs import hacs_by_domain, hacs_repositories  # noqa: E402
+from custom_components.ha_housekeeper.hacs import (  # noqa: E402
+    blocked_repository_ids,
+    hacs_by_domain,
+    hacs_repositories,
+)
 
 
 def repo(**data):
@@ -50,6 +54,8 @@ def test_an_archived_repository_and_a_blocked_update_are_read_from_the_hacs_data
     found = hacs_by_domain(hass)
     assert found["demo"]["archived"] is True and found["demo"]["blocked"] is True
     assert found["plain"]["archived"] is False and found["plain"]["blocked"] is False
+    assert blocked_repository_ids(hass) == {found["demo"]["id"]}
+    assert blocked_repository_ids(SimpleNamespace(data={})) == set()
 
 
 def test_a_commit_install_is_distinguished_from_a_release_and_dates_are_json_safe() -> None:
