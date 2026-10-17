@@ -4,17 +4,39 @@
 
 ### Geändert
 
-- **Weniger CPU-Last:** Zeitsteuerung und Code der Hintergrundarbeit sind optimiert. Die Auswertungen aus der Recorder-Datenbank laufen seltener und verteilt, die Abfragen sind sparsamer (abgeschlossene Tage werden nur noch einmal gerechnet, unnötige Suchen entfallen), und Scans nach Ausfällen rücken bei langsamen Systemen weiter auseinander.
+- **Weniger CPU-Last:**
+  - Zeitsteuerung und Code der Hintergrundarbeit sind optimiert.
+  - Die Auswertungen aus der Recorder-Datenbank laufen seltener und verteilt, die Abfragen sind sparsamer (abgeschlossene Tage werden nur noch einmal gerechnet, unnötige Suchen entfallen), und Scans nach Ausfällen rücken bei langsamen Systemen weiter auseinander.
 - **Speicher & System:** Die Seite lädt schneller: der Durchlauf über die Ordner läuft neben der Abfrage beim Supervisor statt danach, die Plattenbelegung nach Kategorien wird wie die Ordnergrößen einige Minuten wiederverwendet (Aktualisieren liest neu), und beim Öffnen stehen die zuletzt gelesenen Größen sofort da und werden bei Bedarf im Hintergrund erneuert.
-- **Zugangsdaten:** Integrationen, die eine neue Anmeldung verlangen, tragen die Marke „Anmeldung nötig“ und haben eine eigene Kachel, ebenso deaktivierte Integrationen, die noch Zugangsdaten halten; mehr Feldnamen werden als Zugangsdaten erkannt (etwa Cookie, Session-ID, Einmalcode). Neuer Reiter „Konten“ mit Rolle, Zwei-Faktor und letzter Anmeldung jedes Benutzers und eine Kachel „Admins ohne Zwei-Faktor“, ein Reiter „Langzeit-Tokens“ mit Name, Konto und Alter; die Kacheln stehen in gleich großen Reihen.
+- **Zugangsdaten:**
+  - Integrationen, die eine neue Anmeldung verlangen, tragen die Marke „Anmeldung nötig“ und haben eine eigene Kachel, ebenso deaktivierte Integrationen, die noch Zugangsdaten halten; mehr Feldnamen werden als Zugangsdaten erkannt (etwa Cookie, Session-ID, Einmalcode).
+  - Neuer Reiter „Konten“ mit Rolle, Zwei-Faktor und letzter Anmeldung jedes Benutzers und eine Kachel „Admins ohne Zwei-Faktor“, ein Reiter „Langzeit-Tokens“ mit Name, Konto und Alter; die Kacheln stehen in gleich großen Reihen.
 - **Übersicht, Inventarstatus:** Objekte mit einer Markierung (z. B. „Absichtlich offline“), auch die Entitäten eines markierten Geräts, stehen in einer eigenen Zeile „Markiert (erwartet)“ und zählen nicht mehr unter „Problematisch“ (Issue 25).
-- **Oberfläche:** Der Start-Hinweis ist eine kompakte Karte: vier Schritte als Leiste, „38 von 41 Integrationen geladen“ mit Balken und Wartezeit daneben, die Namen der noch ladenden Integrationen und beim Scan die aktuelle Phase. Er aktualisiert sich selbst (alle 3 Sekunden) und verschwindet, sobald die endgültigen Befunde da sind.
-- **Freigaben:** Als sensibel gelten jetzt auch Kameras, Sirenen, Ventile und Türen. Neue Warnung, wenn Google Assistant Schlösser, Alarmanlagen oder Tore ohne PIN öffnen darf, und ein Hinweis, wenn neue Entitäten automatisch an Alexa oder Google freigegeben werden. Ein weiterer Hinweis nennt KI-Gesprächsagenten und den MCP-Server, die Home Assistant über Assist steuern dürfen und so die Assist-Freigaben an ein Sprachmodell oder verbundene Programme geben.
-- **Zugriffe & Datenfluss:** Mehr Integrationen werden erkannt, etwa Bluetooth und Thread als Funk, Frigate und UniFi Protect als Kamera, ESPHome und Matter als Netzwerk; Ollama gilt als lokal. Integrationen aus HACS tragen „Fremdcode, volle Rechte“ und haben mindestens mittleres Risiko. Bei den Apps: Schutzmodus aus (hohes Risiko), offene Ports am Host und eine Spalte zur Herkunft (offiziell, Community, lokal). Neuer Reiter „Von außen erreichbar“: Nabu-Casa-Fernzugriff, Tunnel-, Proxy-, DynDNS- und VPN-Apps, der MCP-Server und offene Webhooks.
+- **Oberfläche:**
+  - Der Start-Hinweis ist eine kompakte Karte: vier Schritte als Leiste, „38 von 41 Integrationen geladen“ mit Balken und Wartezeit daneben, die Namen der noch ladenden Integrationen und beim Scan die aktuelle Phase.
+  - Er aktualisiert sich selbst (alle 3 Sekunden) und verschwindet, sobald die endgültigen Befunde da sind.
+- **Freigaben:**
+  - Als sensibel gelten jetzt auch Kameras, Sirenen, Ventile und Türen.
+  - Neue Warnung, wenn Google Assistant Schlösser, Alarmanlagen oder Tore ohne PIN öffnen darf, und ein Hinweis, wenn neue Entitäten automatisch an Alexa oder Google freigegeben werden.
+  - Ein weiterer Hinweis nennt KI-Gesprächsagenten und den MCP-Server, die Home Assistant über Assist steuern dürfen und so die Assist-Freigaben an ein Sprachmodell oder verbundene Programme geben.
+- **Zugriffe & Datenfluss:**
+  - Mehr Integrationen werden erkannt, etwa Bluetooth und Thread als Funk, Frigate und UniFi Protect als Kamera, ESPHome und Matter als Netzwerk; Ollama gilt als lokal.
+  - Integrationen aus HACS tragen „Fremdcode, volle Rechte“ und haben mindestens mittleres Risiko.
+  - Bei den Apps: Schutzmodus aus (hohes Risiko), offene Ports am Host und eine Spalte zur Herkunft (offiziell, Community, lokal).
+  - Neuer Reiter „Von außen erreichbar“: Nabu-Casa-Fernzugriff, Tunnel-, Proxy-, DynDNS- und VPN-Apps, der MCP-Server und offene Webhooks.
 
 ### Behoben
 
-- **Oberfläche, Korrekturen:** Auf „Zugriffe & Datenfluss“ steht „Wie wird das gezählt?“ in der Liste wie auf den anderen Sicherheitsseiten statt als eigene Karte darunter. Der Start-Hinweis zeigt nach dem Neuladen der Seite nicht mehr kurz die alten „5 Minuten“, sondern wartet auf die aktuelle Angabe. Der Puffer von einer Minute fängt wegen einer kurz ladenden Integration nicht mehr mehrmals von vorn an. Die Zeile „Beobachtung nach Update“ steht auf der Übersicht unter dem Gesundheitsring statt im Seitenkopf. Der Info-Hinweis „ändert nichts von selbst“ oben auf der Befundseite entfällt; eine kurze Erklärung steht stattdessen unter „Über Housekeeper“ in den Einstellungen, die Zeile „Betriebsart“ entfällt dort. Auf schmalen Bildschirmen (Handy) brechen Zeilen mit Knöpfen um, statt den Text auf eine Buchstabenspalte zu quetschen (z. B. der Hinweis zu den Ausfall-Stufen auf der Übersicht). Die Zeilen der Blueprint-Liste lassen sich anklicken und öffnen eine Detailseite mit Übersicht, Eingaben, Nutzung (mit den dort gesetzten Werten) und Dateidaten. Ein Wartungsziel führt zur passenden Liste mit gesetztem Filter (etwa „Defekte Referenzen“ zu den Befunden dieser Art). Die Verfügbarkeit einer Hausfunktion zeigt Kennzahlen als Kacheln und eine Tagesleiste über die ganze Breite mit Achse; „1 Vorfälle“ heißt jetzt „1 Vorfall“.
+- **Oberfläche, Korrekturen:**
+  - Auf „Zugriffe & Datenfluss“ steht „Wie wird das gezählt?“ in der Liste wie auf den anderen Sicherheitsseiten statt als eigene Karte darunter.
+  - Der Start-Hinweis zeigt nach dem Neuladen der Seite nicht mehr kurz die alten „5 Minuten“, sondern wartet auf die aktuelle Angabe.
+  - Der Puffer von einer Minute fängt wegen einer kurz ladenden Integration nicht mehr mehrmals von vorn an.
+  - Die Zeile „Beobachtung nach Update“ steht auf der Übersicht unter dem Gesundheitsring statt im Seitenkopf.
+  - Der Info-Hinweis „ändert nichts von selbst“ oben auf der Befundseite entfällt; eine kurze Erklärung steht stattdessen unter „Über Housekeeper“ in den Einstellungen, die Zeile „Betriebsart“ entfällt dort.
+  - Auf schmalen Bildschirmen (Handy) brechen Zeilen mit Knöpfen um, statt den Text auf eine Buchstabenspalte zu quetschen (z. B. der Hinweis zu den Ausfall-Stufen auf der Übersicht).
+  - Die Zeilen der Blueprint-Liste lassen sich anklicken und öffnen eine Detailseite mit Übersicht, Eingaben, Nutzung (mit den dort gesetzten Werten) und Dateidaten.
+  - Ein Wartungsziel führt zur passenden Liste mit gesetztem Filter (etwa „Defekte Referenzen“ zu den Befunden dieser Art).
+  - Die Verfügbarkeit einer Hausfunktion zeigt Kennzahlen als Kacheln und eine Tagesleiste über die ganze Breite mit Achse; „1 Vorfälle“ heißt jetzt „1 Vorfall“.
 - **Zugriffe & Datenfluss:** Integrationen, deren Tracker nur die Anwesenheit über Router oder Bluetooth melden (etwa die FRITZ!Box), gelten nicht mehr als „Standort“ mit hohem Risiko, sondern zeigen „Anwesenheit im Netz“.
 - **Freigaben:** Alexa und Google Assistant, die in den Nabu-Casa-Einstellungen ausgeschaltet sind, zählen nicht mehr als „freigegeben“ und erzeugen keine Befunde; ihre Kachel zeigt „in Nabu Casa ausgeschaltet“.
 
@@ -22,17 +44,39 @@
 
 #### Changed
 
-- **Less CPU load:** The timing and the code of the background work are optimised. The analyses of the recorder database run less often and spread out, the queries do less work (finished days are calculated only once, needless searches are skipped), and on slow systems the scans after outages are spaced further apart.
+- **Less CPU load:**
+  - The timing and the code of the background work are optimised.
+  - The analyses of the recorder database run less often and spread out, the queries do less work (finished days are calculated only once, needless searches are skipped), and on slow systems the scans after outages are spaced further apart.
 - **Storage & system:** The page loads faster: the walk over the folders runs beside the Supervisor query instead of after it, the disk use by category is reused for a few minutes like the folder sizes (refresh reads it again), and on opening the sizes read last show at once and are renewed in the background when due.
-- **Credentials:** Integrations that ask to sign in again carry a "Login needed" mark and have a tile of their own, as do disabled integrations that still hold credentials; more field names are recognised as credentials (such as cookie, session id, one-time code). New "Accounts" tab with each user's role, two-factor and last login, an "Admins without two-factor" tile, and a "Long-lived tokens" tab with name, account and age; the tiles sit in rows of equal size.
+- **Credentials:**
+  - Integrations that ask to sign in again carry a "Login needed" mark and have a tile of their own, as do disabled integrations that still hold credentials; more field names are recognised as credentials (such as cookie, session id, one-time code).
+  - New "Accounts" tab with each user's role, two-factor and last login, an "Admins without two-factor" tile, and a "Long-lived tokens" tab with name, account and age; the tiles sit in rows of equal size.
 - **Overview, inventory status:** Objects with a mark (e.g. “Offline on purpose”), including the entities of a marked device, sit in their own row “Marked (expected)” and no longer count as “Problematic” (issue 25).
-- **Interface:** The start notice is a compact card: four steps in one track, “38 of 41 integrations loaded” with a bar and the waiting time beside it, the names of the integrations still loading and, during the scan, the current phase. It updates by itself (every 3 seconds) and goes away as soon as the final findings are in.
-- **Exposure:** Cameras, sirens, valves and doors now count as sensitive too. New warning when Google Assistant may open locks, alarm panels or gates without a PIN, and a note when new entities are exposed to Alexa or Google automatically. Another note names AI conversation agents and the MCP server that may control Home Assistant through Assist and so hand the Assist exposure to a language model or connected programs.
-- **Access & data flow:** More integrations are recognised, such as Bluetooth and Thread as radio, Frigate and UniFi Protect as camera, ESPHome and Matter as network; Ollama counts as local. Integrations from HACS carry "custom code, full rights" and are at least medium risk. For apps: protection mode off (high risk), open ports on the host and a column for the origin (official, community, local). New "Reachable from outside" tab: Nabu Casa remote access, tunnel, proxy, DynDNS and VPN apps, the MCP server and open webhooks.
+- **Interface:**
+  - The start notice is a compact card: four steps in one track, “38 of 41 integrations loaded” with a bar and the waiting time beside it, the names of the integrations still loading and, during the scan, the current phase.
+  - It updates by itself (every 3 seconds) and goes away as soon as the final findings are in.
+- **Exposure:**
+  - Cameras, sirens, valves and doors now count as sensitive too.
+  - New warning when Google Assistant may open locks, alarm panels or gates without a PIN, and a note when new entities are exposed to Alexa or Google automatically.
+  - Another note names AI conversation agents and the MCP server that may control Home Assistant through Assist and so hand the Assist exposure to a language model or connected programs.
+- **Access & data flow:**
+  - More integrations are recognised, such as Bluetooth and Thread as radio, Frigate and UniFi Protect as camera, ESPHome and Matter as network; Ollama counts as local.
+  - Integrations from HACS carry "custom code, full rights" and are at least medium risk.
+  - For apps: protection mode off (high risk), open ports on the host and a column for the origin (official, community, local).
+  - New "Reachable from outside" tab: Nabu Casa remote access, tunnel, proxy, DynDNS and VPN apps, the MCP server and open webhooks.
 
 #### Fixed
 
-- **Interface, corrections:** On "Access & data flow", "How is this counted?" sits inside the list like on the other security pages instead of in a card of its own below. After a page reload the start notice no longer shows the old “5 minutes” for a moment but waits for the current figure. The one-minute buffer no longer starts over because an integration loads briefly. The “Observation after update” line now sits on the overview below the health ring instead of in the page header. The “changes nothing by itself” info notice at the top of the findings page is gone; a short explanation now sits under “About Housekeeper” in the settings, and the “Mode” row is dropped there. On narrow screens (phones) rows with buttons now wrap instead of squeezing the text into a one-letter column (e.g. the notice about outage levels on the overview). Rows of the blueprint list can be clicked and open a detail page with overview, inputs, usage (with the values set there) and file data. A maintenance goal leads to the matching list with the filter set (for example "Broken references" to the findings of that kind). The availability of a house function shows its figures as tiles and a day strip across the full width with an axis; "1 incidents" now reads "1 incident".
+- **Interface, corrections:**
+  - On "Access & data flow", "How is this counted?" sits inside the list like on the other security pages instead of in a card of its own below.
+  - After a page reload the start notice no longer shows the old “5 minutes” for a moment but waits for the current figure.
+  - The one-minute buffer no longer starts over because an integration loads briefly.
+  - The “Observation after update” line now sits on the overview below the health ring instead of in the page header.
+  - The “changes nothing by itself” info notice at the top of the findings page is gone; a short explanation now sits under “About Housekeeper” in the settings, and the “Mode” row is dropped there.
+  - On narrow screens (phones) rows with buttons now wrap instead of squeezing the text into a one-letter column (e.g. the notice about outage levels on the overview).
+  - Rows of the blueprint list can be clicked and open a detail page with overview, inputs, usage (with the values set there) and file data.
+  - A maintenance goal leads to the matching list with the filter set (for example "Broken references" to the findings of that kind).
+  - The availability of a house function shows its figures as tiles and a day strip across the full width with an axis; "1 incidents" now reads "1 incident".
 - **Access & data flow:** Integrations whose trackers only report presence through a router or Bluetooth (such as the FRITZ!Box) no longer count as "location" with a high risk but show "presence on the network".
 - **Exposure:** Alexa and Google Assistant switched off in the Nabu Casa settings no longer count as "exposed" and raise no findings; their tile says "switched off in Nabu Casa".
 
