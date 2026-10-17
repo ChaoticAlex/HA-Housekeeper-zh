@@ -52,6 +52,7 @@
 ### Behoben
 
 - **Oberfläche, Korrekturen:**
+  - In der Liste der Erinnerungen steht der Aufklapp-Pfeil links neben dem Namen statt darüber.
   - Wartung: Untertitel und Hinweis nennen die Reiter richtig, jeder Reiter ist über die Suche zu finden, die Zahl am Reiter Blueprints steht schon beim Öffnen der Seite, es heißt „1 Hinweis“ und „3 Hinweise“, und der Reiter Wartungsziele zeigt einen Ladefehler und hat „Aktualisieren“.
   - Die Tabelle „Alle gezählten Läufe“ nimmt wie die anderen Listen die volle Breite.
   - Auf „Zugriffe & Datenfluss“ steht „Wie wird das gezählt?“ in der Liste wie auf den anderen Sicherheitsseiten statt als eigene Karte darunter.
@@ -132,6 +133,7 @@
 #### Fixed
 
 - **Interface, corrections:**
+  - In the reminders list the expand arrow sits to the left of the name instead of above it.
   - Maintenance: the subtitle and hint name the tabs correctly, every tab can be found by search, the number on the Blueprints tab is there when the page opens, it says "1 note" and "3 notes", and the Maintenance goals tab shows a load error and has "Refresh".
   - The table "All counted runs" uses the full width like the other lists.
   - On "Access & data flow", "How is this counted?" sits inside the list like on the other security pages instead of in a card of its own below.

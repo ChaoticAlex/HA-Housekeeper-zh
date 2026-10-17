@@ -56,7 +56,7 @@ class BatteryCareMixin {
   reminderColumns() {
     const tone = r => ({ due: "red", soon: "warn", ok: "ok" }[r.state]);
     return [
-      { key: "name", label: "remColName", dir: "asc", cell: r => `${this.expandBtn("data-rem-open", r.id, (this.remOpen || []).includes(r.id), this.t((this.remOpen || []).includes(r.id) ? "remHistoryClose" : "remHistoryOpen"))}<strong>${this.esc(r.name)}</strong>${r.note ? `<small class="remnote">${this.esc(r.note)}</small>` : ""}` },
+      { key: "name", label: "remColName", dir: "asc", cell: r => `<div class="statcell">${this.expandBtn("data-rem-open", r.id, (this.remOpen || []).includes(r.id), this.t((this.remOpen || []).includes(r.id) ? "remHistoryClose" : "remHistoryOpen"))}<div><strong>${this.esc(r.name)}</strong>${r.note ? `<small class="remnote">${this.esc(r.note)}</small>` : ""}</div></div>` },
       { key: "every", label: "remColEvery", dir: "asc", cell: r => this.esc(this.t("remEveryN", { n: r.interval_days })) },
       { key: "last", label: "remColLast", dir: "desc", cell: r => r.last_done ? this.esc(this.remDay(r.last_done)) : `<span class="muted">–</span>` },
       { key: "due", label: "remColDue", dir: "asc", cell: r => `<span class="pill ${tone(r)}" title="${this.esc(this.remDay(r.due))}">${this.esc(this.remWhen(r.days_left))}</span>` },
