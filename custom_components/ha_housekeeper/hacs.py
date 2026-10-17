@@ -97,14 +97,13 @@ def repository_info(
         **versions,
         "last_fetched": _date(getattr(data, "last_fetched", None)),
         "archived": getattr(data, "archived", None) is True,
-        "blocked": getattr(repository, "can_download", True) is False and versions["pending_update"],
+        "blocked": getattr(repository, "can_download", True) is False
+        and versions["pending_update"],
         "removed": (removed or {}).get(repo_id or ""),
     }
 
 
-def repository_row(
-    repository: Any, removed: dict[str, dict[str, Any]]
-) -> dict[str, Any] | None:
+def repository_row(repository: Any, removed: dict[str, dict[str, Any]]) -> dict[str, Any] | None:
     """One installed repository of any kind (integration, card, theme, ...), else ``None``."""
     data = getattr(repository, "data", None)
     if data is None or not getattr(data, "installed", False):

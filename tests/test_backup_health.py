@@ -432,7 +432,10 @@ def test_the_newest_copy_on_each_external_target_must_not_be_old() -> None:
     both = [backup(5, agents=("hassio.local",)), backup(29, agents=("hassio.local", "cloud.cloud"))]
     check = judge(state(both))[1]["remote_age"]
     assert check["level"] == "ok" and check["values"]["agents"][0]["agent"] == "cloud.cloud"
-    old = [backup(5, agents=("hassio.local",)), backup(24 * 9, agents=("hassio.local", "cloud.cloud"))]
+    old = [
+        backup(5, agents=("hassio.local",)),
+        backup(24 * 9, agents=("hassio.local", "cloud.cloud")),
+    ]
     stale = judge(state(old))[1]["remote_age"]
     assert stale["level"] == "note" and stale["values"]["stale"] == ["cloud.cloud"]
     assert "remote_age" not in judge(state([backup(agents=("hassio.local",))]))[1]

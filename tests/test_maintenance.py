@@ -118,7 +118,9 @@ def test_judging_the_preflight() -> None:
     }
     # The backup line follows the verdict of the backup protection and does not judge the age itself.
     assert judge_preflight(state(backup={"available": True, "level": "note"}))[0]["level"] == "warn"
-    assert judge_preflight(state(backup={"available": True, "level": "problem"}))[0]["level"] == "red"
+    assert (
+        judge_preflight(state(backup={"available": True, "level": "problem"}))[0]["level"] == "red"
+    )
     assert judge_preflight(state(backup={"available": False}))[0]["level"] == "warn"
     counts = {c["check"]: c for c in judge_preflight(state(repairs=[{"issue_id": "a"}]))}
     assert counts["repairs"]["level"] == "warn" and counts["repairs"]["count"] == 1
@@ -146,7 +148,9 @@ async def test_pending_updates_are_grouped_by_platform(hass: HomeAssistant) -> N
         ("update.card_mod_update", "hacs", "1"),
         ("update.proxy_firmware", "esphome", "p"),
     ):
-        registry.async_get_or_create("update", platform, unique_id, suggested_object_id=entity_id[7:])
+        registry.async_get_or_create(
+            "update", platform, unique_id, suggested_object_id=entity_id[7:]
+        )
         hass.states.async_set(
             entity_id,
             "on",
@@ -376,7 +380,9 @@ async def test_the_start_of_a_system_update_takes_the_state_of_that_moment(
         assert scan.await_count == 1
 
 
-async def test_the_configuration_check_reports_validity_and_clips_long_texts(hass: HomeAssistant) -> None:
+async def test_the_configuration_check_reports_validity_and_clips_long_texts(
+    hass: HomeAssistant,
+) -> None:
     from types import SimpleNamespace
     from unittest.mock import AsyncMock, patch
 
@@ -390,4 +396,8 @@ async def test_the_configuration_check_reports_validity_and_clips_long_texts(has
     assert result["valid"] is False and len(result["errors"]) == 4000 and result["warnings"] is None
     with patch(target, AsyncMock(return_value=good)):
         result = await check_configuration(hass)
-    assert result["valid"] is True and result["errors"] is None and result["warnings"] == "a deprecation"
+    assert (
+        result["valid"] is True
+        and result["errors"] is None
+        and result["warnings"] == "a deprecation"
+    )

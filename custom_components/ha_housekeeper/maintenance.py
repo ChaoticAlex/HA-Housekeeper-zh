@@ -400,7 +400,9 @@ def pending_updates(hass: HomeAssistant) -> list[dict[str, Any]]:
                 "blocked": group == "hacs" and bool(entry and entry.unique_id in blocked),
             }
         )
-    return sorted(result, key=lambda u: (UPDATE_GROUPS.index(u["group"]), u["name"].lower(), u["entity_id"]))
+    return sorted(
+        result, key=lambda u: (UPDATE_GROUPS.index(u["group"]), u["name"].lower(), u["entity_id"])
+    )
 
 
 def update_counts(updates: list[dict[str, Any]]) -> dict[str, int]:
@@ -454,7 +456,11 @@ def judge_preflight(state: dict[str, Any]) -> list[dict[str, Any]]:
         checks.append(
             {
                 "check": "disk",
-                "level": "red" if free < DISK_STOP_BYTES else "warn" if free < DISK_WARN_BYTES else "ok",
+                "level": "red"
+                if free < DISK_STOP_BYTES
+                else "warn"
+                if free < DISK_WARN_BYTES
+                else "ok",
             }
         )
     system_pending = any(u["group"] == "system" for u in state.get("updates") or [])

@@ -28,7 +28,9 @@ def open_flows(hass: HomeAssistant) -> list[dict[str, Any]]:
         name = (
             titles.get(context.get("entry_id") or "")
             if reconfigure
-            else placeholders.get("name") if isinstance(placeholders, dict) else None
+            else placeholders.get("name")
+            if isinstance(placeholders, dict)
+            else None
         )
         found.append(
             {

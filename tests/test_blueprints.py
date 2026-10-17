@@ -46,7 +46,11 @@ def test_an_unused_blueprint_carries_its_metadata() -> None:
         }
     }
     unused = evaluate(available, {})["domains"][0]["unused"][0]
-    assert (unused["author"], unused["source_url"], unused["description"]) == ("me", "https://x.y", None)
+    assert (unused["author"], unused["source_url"], unused["description"]) == (
+        "me",
+        "https://x.y",
+        None,
+    )
 
 
 def test_a_missing_blueprint_file_is_found_but_a_broken_or_unread_one_is_not() -> None:
@@ -76,14 +80,19 @@ def test_inputs_are_flat_and_each_user_shows_what_it_set() -> None:
     rows = input_rows(
         {
             "light": {"name": "Light", "selector": {"entity": {}}},
-            "extra": {"name": "More", "input": {"token": {"selector": {"text": {}}, "default": ""}}},
+            "extra": {
+                "name": "More",
+                "input": {"token": {"selector": {"text": {}}, "default": ""}},
+            },
         }
     )
     assert [(r["key"], r["section"], r["selector"], r["has_default"]) for r in rows] == [
         ("light", "", "entity", False),
         ("token", "More", "text", True),
     ]
-    config = {"use_blueprint": {"path": "a/b.yaml", "input": {"light": "light.gone", "token": "abc"}}}
+    config = {
+        "use_blueprint": {"path": "a/b.yaml", "input": {"light": "light.gone", "token": "abc"}}
+    }
     got = user_inputs(config, rows, {"light.kitchen"})
     assert [(x["key"], x["state"], x["value"]) for x in got] == [
         ("light", "missing_entity", "light.gone"),

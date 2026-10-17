@@ -330,7 +330,10 @@ def _remote_age_check(
         return None
     limit = SCHEDULE_LIMIT_HOURS.get(config["recurrence"] if config else "never")
     limit = limit or NO_SCHEDULE_NOTE_HOURS
-    rows = [{"agent": agent, "age_hours": _age_hours(when, now)} for agent, when in sorted(newest_on.items())]
+    rows = [
+        {"agent": agent, "age_hours": _age_hours(when, now)}
+        for agent, when in sorted(newest_on.items())
+    ]
     stale = [row["agent"] for row in rows if row["age_hours"] > limit]
     return _check(
         "remote_age", "note" if stale else "ok", agents=rows, stale=stale, limit_hours=limit

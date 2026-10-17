@@ -56,13 +56,13 @@ from .cleanup import (
     trim_is_plain,
 )
 from .cleanup_exec import CleanupError, backup_is_local_only, entity_restorable
-from .lifecycle import removed_objects
 from .const import DOMAIN, OPTION_LIMITS
 from .device_pairs import pair_devices
 from .history import PinError
 from .ignored import KINDS as IGNORE_KINDS
 from .ignored import REASON_LIMIT as IGNORE_REASON_LIMIT
 from .inventory import InventoryScanner
+from .lifecycle import removed_objects
 from .meter import prepare_meter
 from .monitor import MonitorError, MonitorStore, evaluate
 from .outage_levels import OUTAGE_KEYS, thresholds_from_options, thresholds_rise

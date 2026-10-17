@@ -26,13 +26,13 @@ def _credentials(data: dict[str, Any]) -> int:
             entries += 1
     users = data.get("accounts") or []
     no_mfa = sum(1 for u in users if u.get("active") and u.get("admin") and not u.get("mfa"))
-    tokens = sum(
-        1 for t in data.get("tokens") or [] if t.get("old") or not t.get("account_active")
-    )
+    tokens = sum(1 for t in data.get("tokens") or [] if t.get("old") or not t.get("account_active"))
     return entries + no_mfa + tokens
 
 
-async def view_counts(scanner: Any, hass: HomeAssistant, snapshot: dict[str, Any]) -> dict[str, int]:
+async def view_counts(
+    scanner: Any, hass: HomeAssistant, snapshot: dict[str, Any]
+) -> dict[str, int]:
     """Counts by view id; a view that cannot be read is left out, so the bar shows no number."""
     counts: dict[str, int] = {}
 

@@ -97,7 +97,6 @@ from .issues import async_sync_database_issue, async_sync_issues, async_sync_sca
 from .load_history import LoadStore
 from .log_facts import log_facts
 from .maintenance import repair_keys
-from .sensitive_fields import reauth_entry_ids
 from .marks import (
     GRACE_DEFAULT,
     HIDING_KINDS,
@@ -126,6 +125,7 @@ from .runs import RunStore
 from .scan_coverage import RETRY_LIMIT, RETRY_MINUTES, ScanCoverage, retryable_gaps
 from .scan_health import ScanHealth
 from .scan_trigger import ScanRefused, scan_request
+from .sensitive_fields import reauth_entry_ids
 from .service_check import missing_service_findings
 from .signals import SignalStore, situations
 from .signals import fire as signal_fire
@@ -188,7 +188,9 @@ def marked_keys(objects: list[dict[str, Any]]) -> frozenset[str]:
 def marked_status_counts(objects: list[dict[str, Any]]) -> dict[str, int]:
     """How many marked objects there are per status, for the inventory status card."""
     marked = marked_keys(objects)
-    return dict(Counter(i["status"] for i in objects if f"{i['object_type']}:{i['object_id']}" in marked))
+    return dict(
+        Counter(i["status"] for i in objects if f"{i['object_type']}:{i['object_id']}" in marked)
+    )
 
 
 class _DeviceIds(set):
@@ -842,7 +844,9 @@ class InventoryScanner:
         self.stale = StaleStore(hass)
         self.load = LoadStore(hass)
         self._started = datetime.now(UTC)
-        self._reauth_seen: set[str] | None = None  # the entries that asked for a login at the last scan
+        self._reauth_seen: set[str] | None = (
+            None  # the entries that asked for a login at the last scan
+        )
         self._reauth_asked = float("-inf")
         self.goals = GoalStore(hass)
         self.criteria = CriteriaStore(hass)
@@ -957,7 +961,8 @@ class InventoryScanner:
         enabled = [
             e
             for e in entries
-            if getattr(e, "disabled_by", None) is None and getattr(e, "source", None) != SOURCE_IGNORE
+            if getattr(e, "disabled_by", None) is None
+            and getattr(e, "source", None) != SOURCE_IGNORE
         ]
         self.integrations_pending = len(loading)
         self.integrations_loading = [str(getattr(e, "title", "") or e.domain) for e in loading][

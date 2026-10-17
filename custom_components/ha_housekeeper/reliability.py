@@ -9,7 +9,8 @@ new calculation runs. A regular background run keeps that reply from getting old
 from __future__ import annotations
 
 import time
-from datetime import UTC, datetime, time as clock, timedelta, tzinfo
+from datetime import UTC, datetime, timedelta, tzinfo
+from datetime import time as clock
 from typing import Any
 
 from homeassistant.core import HomeAssistant
@@ -310,7 +311,9 @@ def compute(
         last = outages[-1] if outages else last_single
         if len(counted) >= SHARED_MIN_ENTITIES:
             spans = [(a, b, "shared") for a, b in outages]
-        elif counted:  # too few entities for a shared outage: any entity down for long enough counts
+        elif (
+            counted
+        ):  # too few entities for a shared outage: any entity down for long enough counts
             spans = [
                 (a, b, "single")
                 for a, b in _merge([i for member in counted for i in member])
@@ -327,7 +330,8 @@ def compute(
                 "reauth": bool(info.get("reauth")),
                 "entities": len(counted),
                 "permanent": permanent,
-                "dead": not counted and permanent > 0,  # down the whole window: no figure, but the worst there is
+                "dead": not counted
+                and permanent > 0,  # down the whole window: no figure, but the worst there is
                 "availability": (
                     round(100 * (1 - down_total / observed_total), 2) if observed_total else None
                 ),

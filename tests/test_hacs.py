@@ -88,7 +88,9 @@ def test_every_installed_repository_is_listed_with_what_hacs_removed(monkeypatch
             translation_placeholders={"name": "me/card", "reason": "Deprecated by the owner"},
             dismissed_version="2026.10.1",
         ),
-        ("other", "removed_8"): SimpleNamespace(translation_placeholders={}, dismissed_version=None),
+        ("other", "removed_8"): SimpleNamespace(
+            translation_placeholders={}, dismissed_version=None
+        ),
     }
     monkeypatch.setattr(ir, "async_get", lambda hass: SimpleNamespace(issues=issues))
     demo = repo(installed_version="1.0", last_version="1.1")
@@ -96,12 +98,20 @@ def test_every_installed_repository_is_listed_with_what_hacs_removed(monkeypatch
     theme = repo(category="theme", domain=None, id=10, full_name="me/theme", installed_version="3")
     gone = repo(installed=False, id=11, full_name="me/gone")
     hass = SimpleNamespace(
-        data={"hacs": SimpleNamespace(repositories=SimpleNamespace(list_all=[theme, card, demo, gone]))}
+        data={
+            "hacs": SimpleNamespace(
+                repositories=SimpleNamespace(list_all=[theme, card, demo, gone])
+            )
+        }
     )
     rows = hacs_repositories(hass)
     assert [r["full_name"] for r in rows] == ["me/card", "me/demo", "me/theme"]
     by_id = {r["id"]: r for r in rows}
-    assert by_id["7"]["removed"] == {"name": "me/demo", "reason": "Repository is archived", "ignored": False}
+    assert by_id["7"]["removed"] == {
+        "name": "me/demo",
+        "reason": "Repository is archived",
+        "ignored": False,
+    }
     assert by_id["9"]["removed"]["ignored"] is True and by_id["9"]["category"] == "plugin"
     assert by_id["10"]["removed"] is None
     assert hacs_by_domain(hass)["demo"]["removed"]["reason"] == "Repository is archived"

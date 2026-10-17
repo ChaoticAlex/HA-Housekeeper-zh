@@ -108,7 +108,9 @@ def test_a_config_entry_that_is_not_loaded_is_a_finding_graded_by_how_long() -> 
     assert young == [], "a retry that is still running is no finding before the first threshold"
 
 
-def test_an_entry_that_asks_for_a_new_login_is_a_finding_at_once_and_instead_of_not_loaded() -> None:
+def test_an_entry_that_asks_for_a_new_login_is_a_finding_at_once_and_instead_of_not_loaded() -> (
+    None
+):
     from datetime import UTC, datetime
 
     from custom_components.ha_housekeeper.impact import apply_impact

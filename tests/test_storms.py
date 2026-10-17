@@ -309,11 +309,11 @@ def test_a_loud_entity_is_suggested_for_exclusion_by_the_same_rule_as_in_the_cos
 
 
 def test_the_loud_entities_carry_the_exclusion_suggestion_of_the_last_24_hours() -> None:
-    edges = [
-        {"source": "automation:a", "target": "entity:used", "relation": "TRIGGERS_ON"}
-    ]
+    edges = [{"source": "automation:a", "target": "entity:used", "relation": "TRIGGERS_ON"}]
     result = evaluate(
-        {"free": counts(7000, day_rows=150), "used": counts(7000, day_rows=150)}, edges=edges, days=7
+        {"free": counts(7000, day_rows=150), "used": counts(7000, day_rows=150)},
+        edges=edges,
+        days=7,
     )
     rows = {row["entity_id"]: row for row in result["entities"]}
     assert rows["free"]["suggest_exclude"] and rows["free"]["rows_24h"] == 150
