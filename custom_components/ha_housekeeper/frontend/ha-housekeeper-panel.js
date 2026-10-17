@@ -726,6 +726,14 @@ Object.assign(TEXT.de, {
   pf_backup: "Backup", pf_disk: "Freier Speicher", pf_disk_text: "{free} frei", pf_repairs: "Offene Reparaturen", pf_failed_entries: "Ausgefallene Integrationen", pf_broken: "Fehlende Referenzen",
   pf_backup_ok: "Letztes Backup vor {hours} h", pf_backup_old: "Letztes Backup vor {hours} h – ein neues ist ratsam", pf_backup_none: "Kein Backup eingerichtet oder vorhanden", pf_backup_unavailable: "Backup-Komponente nicht verfügbar",
   pf_count_none: "keine", pf_updates: "Verfügbare Updates", pf_updates_none: "keine",
+  updatesTab: "Updates", pfOpenBackup: "Backup-Schutz",
+  updBlocked: "HACS kann es nicht installieren", updRunning: "läuft", updAuto: "automatisch", updWatch: "Beobachtung startet", updNotes: "Änderungen", updOpenHa: "In Home Assistant öffnen",
+  updVerdict_ready: "Bereit", updVerdict_look: "Erst ansehen", updVerdict_stop: "Stopp", updVerdictNone: "Keine Updates offen",
+  updPending_1: "1 Update offen", updPending_n: "{n} Updates offen", updCheckFirst: "Zu prüfen: {items}",
+  updSumOpen: "Offen", updSumBlocked: "Blockiert",
+  updGroup_system: "System", updGroup_app: "Apps", updGroup_hacs: "Integrationen und Karten über HACS", updGroup_device: "Geräte",
+  updCurrent_system: "Home Assistant, Betriebssystem und Supervisor sind aktuell.", updCurrent_app: "Alle Apps sind aktuell.", updCurrent_hacs: "Alle HACS-Einträge sind aktuell.", updCurrent_device: "Alle Geräte-Firmwares sind aktuell.",
+  updAllCurrent: "Alles ist aktuell.", todoUpdates_1: "1 Update offen", todoUpdates_n: "{n} Updates offen",
   pfAfterTitle: "Danach", pfAfterOn: "Nach einem Update von Home Assistant, Betriebssystem oder Supervisor beobachtet Housekeeper {hours} Stunden lang, ob etwas ausfällt oder neue Reparaturen auftauchen. Beim Start des Updates hält es den Stand fest, die Auswertung steht auf der Befundseite.", pfAfterRunning: "Beobachtung nach {what} läuft, noch {hours} Std., bisher {n} Auffälligkeiten.", pfAfterOff: "Die Beobachtung nach Updates ist ausgeschaltet. Unter Einstellungen → Scan und Schwellen stellst du ein, wie lange sie läuft.",
 });
 Object.assign(TEXT.en, {
@@ -763,6 +771,14 @@ Object.assign(TEXT.en, {
   pf_backup: "Backup", pf_disk: "Free space", pf_disk_text: "{free} free", pf_repairs: "Open repairs", pf_failed_entries: "Failed integrations", pf_broken: "Missing references",
   pf_backup_ok: "Last backup {hours} h ago", pf_backup_old: "Last backup {hours} h ago – a new one is advisable", pf_backup_none: "No backup set up or available", pf_backup_unavailable: "Backup component not available",
   pf_count_none: "none", pf_updates: "Available updates", pf_updates_none: "none",
+  updatesTab: "Updates", pfOpenBackup: "Backup protection",
+  updBlocked: "HACS cannot install it", updRunning: "running", updAuto: "automatic", updWatch: "Watch starts", updNotes: "Changes", updOpenHa: "Open in Home Assistant",
+  updVerdict_ready: "Ready", updVerdict_look: "Look first", updVerdict_stop: "Stop", updVerdictNone: "No updates open",
+  updPending_1: "1 update open", updPending_n: "{n} updates open", updCheckFirst: "To check: {items}",
+  updSumOpen: "Open", updSumBlocked: "Blocked",
+  updGroup_system: "System", updGroup_app: "Apps", updGroup_hacs: "Integrations and cards via HACS", updGroup_device: "Devices",
+  updCurrent_system: "Home Assistant, the operating system and the Supervisor are up to date.", updCurrent_app: "All apps are up to date.", updCurrent_hacs: "All HACS items are up to date.", updCurrent_device: "All device firmware is up to date.",
+  updAllCurrent: "Everything is up to date.", todoUpdates_1: "1 update open", todoUpdates_n: "{n} updates open",
   pfAfterTitle: "Afterwards", pfAfterOn: "After an update of Home Assistant, the operating system or the Supervisor, Housekeeper watches for {hours} hours whether something fails or new repairs appear. When the update starts it keeps the state, the results are on the findings page.", pfAfterRunning: "Watching after {what}, {hours} h left, {n} findings so far.", pfAfterOff: "The watch after updates is switched off. Under Settings → Scan and thresholds you set how long it runs.",
 });
 Object.assign(TEXT.de, {
@@ -1459,7 +1475,7 @@ class StylesMixin {
       .panelhead h2{font-size:calc(15px*var(--hk-fs,1));font-weight:600}.panelhead p{margin-top:3px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}
       .link{display:inline-flex;align-items:center;gap:4px;padding:4px;border:0;color:var(--hk-blue-text);background:transparent;font-size:calc(12px*var(--hk-fs,1));font-weight:600}
       .row{width:100%;display:grid;grid-template-columns:auto minmax(0,1fr);grid-auto-flow:column;grid-auto-columns:auto;align-items:center;gap:12px;padding:12px 16px;border:0;border-bottom:1px solid var(--hk-border);background:transparent;color:inherit;text-align:left}.row:last-child{border-bottom:0}.row:hover{background:var(--hk-soft)}
-      .row .tile{width:34px;height:34px}.row-text{min-width:0;display:grid;gap:2px}.row-text strong{overflow:hidden;font-size:calc(13px*var(--hk-fs,1));font-weight:600;text-overflow:ellipsis;white-space:nowrap}.row-text .id{margin:0;max-width:none;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.row-text small{overflow:hidden;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));text-overflow:ellipsis;white-space:nowrap}.date{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));white-space:nowrap}
+      .row .tile{width:34px;height:34px}.tile .updpic{width:100%;height:100%;object-fit:contain;border-radius:inherit}.row-text{min-width:0;display:grid;gap:2px}.row-text strong{overflow:hidden;font-size:calc(13px*var(--hk-fs,1));font-weight:600;text-overflow:ellipsis;white-space:nowrap}.row-text .id{margin:0;max-width:none;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.row-text small{overflow:hidden;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));text-overflow:ellipsis;white-space:nowrap}.date{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));white-space:nowrap}
       .pill{display:inline-flex;align-items:center;gap:6px;width:max-content;padding:3px 9px;border-radius:99px;font-size:calc(11px*var(--hk-fs,1));font-weight:600;white-space:nowrap;color:color-mix(in srgb,var(--hk-blue) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-blue) 13%,transparent)}
       .pill.ok{color:color-mix(in srgb,var(--hk-green) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-green) 14%,transparent)}.pill.warn{color:color-mix(in srgb,var(--hk-amber) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-amber) 16%,transparent)}.pill.red{color:color-mix(in srgb,var(--hk-red) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-red) 13%,transparent)}.pill.mute{color:color-mix(in srgb,var(--hk-gray) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-gray) 16%,transparent)}.pill.violet{color:color-mix(in srgb,var(--hk-violet) 60%,var(--hk-text));background:color-mix(in srgb,var(--hk-violet) 14%,transparent)}
       .linklike{padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}.linklike:hover{text-decoration:underline}.qrow{grid-template-columns:auto minmax(0,1fr) auto auto}.qconfirm{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}.factaction{display:block;margin-top:6px}
@@ -2318,6 +2334,9 @@ class OverviewMixin {
     }
     const hacsGone = this.data.meta?.hacs_removed || [];
     if (hacsGone.length) items.push({ key: "hacs_removed", area: "care", tone: "warn", icon: "mdi:store-alert-outline", text: hacsGone.length === 1 ? this.t("hacsTodoOne", { name: hacsGone[0].name || hacsGone[0].id }) : this.t("hacsTodoMany", { n: hacsGone.length }), hintText: [hacsGone.length > 1 ? hacsGone.slice(0, 3).map(r => r.name || r.id).join(", ") + (hacsGone.length > 3 ? ", …" : "") : hacsGone[0].reason, this.t("hacsTodoHint")].filter(Boolean).join(" · "), pill: this.t("hacsTodoPill"), jump: 'data-jump="components" data-jump-tab="hacs" data-jump-lf="hacsrepos|state|removed"' });
+    this.ensurePreflight();
+    const updates = this.preflight?.state?.updates || [];
+    if (updates.length) items.push({ key: "updates", area: "care", tone: "warn", icon: "mdi:package-up", text: this.t(updates.length === 1 ? "todoUpdates_1" : "todoUpdates_n", { n: this.formatNumber(updates.length) }), hintText: updates.slice(0, 3).map(u => u.name).join(", ") + (updates.length > 3 ? ", …" : ""), jump: 'data-jump="maintenance" data-jump-tab="updates"' });
     const outages = this.causeList().filter(c => !this.quietCause(c));
     if (outages.length) items.push({ key: "outages", area: "findings", tone: "red", icon: "mdi:source-branch", label: "actOutages", hintText: this.outagesHint(outages), count: outages.length, view: "findingsNav", filter: "" });
     const regressions = (this.data.regressions || []).length;
@@ -5831,7 +5850,7 @@ class MaintenanceMixin {
       const text = detail[c.check] ? detail[c.check]() : c.count ? `${c.count}${names ? ` · ${names}` : ""}` : this.t("pf_count_none");
       const tone = { ok: "ok", warn: "warn", red: "red" }[c.level] || "mute";
       const icon = c.level === "ok" ? "mdi:check" : c.level === "red" ? "mdi:close-octagon-outline" : "mdi:alert-outline";
-      return `<div class="row rel"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`pf_${c.check}`)}</strong><small>${text}</small></span></div>`;
+      return `<div class="row rel"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`pf_${c.check}`)}</strong><small>${text}</small></span>${c.check === "backup" ? `<button class="btn quiet" data-jump="maintenance" data-jump-tab="backup">${this.t("pfOpenBackup")}</button>` : ""}</div>`;
     }).join("");
   }
 
@@ -5846,33 +5865,77 @@ class MaintenanceMixin {
     return `<div class="panelhead topline"><div><h3>${this.t("pfAfterTitle")}</h3></div></div><p class="factnote">${text}${go}</p>`;
   }
 
-  preflightCard() {
+  // Loads once and again after every new scan, so the overview and the Updates tab never show an old report.
+  ensurePreflight() {
+    const key = this.data?.meta?.scanned_at || "";
+    if (this.preflightLoading || (this._pfKey === key && this._pfRequested)) return;
+    this._pfRequested = true; this._pfKey = key;
+    setTimeout(() => this.loadPreflight(), 0);
+  }
+
+  // The icon of an update: the picture Home Assistant knows, if it is a same-origin or https address.
+  updatePicture(u) {
+    const ok = typeof u.picture === "string" && (u.picture.startsWith("/") && !u.picture.startsWith("//") || u.picture.startsWith("https://"));
+    return ok ? `<img class="updpic" src="${this.esc(u.picture)}" alt="" loading="lazy">` : `<ha-icon icon="mdi:package-up"></ha-icon>`;
+  }
+
+  updateRow(u, watching) {
+    const pills = [
+      u.blocked ? `<span class="pill red">${this.t("updBlocked")}</span>` : "",
+      u.in_progress ? `<span class="pill blue">${this.t("updRunning")}</span>` : "",
+      u.auto_update ? `<span class="pill mute">${this.t("updAuto")}</span>` : "",
+      u.group === "system" && watching ? `<span class="pill blue">${this.t("updWatch")}</span>` : "",
+    ].join("");
+    const notes = typeof u.release_url === "string" && u.release_url.startsWith("https://") ? `<a class="btn quiet" href="${this.esc(u.release_url)}" target="_blank" rel="noopener noreferrer">${this.t("updNotes")}</a>` : "";
+    const versions = `${this.esc(u.installed ?? "–")} → ${this.esc(u.latest ?? "–")}`;
+    return `<div class="row rel"><span class="tile mute">${this.updatePicture(u)}</span><span class="row-text"><strong>${this.esc(u.name)}</strong><small>${versions}${u.release_summary ? ` · ${this.esc(u.release_summary)}` : ""}</small></span>${pills}${notes}<button class="btn" data-ha-path="/config/updates">${this.t("updOpenHa")}</button></div>`;
+  }
+
+  updatesCard() {
     const p = this.preflight;
     const head = this.pageBar({ at: this.loadedAt("preflight"), loading: this.preflightLoading, attr: "data-pf-refresh" });
     if (this.preflightError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.preflightError)}</div></div></div>`;
     if (!p) return `<div class="stack">${head}<div class="panel">${this.skeleton("preflightLoading")}</div></div>`;
-    const updates = p.state.updates || [];
-    const updateRow = `<div class="row rel"><span class="tile ${updates.length ? "warn" : "ok"}"><ha-icon icon="mdi:package-up"></ha-icon></span><span class="row-text"><strong>${this.t("pf_updates")}</strong><small>${updates.length ? updates.slice(0, 6).map(u => `${this.esc(u.name)} ${this.esc(u.installed ?? "")} → ${this.esc(u.latest ?? "")}`).join(" · ") : this.t("pf_updates_none")}</small></span></div>`;
-    return `<div class="stack">${head}<div class="panel">${this.preflightRows(p.state, p.checks)}${updateRow}${this.preflightAfter(p.watch)}</div></div>`;
+    const updates = p.state.updates || [], counts = p.counts || {};
+    const total = counts.total ?? updates.length;
+    const tone = { ready: "ok", look: "warn", stop: "red" }[p.verdict] || "mute";
+    const icon = { ready: "mdi:check-circle-outline", look: "mdi:alert-outline", stop: "mdi:close-octagon-outline" }[p.verdict] || "mdi:help-circle-outline";
+    const open = p.checks.filter(c => c.level !== "ok").map(c => this.t(`pf_${c.check}`));
+    const title = total ? this.t(`updVerdict_${p.verdict}`) : this.t("updVerdictNone");
+    const sub = [total ? this.t(total === 1 ? "updPending_1" : "updPending_n", { n: this.formatNumber(total) }) : "", open.length ? this.t("updCheckFirst", { items: open.join(", ") }) : ""].filter(Boolean).join(" · ");
+    const verdict = `<div class="row rel"><span class="tile ${total ? tone : "ok"}"><ha-icon icon="${total ? icon : "mdi:check-circle-outline"}"></ha-icon></span><span class="row-text"><strong>${title}</strong>${sub ? `<small>${this.esc(sub)}</small>` : ""}</span></div>`;
+    const tiles = this.sumTiles([
+      { label: this.t("updSumOpen"), value: this.formatNumber(total), tone: total ? "warn" : "ok" },
+      { label: this.t("updGroup_system"), value: this.formatNumber(counts.system ?? 0), tone: "mute" },
+      { label: this.t("updGroup_app"), value: this.formatNumber(counts.app ?? 0), tone: "mute" },
+      { label: this.t("updSumBlocked"), value: this.formatNumber(counts.blocked ?? 0), tone: counts.blocked ? "red" : "ok" },
+    ]);
+    const watching = p.watch?.hours > 0;
+    const groups = ["system", "app", "hacs", "device"].map(g => {
+      const rows = updates.filter(u => u.group === g);
+      const body = rows.length ? rows.map(u => this.updateRow(u, watching)).join("") : `<div class="row rel"><span class="tile ok"><ha-icon icon="mdi:check"></ha-icon></span><span class="row-text"><small>${this.t(`updCurrent_${g}`)}</small></span></div>`;
+      return `<div class="sectionlabel">${this.t(`updGroup_${g}`)}</div>${body}`;
+    }).join("");
+    const list = total ? `<div class="panel">${groups}</div>` : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("updAllCurrent")}</div></div>`;
+    return `<div class="stack">${head}${tiles}<div class="panel">${verdict}${this.preflightRows(p.state, p.checks)}</div>${list}<div class="panel">${this.preflightAfter(p.watch)}</div></div>`;
   }
 
   maintenanceView() {
-    if (!this.preflight && !this.preflightLoading && !this._pfRequested) { this._pfRequested = true; setTimeout(() => this.loadPreflight(), 0); }
+    this.ensurePreflight();
     this.ensureBackup();
     const checks = this.backup?.available ? this.backup.checks || [] : [];
     const problems = checks.filter(c => c.level === "problem").length, notes = checks.filter(c => c.level === "note").length;
-    const pf = this.preflight, pfChecks = pf?.checks || [];
-    const pfRed = pfChecks.filter(c => c.level === "red").length, pfWarn = pfChecks.filter(c => c.level === "warn").length;
-    const updates = pf?.state?.updates?.length || 0;
+    const pf = this.preflight;
+    const updates = pf?.counts?.total ?? pf?.state?.updates?.length ?? 0;
     const backupTone = !this.backup?.available ? "mute" : problems ? "red" : notes ? "warn" : "ok";
-    const pfTone = !pf ? "mute" : pfRed ? "red" : pfWarn ? "warn" : "ok";
+    const pfTone = !pf ? "mute" : !updates ? "ok" : { stop: "red", look: "warn" }[pf.verdict] || "ok";
     const goalsMissed = (this.goals?.goals || []).filter(g => g.state === "missed").length;
     this.ensureGoals();
     const bp = this.blueprints, bpBad = bp ? (bp.missing || 0) + (bp.broken || 0) : 0;
     const tabs = [
       { id: "backup", icon: "mdi:backup-restore", label: this.t("backupTitle"), hint: "maintHintBackup", pill: !this.backup?.available ? "" : problems ? this.t("mtProblems", { n: problems }) : notes ? this.t("mtNotes", { n: notes }) : this.t("bhLevel_ok"), tone: backupTone },
       { id: "backups", icon: "mdi:delete-sweep-outline", label: this.t("bkcTab"), hint: "maintHintBkc", pill: this.bkc?.available && this.bkc.rows?.length ? this.formatNumber(this.bkc.rows.length) : "", tone: "mute" },
-      { id: "preflight", icon: "mdi:rocket-launch-outline", label: this.t("preflightTitle"), hint: "maintHintPreflight", pill: !pf ? "" : pfRed || pfWarn ? this.t("mtOpen", { n: pfRed + pfWarn }) : this.t("bhLevel_ok"), tone: pfTone },
+      { id: "updates", icon: "mdi:package-up", label: this.t("updatesTab"), hint: "maintHintUpdates", pill: updates ? this.formatNumber(updates) : "", tone: pfTone },
       { id: "blueprints", icon: "mdi:file-code-outline", label: this.t("bpTab"), hint: "maintHintBlueprints", pill: bpBad ? this.t("mtOpen", { n: bpBad }) : "", tone: "warn" },
       { id: "devices", icon: "mdi:devices", label: this.t("lifeRemovedTab"), hint: "maintHintDevices", pill: this.removed?.length ? this.formatNumber(this.removed.length) : "", tone: "mute" },
       { id: "goals", icon: "mdi:target", label: this.t("goalsTitle"), hint: "maintHintGoals", pill: goalsMissed ? this.t("tilesMissed", { count: goalsMissed }) : "", tone: "red" },
@@ -5880,7 +5943,7 @@ class MaintenanceMixin {
     this.ensureBackupCleanup();
     const open = this.viewTabOf("maintenance", tabs, "backup");
     const grid = this.navTiles("maintenance", tabs.map(tab => ({ ...tab, hint: this.t(tab.hint), tone: tab.pill ? tab.tone : "ok" })), open, this.t("maintenance"), true);
-    return `<div class="stack">${grid}${open === "goals" ? this.goalsCard() : open === "preflight" ? this.preflightCard() : open === "devices" ? this.removedCard() : open === "blueprints" ? this.blueprintsCard() : open === "backups" ? this.backupCleanupCard() : this.backupCard()}</div>`;
+    return `<div class="stack">${grid}${open === "goals" ? this.goalsCard() : open === "updates" ? this.updatesCard() : open === "devices" ? this.removedCard() : open === "blueprints" ? this.blueprintsCard() : open === "backups" ? this.backupCleanupCard() : this.backupCard()}</div>`;
   }
 }
 
@@ -10836,7 +10899,7 @@ Object.assign(TEXT.de, {
   setLanguage: "Sprache", setLanguageHint: "Gilt für dieses Panel und wird in deinem Benutzerprofil gespeichert. Automatisch folgt der Sprache von Home Assistant.", langAuto: "Automatisch",
   setTabProtection: "Schutz und Ausnahmen", setHintLook: "Sprache, Dichte und Darstellung.", setHintProtection: "Schutzmodus und ausgeblendete Befunde.", setHintScan: "Wann geprüft wird, Grenzwerte und Meldungen.", setHintInfo: "Version, Diagnose und Support.",
   setEveryHours: "alle {n} h", setManual: "von Hand", setOn: "an", setOff: "aus",
-  maintHintBackup: "Backups prüfen und schützen.", maintHintPreflight: "Vor einem Update auf Probleme prüfen.", maintHintBlueprints: "Blueprints, die fehlen oder defekt sind.", maintHintDevices: "Entfernte Geräte ansehen.", maintHintGoals: "Eigene Grenzen für „in Ordnung“.",
+  maintHintBackup: "Backups prüfen und schützen.", maintHintUpdates: "Offene Updates und was vorher zu prüfen ist.", maintHintBlueprints: "Blueprints, die fehlen oder defekt sind.", maintHintDevices: "Entfernte Geräte ansehen.", maintHintGoals: "Eigene Grenzen für „in Ordnung“.",
   actRepairValues: "Werte reparieren", actHintRepair: "Falsche Werte im Verlauf und in der Statistik ersetzen.", actMeter: "Zähler wechseln", actHintMeter: "Die Statistik bei einem neuen Zähler fortführen.", actExchange: "Gerät austauschen", actHintExchange: "Durch ein neues Gerät ersetzen und alles übernehmen.",
   actHintReplace: "Überall durch eine andere Entität ersetzen.", actHintDisable: "Erst deaktivieren; nach der Wartezeit entfernen.",
   navGroupActions: "Aktionen", navGroupSecurity: "Sicherheit",
@@ -10879,7 +10942,7 @@ Object.assign(TEXT.en, {
   setLanguage: "Language", setLanguageHint: "Applies to this panel and is saved in your user profile. Automatic follows the language of Home Assistant.", langAuto: "Automatic",
   setTabProtection: "Protection and exceptions", setHintLook: "Language, density and appearance.", setHintProtection: "Protection mode and hidden findings.", setHintScan: "When it checks, limits and messages.", setHintInfo: "Version, diagnostics and support.",
   setEveryHours: "every {n} h", setManual: "manual", setOn: "on", setOff: "off",
-  maintHintBackup: "Check and protect backups.", maintHintPreflight: "Check for problems before an update.", maintHintBlueprints: "Blueprints that are missing or broken.", maintHintDevices: "Look at removed devices.", maintHintGoals: "Your own limits for what in order means.",
+  maintHintBackup: "Check and protect backups.", maintHintUpdates: "Open updates and what to check first.", maintHintBlueprints: "Blueprints that are missing or broken.", maintHintDevices: "Look at removed devices.", maintHintGoals: "Your own limits for what in order means.",
   actRepairValues: "Repair values", actHintRepair: "Replace wrong values in the history and the statistics.", actMeter: "Replace the meter", actHintMeter: "Carry the statistics on with a new meter.", actExchange: "Exchange the device", actHintExchange: "Replace it with a new device and carry everything over.",
   actHintReplace: "Replace it with another entity everywhere.", actHintDisable: "Disable first; remove after the waiting time.",
   navGroupActions: "Actions", navGroupSecurity: "Security",

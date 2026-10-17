@@ -116,7 +116,7 @@ class MaintenanceMixin {
       const text = detail[c.check] ? detail[c.check]() : c.count ? `${c.count}${names ? ` · ${names}` : ""}` : this.t("pf_count_none");
       const tone = { ok: "ok", warn: "warn", red: "red" }[c.level] || "mute";
       const icon = c.level === "ok" ? "mdi:check" : c.level === "red" ? "mdi:close-octagon-outline" : "mdi:alert-outline";
-      return `<div class="row rel"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`pf_${c.check}`)}</strong><small>${text}</small></span></div>`;
+      return `<div class="row rel"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`pf_${c.check}`)}</strong><small>${text}</small></span>${c.check === "backup" ? `<button class="btn quiet" data-jump="maintenance" data-jump-tab="backup">${this.t("pfOpenBackup")}</button>` : ""}</div>`;
     }).join("");
   }
 
@@ -131,33 +131,77 @@ class MaintenanceMixin {
     return `<div class="panelhead topline"><div><h3>${this.t("pfAfterTitle")}</h3></div></div><p class="factnote">${text}${go}</p>`;
   }
 
-  preflightCard() {
+  // Loads once and again after every new scan, so the overview and the Updates tab never show an old report.
+  ensurePreflight() {
+    const key = this.data?.meta?.scanned_at || "";
+    if (this.preflightLoading || (this._pfKey === key && this._pfRequested)) return;
+    this._pfRequested = true; this._pfKey = key;
+    setTimeout(() => this.loadPreflight(), 0);
+  }
+
+  // The icon of an update: the picture Home Assistant knows, if it is a same-origin or https address.
+  updatePicture(u) {
+    const ok = typeof u.picture === "string" && (u.picture.startsWith("/") && !u.picture.startsWith("//") || u.picture.startsWith("https://"));
+    return ok ? `<img class="updpic" src="${this.esc(u.picture)}" alt="" loading="lazy">` : `<ha-icon icon="mdi:package-up"></ha-icon>`;
+  }
+
+  updateRow(u, watching) {
+    const pills = [
+      u.blocked ? `<span class="pill red">${this.t("updBlocked")}</span>` : "",
+      u.in_progress ? `<span class="pill blue">${this.t("updRunning")}</span>` : "",
+      u.auto_update ? `<span class="pill mute">${this.t("updAuto")}</span>` : "",
+      u.group === "system" && watching ? `<span class="pill blue">${this.t("updWatch")}</span>` : "",
+    ].join("");
+    const notes = typeof u.release_url === "string" && u.release_url.startsWith("https://") ? `<a class="btn quiet" href="${this.esc(u.release_url)}" target="_blank" rel="noopener noreferrer">${this.t("updNotes")}</a>` : "";
+    const versions = `${this.esc(u.installed ?? "–")} → ${this.esc(u.latest ?? "–")}`;
+    return `<div class="row rel"><span class="tile mute">${this.updatePicture(u)}</span><span class="row-text"><strong>${this.esc(u.name)}</strong><small>${versions}${u.release_summary ? ` · ${this.esc(u.release_summary)}` : ""}</small></span>${pills}${notes}<button class="btn" data-ha-path="/config/updates">${this.t("updOpenHa")}</button></div>`;
+  }
+
+  updatesCard() {
     const p = this.preflight;
     const head = this.pageBar({ at: this.loadedAt("preflight"), loading: this.preflightLoading, attr: "data-pf-refresh" });
     if (this.preflightError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.preflightError)}</div></div></div>`;
     if (!p) return `<div class="stack">${head}<div class="panel">${this.skeleton("preflightLoading")}</div></div>`;
-    const updates = p.state.updates || [];
-    const updateRow = `<div class="row rel"><span class="tile ${updates.length ? "warn" : "ok"}"><ha-icon icon="mdi:package-up"></ha-icon></span><span class="row-text"><strong>${this.t("pf_updates")}</strong><small>${updates.length ? updates.slice(0, 6).map(u => `${this.esc(u.name)} ${this.esc(u.installed ?? "")} → ${this.esc(u.latest ?? "")}`).join(" · ") : this.t("pf_updates_none")}</small></span></div>`;
-    return `<div class="stack">${head}<div class="panel">${this.preflightRows(p.state, p.checks)}${updateRow}${this.preflightAfter(p.watch)}</div></div>`;
+    const updates = p.state.updates || [], counts = p.counts || {};
+    const total = counts.total ?? updates.length;
+    const tone = { ready: "ok", look: "warn", stop: "red" }[p.verdict] || "mute";
+    const icon = { ready: "mdi:check-circle-outline", look: "mdi:alert-outline", stop: "mdi:close-octagon-outline" }[p.verdict] || "mdi:help-circle-outline";
+    const open = p.checks.filter(c => c.level !== "ok").map(c => this.t(`pf_${c.check}`));
+    const title = total ? this.t(`updVerdict_${p.verdict}`) : this.t("updVerdictNone");
+    const sub = [total ? this.t(total === 1 ? "updPending_1" : "updPending_n", { n: this.formatNumber(total) }) : "", open.length ? this.t("updCheckFirst", { items: open.join(", ") }) : ""].filter(Boolean).join(" · ");
+    const verdict = `<div class="row rel"><span class="tile ${total ? tone : "ok"}"><ha-icon icon="${total ? icon : "mdi:check-circle-outline"}"></ha-icon></span><span class="row-text"><strong>${title}</strong>${sub ? `<small>${this.esc(sub)}</small>` : ""}</span></div>`;
+    const tiles = this.sumTiles([
+      { label: this.t("updSumOpen"), value: this.formatNumber(total), tone: total ? "warn" : "ok" },
+      { label: this.t("updGroup_system"), value: this.formatNumber(counts.system ?? 0), tone: "mute" },
+      { label: this.t("updGroup_app"), value: this.formatNumber(counts.app ?? 0), tone: "mute" },
+      { label: this.t("updSumBlocked"), value: this.formatNumber(counts.blocked ?? 0), tone: counts.blocked ? "red" : "ok" },
+    ]);
+    const watching = p.watch?.hours > 0;
+    const groups = ["system", "app", "hacs", "device"].map(g => {
+      const rows = updates.filter(u => u.group === g);
+      const body = rows.length ? rows.map(u => this.updateRow(u, watching)).join("") : `<div class="row rel"><span class="tile ok"><ha-icon icon="mdi:check"></ha-icon></span><span class="row-text"><small>${this.t(`updCurrent_${g}`)}</small></span></div>`;
+      return `<div class="sectionlabel">${this.t(`updGroup_${g}`)}</div>${body}`;
+    }).join("");
+    const list = total ? `<div class="panel">${groups}</div>` : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("updAllCurrent")}</div></div>`;
+    return `<div class="stack">${head}${tiles}<div class="panel">${verdict}${this.preflightRows(p.state, p.checks)}</div>${list}<div class="panel">${this.preflightAfter(p.watch)}</div></div>`;
   }
 
   maintenanceView() {
-    if (!this.preflight && !this.preflightLoading && !this._pfRequested) { this._pfRequested = true; setTimeout(() => this.loadPreflight(), 0); }
+    this.ensurePreflight();
     this.ensureBackup();
     const checks = this.backup?.available ? this.backup.checks || [] : [];
     const problems = checks.filter(c => c.level === "problem").length, notes = checks.filter(c => c.level === "note").length;
-    const pf = this.preflight, pfChecks = pf?.checks || [];
-    const pfRed = pfChecks.filter(c => c.level === "red").length, pfWarn = pfChecks.filter(c => c.level === "warn").length;
-    const updates = pf?.state?.updates?.length || 0;
+    const pf = this.preflight;
+    const updates = pf?.counts?.total ?? pf?.state?.updates?.length ?? 0;
     const backupTone = !this.backup?.available ? "mute" : problems ? "red" : notes ? "warn" : "ok";
-    const pfTone = !pf ? "mute" : pfRed ? "red" : pfWarn ? "warn" : "ok";
+    const pfTone = !pf ? "mute" : !updates ? "ok" : { stop: "red", look: "warn" }[pf.verdict] || "ok";
     const goalsMissed = (this.goals?.goals || []).filter(g => g.state === "missed").length;
     this.ensureGoals();
     const bp = this.blueprints, bpBad = bp ? (bp.missing || 0) + (bp.broken || 0) : 0;
     const tabs = [
       { id: "backup", icon: "mdi:backup-restore", label: this.t("backupTitle"), hint: "maintHintBackup", pill: !this.backup?.available ? "" : problems ? this.t("mtProblems", { n: problems }) : notes ? this.t("mtNotes", { n: notes }) : this.t("bhLevel_ok"), tone: backupTone },
       { id: "backups", icon: "mdi:delete-sweep-outline", label: this.t("bkcTab"), hint: "maintHintBkc", pill: this.bkc?.available && this.bkc.rows?.length ? this.formatNumber(this.bkc.rows.length) : "", tone: "mute" },
-      { id: "preflight", icon: "mdi:rocket-launch-outline", label: this.t("preflightTitle"), hint: "maintHintPreflight", pill: !pf ? "" : pfRed || pfWarn ? this.t("mtOpen", { n: pfRed + pfWarn }) : this.t("bhLevel_ok"), tone: pfTone },
+      { id: "updates", icon: "mdi:package-up", label: this.t("updatesTab"), hint: "maintHintUpdates", pill: updates ? this.formatNumber(updates) : "", tone: pfTone },
       { id: "blueprints", icon: "mdi:file-code-outline", label: this.t("bpTab"), hint: "maintHintBlueprints", pill: bpBad ? this.t("mtOpen", { n: bpBad }) : "", tone: "warn" },
       { id: "devices", icon: "mdi:devices", label: this.t("lifeRemovedTab"), hint: "maintHintDevices", pill: this.removed?.length ? this.formatNumber(this.removed.length) : "", tone: "mute" },
       { id: "goals", icon: "mdi:target", label: this.t("goalsTitle"), hint: "maintHintGoals", pill: goalsMissed ? this.t("tilesMissed", { count: goalsMissed }) : "", tone: "red" },
@@ -165,6 +209,6 @@ class MaintenanceMixin {
     this.ensureBackupCleanup();
     const open = this.viewTabOf("maintenance", tabs, "backup");
     const grid = this.navTiles("maintenance", tabs.map(tab => ({ ...tab, hint: this.t(tab.hint), tone: tab.pill ? tab.tone : "ok" })), open, this.t("maintenance"), true);
-    return `<div class="stack">${grid}${open === "goals" ? this.goalsCard() : open === "preflight" ? this.preflightCard() : open === "devices" ? this.removedCard() : open === "blueprints" ? this.blueprintsCard() : open === "backups" ? this.backupCleanupCard() : this.backupCard()}</div>`;
+    return `<div class="stack">${grid}${open === "goals" ? this.goalsCard() : open === "updates" ? this.updatesCard() : open === "devices" ? this.removedCard() : open === "blueprints" ? this.blueprintsCard() : open === "backups" ? this.backupCleanupCard() : this.backupCard()}</div>`;
   }
 }

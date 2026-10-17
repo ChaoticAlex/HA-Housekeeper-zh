@@ -1571,18 +1571,18 @@ const COSTS = {
 test("the maintenance view loads the preflight; the recorder view offers the cost analysis on request", async () => {
   const { el, shadow } = panel("en", { setTimeout: () => 0 });
   const sent = [];
-  const state = { ha_version: "2026.2.3", backup: { available: true, level: "ok", age_hours: 5 }, disk: { free: 41e9 }, repairs: [{ issue_id: "old", domain: "demo" }], failed_entries: [], broken: [], updates: [{ entity_id: "update.core", name: "Core", installed: "2026.2.3", latest: "2026.3.0" }] };
-  const report = { state, checks: [{ check: "backup", level: "ok" }, { check: "repairs", level: "warn", count: 1 }, { check: "failed_entries", level: "ok", count: 0 }, { check: "broken", level: "ok", count: 0 }], watch: { hours: 24, active: null } };
+  const state = { ha_version: "2026.2.3", backup: { available: true, level: "ok", age_hours: 5 }, disk: { free: 41e9 }, repairs: [{ issue_id: "old", domain: "demo" }], failed_entries: [], broken: [], updates: [{ entity_id: "update.core", name: "Core", installed: "2026.2.3", latest: "2026.3.0", group: "system" }] };
+  const report = { state, checks: [{ check: "backup", level: "ok" }, { check: "repairs", level: "warn", count: 1 }, { check: "failed_entries", level: "ok", count: 0 }, { check: "broken", level: "ok", count: 0 }], verdict: "look", counts: { total: 1, system: 1, app: 0, hacs: 0, device: 0, blocked: 0 }, watch: { hours: 24, active: null } };
   el._hass = { language: "en", callWS: async msg => { sent.push(msg.type); return msg.type.endsWith("recorder_costs") ? COSTS : report; } };
-  el.view = "maintenance"; el.viewTab = { maintenance: "preflight" };
+  el.view = "maintenance"; el.viewTab = { maintenance: "updates" };
   el.render();
-  assert.ok(shadow.innerHTML.includes("Update preflight") && shadow.innerHTML.includes("Checking"));
+  assert.ok(shadow.innerHTML.includes("Updates") && shadow.innerHTML.includes("Checking"));
   assert.ok(!shadow.innerHTML.includes("Start analysis") && !shadow.innerHTML.includes("Storage use"), "the recorder topics moved to the Recorder view");
   await el.loadPreflight();
   let html = shadow.innerHTML;
   assert.deepEqual(sent, ["ha_housekeeper/preflight"]);
   assert.ok(html.includes("Last backup 5 h ago") && html.includes("Open repairs") && html.includes("1 · old"));
-  assert.ok(html.includes("Core 2026.2.3 → 2026.3.0") && html.includes("watches for 24 hours"));
+  assert.ok(html.includes("2026.2.3 → 2026.3.0") && html.includes("1 update open") && html.includes("watches for 24 hours"));
   el.view = "recorder"; el.viewTab = { recorder: "costs" };
   el.render();
   assert.ok(shadow.innerHTML.includes("Start analysis"));
@@ -1656,7 +1656,7 @@ test("the backup card puts text and a word next to every level and escapes what 
     "not found any more", "Latest backups", "How to test a restore", "Housekeeper never performs a restore itself"]) assert.ok(html.includes(text), text);
   for (const word of [">OK<", ">Note<", ">Problem<"]) assert.ok(html.includes(word), word);
   assert.ok(!html.includes("<b>>") && !html.includes("cloud.<b>"));
-  assert.ok(html.indexOf("Backup protection") < html.indexOf("Update preflight"), "the card comes first");
+  assert.ok(html.indexOf("Backup protection") < html.indexOf("Updates"), "the card comes first");
 });
 
 test("the backup card says when the component is missing or the call fails", async () => {
@@ -1700,12 +1700,25 @@ test("backup confirmations are inline, saved with a date, and can be taken back"
 
 test("the preflight says what follows an update: the watch is on, running or off", () => {
   const { el, shadow } = panel("en");
-  const state = { ha_version: "2026.3.0", backup: { available: false }, repairs: [], failed_entries: [], broken: [], pending_updates: [] };
-  const show = watch => { el.preflight = { state, checks: [{ check: "backup", level: "warn" }], watch }; el.view = "maintenance"; el.viewTab = { maintenance: "preflight" }; el._pfRequested = true; el.render(); return shadow.innerHTML; };
+  const state = { ha_version: "2026.3.0", backup: { available: false }, repairs: [], failed_entries: [], broken: [], updates: [] };
+  const show = watch => { el.preflight = { state, checks: [{ check: "backup", level: "warn" }], watch }; el.view = "maintenance"; el.viewTab = { maintenance: "updates" }; el._pfRequested = true; el.render(); return shadow.innerHTML; };
   assert.ok(show({ hours: 24, active: null }).includes("watches for 24 hours") && !show({ hours: 24, active: null }).includes("data-watch-go"));
   const running = show({ hours: 24, active: { id: "w1", until: new Date(Date.now() + 5 * 3600000).toISOString(), triggers: [{ kind: "ha_version", from: "1", to: "2" }], samples: 1, new: 2 } });
   assert.ok(running.includes("2 findings so far") && running.includes('data-watch-go="w1"'));
   assert.ok(show({ hours: 0, active: null }).includes("switched off"));
+});
+
+test("the updates tab judges first, groups the updates and trusts only safe picture addresses", () => {
+  const { el, shadow } = panel("en");
+  const update = (group, name, extra = {}) => ({ entity_id: `update.${name}`, name, installed: "1", latest: "2", group, ...extra });
+  const updates = [update("system", "Core"), update("app", "Cloudflared", { picture: "/api/hassio/addons/x/icon" }), update("hacs", "Card", { blocked: true, picture: "javascript:alert(1)" })];
+  el.preflight = { state: { backup: { available: true, level: "ok", age_hours: 5 }, disk: { free: 41e9 }, repairs: [], failed_entries: [], broken: [], updates },
+    checks: [{ check: "backup", level: "ok" }, { check: "broken", level: "warn", count: 2 }], verdict: "look", counts: { total: 3, system: 1, app: 1, hacs: 1, device: 0, blocked: 1 }, watch: { hours: 24, active: null } };
+  el.view = "maintenance"; el.viewTab = { maintenance: "updates" }; el._pfRequested = true; el.render();
+  const html = shadow.innerHTML;
+  assert.ok(html.includes("Look first") && html.includes("3 updates open") && html.includes("To check: Missing references"));
+  assert.ok(html.indexOf("Cloudflared") < html.indexOf("Card") && html.includes("HACS cannot install it") && html.includes("All device firmware is up to date."));
+  assert.ok(html.includes('src="/api/hassio/addons/x/icon"') && !html.includes("javascript:"));
 });
 
 test("inventory rows and sortable headers can be used with the keyboard", () => {
@@ -4133,7 +4146,7 @@ test("detail, maintenance and settings offer their options as tiles that open on
   assert.equal(el.view, "repair"); assert.equal(el.repairTask, "repair_counter"); assert.equal(el.counterId, "sensor.water");
   assert.equal(sent.at(-1).type, "ha_housekeeper/range_series");
   el.view = "maintenance"; el.render();
-  for (const id of ["backup", "preflight", "blueprints", "devices", "goals"]) assert.ok(shadow.innerHTML.includes(`data-view-tab="maintenance|${id}"`), id);
+  for (const id of ["backup", "updates", "blueprints", "devices", "goals"]) assert.ok(shadow.innerHTML.includes(`data-view-tab="maintenance|${id}"`), id);
   el.view = "settings"; el.settingsTab = "protection"; el.render();
   for (const id of ["look", "protection", "scan", "info"]) assert.ok(shadow.innerHTML.includes(`data-set-tab="${id}"`), id);
   assert.ok(shadow.innerHTML.includes("data-protection") && !shadow.innerHTML.includes("data-notify"));

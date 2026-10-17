@@ -5,8 +5,9 @@
 ### Geändert
 
 - **Wartung, Updates:**
-  - Der Update-Check prüft das Backup nach dem Backup-Schutz (Zeitplan, letzter Lauf) und hat eine Zeile „Freier Speicher“.
-  - Die Liste der offenen Updates ist nach System, Apps, HACS und Geräten gruppiert; HACS-Updates, die HACS nicht installieren kann, sind gekennzeichnet.
+  - Der Reiter „Update-Preflight“ heißt jetzt „Updates“: ein Gesamturteil (Bereit, Erst ansehen, Stopp), die Prüfzeilen und die Liste der offenen Updates, gruppiert nach System, Apps, HACS und Geräten, mit Sprung nach Home Assistant.
+  - Das Backup wird nach dem Backup-Schutz beurteilt (Zeitplan, letzter Lauf); neu ist die Zeile „Freier Speicher“; HACS-Updates, die HACS nicht installieren kann, sind gekennzeichnet.
+  - Auf der Übersicht steht eine Zeile „n Updates offen“ (ohne Einfluss auf den Ring).
 - **Weniger CPU-Last:**
   - Zeitsteuerung und Code der Hintergrundarbeit sind optimiert.
   - Die Auswertungen aus der Recorder-Datenbank laufen seltener und verteilt, die Abfragen sind sparsamer (abgeschlossene Tage werden nur noch einmal gerechnet, unnötige Suchen entfallen), und Scans nach Ausfällen rücken bei langsamen Systemen weiter auseinander.
@@ -73,8 +74,9 @@
 #### Changed
 
 - **Maintenance, updates:**
-  - The update check judges the backup like the backup protection does (schedule, last run) and has a "Free space" line.
-  - The list of open updates is grouped into system, apps, HACS and devices; HACS updates that HACS cannot install are marked.
+  - The "Update preflight" tab is now called "Updates": a verdict (Ready, Look first, Stop), the check lines and the list of open updates, grouped into system, apps, HACS and devices, with a jump to Home Assistant.
+  - The backup is judged like the backup protection does (schedule, last run); there is a new "Free space" line; HACS updates that HACS cannot install are marked.
+  - The overview has an "n updates open" line (without effect on the ring).
 - **Less CPU load:**
   - The timing and the code of the background work are optimised.
   - The analyses of the recorder database run less often and spread out, the queries do less work (finished days are calculated only once, needless searches are skipped), and on slow systems the scans after outages are spaced further apart.

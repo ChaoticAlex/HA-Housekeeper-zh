@@ -124,6 +124,9 @@ class OverviewMixin {
     }
     const hacsGone = this.data.meta?.hacs_removed || [];
     if (hacsGone.length) items.push({ key: "hacs_removed", area: "care", tone: "warn", icon: "mdi:store-alert-outline", text: hacsGone.length === 1 ? this.t("hacsTodoOne", { name: hacsGone[0].name || hacsGone[0].id }) : this.t("hacsTodoMany", { n: hacsGone.length }), hintText: [hacsGone.length > 1 ? hacsGone.slice(0, 3).map(r => r.name || r.id).join(", ") + (hacsGone.length > 3 ? ", …" : "") : hacsGone[0].reason, this.t("hacsTodoHint")].filter(Boolean).join(" · "), pill: this.t("hacsTodoPill"), jump: 'data-jump="components" data-jump-tab="hacs" data-jump-lf="hacsrepos|state|removed"' });
+    this.ensurePreflight();
+    const updates = this.preflight?.state?.updates || [];
+    if (updates.length) items.push({ key: "updates", area: "care", tone: "warn", icon: "mdi:package-up", text: this.t(updates.length === 1 ? "todoUpdates_1" : "todoUpdates_n", { n: this.formatNumber(updates.length) }), hintText: updates.slice(0, 3).map(u => u.name).join(", ") + (updates.length > 3 ? ", …" : ""), jump: 'data-jump="maintenance" data-jump-tab="updates"' });
     const outages = this.causeList().filter(c => !this.quietCause(c));
     if (outages.length) items.push({ key: "outages", area: "findings", tone: "red", icon: "mdi:source-branch", label: "actOutages", hintText: this.outagesHint(outages), count: outages.length, view: "findingsNav", filter: "" });
     const regressions = (this.data.regressions || []).length;

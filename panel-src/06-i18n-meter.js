@@ -35,6 +35,14 @@ Object.assign(TEXT.de, {
   pf_backup: "Backup", pf_disk: "Freier Speicher", pf_disk_text: "{free} frei", pf_repairs: "Offene Reparaturen", pf_failed_entries: "Ausgefallene Integrationen", pf_broken: "Fehlende Referenzen",
   pf_backup_ok: "Letztes Backup vor {hours} h", pf_backup_old: "Letztes Backup vor {hours} h – ein neues ist ratsam", pf_backup_none: "Kein Backup eingerichtet oder vorhanden", pf_backup_unavailable: "Backup-Komponente nicht verfügbar",
   pf_count_none: "keine", pf_updates: "Verfügbare Updates", pf_updates_none: "keine",
+  updatesTab: "Updates", pfOpenBackup: "Backup-Schutz",
+  updBlocked: "HACS kann es nicht installieren", updRunning: "läuft", updAuto: "automatisch", updWatch: "Beobachtung startet", updNotes: "Änderungen", updOpenHa: "In Home Assistant öffnen",
+  updVerdict_ready: "Bereit", updVerdict_look: "Erst ansehen", updVerdict_stop: "Stopp", updVerdictNone: "Keine Updates offen",
+  updPending_1: "1 Update offen", updPending_n: "{n} Updates offen", updCheckFirst: "Zu prüfen: {items}",
+  updSumOpen: "Offen", updSumBlocked: "Blockiert",
+  updGroup_system: "System", updGroup_app: "Apps", updGroup_hacs: "Integrationen und Karten über HACS", updGroup_device: "Geräte",
+  updCurrent_system: "Home Assistant, Betriebssystem und Supervisor sind aktuell.", updCurrent_app: "Alle Apps sind aktuell.", updCurrent_hacs: "Alle HACS-Einträge sind aktuell.", updCurrent_device: "Alle Geräte-Firmwares sind aktuell.",
+  updAllCurrent: "Alles ist aktuell.", todoUpdates_1: "1 Update offen", todoUpdates_n: "{n} Updates offen",
   pfAfterTitle: "Danach", pfAfterOn: "Nach einem Update von Home Assistant, Betriebssystem oder Supervisor beobachtet Housekeeper {hours} Stunden lang, ob etwas ausfällt oder neue Reparaturen auftauchen. Beim Start des Updates hält es den Stand fest, die Auswertung steht auf der Befundseite.", pfAfterRunning: "Beobachtung nach {what} läuft, noch {hours} Std., bisher {n} Auffälligkeiten.", pfAfterOff: "Die Beobachtung nach Updates ist ausgeschaltet. Unter Einstellungen → Scan und Schwellen stellst du ein, wie lange sie läuft.",
 });
 Object.assign(TEXT.en, {
@@ -72,6 +80,14 @@ Object.assign(TEXT.en, {
   pf_backup: "Backup", pf_disk: "Free space", pf_disk_text: "{free} free", pf_repairs: "Open repairs", pf_failed_entries: "Failed integrations", pf_broken: "Missing references",
   pf_backup_ok: "Last backup {hours} h ago", pf_backup_old: "Last backup {hours} h ago – a new one is advisable", pf_backup_none: "No backup set up or available", pf_backup_unavailable: "Backup component not available",
   pf_count_none: "none", pf_updates: "Available updates", pf_updates_none: "none",
+  updatesTab: "Updates", pfOpenBackup: "Backup protection",
+  updBlocked: "HACS cannot install it", updRunning: "running", updAuto: "automatic", updWatch: "Watch starts", updNotes: "Changes", updOpenHa: "Open in Home Assistant",
+  updVerdict_ready: "Ready", updVerdict_look: "Look first", updVerdict_stop: "Stop", updVerdictNone: "No updates open",
+  updPending_1: "1 update open", updPending_n: "{n} updates open", updCheckFirst: "To check: {items}",
+  updSumOpen: "Open", updSumBlocked: "Blocked",
+  updGroup_system: "System", updGroup_app: "Apps", updGroup_hacs: "Integrations and cards via HACS", updGroup_device: "Devices",
+  updCurrent_system: "Home Assistant, the operating system and the Supervisor are up to date.", updCurrent_app: "All apps are up to date.", updCurrent_hacs: "All HACS items are up to date.", updCurrent_device: "All device firmware is up to date.",
+  updAllCurrent: "Everything is up to date.", todoUpdates_1: "1 update open", todoUpdates_n: "{n} updates open",
   pfAfterTitle: "Afterwards", pfAfterOn: "After an update of Home Assistant, the operating system or the Supervisor, Housekeeper watches for {hours} hours whether something fails or new repairs appear. When the update starts it keeps the state, the results are on the findings page.", pfAfterRunning: "Watching after {what}, {hours} h left, {n} findings so far.", pfAfterOff: "The watch after updates is switched off. Under Settings → Scan and thresholds you set how long it runs.",
 });
 Object.assign(TEXT.de, {
