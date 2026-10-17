@@ -84,6 +84,7 @@ class ReliabilityRow(TypedDict):
     reauth: bool
     entities: int
     permanent: int
+    dead: bool
     availability: float | None
     shared_outages: int
     longest_outage: int

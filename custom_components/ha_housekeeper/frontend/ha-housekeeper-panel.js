@@ -869,7 +869,7 @@ Object.assign(TEXT.de, {
   reliability: "Zuverlässigkeit", reliabilitySubtitle: "Wie verfügbar die Entitäten jeder Integration waren und wann sie gemeinsam ausfielen. Liest nur den Recorder.",
   relHint: "Schlechteste zuerst. Gerechnet aus den Zuständen im Recorder",
   relWindow1: "24 Stunden", relWindow7: "7 Tage", relLoading: "Der Recorder wird ausgewertet. Das kann bei einer großen Datenbank einige Sekunden dauern …",
-  relTab: "Zuverlässigkeit", relAllStates: "Alle Zustände", relOnlyOutages: "Mit gemeinsamen Ausfällen", relOnlyReauth: "Neue Anmeldung nötig", relOnlyNotLoaded: "Nicht geladen", relSortAvail: "Verfügbarkeit", relSortOutages: "Ausfälle", relAgeNote: "Stand: {when}", relFactAvail: "Verfügbarkeit ({days} Tage)", relAffected: "Entitäten mit Ausfallzeit ({n})", relAffectedMore: "Gezeigt werden die {shown} mit der niedrigsten Verfügbarkeit von {total}.", relNoAffected: "Keine Entität dieses Eintrags war im Zeitraum nicht verfügbar.", relOpenEntry: "Integration öffnen",
+  relTab: "Zuverlässigkeit", relAllStates: "Alle Zustände", relOnlyOutages: "Mit gemeinsamen Ausfällen", relOnlyDead: "Dauerhaft ausgefallen", relDead: "Ausgefallen", relDeadSub: "{n} Entitäten, ganzes Fenster", relSumAvg: "Ø je Integration", relSumAvgHint: "Mittelwert der Integrationen, jede zählt einmal. Dauerhaft ausgefallene sind nicht eingerechnet.", relTooSmall: "zu klein", relTooSmallHint: "Gemeinsame Ausfälle gibt es erst ab {n} Entitäten.", relReauthOpen: "Zum Befund", relSortAvail: "Verfügbarkeit", relSortOutages: "Gemeinsame Ausfälle", relAgeNote: "Stand: {when}", relFactAvail: "Verfügbarkeit ({days} Tage)", relAffected: "Entitäten mit Ausfallzeit ({n})", relAffectedMore: "Gezeigt werden die {shown} mit der niedrigsten Verfügbarkeit von {total}.", relNoAffected: "Keine Entität dieses Eintrags war im Zeitraum nicht verfügbar.", relOpenEntry: "Integration öffnen",
   stability: "Stabilität", stabilityOk: "Stabil im Zeitraum", stabilityMissing: "Noch nicht berechnet. Die Ansicht Zuverlässigkeit rechnet es aus.", cause_unstable: "Die Entität fällt immer wieder aus: {level}.", hint_unstable: "Prüfe Verbindung, Netz und Integration des Geräts; die Zahlen stehen in der Ansicht Zuverlässigkeit.",
   relSumAvail: "Verfügbarkeit gesamt", relSumOutages: "Integrationen mit Ausfällen", relSumOf: "von {n}", relSumUnstable: "Instabile Entitäten", relSumFlapping: "davon {n} flatternd", relSumAttention: "Brauchen Aufmerksamkeit", relSumAttentionHint: "neue Anmeldung oder nicht geladen", relTabIntegrations: "Integrationen", relTabUnstable: "Instabile Entitäten",
   relTook: "berechnet in {s} s", relCached: "aus dem Zwischenspeicher ({s} s)", relNoRecorder: "Der Recorder von Home Assistant ist nicht verfügbar.",
@@ -884,20 +884,20 @@ Object.assign(TEXT.de, {
   relUnstableFootnote: "Instabil: mindestens {episodes} Ausfälle und {rate} pro Tag, flatternd ab {flap} pro Tag. Ausfälle während eines gemeinsamen Ausfalls der Integration zählen für die Integration, nicht für die Entität. Dauerhaft ausgefallene, deaktivierte und ignorierte Entitäten fehlen.",
   relCoverage: "Letzte {days} Tage · {withData} von {known} Entitäten mit Daten · im Mittel {share} % des Zeitraums beobachtet (neue Entitäten kürzer).",
   relCompare: "Mit Zeitraum davor vergleichen", relDelta: "{delta} Prozentpunkte gegenüber dem Zeitraum davor ({before} %)", relDeltaNone: "Für den Zeitraum davor liegen keine Daten vor.",
-  relFootnote: "Verfügbarkeit: Anteil der Zeit ohne „nicht verfügbar“ in den letzten {days} Tagen, gerechnet ab der ersten Meldung im Zeitraum. Ein gemeinsamer Ausfall heißt: mindestens {share} % der Entitäten des Eintrags, mindestens {entities}, mindestens {minutes} Minuten zugleich nicht verfügbar. Ein Ausfall, der vor dem Zeitraum begann, zählt erst ab der ersten Meldung darin.",
+  relFootnote: "Verfügbarkeit: Anteil der Zeit ohne „nicht verfügbar“ in den letzten {days} Tagen, gerechnet ab der ersten Meldung im Zeitraum. Ein gemeinsamer Ausfall heißt: mindestens {share} % der Entitäten des Eintrags, mindestens {entities}, mindestens {minutes} Minuten zugleich nicht verfügbar. Ein Ausfall, der vor dem Zeitraum begann, zählt erst ab der ersten Meldung darin. Eine Integration, die den ganzen Zeitraum ausgefallen war, hat keinen Prozentwert und steht oben als „Ausgefallen“.",
   relColSetup: "Setup-Fehler", relOnlySetup: "Setup-Fehler", relSetupCount: "{n} in {days} Tagen", relSetupLast: "zuletzt {date}", relHintTitle: "Möglicher Grund:",
   relHintOffline: "{n} Setup-Fehler in {days} Tagen bei niedriger Verfügbarkeit. Das spricht eher für ein Gerät, das offline geht, oder ein instabiles Netz als für die Integration selbst. Strom, WLAN und feste IP des Geräts prüfen.",
   relHintError: "Der Setup steht gerade im Fehler. Das ist meist ein Zugangs- oder Konfigurationsproblem: Integration neu anmelden oder neu einrichten.",
   relHintEarly: "{n} Setup-Fehler in {days} Tagen bei guter Verfügbarkeit. Die Integration startet vielleicht zu früh nach dem Neustart, bevor Netz oder Gerät bereit sind.",
   relHintUnload: "Entladen oder Migration ist fehlgeschlagen. Meist hilft ein Neustart von Home Assistant; danach nach Updates der Integration sehen.",
-  relSumAll: "Alle", relColStatus: "Status", relColLongest: "Längster Ausfall", relColLast: "Letzte Störung", relColDelta: "Veränderung", relColLevel: "Stufe", relColPattern: "Muster",
+  relSumAll: "Alle", relColStatus: "Status", relColLongest: "Längster Ausfall", relColLast: "Letzte Störung", relColDelta: "Veränderung (Prozentpunkte)", relColLevel: "Stufe", relColPattern: "Muster",
   relSortRank: "Standard", relSortEpisodes: "Ausfälle", relSortRate: "Ausfälle pro Tag", relSortDuration: "Gesamtdauer", relOnlyFlapping: "Nur flatternd", relOnlyUnstable: "Nur instabil",
 });
 Object.assign(TEXT.en, {
   reliability: "Reliability", reliabilitySubtitle: "How available each integration's entities were and when they failed together. Only reads the recorder.",
   relHint: "Worst first. Calculated from the states in the recorder",
   relWindow1: "24 hours", relWindow7: "7 days", relLoading: "Evaluating the recorder. On a large database this can take a few seconds …",
-  relTab: "Reliability", relAllStates: "All states", relOnlyOutages: "With shared outages", relOnlyReauth: "Re-authentication open", relOnlyNotLoaded: "Not loaded", relSortAvail: "Availability", relSortOutages: "Outages", relAgeNote: "As of {when}", relFactAvail: "Availability ({days} days)", relAffected: "Entities with downtime ({n})", relAffectedMore: "Showing the {shown} with the lowest availability of {total}.", relNoAffected: "No entity of this entry was unavailable in the period.", relOpenEntry: "Open integration",
+  relTab: "Reliability", relAllStates: "All states", relOnlyOutages: "With shared outages", relOnlyDead: "Down all the time", relDead: "Down", relDeadSub: "{n} entities, the whole window", relSumAvg: "Avg per integration", relSumAvgHint: "Mean of the integrations, each counts once. Those down all the time are not included.", relTooSmall: "too small", relTooSmallHint: "Shared outages need at least {n} entities.", relReauthOpen: "Open the finding", relSortAvail: "Availability", relSortOutages: "Shared outages", relAgeNote: "As of {when}", relFactAvail: "Availability ({days} days)", relAffected: "Entities with downtime ({n})", relAffectedMore: "Showing the {shown} with the lowest availability of {total}.", relNoAffected: "No entity of this entry was unavailable in the period.", relOpenEntry: "Open integration",
   stability: "Stability", stabilityOk: "Stable in the period", stabilityMissing: "Not calculated yet. The Reliability view calculates it.", cause_unstable: "The entity keeps failing: {level}.", hint_unstable: "Check the connection, network and integration of the device; the numbers are in the Reliability view.",
   relSumAvail: "Availability overall", relSumOutages: "Integrations with outages", relSumOf: "of {n}", relSumUnstable: "Unstable entities", relSumFlapping: "{n} of them flapping", relSumAttention: "Need attention", relSumAttentionHint: "re-authentication or not loaded", relTabIntegrations: "Integrations", relTabUnstable: "Unstable entities",
   relTook: "calculated in {s} s", relCached: "from the cache ({s} s)", relNoRecorder: "The Home Assistant recorder is not available.",
@@ -912,13 +912,13 @@ Object.assign(TEXT.en, {
   relUnstableFootnote: "Unstable: at least {episodes} failures and {rate} a day, flapping from {flap} a day. Failures during a shared outage of the integration count for the integration, not the entity. Entities that are down all the time, disabled or ignored are left out.",
   relCoverage: "Last {days} days · {withData} of {known} entities with data · on average {share} % of the period observed (new entities less).",
   relCompare: "Compare with the period before", relDelta: "{delta} percentage points against the period before ({before} %)", relDeltaNone: "There is no data for the period before.",
-  relFootnote: "Availability: the share of time without “unavailable” in the last {days} days, counted from the first report in the period. A shared outage means at least {share} % of the entry's entities, at least {entities}, were unavailable together for at least {minutes} minutes. An outage that began before the period counts from the first report in it.",
+  relFootnote: "Availability: the share of time without “unavailable” in the last {days} days, counted from the first report in the period. A shared outage means at least {share} % of the entry's entities, at least {entities}, were unavailable together for at least {minutes} minutes. An outage that began before the period counts from the first report in it. An integration that was down the whole period has no percentage and is listed first as “Down”.",
   relColSetup: "Setup failures", relOnlySetup: "Setup failures", relSetupCount: "{n} in {days} days", relSetupLast: "last {date}", relHintTitle: "Possible cause:",
   relHintOffline: "{n} setup failures in {days} days with low availability. That points to a device going offline or an unstable network rather than the integration itself. Check the device's power, Wi-Fi and fixed IP.",
   relHintError: "Setup is in an error right now. That is usually an access or configuration problem: sign in again or set the integration up anew.",
   relHintEarly: "{n} setup failures in {days} days with good availability. The integration may start too early after a restart, before the network or device is ready.",
   relHintUnload: "Unloading or migration failed. A restart of Home Assistant usually helps; then look for updates of the integration.",
-  relSumAll: "All", relColStatus: "Status", relColLongest: "Longest outage", relColLast: "Last disruption", relColDelta: "Change", relColLevel: "Level", relColPattern: "Pattern",
+  relSumAll: "All", relColStatus: "Status", relColLongest: "Longest outage", relColLast: "Last disruption", relColDelta: "Change (percentage points)", relColLevel: "Level", relColPattern: "Pattern",
   relSortRank: "Default", relSortEpisodes: "Outages", relSortRate: "Outages per day", relSortDuration: "Total duration", relOnlyFlapping: "Flapping only", relOnlyUnstable: "Unstable only",
 });
 
@@ -6068,7 +6068,7 @@ class ReliabilityMixin {
 
   relSorts() {
     return [
-      { key: "avail", label: "relSortAvail", dir: "asc", get: e => e.availability },
+      { key: "avail", label: "relSortAvail", dir: "asc", get: e => (e.dead ? -1 : e.availability) },
       { key: "title", label: "sortName", dir: "asc", get: e => e.title },
       { key: "outages", label: "relSortOutages", dir: "desc", get: e => e.shared_outages },
     ];
@@ -6076,7 +6076,7 @@ class ReliabilityMixin {
 
   relRowBody(item) {
     const percent = item.availability;
-    const tone = percent === null ? "mute" : percent >= 99.5 ? "ok" : percent >= 95 ? "warn" : "red";
+    const tone = item.dead ? "red" : percent === null ? "mute" : percent >= 99.5 ? "ok" : percent >= 95 ? "warn" : "red";
     const lines = [`${this.esc(item.domain || "")} · ${this.t("relEntities", { n: item.entities })}${item.permanent ? ` · ${this.t("relPermanent", { n: item.permanent })}` : ""}`];
     if (item.shared_outages) {
       const layer = item.layer === "cloud" ? this.t("relLayerCloud") : this.t("relLayerLocal");
@@ -6091,7 +6091,7 @@ class ReliabilityMixin {
       : this.t("relNoDisruption"));
     if (item.delta !== null && item.delta !== undefined) lines.push(this.t("relDelta", { delta: `${item.delta > 0 ? "+" : item.delta < 0 ? "−" : "±"}${this.formatNumber(Math.abs(item.delta))}`, before: this.formatNumber(item.previous_availability) }));
     else if (this.reliability?.comparison?.available) lines.push(this.t("relDeltaNone"));
-    return `<span class="tile ${tone}"><ha-icon icon="mdi:lan-connect"></ha-icon></span><span class="row-text"><strong>${this.esc(item.title)}</strong>${lines.map(line => `<small>${line}</small>`).join("")}${flags.length ? `<span class="relflags">${flags.join(" ")}</span>` : ""}</span><span class="pill ${tone}">${percent === null ? "—" : `${this.formatNumber(percent)} %`}</span>`;
+    return `<span class="tile ${tone}"><ha-icon icon="mdi:lan-connect"></ha-icon></span><span class="row-text"><strong>${this.esc(item.title)}</strong>${lines.map(line => `<small>${line}</small>`).join("")}${flags.length ? `<span class="relflags">${flags.join(" ")}</span>` : ""}</span><span class="pill ${tone}">${item.dead ? this.t("relDead") : percent === null ? "—" : `${this.formatNumber(percent)} %`}</span>`;
   }
 
   // The row of one config entry in the loaded numbers, for its detail page.
@@ -6124,8 +6124,6 @@ class ReliabilityMixin {
     return setup.count >= 2 ? "relHintEarly" : null;
   }
 
-  relEntryState(e) { return e.reauth ? "reauth" : e.state && e.state !== "loaded" ? "notloaded" : ""; }
-
   // One row per integration entry: the numbers sit in columns so the list sorts by them; the sentences live on the detail page.
   relSetupCell(setup) {
     if (!setup) return "–";
@@ -6136,15 +6134,18 @@ class ReliabilityMixin {
 
   relEntriesList(r) {
     const tone = p => (p === null || p === undefined ? "mute" : p >= 99.5 ? "ok" : p >= 95 ? "warn" : "red");
+    const minEntities = r.thresholds?.shared_min_entities ?? 3;
+    const outagesCell = e => (e.dead ? "–" : !e.shared_outages && e.entities < minEntities ? `<span class="pill mute" title="${this.esc(this.t("relTooSmallHint", { n: minEntities }))}">${this.t("relTooSmall")}</span>` : num(e.shared_outages));
+    const availCell = e => (e.dead ? `<span class="pill red">${this.t("relDead")}</span><small>${this.t("relDeadSub", { n: e.permanent })}</small>` : e.availability === null || e.availability === undefined ? "–" : `<span class="pill ${tone(e.availability)}">${this.esc(this.formatNumber(e.availability))} %</span>`);
     const num = v => (v === null || v === undefined ? "–" : this.esc(this.formatNumber(v)));
     const compare = Boolean(r.comparison?.available);
     const delta = e => (e.delta === null || e.delta === undefined ? null : e.delta);
     const columns = [
       { key: "title", label: "utName", cell: e => this.nameCell(e.title, `${e.domain || ""} · ${this.t("relEntities", { n: e.entities })}`) },
-      { key: "status", label: "relColStatus", sortable: false, cell: e => [e.reauth ? `<span class="pill red">${this.t("relReauth")}</span>` : "", e.state && e.state !== "loaded" ? `<span class="pill warn">${this.esc(e.state)}</span>` : "", e.shared_outages && e.layer === "cloud" ? `<span class="pill mute">${this.t("relLayerCloud")}</span>` : ""].filter(Boolean).join(" ") },
+      { key: "status", label: "relColStatus", sortable: false, cell: e => [e.reauth ? `<span class="pill red" role="link" tabindex="0" data-jump="findingsNav" data-filter="config_entry.reauth" title="${this.esc(this.t("relReauthOpen"))}">${this.t("relReauth")}</span>` : "", e.state && e.state !== "loaded" ? `<span class="pill warn">${this.esc(e.state)}</span>` : "", e.shared_outages && e.layer === "cloud" ? `<span class="pill mute">${this.t("relLayerCloud")}</span>` : ""].filter(Boolean).join(" ") },
       { key: "setup", label: "relColSetup", dir: "desc", cell: e => this.relSetupCell(e.setup) },
-      { key: "avail", label: "relSortAvail", dir: "asc", cell: e => (e.availability === null || e.availability === undefined ? "–" : `<span class="pill ${tone(e.availability)}">${this.esc(this.formatNumber(e.availability))} %</span>`) },
-      { key: "outages", label: "relSortOutages", dir: "desc", cell: e => num(e.shared_outages) },
+      { key: "avail", label: "relSortAvail", dir: "asc", cell: availCell },
+      { key: "outages", label: "relSortOutages", dir: "desc", cell: outagesCell },
       { key: "longest", label: "relColLongest", dir: "desc", cell: e => (e.shared_outages ? this.esc(this.relDuration(e.longest_outage)) : "–") },
       { key: "last", label: "relColLast", dir: "desc", cell: e => (e.last_disruption ? this.esc(`${this.formatDate(new Date(e.last_disruption.end * 1000).toISOString())}, ${this.relDuration(e.last_disruption.seconds)}`) : this.esc(this.t("relNoDisruption"))) },
       ...(compare ? [{ key: "delta", label: "relColDelta", dir: "asc", cell: e => (delta(e) === null ? "–" : this.esc(`${delta(e) > 0 ? "+" : delta(e) < 0 ? "−" : "±"}${this.formatNumber(Math.abs(delta(e)))}`)) }] : []),
@@ -6158,8 +6159,8 @@ class ReliabilityMixin {
         { key: "last", label: "relColLast", dir: "desc", get: e => e.last_disruption?.end ?? null },
         ...(compare ? [{ key: "delta", label: "relColDelta", dir: "asc", get: delta }] : []),
       ],
-      filters: [{ name: "state", all: this.t("relAllStates"), options: [["outages", this.t("relOnlyOutages")], ["reauth", this.t("relOnlyReauth")], ["notloaded", this.t("relOnlyNotLoaded")], ["setup", this.t("relOnlySetup")]] }],
-      filterFns: { state: (e, v) => (v === "outages" ? e.shared_outages > 0 : v === "setup" ? Boolean(e.setup) : this.relEntryState(e) === v) },
+      filters: [{ name: "state", all: this.t("relAllStates"), options: [["dead", this.t("relOnlyDead")], ["outages", this.t("relOnlyOutages")], ["setup", this.t("relOnlySetup")]] }],
+      filterFns: { state: (e, v) => (v === "dead" ? Boolean(e.dead) : v === "outages" ? e.shared_outages > 0 : Boolean(e.setup)) },
       text: e => [e.title, e.domain].join(" "), tie: e => e.title, empty: "relEmpty", columns,
       rowAttrs: e => (this.findObject(`config_entry:${e.entry_id}`) ? `data-object="${this.esc(`config_entry:${e.entry_id}`)}" tabindex="0" role="button" aria-label="${this.esc(e.title)}"` : 'class="static"'),
       exportName: "reliability", header: [this.t("utName"), "Domain", this.t("relSortAvail"), this.t("relSortOutages"), this.t("relColLongest")], rows: e => [e.title, e.domain, e.availability ?? "", e.shared_outages ?? 0, e.longest_outage ?? ""],
@@ -6187,17 +6188,18 @@ class ReliabilityMixin {
     const flapping = Object.values(u.entities || {}).filter(e => e.level === "flapping").length;
     const outages = r.entries.filter(e => e.shared_outages > 0).length;
     const attention = r.entries.filter(e => e.reauth || (e.state && e.state !== "loaded")).length;
-    const counted = r.entries.reduce((n, e) => n + (e.availability === null || e.availability === undefined ? 0 : e.entities), 0);
-    const overall = counted ? r.entries.reduce((n, e) => n + (e.availability === null || e.availability === undefined ? 0 : e.availability * e.entities), 0) / counted : null;
+    const dead = r.entries.filter(e => e.dead).length;
+    const figures = r.entries.filter(e => !e.dead && e.availability !== null && e.availability !== undefined);
+    const overall = figures.length ? figures.reduce((n, e) => n + e.availability, 0) / figures.length : null;
     const availText = overall === null ? "–" : `${this.formatNumber(Math.round(overall * 10) / 10)} %`;
-    const odd = r.entries.filter(e => e.shared_outages > 0 || e.reauth || (e.state && e.state !== "loaded") || e.setup).length;
+    const odd = r.entries.filter(e => e.dead || e.shared_outages > 0 || e.reauth || (e.state && e.state !== "loaded") || e.setup).length;
     const setupCount = r.entries.filter(e => e.setup).length;
     const tiles = this.sumTiles([
       { label: this.t("relSumAll"), value: this.formatNumber(r.entries.length), tone: "mute", lf: ["relentries", "", ""] },
+      { label: this.t("relOnlyDead"), value: this.formatNumber(dead), tone: dead ? "red" : "ok", lf: ["relentries", "state", "dead"] },
       { label: this.t("relOnlyOutages"), value: this.formatNumber(outages), tone: outages ? "warn" : "ok", lf: ["relentries", "state", "outages"] },
-      { label: this.t("relOnlyReauth"), value: this.formatNumber(r.entries.filter(e => e.reauth).length), tone: r.entries.some(e => e.reauth) ? "red" : "ok", lf: ["relentries", "state", "reauth"] },
-      { label: this.t("relOnlyNotLoaded"), value: this.formatNumber(r.entries.filter(e => e.state && e.state !== "loaded").length), tone: r.entries.some(e => e.state && e.state !== "loaded") ? "warn" : "ok", lf: ["relentries", "state", "notloaded"] },
       { label: this.t("relOnlySetup"), value: this.formatNumber(setupCount), tone: setupCount ? "warn" : "ok", lf: ["relentries", "state", "setup"] },
+      { label: this.t("relSumAvg"), value: availText, tone: overall === null ? "mute" : overall >= 99.5 ? "ok" : overall >= 95 ? "warn" : "red", hint: this.t("relSumAvgHint") },
     ]);
     const tabs = [
       { id: "integrations", icon: "mdi:puzzle-outline", label: this.t("relTabIntegrations"), hint: this.t("relTileIntHint", { avail: availText, window: this.t(r.window_days === 1 ? "relWindow1" : "relWindow7") }), count: r.entries.length, tone: outages || attention ? "warn" : "ok", pill: odd ? this.t("relTilePill", { n: this.formatNumber(odd) }) : "", pillTone: attention ? "red" : "warn" },
@@ -16282,7 +16284,8 @@ class HAHousekeeperPanel extends HTMLElement {
       this.render();
     });
     root.querySelectorAll("[data-cov-details]").forEach(el => el.onclick = () => { this.settingsTab = "info"; this.noteJump?.("settings"); this.view = "settings"; this.pages = {}; this.render(); });
-    root.querySelectorAll("[data-jump]").forEach(el => el.onclick = () => {
+    root.querySelectorAll("[data-jump]").forEach(el => el.onclick = ev => {
+      ev?.stopPropagation(); // a jump inside a row that opens something else leaves that row alone
       this.noteJump(el.dataset.jump);
       this.view = el.dataset.jump; this.pages = {};
       if (el.dataset.jumpTab) (this.viewTab ||= {})[this.view] = el.dataset.jumpTab;

@@ -293,6 +293,7 @@ def compute(
                 "reauth": bool(info.get("reauth")),
                 "entities": len(counted),
                 "permanent": permanent,
+                "dead": not counted and permanent > 0,  # down the whole window: no figure, but the worst there is
                 "availability": (
                     round(100 * (1 - down_total / observed_total), 2) if observed_total else None
                 ),
@@ -310,7 +311,7 @@ def compute(
                 ),
             }
         )
-    rows.sort(key=lambda r: (r["availability"] is None, r["availability"] or 0, r["title"]))
+    rows.sort(key=lambda r: (not r["dead"], r["availability"] or 0, r["title"]))
     return {
         "entries": rows,
         "outage_periods": periods,

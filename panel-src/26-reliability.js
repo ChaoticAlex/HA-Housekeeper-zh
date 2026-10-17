@@ -42,7 +42,7 @@ class ReliabilityMixin {
 
   relSorts() {
     return [
-      { key: "avail", label: "relSortAvail", dir: "asc", get: e => e.availability },
+      { key: "avail", label: "relSortAvail", dir: "asc", get: e => (e.dead ? -1 : e.availability) },
       { key: "title", label: "sortName", dir: "asc", get: e => e.title },
       { key: "outages", label: "relSortOutages", dir: "desc", get: e => e.shared_outages },
     ];
@@ -50,7 +50,7 @@ class ReliabilityMixin {
 
   relRowBody(item) {
     const percent = item.availability;
-    const tone = percent === null ? "mute" : percent >= 99.5 ? "ok" : percent >= 95 ? "warn" : "red";
+    const tone = item.dead ? "red" : percent === null ? "mute" : percent >= 99.5 ? "ok" : percent >= 95 ? "warn" : "red";
     const lines = [`${this.esc(item.domain || "")} · ${this.t("relEntities", { n: item.entities })}${item.permanent ? ` · ${this.t("relPermanent", { n: item.permanent })}` : ""}`];
     if (item.shared_outages) {
       const layer = item.layer === "cloud" ? this.t("relLayerCloud") : this.t("relLayerLocal");
@@ -65,7 +65,7 @@ class ReliabilityMixin {
       : this.t("relNoDisruption"));
     if (item.delta !== null && item.delta !== undefined) lines.push(this.t("relDelta", { delta: `${item.delta > 0 ? "+" : item.delta < 0 ? "−" : "±"}${this.formatNumber(Math.abs(item.delta))}`, before: this.formatNumber(item.previous_availability) }));
     else if (this.reliability?.comparison?.available) lines.push(this.t("relDeltaNone"));
-    return `<span class="tile ${tone}"><ha-icon icon="mdi:lan-connect"></ha-icon></span><span class="row-text"><strong>${this.esc(item.title)}</strong>${lines.map(line => `<small>${line}</small>`).join("")}${flags.length ? `<span class="relflags">${flags.join(" ")}</span>` : ""}</span><span class="pill ${tone}">${percent === null ? "—" : `${this.formatNumber(percent)} %`}</span>`;
+    return `<span class="tile ${tone}"><ha-icon icon="mdi:lan-connect"></ha-icon></span><span class="row-text"><strong>${this.esc(item.title)}</strong>${lines.map(line => `<small>${line}</small>`).join("")}${flags.length ? `<span class="relflags">${flags.join(" ")}</span>` : ""}</span><span class="pill ${tone}">${item.dead ? this.t("relDead") : percent === null ? "—" : `${this.formatNumber(percent)} %`}</span>`;
   }
 
   // The row of one config entry in the loaded numbers, for its detail page.
@@ -98,8 +98,6 @@ class ReliabilityMixin {
     return setup.count >= 2 ? "relHintEarly" : null;
   }
 
-  relEntryState(e) { return e.reauth ? "reauth" : e.state && e.state !== "loaded" ? "notloaded" : ""; }
-
   // One row per integration entry: the numbers sit in columns so the list sorts by them; the sentences live on the detail page.
   relSetupCell(setup) {
     if (!setup) return "–";
@@ -110,15 +108,18 @@ class ReliabilityMixin {
 
   relEntriesList(r) {
     const tone = p => (p === null || p === undefined ? "mute" : p >= 99.5 ? "ok" : p >= 95 ? "warn" : "red");
+    const minEntities = r.thresholds?.shared_min_entities ?? 3;
+    const outagesCell = e => (e.dead ? "–" : !e.shared_outages && e.entities < minEntities ? `<span class="pill mute" title="${this.esc(this.t("relTooSmallHint", { n: minEntities }))}">${this.t("relTooSmall")}</span>` : num(e.shared_outages));
+    const availCell = e => (e.dead ? `<span class="pill red">${this.t("relDead")}</span><small>${this.t("relDeadSub", { n: e.permanent })}</small>` : e.availability === null || e.availability === undefined ? "–" : `<span class="pill ${tone(e.availability)}">${this.esc(this.formatNumber(e.availability))} %</span>`);
     const num = v => (v === null || v === undefined ? "–" : this.esc(this.formatNumber(v)));
     const compare = Boolean(r.comparison?.available);
     const delta = e => (e.delta === null || e.delta === undefined ? null : e.delta);
     const columns = [
       { key: "title", label: "utName", cell: e => this.nameCell(e.title, `${e.domain || ""} · ${this.t("relEntities", { n: e.entities })}`) },
-      { key: "status", label: "relColStatus", sortable: false, cell: e => [e.reauth ? `<span class="pill red">${this.t("relReauth")}</span>` : "", e.state && e.state !== "loaded" ? `<span class="pill warn">${this.esc(e.state)}</span>` : "", e.shared_outages && e.layer === "cloud" ? `<span class="pill mute">${this.t("relLayerCloud")}</span>` : ""].filter(Boolean).join(" ") },
+      { key: "status", label: "relColStatus", sortable: false, cell: e => [e.reauth ? `<span class="pill red" role="link" tabindex="0" data-jump="findingsNav" data-filter="config_entry.reauth" title="${this.esc(this.t("relReauthOpen"))}">${this.t("relReauth")}</span>` : "", e.state && e.state !== "loaded" ? `<span class="pill warn">${this.esc(e.state)}</span>` : "", e.shared_outages && e.layer === "cloud" ? `<span class="pill mute">${this.t("relLayerCloud")}</span>` : ""].filter(Boolean).join(" ") },
       { key: "setup", label: "relColSetup", dir: "desc", cell: e => this.relSetupCell(e.setup) },
-      { key: "avail", label: "relSortAvail", dir: "asc", cell: e => (e.availability === null || e.availability === undefined ? "–" : `<span class="pill ${tone(e.availability)}">${this.esc(this.formatNumber(e.availability))} %</span>`) },
-      { key: "outages", label: "relSortOutages", dir: "desc", cell: e => num(e.shared_outages) },
+      { key: "avail", label: "relSortAvail", dir: "asc", cell: availCell },
+      { key: "outages", label: "relSortOutages", dir: "desc", cell: outagesCell },
       { key: "longest", label: "relColLongest", dir: "desc", cell: e => (e.shared_outages ? this.esc(this.relDuration(e.longest_outage)) : "–") },
       { key: "last", label: "relColLast", dir: "desc", cell: e => (e.last_disruption ? this.esc(`${this.formatDate(new Date(e.last_disruption.end * 1000).toISOString())}, ${this.relDuration(e.last_disruption.seconds)}`) : this.esc(this.t("relNoDisruption"))) },
       ...(compare ? [{ key: "delta", label: "relColDelta", dir: "asc", cell: e => (delta(e) === null ? "–" : this.esc(`${delta(e) > 0 ? "+" : delta(e) < 0 ? "−" : "±"}${this.formatNumber(Math.abs(delta(e)))}`)) }] : []),
@@ -132,8 +133,8 @@ class ReliabilityMixin {
         { key: "last", label: "relColLast", dir: "desc", get: e => e.last_disruption?.end ?? null },
         ...(compare ? [{ key: "delta", label: "relColDelta", dir: "asc", get: delta }] : []),
       ],
-      filters: [{ name: "state", all: this.t("relAllStates"), options: [["outages", this.t("relOnlyOutages")], ["reauth", this.t("relOnlyReauth")], ["notloaded", this.t("relOnlyNotLoaded")], ["setup", this.t("relOnlySetup")]] }],
-      filterFns: { state: (e, v) => (v === "outages" ? e.shared_outages > 0 : v === "setup" ? Boolean(e.setup) : this.relEntryState(e) === v) },
+      filters: [{ name: "state", all: this.t("relAllStates"), options: [["dead", this.t("relOnlyDead")], ["outages", this.t("relOnlyOutages")], ["setup", this.t("relOnlySetup")]] }],
+      filterFns: { state: (e, v) => (v === "dead" ? Boolean(e.dead) : v === "outages" ? e.shared_outages > 0 : Boolean(e.setup)) },
       text: e => [e.title, e.domain].join(" "), tie: e => e.title, empty: "relEmpty", columns,
       rowAttrs: e => (this.findObject(`config_entry:${e.entry_id}`) ? `data-object="${this.esc(`config_entry:${e.entry_id}`)}" tabindex="0" role="button" aria-label="${this.esc(e.title)}"` : 'class="static"'),
       exportName: "reliability", header: [this.t("utName"), "Domain", this.t("relSortAvail"), this.t("relSortOutages"), this.t("relColLongest")], rows: e => [e.title, e.domain, e.availability ?? "", e.shared_outages ?? 0, e.longest_outage ?? ""],
@@ -161,17 +162,18 @@ class ReliabilityMixin {
     const flapping = Object.values(u.entities || {}).filter(e => e.level === "flapping").length;
     const outages = r.entries.filter(e => e.shared_outages > 0).length;
     const attention = r.entries.filter(e => e.reauth || (e.state && e.state !== "loaded")).length;
-    const counted = r.entries.reduce((n, e) => n + (e.availability === null || e.availability === undefined ? 0 : e.entities), 0);
-    const overall = counted ? r.entries.reduce((n, e) => n + (e.availability === null || e.availability === undefined ? 0 : e.availability * e.entities), 0) / counted : null;
+    const dead = r.entries.filter(e => e.dead).length;
+    const figures = r.entries.filter(e => !e.dead && e.availability !== null && e.availability !== undefined);
+    const overall = figures.length ? figures.reduce((n, e) => n + e.availability, 0) / figures.length : null;
     const availText = overall === null ? "–" : `${this.formatNumber(Math.round(overall * 10) / 10)} %`;
-    const odd = r.entries.filter(e => e.shared_outages > 0 || e.reauth || (e.state && e.state !== "loaded") || e.setup).length;
+    const odd = r.entries.filter(e => e.dead || e.shared_outages > 0 || e.reauth || (e.state && e.state !== "loaded") || e.setup).length;
     const setupCount = r.entries.filter(e => e.setup).length;
     const tiles = this.sumTiles([
       { label: this.t("relSumAll"), value: this.formatNumber(r.entries.length), tone: "mute", lf: ["relentries", "", ""] },
+      { label: this.t("relOnlyDead"), value: this.formatNumber(dead), tone: dead ? "red" : "ok", lf: ["relentries", "state", "dead"] },
       { label: this.t("relOnlyOutages"), value: this.formatNumber(outages), tone: outages ? "warn" : "ok", lf: ["relentries", "state", "outages"] },
-      { label: this.t("relOnlyReauth"), value: this.formatNumber(r.entries.filter(e => e.reauth).length), tone: r.entries.some(e => e.reauth) ? "red" : "ok", lf: ["relentries", "state", "reauth"] },
-      { label: this.t("relOnlyNotLoaded"), value: this.formatNumber(r.entries.filter(e => e.state && e.state !== "loaded").length), tone: r.entries.some(e => e.state && e.state !== "loaded") ? "warn" : "ok", lf: ["relentries", "state", "notloaded"] },
       { label: this.t("relOnlySetup"), value: this.formatNumber(setupCount), tone: setupCount ? "warn" : "ok", lf: ["relentries", "state", "setup"] },
+      { label: this.t("relSumAvg"), value: availText, tone: overall === null ? "mute" : overall >= 99.5 ? "ok" : overall >= 95 ? "warn" : "red", hint: this.t("relSumAvgHint") },
     ]);
     const tabs = [
       { id: "integrations", icon: "mdi:puzzle-outline", label: this.t("relTabIntegrations"), hint: this.t("relTileIntHint", { avail: availText, window: this.t(r.window_days === 1 ? "relWindow1" : "relWindow7") }), count: r.entries.length, tone: outages || attention ? "warn" : "ok", pill: odd ? this.t("relTilePill", { n: this.formatNumber(odd) }) : "", pillTone: attention ? "red" : "warn" },

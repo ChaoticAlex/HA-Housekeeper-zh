@@ -559,3 +559,15 @@ async def test_kept_days_give_the_same_runs_and_loads_as_one_query_also_over_mid
     for _ in range(2):
         kept = await run(query_storms, hass, base, end, loads)
         assert kept["entities"] == plain["entities"] and kept["events"] == plain["events"]
+
+
+def test_an_entry_that_was_down_the_whole_window_is_dead_and_comes_first() -> None:
+    entries = {
+        "e1": {**ENTRIES["e1"], "title": "Fine"},
+        "e2": {**ENTRIES["e1"], "title": "Gone"},
+    }
+    items = [*entities("a", entry="e1"), *entities("b", entry="e2")]
+    result = compute(runs({"a": START, "b": START}, {"b": [(START, END)]}), items, entries)
+    gone = result["entries"][0]
+    assert gone["title"] == "Gone" and gone["dead"] and gone["availability"] is None
+    assert not result["entries"][1]["dead"]

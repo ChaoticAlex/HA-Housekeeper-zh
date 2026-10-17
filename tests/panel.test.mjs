@@ -2452,6 +2452,7 @@ const RELIABILITY = {
   entries: [
     { entry_id: "e1", title: "Cloud <b>Hub</b>", domain: "hue", state: "setup_retry", reauth: true, entities: 12, permanent: 2, availability: 93.4, shared_outages: 3, longest_outage: 7200, layer: "cloud", last_disruption: { end: 1791470000, seconds: 3600, shared: true } },
     { entry_id: "e2", title: "Local Box", domain: "zha", state: "loaded", reauth: false, entities: 5, permanent: 0, availability: 100, shared_outages: 0, longest_outage: 0, layer: null, last_disruption: null },
+    { entry_id: "e9", title: "Dead Gate", domain: "shelly", state: "setup_error", reauth: false, entities: 0, permanent: 6, dead: true, availability: null, shared_outages: 0, longest_outage: 0, layer: null, last_disruption: null },
   ],
 };
 
@@ -2464,8 +2465,10 @@ test("the reliability view lists the worst integration first with numbers, words
   await el.loadReliability();
   const html = shadow.innerHTML;
   for (const text of [el.t("relTabIntegrations"), "Cloud &lt;b&gt;Hub&lt;/b&gt;", "93.4 %", "12 entities", "2 h", "probably the cloud or its API", "Re-authentication open", "setup_retry", "No disruption", "calculated in 2.8 s", "24 hours", "7 days"]) assert.ok(html.includes(text), text);
-  assert.ok(html.indexOf("Cloud &lt;b&gt;") < html.indexOf("Local Box"));
+  assert.ok(html.indexOf("Dead Gate") < html.indexOf("Cloud &lt;b&gt;") && html.indexOf("Cloud &lt;b&gt;") < html.indexOf("Local Box"), "the dead one first");
   assert.ok(!html.includes("<b>Hub</b>"));
+  assert.ok(html.includes("Down all the time") && html.includes("6 entities, the whole window") && html.includes("Avg per integration"));
+  assert.ok(!html.includes("Re-authentication open</button>") && html.includes('data-jump="findingsNav" data-filter="config_entry.reauth"'));
 });
 
 test("reliability rows open the integration, and its detail page shows the numbers with the affected entities", async () => {
@@ -2678,10 +2681,9 @@ test("reliability and the unstable entities can be searched and filtered", () =>
   el.lvState("relentries", "avail", "asc").f = { state: "outages" };
   html = el.reliabilityView();
   assert.ok(html.includes("Box 3") && !html.includes("Box 0"));
-  el.lv.relentries.f = { state: "reauth" };
-  assert.ok(el.reliabilityView().includes("Box 5") && !el.reliabilityView().includes("Box 3"));
-  el.lv.relentries.f = { state: "notloaded" };
-  assert.ok(el.reliabilityView().includes("Box 6") && !el.reliabilityView().includes("Box 5"));
+  el.lv.relentries.f = { state: "setup" };
+  assert.ok(!el.reliabilityView().includes("Box 3"));
+  assert.ok(el.reliabilityView().includes("too small") === false, "five entities are enough for a shared outage");
   el.lv.relentries.f = {}; el.lv.relentries.q = "zha";
   assert.ok(el.reliabilityView().includes("Box 3") && !el.reliabilityView().includes("Box 0"));
   el.lv.relentries.q = ""; el.lvState("relunstable", "", "asc").q = "flatter 4"; el.viewTab = { reliability: "unstable" };
@@ -5702,4 +5704,12 @@ test("the components page lists what Home Assistant still waits for as informati
   assert.ok(el.openFlowsFold().includes("Hue Bridge") && el.openFlowsFold().includes("Gefunden über zeroconf"));
   el.sysState("flows").data = { flows: [] };
   assert.equal(el.openFlowsFold(), "");
+});
+
+test("an integration with too few entities for a shared outage says so instead of showing zero", () => {
+  const { el } = panel("en");
+  el.data = DATA; el.view = "reliability"; el._relRequested = 7;
+  el.reliability = { ...RELIABILITY, thresholds: { shared_min_entities: 3 }, entries: [{ ...RELIABILITY.entries[1], entry_id: "s1", title: "Tiny", entities: 2, shared_outages: 0 }] };
+  const html = el.reliabilityView();
+  assert.ok(html.includes("too small") && html.includes("Shared outages need at least 3 entities."));
 });

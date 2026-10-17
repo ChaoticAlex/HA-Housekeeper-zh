@@ -10,6 +10,10 @@
 - **Speicher & System:** Die Seite lädt schneller: der Durchlauf über die Ordner läuft neben der Abfrage beim Supervisor statt danach, die Plattenbelegung nach Kategorien wird wie die Ordnergrößen einige Minuten wiederverwendet (Aktualisieren liest neu), und beim Öffnen stehen die zuletzt gelesenen Größen sofort da und werden bei Bedarf im Hintergrund erneuert.
 - **Befunde, Anmeldung nötig:** Verlangt eine Integration eine neue Anmeldung, ist das ein Befund („Anmeldung nötig“, mindestens mittel) mit den betroffenen Entitäten als Folgen, auch wenn die Integration geladen bleibt. Er erscheint innerhalb etwa einer Minute und verschwindet nach der Anmeldung wieder. In „Was muss ich tun?“ steht er als eigene Zeile ganz oben.
 - **Apps & Integrationen, offen in Home Assistant:** Über der Liste steht eine zugeklappte Info-Zeile mit den gefundenen Geräten, die noch auf ihre Einrichtung warten, und den Integrationen, die neu konfiguriert werden möchten. Sie ist ein Hinweis, kein Befund, und fehlt, wenn nichts offen ist.
+- **Zuverlässigkeit:**
+  - Integrationen, die den ganzen Zeitraum ausgefallen waren, stehen oben als „Ausgefallen“ (statt ohne Wert am Ende der Liste) und haben eine eigene Kachel.
+  - Die Kachel „Ø je Integration“ zählt jede Integration einmal und lässt dauerhaft Ausgefallene weg; die Spalte heißt „Gemeinsame Ausfälle“, bei Integrationen mit weniger als drei Entitäten steht „zu klein“ statt einer 0.
+  - Die Kacheln und Filter „Neue Anmeldung nötig“ und „Nicht geladen“ entfallen, die Anmeldung bleibt als Hinweis in der Zeile und führt zum Befund.
 - **Zugangsdaten:**
   - Integrationen, die eine neue Anmeldung verlangen, tragen die Marke „Anmeldung nötig“ und haben eine eigene Kachel, ebenso deaktivierte Integrationen, die noch Zugangsdaten halten; mehr Feldnamen werden als Zugangsdaten erkannt (etwa Cookie, Session-ID, Einmalcode).
   - Neuer Reiter „Konten“ mit Rolle, Zwei-Faktor und letzter Anmeldung jedes Benutzers und eine Kachel „Admins ohne Zwei-Faktor“, ein Reiter „Langzeit-Tokens“ mit Name, Konto und Alter; die Kacheln stehen in gleich großen Reihen.
@@ -55,6 +59,10 @@
 - **Storage & system:** The page loads faster: the walk over the folders runs beside the Supervisor query instead of after it, the disk use by category is reused for a few minutes like the folder sizes (refresh reads it again), and on opening the sizes read last show at once and are renewed in the background when due.
 - **Findings, login needed:** An integration that asks for a new login is a finding ("Login needed", at least medium) with its affected entities as follow-ups, even while it stays loaded. It appears within about a minute and goes away after the login. On the overview it is a row of its own at the top of "What do I have to do?".
 - **Apps & integrations, open in Home Assistant:** A collapsed info row above the list shows the devices found that still wait to be set up and the integrations that want to be reconfigured. It is a hint, not a finding, and is left out when nothing is open.
+- **Reliability:**
+  - Integrations that were down the whole period are listed first as "Down" (instead of without a value at the end) and have a tile of their own.
+  - The tile "Avg per integration" counts each integration once and leaves out those down all the time; the column is called "Shared outages", and integrations with fewer than three entities say "too small" instead of 0.
+  - The tiles and filters "Login needed" and "Not loaded" are gone; the login request stays a hint in the row and leads to the finding.
 - **Credentials:**
   - Integrations that ask to sign in again carry a "Login needed" mark and have a tile of their own, as do disabled integrations that still hold credentials; more field names are recognised as credentials (such as cookie, session id, one-time code).
   - New "Accounts" tab with each user's role, two-factor and last login, an "Admins without two-factor" tile, and a "Long-lived tokens" tab with name, account and age; the tiles sit in rows of equal size.
