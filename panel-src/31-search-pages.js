@@ -9,6 +9,7 @@ const SEARCH_WORDS = {
   cleanup: "aufräumen bereinigen löschen entfernen quarantäne cleanup delete remove quarantine",
   repair: "reparieren zähler umziehen ersetzen austauschen repair counter meter replace exchange",
   journal: "journal pläne rückgängig verlauf plans undo history",
+  removedDevices: "entfernte geräte gelöscht vergessen removed devices forgotten",
   maintenance: "wartung backup sicherung wiederherstellung update ziele maintenance restore goals",
   batteries: "batterien batterie akku schwach batteries battery low",
   reminders: "erinnerungen wartung filter reminders due",
@@ -54,6 +55,7 @@ class SearchPagesMixin {
     pages.push({ view: "settings", label: this.t("settings"), path: "", words: SEARCH_WORDS.settings });
     for (const [id, , labelKey] of this.settingsTabs()) pages.push({ view: "settings", settingsTab: id, label: this.t(labelKey), path: this.t("settings"), words: SEARCH_WORDS[id] || "" });
     for (const [id, label] of [["backup", "backupTitle"], ["backups", "bkcTab"], ["updates", "updatesTab"], ["blueprints", "bpTab"], ["goals", "goalsTitle"]]) pages.push({ view: "maintenance", viewTab: id, label: this.t(label), path: this.t("maintenance"), words: SEARCH_WORDS[id] });
+    pages.push({ view: "journal", viewTab: "devices", label: this.t("lifeRemovedTab"), path: this.t("journal"), words: SEARCH_WORDS.removedDevices });
     pages.push({ view: "changes", viewTab: "compare", label: this.t("tabScans"), path: this.t("changes"), words: SEARCH_WORDS.compare });
     pages.push({ view: "changes", viewTab: "logbook", label: this.t("logbook"), path: this.t("changes"), words: SEARCH_WORDS.logbook });
     return pages;

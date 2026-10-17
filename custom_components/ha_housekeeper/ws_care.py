@@ -23,7 +23,7 @@ from .goals import evaluate as evaluate_goals
 from .goals import measure as measure_goals
 from .ignored import REASON_LIMIT as IGNORE_REASON_LIMIT
 from .inventory import InventoryScanner
-from .lifecycle import removed_devices, timeline
+from .lifecycle import timeline
 from .maintenance import preflight_report
 from .marks import GRACE_DEFAULT, GRACE_MAX
 from .marks import KINDS as MARK_KINDS
@@ -554,7 +554,7 @@ def websocket_protection_set(
 
 @websocket_api.require_admin
 @websocket_api.websocket_command(
-    {vol.Required("type"): f"{DOMAIN}/lifecycle", vol.Optional("device_id"): str}
+    {vol.Required("type"): f"{DOMAIN}/lifecycle", vol.Required("device_id"): str}
 )
 @websocket_api.async_response
 @with_scanner
@@ -564,11 +564,8 @@ async def websocket_lifecycle(
     msg: dict[str, Any],
     scanner: InventoryScanner,
 ) -> None:
-    """The life of one device (steps, state), or without a device the removed devices."""
+    """The life of one device: its steps and its state."""
     plans = scanner.journal.plans
-    if "device_id" not in msg:
-        connection.send_result(msg["id"], _versioned({"removed": removed_devices(plans)}))
-        return
     snapshot = await scanner.async_get_snapshot()
     device = next(
         (

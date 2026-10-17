@@ -2779,7 +2779,7 @@ test("polish: the to-do list groups by urgency, the cleanup view has tabs, the q
   assert.ok(card.includes(">Findings<") && card.includes('data-fold="todo_care"') && !card.includes(">State<"), "areas without rows are left out, maintenance folds while something else is open");
   el.view = "cleanup"; el.journal = []; el._journalRequested = true; el.purges = [{ at: "2026-10-01T10:00:00+00:00", removed: ["sensor.a"], skipped: [], states: false }];
   const html = el.cleanupView();
-  assert.ok(html.includes('data-view-tab="cleanup|entities"') && html.includes('data-view-tab="cleanup|devices"') && html.includes('data-view-tab="cleanup|unused"') && html.includes('data-view-tab="cleanup|stats"') && html.includes('data-view-tab="cleanup|purges"'));
+  assert.ok(html.includes('data-view-tab="cleanup|entities"') && html.includes('data-view-tab="cleanup|devices"') && html.includes('data-view-tab="cleanup|unused"') && html.includes('data-view-tab="cleanup|stats"') && !html.includes('data-view-tab="cleanup|purges"'), "old purges are noted in the Journal, no tab here");
   el.diag = { quality: { items: [{ entity_id: "automation.ok", name: "Fine", status: "on", worst: "ok", dimensions: Object.fromEntries(["integrity", "reliability", "effectiveness", "maintainability", "restart_safety", "efficiency", "conflicts"].map(id => [id, { level: "ok", reasons: [] }])) }] }, criteria: {}, detail: {} };
   el._qualityRequested = true;
   el.lvState("overview", "worst", "asc").f.level = "problem";
@@ -3389,7 +3389,7 @@ test("a watch joins the incident that holds the same update, and ending it asks 
   assert.ok(el.confirmState && el.confirmState.text.includes("judged now"));
 });
 
-test("a device has a history tab with its steps and no note; removed devices show their logbook entry in Maintenance", () => {
+test("a device has a history tab with its steps and no note; removed devices show their logbook entry and the plan in the Journal", () => {
   const { el } = panel("en");
   el.data = DATA;
   const device = { object_type: "device", object_id: "d1", name: "Hub", status: "active" };
@@ -3397,11 +3397,12 @@ test("a device has a history tab with its steps and no note; removed devices sho
   el.life = new Map([["d1", { steps: [{ kind: "discovered", at: "2026-01-01T00:00:00+00:00" }, { kind: "replaced", at: "2026-02-01T00:00:00+00:00", from: "light.old", to: "light.new" }], unstable: "flapping" }]]);
   const html = el.lifeCard(device);
   assert.ok(html.includes("Discovered") && html.includes("light.old → light.new") && html.includes("flapping") && !html.includes("<textarea") && !html.includes("data-life-save"));
-  el._removedRequested = true;
-  el.removed = [{ object_id: "d9", name: "Old hub", kind: "remove_device", at: "2026-03-01T00:00:00+00:00" }, { object_id: "d8", name: "Old plug", kind: "forget_device", at: "2026-03-02T00:00:00+00:00" }];
+  el.journal = [{ plan_id: "p1", created_at: "2026-03-01T00:00:00+00:00", status: "verified", summary: { total: 1, ok: 1, review: 0, blocked: 0 } }];
+  el.removed = [{ object_id: "d9", name: "Old hub", kind: "remove_device", at: "2026-03-01T00:00:00+00:00", plan_id: "p1" }, { object_id: "d8", name: "Old plug", kind: "forget_device", at: "2026-03-02T00:00:00+00:00" }];
   el.data = { ...DATA, notes: [{ id: "n1", title: "Device “Old plug” forgotten", at: "2026-03-02T00:00:00+00:00", target: "device:d8", note: "broken <b>", source: "housekeeper", ref: "forget_device:d8" }] };
   const list = el.removedCard();
   assert.ok(list.includes("Old hub") && list.includes("Removed by a plan") && list.includes("Device “Old plug” forgotten") && list.includes('data-note-edit="n1"') && list.includes("broken &lt;b&gt;") && !list.includes("<b>"));
+  assert.ok(list.includes('<button type="button" class="btn small" data-plan-open="p1">Open plan</button>') && list.includes("beyond the 300 newest"), "the plan is one click away, and the list says how far back it reaches");
 });
 
 test("missing statistics hours say what all series lack, name the periods and list the series", () => {
@@ -4146,7 +4147,7 @@ test("detail, maintenance and settings offer their options as tiles that open on
   assert.equal(el.view, "repair"); assert.equal(el.repairTask, "repair_counter"); assert.equal(el.counterId, "sensor.water");
   assert.equal(sent.at(-1).type, "ha_housekeeper/range_series");
   el.view = "maintenance"; el.render();
-  for (const id of ["backup", "updates", "blueprints", "devices", "goals"]) assert.ok(shadow.innerHTML.includes(`data-view-tab="maintenance|${id}"`), id);
+  for (const id of ["backup", "updates", "blueprints", "goals"]) assert.ok(shadow.innerHTML.includes(`data-view-tab="maintenance|${id}"`), id);
   el.view = "settings"; el.settingsTab = "protection"; el.render();
   for (const id of ["look", "protection", "scan", "info"]) assert.ok(shadow.innerHTML.includes(`data-set-tab="${id}"`), id);
   assert.ok(shadow.innerHTML.includes("data-protection") && !shadow.innerHTML.includes("data-notify"));
@@ -5804,4 +5805,20 @@ test("every tab of Maintenance can be found by search, and the goals tab says wh
   assert.ok(shadow.innerHTML.includes("There are no maintenance goals yet."));
   el.goals = null; el.goalsError = "boom"; el.render();
   assert.ok(shadow.innerHTML.includes("boom"));
+});
+
+test("the journal has tabs for plans and removed devices, shows a load error and points to older purges from tidy up", () => {
+  const { el, shadow } = panel("en");
+  el.data = { ...DATA, objects: [], edges: [], findings: [], quarantine: [], notes: [] };
+  el.journal = []; el._journalRequested = true; el.removed = [{ object_id: "d9", name: "Old hub", kind: "remove_device", at: "2026-03-01T00:00:00+00:00", plan_id: "gone" }]; el.purges = [];
+  el.view = "journal"; el.render();
+  let html = shadow.innerHTML;
+  assert.ok(html.includes('data-view-tab="journal|plans"') && html.includes('data-view-tab="journal|devices"') && !html.includes('data-view-tab="journal|purges"') && html.includes("data-journal-refresh"));
+  el.viewTab = { journal: "devices" }; el.render();
+  assert.ok(shadow.innerHTML.includes("Old hub") && !shadow.innerHTML.includes("Open plan"), "a plan that left the journal gets no button");
+  el.journalError = "boom"; el.render();
+  assert.ok(shadow.innerHTML.includes("boom") && !shadow.innerHTML.includes("Old hub"), "a failed load is shown, not mistaken for an empty journal");
+  el.journalError = ""; el.purges = [{ at: "2026-10-01T10:00:00+00:00", removed: ["sensor.a"], skipped: [], states: false }];
+  el.view = "cleanup"; el.viewTab = { cleanup: "stats" };
+  assert.ok(el.cleanupView().includes('data-jump-tab="purges"'));
 });

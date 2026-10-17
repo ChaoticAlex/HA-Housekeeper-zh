@@ -217,8 +217,9 @@ class CleanupMixin {
   async loadJournal() {
     try {
       const reply = await this._hass.callWS({ type: "ha_housekeeper/plan_list" });
-      this.journal = reply.plans || []; this.purges = reply.purges || [];
-    } catch (_) { this.journal = []; }
+      this.journal = reply.plans || []; this.purges = reply.purges || []; this.removed = reply.removed || []; this.journalError = "";
+      this.markLoaded("journal");
+    } catch (err) { this.journal = []; this.journalError = this.errText(err); }
     this.render();
   }
 
@@ -719,17 +720,18 @@ class CleanupMixin {
       { id: "devices", icon: "mdi:devices", label: this.t("cleanupTabDevices"), hint: this.t("cleanupTileDevicesHint"), count: count("disable_device"), facts: nothing(count("disable_device")), tone: "warn" },
       { id: "quarantine", icon: "mdi:archive-clock-outline", label: this.t("cleanupTabQuarantine"), hint: this.t("cleanupTileQuarantineHint", { days: limit }), count: held.length, facts: [], pill: heldReady ? this.t("cleanupReadyCount", { count: heldReady }) : "", tone: heldReady ? "ok" : "mute" },
       { id: "stats", icon: "mdi:database-remove-outline", label: this.t("orphanStats"), hint: this.t("cleanupTileStatsHint"), count: statsCount, facts: [], tone: "mute" },
-      ...(purges.length ? [{ id: "purges", icon: "mdi:history", label: this.t("cleanupTabPurges"), hint: this.t("cleanupTilePurgesHint"), count: purges.length, facts: [], tone: "mute" }] : []),
       { id: "unused", icon: "mdi:link-variant-off", label: this.t("unreferenced"), hint: this.t("cleanupTileUnusedHint"), count: unusedCount, facts: unusedFacts, tone: "mute" },
     ];
     const open = this.viewTabOf("cleanup", tabs, "entities");
     const tiles = this.cleanupTiles(tabs, open);
-    if (["unused", "stats", "purges"].includes(open)) {
+    if (["unused", "stats"].includes(open)) {
       this.unrefTab = open === "stats" ? "statistics" : "entities";
       this._embedUnref = true;
-      const body = open === "purges" ? this.purgeJournalCard() : this.unreferencedView();
+      const body = this.unreferencedView();
       this._embedUnref = false;
-      return `<div class="stack">${this.planHeader()}${tiles}${body}</div>`;
+      // What was deleted from the recorder is noted in the Journal.
+      const pointer = open === "stats" && purges.length ? `<p class="factnote pad">${this.t("purgesInJournal", { n: purges.length })} <button class="link" data-jump="journal" data-jump-tab="purges">${this.t("purgesInJournalLink")}</button></p>` : "";
+      return `<div class="stack">${this.planHeader()}${tiles}${pointer}${body}</div>`;
     }
     const quarantineType = this.quarantineType === "device" ? "device" : "entity";
     this._cleanupKinds = open === "devices" ? ["disable_device"] : open === "quarantine" ? (quarantineType === "device" ? ["remove_device", "forget_device"] : ["remove_entity"]) : ["disable_entity"];
@@ -786,6 +788,12 @@ class CleanupMixin {
 
   ensureJournal() {
     if (this.journal === null && !this._journalRequested) { this._journalRequested = true; this.loadJournal(); }
+  }
+
+  // "Refresh" on the Journal: asks again; the lists show their loading state meanwhile.
+  refreshJournal() {
+    this.journal = null; this._journalRequested = false; this.journalError = "";
+    this.ensureJournal(); this.render();
   }
 
   // Every new plan opens the same way: it becomes the open plan, goes on top of the journal and the
@@ -908,8 +916,19 @@ class CleanupMixin {
     }) : `<div class="emptymsg mute"><ha-icon icon="mdi:clipboard-text-outline"></ha-icon><strong>${this.t("journalEmpty")}</strong>${this.t("journalEmptyNext")}<button class="btn" data-jump="repair">${this.t("repair")}</button></div>`;
     const picked = this.mergeSel?.size || 0;
     const tools = plans.some(p => this.mergeable(p)) ? `<div class="toolbar${picked ? "" : " nosel"}"><button class="btn" data-merge ${picked >= 2 && picked <= 10 && !this.cleanupBusy ? "" : "disabled"}${picked > 10 ? ` title="${this.esc(this.t("mergeTooMany"))}"` : ""}>${this.t("mergeButton", { count: picked })}</button><button class="btn dangersoft" data-merge-delete ${picked && !this.cleanupBusy ? "" : "disabled"}>${this.t("deleteSelectedPlans", { count: picked })}</button><span class="selcount" aria-live="polite">${this.t("selectedCount", { count: picked })}</span>${this.viewCount(this.lv.journal?.shown ?? plans.length)}</div>` : "";
-    const journalCard = `<div class="panel"><div class="panelhead"><div><h2>${this.t("journal")} (${plans.length})</h2><p>${this.t("journalHint")}</p></div></div>${this.mergeNote ? `<div class="pad"><small role="status">${this.esc(this.mergeNote)}</small></div>` : ""}${tools}${table}</div>`;
-    return `<div class="stack">${this.planHeader()}${journalCard}</div>`;
+    const journalCard = `<div class="panel"><div class="panelhead"><div><h2>${this.t("journalPlans")}</h2><p>${this.t("journalHint")}</p></div></div>${this.mergeNote ? `<div class="pad"><small role="status">${this.esc(this.mergeNote)}</small></div>` : ""}${tools}${table}</div>`;
+    const removed = this.removed || [], purges = this.purges || [];
+    const tabs = [
+      { id: "plans", icon: "mdi:clipboard-text-clock-outline", label: this.t("journalPlans"), hint: this.t("journalTabPlansHint"), count: plans.length, tone: "mute" },
+      { id: "devices", icon: "mdi:delete-outline", label: this.t("lifeRemovedTab"), hint: this.t("journalTabDevicesHint"), count: removed.length, tone: "mute" },
+      // Only older installations have these: deletions of recorder leftovers from before there were plans.
+      ...(purges.length ? [{ id: "purges", icon: "mdi:database-remove-outline", label: this.t("cleanupTabPurges"), hint: this.t("journalTabPurgesHint"), count: purges.length, tone: "mute" }] : []),
+    ];
+    const open = this.viewTabOf("journal", tabs, "plans");
+    const head = this.pageBar({ at: this.loadedAt("journal"), loading: this.journal === null, attr: "data-journal-refresh" });
+    const failed = this.journalError ? `<div class="panel"><div class="error">${this.esc(this.journalError)}</div></div>` : "";
+    const body = this.journalError ? "" : open === "devices" ? this.removedCard() : open === "purges" ? this.purgeJournalCard() : journalCard;
+    return `<div class="stack">${this.planHeader()}${head}${this.navTiles("journal", tabs, open, this.t("journal"), true)}${failed}${body}</div>`;
   }
 
   // Where the person is in an assistant: choose, set up, look at the preview.

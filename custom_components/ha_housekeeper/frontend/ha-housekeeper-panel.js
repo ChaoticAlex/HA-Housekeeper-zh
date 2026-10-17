@@ -113,7 +113,7 @@ const TEXT = {
     planStaleHint: "Diese Vorschau ist älter als 24 Stunden und kann nicht mehr bestätigt werden. Erneuern prüft dieselben Einträge noch einmal und ersetzt sie.",
     planChangedTitle: "Seit der Vorschau hat sich etwas geändert", planChangedHint: "Für diese Einträge ergibt die Prüfung jetzt ein anderes Bild. Erneuere die Vorschau und sieh sie dir noch einmal an.", planChangedMore: "… und {count} weitere",
     planSummary: "{total} geprüft: {ok} ohne bekannte Verwendung, {review} zu prüfen, {blocked} blockiert.", planUses: "{count} Verwendungen betroffen", planStats: "{count} mit Langzeitstatistik",
-    verdict_ok: "Keine bekannte Verwendung", verdict_review: "Prüfen", verdict_blocked: "Blockiert", journal: "Journal", journalHint: "Frühere Vorschauen (die letzten 50).", journalEmpty: "Noch keine Vorschau erstellt.",
+    verdict_ok: "Keine bekannte Verwendung", verdict_review: "Prüfen", verdict_blocked: "Blockiert", journal: "Journal", journalHint: "Vorschauen und ausgeführte Pläne, die neuesten zuerst. Ausgeführte bleiben bis zu einem Jahr (höchstens 300), nie gestartete Vorschauen verfallen früher.", journalEmpty: "Noch keine Vorschau erstellt.",
     openPlan: "Öffnen", deletePlan: "Löschen", dryRun: "Dry Run", usedBy: "Verwendet von",
     reason_entity_working: "Die Entität funktioniert noch und ist kein Kandidat.", reason_used_certain: "Wird sicher verwendet – Entfernen würde Verweise brechen.", reason_used_probable: "Wird vermutlich verwendet (Template oder Dashboard).",
     reason_has_statistics: "Hat Langzeitstatistiken im Recorder; sie blieben ohne Entität zurück.", reason_ignored_by_label: "Trägt das Label housekeeper_ignore.", reason_not_found: "Im letzten Scan nicht gefunden.", reason_unsupported_action: "Diese Aktion wird nicht unterstützt.",
@@ -296,7 +296,7 @@ const TEXT = {
     planStaleHint: "This preview is older than 24 hours and can no longer be confirmed. Renewing checks the same entries again and replaces it.",
     planChangedTitle: "Something changed since the preview", planChangedHint: "The check now gives a different result for these entries. Renew the preview and look at it again.", planChangedMore: "… and {count} more",
     planSummary: "{total} checked: {ok} with no known use, {review} to review, {blocked} blocked.", planUses: "{count} uses affected", planStats: "{count} with long-term statistics",
-    verdict_ok: "No known use", verdict_review: "Review", verdict_blocked: "Blocked", journal: "Journal", journalHint: "Earlier previews (the last 50).", journalEmpty: "No preview created yet.",
+    verdict_ok: "No known use", verdict_review: "Review", verdict_blocked: "Blocked", journal: "Journal", journalHint: "Previews and plans that ran, newest first. Plans that ran stay up to a year (at most 300); previews that were never started expire sooner.", journalEmpty: "No preview created yet.",
     openPlan: "Open", deletePlan: "Delete", dryRun: "Dry run", usedBy: "Used by",
     reason_entity_working: "The entity still works and is not a candidate.", reason_used_certain: "Definitely in use – removing it would break references.", reason_used_probable: "Probably in use (template or dashboard).",
     reason_has_statistics: "Has long-term statistics in the recorder; they would be left without an entity.", reason_ignored_by_label: "Carries the label housekeeper_ignore.", reason_not_found: "Not found in the latest scan.", reason_unsupported_action: "This action is not supported.",
@@ -3261,12 +3261,12 @@ class ChangesMixin {
 Object.assign(TEXT.de, {
   lifeTab: "Verlauf", lifeHint: "Was sich aus der Geräte-Registry, dem Journal und der Zuverlässigkeit über dieses Gerät sagen lässt.", lifeNow: "Jetzt", lifeNone: "Noch keine Schritte bekannt.",
   life_discovered: "Entdeckt", life_quarantine: "In Quarantäne", life_disabled: "Durch einen Plan deaktiviert", life_removed: "Durch einen Plan entfernt", life_replaced: "Ersetzung: {from} → {to}", lifeForgotten: "Durch einen Plan vergessen",
-  lifeRemovedTab: "Entfernte Geräte", lifeRemovedTitle: "Entfernte Geräte", lifeRemovedHint: "Geräte, die ein Plan von Housekeeper entfernt oder vergessen hat, nach dem Journal.", lifeRemovedNone: "Housekeeper hat noch kein Gerät entfernt.",
+  lifeRemovedTab: "Entfernte Geräte", lifeRemovedTitle: "Entfernte Geräte", lifeRemovedHint: "Geräte, die ein Plan von Housekeeper entfernt oder vergessen hat, nach dem Journal. Pläne, die länger als ein Jahr zurückliegen oder über die 300 jüngsten hinausgehen, fallen aus dem Journal und damit aus dieser Liste.", lifeColPlan: "Plan", lifeOpenPlan: "Plan öffnen", lifeRemovedNone: "Housekeeper hat noch kein Gerät entfernt.",
 });
 Object.assign(TEXT.en, {
   lifeTab: "History", lifeHint: "What the device registry, the journal and the reliability say about this device.", lifeNow: "Now", lifeNone: "No steps known yet.",
   life_discovered: "Discovered", life_quarantine: "In quarantine", life_disabled: "Disabled by a plan", life_removed: "Removed by a plan", life_replaced: "Replacement: {from} → {to}", lifeForgotten: "Forgotten by a plan",
-  lifeRemovedTab: "Removed devices", lifeRemovedTitle: "Removed devices", lifeRemovedHint: "Devices that a Housekeeper plan removed or forgot, from the journal.", lifeRemovedNone: "Housekeeper has not removed a device yet.",
+  lifeRemovedTab: "Removed devices", lifeRemovedTitle: "Removed devices", lifeRemovedHint: "Devices that a Housekeeper plan removed or forgot, from the journal. Plans older than a year or beyond the 300 newest leave the journal and so this list.", lifeColPlan: "Plan", lifeOpenPlan: "Open plan", lifeRemovedNone: "Housekeeper has not removed a device yet.",
 });
 
 // SettingsMixin: methods of the panel element, mixed into the class in 99-register.js.
@@ -3736,8 +3736,9 @@ class CleanupMixin {
   async loadJournal() {
     try {
       const reply = await this._hass.callWS({ type: "ha_housekeeper/plan_list" });
-      this.journal = reply.plans || []; this.purges = reply.purges || [];
-    } catch (_) { this.journal = []; }
+      this.journal = reply.plans || []; this.purges = reply.purges || []; this.removed = reply.removed || []; this.journalError = "";
+      this.markLoaded("journal");
+    } catch (err) { this.journal = []; this.journalError = this.errText(err); }
     this.render();
   }
 
@@ -4238,17 +4239,18 @@ class CleanupMixin {
       { id: "devices", icon: "mdi:devices", label: this.t("cleanupTabDevices"), hint: this.t("cleanupTileDevicesHint"), count: count("disable_device"), facts: nothing(count("disable_device")), tone: "warn" },
       { id: "quarantine", icon: "mdi:archive-clock-outline", label: this.t("cleanupTabQuarantine"), hint: this.t("cleanupTileQuarantineHint", { days: limit }), count: held.length, facts: [], pill: heldReady ? this.t("cleanupReadyCount", { count: heldReady }) : "", tone: heldReady ? "ok" : "mute" },
       { id: "stats", icon: "mdi:database-remove-outline", label: this.t("orphanStats"), hint: this.t("cleanupTileStatsHint"), count: statsCount, facts: [], tone: "mute" },
-      ...(purges.length ? [{ id: "purges", icon: "mdi:history", label: this.t("cleanupTabPurges"), hint: this.t("cleanupTilePurgesHint"), count: purges.length, facts: [], tone: "mute" }] : []),
       { id: "unused", icon: "mdi:link-variant-off", label: this.t("unreferenced"), hint: this.t("cleanupTileUnusedHint"), count: unusedCount, facts: unusedFacts, tone: "mute" },
     ];
     const open = this.viewTabOf("cleanup", tabs, "entities");
     const tiles = this.cleanupTiles(tabs, open);
-    if (["unused", "stats", "purges"].includes(open)) {
+    if (["unused", "stats"].includes(open)) {
       this.unrefTab = open === "stats" ? "statistics" : "entities";
       this._embedUnref = true;
-      const body = open === "purges" ? this.purgeJournalCard() : this.unreferencedView();
+      const body = this.unreferencedView();
       this._embedUnref = false;
-      return `<div class="stack">${this.planHeader()}${tiles}${body}</div>`;
+      // What was deleted from the recorder is noted in the Journal.
+      const pointer = open === "stats" && purges.length ? `<p class="factnote pad">${this.t("purgesInJournal", { n: purges.length })} <button class="link" data-jump="journal" data-jump-tab="purges">${this.t("purgesInJournalLink")}</button></p>` : "";
+      return `<div class="stack">${this.planHeader()}${tiles}${pointer}${body}</div>`;
     }
     const quarantineType = this.quarantineType === "device" ? "device" : "entity";
     this._cleanupKinds = open === "devices" ? ["disable_device"] : open === "quarantine" ? (quarantineType === "device" ? ["remove_device", "forget_device"] : ["remove_entity"]) : ["disable_entity"];
@@ -4305,6 +4307,12 @@ class CleanupMixin {
 
   ensureJournal() {
     if (this.journal === null && !this._journalRequested) { this._journalRequested = true; this.loadJournal(); }
+  }
+
+  // "Refresh" on the Journal: asks again; the lists show their loading state meanwhile.
+  refreshJournal() {
+    this.journal = null; this._journalRequested = false; this.journalError = "";
+    this.ensureJournal(); this.render();
   }
 
   // Every new plan opens the same way: it becomes the open plan, goes on top of the journal and the
@@ -4427,8 +4435,19 @@ class CleanupMixin {
     }) : `<div class="emptymsg mute"><ha-icon icon="mdi:clipboard-text-outline"></ha-icon><strong>${this.t("journalEmpty")}</strong>${this.t("journalEmptyNext")}<button class="btn" data-jump="repair">${this.t("repair")}</button></div>`;
     const picked = this.mergeSel?.size || 0;
     const tools = plans.some(p => this.mergeable(p)) ? `<div class="toolbar${picked ? "" : " nosel"}"><button class="btn" data-merge ${picked >= 2 && picked <= 10 && !this.cleanupBusy ? "" : "disabled"}${picked > 10 ? ` title="${this.esc(this.t("mergeTooMany"))}"` : ""}>${this.t("mergeButton", { count: picked })}</button><button class="btn dangersoft" data-merge-delete ${picked && !this.cleanupBusy ? "" : "disabled"}>${this.t("deleteSelectedPlans", { count: picked })}</button><span class="selcount" aria-live="polite">${this.t("selectedCount", { count: picked })}</span>${this.viewCount(this.lv.journal?.shown ?? plans.length)}</div>` : "";
-    const journalCard = `<div class="panel"><div class="panelhead"><div><h2>${this.t("journal")} (${plans.length})</h2><p>${this.t("journalHint")}</p></div></div>${this.mergeNote ? `<div class="pad"><small role="status">${this.esc(this.mergeNote)}</small></div>` : ""}${tools}${table}</div>`;
-    return `<div class="stack">${this.planHeader()}${journalCard}</div>`;
+    const journalCard = `<div class="panel"><div class="panelhead"><div><h2>${this.t("journalPlans")}</h2><p>${this.t("journalHint")}</p></div></div>${this.mergeNote ? `<div class="pad"><small role="status">${this.esc(this.mergeNote)}</small></div>` : ""}${tools}${table}</div>`;
+    const removed = this.removed || [], purges = this.purges || [];
+    const tabs = [
+      { id: "plans", icon: "mdi:clipboard-text-clock-outline", label: this.t("journalPlans"), hint: this.t("journalTabPlansHint"), count: plans.length, tone: "mute" },
+      { id: "devices", icon: "mdi:delete-outline", label: this.t("lifeRemovedTab"), hint: this.t("journalTabDevicesHint"), count: removed.length, tone: "mute" },
+      // Only older installations have these: deletions of recorder leftovers from before there were plans.
+      ...(purges.length ? [{ id: "purges", icon: "mdi:database-remove-outline", label: this.t("cleanupTabPurges"), hint: this.t("journalTabPurgesHint"), count: purges.length, tone: "mute" }] : []),
+    ];
+    const open = this.viewTabOf("journal", tabs, "plans");
+    const head = this.pageBar({ at: this.loadedAt("journal"), loading: this.journal === null, attr: "data-journal-refresh" });
+    const failed = this.journalError ? `<div class="panel"><div class="error">${this.esc(this.journalError)}</div></div>` : "";
+    const body = this.journalError ? "" : open === "devices" ? this.removedCard() : open === "purges" ? this.purgeJournalCard() : journalCard;
+    return `<div class="stack">${this.planHeader()}${head}${this.navTiles("journal", tabs, open, this.t("journal"), true)}${failed}${body}</div>`;
   }
 
   // Where the person is in an assistant: choose, set up, look at the preview.
@@ -5938,13 +5957,12 @@ class MaintenanceMixin {
       { id: "backups", icon: "mdi:delete-sweep-outline", label: this.t("bkcTab"), hint: "maintHintBkc", pill: this.bkc?.available && this.bkc.rows?.length ? this.formatNumber(this.bkc.rows.length) : "", tone: "mute" },
       { id: "updates", icon: "mdi:package-up", label: this.t("updatesTab"), hint: "maintHintUpdates", pill: updates ? this.formatNumber(updates) : "", tone: pfTone },
       { id: "blueprints", icon: "mdi:file-code-outline", label: this.t("bpTab"), hint: "maintHintBlueprints", pill: bpBad ? this.t("mtOpen", { n: bpBad }) : "", tone: "warn" },
-      { id: "devices", icon: "mdi:devices", label: this.t("lifeRemovedTab"), hint: "maintHintDevices", pill: this.removed?.length ? this.formatNumber(this.removed.length) : "", tone: "mute" },
       { id: "goals", icon: "mdi:target", label: this.t("goalsTitle"), hint: "maintHintGoals", pill: goalsMissed ? this.t("tilesMissed", { count: goalsMissed }) : "", tone: "red" },
     ];
     this.ensureBackupCleanup();
     const open = this.viewTabOf("maintenance", tabs, "backup");
     const grid = this.navTiles("maintenance", tabs.map(tab => ({ ...tab, hint: this.t(tab.hint), tone: tab.pill ? tab.tone : "ok" })), open, this.t("maintenance"), true);
-    return `<div class="stack">${grid}${open === "goals" ? this.goalsCard() : open === "updates" ? this.updatesCard() : open === "devices" ? this.removedCard() : open === "blueprints" ? this.blueprintsCard() : open === "backups" ? this.backupCleanupCard() : this.backupCard()}</div>`;
+    return `<div class="stack">${grid}${open === "goals" ? this.goalsCard() : open === "updates" ? this.updatesCard() : open === "blueprints" ? this.blueprintsCard() : open === "backups" ? this.backupCleanupCard() : this.backupCard()}</div>`;
   }
 }
 
@@ -7158,6 +7176,7 @@ const SEARCH_WORDS = {
   cleanup: "aufräumen bereinigen löschen entfernen quarantäne cleanup delete remove quarantine",
   repair: "reparieren zähler umziehen ersetzen austauschen repair counter meter replace exchange",
   journal: "journal pläne rückgängig verlauf plans undo history",
+  removedDevices: "entfernte geräte gelöscht vergessen removed devices forgotten",
   maintenance: "wartung backup sicherung wiederherstellung update ziele maintenance restore goals",
   batteries: "batterien batterie akku schwach batteries battery low",
   reminders: "erinnerungen wartung filter reminders due",
@@ -7203,6 +7222,7 @@ class SearchPagesMixin {
     pages.push({ view: "settings", label: this.t("settings"), path: "", words: SEARCH_WORDS.settings });
     for (const [id, , labelKey] of this.settingsTabs()) pages.push({ view: "settings", settingsTab: id, label: this.t(labelKey), path: this.t("settings"), words: SEARCH_WORDS[id] || "" });
     for (const [id, label] of [["backup", "backupTitle"], ["backups", "bkcTab"], ["updates", "updatesTab"], ["blueprints", "bpTab"], ["goals", "goalsTitle"]]) pages.push({ view: "maintenance", viewTab: id, label: this.t(label), path: this.t("maintenance"), words: SEARCH_WORDS[id] });
+    pages.push({ view: "journal", viewTab: "devices", label: this.t("lifeRemovedTab"), path: this.t("journal"), words: SEARCH_WORDS.removedDevices });
     pages.push({ view: "changes", viewTab: "compare", label: this.t("tabScans"), path: this.t("changes"), words: SEARCH_WORDS.compare });
     pages.push({ view: "changes", viewTab: "logbook", label: this.t("logbook"), path: this.t("changes"), words: SEARCH_WORDS.logbook });
     return pages;
@@ -7884,7 +7904,7 @@ Object.assign(TEXT.en, {
   optWatchTitle: "Watch after a system update", optWatchHint: "For how many hours after an update of Home Assistant, the operating system or the Supervisor Housekeeper scans extra and compares with the state before. 0 switches the watch off.",
 });
 
-// LifecycleMixin: the "Verlauf" tab of a device and the list of removed devices in Maintenance; mixed in by 99-register.js.
+// LifecycleMixin: the "Verlauf" tab of a device and the list of removed devices in the Journal; mixed in by 99-register.js.
 // The steps come from the device registry, the journal and the last reliability numbers; the logbook entry of a removed device is shown in the list of removed devices.
 class LifecycleMixin {
   async loadLifecycle(deviceId) {
@@ -7914,19 +7934,9 @@ class LifecycleMixin {
     return `<section class="panel">${head}${rows || `<p class="factnote">${this.t("lifeNone")}</p>`}${now}</section>`;
   }
 
-  // Devices that a plan removed or forgot; they no longer exist, so the journal is the only source.
-  ensureRemoved() {
-    if (this._removedRequested) return;
-    this._removedRequested = true;
-    setTimeout(async () => {
-      try { this.removed = (await this._hass.callWS({ type: "ha_housekeeper/lifecycle" })).removed || []; } catch (_) { this.removed = []; }
-      this.render();
-    }, 0);
-  }
-
   removedCard() {
-    this.ensureRemoved();
-    const head = `<p class="factnote pad">${this.t("lifeRemovedHint")}</p>`;  // the title is on the tile of the tab
+    // The list comes with the journal (they are the same source); the title is on the tile of the tab.
+    const head = `<p class="factnote pad">${this.t("lifeRemovedHint")}</p>`;
     if (!this.removed) return `<div class="panel">${head}${this.skeleton("loading")}</div>`;
     // The logbook entry that was written when the device was removed (or one the person added to it).
     const noteOf = d => this.notesList().find(x => x.target === `device:${d.object_id}`);
@@ -7946,6 +7956,7 @@ class LifecycleMixin {
         { key: "kind", label: "lifeColKind", sortable: false, cell: kindText },
         { key: "when", label: "lifeColWhen", dir: "desc", cell: d => this.esc(this.formatDate(d.at)) },
         { key: "note", label: "lifeColNote", sortable: false, cell: d => { const n = noteOf(d); return n ? `${this.esc(n.title)}${n.note ? `<small class="u-block">${this.esc(n.note)}</small>` : ""}` : "–"; } },
+        { key: "plan", label: "lifeColPlan", sortable: false, cell: d => ((this.journal || []).some(p => p.plan_id === d.plan_id) ? `<button type="button" class="btn small" data-plan-open="${this.esc(d.plan_id)}">${this.t("lifeOpenPlan")}</button>` : "–") },
       ],
     }) : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("lifeRemovedNone")}</div>`;
     return `<div class="panel">${head}${table}</div>`;
@@ -9556,6 +9567,7 @@ class DryRunMixin {
 // Texts of the panel polish: folds, groups and tabs in the cleanup view, filters of the quality view.
 Object.assign(TEXT.de, {
  
+  journalPlans: "Pläne", journalTabPlansHint: "Alle Pläne mit Ergebnis und Rückgängig.", journalTabDevicesHint: "Was ein Plan entfernt hat.", journalTabPurgesHint: "Ältere Löschungen, vor den Plänen.", purgesInJournal: "{n} ältere Löschungen von Statistiken stehen im Journal.", purgesInJournalLink: "Im Journal ansehen",
   cleanupTabNew: "Neuer Plan", cleanupTabJournal: "Pläne und Journal", cleanupTabPurges: "Gelöschte Statistiken",
   journalEmptyNext: "Noch kein Plan. Wähle unter „Neuer Plan“ Kandidaten aus und lege einen Plan an.",
   
@@ -9565,6 +9577,7 @@ Object.assign(TEXT.de, {
 });
 Object.assign(TEXT.en, {
  
+  journalPlans: "Plans", journalTabPlansHint: "Every plan with result and undo.", journalTabDevicesHint: "What a plan removed.", journalTabPurgesHint: "Older deletions, from before plans.", purgesInJournal: "{n} older deletions of statistics are noted in the Journal.", purgesInJournalLink: "See in the Journal",
   cleanupTabNew: "New plan", cleanupTabJournal: "Plans and journal", cleanupTabPurges: "Deleted statistics",
   journalEmptyNext: "No plan yet. Pick candidates under “New plan” and create one.",
   
@@ -10913,7 +10926,7 @@ Object.assign(TEXT.de, {
   setLanguage: "Sprache", setLanguageHint: "Gilt für dieses Panel und wird in deinem Benutzerprofil gespeichert. Automatisch folgt der Sprache von Home Assistant.", langAuto: "Automatisch",
   setTabProtection: "Schutz und Ausnahmen", setHintLook: "Sprache, Dichte und Darstellung.", setHintProtection: "Schutzmodus und ausgeblendete Befunde.", setHintScan: "Wann geprüft wird, Grenzwerte und Meldungen.", setHintInfo: "Version, Diagnose und Support.",
   setEveryHours: "alle {n} h", setManual: "von Hand", setOn: "an", setOff: "aus",
-  maintHintBackup: "Backups prüfen und schützen.", maintHintUpdates: "Offene Updates und was vorher zu prüfen ist.", maintHintBlueprints: "Blueprints, die fehlen oder defekt sind.", maintHintDevices: "Entfernte Geräte ansehen.", maintHintGoals: "Eigene Grenzen für „in Ordnung“.",
+  maintHintBackup: "Backups prüfen und schützen.", maintHintUpdates: "Offene Updates und was vorher zu prüfen ist.", maintHintBlueprints: "Blueprints, die fehlen oder defekt sind.", maintHintGoals: "Eigene Grenzen für „in Ordnung“.",
   actRepairValues: "Werte reparieren", actHintRepair: "Falsche Werte im Verlauf und in der Statistik ersetzen.", actMeter: "Zähler wechseln", actHintMeter: "Die Statistik bei einem neuen Zähler fortführen.", actExchange: "Gerät austauschen", actHintExchange: "Durch ein neues Gerät ersetzen und alles übernehmen.",
   actHintReplace: "Überall durch eine andere Entität ersetzen.", actHintDisable: "Erst deaktivieren; nach der Wartezeit entfernen.",
   navGroupActions: "Aktionen", navGroupSecurity: "Sicherheit",
@@ -10922,7 +10935,7 @@ Object.assign(TEXT.de, {
   goalsLine: "Wartungsziele: {met} von {total} erfüllt", hintsTitle: "Hinweise",
   healthScore: "Zustand {percent} %", healthTasks: "{count} Aufgaben offen", healthNoTasks: "keine offenen Aufgaben", healthTip: "Anteil der Objekte in Ordnung: Jedes Objekt mit Befund nimmt je nach Auswirkung ganz, halb oder zu einem Fünftel ab. {affected} von {base} Objekten haben einen Befund; das ist nur die Begleitzahl. Mehr per Klick auf den Ring.",
   repair: "Reparieren", repairSubtitle: "Bestehende Daten und Verweise korrigieren oder auf etwas Neues umstellen. Housekeeper zeigt erst eine Vorschau; geschrieben wird erst nach deiner Bestätigung.", repairDryRun: "Nichts wird geändert, bis du die Vorschau bestätigst.",
-  journalSubtitle: "Alle Pläne aus Aufräumen und Reparieren: was geändert wurde, was geprüft wurde und was sich rückgängig machen lässt.",
+  journalSubtitle: "Alle Pläne aus Aufräumen und Reparieren: was geändert wurde, was geprüft wurde und was sich rückgängig machen lässt, dazu die entfernten Geräte.",
  relTileIntHint: "Verfügbarkeit {avail} in {window}", relTilePill: "{n} auffällig", relTileUnstableHint: "Entitäten, die oft zwischen Zuständen wechseln", recTileLoadRows: "{n} Einträge pro Tag ({window})", recTileLoadHint: "Wie oft etwas geschrieben wird", recTileCostsTop: "Größter Posten: {name} ({share} %)", recTileCostsHint: "Wie viel Platz jede Entität belegt", recTileDbHint: "Größe, Wachstum und Aufbewahrung", polTileRulesHint: "{on} eingeschaltet", polTileViolationsHint: "Verstöße gegen eingeschaltete Regeln", polTileHidden: "{n} ausgeblendet", expoTileFindingsHint: "Was du prüfen oder wissen solltest", expoTileSourceHint: "{n} Entitäten freigegeben", runsTileRunsHint: "Gezählte Läufe von Automationen und Skripten", runsTileQualityHint: "Alle Automationen auf einen Blick",
   cleanupTabEntities: "Entitäten deaktivieren", cleanupTabDevices: "Geräte deaktivieren", cleanupTabQuarantine: "Quarantäne und Entfernen", cleanupReadyCount: "{count} bereit", cleanupNothing: "nichts zu tun", unrefFactStats: "{n} mit Statistik", unrefFactDomain: "häufigste: {name}", cleanupTileEntitiesHint: "Verwaist oder lange nicht verfügbar", cleanupTileDevicesHint: "Geräte ohne funktionierende Entität", cleanupTileQuarantineHint: "Frühestens nach {days} Tagen entfernbar", cleanupTileUnusedHint: "Ohne bekannte Verwendung, nur ein Hinweis", cleanupTileStatsHint: "Reste in der Datenbank löschen", cleanupTilePurgesHint: "Was schon gelöscht wurde", qTypeEntities: "Entitäten ({count})", qTypeDevices: "Geräte ({count})",
   repairTitle: "Was möchtest du reparieren?", repairHint: "Wähle eine Aufgabe. Jede führt in Schritten durch, mit Vorschau und Bestätigung.", repairBack: "Alle Aufgaben", repairFound: "{count} Funde", repairNotChecked: "nicht geprüft", repairNoneFound: "keine Funde",
@@ -10956,7 +10969,7 @@ Object.assign(TEXT.en, {
   setLanguage: "Language", setLanguageHint: "Applies to this panel and is saved in your user profile. Automatic follows the language of Home Assistant.", langAuto: "Automatic",
   setTabProtection: "Protection and exceptions", setHintLook: "Language, density and appearance.", setHintProtection: "Protection mode and hidden findings.", setHintScan: "When it checks, limits and messages.", setHintInfo: "Version, diagnostics and support.",
   setEveryHours: "every {n} h", setManual: "manual", setOn: "on", setOff: "off",
-  maintHintBackup: "Check and protect backups.", maintHintUpdates: "Open updates and what to check first.", maintHintBlueprints: "Blueprints that are missing or broken.", maintHintDevices: "Look at removed devices.", maintHintGoals: "Your own limits for what in order means.",
+  maintHintBackup: "Check and protect backups.", maintHintUpdates: "Open updates and what to check first.", maintHintBlueprints: "Blueprints that are missing or broken.", maintHintGoals: "Your own limits for what in order means.",
   actRepairValues: "Repair values", actHintRepair: "Replace wrong values in the history and the statistics.", actMeter: "Replace the meter", actHintMeter: "Carry the statistics on with a new meter.", actExchange: "Exchange the device", actHintExchange: "Replace it with a new device and carry everything over.",
   actHintReplace: "Replace it with another entity everywhere.", actHintDisable: "Disable first; remove after the waiting time.",
   navGroupActions: "Actions", navGroupSecurity: "Security",
@@ -10965,7 +10978,7 @@ Object.assign(TEXT.en, {
   goalsLine: "Maintenance goals: {met} of {total} met", hintsTitle: "Hints",
   healthScore: "State {percent} %", healthTasks: "{count} tasks open", healthNoTasks: "no open tasks", healthTip: "Share of the objects in order: every object with a finding takes off fully, by half or by a fifth, by its impact. {affected} of {base} objects have a finding; that is only the number beside it. More with a click on the ring.",
   repair: "Repair", repairSubtitle: "Correct existing data and references, or switch them over to something new. Housekeeper shows a preview first; nothing is written until you confirm.", repairDryRun: "Nothing is changed until you confirm the preview.",
-  journalSubtitle: "Every plan from Tidy up and Repair: what changed, what was checked and what can be undone.",
+  journalSubtitle: "Every plan from Tidy up and Repair: what changed, what was checked and what can be undone, plus the removed devices.",
  relTileIntHint: "Availability {avail} over {window}", relTilePill: "{n} need a look", relTileUnstableHint: "Entities that often change between states", recTileLoadRows: "{n} rows a day ({window})", recTileLoadHint: "How often things are written", recTileCostsTop: "Biggest item: {name} ({share} %)", recTileCostsHint: "How much space each entity takes", recTileDbHint: "Size, growth and retention", polTileRulesHint: "{on} switched on", polTileViolationsHint: "Violations of the rules that are on", polTileHidden: "{n} hidden", expoTileFindingsHint: "What you should check or know", expoTileSourceHint: "{n} entities exposed", runsTileRunsHint: "Counted runs of automations and scripts", runsTileQualityHint: "All automations at a glance",
   cleanupTabEntities: "Disable entities", cleanupTabDevices: "Disable devices", cleanupTabQuarantine: "Quarantine and removal", cleanupReadyCount: "{count} ready", cleanupNothing: "nothing to do", unrefFactStats: "{n} with statistics", unrefFactDomain: "most: {name}", cleanupTileEntitiesHint: "Orphaned or unavailable for a long time", cleanupTileDevicesHint: "Devices without a working entity", cleanupTileQuarantineHint: "Removable after {days} days at the earliest", cleanupTileUnusedHint: "No known use, a hint only", cleanupTileStatsHint: "Delete leftovers in the database", cleanupTilePurgesHint: "What has been deleted already", qTypeEntities: "Entities ({count})", qTypeDevices: "Devices ({count})",
   repairTitle: "What would you like to repair?", repairHint: "Pick a task. Each one leads through the steps, with a preview and a confirmation.", repairBack: "All tasks", repairFound: "{count} found", repairNotChecked: "not checked", repairNoneFound: "none found",
@@ -16717,7 +16730,8 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-bh-clear]").forEach(el => el.onclick = () => this.loadBackup({ type: "ha_housekeeper/backup_attest", kind: el.dataset.bhClear, clear: true }));
     root.querySelector("[data-pf-refresh]")?.addEventListener("click", () => this.loadPreflight());
     root.querySelectorAll("[data-plan-close]").forEach(el => el.addEventListener("click", () => this.leavePlan()));
-    root.querySelectorAll("[data-plan-open]").forEach(el => el.onclick = ev => { const inner = ev?.target?.closest?.("button, select, input, a, label"); if (inner && inner !== el && el.contains(inner)) return; this.openPlan(el.dataset.planOpen); });
+    root.querySelector("[data-journal-refresh]")?.addEventListener("click", () => this.refreshJournal());
+    root.querySelectorAll("[data-plan-open]").forEach(el => el.onclick = ev => { if (el.tagName === "BUTTON") ev?.stopPropagation?.(); const inner = ev?.target?.closest?.("button, select, input, a, label"); if (inner && inner !== el && el.contains(inner)) return; this.openPlan(el.dataset.planOpen); });
     root.querySelectorAll("[data-merge-sel]").forEach(el => el.onchange = () => { this.mergeSel = new Set(this.mergeSel || []); el.checked ? this.mergeSel.add(el.dataset.mergeSel) : this.mergeSel.delete(el.dataset.mergeSel); this.render(); });
     root.querySelector("[data-merge]")?.addEventListener("click", () => this.mergePlans());
     root.querySelector("[data-merge-delete]")?.addEventListener("click", () => { const n = this.mergeSel?.size || 0; if (n) this.confirmAsk(this.t("confirmPlansDelete", { count: n }), () => this.deletePlans()); });

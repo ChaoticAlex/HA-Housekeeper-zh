@@ -1,4 +1,4 @@
-// LifecycleMixin: the "Verlauf" tab of a device and the list of removed devices in Maintenance; mixed in by 99-register.js.
+// LifecycleMixin: the "Verlauf" tab of a device and the list of removed devices in the Journal; mixed in by 99-register.js.
 // The steps come from the device registry, the journal and the last reliability numbers; the logbook entry of a removed device is shown in the list of removed devices.
 class LifecycleMixin {
   async loadLifecycle(deviceId) {
@@ -28,19 +28,9 @@ class LifecycleMixin {
     return `<section class="panel">${head}${rows || `<p class="factnote">${this.t("lifeNone")}</p>`}${now}</section>`;
   }
 
-  // Devices that a plan removed or forgot; they no longer exist, so the journal is the only source.
-  ensureRemoved() {
-    if (this._removedRequested) return;
-    this._removedRequested = true;
-    setTimeout(async () => {
-      try { this.removed = (await this._hass.callWS({ type: "ha_housekeeper/lifecycle" })).removed || []; } catch (_) { this.removed = []; }
-      this.render();
-    }, 0);
-  }
-
   removedCard() {
-    this.ensureRemoved();
-    const head = `<p class="factnote pad">${this.t("lifeRemovedHint")}</p>`;  // the title is on the tile of the tab
+    // The list comes with the journal (they are the same source); the title is on the tile of the tab.
+    const head = `<p class="factnote pad">${this.t("lifeRemovedHint")}</p>`;
     if (!this.removed) return `<div class="panel">${head}${this.skeleton("loading")}</div>`;
     // The logbook entry that was written when the device was removed (or one the person added to it).
     const noteOf = d => this.notesList().find(x => x.target === `device:${d.object_id}`);
@@ -60,6 +50,7 @@ class LifecycleMixin {
         { key: "kind", label: "lifeColKind", sortable: false, cell: kindText },
         { key: "when", label: "lifeColWhen", dir: "desc", cell: d => this.esc(this.formatDate(d.at)) },
         { key: "note", label: "lifeColNote", sortable: false, cell: d => { const n = noteOf(d); return n ? `${this.esc(n.title)}${n.note ? `<small class="u-block">${this.esc(n.note)}</small>` : ""}` : "–"; } },
+        { key: "plan", label: "lifeColPlan", sortable: false, cell: d => ((this.journal || []).some(p => p.plan_id === d.plan_id) ? `<button type="button" class="btn small" data-plan-open="${this.esc(d.plan_id)}">${this.t("lifeOpenPlan")}</button>` : "–") },
       ],
     }) : `<div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("lifeRemovedNone")}</div>`;
     return `<div class="panel">${head}${table}</div>`;

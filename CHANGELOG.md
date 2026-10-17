@@ -4,6 +4,10 @@
 
 ### Geändert
 
+- **Journal:**
+  - Das Journal hat Reiter: „Pläne“ und „Entfernte Geräte“ (bisher unter Wartung, jetzt mit einem Sprung zum Plan); ältere Löschungen von Statistiken stehen als dritter Reiter dort, wenn es sie gibt.
+  - Ein Fehler beim Laden wird angezeigt statt „Noch keine Vorschau“, und die Seite hat „Aktualisieren“ und einen Zeitstempel.
+  - Der Hinweis nennt die richtigen Grenzen (ausgeführte Pläne bis zu einem Jahr, höchstens 300).
 - **Wartung, Updates:**
   - Der Reiter „Update-Preflight“ heißt jetzt „Updates“: ein Gesamturteil (Bereit, Erst ansehen, Stopp), die Prüfzeilen und die Liste der offenen Updates, gruppiert nach System, Apps, HACS und Geräten, mit Sprung nach Home Assistant.
   - Das Backup wird nach dem Backup-Schutz beurteilt (Zeitplan, letzter Lauf); neu ist die Zeile „Freier Speicher“; HACS-Updates, die HACS nicht installieren kann, sind gekennzeichnet.
@@ -74,6 +78,10 @@
 
 #### Changed
 
+- **Journal:**
+  - The Journal has tabs: "Plans" and "Removed devices" (so far under Maintenance, now with a jump to the plan); older deletions of statistics are a third tab there when there are any.
+  - A load error is shown instead of "No preview yet", and the page has "Refresh" and a time stamp.
+  - The hint names the right limits (plans that ran up to a year, at most 300).
 - **Maintenance, updates:**
   - The "Update preflight" tab is now called "Updates": a verdict (Ready, Look first, Stop), the check lines and the list of open updates, grouped into system, apps, HACS and devices, with a jump to Home Assistant.
   - The backup is judged like the backup protection does (schedule, last run); there is a new "Free space" line; HACS updates that HACS cannot install are marked.
