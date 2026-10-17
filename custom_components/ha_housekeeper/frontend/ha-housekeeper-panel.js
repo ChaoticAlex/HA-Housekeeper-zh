@@ -723,7 +723,7 @@ Object.assign(TEXT.de, {
   recorderUsed: "{count} Verwendungen", recorderUnused: "nicht verwendet", recorderExcluded: "bereits ausgeschlossen", recorderSuggest: "Empfohlen", recorderStats: "Statistikwerte nach Entität",
   recorderSnippetTitle: "Vorschlag für die configuration.yaml", recorderSnippetHint: "Entitäten, die nichts verwendet, keine Statistik haben und sehr oft schreiben. Prüfe die Liste, bevor du sie übernimmst.", recorderCopy: "Kopieren", recorderCopied: "Kopiert",
   preflightTitle: "Update-Preflight", preflightLoading: "Wird geprüft …",
-  pf_backup: "Backup", pf_disk: "Freier Speicher", pf_disk_text: "{free} frei", pf_repairs: "Offene Reparaturen", pf_failed_entries: "Ausgefallene Integrationen", pf_broken: "Fehlende Referenzen",
+  pf_backup: "Backup", pf_disk: "Freier Speicher", pf_config: "Konfiguration", pfConfigHint: "Prüft alle Konfigurationsdateien. Das dauert einige Sekunden und läuft nur auf Knopfdruck.", pfConfigRun: "Prüfen", pfConfigAgain: "Erneut prüfen", pfConfigRunning: "Wird geprüft …", pfConfigOk: "Gültig, geprüft am {time}", pfConfigWarn: "Gültig mit Warnungen, geprüft am {time}: ", pfConfigBad: "Ungültig: ", pf_disk_text: "{free} frei", pf_repairs: "Offene Reparaturen", pf_failed_entries: "Ausgefallene Integrationen", pf_broken: "Fehlende Referenzen",
   pf_backup_ok: "Letztes Backup vor {hours} h", pf_backup_old: "Letztes Backup vor {hours} h – ein neues ist ratsam", pf_backup_none: "Kein Backup eingerichtet oder vorhanden", pf_backup_unavailable: "Backup-Komponente nicht verfügbar",
   pf_count_none: "keine", pf_updates: "Verfügbare Updates", pf_updates_none: "keine",
   updatesTab: "Updates", pfOpenBackup: "Backup-Schutz",
@@ -768,7 +768,7 @@ Object.assign(TEXT.en, {
   recorderUsed: "{count} uses", recorderUnused: "not used", recorderExcluded: "already excluded", recorderSuggest: "Recommended", recorderStats: "Statistics values by entity",
   recorderSnippetTitle: "Suggestion for configuration.yaml", recorderSnippetHint: "Entities that nothing uses, that have no statistics and that write very often. Review the list before you adopt it.", recorderCopy: "Copy", recorderCopied: "Copied",
   preflightTitle: "Update preflight", preflightLoading: "Checking …",
-  pf_backup: "Backup", pf_disk: "Free space", pf_disk_text: "{free} free", pf_repairs: "Open repairs", pf_failed_entries: "Failed integrations", pf_broken: "Missing references",
+  pf_backup: "Backup", pf_disk: "Free space", pf_config: "Configuration", pfConfigHint: "Checks every configuration file. It takes a few seconds and runs only when you press the button.", pfConfigRun: "Check", pfConfigAgain: "Check again", pfConfigRunning: "Checking …", pfConfigOk: "Valid, checked on {time}", pfConfigWarn: "Valid with warnings, checked on {time}: ", pfConfigBad: "Invalid: ", pf_disk_text: "{free} free", pf_repairs: "Open repairs", pf_failed_entries: "Failed integrations", pf_broken: "Missing references",
   pf_backup_ok: "Last backup {hours} h ago", pf_backup_old: "Last backup {hours} h ago – a new one is advisable", pf_backup_none: "No backup set up or available", pf_backup_unavailable: "Backup component not available",
   pf_count_none: "none", pf_updates: "Available updates", pf_updates_none: "none",
   updatesTab: "Updates", pfOpenBackup: "Backup protection",
@@ -1625,7 +1625,7 @@ class StylesMixin {
       .kpis{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(120px,1fr);gap:10px;margin-left:auto}@media(max-width:640px){.kpis{grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);width:100%;gap:8px}}
       .kpi{display:block;min-width:0;text-align:left;padding:9px 14px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-soft);color:inherit;font:inherit;cursor:pointer;box-shadow:var(--hk-hi)}.kpi:hover{box-shadow:var(--hk-sh2)}
       .kpi small{display:block;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.kpi strong{font-size:calc(20px*var(--hk-fs,1));font-weight:600}.kpi.red strong{color:var(--hk-red)}.kpi.warn strong{color:var(--hk-amber)}
-      .bhsizes{display:flex;align-items:flex-end;gap:3px;height:48px;padding:6px 16px 0}.bhsizes i{flex:1;min-width:0;background:color-mix(in srgb,var(--hk-blue) 45%,transparent);border-radius:3px 3px 0 0}.bhsizes i.last{background:var(--hk-blue)}.bhsizes i.last.warn{background:var(--hk-amber)}.spark-row{display:block;margin-top:4px}.spark{display:block;width:100%;height:36px}.sysmeter+.spark,.sysmeter+.spark-hint{margin-top:14px}.sysmeter+.spark polyline{opacity:.65}.spark-end,.spark-halo{stroke-linecap:round;vector-effect:non-scaling-stroke}.spark-halo{stroke:var(--hk-soft);stroke-width:10}.spark-end{stroke:var(--hk-muted);stroke-width:7}.sys-spark-end{stroke-width:4}.spark-end.red{stroke:var(--hk-red)}.spark-end.ok{stroke:var(--hk-green)}.spark-cap,.spark-hint{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.spark-cap.red{color:var(--hk-red)}.spark-cap.ok{color:var(--hk-green)}
+      .cfgout{display:block;margin-top:4px;white-space:pre-wrap;word-break:break-word}.bhsizes{display:flex;align-items:flex-end;gap:3px;height:48px;padding:6px 16px 0}.bhsizes i{flex:1;min-width:0;background:color-mix(in srgb,var(--hk-blue) 45%,transparent);border-radius:3px 3px 0 0}.bhsizes i.last{background:var(--hk-blue)}.bhsizes i.last.warn{background:var(--hk-amber)}.spark-row{display:block;margin-top:4px}.spark{display:block;width:100%;height:36px}.sysmeter+.spark,.sysmeter+.spark-hint{margin-top:14px}.sysmeter+.spark polyline{opacity:.65}.spark-end,.spark-halo{stroke-linecap:round;vector-effect:non-scaling-stroke}.spark-halo{stroke:var(--hk-soft);stroke-width:10}.spark-end{stroke:var(--hk-muted);stroke-width:7}.sys-spark-end{stroke-width:4}.spark-end.red{stroke:var(--hk-red)}.spark-end.ok{stroke:var(--hk-green)}.spark-cap,.spark-hint{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.spark-cap.red{color:var(--hk-red)}.spark-cap.ok{color:var(--hk-green)}
       .taskgrid{gap:14px}
       .taskcard{--c:var(--hk-blue);position:relative;overflow:hidden;padding-left:20px;box-shadow:var(--hk-sh1),var(--hk-hi)}
       .taskcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c)}
@@ -5890,6 +5890,27 @@ class MaintenanceMixin {
     return `<div class="panelhead topline"><div><h3>${this.t("pfAfterTitle")}</h3></div></div><p class="factnote">${text}${go}</p>`;
   }
 
+  // Home Assistant's own configuration check, on request only: it loads every file and takes a few seconds.
+  async runConfigCheck() {
+    if (this.configChecking) return;
+    this.configChecking = true; this.configCheckError = ""; this.render();
+    try { this.configCheck = await this._hass.callWS({ type: "ha_housekeeper/check_config" }); }
+    catch (err) { this.configCheckError = this.errText(err); }
+    this.configChecking = false; this.render();
+  }
+
+  configRow() {
+    const r = this.configCheck, busy = this.configChecking, failed = this.configCheckError;
+    const tone = busy || (!r && !failed) ? "mute" : failed ? "warn" : !r.valid ? "red" : r.warnings ? "warn" : "ok";
+    const icon = { ok: "mdi:check", warn: "mdi:alert-outline", red: "mdi:close-octagon-outline", mute: "mdi:file-cog-outline" }[tone];
+    const clip = text => this.esc(String(text).slice(0, 600));
+    const text = busy ? this.t("pfConfigRunning") : failed ? this.esc(failed) : !r ? this.t("pfConfigHint")
+      : !r.valid ? `${this.t("pfConfigBad")}<span class="cfgout">${clip(r.errors)}</span>`
+      : r.warnings ? `${this.t("pfConfigWarn", { time: this.formatDate(r.at) })}<span class="cfgout">${clip(r.warnings)}</span>`
+      : this.t("pfConfigOk", { time: this.formatDate(r.at) });
+    return `<div class="row rel"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t("pf_config")}</strong><small>${text}</small></span><button class="btn" data-config-check>${this.t(r ? "pfConfigAgain" : "pfConfigRun")}</button></div>`;
+  }
+
   // Loads once and again after every new scan, so the overview and the Updates tab never show an old report.
   ensurePreflight() {
     const key = this.data?.meta?.scanned_at || "";
@@ -5923,10 +5944,12 @@ class MaintenanceMixin {
     if (!p) return `<div class="stack">${head}<div class="panel">${this.skeleton("preflightLoading")}</div></div>`;
     const updates = p.state.updates || [], counts = p.counts || {};
     const total = counts.total ?? updates.length;
-    const tone = { ready: "ok", look: "warn", stop: "red" }[p.verdict] || "mute";
-    const icon = { ready: "mdi:check-circle-outline", look: "mdi:alert-outline", stop: "mdi:close-octagon-outline" }[p.verdict] || "mdi:help-circle-outline";
-    const open = p.checks.filter(c => c.level !== "ok").map(c => this.t(`pf_${c.check}`));
-    const title = total ? this.t(`updVerdict_${p.verdict}`) : this.t("updVerdictNone");
+    // An invalid configuration, once it was checked, stops whatever the other lines say.
+    const cfg = this.configCheck, level = cfg && !cfg.valid ? "stop" : p.verdict;
+    const tone = { ready: "ok", look: "warn", stop: "red" }[level] || "mute";
+    const icon = { ready: "mdi:check-circle-outline", look: "mdi:alert-outline", stop: "mdi:close-octagon-outline" }[level] || "mdi:help-circle-outline";
+    const open = [...p.checks.filter(c => c.level !== "ok").map(c => this.t(`pf_${c.check}`)), ...(cfg && !cfg.valid ? [this.t("pf_config")] : [])];
+    const title = total ? this.t(`updVerdict_${level}`) : this.t("updVerdictNone");
     const sub = [total ? this.t(total === 1 ? "updPending_1" : "updPending_n", { n: this.formatNumber(total) }) : "", open.length ? this.t("updCheckFirst", { items: open.join(", ") }) : ""].filter(Boolean).join(" · ");
     const verdict = `<div class="row rel"><span class="tile ${total ? tone : "ok"}"><ha-icon icon="${total ? icon : "mdi:check-circle-outline"}"></ha-icon></span><span class="row-text"><strong>${title}</strong>${sub ? `<small>${this.esc(sub)}</small>` : ""}</span></div>`;
     const tiles = this.sumTiles([
@@ -5942,7 +5965,7 @@ class MaintenanceMixin {
       return `<div class="sectionlabel">${this.t(`updGroup_${g}`)}</div>${body}`;
     }).join("");
     const list = total ? `<div class="panel">${groups}</div>` : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("updAllCurrent")}</div></div>`;
-    return `<div class="stack">${head}${tiles}<div class="panel">${verdict}${this.preflightRows(p.state, p.checks)}</div>${list}<div class="panel">${this.preflightAfter(p.watch)}</div></div>`;
+    return `<div class="stack">${head}${tiles}<div class="panel">${verdict}${this.preflightRows(p.state, p.checks)}${this.configRow()}</div>${list}<div class="panel">${this.preflightAfter(p.watch)}</div></div>`;
   }
 
   maintenanceView() {
@@ -16805,6 +16828,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelectorAll("[data-fold]").forEach(el => el.onclick = () => { if (el.dataset.fold.startsWith("chg_")) this.changesCat = ""; this.folds = { ...this.folds, [el.dataset.fold]: el.getAttribute("aria-expanded") !== "true" }; this.render(); });
     root.querySelectorAll("[data-bh-clear]").forEach(el => el.onclick = () => this.loadBackup({ type: "ha_housekeeper/backup_attest", kind: el.dataset.bhClear, clear: true }));
     root.querySelector("[data-pf-refresh]")?.addEventListener("click", () => this.loadPreflight());
+    root.querySelector("[data-config-check]")?.addEventListener("click", () => this.runConfigCheck());
     root.querySelectorAll("[data-plan-close]").forEach(el => el.addEventListener("click", () => this.leavePlan()));
     root.querySelector("[data-journal-refresh]")?.addEventListener("click", () => this.refreshJournal());
     root.querySelectorAll("[data-plan-open]").forEach(el => el.onclick = ev => { if (el.tagName === "BUTTON") ev?.stopPropagation?.(); const inner = ev?.target?.closest?.("button, select, input, a, label"); if (inner && inner !== el && el.contains(inner)) return; this.openPlan(el.dataset.planOpen); });

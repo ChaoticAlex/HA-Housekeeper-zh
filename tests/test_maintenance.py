@@ -374,3 +374,20 @@ async def test_the_start_of_a_system_update_takes_the_state_of_that_moment(
         scanner.watch_hours = 0  # the watch is off: nothing to compare with
         await scanner.async_update_changed(state(False), state(True))
         assert scan.await_count == 1
+
+
+async def test_the_configuration_check_reports_validity_and_clips_long_texts(hass: HomeAssistant) -> None:
+    from types import SimpleNamespace
+    from unittest.mock import AsyncMock, patch
+
+    from custom_components.ha_housekeeper.maintenance import check_configuration
+
+    bad = SimpleNamespace(errors=[object()], error_str="x" * 5000, warning_str="")
+    good = SimpleNamespace(errors=[], error_str="", warning_str="a deprecation")
+    target = "homeassistant.helpers.check_config.async_check_ha_config_file"
+    with patch(target, AsyncMock(return_value=bad)):
+        result = await check_configuration(hass)
+    assert result["valid"] is False and len(result["errors"]) == 4000 and result["warnings"] is None
+    with patch(target, AsyncMock(return_value=good)):
+        result = await check_configuration(hass)
+    assert result["valid"] is True and result["errors"] is None and result["warnings"] == "a deprecation"

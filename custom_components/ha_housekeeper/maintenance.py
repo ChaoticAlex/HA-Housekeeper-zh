@@ -6,6 +6,7 @@ job of the watch (``watch.py``).
 
 from __future__ import annotations
 
+import asyncio
 import os
 import time
 from datetime import UTC, datetime
@@ -35,6 +36,8 @@ GIB = 1024**3
 DISK_WARN_BYTES = 3 * GIB  # a guess: below this an update or a backup may no longer fit
 DISK_STOP_BYTES = 1 * GIB
 UPDATE_GROUPS = ("system", "app", "hacs", "device")
+CONFIG_CHECK_TIMEOUT = 60  # seconds; the check loads and validates every configuration file
+CONFIG_TEXT_LIMIT = 4000
 
 
 def _query_costs(hass: HomeAssistant, limit: int) -> dict[str, Any]:
@@ -480,4 +483,27 @@ async def preflight_report(
         "checks": checks,
         "verdict": preflight_verdict(checks),
         "counts": update_counts(state["updates"]),
+    }
+
+
+async def check_configuration(hass: HomeAssistant) -> dict[str, Any]:
+    """Home Assistant's own configuration check, the one behind "Check configuration". Reads only.
+
+    It is not cheap (every file is loaded), so it runs when the person asks and never by itself.
+    """
+    from homeassistant.helpers.check_config import async_check_ha_config_file
+
+    started = time.monotonic()
+    async with asyncio.timeout(CONFIG_CHECK_TIMEOUT):
+        result = await async_check_ha_config_file(hass)
+
+    def clip(text: Any) -> str | None:
+        return str(text)[:CONFIG_TEXT_LIMIT] if text else None
+
+    return {
+        "valid": not result.errors,
+        "errors": clip(result.error_str),
+        "warnings": clip(result.warning_str),
+        "took_ms": round((time.monotonic() - started) * 1000),
+        "at": datetime.now(UTC).isoformat(),
     }

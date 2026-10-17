@@ -5857,3 +5857,17 @@ test("the Backups tab draws the sizes of the last backups and marks the newest, 
   assert.ok(html.includes("Size of the last backups") && (html.match(/<i /g) || []).length === 3 && html.includes('class="last warn"') && html.includes("from 2 GB to 4 GB"), "own backups stay out");
   assert.equal(el.bhSizes({ ...el.backup, backups: el.backup.backups.slice(0, 2) }), "");
 });
+
+test("the configuration check runs on request only and an invalid result stops the verdict", async () => {
+  const { el, shadow } = panel("en");
+  const sent = [];
+  el._hass = { language: "en", callWS: async msg => { sent.push(msg.type); return { valid: false, errors: "Invalid config for [demo] <b>", warnings: null, at: "2026-10-17T10:00:00+00:00", took_ms: 900 }; } };
+  el.preflight = { state: { backup: { available: true, level: "ok", age_hours: 5 }, disk: { free: 41e9 }, repairs: [], failed_entries: [], broken: [], updates: [{ entity_id: "update.core", name: "Core", installed: "1", latest: "2", group: "system" }] },
+    checks: [{ check: "backup", level: "ok" }], verdict: "ready", counts: { total: 1, system: 1, app: 0, hacs: 0, device: 0, blocked: 0 }, watch: { hours: 24, active: null } };
+  el.view = "maintenance"; el.viewTab = { maintenance: "updates" }; el._pfRequested = true; el.render();
+  assert.ok(shadow.innerHTML.includes("data-config-check") && shadow.innerHTML.includes("runs only when you press the button") && shadow.innerHTML.includes("Ready"));
+  await el.runConfigCheck();
+  const html = shadow.innerHTML;
+  assert.deepEqual(sent, ["ha_housekeeper/check_config"]);
+  assert.ok(html.includes("Stop") && html.includes("To check: Configuration") && html.includes("Invalid config for [demo] &lt;b&gt;") && !html.includes("<b>"));
+});

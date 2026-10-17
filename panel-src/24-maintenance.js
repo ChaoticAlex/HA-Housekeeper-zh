@@ -131,6 +131,27 @@ class MaintenanceMixin {
     return `<div class="panelhead topline"><div><h3>${this.t("pfAfterTitle")}</h3></div></div><p class="factnote">${text}${go}</p>`;
   }
 
+  // Home Assistant's own configuration check, on request only: it loads every file and takes a few seconds.
+  async runConfigCheck() {
+    if (this.configChecking) return;
+    this.configChecking = true; this.configCheckError = ""; this.render();
+    try { this.configCheck = await this._hass.callWS({ type: "ha_housekeeper/check_config" }); }
+    catch (err) { this.configCheckError = this.errText(err); }
+    this.configChecking = false; this.render();
+  }
+
+  configRow() {
+    const r = this.configCheck, busy = this.configChecking, failed = this.configCheckError;
+    const tone = busy || (!r && !failed) ? "mute" : failed ? "warn" : !r.valid ? "red" : r.warnings ? "warn" : "ok";
+    const icon = { ok: "mdi:check", warn: "mdi:alert-outline", red: "mdi:close-octagon-outline", mute: "mdi:file-cog-outline" }[tone];
+    const clip = text => this.esc(String(text).slice(0, 600));
+    const text = busy ? this.t("pfConfigRunning") : failed ? this.esc(failed) : !r ? this.t("pfConfigHint")
+      : !r.valid ? `${this.t("pfConfigBad")}<span class="cfgout">${clip(r.errors)}</span>`
+      : r.warnings ? `${this.t("pfConfigWarn", { time: this.formatDate(r.at) })}<span class="cfgout">${clip(r.warnings)}</span>`
+      : this.t("pfConfigOk", { time: this.formatDate(r.at) });
+    return `<div class="row rel"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t("pf_config")}</strong><small>${text}</small></span><button class="btn" data-config-check>${this.t(r ? "pfConfigAgain" : "pfConfigRun")}</button></div>`;
+  }
+
   // Loads once and again after every new scan, so the overview and the Updates tab never show an old report.
   ensurePreflight() {
     const key = this.data?.meta?.scanned_at || "";
@@ -164,10 +185,12 @@ class MaintenanceMixin {
     if (!p) return `<div class="stack">${head}<div class="panel">${this.skeleton("preflightLoading")}</div></div>`;
     const updates = p.state.updates || [], counts = p.counts || {};
     const total = counts.total ?? updates.length;
-    const tone = { ready: "ok", look: "warn", stop: "red" }[p.verdict] || "mute";
-    const icon = { ready: "mdi:check-circle-outline", look: "mdi:alert-outline", stop: "mdi:close-octagon-outline" }[p.verdict] || "mdi:help-circle-outline";
-    const open = p.checks.filter(c => c.level !== "ok").map(c => this.t(`pf_${c.check}`));
-    const title = total ? this.t(`updVerdict_${p.verdict}`) : this.t("updVerdictNone");
+    // An invalid configuration, once it was checked, stops whatever the other lines say.
+    const cfg = this.configCheck, level = cfg && !cfg.valid ? "stop" : p.verdict;
+    const tone = { ready: "ok", look: "warn", stop: "red" }[level] || "mute";
+    const icon = { ready: "mdi:check-circle-outline", look: "mdi:alert-outline", stop: "mdi:close-octagon-outline" }[level] || "mdi:help-circle-outline";
+    const open = [...p.checks.filter(c => c.level !== "ok").map(c => this.t(`pf_${c.check}`)), ...(cfg && !cfg.valid ? [this.t("pf_config")] : [])];
+    const title = total ? this.t(`updVerdict_${level}`) : this.t("updVerdictNone");
     const sub = [total ? this.t(total === 1 ? "updPending_1" : "updPending_n", { n: this.formatNumber(total) }) : "", open.length ? this.t("updCheckFirst", { items: open.join(", ") }) : ""].filter(Boolean).join(" · ");
     const verdict = `<div class="row rel"><span class="tile ${total ? tone : "ok"}"><ha-icon icon="${total ? icon : "mdi:check-circle-outline"}"></ha-icon></span><span class="row-text"><strong>${title}</strong>${sub ? `<small>${this.esc(sub)}</small>` : ""}</span></div>`;
     const tiles = this.sumTiles([
@@ -183,7 +206,7 @@ class MaintenanceMixin {
       return `<div class="sectionlabel">${this.t(`updGroup_${g}`)}</div>${body}`;
     }).join("");
     const list = total ? `<div class="panel">${groups}</div>` : `<div class="panel"><div class="emptymsg"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("updAllCurrent")}</div></div>`;
-    return `<div class="stack">${head}${tiles}<div class="panel">${verdict}${this.preflightRows(p.state, p.checks)}</div>${list}<div class="panel">${this.preflightAfter(p.watch)}</div></div>`;
+    return `<div class="stack">${head}${tiles}<div class="panel">${verdict}${this.preflightRows(p.state, p.checks)}${this.configRow()}</div>${list}<div class="panel">${this.preflightAfter(p.watch)}</div></div>`;
   }
 
   maintenanceView() {

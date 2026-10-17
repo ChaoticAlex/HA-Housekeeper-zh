@@ -24,7 +24,7 @@ from .goals import measure as measure_goals
 from .ignored import REASON_LIMIT as IGNORE_REASON_LIMIT
 from .inventory import InventoryScanner
 from .lifecycle import timeline
-from .maintenance import preflight_report
+from .maintenance import check_configuration, preflight_report
 from .marks import GRACE_DEFAULT, GRACE_MAX
 from .marks import KINDS as MARK_KINDS
 from .marks import OBJECT_TYPES as MARK_TYPES
@@ -66,6 +66,21 @@ async def websocket_preflight(
         result["watch"] = {"hours": scanner.watch_hours, "active": scanner.watch_summary()}
     except Exception as err:
         connection.send_error(msg["id"], "scan_failed", f"{type(err).__name__}: {err}")
+        return
+    connection.send_result(msg["id"], result)
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/check_config"})
+@websocket_api.async_response
+async def websocket_check_config(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> None:
+    """Run Home Assistant's configuration check on request; it changes nothing."""
+    try:
+        result = await check_configuration(hass)
+    except Exception as err:  # noqa: BLE001 - the panel shows the reason
+        connection.send_error(msg["id"], "check_config_failed", f"{type(err).__name__}: {err}")
         return
     connection.send_result(msg["id"], result)
 
@@ -815,6 +830,7 @@ async def websocket_backup_attest(
 def async_register(hass: HomeAssistant) -> None:
     """Register the commands of this part."""
     websocket_api.async_register_command(hass, websocket_preflight)
+    websocket_api.async_register_command(hass, websocket_check_config)
     websocket_api.async_register_command(hass, websocket_backup_health)
     websocket_api.async_register_command(hass, websocket_policies)
     websocket_api.async_register_command(hass, websocket_set_policy)
