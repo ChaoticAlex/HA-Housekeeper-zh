@@ -24,6 +24,7 @@ MANY = 5  # this many dependents make a finding high on their own
 FACT_LIMIT = 5
 RANK = {"none": 0, "info": 1, "low": 2, "medium": 3, "high": 4}
 OUTAGE_RULE = "config_entry.not_loaded"
+REAUTH_RULE = "config_entry.reauth"
 
 
 def _kind_critical(object_id: str, device_class: str | None) -> bool:
@@ -83,6 +84,8 @@ def apply_impact(
             aged = finding.pop("outage_level", None) or "info"
             facts.append({"fact": "outage_age", "level": aged})
             level = max(level, aged, key=RANK.__getitem__)
+        if finding["rule_id"] == REAUTH_RULE:  # nothing heals it by itself: it never starts quiet
+            level = max(level, "medium", key=RANK.__getitem__)
         finding["impact"], finding["impact_facts"] = level, facts[:FACT_LIMIT]
 
 

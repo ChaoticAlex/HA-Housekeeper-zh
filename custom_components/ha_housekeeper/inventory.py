@@ -97,6 +97,7 @@ from .issues import async_sync_database_issue, async_sync_issues, async_sync_sca
 from .load_history import LoadStore
 from .log_facts import log_facts
 from .maintenance import repair_keys
+from .sensitive_fields import reauth_entry_ids
 from .marks import (
     GRACE_DEFAULT,
     HIDING_KINDS,
@@ -398,15 +399,21 @@ def _config_entry_item(
     integration: Any = None,
     entity_count: int = 0,
     device_count: int = 0,
+    reauth: bool = False,
 ) -> dict[str, Any]:
-    """Normalize one config entry; ``integration`` is the loader's description of its domain."""
+    """Normalize one config entry; ``integration`` is the loader's description of its domain.
+
+    ``reauth`` says that a reauth flow of the entry is open: it asks for a new login. Such an entry
+    is a problem even while it is loaded, because its data stops coming.
+    """
     state = _enum(entry.state)
     if entry.disabled_by:
         status = "disabled"
     elif entry.source == "ignore":
         status = "ignored"  # a discovery the user dismissed: never set up, so not a problem
     else:
-        status = "active" if state == "loaded" else "problem"
+        status = "active" if state == "loaded" and not reauth else "problem"
+    reauth = reauth and status == "problem"
     custom = integration is not None and not getattr(integration, "is_built_in", True)
     return {
         "object_type": "config_entry",
@@ -423,6 +430,7 @@ def _config_entry_item(
         "source": entry.source,
         "state": state,
         "error": getattr(entry, "reason", None),
+        "reauth": reauth,
         "unique_id": entry.unique_id,
         "disabled_by": _enum(entry.disabled_by),
         "entity_count": entity_count,
@@ -601,6 +609,10 @@ def _graded_outage(
     return started.isoformat(), outage_level(age, levels, direct)
 
 
+REAUTH_RULE = "config_entry.reauth"
+REAUTH_SCAN_GAP = 60  # seconds between two scans that a changed login request asks for
+
+
 def _config_entry_findings(
     integrations: list[dict[str, Any]],
     now: datetime,
@@ -615,6 +627,18 @@ def _config_entry_findings(
     findings = []
     for item in integrations:
         since = item.get("status_since")
+        if item.get("reauth"):
+            findings.append(
+                {
+                    "rule_id": REAUTH_RULE,
+                    "object_id": item["object_id"],
+                    "classification": "problem",
+                    "confidence": 0.95,
+                    "first_detected_at": since or now.isoformat(),
+                    "evidence": [{"kind": "reauth", "source": "config_entries"}],
+                }
+            )
+            continue  # the new login is the news, not that the entry is not loaded
         if item["status"] != "problem" or item["state"] not in FAILED_ENTRY_STATES or not since:
             continue
         counted, level = _graded_outage(
@@ -817,6 +841,8 @@ class InventoryScanner:
         self.stale = StaleStore(hass)
         self.load = LoadStore(hass)
         self._started = datetime.now(UTC)
+        self._reauth_seen: set[str] | None = None  # the entries that asked for a login at the last scan
+        self._reauth_asked = float("-inf")
         self.goals = GoalStore(hass)
         self.criteria = CriteriaStore(hass)
         self.coverage = CoverageStore(hass)
@@ -1203,6 +1229,22 @@ class InventoryScanner:
         except ScanRefused:
             return
 
+    async def async_check_reauth(self) -> None:
+        """Ask for a scan when the entries that wait for a new login are not those of the last scan.
+
+        Home Assistant has no hook for a flow that starts or ends, so this is a cheap look at its open
+        flows. At most one scan a minute comes of it, and only when the set has changed.
+        """
+        if self._reauth_seen is None or reauth_entry_ids(self.hass) == self._reauth_seen:
+            return
+        if time.monotonic() - self._reauth_asked < REAUTH_SCAN_GAP:
+            return
+        self._reauth_asked = time.monotonic()
+        try:
+            await self.async_request_scan()
+        except ScanRefused:  # a plan or the start is in the way: the next look asks again
+            return
+
     async def async_watch_tick(self) -> None:
         """Ask for the next scan of an open watch when it is due; it is judged at its end."""
         watch = self.watch.active()
@@ -1298,6 +1340,8 @@ class InventoryScanner:
         described = await async_get_integrations(
             self.hass, {entry.domain for entry in config_entries}
         )
+        reauth = reauth_entry_ids(self.hass)
+        self._reauth_seen = reauth
         integrations = [
             _config_entry_item(
                 entry,
@@ -1306,6 +1350,7 @@ class InventoryScanner:
                 else None,
                 entities_per_entry[entry.entry_id],
                 devices_per_entry[entry.entry_id],
+                entry.entry_id in reauth,
             )
             for entry in config_entries
         ]

@@ -8,6 +8,7 @@
   - Zeitsteuerung und Code der Hintergrundarbeit sind optimiert.
   - Die Auswertungen aus der Recorder-Datenbank laufen seltener und verteilt, die Abfragen sind sparsamer (abgeschlossene Tage werden nur noch einmal gerechnet, unnötige Suchen entfallen), und Scans nach Ausfällen rücken bei langsamen Systemen weiter auseinander.
 - **Speicher & System:** Die Seite lädt schneller: der Durchlauf über die Ordner läuft neben der Abfrage beim Supervisor statt danach, die Plattenbelegung nach Kategorien wird wie die Ordnergrößen einige Minuten wiederverwendet (Aktualisieren liest neu), und beim Öffnen stehen die zuletzt gelesenen Größen sofort da und werden bei Bedarf im Hintergrund erneuert.
+- **Befunde, Anmeldung nötig:** Verlangt eine Integration eine neue Anmeldung, ist das ein Befund („Anmeldung nötig“, mindestens mittel) mit den betroffenen Entitäten als Folgen, auch wenn die Integration geladen bleibt. Er erscheint innerhalb etwa einer Minute und verschwindet nach der Anmeldung wieder.
 - **Zugangsdaten:**
   - Integrationen, die eine neue Anmeldung verlangen, tragen die Marke „Anmeldung nötig“ und haben eine eigene Kachel, ebenso deaktivierte Integrationen, die noch Zugangsdaten halten; mehr Feldnamen werden als Zugangsdaten erkannt (etwa Cookie, Session-ID, Einmalcode).
   - Neuer Reiter „Konten“ mit Rolle, Zwei-Faktor und letzter Anmeldung jedes Benutzers und eine Kachel „Admins ohne Zwei-Faktor“, ein Reiter „Langzeit-Tokens“ mit Name, Konto und Alter; die Kacheln stehen in gleich großen Reihen.
@@ -51,6 +52,7 @@
   - The timing and the code of the background work are optimised.
   - The analyses of the recorder database run less often and spread out, the queries do less work (finished days are calculated only once, needless searches are skipped), and on slow systems the scans after outages are spaced further apart.
 - **Storage & system:** The page loads faster: the walk over the folders runs beside the Supervisor query instead of after it, the disk use by category is reused for a few minutes like the folder sizes (refresh reads it again), and on opening the sizes read last show at once and are renewed in the background when due.
+- **Findings, login needed:** An integration that asks for a new login is a finding ("Login needed", at least medium) with its affected entities as follow-ups, even while it stays loaded. It appears within about a minute and goes away after the login.
 - **Credentials:**
   - Integrations that ask to sign in again carry a "Login needed" mark and have a tile of their own, as do disabled integrations that still hold credentials; more field names are recognised as credentials (such as cookie, session id, one-time code).
   - New "Accounts" tab with each user's role, two-factor and last login, an "Admins without two-factor" tile, and a "Long-lived tokens" tab with name, account and age; the tiles sit in rows of equal size.

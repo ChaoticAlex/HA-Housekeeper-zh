@@ -39,6 +39,7 @@ MISSING_TARGETS = {
     "blueprint": "blueprint_missing",
 }
 OUTAGE_RULE = "config_entry.not_loaded"
+REAUTH_RULE = "config_entry.reauth"
 DEVICE_RULE = "device.down"
 APP_RULE = "app.stopped_in_use"
 
@@ -185,7 +186,7 @@ def apply_causes(
         causes[cause["id"]] = device_cause[item["object_id"]] = cause
 
     # 2. Integrations that are not loaded: the entities no device took, and the devices below.
-    outage = {f["object_id"]: f for f in findings if f["rule_id"] == OUTAGE_RULE}
+    outage = {f["object_id"]: f for f in findings if f["rule_id"] in (OUTAGE_RULE, REAUTH_RULE)}
     integration_cause: dict[str, dict[str, Any]] = {}
     for item in objects:
         if item["object_type"] != "config_entry" or item["status"] != "problem":

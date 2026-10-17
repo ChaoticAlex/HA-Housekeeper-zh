@@ -230,6 +230,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     entry.async_on_unload(async_track_time_interval(hass, _watch_tick, timedelta(minutes=5)))
 
+    async def _check_reauth(_: Any) -> None:
+        await scanner.async_check_reauth()
+
+    # A request for a new login is a finding as soon as it opens, not at the next scheduled scan.
+    entry.async_on_unload(async_track_time_interval(hass, _check_reauth, timedelta(minutes=1)))
+
     async def _mark_windows(_: Any) -> None:
         if scanner.refresh_marks_on_window_change():
             try:  # an outage counts from the end of the window: the scan grades it anew

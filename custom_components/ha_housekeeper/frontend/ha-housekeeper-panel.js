@@ -33,7 +33,7 @@ const TEXT = {
     integration_disabled: "Zugehörige Integration wurde deaktiviert",
     device_disabled: "Zugehöriges Gerät wurde deaktiviert",
     device_missing: "Zugehöriges Gerät existiert nicht mehr in der Geräte-Registry",
-    config_entry_missing: "Zugehöriger Konfigurationseintrag fehlt", "config_entry.not_loaded": "Integration nicht geladen", "device.down": "Gerät ganz ausgefallen", "automation.blocked": "Automation kann nicht starten: alle Auslöser sind ausgefallen", "automation.dead_actions": "Automation ändert nichts: alle Aktionen zielen auf ausgefallene Entitäten", "script.dead_actions": "Skript ändert nichts: alle Aktionen zielen auf ausgefallene Entitäten", "automation.dead_condition": "Eine Bedingung kann nie wahr werden: ausgefallene Entität", "app.stopped_in_use": "App gestoppt, Integration hängt vermutlich daran",
+    config_entry_missing: "Zugehöriger Konfigurationseintrag fehlt", "config_entry.not_loaded": "Integration nicht geladen", "config_entry.reauth": "Anmeldung nötig", "device.down": "Gerät ganz ausgefallen", "automation.blocked": "Automation kann nicht starten: alle Auslöser sind ausgefallen", "automation.dead_actions": "Automation ändert nichts: alle Aktionen zielen auf ausgefallene Entitäten", "script.dead_actions": "Skript ändert nichts: alle Aktionen zielen auf ausgefallene Entitäten", "automation.dead_condition": "Eine Bedingung kann nie wahr werden: ausgefallene Entität", "app.stopped_in_use": "App gestoppt, Integration hängt vermutlich daran",
     state_missing: "Entität ist registriert, besitzt aber keinen Zustand",
     state_unavailable: "Integration meldet den Zustand unavailable",
     state_unknown: "Integration meldet den Zustand unknown", state_available: "Zustand ist verfügbar",
@@ -216,7 +216,7 @@ const TEXT = {
     integration_disabled: "Related integration was disabled",
     device_disabled: "Related device was disabled",
     device_missing: "Related device no longer exists in the device registry",
-    config_entry_missing: "Related config entry is missing", "config_entry.not_loaded": "Integration not loaded", "device.down": "Device is down completely", "automation.blocked": "Automation cannot start: all its triggers are out of order", "automation.dead_actions": "Automation changes nothing: all its actions target dead entities", "script.dead_actions": "Script changes nothing: all its actions target dead entities", "automation.dead_condition": "A condition can never be true: dead entity", "app.stopped_in_use": "App stopped, an integration probably depends on it",
+    config_entry_missing: "Related config entry is missing", "config_entry.not_loaded": "Integration not loaded", "config_entry.reauth": "Login needed", "device.down": "Device is down completely", "automation.blocked": "Automation cannot start: all its triggers are out of order", "automation.dead_actions": "Automation changes nothing: all its actions target dead entities", "script.dead_actions": "Script changes nothing: all its actions target dead entities", "automation.dead_condition": "A condition can never be true: dead entity", "app.stopped_in_use": "App stopped, an integration probably depends on it",
     state_missing: "Entity is registered but has no state",
     state_unavailable: "Integration reports unavailable",
     state_unknown: "Integration reports unknown", state_available: "State is available",
@@ -553,7 +553,7 @@ const STATUS_TONE = {
 
 // Finding classes that call for action when they are new.
 // The findings that belong to a cause itself (an integration, a device, an app); the others are its follow-up findings.
-const CAUSE_OWN_RULES = ["config_entry.not_loaded", "device.down", "app.stopped_in_use"];
+const CAUSE_OWN_RULES = ["config_entry.not_loaded", "config_entry.reauth", "device.down", "app.stopped_in_use"];
 // The findings of an outage are quiet (info, low) at first and loud from medium on; quiet ones stay on the findings page only.
 const OUTAGE_RULES = ["entity.state_unavailable", "entity.state_unknown", "device.down", "config_entry.not_loaded", "app.stopped_in_use"];
 const CRITICAL_CLASSES = ["broken_reference", "unavailable", "problem"];
@@ -5275,6 +5275,7 @@ class DiagnosisMixin {
       const state = item.state || "not_loaded";
       if (item.disabled_by) { rows.push(this.check(t("status"), "mute", item.name, t("disabled"))); cause = t("cause_entry_off"); }
       else if (item.source === "ignore") { rows.push(this.check(t("status"), "mute", item.name, t("ignored"))); cause = t("cause_entry_ignored"); hint = t("hint_entry_ignored"); tone = "ok"; }
+      else if (item.reauth) { rows.push(this.check(t("status"), "red", item.name, t("entryReauth"))); cause = t("cause_entry_reauth"); hint = t("hint_entry_reauth"); }
       else if (state === "loaded") { rows.push(this.check(t("status"), "ok", item.name, t("cs_loaded"))); cause = t("cause_entry_ok"); }
       else {
         rows.push(this.check(t("status"), tone, item.name, t(`cs_${state}`)));
@@ -13242,6 +13243,7 @@ Object.assign(TEXT.de, {
   secNone: "Keine Integration mit gespeicherten Zugangsdaten erkannt.", secOpen: "{name} in Home Assistant öffnen",
   secSumDisabled: "Deaktivierte Integrationen", secSumDisabledSub: "Zugangsdaten bleiben gespeichert", secStateDisabled: "deaktiviert, mit Wert",
   secSumReauth: "Anmeldung nötig", secSumReauthSub: "Integration verlangt neuen Login", secReauth: "Anmeldung nötig",
+  entryReauth: "Neue Anmeldung offen", cause_entry_reauth: "Die Integration hat Home Assistant um eine neue Anmeldung gebeten. Bis sie erledigt ist, liefert sie keine Daten.", hint_entry_reauth: "In den Integrationen bei diesem Eintrag „Neu authentifizieren“ wählen und die Zugangsdaten eingeben.",
   secTabAccounts: "Konten", secAccHint: "Benutzer dieses Home Assistant ohne Systemkonten; ein Klick öffnet die Benutzerverwaltung",
   secSumNoMfa: "Admins ohne Zwei-Faktor", secSumNoMfaSub: "von {n} Admins",
   secColAccount: "Konto", secColRole: "Rolle", secColMfa: "Zwei-Faktor", secColLogin: "Letzte Anmeldung", secColTokens: "Langzeit-Tokens",
@@ -13317,6 +13319,7 @@ Object.assign(TEXT.en, {
   secNone: "No integration with stored credentials found.", secOpen: "Open {name} in Home Assistant",
   secSumDisabled: "Disabled integrations", secSumDisabledSub: "credentials stay stored", secStateDisabled: "disabled, with a value",
   secSumReauth: "Login needed", secSumReauthSub: "integration asks to sign in again", secReauth: "login needed",
+  entryReauth: "New login open", cause_entry_reauth: "The integration has asked Home Assistant for a new login. Until it is done, it delivers no data.", hint_entry_reauth: "Under integrations, choose “Reauthenticate” on this entry and enter the credentials.",
   secTabAccounts: "Accounts", secAccHint: "Users of this Home Assistant without system accounts; a click opens the user settings",
   secSumNoMfa: "Admins without two-factor", secSumNoMfaSub: "of {n} admins",
   secColAccount: "Account", secColRole: "Role", secColMfa: "Two-factor", secColLogin: "Last login", secColTokens: "Long-lived tokens",

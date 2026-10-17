@@ -106,3 +106,32 @@ def test_a_config_entry_that_is_not_loaded_is_a_finding_graded_by_how_long() -> 
         [item("retry", "setup_retry", "problem", 0.1)], now, (15, 1, 24, 168)
     )
     assert young == [], "a retry that is still running is no finding before the first threshold"
+
+
+def test_an_entry_that_asks_for_a_new_login_is_a_finding_at_once_and_instead_of_not_loaded() -> None:
+    from datetime import UTC, datetime
+
+    from custom_components.ha_housekeeper.impact import apply_impact
+    from custom_components.ha_housekeeper.inventory import _config_entry_findings
+
+    now = datetime(2026, 10, 12, 12, tzinfo=UTC)
+
+    def item(entry_id, state):
+        return {
+            "object_id": entry_id,
+            "state": state,
+            "status": "problem",
+            "reauth": True,
+            "status_since": now.isoformat(),
+        }
+
+    found = _config_entry_findings(
+        [item("loaded", "loaded"), item("failed", "setup_error")], now, (15, 1, 24, 168)
+    )
+    assert [(f["object_id"], f["rule_id"]) for f in found] == [
+        ("loaded", "config_entry.reauth"),
+        ("failed", "config_entry.reauth"),
+    ]
+    objects = [{"object_type": "config_entry", "object_id": "loaded", "status": "problem"}]
+    apply_impact(objects, [], found[:1])
+    assert found[0]["impact"] == "medium", "it never starts quiet"

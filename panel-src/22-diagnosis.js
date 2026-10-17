@@ -91,6 +91,7 @@ class DiagnosisMixin {
       const state = item.state || "not_loaded";
       if (item.disabled_by) { rows.push(this.check(t("status"), "mute", item.name, t("disabled"))); cause = t("cause_entry_off"); }
       else if (item.source === "ignore") { rows.push(this.check(t("status"), "mute", item.name, t("ignored"))); cause = t("cause_entry_ignored"); hint = t("hint_entry_ignored"); tone = "ok"; }
+      else if (item.reauth) { rows.push(this.check(t("status"), "red", item.name, t("entryReauth"))); cause = t("cause_entry_reauth"); hint = t("hint_entry_reauth"); }
       else if (state === "loaded") { rows.push(this.check(t("status"), "ok", item.name, t("cs_loaded"))); cause = t("cause_entry_ok"); }
       else {
         rows.push(this.check(t("status"), tone, item.name, t(`cs_${state}`)));

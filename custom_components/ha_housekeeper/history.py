@@ -98,7 +98,12 @@ def health_percent(base: int | None, load: float | None) -> float | None:
 
 
 # The rules whose finding is a cause itself; any other finding with a cause_id is a follow-up.
-CAUSE_OWN_RULES = {"config_entry.not_loaded", "device.down", "app.stopped_in_use"}
+CAUSE_OWN_RULES = {
+    "config_entry.not_loaded",
+    "config_entry.reauth",
+    "device.down",
+    "app.stopped_in_use",
+}
 
 
 def _is_follower(finding: dict[str, Any]) -> bool:

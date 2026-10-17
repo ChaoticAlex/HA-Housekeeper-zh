@@ -242,7 +242,7 @@ def apply_marks(
     for finding in findings:
         finding.pop("mark", None)
         finding.pop("mark_outside_window", None)
-        if finding.get("rule_id") == "config_entry.not_loaded":
+        if finding.get("rule_id") in ("config_entry.not_loaded", "config_entry.reauth"):
             keys = (mark_key("config_entry", finding["object_id"]),)
         elif finding.get("rule_id") == "device.down":
             keys = (mark_key("device", finding["object_id"]),)
