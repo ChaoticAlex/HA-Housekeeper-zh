@@ -13,7 +13,7 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.util import dt as dt_util
 
 from . import refactor as refactor_module
-from .blueprints import async_blueprints
+from .blueprints import async_blueprint_detail, async_blueprints
 from .const import DOMAIN
 from .correlation import correlate
 from .criteria import THRESHOLDS as CRITERIA_LIMITS
@@ -370,6 +370,35 @@ async def websocket_blueprints(
 
 
 @websocket_api.require_admin
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): f"{DOMAIN}/blueprint_detail",
+        vol.Required("domain"): vol.In(("automation", "script")),
+        vol.Required("path"): str,
+    }
+)
+@websocket_api.async_response
+@with_scanner
+async def websocket_blueprint_detail(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """One blueprint with its inputs, its file and what each automation or script set. Read-only."""
+    try:
+        component = scanner._runtime_component(msg["domain"])
+        known = scanner._existing_objects()["entity"]
+        result = await async_blueprint_detail(
+            hass, msg["domain"], msg["path"], list(component.entities) if component else [], known
+        )
+    except Exception as err:
+        connection.send_error(msg["id"], "blueprint_detail_failed", f"{type(err).__name__}: {err}")
+        return
+    connection.send_result(msg["id"], _versioned(result))
+
+
+@websocket_api.require_admin
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/watches"})
 @websocket_api.async_response
 @with_scanner
@@ -425,6 +454,7 @@ async def websocket_correlations(
 def async_register(hass: HomeAssistant) -> None:
     """Register the commands of this part."""
     websocket_api.async_register_command(hass, websocket_blueprints)
+    websocket_api.async_register_command(hass, websocket_blueprint_detail)
     websocket_api.async_register_command(hass, websocket_correlations)
     websocket_api.async_register_command(hass, websocket_watches)
     websocket_api.async_register_command(hass, websocket_watch_end)

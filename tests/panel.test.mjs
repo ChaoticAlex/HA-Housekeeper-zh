@@ -2181,6 +2181,17 @@ test("blueprints tab, notification switch, diagnostics without names and the wee
   el._blueprintsRequested = true;
   el.render();
   assert.ok(shadow.innerHTML.includes("a/gone.yaml") && shadow.innerHTML.includes("Idle") && shadow.innerHTML.includes("data-bp-refresh"));
+  assert.ok(shadow.innerHTML.includes('data-bp-open="automation/a/idle.yaml"'), "rows open the detail");
+  el.bpOpen = "automation/a/idle.yaml"; el._bpDetailKey = "automation/a/idle.yaml";
+  el.bpDetail = { available: true, user_count: 1, size: 1200, modified: "2026-10-01T10:00:00+00:00", min_version: "2024.10.0", inputs: [{ key: "light", name: "Light", section: "", selector: "entity", has_default: false, default: null, description: null }],
+    users: [{ id: "automation.c", name: "C", inputs: [{ key: "light", state: "missing_entity", value: "light.gone" }] }] };
+  el.viewTab.blueprint = "inputs"; el.render();
+  assert.ok(shadow.innerHTML.includes("Light") && shadow.innerHTML.includes("No default, must be set"));
+  el.viewTab.blueprint = "users"; el.render();
+  assert.ok(shadow.innerHTML.includes("light.gone") && shadow.innerHTML.includes("entity missing"));
+  el.viewTab.blueprint = "technical"; el.render();
+  assert.ok(shadow.innerHTML.includes("2024.10.0"));
+  el.bpOpen = "";
   el.view = "settings"; el.settingsTab = "scan";
   el.data = { ...DATA, meta: { ...DATA.meta, notify: true } };
   el.render();

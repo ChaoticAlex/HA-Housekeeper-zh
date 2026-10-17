@@ -1676,10 +1676,10 @@ class StylesMixin {
 
 // Texts of the shared table of objects (objectTable); merged into TEXT.
 Object.assign(TEXT.de, {
-  objColState: "Zustand", objAllStatus: "Alle Zustände", objColEntities: "Entitäten", objColDevices: "Geräte", relColAvail: "Verfügbarkeit", relColObject: "Objekt", relColType: "Typ", relColRelation: "Beziehung", relColKind: "Art", relColStatus: "Zustand", relAllGroups: "Alle Arten", relAvailOk: "Ab 99,5 %", relAvailWarn: "95 bis 99,5 %", cleanupAllClasses: "Alle Einstufungen", cleanupAllReadiness: "Alle Zustände", cleanupColRecorder: "Recorder-Daten", recurringColSince: "Vergessen am", recurringColDomains: "Integrationen", recurringPill: "Kehrt zurück", purgeColWhen: "Zeit", purgeColWhat: "Gelöscht", purgeColDetails: "Einzelheiten", bkcColName: "Backup", bkcColDb: "Datenbank", bkcColState: "Schutz / Alter", bkcAllStates: "Alle Backups", bkcFilterProtected: "Geschützt", bkcFilterSelected: "Ausgewählt", bpColFile: "Datei", bpColKind: "Art", bpColDomain: "Domain", bpColUsers: "Verwendet von", bpBack: "Zur Liste", bpDetPath: "Pfad", bpDetAuthor: "Autor", bpDetSource: "Quelle", bpHint_missing: "Die Datei gibt es nicht mehr. Diese Automationen oder Skripte laufen nicht, solange sie nicht neu zugewiesen werden.", bpHint_broken: "Die Datei lässt sich nicht laden. Die Nutzer unten laufen nicht, bis sie repariert ist.", bpHint_unused: "Keine Automation und kein Skript benutzt dieses Blueprint.", bpAllKinds: "Alle Arten", bpAllDomains: "Alle Domains", lifeColDevice: "Gerät", lifeColKind: "Art", lifeColWhen: "Wann", lifeColNote: "Notiz", lifeAllKinds: "Alle Arten", journalColDate: "Erstellt", journalColActions: "Prüfung", journalColFollow: "Nachkontrolle", journalColAct: "Aktionen", journalAllStatus: "Alle Zustände", journalAllFollow: "Alle Nachkontrollen", exColEntity: "Entität", exColUsed: "Verwendung", exColTarget: "Ersatz", exColHow: "Art", exAllPairs: "Alle Paare", exFilterSuggest: "Mit Vorschlag", exFilterNone: "Ohne Verwendung", exFilterChosen: "Gewählt", counterColName: "Entität", counterColKind: "Art", counterColFound: "Fund", counterColAction: "Aktion", counterAllKinds: "Alle Arten", counterKindMeasurement: "Messwert", counterKindCounter: "Zähler", relAvailRed: "Unter 95 %",
+  objColState: "Zustand", objAllStatus: "Alle Zustände", objColEntities: "Entitäten", objColDevices: "Geräte", relColAvail: "Verfügbarkeit", relColObject: "Objekt", relColType: "Typ", relColRelation: "Beziehung", relColKind: "Art", relColStatus: "Zustand", relAllGroups: "Alle Arten", relAvailOk: "Ab 99,5 %", relAvailWarn: "95 bis 99,5 %", cleanupAllClasses: "Alle Einstufungen", cleanupAllReadiness: "Alle Zustände", cleanupColRecorder: "Recorder-Daten", recurringColSince: "Vergessen am", recurringColDomains: "Integrationen", recurringPill: "Kehrt zurück", purgeColWhen: "Zeit", purgeColWhat: "Gelöscht", purgeColDetails: "Einzelheiten", bkcColName: "Backup", bkcColDb: "Datenbank", bkcColState: "Schutz / Alter", bkcAllStates: "Alle Backups", bkcFilterProtected: "Geschützt", bkcFilterSelected: "Ausgewählt", bpColFile: "Datei", bpColKind: "Art", bpColDomain: "Domain", bpColUsers: "Verwendet von", bpBack: "Zur Liste", bpTabInputs: "Eingaben", bpDetSize: "Dateigröße", bpDetModified: "Geändert", bpDetMin: "Mindestens Home Assistant", bpNoInputs: "Dieses Blueprint hat keine Eingaben.", bpUsersNone: "Keine Automation und kein Skript benutzt dieses Blueprint.", bpInDefaultIs: "Standard", bpInNoDefault: "Kein Standardwert, muss gesetzt werden", bpInDefault: "Standard", bpInSet: "gesetzt", bpInMissing: "Entität fehlt", bpValueHidden: "Wert ausgeblendet", bpDetPath: "Pfad", bpDetAuthor: "Autor", bpDetSource: "Quelle", bpHint_missing: "Die Datei gibt es nicht mehr. Diese Automationen oder Skripte laufen nicht, solange sie nicht neu zugewiesen werden.", bpHint_broken: "Die Datei lässt sich nicht laden. Die Nutzer unten laufen nicht, bis sie repariert ist.", bpHint_unused: "Keine Automation und kein Skript benutzt dieses Blueprint.", bpAllKinds: "Alle Arten", bpAllDomains: "Alle Domains", lifeColDevice: "Gerät", lifeColKind: "Art", lifeColWhen: "Wann", lifeColNote: "Notiz", lifeAllKinds: "Alle Arten", journalColDate: "Erstellt", journalColActions: "Prüfung", journalColFollow: "Nachkontrolle", journalColAct: "Aktionen", journalAllStatus: "Alle Zustände", journalAllFollow: "Alle Nachkontrollen", exColEntity: "Entität", exColUsed: "Verwendung", exColTarget: "Ersatz", exColHow: "Art", exAllPairs: "Alle Paare", exFilterSuggest: "Mit Vorschlag", exFilterNone: "Ohne Verwendung", exFilterChosen: "Gewählt", counterColName: "Entität", counterColKind: "Art", counterColFound: "Fund", counterColAction: "Aktion", counterAllKinds: "Alle Arten", counterKindMeasurement: "Messwert", counterKindCounter: "Zähler", relAvailRed: "Unter 95 %",
 });
 Object.assign(TEXT.en, {
-  objColState: "State", objAllStatus: "All states", objColEntities: "Entities", objColDevices: "Devices", relColAvail: "Availability", relColObject: "Object", relColType: "Type", relColRelation: "Relation", relColKind: "Kind", relColStatus: "State", relAllGroups: "All kinds", relAvailOk: "99.5 % and above", relAvailWarn: "95 to 99.5 %", cleanupAllClasses: "All classes", cleanupAllReadiness: "All states", cleanupColRecorder: "Recorder data", recurringColSince: "Forgotten on", recurringColDomains: "Integrations", recurringPill: "Keeps coming back", purgeColWhen: "Time", purgeColWhat: "Deleted", purgeColDetails: "Details", bkcColName: "Backup", bkcColDb: "Database", bkcColState: "Protection / age", bkcAllStates: "All backups", bkcFilterProtected: "Protected", bkcFilterSelected: "Selected", bpColFile: "File", bpColKind: "Kind", bpColDomain: "Domain", bpColUsers: "Used by", bpBack: "Back to list", bpDetPath: "Path", bpDetAuthor: "Author", bpDetSource: "Source", bpHint_missing: "The file is gone. These automations or scripts do not run until they are pointed at another blueprint.", bpHint_broken: "The file fails to load. The users below do not run until it is repaired.", bpHint_unused: "No automation or script uses this blueprint.", bpAllKinds: "All kinds", bpAllDomains: "All domains", lifeColDevice: "Device", lifeColKind: "Kind", lifeColWhen: "When", lifeColNote: "Note", lifeAllKinds: "All kinds", journalColDate: "Created", journalColActions: "Check", journalColFollow: "Follow-up", journalColAct: "Actions", journalAllStatus: "All states", journalAllFollow: "All follow-ups", exColEntity: "Entity", exColUsed: "Use", exColTarget: "Replacement", exColHow: "How", exAllPairs: "All pairs", exFilterSuggest: "With a proposal", exFilterNone: "Unused", exFilterChosen: "Chosen", counterColName: "Entity", counterColKind: "Kind", counterColFound: "Finding", counterColAction: "Action", counterAllKinds: "All kinds", counterKindMeasurement: "Measurement", counterKindCounter: "Counter", relAvailRed: "Below 95 %",
+  objColState: "State", objAllStatus: "All states", objColEntities: "Entities", objColDevices: "Devices", relColAvail: "Availability", relColObject: "Object", relColType: "Type", relColRelation: "Relation", relColKind: "Kind", relColStatus: "State", relAllGroups: "All kinds", relAvailOk: "99.5 % and above", relAvailWarn: "95 to 99.5 %", cleanupAllClasses: "All classes", cleanupAllReadiness: "All states", cleanupColRecorder: "Recorder data", recurringColSince: "Forgotten on", recurringColDomains: "Integrations", recurringPill: "Keeps coming back", purgeColWhen: "Time", purgeColWhat: "Deleted", purgeColDetails: "Details", bkcColName: "Backup", bkcColDb: "Database", bkcColState: "Protection / age", bkcAllStates: "All backups", bkcFilterProtected: "Protected", bkcFilterSelected: "Selected", bpColFile: "File", bpColKind: "Kind", bpColDomain: "Domain", bpColUsers: "Used by", bpBack: "Back to list", bpTabInputs: "Inputs", bpDetSize: "File size", bpDetModified: "Changed", bpDetMin: "Home Assistant at least", bpNoInputs: "This blueprint has no inputs.", bpUsersNone: "No automation or script uses this blueprint.", bpInDefaultIs: "Default", bpInNoDefault: "No default, must be set", bpInDefault: "default", bpInSet: "set", bpInMissing: "entity missing", bpValueHidden: "value hidden", bpDetPath: "Path", bpDetAuthor: "Author", bpDetSource: "Source", bpHint_missing: "The file is gone. These automations or scripts do not run until they are pointed at another blueprint.", bpHint_broken: "The file fails to load. The users below do not run until it is repaired.", bpHint_unused: "No automation or script uses this blueprint.", bpAllKinds: "All kinds", bpAllDomains: "All domains", lifeColDevice: "Device", lifeColKind: "Kind", lifeColWhen: "When", lifeColNote: "Note", lifeAllKinds: "All kinds", journalColDate: "Created", journalColActions: "Check", journalColFollow: "Follow-up", journalColAct: "Actions", journalAllStatus: "All states", journalAllFollow: "All follow-ups", exColEntity: "Entity", exColUsed: "Use", exColTarget: "Replacement", exColHow: "How", exAllPairs: "All pairs", exFilterSuggest: "With a proposal", exFilterNone: "Unused", exFilterChosen: "Chosen", counterColName: "Entity", counterColKind: "Kind", counterColFound: "Finding", counterColAction: "Action", counterAllKinds: "All kinds", counterKindMeasurement: "Measurement", counterKindCounter: "Counter", relAvailRed: "Below 95 %",
 });
 
 // Texts for the policies view; merged into TEXT.
@@ -7963,21 +7963,64 @@ class BlueprintsMixin {
     return `<div class="stack">${head}<div class="panel"><p class="factnote pad">${this.esc(files)}</p>${table}</div></div>`;
   }
 
-  // One blueprint: what it is and who uses it. A missing or broken file has no metadata; the fields stay out.
+  // The inputs, the file and what each user set are read when a blueprint is opened, not with the list.
+  ensureBlueprintDetail(item) {
+    const key = `${item.domain}/${item.path}`;
+    if (this._bpDetailKey === key) return;
+    this._bpDetailKey = key; this.bpDetail = null; this.bpDetailError = "";
+    setTimeout(async () => {
+      try { const reply = await this._hass.callWS({ type: "ha_housekeeper/blueprint_detail", domain: item.domain, path: item.path }); if (this._bpDetailKey === key) this.bpDetail = reply; }
+      catch (err) { if (this._bpDetailKey === key) this.bpDetailError = this.errText(err); }
+      this.render();
+    }, 0);
+  }
+
+  // One blueprint as a page of its own: overview, inputs, who uses it and how, and the file.
   blueprintDetail(i) {
-    const b = i.raw, tone = { missing: "red", broken: "red", unused: "mute" }[i.kind];
-    const users = (b.users || []).map(u => {
-      const obj = this.findObject(`${u.id.split(".")[0]}:${u.id}`);
-      return `<li>${obj ? `<button class="linklike" data-object="${this.esc(this.objectKey(obj))}">${this.esc(u.name)}</button>` : this.esc(u.name)}</li>`;
-    }).join("");
-    const url = typeof b.source_url === "string" && /^https?:\/\//.test(b.source_url) ? `<a href="${this.esc(b.source_url)}" target="_blank" rel="noopener noreferrer">${this.esc(b.source_url)}</a>` : "";
+    this.ensureBlueprintDetail(i);
+    const b = i.raw, d = this.bpDetail, tone = { missing: "red", broken: "red", unused: "mute" }[i.kind];
+    const nUsers = d ? d.user_count : (b.count ?? 0);
+    const tabs = [{ id: "overview", label: this.t("tabOverview") }, { id: "inputs", label: this.t("bpTabInputs"), count: d ? d.inputs.length : null }, { id: "users", label: this.t("bpColUsers"), count: d ? nUsers : null }, { id: "technical", label: this.t("tabTechnical") }];
+    const open = this.viewTabOf("blueprint", tabs, "overview");
+    const head = `<div class="panelhead"><div><h2>${this.esc(i.title)}</h2><p><span class="pill ${tone}">${this.t({ missing: "bpMissing", broken: "bpBroken", unused: "bpUnused" }[i.kind])}</span></p></div><button class="link" data-bp-back><ha-icon icon="mdi:arrow-left"></ha-icon> ${this.t("bpBack")}</button></div>`;
     const fact = (label, value) => value ? `<div class="fact"><span>${this.t(label)}</span><b>${value}</b></div>` : "";
-    const rest = Math.max(0, (b.count || 0) - (b.users || []).length);
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.esc(i.title)}</h2><p><span class="pill ${tone}">${this.t({ missing: "bpMissing", broken: "bpBroken", unused: "bpUnused" }[i.kind])}</span></p></div><button class="link" data-bp-back><ha-icon icon="mdi:arrow-left"></ha-icon> ${this.t("bpBack")}</button></div>
-      <div class="facts">${fact("bpColDomain", this.esc(this.t(i.domain)))}${fact("bpDetPath", `<code>${this.esc(i.path)}</code>`)}${fact("bpDetAuthor", this.esc(b.author || ""))}${fact("bpDetSource", url)}</div>
-      ${b.description ? `<p class="factnote pad">${this.esc(b.description)}</p>` : ""}
-      <p class="factnote pad">${this.t(`bpHint_${i.kind}`)}</p>
-      ${users ? `<h3 class="pad">${this.t("bpColUsers")}</h3><ul class="pad">${users}${rest ? `<li>+${rest}</li>` : ""}</ul>` : ""}</section>`;
+    const url = typeof b.source_url === "string" && /^https?:\/\//.test(b.source_url) ? `<a href="${this.esc(b.source_url)}" target="_blank" rel="noopener noreferrer">${this.esc(b.source_url)}</a>` : "";
+    let body;
+    if (open === "overview") {
+      body = `<div class="facts">${fact("bpColDomain", this.esc(this.t(i.domain)))}${fact("bpDetAuthor", this.esc(b.author || ""))}${fact("bpDetSource", url)}${d ? fact("bpTabInputs", this.formatNumber(d.inputs.length)) : ""}${fact("bpColUsers", this.formatNumber(nUsers))}</div>${b.description ? `<p class="factnote pad">${this.esc(b.description)}</p>` : ""}<p class="factnote pad">${this.t(`bpHint_${i.kind}`)}</p>`;
+    } else if (open === "technical") {
+      body = `<div class="facts">${fact("bpDetPath", `<code>${this.esc(i.path)}</code>`)}${fact("bpColDomain", this.esc(this.t(i.domain)))}${d?.size != null ? fact("bpDetSize", this.formatBytes(d.size)) : ""}${d?.modified ? fact("bpDetModified", this.esc(this.formatDate(d.modified))) : ""}${d?.min_version ? fact("bpDetMin", this.esc(d.min_version)) : ""}</div>${d ? "" : this.bpLoading()}`;
+    } else if (!d) {
+      body = this.bpLoading();
+    } else if (open === "inputs") {
+      body = this.blueprintInputs(d);
+    } else {
+      body = this.blueprintUsers(d, nUsers);
+    }
+    return `<section class="panel">${head}${this.viewTabBar("blueprint", tabs, open)}${body}</section>`;
+  }
+
+  bpLoading() { return this.bpDetailError ? `<div class="error pad">${this.esc(this.bpDetailError)}</div>` : this.skeleton("loading"); }
+
+  blueprintInputs(d) {
+    if (!d.inputs.length) return `<div class="emptymsg">${this.t("bpNoInputs")}</div>`;
+    const sections = [...new Set(d.inputs.map(r => r.section))];
+    return sections.map(section => `${section ? `<h3 class="pad">${this.esc(section)}</h3>` : ""}<ul class="pad">${d.inputs.filter(r => r.section === section).map(r => `<li><strong>${this.esc(r.name)}</strong> <code>${this.esc(r.key)}</code>${r.selector ? ` <span class="pill mute">${this.esc(r.selector)}</span>` : ""}${r.description ? `<br><small>${this.esc(r.description)}</small>` : ""}<br><small>${r.has_default ? `${this.t("bpInDefaultIs")}: <code>${this.esc(r.default)}</code>` : this.t("bpInNoDefault")}</small></li>`).join("")}</ul>`).join("");
+  }
+
+  // Each user with what it set; an input left alone, one that points to an entity that is gone, and a value kept back stand out.
+  blueprintUsers(d, count) {
+    if (!d.users.length) return `<div class="emptymsg">${this.t("bpUsersNone")}</div>`;
+    const names = Object.fromEntries(d.inputs.map(r => [r.key, r.name]));
+    const state = { default: ["mute", "bpInDefault"], set: ["ok", "bpInSet"], missing_entity: ["red", "bpInMissing"] };
+    const users = d.users.map(u => {
+      const obj = this.findObject(`${u.id.split(".")[0]}:${u.id}`);
+      const who = obj ? `<button class="linklike" data-object="${this.esc(this.objectKey(obj))}">${this.esc(u.name)}</button>` : this.esc(u.name);
+      const rows = u.inputs.map(x => `<li>${this.esc(names[x.key] || x.key)}: ${x.state === "default" ? "" : (x.value === null ? `<small>${this.t("bpValueHidden")}</small>` : `<code>${this.esc(x.value)}</code>`)} <span class="pill ${state[x.state][0]}">${this.t(state[x.state][1])}</span></li>`).join("");
+      return `<h3 class="pad">${who}</h3>${rows ? `<ul class="pad">${rows}</ul>` : ""}`;
+    }).join("");
+    const rest = Math.max(0, count - d.users.length);
+    return `${users}${rest ? `<p class="factnote pad">+${rest}</p>` : ""}`;
   }
 }
 
@@ -16325,10 +16368,10 @@ class HAHousekeeperPanel extends HTMLElement {
       catch (err) { this.failed(err); }
       this.render();
     });
-    root.querySelectorAll("[data-bp-open]").forEach(el => el.onclick = ev => { const inner = ev?.target?.closest?.("button, select, input, a, label"); if (inner && inner !== el && el.contains(inner)) return; this.bpOpen = el.dataset.bpOpen; this.render(); });
+    root.querySelectorAll("[data-bp-open]").forEach(el => el.onclick = ev => { const inner = ev?.target?.closest?.("button, select, input, a, label"); if (inner && inner !== el && el.contains(inner)) return; this.bpOpen = el.dataset.bpOpen; (this.viewTab ||= {}).blueprint = "overview"; this.render(); });
     root.querySelectorAll("tr[data-bp-open]").forEach(openByKey);
     root.querySelector("[data-bp-back]")?.addEventListener("click", () => { this.bpOpen = ""; this.render(); });
-    root.querySelector("[data-bp-refresh]")?.addEventListener("click", () => { this._blueprintsRequested = false; this.blueprints = null; this.render(); });
+    root.querySelector("[data-bp-refresh]")?.addEventListener("click", () => { this._blueprintsRequested = false; this._bpDetailKey = ""; this.blueprints = null; this.render(); });
     root.querySelector("[data-weekly]")?.addEventListener("click", () => this.weeklyReport());
     root.querySelectorAll("[data-fsel-group]").forEach(el => el.onchange = () => { (this._findGroups?.[el.dataset.fselGroup] || []).forEach(key => (el.checked ? this.findSel.add(key) : this.findSel.delete(key))); this.render(); });
     root.querySelectorAll("[data-fsel]").forEach(el => el.onchange = () => { this.pickRows("fsel", el.dataset.fsel, el.checked, this.findSel, this._findPage); this.render(); });

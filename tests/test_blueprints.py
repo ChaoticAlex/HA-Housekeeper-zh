@@ -9,7 +9,9 @@ pytest.importorskip("homeassistant")
 from custom_components.ha_housekeeper.blueprints import (  # noqa: E402
     blueprint_path,
     evaluate,
+    input_rows,
     missing_blueprint_findings,
+    user_inputs,
 )
 
 
@@ -68,3 +70,23 @@ def test_a_missing_blueprint_file_is_found_but_a_broken_or_unread_one_is_not() -
         ("script.missing_blueprint", "script.c", "a/gone.yaml"),
     ]
     assert missing_blueprint_findings(items, None) == [], "an unread list says nothing"
+
+
+def test_inputs_are_flat_and_each_user_shows_what_it_set() -> None:
+    rows = input_rows(
+        {
+            "light": {"name": "Light", "selector": {"entity": {}}},
+            "extra": {"name": "More", "input": {"token": {"selector": {"text": {}}, "default": ""}}},
+        }
+    )
+    assert [(r["key"], r["section"], r["selector"], r["has_default"]) for r in rows] == [
+        ("light", "", "entity", False),
+        ("token", "More", "text", True),
+    ]
+    config = {"use_blueprint": {"path": "a/b.yaml", "input": {"light": "light.gone", "token": "abc"}}}
+    got = user_inputs(config, rows, {"light.kitchen"})
+    assert [(x["key"], x["state"], x["value"]) for x in got] == [
+        ("light", "missing_entity", "light.gone"),
+        ("token", "set", None),
+    ]
+    assert user_inputs({}, rows, set())[0]["state"] == "default"
