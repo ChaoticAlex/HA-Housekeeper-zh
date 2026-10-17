@@ -826,7 +826,7 @@ Object.assign(TEXT.de, {
   backupRefresh: "Neu prüfen", backupLoading: "Backups werden geprüft …", backupUnavailable: "Die Backup-Komponente von Home Assistant ist nicht verfügbar.",
   bhLevel_ok: "In Ordnung", bhLevel_note: "Hinweis", bhLevel_problem: "Problem", bhLevel_unknown: "Unbekannt",
   bh_setup: "Ziele und Zeitplan", bh_newest: "Letztes Backup", bh_last_run: "Letzter automatischer Lauf", bh_targets: "Ablageorte", bh_size: "Größe",
-  bh_retention: "Aufbewahrung", bh_encryption: "Verschlüsselung", bh_emergency_kit: "Emergency Kit", bh_restore_test: "Restore-Test", bh_plan_backups: "Backups vor Bereinigungen", bh_own_backups: "Housekeeper-Backups", bhOwnOpen: "Aufräumen", backupsTab: "Backups",
+  bh_retention: "Aufbewahrung", bh_encryption: "Verschlüsselung", bh_emergency_kit: "Emergency Kit", bh_restore_test: "Restore-Test", bh_plan_backups: "Backups vor Bereinigungen", bh_own_backups: "Housekeeper-Backups", bhOwnOpen: "Aufräumen", bhVerdict_ok: "Belastbar", bhVerdict_note: "Erst ansehen", bhVerdict_problem: "Problem", bhVerdict_unknown: "Unbekannt", bhCheckFirst: "Zu prüfen: {items}", bhTileLast: "Letztes Backup", bhTileCount: "Backups", bhTileRemote: "Externe Kopie", bhTileOpen: "Zu prüfen", bhGroup_running: "Sicherung läuft", bhGroup_storage: "Ablage", bhGroup_restore: "Wiederherstellbarkeit", bhGroup_house: "Housekeeper", backupsTab: "Backups",
   bhRec_daily: "täglich", bhRec_custom_days: "an bestimmten Tagen", bhRec_never: "ohne Zeitplan", bhNone: "keine", bhNever: "nie",
   bhAgeHours: "{n} Std.", bhAgeDays: "{n} Tagen",
   bhSetupOk: "Ziele: {agents} · Zeitplan: {recurrence}", bhSetupNote: "Kein Ziel für automatische Backups gewählt, ältere Backups sind aber vorhanden.", bhSetupProblem: "Weder ein Backup-Ziel noch ein vorhandenes Backup.",
@@ -855,7 +855,7 @@ Object.assign(TEXT.en, {
   backupRefresh: "Check again", backupLoading: "Checking backups …", backupUnavailable: "The backup component of Home Assistant is not available.",
   bhLevel_ok: "OK", bhLevel_note: "Note", bhLevel_problem: "Problem", bhLevel_unknown: "Unknown",
   bh_setup: "Targets and schedule", bh_newest: "Latest backup", bh_last_run: "Last automatic run", bh_targets: "Storage locations", bh_size: "Size",
-  bh_retention: "Retention", bh_encryption: "Encryption", bh_emergency_kit: "Emergency kit", bh_restore_test: "Restore test", bh_plan_backups: "Backups before cleanups", bh_own_backups: "Housekeeper backups", bhOwnOpen: "Tidy up", backupsTab: "Backups",
+  bh_retention: "Retention", bh_encryption: "Encryption", bh_emergency_kit: "Emergency kit", bh_restore_test: "Restore test", bh_plan_backups: "Backups before cleanups", bh_own_backups: "Housekeeper backups", bhOwnOpen: "Tidy up", bhVerdict_ok: "Reliable", bhVerdict_note: "Look first", bhVerdict_problem: "Problem", bhVerdict_unknown: "Unknown", bhCheckFirst: "To check: {items}", bhTileLast: "Latest backup", bhTileCount: "Backups", bhTileRemote: "External copy", bhTileOpen: "To check", bhGroup_running: "Backup runs", bhGroup_storage: "Storage", bhGroup_restore: "Restorability", bhGroup_house: "Housekeeper", backupsTab: "Backups",
   bhRec_daily: "daily", bhRec_custom_days: "on chosen days", bhRec_never: "no schedule", bhNone: "none", bhNever: "never",
   bhAgeHours: "{n} h", bhAgeDays: "{n} days",
   bhSetupOk: "Targets: {agents} · schedule: {recurrence}", bhSetupNote: "No target chosen for automatic backups, but older backups exist.", bhSetupProblem: "Neither a backup target nor an existing backup.",
@@ -6107,7 +6107,45 @@ class BackupMixin {
     if (!b) return `<div class="stack">${head}<div class="panel">${this.skeleton("backupLoading")}</div></div>`;
     if (!b.available) return `<div class="stack">${head}<div class="panel"><div class="emptymsg">${this.t("backupUnavailable")}</div></div></div>`;
     const guide = `<details class="bhguide"><summary>${this.t("bhGuideTitle")}</summary><p class="factnote">${this.t("bhGuideSteps")}</p></details>`;
-    return `<div class="stack">${head}<div class="panel">${b.checks.map(c => this.bhRow(c)).join("")}${guide}</div>${this.bhBackups(b.backups)}${this.bkcFold()}</div>`;
+    return `<div class="stack">${head}${this.bhTiles(b)}<div class="panel">${this.bhVerdict(b)}${this.bhGroups(b.checks)}${guide}</div>${this.bhBackups(b.backups)}${this.bkcFold()}</div>`;
+  }
+
+  // The checks in the order a person thinks in: does it run, where is it kept and what is in it, can it be restored, what Housekeeper adds.
+  bhGroups(checks) {
+    const groups = [
+      ["running", ["setup", "newest", "last_run"]],
+      ["storage", ["targets", "size", "retention"]],
+      ["restore", ["encryption", "emergency_kit", "restore_test"]],
+      ["house", ["plan_backups", "own_backups"]],
+    ];
+    const known = new Set(groups.flatMap(([, ids]) => ids));
+    return groups.map(([name, ids], i) => {
+      const rows = checks.filter(c => ids.includes(c.id) || (i === groups.length - 1 && !known.has(c.id)));
+      rows.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+      return rows.length ? `<div class="sectionlabel">${this.t(`bhGroup_${name}`)}</div>${rows.map(c => this.bhRow(c)).join("")}` : "";
+    }).join("");
+  }
+
+  // One line on top: reliable, look first or a problem, and what to look at.
+  bhVerdict(b) {
+    const tone = { ok: "ok", note: "warn", problem: "red" }[b.overall] || "mute";
+    const icon = { ok: "mdi:check-circle-outline", note: "mdi:alert-outline", problem: "mdi:close-octagon-outline" }[b.overall] || "mdi:help-circle-outline";
+    const open = b.checks.filter(c => c.level === "note" || c.level === "problem").map(c => this.t(`bh_${c.id}`));
+    const sub = open.length ? this.t("bhCheckFirst", { items: `${open.slice(0, 4).join(", ")}${open.length > 4 ? ", …" : ""}` }) : "";
+    return `<div class="row rel"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`bhVerdict_${b.overall}`)}</strong>${sub ? `<small>${this.esc(sub)}</small>` : ""}</span></div>`;
+  }
+
+  // Four figures above the checks. The size is not among them: the list holds only the newest backups.
+  bhTiles(b) {
+    const by = Object.fromEntries(b.checks.map(c => [c.id, c.values || {}]));
+    const age = by.newest?.age_hours, remote = by.targets?.remote?.length || by.targets?.at;
+    const open = (b.counts?.note || 0) + (b.counts?.problem || 0);
+    return this.sumTiles([
+      { label: this.t("bhTileLast"), value: age === null || age === undefined ? "–" : this.esc(this.bhAge(age)), tone: "mute" },
+      { label: this.t("bhTileCount"), value: this.formatNumber(b.backup_count ?? 0), tone: "mute" },
+      { label: this.t("bhTileRemote"), value: this.t(remote ? "bhYes" : "bhNo"), tone: remote ? "ok" : "warn" },
+      { label: this.t("bhTileOpen"), value: this.formatNumber(open), tone: open ? "warn" : "ok" },
+    ]);
   }
 }
 

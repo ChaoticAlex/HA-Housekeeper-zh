@@ -5830,6 +5830,8 @@ test("the Backups tab holds the protection and, folded at the foot, the tidy-up 
   el.backup = { available: true, overall: "note", checks: [{ id: "own_backups", level: "note", values: { count: 12, size: 3145728000 } }], backups: [] };
   let html = el.backupCard();
   assert.ok(html.includes("data-bkc-open") && html.includes('data-fold="bkc"') && html.includes('aria-expanded="false"') && !html.includes("data-bkc-plan"), "folded: nothing to press by accident");
+  assert.ok(html.includes("Look first") && html.includes("To check: Housekeeper backups") && html.includes("Latest backup") && html.includes("Backup runs") === false, "a verdict on top, groups only where there are checks");
+  assert.ok(html.indexOf("Look first") < html.indexOf("Housekeeper</div>"), "the verdict comes before the groups");
   el.folds = { bkc: true };
   html = el.backupCard();
   assert.ok(html.includes("data-bkc-plan") && html.includes("Housekeeper bbbb2222"));

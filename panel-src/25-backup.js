@@ -140,6 +140,44 @@ class BackupMixin {
     if (!b) return `<div class="stack">${head}<div class="panel">${this.skeleton("backupLoading")}</div></div>`;
     if (!b.available) return `<div class="stack">${head}<div class="panel"><div class="emptymsg">${this.t("backupUnavailable")}</div></div></div>`;
     const guide = `<details class="bhguide"><summary>${this.t("bhGuideTitle")}</summary><p class="factnote">${this.t("bhGuideSteps")}</p></details>`;
-    return `<div class="stack">${head}<div class="panel">${b.checks.map(c => this.bhRow(c)).join("")}${guide}</div>${this.bhBackups(b.backups)}${this.bkcFold()}</div>`;
+    return `<div class="stack">${head}${this.bhTiles(b)}<div class="panel">${this.bhVerdict(b)}${this.bhGroups(b.checks)}${guide}</div>${this.bhBackups(b.backups)}${this.bkcFold()}</div>`;
+  }
+
+  // The checks in the order a person thinks in: does it run, where is it kept and what is in it, can it be restored, what Housekeeper adds.
+  bhGroups(checks) {
+    const groups = [
+      ["running", ["setup", "newest", "last_run"]],
+      ["storage", ["targets", "size", "retention"]],
+      ["restore", ["encryption", "emergency_kit", "restore_test"]],
+      ["house", ["plan_backups", "own_backups"]],
+    ];
+    const known = new Set(groups.flatMap(([, ids]) => ids));
+    return groups.map(([name, ids], i) => {
+      const rows = checks.filter(c => ids.includes(c.id) || (i === groups.length - 1 && !known.has(c.id)));
+      rows.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+      return rows.length ? `<div class="sectionlabel">${this.t(`bhGroup_${name}`)}</div>${rows.map(c => this.bhRow(c)).join("")}` : "";
+    }).join("");
+  }
+
+  // One line on top: reliable, look first or a problem, and what to look at.
+  bhVerdict(b) {
+    const tone = { ok: "ok", note: "warn", problem: "red" }[b.overall] || "mute";
+    const icon = { ok: "mdi:check-circle-outline", note: "mdi:alert-outline", problem: "mdi:close-octagon-outline" }[b.overall] || "mdi:help-circle-outline";
+    const open = b.checks.filter(c => c.level === "note" || c.level === "problem").map(c => this.t(`bh_${c.id}`));
+    const sub = open.length ? this.t("bhCheckFirst", { items: `${open.slice(0, 4).join(", ")}${open.length > 4 ? ", …" : ""}` }) : "";
+    return `<div class="row rel"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`bhVerdict_${b.overall}`)}</strong>${sub ? `<small>${this.esc(sub)}</small>` : ""}</span></div>`;
+  }
+
+  // Four figures above the checks. The size is not among them: the list holds only the newest backups.
+  bhTiles(b) {
+    const by = Object.fromEntries(b.checks.map(c => [c.id, c.values || {}]));
+    const age = by.newest?.age_hours, remote = by.targets?.remote?.length || by.targets?.at;
+    const open = (b.counts?.note || 0) + (b.counts?.problem || 0);
+    return this.sumTiles([
+      { label: this.t("bhTileLast"), value: age === null || age === undefined ? "–" : this.esc(this.bhAge(age)), tone: "mute" },
+      { label: this.t("bhTileCount"), value: this.formatNumber(b.backup_count ?? 0), tone: "mute" },
+      { label: this.t("bhTileRemote"), value: this.t(remote ? "bhYes" : "bhNo"), tone: remote ? "ok" : "warn" },
+      { label: this.t("bhTileOpen"), value: this.formatNumber(open), tone: open ? "warn" : "ok" },
+    ]);
   }
 }
