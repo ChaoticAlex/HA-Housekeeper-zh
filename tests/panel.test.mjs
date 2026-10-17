@@ -2464,7 +2464,7 @@ test("the reliability view lists the worst integration first with numbers, words
   assert.ok(shadow.innerHTML.includes("Evaluating the recorder"));
   await el.loadReliability();
   const html = shadow.innerHTML;
-  for (const text of [el.t("relTabIntegrations"), "Cloud &lt;b&gt;Hub&lt;/b&gt;", "93.4 %", "12 entities", "2 h", "probably the cloud or its API", "Re-authentication open", "setup_retry", "No disruption", "calculated in 2.8 s", "24 hours", "7 days"]) assert.ok(html.includes(text), text);
+  for (const text of [el.t("relTabIntegrations"), "Cloud &lt;b&gt;Hub&lt;/b&gt;", "93.4 %", "12 entities", "2 h", "probably the cloud or its API", "Re-authentication open", "setup_retry", "No disruption", "calculated in 2.8 s", "24 hours", "7 days", "30 days"]) assert.ok(html.includes(text), text);
   assert.ok(html.indexOf("Dead Gate") < html.indexOf("Cloud &lt;b&gt;") && html.indexOf("Cloud &lt;b&gt;") < html.indexOf("Local Box"), "the dead one first");
   assert.ok(!html.includes("<b>Hub</b>"));
   assert.ok(html.includes("Down all the time") && html.includes("6 entities, the whole window") && html.includes("Avg per integration"));
@@ -2519,8 +2519,10 @@ test("the reliability window switch and refresh ask the backend with the right a
   assert.deepEqual({ ...calls[0] }, { type: "ha_housekeeper/reliability", window_days: 7, refresh: false });
   el.relWindow = 1; el.ensureReliability(); await drain();
   assert.equal(calls[1].window_days, 1);
+  el.relWindow = 30; el.ensureReliability(); await drain();
+  assert.equal(calls[2].window_days, 30);
   await el.loadReliability(true);
-  assert.equal(calls[2].refresh, true);
+  assert.equal(calls[3].refresh, true);
 });
 
 const UNSTABLE = {

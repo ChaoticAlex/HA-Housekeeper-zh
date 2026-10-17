@@ -868,7 +868,7 @@ Object.assign(TEXT.en, {
 Object.assign(TEXT.de, {
   reliability: "Zuverlässigkeit", reliabilitySubtitle: "Wie verfügbar die Entitäten jeder Integration waren und wann sie gemeinsam ausfielen. Liest nur den Recorder.",
   relHint: "Schlechteste zuerst. Gerechnet aus den Zuständen im Recorder",
-  relWindow1: "24 Stunden", relWindow7: "7 Tage", relLoading: "Der Recorder wird ausgewertet. Das kann bei einer großen Datenbank einige Sekunden dauern …",
+  relWindow1: "24 Stunden", relWindow7: "7 Tage", relWindow30: "30 Tage", relLoading: "Der Recorder wird ausgewertet. Das kann bei einer großen Datenbank einige Sekunden dauern …",
   relTab: "Zuverlässigkeit", relAllStates: "Alle Zustände", relOnlyOutages: "Mit gemeinsamen Ausfällen", relOnlyDead: "Dauerhaft ausgefallen", relDead: "Ausgefallen", relDeadSub: "{n} Entitäten, ganzes Fenster", relSumAvg: "Ø je Integration", relSumAvgHint: "Mittelwert der Integrationen, jede zählt einmal. Dauerhaft ausgefallene sind nicht eingerechnet.", relTooSmall: "zu klein", relTooSmallHint: "Gemeinsame Ausfälle gibt es erst ab {n} Entitäten.", relReauthOpen: "Zum Befund", relSortAvail: "Verfügbarkeit", relSortOutages: "Gemeinsame Ausfälle", relAgeNote: "Stand: {when}", relFactAvail: "Verfügbarkeit ({days} Tage)", relAffected: "Entitäten mit Ausfallzeit ({n})", relAffectedMore: "Gezeigt werden die {shown} mit der niedrigsten Verfügbarkeit von {total}.", relNoAffected: "Keine Entität dieses Eintrags war im Zeitraum nicht verfügbar.", relOpenEntry: "Integration öffnen",
   stability: "Stabilität", stabilityOk: "Stabil im Zeitraum", stabilityMissing: "Noch nicht berechnet. Die Ansicht Zuverlässigkeit rechnet es aus.", cause_unstable: "Die Entität fällt immer wieder aus: {level}.", hint_unstable: "Prüfe Verbindung, Netz und Integration des Geräts; die Zahlen stehen in der Ansicht Zuverlässigkeit.",
   relSumAvail: "Verfügbarkeit gesamt", relSumOutages: "Integrationen mit Ausfällen", relSumOf: "von {n}", relSumUnstable: "Instabile Entitäten", relSumFlapping: "davon {n} flatternd", relSumAttention: "Brauchen Aufmerksamkeit", relSumAttentionHint: "neue Anmeldung oder nicht geladen", relTabIntegrations: "Integrationen", relTabUnstable: "Instabile Entitäten",
@@ -884,7 +884,7 @@ Object.assign(TEXT.de, {
   relUnstableFootnote: "Instabil: mindestens {episodes} Ausfälle und {rate} pro Tag, flatternd ab {flap} pro Tag. Ausfälle während eines gemeinsamen Ausfalls der Integration zählen für die Integration, nicht für die Entität. Dauerhaft ausgefallene, deaktivierte und ignorierte Entitäten fehlen.",
   relCoverage: "Letzte {days} Tage · {withData} von {known} Entitäten mit Daten · im Mittel {share} % des Zeitraums beobachtet (neue Entitäten kürzer).",
   relCompare: "Mit Zeitraum davor vergleichen", relDelta: "{delta} Prozentpunkte gegenüber dem Zeitraum davor ({before} %)", relDeltaNone: "Für den Zeitraum davor liegen keine Daten vor.",
-  relFootnote: "Verfügbarkeit: Anteil der Zeit ohne „nicht verfügbar“ in den letzten {days} Tagen, gerechnet ab der ersten Meldung im Zeitraum. Ein gemeinsamer Ausfall heißt: mindestens {share} % der Entitäten des Eintrags, mindestens {entities}, mindestens {minutes} Minuten zugleich nicht verfügbar. Ein Ausfall, der vor dem Zeitraum begann, zählt erst ab der ersten Meldung darin. Eine Integration, die den ganzen Zeitraum ausgefallen war, hat keinen Prozentwert und steht oben als „Ausgefallen“.",
+  relFootnote: "Verfügbarkeit: Anteil der Zeit ohne „nicht verfügbar“ in den letzten {days} Tagen, gerechnet ab der ersten Meldung im Zeitraum. Ein gemeinsamer Ausfall heißt: mindestens {share} % der Entitäten des Eintrags, mindestens {entities}, mindestens {minutes} Minuten zugleich nicht verfügbar. Ein Ausfall, der vor dem Zeitraum begann, zählt erst ab der ersten Meldung darin. Eine Integration, die den ganzen Zeitraum ausgefallen war, hat keinen Prozentwert und steht oben als „Ausgefallen“. Farben: grün ab {green} %, gelb ab {yellow} %, darunter rot; die Tagesleiste einer Hausfunktion färbt nach der Dauer des Ausfalls und hat eine eigene Schwelle.",
   relColSetup: "Setup-Fehler", relOnlySetup: "Setup-Fehler", relSetupCount: "{n} in {days} Tagen", relSetupLast: "zuletzt {date}", relHintTitle: "Möglicher Grund:",
   relHintOffline: "{n} Setup-Fehler in {days} Tagen bei niedriger Verfügbarkeit. Das spricht eher für ein Gerät, das offline geht, oder ein instabiles Netz als für die Integration selbst. Strom, WLAN und feste IP des Geräts prüfen.",
   relHintError: "Der Setup steht gerade im Fehler. Das ist meist ein Zugangs- oder Konfigurationsproblem: Integration neu anmelden oder neu einrichten.",
@@ -896,7 +896,7 @@ Object.assign(TEXT.de, {
 Object.assign(TEXT.en, {
   reliability: "Reliability", reliabilitySubtitle: "How available each integration's entities were and when they failed together. Only reads the recorder.",
   relHint: "Worst first. Calculated from the states in the recorder",
-  relWindow1: "24 hours", relWindow7: "7 days", relLoading: "Evaluating the recorder. On a large database this can take a few seconds …",
+  relWindow1: "24 hours", relWindow7: "7 days", relWindow30: "30 days", relLoading: "Evaluating the recorder. On a large database this can take a few seconds …",
   relTab: "Reliability", relAllStates: "All states", relOnlyOutages: "With shared outages", relOnlyDead: "Down all the time", relDead: "Down", relDeadSub: "{n} entities, the whole window", relSumAvg: "Avg per integration", relSumAvgHint: "Mean of the integrations, each counts once. Those down all the time are not included.", relTooSmall: "too small", relTooSmallHint: "Shared outages need at least {n} entities.", relReauthOpen: "Open the finding", relSortAvail: "Availability", relSortOutages: "Shared outages", relAgeNote: "As of {when}", relFactAvail: "Availability ({days} days)", relAffected: "Entities with downtime ({n})", relAffectedMore: "Showing the {shown} with the lowest availability of {total}.", relNoAffected: "No entity of this entry was unavailable in the period.", relOpenEntry: "Open integration",
   stability: "Stability", stabilityOk: "Stable in the period", stabilityMissing: "Not calculated yet. The Reliability view calculates it.", cause_unstable: "The entity keeps failing: {level}.", hint_unstable: "Check the connection, network and integration of the device; the numbers are in the Reliability view.",
   relSumAvail: "Availability overall", relSumOutages: "Integrations with outages", relSumOf: "of {n}", relSumUnstable: "Unstable entities", relSumFlapping: "{n} of them flapping", relSumAttention: "Need attention", relSumAttentionHint: "re-authentication or not loaded", relTabIntegrations: "Integrations", relTabUnstable: "Unstable entities",
@@ -912,7 +912,7 @@ Object.assign(TEXT.en, {
   relUnstableFootnote: "Unstable: at least {episodes} failures and {rate} a day, flapping from {flap} a day. Failures during a shared outage of the integration count for the integration, not the entity. Entities that are down all the time, disabled or ignored are left out.",
   relCoverage: "Last {days} days · {withData} of {known} entities with data · on average {share} % of the period observed (new entities less).",
   relCompare: "Compare with the period before", relDelta: "{delta} percentage points against the period before ({before} %)", relDeltaNone: "There is no data for the period before.",
-  relFootnote: "Availability: the share of time without “unavailable” in the last {days} days, counted from the first report in the period. A shared outage means at least {share} % of the entry's entities, at least {entities}, were unavailable together for at least {minutes} minutes. An outage that began before the period counts from the first report in it. An integration that was down the whole period has no percentage and is listed first as “Down”.",
+  relFootnote: "Availability: the share of time without “unavailable” in the last {days} days, counted from the first report in the period. A shared outage means at least {share} % of the entry's entities, at least {entities}, were unavailable together for at least {minutes} minutes. An outage that began before the period counts from the first report in it. An integration that was down the whole period has no percentage and is listed first as “Down”. Colors: green from {green} %, yellow from {yellow} %, red below; the day strip of a house function colors by the length of the outage and has a threshold of its own.",
   relColSetup: "Setup failures", relOnlySetup: "Setup failures", relSetupCount: "{n} in {days} days", relSetupLast: "last {date}", relHintTitle: "Possible cause:",
   relHintOffline: "{n} setup failures in {days} days with low availability. That points to a device going offline or an unstable network rather than the integration itself. Check the device's power, Wi-Fi and fixed IP.",
   relHintError: "Setup is in an error right now. That is usually an access or configuration problem: sign in again or set the integration up anew.",
@@ -6025,6 +6025,7 @@ class BackupMixin {
 }
 
 // ReliabilityMixin: the reliability view; mixed into the panel in 99-register.js.
+const REL_GREEN = 99.5, REL_YELLOW = 95; // availability in percent: green from, yellow from, red below
 class ReliabilityMixin {
   // Slow recorder views: an old reply is shown at once and renewed once; when another calculation holds the
   // query lock, the panel asks again by itself a few times instead of asking the user to click.
@@ -6076,7 +6077,7 @@ class ReliabilityMixin {
 
   relRowBody(item) {
     const percent = item.availability;
-    const tone = item.dead ? "red" : percent === null ? "mute" : percent >= 99.5 ? "ok" : percent >= 95 ? "warn" : "red";
+    const tone = item.dead ? "red" : percent === null ? "mute" : percent >= REL_GREEN ? "ok" : percent >= REL_YELLOW ? "warn" : "red";
     const lines = [`${this.esc(item.domain || "")} · ${this.t("relEntities", { n: item.entities })}${item.permanent ? ` · ${this.t("relPermanent", { n: item.permanent })}` : ""}`];
     if (item.shared_outages) {
       const layer = item.layer === "cloud" ? this.t("relLayerCloud") : this.t("relLayerLocal");
@@ -6104,14 +6105,14 @@ class ReliabilityMixin {
     const r = this.reliability;
     const items = row.affected || [];
     const list = this.objectTable(`relaffected-${row.entry_id || row.domain || ""}`, items.map(m => {
-      const tone = m.availability >= 99.5 ? "ok" : m.availability >= 95 ? "warn" : "red";
+      const tone = m.availability >= REL_GREEN ? "ok" : m.availability >= REL_YELLOW ? "warn" : "red";
       return { key: `entity:${m.entity_id}`, type: "entity", name: m.name, sub: m.entity_id, tone, state: tone, stateLabel: this.t({ ok: "relAvailOk", warn: "relAvailWarn", red: "relAvailRed" }[tone]), avail: m.availability, pill: `<span class="pill ${tone}">${this.formatNumber(m.availability)} %</span>`, rank: m.availability };
     }), { extras: [{ key: "avail", label: "relColAvail", get: r => r.avail, cell: r => `${this.formatNumber(r.avail)} %` }], empty: "" });
     const more = row.affected_total > items.length ? `<p class="factnote">${this.t("relAffectedMore", { shown: items.length, total: row.affected_total })}</p>` : "";
     const hintKey = this.relSetupHint(row);
     const hint = hintKey ? `<div class="factnote"><strong>${this.t("relHintTitle")}</strong> ${this.t(hintKey, { n: row.setup.count, days: row.setup.days })}</div>` : "";
     const summary = `<div class="row">${this.relRowBody(row)}</div>${hint}`;
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("relTab")}</h2><p>${this.t(r.window_days === 1 ? "relWindow1" : "relWindow7")}${r.stale || r.age_seconds ? ` · ${this.t("relAgeNote", { when: this.relTime(new Date(r.computed_at * 1000).toISOString()) })}` : ""}</p></div></div>${summary}<div class="sectionlabel">${this.t("relAffected", { n: this.formatNumber(row.affected_total || 0) })}</div>${list || `<p class="factnote">${this.t("relNoAffected")}</p>`}${more}</section>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("relTab")}</h2><p>${this.t(`relWindow${r.window_days}`)}${r.stale || r.age_seconds ? ` · ${this.t("relAgeNote", { when: this.relTime(new Date(r.computed_at * 1000).toISOString()) })}` : ""}</p></div></div>${summary}<div class="sectionlabel">${this.t("relAffected", { n: this.formatNumber(row.affected_total || 0) })}</div>${list || `<p class="factnote">${this.t("relNoAffected")}</p>`}${more}</section>`;
   }
 
   // A guess at the cause from the setup failures and the availability, worded as a possibility.
@@ -6133,7 +6134,7 @@ class ReliabilityMixin {
   }
 
   relEntriesList(r) {
-    const tone = p => (p === null || p === undefined ? "mute" : p >= 99.5 ? "ok" : p >= 95 ? "warn" : "red");
+    const tone = p => (p === null || p === undefined ? "mute" : p >= REL_GREEN ? "ok" : p >= REL_YELLOW ? "warn" : "red");
     const minEntities = r.thresholds?.shared_min_entities ?? 3;
     const outagesCell = e => (e.dead ? "–" : !e.shared_outages && e.entities < minEntities ? `<span class="pill mute" title="${this.esc(this.t("relTooSmallHint", { n: minEntities }))}">${this.t("relTooSmall")}</span>` : num(e.shared_outages));
     const availCell = e => (e.dead ? `<span class="pill red">${this.t("relDead")}</span><small>${this.t("relDeadSub", { n: e.permanent })}</small>` : e.availability === null || e.availability === undefined ? "–" : `<span class="pill ${tone(e.availability)}">${this.esc(this.formatNumber(e.availability))} %</span>`);
@@ -6170,7 +6171,7 @@ class ReliabilityMixin {
   reliabilityView() {
     this.ensureReliability();
     const r = this.reliability;
-    const windows = [[1, "relWindow1"], [7, "relWindow7"]].map(([days, key]) => `<button class="chip ${this.relWindow === days ? "active" : ""}" data-rel-window="${days}" aria-pressed="${this.relWindow === days}">${this.t(key)}</button>`).join("") + `<button class="chip ${this.relCompare ? "active" : ""}" data-rel-compare aria-pressed="${this.relCompare}">${this.t("relCompare")}</button>`;
+    const windows = [[1, "relWindow1"], [7, "relWindow7"], [30, "relWindow30"]].map(([days, key]) => `<button class="chip ${this.relWindow === days ? "active" : ""}" data-rel-window="${days}" aria-pressed="${this.relWindow === days}">${this.t(key)}</button>`).join("") + `<button class="chip ${this.relCompare ? "active" : ""}" data-rel-compare aria-pressed="${this.relCompare}">${this.t("relCompare")}</button>`;
     const aged = Boolean(r?.computed_at && (r.stale || r.age_seconds >= 60)), took = aged ? "" : this.tookNote(r).replace(/^ · /, "");
     const head = this.pageBar({ left: `${windows}${took ? `<span>${this.esc(took)}</span>` : ""}`, at: r?.computed_at ? new Date(r.computed_at * 1000).toISOString() : null, loading: this.relLoading, attr: "data-rel-refresh" });
     const alone = inner => `<div class="stack">${head}<div class="panel">${inner}</div></div>`;
@@ -6199,14 +6200,14 @@ class ReliabilityMixin {
       { label: this.t("relOnlyDead"), value: this.formatNumber(dead), tone: dead ? "red" : "ok", lf: ["relentries", "state", "dead"] },
       { label: this.t("relOnlyOutages"), value: this.formatNumber(outages), tone: outages ? "warn" : "ok", lf: ["relentries", "state", "outages"] },
       { label: this.t("relOnlySetup"), value: this.formatNumber(setupCount), tone: setupCount ? "warn" : "ok", lf: ["relentries", "state", "setup"] },
-      { label: this.t("relSumAvg"), value: availText, tone: overall === null ? "mute" : overall >= 99.5 ? "ok" : overall >= 95 ? "warn" : "red", hint: this.t("relSumAvgHint") },
+      { label: this.t("relSumAvg"), value: availText, tone: overall === null ? "mute" : overall >= REL_GREEN ? "ok" : overall >= REL_YELLOW ? "warn" : "red", hint: this.t("relSumAvgHint") },
     ]);
     const tabs = [
-      { id: "integrations", icon: "mdi:puzzle-outline", label: this.t("relTabIntegrations"), hint: this.t("relTileIntHint", { avail: availText, window: this.t(r.window_days === 1 ? "relWindow1" : "relWindow7") }), count: r.entries.length, tone: outages || attention ? "warn" : "ok", pill: odd ? this.t("relTilePill", { n: this.formatNumber(odd) }) : "", pillTone: attention ? "red" : "warn" },
+      { id: "integrations", icon: "mdi:puzzle-outline", label: this.t("relTabIntegrations"), hint: this.t("relTileIntHint", { avail: availText, window: this.t(`relWindow${r.window_days}`) }), count: r.entries.length, tone: outages || attention ? "warn" : "ok", pill: odd ? this.t("relTilePill", { n: this.formatNumber(odd) }) : "", pillTone: attention ? "red" : "warn" },
       { id: "unstable", icon: "mdi:pulse", label: this.t("relTabUnstable"), hint: this.t("relTileUnstableHint"), count: u.total || 0, tone: flapping ? "red" : u.total ? "warn" : "ok", pill: flapping ? this.t("relSumFlapping", { n: this.formatNumber(flapping) }) : "" },
     ];
     const open = this.viewTabOf("reliability", tabs, u.total && !outages ? "unstable" : "integrations");
-    const body = open === "unstable" ? this.unstableCard(r) : `<div class="panel">${coverage}${loading}${list}${this.howCounted("relFootnote", { days: r.window_days, share: th.shared_share_percent ?? 80, entities: th.shared_min_entities ?? 3, minutes: Math.round((th.shared_min_seconds ?? 300) / 60) })}</div>`;
+    const body = open === "unstable" ? this.unstableCard(r) : `<div class="panel">${coverage}${loading}${list}${this.howCounted("relFootnote", { days: r.window_days, share: th.shared_share_percent ?? 80, entities: th.shared_min_entities ?? 3, minutes: Math.round((th.shared_min_seconds ?? 300) / 60), green: this.formatNumber(REL_GREEN), yellow: this.formatNumber(REL_YELLOW) })}</div>`;
     return `<div class="stack">${head}${this.navTiles("reliability", tabs, open, this.t("reliability"), true)}${open === "integrations" ? tiles : ""}${body}</div>`;
   }
 

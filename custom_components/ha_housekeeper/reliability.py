@@ -21,7 +21,7 @@ from .payloads import ReliabilityResult
 from .queries import DayCache, ReplyStore, cached_query, kept_reply, pieces
 
 DAY = 86400
-WINDOWS = (1, 7)  # days
+WINDOWS = (1, 7, 30)  # days; the finished days of a long window come from the day cache
 CACHE_SECONDS = 300
 MEMBER_LIMIT = 15  # entities with downtime listed per config entry
 CHUNK = 500  # entities per second-pass query
