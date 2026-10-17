@@ -2024,9 +2024,9 @@ test("a plan with many rows has a search box for its rows, and the editors share
   const note = el.noteEditor();
   assert.ok(note.indexOf('role="alert"') > note.indexOf("note-actions") && !note.includes('<div class="error" role="alert">'), "the error stands in the bottom bar");
   el.noteOpen({ id: "n1", title: "t", at: "2026-10-08T18:05:00+00:00", target: "", note: "", source: "me", ref: "" });
-  assert.ok(el.noteEditor().includes("btn quiet danger-t"), "delete is the quiet red button");
+  assert.ok(el.noteEditor().includes("btn dangersoft"), "delete is the soft red button");
   el.monitorForm = { id: "f1", name: "x", description: "", enabled: true, notify: true, members: [] };
-  assert.ok(el.monitorEditor().includes("btn quiet danger-t") && !el.monitorEditor().includes("btn danger"), "the same in the home functions editor");
+  assert.ok(el.monitorEditor().includes("btn dangersoft") && !el.monitorEditor().includes("btn danger\""), "the same in the home functions editor");
 });
 
 test("the plan card shows the steps with text, marks undo kinds and folds the details", () => {

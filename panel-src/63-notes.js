@@ -81,7 +81,7 @@ class NotesMixin {
     const d = this.noteDraft;
     if (!d) return "";
     const chips = d.id ? "" : `<div class="notechips" role="group" aria-label="${this.esc(this.t("noteChips"))}">${["Stick", "Firmware", "Paired", "Moved"].map(k => `<button type="button" class="chip" data-note-chip="${this.esc(this.t(`noteChip${k}`))}">${this.t(`noteChip${k}`)}</button>`).join("")}</div>`;
-    const foot = `<div class="toolbar savebar note-actions">${d.id ? `<button type="button" class="btn quiet danger-t" data-note-del="${this.esc(d.id)}">${this.t("noteDelete")}</button>` : ""}<span class="error" role="alert">${this.esc(d.error || "")}</span><span class="toolgap"></span><button type="button" class="btn" data-note-cancel>${this.t("noteCancel")}</button><button type="submit" class="btn primary">${this.t("noteSave")}</button></div>`;
+    const foot = `<div class="toolbar savebar note-actions">${d.id ? `<button type="button" class="btn dangersoft" data-note-del="${this.esc(d.id)}"><ha-icon icon="mdi:delete-outline"></ha-icon>${this.t("noteDelete")}</button>` : ""}<span class="error" role="alert">${this.esc(d.error || "")}</span><span class="toolgap"></span><button type="button" class="btn" data-note-cancel>${this.t("noteCancel")}</button><button type="submit" class="btn primary">${this.t("noteSave")}</button></div>`;
     return `<form class="note-editor${inline ? " inline" : ""}" data-note-form>
       <div class="note-fields">
         ${inline ? `<h3>${this.t(d.id ? "noteDialogEdit" : "noteDialogNew")}</h3>` : ""}
