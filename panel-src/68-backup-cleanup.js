@@ -54,9 +54,17 @@ class BackupCleanupMixin {
     this.bkcLoading = false; this.render();
   }
 
+  // The tidy-up is a section at the foot of the Backups tab, folded: the tab reads, this part deletes.
+  bkcFold() {
+    this.ensureBackupCleanup();
+    const n = this.bkc?.available ? this.bkc.rows?.length || 0 : 0;
+    const open = this.foldOpen("bkc", false);
+    return `<div class="panel" id="hk-bkc">${this.fold("bkc", { title: this.t("bkcTitle"), sub: this.t("maintHintBkc"), pill: n ? this.formatNumber(n) : "", tone: "warn" }, open ? this.backupCleanupCard() : "", false)}</div>`;
+  }
+
   backupCleanupCard() {
     this.ensureBackupCleanup();
-    const head = `<p class="factnote pad">${this.t("bkcHint")}</p>`;  // the title is on the tile of the tab
+    const head = `<p class="factnote pad">${this.t("bkcHint")}</p>`;  // the title is on the head of the fold
     if (this.bkcError) return `<div class="panel">${head}<div class="error">${this.esc(this.bkcError)}</div></div>`;
     const d = this.bkc;
     if (!d) return `<div class="panel">${head}${this.skeleton("bkcLoading")}</div>`;

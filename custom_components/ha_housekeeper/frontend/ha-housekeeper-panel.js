@@ -826,7 +826,7 @@ Object.assign(TEXT.de, {
   backupRefresh: "Neu prüfen", backupLoading: "Backups werden geprüft …", backupUnavailable: "Die Backup-Komponente von Home Assistant ist nicht verfügbar.",
   bhLevel_ok: "In Ordnung", bhLevel_note: "Hinweis", bhLevel_problem: "Problem", bhLevel_unknown: "Unbekannt",
   bh_setup: "Ziele und Zeitplan", bh_newest: "Letztes Backup", bh_last_run: "Letzter automatischer Lauf", bh_targets: "Ablageorte", bh_size: "Größe",
-  bh_retention: "Aufbewahrung", bh_encryption: "Verschlüsselung", bh_emergency_kit: "Emergency Kit", bh_restore_test: "Restore-Test", bh_plan_backups: "Backups vor Bereinigungen", bh_own_backups: "Housekeeper-Backups",
+  bh_retention: "Aufbewahrung", bh_encryption: "Verschlüsselung", bh_emergency_kit: "Emergency Kit", bh_restore_test: "Restore-Test", bh_plan_backups: "Backups vor Bereinigungen", bh_own_backups: "Housekeeper-Backups", bhOwnOpen: "Aufräumen", backupsTab: "Backups",
   bhRec_daily: "täglich", bhRec_custom_days: "an bestimmten Tagen", bhRec_never: "ohne Zeitplan", bhNone: "keine", bhNever: "nie",
   bhAgeHours: "{n} Std.", bhAgeDays: "{n} Tagen",
   bhSetupOk: "Ziele: {agents} · Zeitplan: {recurrence}", bhSetupNote: "Kein Ziel für automatische Backups gewählt, ältere Backups sind aber vorhanden.", bhSetupProblem: "Weder ein Backup-Ziel noch ein vorhandenes Backup.",
@@ -840,7 +840,7 @@ Object.assign(TEXT.de, {
   bhEncOk: "Passwort gesetzt, das jüngste Backup ist geschützt.", bhEncNoPassword: "Kein Backup-Passwort gesetzt.", bhEncNotProtected: "Das jüngste Backup ist nicht geschützt.",
   bhKitNone: "Noch nicht bestätigt. Ohne das Emergency Kit lassen sich verschlüsselte Backups nicht lesen.", bhKitOk: "Bestätigt am {date}.",
   bhRestoreNone: "Noch nie dokumentiert. Ein Backup gilt erst als sicher, wenn eine Wiederherstellung einmal geklappt hat.", bhRestoreOk: "Zuletzt am {date} (vor {days} Tagen).", bhRestoreOld: "Zuletzt am {date}, das ist {days} Tage her (empfohlen: höchstens {limit}).",
-  bhOwnNote: "{count} Backups von Housekeeper belegen {size}. Home Assistant löscht sie nicht von selbst; unter Wartung → Backups aufräumen kannst du ältere löschen.",
+  bhOwnNote: "{count} Backups von Housekeeper belegen {size}. Home Assistant löscht sie nicht von selbst; unter Wartung → Backups ganz unten kannst du ältere löschen.",
   bhPlansOk: "Für die {checked} zuletzt ausgeführten Pläne ist das Backup noch vorhanden.", bhPlansNote: "Für {missing} von {checked} zuletzt ausgeführten Plänen wurde das Backup nicht mehr gefunden (vermutlich durch die Aufbewahrung gelöscht).",
   bhAttestDate: "Datum", bhAttestSave: "Speichern", bhAttestClear: "Bestätigung zurücknehmen", bhAttestMark: "Als erledigt markieren", bhAttestTargets: "Externen Ablageort bestätigen", bhAttestAgain: "Erneut bestätigen", bhAttestCancel: "Abbrechen",
   bhListTitle: "Letzte Backups", bhAllProtected: "Alle (geschützt oder nicht)", bhColDate: "Datum", bhColSize: "Größe", bhColTargets: "Ziele", bhColProtected: "Verschlüsselt", bhYes: "Ja", bhNo: "Nein",
@@ -855,7 +855,7 @@ Object.assign(TEXT.en, {
   backupRefresh: "Check again", backupLoading: "Checking backups …", backupUnavailable: "The backup component of Home Assistant is not available.",
   bhLevel_ok: "OK", bhLevel_note: "Note", bhLevel_problem: "Problem", bhLevel_unknown: "Unknown",
   bh_setup: "Targets and schedule", bh_newest: "Latest backup", bh_last_run: "Last automatic run", bh_targets: "Storage locations", bh_size: "Size",
-  bh_retention: "Retention", bh_encryption: "Encryption", bh_emergency_kit: "Emergency kit", bh_restore_test: "Restore test", bh_plan_backups: "Backups before cleanups", bh_own_backups: "Housekeeper backups",
+  bh_retention: "Retention", bh_encryption: "Encryption", bh_emergency_kit: "Emergency kit", bh_restore_test: "Restore test", bh_plan_backups: "Backups before cleanups", bh_own_backups: "Housekeeper backups", bhOwnOpen: "Tidy up", backupsTab: "Backups",
   bhRec_daily: "daily", bhRec_custom_days: "on chosen days", bhRec_never: "no schedule", bhNone: "none", bhNever: "never",
   bhAgeHours: "{n} h", bhAgeDays: "{n} days",
   bhSetupOk: "Targets: {agents} · schedule: {recurrence}", bhSetupNote: "No target chosen for automatic backups, but older backups exist.", bhSetupProblem: "Neither a backup target nor an existing backup.",
@@ -869,7 +869,7 @@ Object.assign(TEXT.en, {
   bhEncOk: "Password set, the latest backup is protected.", bhEncNoPassword: "No backup password set.", bhEncNotProtected: "The latest backup is not protected.",
   bhKitNone: "Not confirmed yet. Without the emergency kit, encrypted backups cannot be read.", bhKitOk: "Confirmed on {date}.",
   bhRestoreNone: "Never documented. A backup counts as safe only once a restore has worked.", bhRestoreOk: "Last on {date} ({days} days ago).", bhRestoreOld: "Last on {date}, {days} days ago (recommended: at most {limit}).",
-  bhOwnNote: "{count} Housekeeper backups take up {size}. Home Assistant does not delete them on its own; under Maintenance → Tidy backups you can delete older ones.",
+  bhOwnNote: "{count} Housekeeper backups take up {size}. Home Assistant does not delete them on its own; under Maintenance → Backups, at the bottom, you can delete older ones.",
   bhPlansOk: "The backup of the {checked} most recently executed plans still exists.", bhPlansNote: "The backup of {missing} of the {checked} most recently executed plans was not found any more (probably deleted by the retention).",
   bhAttestDate: "Date", bhAttestSave: "Save", bhAttestClear: "Take back confirmation", bhAttestMark: "Mark as done", bhAttestTargets: "Confirm remote storage", bhAttestAgain: "Confirm again", bhAttestCancel: "Cancel",
   bhListTitle: "Latest backups", bhAllProtected: "All (protected or not)", bhColDate: "Date", bhColSize: "Size", bhColTargets: "Targets", bhColProtected: "Encrypted", bhYes: "Yes", bhNo: "No",
@@ -5953,8 +5953,7 @@ class MaintenanceMixin {
     this.ensureBlueprints(); // the pill of the tab needs the numbers before the tab is opened
     const bp = this.blueprints, bpBad = bp ? (bp.missing || 0) + (bp.broken || 0) : 0;
     const tabs = [
-      { id: "backup", icon: "mdi:backup-restore", label: this.t("backupTitle"), hint: "maintHintBackup", pill: !this.backup?.available ? "" : problems ? this.t(problems === 1 ? "mtProblems_1" : "mtProblems_n", { n: problems }) : notes ? this.t(notes === 1 ? "mtNotes_1" : "mtNotes_n", { n: notes }) : this.t("bhLevel_ok"), tone: backupTone },
-      { id: "backups", icon: "mdi:delete-sweep-outline", label: this.t("bkcTab"), hint: "maintHintBkc", pill: this.bkc?.available && this.bkc.rows?.length ? this.formatNumber(this.bkc.rows.length) : "", tone: "mute" },
+      { id: "backup", icon: "mdi:backup-restore", label: this.t("backupsTab"), hint: "maintHintBackup", pill: !this.backup?.available ? "" : problems ? this.t(problems === 1 ? "mtProblems_1" : "mtProblems_n", { n: problems }) : notes ? this.t(notes === 1 ? "mtNotes_1" : "mtNotes_n", { n: notes }) : this.t("bhLevel_ok"), tone: backupTone },
       { id: "updates", icon: "mdi:package-up", label: this.t("updatesTab"), hint: "maintHintUpdates", pill: updates ? this.formatNumber(updates) : "", tone: pfTone },
       { id: "blueprints", icon: "mdi:file-code-outline", label: this.t("bpTab"), hint: "maintHintBlueprints", pill: bpBad ? this.t("mtOpen", { n: bpBad }) : "", tone: "warn" },
       { id: "goals", icon: "mdi:target", label: this.t("goalsTitle"), hint: "maintHintGoals", pill: goalsMissed ? this.t("tilesMissed", { count: goalsMissed }) : "", tone: "red" },
@@ -5962,7 +5961,7 @@ class MaintenanceMixin {
     this.ensureBackupCleanup();
     const open = this.viewTabOf("maintenance", tabs, "backup");
     const grid = this.navTiles("maintenance", tabs.map(tab => ({ ...tab, hint: this.t(tab.hint), tone: tab.pill ? tab.tone : "ok" })), open, this.t("maintenance"), true);
-    return `<div class="stack">${grid}${open === "goals" ? this.goalsCard() : open === "updates" ? this.updatesCard() : open === "blueprints" ? this.blueprintsCard() : open === "backups" ? this.backupCleanupCard() : this.backupCard()}</div>`;
+    return `<div class="stack">${grid}${open === "goals" ? this.goalsCard() : open === "updates" ? this.updatesCard() : open === "blueprints" ? this.blueprintsCard() : this.backupCard()}</div>`;
   }
 }
 
@@ -6044,9 +6043,10 @@ class BackupMixin {
     const tone = { ok: "ok", note: "warn", problem: "red", unknown: "mute" }[c.level] || "mute";
     const icon = { ok: "mdi:check", note: "mdi:alert-outline", problem: "mdi:close-octagon-outline", unknown: "mdi:help-circle-outline" }[c.level] || "mdi:help-circle-outline";
     const attest = c.id === "targets" || c.id === "emergency_kit" || c.id === "restore_test";
+    const tidy = c.id === "own_backups" ? `<button class="bhopen" data-bkc-open>${this.t("bhOwnOpen")}</button>` : "";
     const open = attest && c.level !== "unknown" && this.bhForm === c.id;
     const opener = attest && c.level !== "unknown" ? `<button class="bhopen" data-bh-open="${c.id}" aria-expanded="${open}">${this.t(c.values?.at ? "bhAttestAgain" : c.id === "targets" ? "bhAttestTargets" : "bhAttestMark")}</button>` : "";
-    const row = `<div class="row rel bh${open ? " open" : ""}"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`bh_${c.id}`)}</strong><small>${this.bhText(c)}</small></span><span class="bhactions">${opener}<span class="pill ${tone}">${this.t(`bhLevel_${c.level}`)}</span></span></div>`;
+    const row = `<div class="row rel bh${open ? " open" : ""}"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`bh_${c.id}`)}</strong><small>${this.bhText(c)}</small></span><span class="bhactions">${opener}${tidy}<span class="pill ${tone}">${this.t(`bhLevel_${c.level}`)}</span></span></div>`;
     if (!open) return row;
     const today = new Date().toISOString().slice(0, 10);
     const clear = c.values?.at ? `<button class="bhtake" data-bh-clear="${c.id}">${this.t("bhAttestClear")}</button>` : "";
@@ -6107,7 +6107,7 @@ class BackupMixin {
     if (!b) return `<div class="stack">${head}<div class="panel">${this.skeleton("backupLoading")}</div></div>`;
     if (!b.available) return `<div class="stack">${head}<div class="panel"><div class="emptymsg">${this.t("backupUnavailable")}</div></div></div>`;
     const guide = `<details class="bhguide"><summary>${this.t("bhGuideTitle")}</summary><p class="factnote">${this.t("bhGuideSteps")}</p></details>`;
-    return `<div class="stack">${head}<div class="panel">${b.checks.map(c => this.bhRow(c)).join("")}${guide}</div>${this.bhBackups(b.backups)}</div>`;
+    return `<div class="stack">${head}<div class="panel">${b.checks.map(c => this.bhRow(c)).join("")}${guide}</div>${this.bhBackups(b.backups)}${this.bkcFold()}</div>`;
   }
 }
 
@@ -7197,8 +7197,7 @@ const SEARCH_WORDS = {
   protection: "schutz schutzmodus sicherheit ausgeblendet ignoriert ausnahmen protection mode hidden ignored exceptions",
   scan: "scan schwellen intervall tage benachrichtigung meldung ereignisse threshold interval notification message events",
   goals: "ziele wartungsziele grenzen goals",
-  backup: "backup sicherung wiederherstellung restore emergency kit verschlüsselung ablage backups protection",
-  backups: "backups aufräumen löschen eigene housekeeper tidy delete own",
+  backup: "backup backups sicherung wiederherstellung restore emergency kit verschlüsselung ablage protection aufräumen löschen eigene housekeeper tidy delete own",
   updates: "updates aktualisierungen vorab prüfen preflight speicher system apps hacs firmware check before",
   blueprints: "blueprints vorlagen fehlend defekt ungenutzt missing broken unused",
   info: "info version speichert daten diagnose prüfung quellen dauer about stored diagnostics coverage timing",
@@ -7221,7 +7220,7 @@ class SearchPagesMixin {
     }
     pages.push({ view: "settings", label: this.t("settings"), path: "", words: SEARCH_WORDS.settings });
     for (const [id, , labelKey] of this.settingsTabs()) pages.push({ view: "settings", settingsTab: id, label: this.t(labelKey), path: this.t("settings"), words: SEARCH_WORDS[id] || "" });
-    for (const [id, label] of [["backup", "backupTitle"], ["backups", "bkcTab"], ["updates", "updatesTab"], ["blueprints", "bpTab"], ["goals", "goalsTitle"]]) pages.push({ view: "maintenance", viewTab: id, label: this.t(label), path: this.t("maintenance"), words: SEARCH_WORDS[id] });
+    for (const [id, label] of [["backup", "backupsTab"], ["updates", "updatesTab"], ["blueprints", "bpTab"], ["goals", "goalsTitle"]]) pages.push({ view: "maintenance", viewTab: id, label: this.t(label), path: this.t("maintenance"), words: SEARCH_WORDS[id] });
     pages.push({ view: "journal", viewTab: "devices", label: this.t("lifeRemovedTab"), path: this.t("journal"), words: SEARCH_WORDS.removedDevices });
     pages.push({ view: "changes", viewTab: "compare", label: this.t("tabScans"), path: this.t("changes"), words: SEARCH_WORDS.compare });
     pages.push({ view: "changes", viewTab: "logbook", label: this.t("logbook"), path: this.t("changes"), words: SEARCH_WORDS.logbook });
@@ -10926,7 +10925,7 @@ Object.assign(TEXT.de, {
   setLanguage: "Sprache", setLanguageHint: "Gilt für dieses Panel und wird in deinem Benutzerprofil gespeichert. Automatisch folgt der Sprache von Home Assistant.", langAuto: "Automatisch",
   setTabProtection: "Schutz und Ausnahmen", setHintLook: "Sprache, Dichte und Darstellung.", setHintProtection: "Schutzmodus und ausgeblendete Befunde.", setHintScan: "Wann geprüft wird, Grenzwerte und Meldungen.", setHintInfo: "Version, Diagnose und Support.",
   setEveryHours: "alle {n} h", setManual: "von Hand", setOn: "an", setOff: "aus",
-  maintHintBackup: "Backups prüfen und schützen.", maintHintUpdates: "Offene Updates und was vorher zu prüfen ist.", maintHintBlueprints: "Blueprints, die fehlen oder defekt sind.", maintHintGoals: "Eigene Grenzen für „in Ordnung“.",
+  maintHintBackup: "Backups prüfen, schützen und aufräumen.", maintHintUpdates: "Offene Updates und was vorher zu prüfen ist.", maintHintBlueprints: "Blueprints, die fehlen oder defekt sind.", maintHintGoals: "Eigene Grenzen für „in Ordnung“.",
   actRepairValues: "Werte reparieren", actHintRepair: "Falsche Werte im Verlauf und in der Statistik ersetzen.", actMeter: "Zähler wechseln", actHintMeter: "Die Statistik bei einem neuen Zähler fortführen.", actExchange: "Gerät austauschen", actHintExchange: "Durch ein neues Gerät ersetzen und alles übernehmen.",
   actHintReplace: "Überall durch eine andere Entität ersetzen.", actHintDisable: "Erst deaktivieren; nach der Wartezeit entfernen.",
   navGroupActions: "Aktionen", navGroupSecurity: "Sicherheit",
@@ -10969,7 +10968,7 @@ Object.assign(TEXT.en, {
   setLanguage: "Language", setLanguageHint: "Applies to this panel and is saved in your user profile. Automatic follows the language of Home Assistant.", langAuto: "Automatic",
   setTabProtection: "Protection and exceptions", setHintLook: "Language, density and appearance.", setHintProtection: "Protection mode and hidden findings.", setHintScan: "When it checks, limits and messages.", setHintInfo: "Version, diagnostics and support.",
   setEveryHours: "every {n} h", setManual: "manual", setOn: "on", setOff: "off",
-  maintHintBackup: "Check and protect backups.", maintHintUpdates: "Open updates and what to check first.", maintHintBlueprints: "Blueprints that are missing or broken.", maintHintGoals: "Your own limits for what in order means.",
+  maintHintBackup: "Check, protect and tidy up backups.", maintHintUpdates: "Open updates and what to check first.", maintHintBlueprints: "Blueprints that are missing or broken.", maintHintGoals: "Your own limits for what in order means.",
   actRepairValues: "Repair values", actHintRepair: "Replace wrong values in the history and the statistics.", actMeter: "Replace the meter", actHintMeter: "Carry the statistics on with a new meter.", actExchange: "Exchange the device", actHintExchange: "Replace it with a new device and carry everything over.",
   actHintReplace: "Replace it with another entity everywhere.", actHintDisable: "Disable first; remove after the waiting time.",
   navGroupActions: "Actions", navGroupSecurity: "Security",
@@ -12950,9 +12949,17 @@ class BackupCleanupMixin {
     this.bkcLoading = false; this.render();
   }
 
+  // The tidy-up is a section at the foot of the Backups tab, folded: the tab reads, this part deletes.
+  bkcFold() {
+    this.ensureBackupCleanup();
+    const n = this.bkc?.available ? this.bkc.rows?.length || 0 : 0;
+    const open = this.foldOpen("bkc", false);
+    return `<div class="panel" id="hk-bkc">${this.fold("bkc", { title: this.t("bkcTitle"), sub: this.t("maintHintBkc"), pill: n ? this.formatNumber(n) : "", tone: "warn" }, open ? this.backupCleanupCard() : "", false)}</div>`;
+  }
+
   backupCleanupCard() {
     this.ensureBackupCleanup();
-    const head = `<p class="factnote pad">${this.t("bkcHint")}</p>`;  // the title is on the tile of the tab
+    const head = `<p class="factnote pad">${this.t("bkcHint")}</p>`;  // the title is on the head of the fold
     if (this.bkcError) return `<div class="panel">${head}<div class="error">${this.esc(this.bkcError)}</div></div>`;
     const d = this.bkc;
     if (!d) return `<div class="panel">${head}${this.skeleton("bkcLoading")}</div>`;
@@ -16713,6 +16720,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-db-refresh]")?.addEventListener("click", () => this.loadDbHealth(true));
     root.querySelector("[data-db-check]")?.addEventListener("click", () => this.loadDbHealth(false, true));
     root.querySelector("[data-bh-refresh]")?.addEventListener("click", () => this.loadBackup());
+    root.querySelector("[data-bkc-open]")?.addEventListener("click", () => { this.folds = { ...this.folds, bkc: true }; this.render(); this.shadowRoot?.querySelector?.("#hk-bkc")?.scrollIntoView?.({ block: "start" }); });
     root.querySelectorAll("[data-bh-open]").forEach(el => el.onclick = () => { this.bhForm = this.bhForm === el.dataset.bhOpen ? null : el.dataset.bhOpen; this.render(); });
     root.querySelector("[data-bh-cancel]")?.addEventListener("click", () => { this.bhForm = null; this.render(); });
     root.querySelectorAll("[data-bh-save]").forEach(el => el.onclick = () => {

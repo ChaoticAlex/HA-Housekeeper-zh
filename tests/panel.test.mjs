@@ -1647,7 +1647,7 @@ test("the backup card puts text and a word next to every level and escapes what 
   el.data = DATA;
   el._hass = { language: "en", callWS: async () => BACKUP_REPORT };
   el.view = "maintenance"; el.render();
-  assert.ok(shadow.innerHTML.includes("Backup protection") && shadow.innerHTML.includes("Checking backups"));
+  assert.ok(shadow.innerHTML.includes("Backups") && shadow.innerHTML.includes("Checking backups"));
   await el.loadBackup();
   const html = shadow.innerHTML;
   for (const text of ["Targets and schedule", "Targets: hassio.local, cloud.cloud · schedule: daily", "3 days ago · limit for the schedule: 36 h",
@@ -1656,7 +1656,7 @@ test("the backup card puts text and a word next to every level and escapes what 
     "not found any more", "Latest backups", "How to test a restore", "Housekeeper never performs a restore itself"]) assert.ok(html.includes(text), text);
   for (const word of [">OK<", ">Note<", ">Problem<"]) assert.ok(html.includes(word), word);
   assert.ok(!html.includes("<b>>") && !html.includes("cloud.<b>"));
-  assert.ok(html.indexOf("Backup protection") < html.indexOf("Updates"), "the card comes first");
+  assert.ok(html.indexOf("Backups") < html.indexOf("Updates"), "the card comes first");
 });
 
 test("the backup card says when the component is missing or the call fails", async () => {
@@ -5799,7 +5799,7 @@ test("the database tab shows size, growth, retention and purge as tiles and keep
 test("every tab of Maintenance can be found by search, and the goals tab says why it is empty", () => {
   const { el, shadow } = panel("en");
   const tabs = el.searchPages().filter(page => page.view === "maintenance" && page.viewTab).map(page => page.viewTab);
-  assert.equal(tabs.join(","), "backup,backups,updates,blueprints,goals");
+  assert.equal(tabs.join(","), "backup,updates,blueprints,goals");
   assert.equal(el.t("mtNotes_1"), "1 note");
   el.goals = { goals: [], met: 0, missed: 0 }; el._goalsRequested = true; el.view = "maintenance"; el.viewTab = { maintenance: "goals" }; el.render();
   assert.ok(shadow.innerHTML.includes("There are no maintenance goals yet."));
@@ -5821,4 +5821,16 @@ test("the journal has tabs for plans and removed devices, shows a load error and
   el.journalError = ""; el.purges = [{ at: "2026-10-01T10:00:00+00:00", removed: ["sensor.a"], skipped: [], states: false }];
   el.view = "cleanup"; el.viewTab = { cleanup: "stats" };
   assert.ok(el.cleanupView().includes('data-jump-tab="purges"'));
+});
+
+test("the Backups tab holds the protection and, folded at the foot, the tidy-up of Housekeeper's own backups", () => {
+  const { el } = panel("en");
+  el._bkcRequested = true;
+  el.bkc = { available: true, rows: [{ backup_id: "b2", name: "Housekeeper bbbb2222", date: "2026-08-30T10:00:00+00:00", age_days: 41, size: 900, with_database: true, plan_id: "p2", protected: null, only_return: false, suggested: true }], total: { count: 1, bytes: 900 }, suggested: { count: 1, bytes: 900 } };
+  el.backup = { available: true, overall: "note", checks: [{ id: "own_backups", level: "note", values: { count: 12, size: 3145728000 } }], backups: [] };
+  let html = el.backupCard();
+  assert.ok(html.includes("data-bkc-open") && html.includes('data-fold="bkc"') && html.includes('aria-expanded="false"') && !html.includes("data-bkc-plan"), "folded: nothing to press by accident");
+  el.folds = { bkc: true };
+  html = el.backupCard();
+  assert.ok(html.includes("data-bkc-plan") && html.includes("Housekeeper bbbb2222"));
 });

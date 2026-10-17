@@ -76,9 +76,10 @@ class BackupMixin {
     const tone = { ok: "ok", note: "warn", problem: "red", unknown: "mute" }[c.level] || "mute";
     const icon = { ok: "mdi:check", note: "mdi:alert-outline", problem: "mdi:close-octagon-outline", unknown: "mdi:help-circle-outline" }[c.level] || "mdi:help-circle-outline";
     const attest = c.id === "targets" || c.id === "emergency_kit" || c.id === "restore_test";
+    const tidy = c.id === "own_backups" ? `<button class="bhopen" data-bkc-open>${this.t("bhOwnOpen")}</button>` : "";
     const open = attest && c.level !== "unknown" && this.bhForm === c.id;
     const opener = attest && c.level !== "unknown" ? `<button class="bhopen" data-bh-open="${c.id}" aria-expanded="${open}">${this.t(c.values?.at ? "bhAttestAgain" : c.id === "targets" ? "bhAttestTargets" : "bhAttestMark")}</button>` : "";
-    const row = `<div class="row rel bh${open ? " open" : ""}"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`bh_${c.id}`)}</strong><small>${this.bhText(c)}</small></span><span class="bhactions">${opener}<span class="pill ${tone}">${this.t(`bhLevel_${c.level}`)}</span></span></div>`;
+    const row = `<div class="row rel bh${open ? " open" : ""}"><span class="tile ${tone}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${this.t(`bh_${c.id}`)}</strong><small>${this.bhText(c)}</small></span><span class="bhactions">${opener}${tidy}<span class="pill ${tone}">${this.t(`bhLevel_${c.level}`)}</span></span></div>`;
     if (!open) return row;
     const today = new Date().toISOString().slice(0, 10);
     const clear = c.values?.at ? `<button class="bhtake" data-bh-clear="${c.id}">${this.t("bhAttestClear")}</button>` : "";
@@ -139,6 +140,6 @@ class BackupMixin {
     if (!b) return `<div class="stack">${head}<div class="panel">${this.skeleton("backupLoading")}</div></div>`;
     if (!b.available) return `<div class="stack">${head}<div class="panel"><div class="emptymsg">${this.t("backupUnavailable")}</div></div></div>`;
     const guide = `<details class="bhguide"><summary>${this.t("bhGuideTitle")}</summary><p class="factnote">${this.t("bhGuideSteps")}</p></details>`;
-    return `<div class="stack">${head}<div class="panel">${b.checks.map(c => this.bhRow(c)).join("")}${guide}</div>${this.bhBackups(b.backups)}</div>`;
+    return `<div class="stack">${head}<div class="panel">${b.checks.map(c => this.bhRow(c)).join("")}${guide}</div>${this.bhBackups(b.backups)}${this.bkcFold()}</div>`;
   }
 }
