@@ -5673,3 +5673,19 @@ test("a new plan opens on its own page, and closing it returns to the page it ca
   assert.equal(el.plan, null);
   assert.ok(!shadow.innerHTML.includes("data-plan-card"));
 });
+
+test("an open request for a new login is a pinned row of the to-do card", () => {
+  const { el } = panel("de");
+  el.ensureSysLight = el.ensureGoals = el.ensurePolicies = () => {};
+  el.staleScan = () => null;
+  el.causeList = () => [{ kind: "integration_down", object_id: "e1", follower_count: 14, impact: "medium" }];
+  const finding = (id) => ({ rule_id: "config_entry.reauth", object_id: id, classification: "problem", ignored: false });
+  el.data = { ...DATA, monitor: [], quarantine: [], findings: [finding("e1")], objects: [{ object_type: "config_entry", object_id: "e1", name: "Tibber" }] };
+  el.findObject = key => (key === "config_entry:e1" ? { name: "Tibber" } : null);
+  const row = el.todoItems().find(i => i.key === "reauth");
+  assert.equal(row.text, "Anmeldung nötig: Tibber");
+  assert.equal(row.hintText, "14 Entitäten fallen aus");
+  assert.equal(row.filter, "config_entry.reauth");
+  el.data = { ...el.data, findings: [finding("e1"), finding("e2")] };
+  assert.equal(el.todoItems().find(i => i.key === "reauth").text, "Anmeldung nötig: 2 Integrationen");
+});
