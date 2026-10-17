@@ -28,7 +28,11 @@ const SEARCH_WORDS = {
   look: "darstellung theme dunkel hell schrift farbe appearance dark light font",
   protection: "schutz schutzmodus sicherheit ausgeblendet ignoriert ausnahmen protection mode hidden ignored exceptions",
   scan: "scan schwellen intervall tage benachrichtigung meldung ereignisse threshold interval notification message events",
-  goals: "ziele goals",
+  goals: "ziele wartungsziele grenzen goals",
+  backup: "backup sicherung wiederherstellung restore emergency kit verschlüsselung ablage backups protection",
+  backups: "backups aufräumen löschen eigene housekeeper tidy delete own",
+  updates: "updates aktualisierungen vorab prüfen preflight speicher system apps hacs firmware check before",
+  blueprints: "blueprints vorlagen fehlend defekt ungenutzt missing broken unused",
   info: "info version speichert daten diagnose prüfung quellen dauer about stored diagnostics coverage timing",
   compare: "scan-vergleich verlauf vergleich scans history compare",
   logbook: "logbuch notizen logbook notes",
@@ -49,7 +53,7 @@ class SearchPagesMixin {
     }
     pages.push({ view: "settings", label: this.t("settings"), path: "", words: SEARCH_WORDS.settings });
     for (const [id, , labelKey] of this.settingsTabs()) pages.push({ view: "settings", settingsTab: id, label: this.t(labelKey), path: this.t("settings"), words: SEARCH_WORDS[id] || "" });
-    pages.push({ view: "maintenance", viewTab: "goals", label: this.t("goalsTitle"), path: this.t("maintenance"), words: SEARCH_WORDS.goals });
+    for (const [id, label] of [["backup", "backupTitle"], ["backups", "bkcTab"], ["updates", "updatesTab"], ["blueprints", "bpTab"], ["goals", "goalsTitle"]]) pages.push({ view: "maintenance", viewTab: id, label: this.t(label), path: this.t("maintenance"), words: SEARCH_WORDS[id] });
     pages.push({ view: "changes", viewTab: "compare", label: this.t("tabScans"), path: this.t("changes"), words: SEARCH_WORDS.compare });
     pages.push({ view: "changes", viewTab: "logbook", label: this.t("logbook"), path: this.t("changes"), words: SEARCH_WORDS.logbook });
     return pages;

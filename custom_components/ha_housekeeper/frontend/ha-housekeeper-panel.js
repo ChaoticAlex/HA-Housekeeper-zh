@@ -714,8 +714,8 @@ Object.assign(TEXT.de, {
   abort_meter_changed: "Entitäten oder Statistik wurden nach der Vorschau geändert.", abort_statistics_changed: "Die Statistik wurde nach der Vorschau geändert.", abort_statistics_failed: "Die Statistik konnte nicht bestätigt werden; der Lauf wurde angehalten.",
   abort_no_recorder: "Der Recorder läuft nicht.", abort_alt_id_taken: "Die Ausweich-ID ist inzwischen belegt.", abort_id_not_freed: "Home Assistant hat die alte ID nicht rechtzeitig freigegeben; alles wurde zurückgesetzt.", abort_id_takeover_failed: "Das Umbenennen ist fehlgeschlagen; alles wurde zurückgesetzt.",
   // maintenance
-  maintHint: "Backup-Schutz, Preflight, Blueprints und Ziele",
-  maintenance: "Wartung", maintenanceSubtitle: "Backup-Schutz und Update-Preflight. Beides liest nur; gespeichert wird allein Housekeepers eigener Ausgangszustand und was du als erledigt bestätigst.",
+  maintHint: "Backups, Updates, Blueprints und Wartungsziele",
+  maintenance: "Wartung", maintenanceSubtitle: "Backups prüfen, offene Updates mit der Prüfung davor, Blueprints und Wartungsziele. Housekeeper liest nur; gelöscht werden allein seine eigenen Backups, und erst nach deiner Bestätigung.",
   recorderTitle: "Speicherbedarf", 
   recorderLoad: "Analyse starten", recorderReload: "Neu berechnen", recorderLoading: "Datenbank wird ausgewertet …", recorderUnavailable: "Der Recorder läuft nicht, daher gibt es nichts auszuwerten.",
   recorderSummary: "{states} gespeicherte Zustände · {size} · Aufbewahrung {days} Tage · {stats} Statistikwerte", recorderSizeUnknown: "Größe unbekannt", recorderPerDay: "{count} pro Tag", recorderTook: "berechnet in {ms} ms", recorderCached: "Ergebnis von vor wenigen Minuten ({ms} ms)", recorderShare: "{share} % aller Zustände",
@@ -759,8 +759,8 @@ Object.assign(TEXT.en, {
   result_migrated: "Migrated", check_meter_statistics: "Statistics continued", check_meter_id_taken: "New entity carries the stable ID", undo_conflict_statistics: "not undone: statistics can only be reset with the backup",
   abort_meter_changed: "Entities or statistics were changed after the preview.", abort_statistics_changed: "The statistics were changed after the preview.", abort_statistics_failed: "The statistics could not be confirmed; the run stopped.",
   abort_no_recorder: "The recorder is not running.", abort_alt_id_taken: "The fallback ID is taken now.", abort_id_not_freed: "Home Assistant did not free the old ID in time; everything was put back.", abort_id_takeover_failed: "Renaming failed; everything was put back.",
-  maintHint: "Backup protection, preflight, blueprints and goals",
-  maintenance: "Maintenance", maintenanceSubtitle: "Backup protection and update preflight. Both only read; the only things stored are Housekeeper's own starting state and what you confirm as done.",
+  maintHint: "Backups, updates, blueprints and maintenance goals",
+  maintenance: "Maintenance", maintenanceSubtitle: "Check backups, open updates with the checks before them, blueprints and maintenance goals. Housekeeper only reads; the only things it deletes are its own backups, and only after you confirm.",
   recorderTitle: "Storage use", 
   recorderLoad: "Start analysis", recorderReload: "Recalculate", recorderLoading: "Evaluating the database …", recorderUnavailable: "The recorder is not running, so there is nothing to evaluate.",
   recorderSummary: "{states} stored states · {size} · kept {days} days · {stats} statistics values", recorderSizeUnknown: "size unknown", recorderPerDay: "{count} per day", recorderTook: "calculated in {ms} ms", recorderCached: "result from a few minutes ago ({ms} ms)", recorderShare: "{share} % of all states",
@@ -848,7 +848,7 @@ Object.assign(TEXT.de, {
   bhName: "Name", bhVersion: "HA-Version", bhDatabase: "Datenbank", bhApps: "Apps", bhFolders: "Ordner", bhSizes: "Größe je Ziel", bhFailed: "Fehlgeschlagen", bhId: "Backup-ID",
   bhGuideTitle: "So testest du eine Wiederherstellung", bhGuideSteps: "1. Eine Test-Instanz oder eine zweite Installation bereitstellen (nie zuerst die Hauptinstanz). 2. Dort ein aktuelles Backup einspielen: Einstellungen → System → Backups → Backup hochladen oder bei der Einrichtung wiederherstellen. 3. Prüfen, ob Integrationen, Automationen und Dashboards da sind. 4. Hier das Datum des Tests speichern. Housekeeper führt selbst nie eine Wiederherstellung aus.",
   todoBackupProblem: "Backup-Schutz: Problem",
-  mtProblems: "{n} Problem(e)", mtNotes: "{n} Hinweis(e)", mtChecks: "{n} Prüfungen", mtPreflight: "Preflight", mtOpen: "{n} offen", mtRecord: "Gespeicherter Stand", mtNoRecord: "keiner",
+  mtProblems_1: "1 Problem", mtProblems_n: "{n} Probleme", mtNotes_1: "1 Hinweis", mtNotes_n: "{n} Hinweise", mtChecks: "{n} Prüfungen", mtPreflight: "Preflight", mtOpen: "{n} offen", mtRecord: "Gespeicherter Stand", mtNoRecord: "keiner",
 });
 Object.assign(TEXT.en, {
   backupTitle: "Backup protection", 
@@ -877,7 +877,7 @@ Object.assign(TEXT.en, {
   bhName: "Name", bhVersion: "HA version", bhDatabase: "Database", bhApps: "Apps", bhFolders: "Folders", bhSizes: "Size per target", bhFailed: "Failed", bhId: "Backup ID",
   bhGuideTitle: "How to test a restore", bhGuideSteps: "1. Set up a test instance or a second installation (never the main instance first). 2. Restore a recent backup there: Settings → System → Backups → upload a backup, or restore during setup. 3. Check that integrations, automations and dashboards are there. 4. Save the date of the test here. Housekeeper never performs a restore itself.",
   todoBackupProblem: "Backup protection: problem",
-  mtProblems: "{n} problem(s)", mtNotes: "{n} note(s)", mtChecks: "{n} checks", mtPreflight: "Preflight", mtOpen: "{n} open", mtRecord: "Saved state", mtNoRecord: "none",
+  mtProblems_1: "1 problem", mtProblems_n: "{n} problems", mtNotes_1: "1 note", mtNotes_n: "{n} notes", mtChecks: "{n} checks", mtPreflight: "Preflight", mtOpen: "{n} open", mtRecord: "Saved state", mtNoRecord: "none",
 });
 
 // Texts for the reliability view; merged into TEXT.
@@ -2547,7 +2547,7 @@ class OverviewMixin {
     const rows = [
       fact("bh_newest", age === null || age === undefined ? this.t("safeNoBackup") : this.esc(this.t("backupAgo", { age: this.bhAge(age) })), newest?.level),
       run ? fact("bh_last_run", run.values?.completed ? this.esc(this.formatDate(run.values.completed)) : this.t("bhNever"), run.level) : "",
-      fact("bhResult", problems ? this.t("mtProblems", { n: problems }) : notes ? this.t("mtNotes", { n: notes }) : this.t("bhLevel_ok"), ""),
+      fact("bhResult", problems ? this.t(problems === 1 ? "mtProblems_1" : "mtProblems_n", { n: problems }) : notes ? this.t(notes === 1 ? "mtNotes_1" : "mtNotes_n", { n: notes }) : this.t("bhLevel_ok"), ""),
     ].join("");
     return `<div class="panel"><div class="panelhead"><div><h2>${this.t("backupTitle")}</h2><p>${this.t("maintHintBackup")}</p></div><button class="link" data-jump="maintenance">${this.t("backupOpen")} <ha-icon icon="mdi:chevron-right"></ha-icon></button></div><div class="facts">${rows}</div></div>`;
   }
@@ -5931,9 +5931,10 @@ class MaintenanceMixin {
     const pfTone = !pf ? "mute" : !updates ? "ok" : { stop: "red", look: "warn" }[pf.verdict] || "ok";
     const goalsMissed = (this.goals?.goals || []).filter(g => g.state === "missed").length;
     this.ensureGoals();
+    this.ensureBlueprints(); // the pill of the tab needs the numbers before the tab is opened
     const bp = this.blueprints, bpBad = bp ? (bp.missing || 0) + (bp.broken || 0) : 0;
     const tabs = [
-      { id: "backup", icon: "mdi:backup-restore", label: this.t("backupTitle"), hint: "maintHintBackup", pill: !this.backup?.available ? "" : problems ? this.t("mtProblems", { n: problems }) : notes ? this.t("mtNotes", { n: notes }) : this.t("bhLevel_ok"), tone: backupTone },
+      { id: "backup", icon: "mdi:backup-restore", label: this.t("backupTitle"), hint: "maintHintBackup", pill: !this.backup?.available ? "" : problems ? this.t(problems === 1 ? "mtProblems_1" : "mtProblems_n", { n: problems }) : notes ? this.t(notes === 1 ? "mtNotes_1" : "mtNotes_n", { n: notes }) : this.t("bhLevel_ok"), tone: backupTone },
       { id: "backups", icon: "mdi:delete-sweep-outline", label: this.t("bkcTab"), hint: "maintHintBkc", pill: this.bkc?.available && this.bkc.rows?.length ? this.formatNumber(this.bkc.rows.length) : "", tone: "mute" },
       { id: "updates", icon: "mdi:package-up", label: this.t("updatesTab"), hint: "maintHintUpdates", pill: updates ? this.formatNumber(updates) : "", tone: pfTone },
       { id: "blueprints", icon: "mdi:file-code-outline", label: this.t("bpTab"), hint: "maintHintBlueprints", pill: bpBad ? this.t("mtOpen", { n: bpBad }) : "", tone: "warn" },
@@ -7176,7 +7177,11 @@ const SEARCH_WORDS = {
   look: "darstellung theme dunkel hell schrift farbe appearance dark light font",
   protection: "schutz schutzmodus sicherheit ausgeblendet ignoriert ausnahmen protection mode hidden ignored exceptions",
   scan: "scan schwellen intervall tage benachrichtigung meldung ereignisse threshold interval notification message events",
-  goals: "ziele goals",
+  goals: "ziele wartungsziele grenzen goals",
+  backup: "backup sicherung wiederherstellung restore emergency kit verschlüsselung ablage backups protection",
+  backups: "backups aufräumen löschen eigene housekeeper tidy delete own",
+  updates: "updates aktualisierungen vorab prüfen preflight speicher system apps hacs firmware check before",
+  blueprints: "blueprints vorlagen fehlend defekt ungenutzt missing broken unused",
   info: "info version speichert daten diagnose prüfung quellen dauer about stored diagnostics coverage timing",
   compare: "scan-vergleich verlauf vergleich scans history compare",
   logbook: "logbuch notizen logbook notes",
@@ -7197,7 +7202,7 @@ class SearchPagesMixin {
     }
     pages.push({ view: "settings", label: this.t("settings"), path: "", words: SEARCH_WORDS.settings });
     for (const [id, , labelKey] of this.settingsTabs()) pages.push({ view: "settings", settingsTab: id, label: this.t(labelKey), path: this.t("settings"), words: SEARCH_WORDS[id] || "" });
-    pages.push({ view: "maintenance", viewTab: "goals", label: this.t("goalsTitle"), path: this.t("maintenance"), words: SEARCH_WORDS.goals });
+    for (const [id, label] of [["backup", "backupTitle"], ["backups", "bkcTab"], ["updates", "updatesTab"], ["blueprints", "bpTab"], ["goals", "goalsTitle"]]) pages.push({ view: "maintenance", viewTab: id, label: this.t(label), path: this.t("maintenance"), words: SEARCH_WORDS[id] });
     pages.push({ view: "changes", viewTab: "compare", label: this.t("tabScans"), path: this.t("changes"), words: SEARCH_WORDS.compare });
     pages.push({ view: "changes", viewTab: "logbook", label: this.t("logbook"), path: this.t("changes"), words: SEARCH_WORDS.logbook });
     return pages;
@@ -8667,14 +8672,14 @@ Object.assign(TEXT.en, {
 
 // Maintenance goals: what "in order" means for this house and whether it is so (see goals.py); mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
-  tilesMissed: "{count} Ziele verfehlt", moreItems: "und {count} weitere", goalsTitle: "Wartungsziele", goalsSub: "Eigene Grenzen für das, was in Ordnung heißt. Housekeeper ändert nichts.", goalsSummary: "{met} erfüllt, {missed} verfehlt",
+  tilesMissed: "{count} Ziele verfehlt", moreItems: "und {count} weitere", goalsTitle: "Wartungsziele", goalsSub: "Eigene Grenzen für das, was in Ordnung heißt. Housekeeper ändert nichts.", goalsSummary: "{met} erfüllt, {missed} verfehlt", goalsNone: "Es gibt noch keine Wartungsziele.",
   goal_broken_references: "Defekte Referenzen", goal_unavailable: "Nicht verfügbare Entitäten", goal_backup_age: "Alter des letzten Backups", goal_restore_test_age: "Alter des Wiederherstellungstests", goal_recorder_growth: "Datenbankwachstum", goal_weak_batteries: "Schwache Batterien", goal_devices_without_area: "Geräte ohne Bereich", goal_stale_sensors: "Sensoren ohne neue Meldung", goal_recurring_devices: "Wiederkehrende Ausfälle (Geräte)", goal_automation_errors: "Automationen mit Fehlern (30 Tage)", goal_blocked_automations: "Blockierte Automationen", goal_orphaned_statistics: "Verwaiste Statistiken",
   goalLimit: "höchstens {limit}", goalAllowed: "erlaubt: {limit}", goalAllowedNone: "erlaubt: keine", goalMissedPill: "Ziel verfehlt", areaFindings: "Befunde", areaState: "Zustand", areaCare: "Wartung", areaCareSub: "nichts dringend", goalNow: "jetzt {value}", goalNever: "nie", goalNoBackup: "kein Backup", goalUnknownHint: "noch nicht messbar",
   goalState_met: "Erfüllt", goalState_missed: "Verfehlt", goalState_unknown: "Unbekannt", goalState_off: "Aus",
   goalUnit_mb_per_day: "{n} MB pro Tag", goalEdit: "Anpassen", goalLimitLabel: "Grenze", goalEnabled: "Ziel beachten", goalDefault: "Standard: {n}", goalFailed: "Nicht gespeichert: {reason}", goalSave: "Speichern", goalsAdjust: "Grenzen anpassen", goalsAllMet: "Alle {n} beachteten Ziele sind erreicht.",
 });
 Object.assign(TEXT.en, {
-  tilesMissed: "{count} goals missed", moreItems: "and {count} more", goalsTitle: "Maintenance goals", goalsSub: "Your own limits for what in order means. Housekeeper changes nothing.", goalsSummary: "{met} met, {missed} missed",
+  tilesMissed: "{count} goals missed", moreItems: "and {count} more", goalsTitle: "Maintenance goals", goalsSub: "Your own limits for what in order means. Housekeeper changes nothing.", goalsSummary: "{met} met, {missed} missed", goalsNone: "There are no maintenance goals yet.",
   goal_broken_references: "Broken references", goal_unavailable: "Unavailable entities", goal_backup_age: "Age of the latest backup", goal_restore_test_age: "Age of the restore test", goal_recorder_growth: "Database growth", goal_weak_batteries: "Weak batteries", goal_devices_without_area: "Devices without an area", goal_stale_sensors: "Sensors without a new report", goal_recurring_devices: "Recurring outages (devices)", goal_automation_errors: "Automations with errors (30 days)", goal_blocked_automations: "Blocked automations", goal_orphaned_statistics: "Orphaned statistics",
   goalLimit: "at most {limit}", goalAllowed: "allowed: {limit}", goalAllowedNone: "allowed: none", goalMissedPill: "Goal missed", areaFindings: "Findings", areaState: "State", areaCare: "Maintenance", areaCareSub: "nothing urgent", goalNow: "now {value}", goalNever: "never", goalNoBackup: "no backup", goalUnknownHint: "cannot be measured yet",
   goalState_met: "Met", goalState_missed: "Missed", goalState_unknown: "Unknown", goalState_off: "Off",
@@ -8700,9 +8705,9 @@ const GOAL_TONES = { met: "ok", missed: "red", unknown: "mute", off: "mute" };
 
 class GoalsMixin {
   async loadGoals() {
-    this.goalsLoading = true;
-    try { this.goals = await this._hass.callWS({ type: "ha_housekeeper/goals" }); }
-    catch (_) { this.goals = null; }
+    this.goalsLoading = true; this.goalsError = "";
+    try { this.goals = await this._hass.callWS({ type: "ha_housekeeper/goals" }); this.markLoaded("goals"); }
+    catch (err) { this.goals = null; this.goalsError = this.errText(err); }
     this.goalsLoading = false; this.render();
   }
 
@@ -8749,13 +8754,21 @@ class GoalsMixin {
   goalsCard(compact = false) {
     this.ensureGoals();
     const r = this.goals;
+    if (!compact) {
+      // The tab in Maintenance says what is going on instead of staying empty.
+      const head = this.pageBar({ at: this.loadedAt("goals"), loading: this.goalsLoading, attr: "data-goals-refresh" });
+      if (this.goalsError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.goalsError)}</div></div></div>`;
+      if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("loading")}</div></div>`;
+      if (!r.goals?.length) return `<div class="stack">${head}<div class="panel"><div class="emptymsg">${this.t("goalsNone")}</div></div></div>`;
+    }
     if (!r?.goals?.length) return "";
     if (compact) {
       const missed = r.goals.filter(g => g.state === "missed");
       const body = missed.length ? missed.map(g => this.goalRow(g, false)).join("") : `<div class="pad"><small>${this.t("goalsAllMet", { n: r.met })}</small></div>`;
       return `<section class="panel u-mb14" aria-labelledby="hk-goals"><div class="panelhead"><div><h2 id="hk-goals">${this.t("goalsTitle")}</h2></div><span class="date">${this.t("goalsSummary", { met: r.met, missed: r.missed })}</span><button class="btn quiet" data-goals-settings>${this.t("goalsAdjust")}</button></div>${body}</section>`;
     }
-    return `<section class="panel u-mb14" aria-label="${this.esc(this.t("goalsTitle"))}"><p class="factnote pad">${this.t("goalsSummary", { met: r.met, missed: r.missed })}</p>${r.goals.map(g => this.goalRow(g)).join("")}</section>`;
+    const head = this.pageBar({ at: this.loadedAt("goals"), loading: this.goalsLoading, attr: "data-goals-refresh" });
+    return `<div class="stack">${head}<section class="panel u-mb14" aria-label="${this.esc(this.t("goalsTitle"))}"><p class="factnote pad">${this.t("goalsSummary", { met: r.met, missed: r.missed })}</p>${r.goals.map(g => this.goalRow(g)).join("")}</section></div>`;
   }
 
   openGoal(id) {
@@ -8780,6 +8793,7 @@ class GoalsMixin {
 
   bindGoals(root) {
     root.querySelectorAll("[data-goals-settings]").forEach(el => el.onclick = () => { (this.viewTab ||= {}).maintenance = "goals"; this.noteJump?.("maintenance"); this.view = "maintenance"; this.selected = null; this.pages = {}; this.render(); });
+    root.querySelector("[data-goals-refresh]")?.addEventListener("click", () => this.loadGoals());
     root.querySelectorAll("[data-goal-open]").forEach(el => el.onclick = () => this.openGoal(el.dataset.goalOpen));
     root.querySelectorAll("[data-goal-cancel]").forEach(el => el.onclick = () => { this.goalForm = null; this.render(); });
     root.querySelectorAll("[data-goal-form]").forEach(form => {

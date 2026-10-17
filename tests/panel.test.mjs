@@ -5794,3 +5794,14 @@ test("the database tab shows size, growth, retention and purge as tiles and keep
   html = el.dbCard();
   assert.ok(!html.includes("Growth per day") && html.includes("Size not measurable (database: mysql)") && html.includes("Growth is being observed"));
 });
+
+test("every tab of Maintenance can be found by search, and the goals tab says why it is empty", () => {
+  const { el, shadow } = panel("en");
+  const tabs = el.searchPages().filter(page => page.view === "maintenance" && page.viewTab).map(page => page.viewTab);
+  assert.equal(tabs.join(","), "backup,backups,updates,blueprints,goals");
+  assert.equal(el.t("mtNotes_1"), "1 note");
+  el.goals = { goals: [], met: 0, missed: 0 }; el._goalsRequested = true; el.view = "maintenance"; el.viewTab = { maintenance: "goals" }; el.render();
+  assert.ok(shadow.innerHTML.includes("There are no maintenance goals yet."));
+  el.goals = null; el.goalsError = "boom"; el.render();
+  assert.ok(shadow.innerHTML.includes("boom"));
+});
