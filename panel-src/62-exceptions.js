@@ -145,8 +145,9 @@ class ExceptionsMixin {
         <div><input list="hk-vac-ids" data-vac-entity autocomplete="off" value="${this.esc(form.entity)}"><datalist id="hk-vac-ids">${ids.map(id => `<option value="${this.esc(id)}">`).join("")}</datalist>
         ${v.entity ? `<small role="status">${this.t(state)}${v.ended_at ? ` · ${this.t("vacEnded", { date: this.formatDate(v.ended_at) })}` : ""}</small>` : ""}</div></div>
       <div class="setrow"><div><strong>${this.t("vacGrace")}</strong><small>${this.t("vacGraceHint")}</small></div>
-        <div class="excnum"><input type="number" min="0" max="${v.grace_max || 720}" data-vac-grace value="${this.esc(form.grace)}"> <span>${this.t("vacGraceUnit")}</span><span class="grow"></span><small class="vacdirty" data-vac-dirty ${dirty ? "" : "hidden"}>${this.t("vacUnsaved")}</small><button type="submit" class="btn primary" data-vac-save ${dirty ? "" : "disabled"}>${this.t("vacSave")}</button></div></div>
-      ${form.error ? `<div class="pad">${this.notice("err", form.error)}</div>` : ""}</form>`;
+        <div class="excnum"><input type="number" min="0" max="${v.grace_max || 720}" data-vac-grace value="${this.esc(form.grace)}"> <span>${this.t("vacGraceUnit")}</span></div></div>
+      ${form.error ? `<div class="pad">${this.notice("err", form.error)}</div>` : ""}
+      <div class="formfoot"><small class="vacdirty" data-vac-dirty ${dirty ? "" : "hidden"}>${this.t("vacUnsaved")}</small><button type="submit" class="btn primary" data-vac-save ${dirty ? "" : "disabled"}>${this.t("vacSave")}</button></div></form>`;
   }
 
   // Whether the vacation fields differ from what is saved; reverting a change makes it clean again.
