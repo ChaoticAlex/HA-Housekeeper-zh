@@ -535,6 +535,7 @@ async def run(
     """Call one function: check, run, log. Raises ``McpError`` when it is not allowed or fails."""
     if scanner is None:
         raise McpError("not_loaded")
+    scanner.mcp.expire()
     function = FUNCTIONS[name]
     params = short_params(data)
     result, count, undo = "ok", None, None

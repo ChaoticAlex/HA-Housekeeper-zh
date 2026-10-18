@@ -1640,7 +1640,7 @@ class InventoryScanner:
                 "ignore_label": IGNORE_LABEL,
                 "version": self.version,
                 "notify": self.notify.enabled,
-                "mcp": {"enabled": self.mcp.enabled, "write": self.mcp.write},
+                "mcp": self.mcp.meta(),
                 "protection": self.protection.mode,
                 "protection_rules": protection_rules(),
                 "recorder_available": self._recorder_available,

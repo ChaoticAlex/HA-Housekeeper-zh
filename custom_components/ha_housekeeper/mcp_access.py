@@ -22,6 +22,7 @@ KEEP_DAYS = 90
 MERGE_SECONDS = 60  # reads of one caller within this time are one line
 PARAM_TEXT = 60
 KINDS = ("read", "write", "denied")
+AUTO_OFF_CHOICES = (0, 1, 8, 24)  # hours until AI access switches itself off; 0 is never
 
 
 def short_params(params: dict[str, Any]) -> dict[str, Any]:
@@ -53,6 +54,8 @@ class McpStore:
         self._store: Store[dict[str, Any]] = Store(hass, STORAGE_VERSION, MCP_STORAGE_KEY)
         self.enabled = False
         self.write = False
+        self.auto_off_hours = 0
+        self.enabled_at: str | None = None
         self.entries: list[dict[str, Any]] = []
 
     async def async_load(self) -> None:
@@ -61,6 +64,10 @@ class McpStore:
             return
         self.enabled = data.get("enabled") is True
         self.write = data.get("write") is True
+        if data.get("auto_off_hours") in AUTO_OFF_CHOICES:
+            self.auto_off_hours = data["auto_off_hours"]
+        if self.enabled and _time(data.get("enabled_at")) is not None:
+            self.enabled_at = data["enabled_at"]
         entries = data.get("entries")
         if isinstance(entries, list):
             self.entries = [
@@ -72,12 +79,51 @@ class McpStore:
         """Writing needs both switches."""
         return self.enabled and self.write
 
-    def set_switches(self, enabled: bool | None = None, write: bool | None = None) -> None:
+    def set_switches(
+        self,
+        enabled: bool | None = None,
+        write: bool | None = None,
+        auto_off_hours: int | None = None,
+    ) -> None:
         if enabled is not None:
+            if enabled and not self.enabled:
+                self.enabled_at = datetime.now(UTC).isoformat()
+            if not enabled:
+                self.enabled_at = None
             self.enabled = enabled
         if write is not None:
             self.write = write
+        if auto_off_hours in AUTO_OFF_CHOICES:
+            self.auto_off_hours = auto_off_hours
         self._save()
+
+    @property
+    def off_at(self) -> str | None:
+        """When AI access switches itself off, or ``None`` when it is off or has no time limit."""
+        started = _time(self.enabled_at)
+        if not self.enabled or not self.auto_off_hours or started is None:
+            return None
+        return (started + timedelta(hours=self.auto_off_hours)).isoformat()
+
+    def expire(self, now: datetime | None = None) -> bool:
+        """Switch both switches off when the time limit has passed; True when it did."""
+        due = _time(self.off_at)
+        if due is None or (now or datetime.now(UTC)) < due:
+            return False
+        hours = self.auto_off_hours
+        self.enabled = self.write = False
+        self.enabled_at = None
+        self.log(None, "auto_off", "write", {"hours": hours}, "ok", None)
+        return True
+
+    def meta(self) -> dict[str, Any]:
+        """The state the panel shows next to the page: switches and the time limit."""
+        return {
+            "enabled": self.enabled,
+            "write": self.write,
+            "auto_off_hours": self.auto_off_hours,
+            "off_at": self.off_at,
+        }
 
     def log(
         self,
@@ -165,6 +211,12 @@ class McpStore:
 
     def _save(self) -> None:
         self._store.async_delay_save(
-            lambda: {"enabled": self.enabled, "write": self.write, "entries": self.entries},
+            lambda: {
+                "enabled": self.enabled,
+                "write": self.write,
+                "auto_off_hours": self.auto_off_hours,
+                "enabled_at": self.enabled_at,
+                "entries": self.entries,
+            },
             SAVE_DELAY,
         )

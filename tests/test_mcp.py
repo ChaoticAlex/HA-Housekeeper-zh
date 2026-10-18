@@ -261,6 +261,21 @@ async def test_no_secret_reaches_an_answer(hass: HomeAssistant) -> None:
     assert secret not in json.dumps(answers)
 
 
+async def test_ai_access_switches_itself_off_after_its_time(hass: HomeAssistant) -> None:
+    scanner = scanner_with(hass, 3)
+    store = scanner.mcp
+    store.set_switches(True, True, 1)
+    assert store.off_at is not None and store.meta()["auto_off_hours"] == 1
+    assert not store.expire()
+    assert store.expire(datetime.now(UTC) + timedelta(hours=2))
+    assert not store.enabled and not store.write and store.off_at is None
+    assert store.entries[-1]["fn"] == "auto_off"
+    store.set_switches(True)  # a new start counts from now
+    assert store.off_at is not None
+    store.set_switches(auto_off_hours=0)
+    assert store.off_at is None and not store.expire(datetime.now(UTC) + timedelta(days=9))
+
+
 async def test_reads_are_limited_per_minute(hass: HomeAssistant) -> None:
     scanner = scanner_with(hass, 3)
     scanner.mcp.enabled = True

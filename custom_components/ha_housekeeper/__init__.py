@@ -223,6 +223,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     @callback
     def _heartbeat(_: Any) -> None:
         scanner.events.beat(datetime.now(UTC))
+        if scanner.mcp.expire() and scanner.snapshot:
+            scanner.snapshot["meta"]["mcp"] = scanner.mcp.meta()
 
     entry.async_on_unload(async_track_time_interval(hass, _heartbeat, timedelta(minutes=5)))
 

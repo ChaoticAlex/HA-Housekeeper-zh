@@ -10,6 +10,7 @@ from homeassistant.core import HomeAssistant, callback
 
 from .const import DOMAIN
 from .inventory import InventoryScanner
+from .mcp_access import AUTO_OFF_CHOICES
 from .mcp_api import LIMIT_MAX, McpError, undo, undo_all
 from .ws_common import _versioned, panel_session_only, with_scanner
 
@@ -20,6 +21,7 @@ from .ws_common import _versioned, panel_session_only, with_scanner
         vol.Required("type"): f"{DOMAIN}/mcp_set",
         vol.Optional("enabled"): bool,
         vol.Optional("write"): bool,
+        vol.Optional("auto_off_hours"): vol.In(AUTO_OFF_CHOICES),
     }
 )
 @callback
@@ -33,13 +35,10 @@ def websocket_mcp_set(
     """Switch AI access and the right to change Housekeeper's lists. Both are off by default."""
     if panel_session_only(hass, connection, msg):
         return
-    scanner.mcp.set_switches(msg.get("enabled"), msg.get("write"))
+    scanner.mcp.set_switches(msg.get("enabled"), msg.get("write"), msg.get("auto_off_hours"))
     if scanner.snapshot:
-        scanner.snapshot["meta"]["mcp"] = {
-            "enabled": scanner.mcp.enabled,
-            "write": scanner.mcp.write,
-        }
-    connection.send_result(msg["id"], {"enabled": scanner.mcp.enabled, "write": scanner.mcp.write})
+        scanner.snapshot["meta"]["mcp"] = scanner.mcp.meta()
+    connection.send_result(msg["id"], scanner.mcp.meta())
 
 
 @websocket_api.require_admin
@@ -60,13 +59,14 @@ def websocket_mcp_audit(
     scanner: InventoryScanner,
 ) -> None:
     """The log of calls for the panel, newest first. Reading it is no call and is not logged."""
+    if scanner.mcp.expire() and scanner.snapshot:
+        scanner.snapshot["meta"]["mcp"] = scanner.mcp.meta()
     rows = scanner.mcp.recent(msg.get("kind"), msg["failed"])
     connection.send_result(
         msg["id"],
         _versioned(
             {
-                "enabled": scanner.mcp.enabled,
-                "write": scanner.mcp.write,
+                **scanner.mcp.meta(),
                 "calls_24h": scanner.mcp.calls_since(24),
                 "total": len(rows),
                 "entries": rows[: msg["limit"]],
