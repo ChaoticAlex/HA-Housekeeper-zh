@@ -18,14 +18,12 @@
 - **Links nach Home Assistant:** Alle Sprünge nach Home Assistant (Apps, Integrationen, HACS, Benutzer, Cloud) öffnen in einem neuen Tab statt im selben.
 - **Schutzmodus und Ausnahmen:** Die Einstellungen trennen beides in zwei Reiter. Der Schutzmodus nennt die Wirkung statt der Stufe: „Alles erlaubt“, „Ohne endgültiges Löschen“, „Nur Quarantäne“, „Nur lesen“.
 - **Einstellungen, Kacheln:** Die Kacheln stehen in neuer Reihenfolge (Schutzmodus, Ausnahmen, Scan und Meldungen, KI-Zugriff, Darstellung, Info) in drei Spalten. Jede Kachel zeigt ihren Stand, der Randstreifen folgt ihm (z. B. KI-Zugriff: aus grau, Lesen grün, Ändern gelb).
-- **Ausnahmeregeln, Speichern und Meldungen:** Regeln mit „Ausblenden“ ließen sich nicht mehr speichern („expected int at rules[0].days“); das ist behoben. Fehler, Warnungen und Hinweise stehen in einheitlichen Kästen, Fehler erst nach dem Speichern und nur bis zur nächsten Änderung. Der Urlaubsmodus zeigt „Nicht gespeichert“, solange etwas vom Gespeicherten abweicht.
-- **Urlaubsmodus:** Ist noch nichts gewählt und gibt es einen Helfer wie `input_boolean.urlaubsmodus` oder `vacation_mode`, steht er als Vorschlag im Feld und gilt nach dem Speichern. Eine Kalender-Entität kann ein Stichwort bekommen: Dann schaltet in deinem normalen Kalender ein Termin mit „Urlaub“ im Titel den Modus ein, auch wenn gleichzeitig andere Termine laufen. Ohne Stichwort zählt jeder Termin, wie bisher.
-- **Ausnahmeregeln, eine Karte:** „Immer“ und „Im Urlaubsmodus“ sind eine Karte mit Umschalter, einem einzigen Knopf „Regel hinzufügen“ und einem Leerzustand wie bei den Erinnerungen; die Urlaubsmodus-Einstellungen folgen in einer eigenen Karte, „Speichern“ erscheint erst nach einer Änderung. (Ersetzt den Aufbau darunter.)
-- **Ausnahmeregeln, Aufbau:** Die Seite besteht aus eigenen Karten: Einleitung, Regeln „Immer“, Urlaubsmodus (Entität und Nachfrist) und Regeln „Im Urlaubsmodus“. Die Regeln stehen in einer Tabelle mit Kopfzeile (Regel, Aktion, Wirkung jetzt, An, Aktionen).
-- **Ausnahmeregeln, Knöpfe:** „+ Regel“ steht rechts im Kopf der Karte, Speichern und Abbrechen unten rechts wie in den anderen Formularen, auch beim Urlaubsmodus (dort mit „Nicht gespeichert“ links daneben).
-- **Urlaubsmodus, Feld:** Das Feld für die Entität ist breiter, lange Namen wie `input_boolean.urlaub_haus` passen hinein.
-- **Ausnahmeregeln, „Alles“:** Neben Bereich, Label, Integration, Typ, Gerät und Entität gibt es die Art „Alles“: die Regel trifft jedes Objekt, ohne Auswahl, etwa „im Urlaubsmodus alles zurückhalten“. Bei „Immer“ warnt die Vorschau mit der Zahl der betroffenen Objekte.
-- **Ausnahmeregeln, Feinschliff:** Die Formulare heißen „Regel anlegen“ und „Regel bearbeiten“, der Knopf „Regel hinzufügen“; altes Aussehen der Regelzeilen entfernt. Das Benutzerhandbuch nennt „Alles“ und den neuen Aufbau.
+- **Ausnahmeregeln und Urlaubsmodus, Oberfläche:**
+  - Die Seite besteht aus zwei Karten: die Regeln mit einem Umschalter „Immer“ und „Im Urlaubsmodus“, einer Tabelle, einem Knopf „Regel hinzufügen“ und einem Leerzustand wie bei den Erinnerungen, darunter der Urlaubsmodus. „Speichern“ und „Abbrechen“ stehen unten rechts und erscheinen beim Urlaubsmodus erst nach einer Änderung („Nicht gespeichert“).
+  - Regeln mit „Ausblenden“ ließen sich nicht mehr speichern („expected int at rules[0].days“); behoben. Fehler, Warnungen und Hinweise stehen in einheitlichen Kästen, Fehler erst nach dem Speichern und nur bis zur nächsten Änderung.
+  - Neue Art „Alles“: die Regel trifft jedes Objekt, ohne Auswahl; bei „Immer“ warnt die Vorschau mit der Zahl der betroffenen Objekte.
+  - Ist noch nichts gewählt und gibt es einen Helfer wie `input_boolean.urlaubsmodus` oder `vacation_mode`, steht er als Vorschlag im Feld und gilt nach dem Speichern. Das Feld ist breiter.
+  - Eine Kalender-Entität kann ein Stichwort bekommen: Dann schaltet in deinem normalen Kalender ein Termin mit „Urlaub“ im Titel den Modus ein, auch wenn gleichzeitig andere Termine laufen. Ohne Stichwort zählt jeder Termin, wie bisher.
 - **Updates:** Die ausstehenden Updates stehen in der gewohnten Tabelle mit Suche, Sortierung, Filter nach Bereich und Seiten.
 
 ### English
@@ -46,14 +44,12 @@
 - **Links into Home Assistant:** All jumps into Home Assistant (apps, integrations, HACS, users, cloud) now open in a new tab instead of the current one.
 - **Protection mode and exceptions:** Settings now split them into two tabs. The protection mode names the effect instead of the level: “Everything allowed”, “No irreversible deletions”, “Quarantine only”, “Read only”.
 - **Settings, tiles:** The tiles come in a new order (protection mode, exceptions, scan and messages, AI access, appearance, info) in three columns. Every tile shows its state, and the edge stripe follows it (e.g. AI access: off grey, reads green, changes amber).
-- **Exception rules, saving and messages:** Rules with “Hide” could no longer be saved (“expected int at rules[0].days”); fixed. Errors, warnings and notes use uniform boxes, errors only after saving and only until the next change. The vacation mode shows “Not saved” while anything differs from what is saved.
-- **Vacation mode:** If nothing is chosen and a helper like `input_boolean.urlaubsmodus` or `vacation_mode` exists, it is offered as a suggestion in the field and counts once saved. A calendar entity can get a keyword: an event with “Vacation” in its title in your normal calendar then switches the mode on, even while other events run. Without a keyword every event counts, as before.
-- **Exception rules, one card:** Always and In vacation mode are one card with a switch, a single “Add rule” button and an empty state like the reminders; the vacation settings follow in a card of their own, “Save” appears only after a change. (Replaces the layout below.)
-- **Exception rules, layout:** The page is made of cards of their own: introduction, rules “Always”, vacation mode (entity and grace period) and rules “In vacation mode”. The rules sit in a table with a header (rule, action, effect now, on, actions).
-- **Exception rules, buttons:** “+ Rule” sits at the right of the card header, Save and Cancel at the bottom right as in the other forms, also for the vacation mode (with “Not saved” on the left).
-- **Vacation mode, field:** The entity field is wider, long names such as `input_boolean.vacation_house` fit.
-- **Exception rules, “Everything”:** Besides area, label, integration, type, device and entity there is the kind “Everything”: the rule covers every object, without a selection, for example “hold everything back in vacation mode”. With “Always” the preview warns with the number of objects it covers.
-- **Exception rules, polish:** The forms are called “Add rule” and “Edit rule”, the button “Add rule”; the old look of the rule rows is gone. The user guide names “Everything” and the new layout.
+- **Exception rules and vacation mode, interface:**
+  - The page is made of two cards: the rules with a switch “Always” and “In vacation mode”, a table, one “Add rule” button and an empty state like the reminders, and below it the vacation mode. Save and Cancel sit at the bottom right and, for the vacation mode, appear only after a change (“Not saved”).
+  - Rules with “Hide” could no longer be saved (“expected int at rules[0].days”); fixed. Errors, warnings and hints appear in uniform boxes, errors only after saving and only until the next change.
+  - New kind “Everything”: the rule covers every object, without a selection; with “Always” the preview warns with the number of objects.
+  - If nothing is chosen and a helper like `input_boolean.urlaubsmodus` or `vacation_mode` exists, it is offered as a suggestion in the field and counts once saved. The field is wider.
+  - A calendar entity can get a keyword: an event with “Vacation” in its title in your normal calendar then switches the mode on, even while other events run. Without a keyword every event counts, as before.
 - **Updates:** Pending updates are shown in the usual table with search, sorting, an area filter and pages.
 
 ## 1.9.0 - 2026-10-17
