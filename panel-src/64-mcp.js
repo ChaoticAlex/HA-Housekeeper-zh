@@ -19,6 +19,7 @@ Object.assign(TEXT.de, {
   mcpResult_ok: "ok", mcpResult_disabled: "KI-Zugriff war aus", mcpResult_write_disabled: "Ändern war aus", mcpResult_not_admin: "kein Administrator", mcpResult_invalid_format: "Angaben unvollständig oder falsch", mcpResult_rate_limited: "zu viele Änderungen", mcpResult_too_many_calls: "zu viele Aufrufe", mcpResult_reason_required: "Grund fehlt", mcpResult_error: "Fehler",
   mcpUndoAll: "Zurücknehmen", mcpUndoAllHint: "Änderungen durch KI-Zugriff", mcpUndoHour: "der letzten Stunde", mcpUndoDay: "der letzten 24 Stunden", mcpUndoEverything: "alle", mcpUndoneCount: "{n} Änderungen zurückgenommen", mcpFn_undo_all: "Alles zurücknehmen",
   mcpAutoOff: "Automatisch ausschalten", mcpAutoOffDetail: "Schaltet KI-Zugriff und „Merkliste ändern“ nach dieser Zeit selbst aus, damit sie nicht aus Versehen an bleiben.", mcpAutoNever: "nie", mcpAutoHours: "nach {n} Stunden", mcpAutoHour: "nach 1 Stunde", mcpOffAt: "Schaltet sich aus: {date}", mcpFn_auto_off: "Automatisch ausgeschaltet",
+  mcpBarOn: "KI-Zugriff aktiv", mcpBarRead: "nur lesend", mcpBarWrite: "mit Ändern der Merkliste", mcpBarOpen: "Protokoll ansehen",
   mcpTimes: "{n} Aufrufe bis {date}", mcpCount: "{n} Treffer", mcpUndo: "Rückgängig", mcpUndone: "zurückgenommen", mcpUndoFailed: "Nicht zurückgenommen: {reason}",
   mcpUserSystem: "Automation oder System", mcpUserYou: "du", mcpUserOther: "anderer Benutzer",
   mcpFn_status: "Status", mcpFn_findings: "Befunde", mcpFn_object: "Objekt", mcpFn_finding_decide: "Befund entscheiden", mcpFn_mark: "Objekt markieren", mcpFn_note_set: "Logbuch-Eintrag", mcpFn_undo: "Zurücknehmen",
@@ -44,6 +45,7 @@ Object.assign(TEXT.en, {
   mcpResult_ok: "ok", mcpResult_disabled: "AI access was off", mcpResult_write_disabled: "changing was off", mcpResult_not_admin: "not an administrator", mcpResult_invalid_format: "invalid parameters", mcpResult_rate_limited: "too many changes", mcpResult_too_many_calls: "too many calls", mcpResult_reason_required: "reason missing", mcpResult_error: "error",
   mcpUndoAll: "Take back", mcpUndoAllHint: "Changes through AI access", mcpUndoHour: "of the last hour", mcpUndoDay: "of the last 24 hours", mcpUndoEverything: "all", mcpUndoneCount: "{n} changes taken back", mcpFn_undo_all: "Take everything back",
   mcpAutoOff: "Switch off automatically", mcpAutoOffDetail: "Switches AI access and “Change the list” off by itself after this time, so they do not stay on by mistake.", mcpAutoNever: "never", mcpAutoHours: "after {n} hours", mcpAutoHour: "after 1 hour", mcpOffAt: "Switches off: {date}", mcpFn_auto_off: "Switched off automatically",
+  mcpBarOn: "AI access on", mcpBarRead: "read-only", mcpBarWrite: "with changes to the list", mcpBarOpen: "Show the log",
   mcpTimes: "{n} calls until {date}", mcpCount: "{n} results", mcpUndo: "Undo", mcpUndone: "taken back", mcpUndoFailed: "Not taken back: {reason}",
   mcpUserSystem: "Automation or system", mcpUserYou: "you", mcpUserOther: "another user",
   mcpFn_status: "Status", mcpFn_findings: "Findings", mcpFn_object: "Object", mcpFn_finding_decide: "Decide about a finding", mcpFn_mark: "Mark an object", mcpFn_note_set: "Logbook entry", mcpFn_undo: "Undo",
@@ -97,6 +99,14 @@ class McpMixin {
     return `<details class="logitem${tint}${e.undone ? " undone" : ""}"><summary class="logline"><time class="logtime" datetime="${this.esc(e.at)}">${this.esc(this.mcpTime(e.at))}</time><span class="pill logbadge ${tone}">${badge}</span><span class="logfn">${this.esc(this.t(`mcpFn_${e.fn}`) || e.fn)}</span><span class="logwhat">${target ? `<code>${this.esc(target)}</code>` : ""}${notes ? `<small>${this.esc(notes)}</small>` : ""}${times}${who ? `<small>${this.esc(who)}</small>` : ""}</span>${undo}</summary><div class="logdetail"><small>${this.t("mcpParams")}</small>${params}</div></details>`;
   }
 
+  // A strip under the header while AI access is on, so it is not forgotten; not on its own page.
+  aiBar() {
+    const m = this.data?.meta?.mcp;
+    if (!m?.enabled || (this.view === "settings" && this.settingsTab === "mcp")) return "";
+    const off = m.off_at ? ` · ${this.t("mcpOffAt", { date: `${this.mcpDay(m.off_at)}, ${this.mcpTime(m.off_at).slice(0, 5)}` })}` : "";
+    return `<div class="vacbar aibar" role="status"><b>${this.t("mcpBarOn")}</b><span>${this.t(m.write ? "mcpBarWrite" : "mcpBarRead")}${off}</span><span class="sp"></span><a href="#" data-ai-go>${this.t("mcpBarOpen")}</a></div>`;
+  }
+
   mcpCard() {
     const m = this.data?.meta?.mcp || {};
     const on = Boolean(m.enabled), write = Boolean(m.write);
@@ -134,6 +144,11 @@ class McpMixin {
   }
 
   bindMcp(root) {
+    root.querySelectorAll("[data-ai-go]").forEach(el => el.onclick = ev => {
+      ev.preventDefault();
+      this.selected = null; this.view = "settings"; this.settingsTab = "mcp"; this.pages = {};
+      this.render();
+    });
     const set = async changes => {
       try {
         const res = await this._hass.callWS({ type: "ha_housekeeper/mcp_set", ...changes });
