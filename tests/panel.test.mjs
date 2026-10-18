@@ -5888,3 +5888,20 @@ test("the AI access tab shows the two switches and the log with an undo for a ch
   assert.ok(html.includes("data-set-tab=\"mcp\""));
   assert.ok(html.includes('class="logline"') && html.includes("×3") && html.includes("logbadge"));
 });
+
+test("the exceptions card builds the editor with chips for areas and the shared search for entities", () => {
+  const { el } = panel("de");
+  el.exc = { rules: [{ id: "r1", kind: "area", targets: ["keller"], action: "delay", days: 7, scope: "always", enabled: true, note: "", effect: { hold: 2, due: 0 } }],
+    areas: [{ id: "keller", name: "Keller" }, { id: "lager", name: "Lager" }], labels: [], integrations: [], domains: [], devices: [], entities: [], vacation: { entity: "input_boolean.urlaub", state: "on", grace_hours: 24 } };
+  el.openException = () => {};
+  el.excForm = { id: "", kind: "area", targets: ["keller"], action: "hide", scope: "always", search: "", days: 7, enabled: true, note: "", error: "", preview: null };
+  let html = el.excCard();
+  assert.match(html, /data-exc-target="lager"[^>]*aria-pressed="false"/);
+  assert.match(html, /data-exc-target="keller"[^>]*aria-pressed="true"/);
+  assert.match(html, /class="policyswitch" data-exc-toggle="r1"/);
+  assert.ok(!html.includes("data-picker=\"exc\""));
+  el.excForm = { ...el.excForm, kind: "entity", targets: [], scope: "vacation" };
+  html = el.excCard();
+  assert.match(html, /data-picker="exc"/);
+  assert.ok(!html.includes("data-exc-action"), "vacation rules always hide");
+});

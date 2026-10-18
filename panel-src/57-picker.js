@@ -45,6 +45,11 @@ class PickerMixin {
         get: () => this.noteDraft?.targetText ?? "", set: v => { if (this.noteDraft) { this.noteDraft.targetText = v; this.noteDraft.target = ""; } }, min: 2, types: null, limit: 15,
         pick: o => { this.noteDraft.target = this.objectKey(o); this.noteDraft.targetText = o.name; },
       },
+      exc: {
+        get: () => this.excForm?.search || "", set: v => { if (this.excForm) this.excForm.search = v; }, min: 1, types: [this.excForm?.kind || "entity"], limit: 30, sub: o => (o.object_type === "device" ? this.deviceSub(o) : o.object_id),
+        filter: o => o.object_type === this.excForm?.kind && !this.excForm.targets.includes(o.object_id),
+        pick: o => { this.excForm.targets = [...this.excForm.targets, o.object_id]; this.excForm.search = ""; this.excPreview(); },
+      },
       graph: {
         get: () => this.graphQuery, set: v => { this.graphQuery = v; }, min: 2, types: null, limit: 15,
         pick: o => { this.noteGraphStep(o); this.graphSelected = o; this.graphQuery = ""; this.graphLimit = GRAPH_NODE_STEP; },
