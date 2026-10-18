@@ -1,4 +1,4 @@
-"""Exception rules: objects of an area, label, integration, domain, device or entity are left out.
+"""Exception rules: objects of an area, label, integration, domain, device or entity, or all objects, are left out.
 
 Stored by Housekeeper only; Home Assistant stays untouched. A rule names areas, labels,
 integrations, domains, devices or entities (one or more of them) and an action: ``hide`` hides
@@ -26,7 +26,8 @@ from homeassistant.helpers.storage import Store
 from .const import EXCEPTIONS_STORAGE_KEY, STORAGE_VERSION
 
 SAVE_DELAY = 5
-KINDS = ("area", "label", "integration", "domain", "device", "entity")
+KINDS = ("area", "label", "integration", "domain", "device", "entity", "all")
+ALL_TARGET = "*"  # the one target of a rule of kind ``all``, which covers every object
 ACTIONS = ("hide", "delay")
 SCOPES = ("always", "vacation")
 ITEM_LIMIT = 100
@@ -65,14 +66,17 @@ def clean_rule(raw: Any) -> dict[str, Any] | None:
     """One rule in its known shape, or None when it cannot be one."""
     if not isinstance(raw, dict) or raw.get("kind") not in KINDS:
         return None
-    targets = raw.get("targets")
-    if not isinstance(targets, list):
-        return None
-    clean = list(
-        dict.fromkeys(t for t in targets if isinstance(t, str) and 0 < len(t) <= TARGET_LENGTH)
-    )
-    if not clean or len(clean) > TARGET_LIMIT:
-        return None
+    if raw["kind"] == "all":
+        clean = [ALL_TARGET]
+    else:
+        targets = raw.get("targets")
+        if not isinstance(targets, list):
+            return None
+        clean = list(
+            dict.fromkeys(t for t in targets if isinstance(t, str) and 0 < len(t) <= TARGET_LENGTH)
+        )
+        if not clean or len(clean) > TARGET_LIMIT:
+            return None
     scope = raw.get("scope") if raw.get("scope") in SCOPES else "always"
     # A vacation rule only keeps quiet: how long to wait is for the rules that always apply.
     action = raw.get("action") if raw.get("action") in ACTIONS and scope == "always" else "hide"
@@ -135,6 +139,8 @@ def matches(rule: dict[str, Any], found: Traits) -> bool:
     if not rule["enabled"]:
         return False
     targets, kind = rule["targets"], rule["kind"]
+    if kind == "all":
+        return True
     if kind == "area":
         return found.area is not None and found.area in targets
     if kind == "integration":

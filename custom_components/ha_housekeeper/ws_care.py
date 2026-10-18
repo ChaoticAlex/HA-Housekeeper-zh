@@ -814,7 +814,7 @@ async def websocket_exceptions(
 _RULE_SCHEMA = {
     vol.Optional("id"): str,
     vol.Required("kind"): vol.In(EXCEPTION_KINDS),
-    vol.Required("targets"): [str],
+    vol.Optional("targets", default=list): [str],
     vol.Optional("action", default="hide"): vol.In(EXCEPTION_ACTIONS),
     vol.Optional("days"): vol.Any(None, vol.All(int, vol.Range(min=1, max=EXCEPTION_DAYS_MAX))),
     vol.Optional("scope", default="always"): vol.In(EXCEPTION_SCOPES),

@@ -22,6 +22,7 @@
 - **Ausnahmeregeln, Aufbau:** Die Seite besteht aus eigenen Karten: Einleitung, Regeln „Immer“, Urlaubsmodus (Entität und Nachfrist) und Regeln „Im Urlaubsmodus“. Die Regeln stehen in einer Tabelle mit Kopfzeile (Regel, Aktion, Wirkung jetzt, An, Aktionen).
 - **Ausnahmeregeln, Knöpfe:** „+ Regel“ steht rechts im Kopf der Karte, Speichern und Abbrechen unten rechts wie in den anderen Formularen, auch beim Urlaubsmodus (dort mit „Nicht gespeichert“ links daneben).
 - **Urlaubsmodus, Feld:** Das Feld für die Entität ist breiter, lange Namen wie `input_boolean.urlaub_haus` passen hinein.
+- **Ausnahmeregeln, „Alles“:** Neben Bereich, Label, Integration, Typ, Gerät und Entität gibt es die Art „Alles“: die Regel trifft jedes Objekt, ohne Auswahl, etwa „im Urlaubsmodus alles zurückhalten“. Bei „Immer“ warnt die Vorschau mit der Zahl der betroffenen Objekte.
 - **Updates:** Die ausstehenden Updates stehen in der gewohnten Tabelle mit Suche, Sortierung, Filter nach Bereich und Seiten.
 
 ### English
@@ -46,6 +47,7 @@
 - **Exception rules, layout:** The page is made of cards of their own: introduction, rules “Always”, vacation mode (entity and grace period) and rules “In vacation mode”. The rules sit in a table with a header (rule, action, effect now, on, actions).
 - **Exception rules, buttons:** “+ Rule” sits at the right of the card header, Save and Cancel at the bottom right as in the other forms, also for the vacation mode (with “Not saved” on the left).
 - **Vacation mode, field:** The entity field is wider, long names such as `input_boolean.vacation_house` fit.
+- **Exception rules, “Everything”:** Besides area, label, integration, type, device and entity there is the kind “Everything”: the rule covers every object, without a selection, for example “hold everything back in vacation mode”. With “Always” the preview warns with the number of objects it covers.
 - **Updates:** Pending updates are shown in the usual table with search, sorting, an area filter and pages.
 
 ## 1.9.0 - 2026-10-17

@@ -119,3 +119,10 @@ def test_rule_schema_takes_the_days_of_a_hide_rule_back_as_none() -> None:
 
     rule = {"kind": "area", "targets": ["a"], "action": "hide", "days": None, "scope": "always"}
     assert Schema(_RULE_SCHEMA)(rule)["days"] is None
+
+
+def test_a_rule_for_all_covers_every_object_and_needs_no_target() -> None:
+    rule = clean_rule({"kind": "all", "action": "hide", "scope": "vacation"})
+    assert rule is not None and rule["targets"] == ["*"]
+    assert matches(rule, Traits(None, frozenset()))
+    assert not matches({**rule, "enabled": False}, Traits(None, frozenset()))
