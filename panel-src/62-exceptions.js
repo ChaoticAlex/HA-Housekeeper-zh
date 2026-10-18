@@ -16,7 +16,7 @@ Object.assign(TEXT.de, {
   hidByRule: "Durch eine Regel", ignoredByRule: "Ausgeblendet durch eine Ausnahmeregel: {rule}", heldByRule: "Zurückgehalten durch eine Ausnahmeregel: {rule}, wird ab {date} gemeldet", dueByRule: "Frist abgelaufen · Ausnahmeregel: {rule}",
   hidRuleLink: "Regel",
   excKind_device: "Gerät", excKind_entity: "Entität", excRuleDevice: "Gerät {names}", excRuleEntity: "Entität {names}", excSearch: "Suchen …", excMore: "Weitere über die Suche",
-  excColRule: "Regel", excColAction: "Aktion", excColEffect: "Wirkung jetzt", excColOn: "An", excColActions: "Aktionen", excKind_all: "Alles", excRuleAll: "Alle Objekte", excAllHint: "Die Regel trifft jedes Objekt, ohne Auswahl.", excAllWarn: "Die Regel trifft jedes Objekt ({n} mit Befunden). Prüfe, ob das gewollt ist.", excGroupAlways: "Immer", excGroupVacation: "Im Urlaubsmodus", excAddShort: "Regel hinzufügen", excChosen: "{n} gewählt",
+  excColRule: "Regel", excColAction: "Aktion", excColEffect: "Wirkung jetzt", excColOn: "An", excColActions: "Aktionen", excKind_any: "Alle Typen", excAnyHint: "Sucht über alle Typen: Bereiche, Labels, Integrationen, Geräte und Entitäten. Beim Speichern entsteht je Art eine Regel ({n}).", excGroupAlways: "Immer", excGroupVacation: "Im Urlaubsmodus", excAddShort: "Regel hinzufügen", excChosen: "{n} gewählt",
   excEmptyAlways: "Noch keine dauerhafte Regel", excEmptyAlwaysNext: "Zum Beispiel einen Bereich oder ein Label dauerhaft ausblenden.", excEmptyVacation: "Noch keine Regel für den Urlaubsmodus", excEmptyVacationNext: "Zum Beispiel das Gewächshaus ausblenden, solange du weg bist.", excVacNoEntity: "Ohne Entität für den Urlaubsmodus greifen diese Regeln nie. Wähle sie unten bei „Urlaubsmodus“.",
   excScope: "Gilt", excScope_always: "Immer", excScope_vacation: "Nur im Urlaubsmodus", excScopeChip_vacation: "nur im Urlaub", excScopeChip_always: "immer",
   excScopeHint: "Im Urlaubsmodus bleiben diese Objekte still, auch wenn ein Gerät kaputtgeht. Nach dem Urlaub zählt der Ausfall neu: mit eigener Frist deren Tage, sonst die Nachfrist.",
@@ -48,7 +48,7 @@ Object.assign(TEXT.en, {
   hidByRule: "By a rule", ignoredByRule: "Hidden by an exception rule: {rule}", heldByRule: "Held back by an exception rule: {rule}, reported from {date}", dueByRule: "Time has passed · exception rule: {rule}",
   hidRuleLink: "Rule",
   excKind_device: "Device", excKind_entity: "Entity", excRuleDevice: "Device {names}", excRuleEntity: "Entity {names}", excSearch: "Search …", excMore: "More through the search",
-  excColRule: "Rule", excColAction: "Action", excColEffect: "Effect now", excColOn: "On", excColActions: "Actions", excKind_all: "Everything", excRuleAll: "All objects", excAllHint: "The rule covers every object, without a selection.", excAllWarn: "The rule covers every object ({n} with findings). Check that this is what you want.", excGroupAlways: "Always", excGroupVacation: "In vacation mode", excAddShort: "Add rule", excChosen: "{n} chosen",
+  excColRule: "Rule", excColAction: "Action", excColEffect: "Effect now", excColOn: "On", excColActions: "Actions", excKind_any: "All types", excAnyHint: "Searches all types: areas, labels, integrations, devices and entities. Saving makes one rule per kind ({n}).", excGroupAlways: "Always", excGroupVacation: "In vacation mode", excAddShort: "Add rule", excChosen: "{n} chosen",
   excEmptyAlways: "No permanent rule yet", excEmptyAlwaysNext: "For example hide an area or a label for good.", excEmptyVacation: "No vacation mode rule yet", excEmptyVacationNext: "For example hide the greenhouse while you are away.", excVacNoEntity: "Without an entity for the vacation mode these rules never apply. Choose it below under “Vacation mode”.",
   excScope: "Applies", excScope_always: "Always", excScope_vacation: "Only in vacation mode", excScopeChip_vacation: "vacation only", excScopeChip_always: "always",
   excScopeHint: "In vacation mode these objects stay quiet, even if a device breaks. After the vacation the outage counts anew: with a delay of its own that delay, otherwise the grace period.",
@@ -67,7 +67,6 @@ Object.assign(TEXT.en, {
 class ExceptionsMixin {
   // "Area Lager" or "Label ignore_status, other": what a rule names, in the words of Home Assistant.
   excRuleName(rule) {
-    if (rule.kind === "all") return this.t("excRuleAll");
     const list = this.data?.objects || [], lookup = ["area", "label", "device", "entity"].includes(rule.kind);
     const names = rule.targets.map(id => (lookup ? list.find(x => x.object_type === rule.kind && x.object_id === id)?.name : "") || id).join(", ");
     return this.t({ area: "excRuleArea", label: "excRuleLabel", integration: "excRuleIntegration", domain: "excRuleDomain", device: "excRuleDevice", entity: "excRuleEntity" }[rule.kind], { names });
@@ -104,7 +103,7 @@ class ExceptionsMixin {
 
   // One rule as the cells of a table row: what it names, what it does, what that does now, the switch and the two buttons.
   excRuleCells(rule) {
-    const icons = { area: "mdi:floor-plan", label: "mdi:label-outline", integration: "mdi:puzzle-outline", domain: "mdi:shape-outline", device: "mdi:devices", entity: "mdi:shape-outline", all: "mdi:select-all" };
+    const icons = { area: "mdi:floor-plan", label: "mdi:label-outline", integration: "mdi:puzzle-outline", domain: "mdi:shape-outline", device: "mdi:devices", entity: "mdi:shape-outline" };
     const id = this.esc(rule.id), tone = rule.enabled ? (rule.effect?.due ? "warn" : "ok") : "mute";
     return [
       { key: "target", label: "excColRule", cell: () => `<div class="statcell"><span class="tile ${tone}"><ha-icon icon="${icons[rule.kind]}"></ha-icon></span><div><strong>${this.esc(this.excRuleName(rule))}</strong>${rule.note ? `<small>${this.esc(rule.note)}</small>` : ""}</div></div>` },
@@ -198,23 +197,30 @@ class ExceptionsMixin {
     return "";
   }
 
+  // What a rule can take from an object of the search: its kind and the id the rule stores; null for objects no rule can name.
+  excTargetOf(o) {
+    if (["area", "label", "device"].includes(o.object_type)) return { kind: o.object_type, id: o.object_id };
+    if (o.object_type === "config_entry") return o.domain ? { kind: "integration", id: o.domain } : null;
+    return ["entity", "automation", "scene", "script"].includes(o.object_type) && String(o.object_id).includes(".") ? { kind: "entity", id: o.object_id } : null;
+  }
+
   // Kinds with few entries are chips to tap; devices and entities use the shared search field of the panel.
   excFormHtml(f) {
     const all = { area: this.exc.areas, label: this.exc.labels, integration: this.exc.integrations, domain: this.exc.domains, device: this.exc.devices, entity: this.exc.entities }[f.kind] || [];
-    const lookup = f.kind === "device" || f.kind === "entity";
+    const any = f.kind === "any", lookup = any || f.kind === "device" || f.kind === "entity";
     const nameOf = id => all.find(x => x.id === id)?.name || this.findObject(`${f.kind}:${id}`)?.name || id;
     const chip = (id, on, extra = "") => `<button type="button" class="chip${on ? " active" : ""}" data-exc-target="${this.esc(id)}" aria-pressed="${on}">${this.esc(nameOf(id))}${extra}</button>`;
     const needle = (f.search || "").trim().toLowerCase();
     const shown = needle ? all.filter(x => `${x.name} ${x.id}`.toLowerCase().includes(needle)) : all;
     const search = !lookup && all.length > 12 ? `<input type="search" data-exc-search placeholder="${this.esc(this.t("excSearch"))}" autocomplete="off" value="${this.esc(f.search || "")}">` : "";
-    const picked = f.targets.map(id => chip(id, true, ` <ha-icon icon="mdi:close"></ha-icon>`)).join("");
-    const everything = f.kind === "all";
-    const choices = everything ? `<small class="factnote">${this.t("excAllHint")}</small>` : lookup ? `${picked ? `<div class="chips bare">${picked}</div>` : ""}${this.pickerBox("exc", this.t("excSearch"))}`
+    const picked = any ? f.picks.map(p => `<button type="button" class="chip active" data-exc-pick="${this.esc(`${p.kind}:${p.id}`)}" aria-pressed="true">${this.esc(p.name)} · ${this.t(`excKind_${p.kind}`)} <ha-icon icon="mdi:close"></ha-icon></button>`).join("") : f.targets.map(id => chip(id, true, ` <ha-icon icon="mdi:close"></ha-icon>`)).join("");
+    const count = any ? f.picks.length : f.targets.length;
+    const choices = lookup ? `${picked ? `<div class="chips bare">${picked}</div>` : ""}${this.pickerBox("exc", this.t("excSearch"))}`
       : `${search}<div class="chips bare">${shown.map(x => chip(x.id, f.targets.includes(x.id))).join("") || `<small class="factnote">${this.t("excNoTargets")}</small>`}</div>`;
-    const kinds = ["area", "label", "integration", "domain", "device", "entity", "all"].map(k => `<button type="button" class="chip${f.kind === k ? " active" : ""}" data-exc-kind="${k}" aria-pressed="${f.kind === k}">${this.t(`excKind_${k}`)}</button>`).join("");
+    const kinds = ["any", "area", "label", "integration", "domain", "device", "entity"].map(k => `<button type="button" class="chip${f.kind === k ? " active" : ""}" data-exc-kind="${k}" aria-pressed="${f.kind === k}">${this.t(`excKind_${k}`)}</button>`).join("");
     const pv = f.preview;
     const preview = pv ? `<div class="excprev" role="status"><strong>${this.t("excPreview")}:</strong> ${f.action === "delay" ? this.t("excPreviewDelay", { hold: pv.hold, due: pv.due }) : this.t("excPreviewHide", { objects: pv.objects, n: pv.hide })}
-        ${pv.overlap?.length ? `<br><small class="factnote">${this.esc(this.t("excOverlap", { rules: pv.overlap.map(id => { const r = this.exc.rules.find(x => x.id === id); return r ? this.excRuleName(r) : id; }).join(", ") }))}</small>` : ""}</div>${f.kind === "all" && f.scope !== "vacation" ? this.notice("warn", this.t("excAllWarn", { n: pv.objects })) : ""}${pv.important?.length ? this.notice("warn", this.t("excImportant", { names: pv.important.map(x => x.name).join(", ") })) : ""}` : "";
+        ${pv.overlap?.length ? `<br><small class="factnote">${this.esc(this.t("excOverlap", { rules: pv.overlap.map(id => { const r = this.exc.rules.find(x => x.id === id); return r ? this.excRuleName(r) : id; }).join(", ") }))}</small>` : ""}</div>${pv.important?.length ? this.notice("warn", this.t("excImportant", { names: pv.important.map(x => x.name).join(", ") })) : ""}` : "";
     const action = f.scope === "vacation" ? `<small class="factnote">${this.t("excScopeHint")}</small>`
       : `<div class="mfield"><span>${this.t("excAction")}</span><div class="excact"><button type="button" class="chip${f.action === "hide" ? " active" : ""}" data-exc-action="hide" aria-pressed="${f.action === "hide"}">${this.t("excAction_hide")}</button><button type="button" class="chip${f.action === "delay" ? " active" : ""}" data-exc-action="delay" aria-pressed="${f.action === "delay"}">${this.t("excAction_delay")}</button>
         ${f.action === "delay" ? `<input type="number" min="1" max="${this.exc.days_max || 365}" data-exc-days value="${this.esc(f.days)}" aria-label="${this.esc(this.t("excDays"))}"> <span>${this.t("excDays")}</span>` : ""}</div>
@@ -222,15 +228,23 @@ class ExceptionsMixin {
     return `<form class="excform markform" data-exc-form>
       <strong>${this.t(f.id ? "excFormEdit" : "excFormNew")}</strong>
       <div class="mfield"><span>${this.t("excKind")}</span><div class="chips bare">${kinds}</div></div>
-      <div class="mfield"><span>${this.t("excTargets")}${f.targets.length && !everything ? ` (${this.t("excChosen", { n: f.targets.length })})` : ""}</span>${choices}${everything ? "" : `<small class="factnote">${this.t("excInherit")}</small>`}</div>
+      <div class="mfield"><span>${this.t("excTargets")}${count ? ` (${this.t("excChosen", { n: count })})` : ""}</span>${choices}<small class="factnote">${any ? this.t("excAnyHint", { n: new Set(f.picks.map(p => p.kind)).size || 1 }) : this.t("excInherit")}</small></div>
       ${action}
       <label class="mfield"><span>${this.t("excNote")}</span><input data-exc-note maxlength="200" autocomplete="off" value="${this.esc(f.note)}"></label>
       ${preview}${f.error ? this.notice("err", f.error) : ""}
       <div class="mbtns"><button type="button" class="btn quiet" data-exc-cancel>${this.t("excCancel")}</button><button type="submit" class="btn primary">${this.t("excSave")}</button></div></form>`;
   }
 
-  excDraft(f) {
-    return { ...(f.id ? { id: f.id } : {}), kind: f.kind, targets: f.kind === "all" ? [] : f.targets, action: f.scope === "vacation" ? "hide" : f.action, scope: f.scope || "always", ...(f.scope !== "vacation" && f.action === "delay" ? { days: Math.max(1, Number(f.days) || 7) } : {}), enabled: f.enabled !== false, note: f.note.trim() };
+  // The rules a form makes: one, or with "all types" one per kind of the objects picked.
+  excDrafts(f) {
+    if (f.kind !== "any") return [this.excDraft(f, f.kind, f.targets, Boolean(f.id))];
+    const groups = new Map();
+    f.picks.forEach(p => groups.set(p.kind, [...(groups.get(p.kind) || []), p.id]));
+    return [...groups].map(([kind, targets]) => this.excDraft(f, kind, targets, false));
+  }
+
+  excDraft(f, kind, targets, keepId) {
+    return { ...(keepId ? { id: f.id } : {}), kind, targets, action: f.scope === "vacation" ? "hide" : f.action, scope: f.scope || "always", ...(f.scope !== "vacation" && f.action === "delay" ? { days: Math.max(1, Number(f.days) || 7) } : {}), enabled: f.enabled !== false, note: f.note.trim() };
   }
 
   // The stored rules as the server takes them back: no effect, and days only where a delay has them.
@@ -240,18 +254,18 @@ class ExceptionsMixin {
 
   openException(id, scope) {
     const rule = this.exc.rules.find(r => r.id === id);
-    this.excForm = rule ? { id, kind: rule.kind, targets: [...rule.targets], action: rule.action, scope: rule.scope || "always", search: "", days: rule.days || 7, enabled: rule.enabled, note: rule.note || "", error: "", preview: null }
-      : { id: "", kind: "area", targets: [], action: "hide", scope: scope || "always", search: "", days: 7, enabled: true, note: "", error: "", preview: null };
+    this.excForm = rule ? { id, kind: rule.kind, targets: [...rule.targets], picks: [], action: rule.action, scope: rule.scope || "always", search: "", days: rule.days || 7, enabled: rule.enabled, note: rule.note || "", error: "", preview: null }
+      : { id: "", kind: "any", targets: [], picks: [], action: "hide", scope: scope || "always", search: "", days: 7, enabled: true, note: "", error: "", preview: null };
     this.render();
     this.excPreview();
   }
 
   async excPreview() {
     const f = this.excForm;
-    if (!f || (f.kind !== "all" && !f.targets.length)) { if (f) { f.preview = null; this.render(); } return; }
+    if (!f || !(f.kind === "any" ? f.picks.length : f.targets.length)) { if (f) { f.preview = null; this.render(); } return; }
     const seq = (this._excSeq = (this._excSeq || 0) + 1);
     try {
-      const preview = await this._hass.callWS({ type: "ha_housekeeper/exceptions_preview", rule: this.excDraft(f) });
+      const preview = await this._hass.callWS({ type: "ha_housekeeper/exceptions_preview", rules: this.excDrafts(f).map(({ id, ...rule }) => rule) });
       if (seq !== this._excSeq || this.excForm !== f) return;
       f.preview = preview;
     } catch (_) { f.preview = null; }
@@ -271,12 +285,13 @@ class ExceptionsMixin {
   commitException() {
     const f = this.excForm;
     if (!f) return;
-    if (f.kind !== "all" && !f.targets.length) { f.error = this.t("excNeedTarget"); this.render(); return; }
+    if (!(f.kind === "any" ? f.picks.length : f.targets.length)) { f.error = this.t("excNeedTarget"); this.render(); return; }
     const max = this.exc.days_max || 365, days = Number(f.days);
     if (f.scope !== "vacation" && f.action === "delay" && !(Number.isInteger(days) && days >= 1 && days <= max)) { f.error = this.t("excDaysInvalid", { max }); this.render(); return; }
-    const draft = this.excDraft(f), rules = this.excRules();
+    const drafts = this.excDrafts(f), rules = this.excRules();
     const at = rules.findIndex(r => r.id === f.id);
-    if (at >= 0) rules[at] = draft; else rules.push(draft);
+    if (at >= 0 && f.kind !== "any") rules[at] = drafts[0];
+    else { if (at >= 0) rules.splice(at, 1); rules.push(...drafts); }
     this.saveExceptions(rules, f);
   }
 
@@ -315,13 +330,17 @@ class ExceptionsMixin {
     root.querySelectorAll("[data-exc-form]").forEach(form => {
       const f = this.excForm;
       form.onsubmit = ev => { ev.preventDefault(); this.commitException(); };
-      form.querySelectorAll("[data-exc-kind]").forEach(el => el.onclick = () => { f.error = ""; f.kind = el.dataset.excKind; f.targets = []; f.search = ""; f.preview = null; this._picker = null; this.render(); if (f.kind === "all") this.excPreview(); });
+      form.querySelectorAll("[data-exc-kind]").forEach(el => el.onclick = () => { f.error = ""; f.kind = el.dataset.excKind; f.targets = []; f.picks = []; f.search = ""; f.preview = null; this._picker = null; this.render(); });
       const search = form.querySelector("[data-exc-search]");
       if (search) search.oninput = ev => { f.search = ev.target.value; this.render(); this.shadowRoot.querySelector("[data-exc-search]")?.focus(); };
       form.querySelector("[data-exc-note]").oninput = ev => { f.error = ""; f.note = ev.target.value; };
       form.querySelectorAll("[data-exc-action]").forEach(el => el.onclick = () => { f.error = ""; f.action = el.dataset.excAction; this.render(); this.excPreview(); });
       const days = form.querySelector("[data-exc-days]");
       if (days) days.onchange = ev => { f.error = ""; f.days = ev.target.value; this.excPreview(); };
+      form.querySelectorAll("[data-exc-pick]").forEach(el => el.onclick = () => {
+        f.error = ""; f.picks = f.picks.filter(p => `${p.kind}:${p.id}` !== el.dataset.excPick);
+        this.render(); this.excPreview();
+      });
       form.querySelectorAll("[data-exc-target]").forEach(el => el.onclick = () => {
         const id = el.dataset.excTarget;
         f.error = "";

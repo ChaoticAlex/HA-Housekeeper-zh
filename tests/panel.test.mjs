@@ -5910,4 +5910,7 @@ test("the exceptions card builds the editor with chips for areas and the shared 
   html = el.excCard();
   assert.match(html, /data-picker="exc"/);
   assert.ok(!html.includes("data-exc-action"), "vacation rules always hide");
+  el.excForm = { id: "", kind: "any", targets: [], picks: [{ kind: "area", id: "keller", name: "Keller" }, { kind: "entity", id: "sensor.a", name: "A" }, { kind: "entity", id: "sensor.b", name: "B" }], action: "hide", scope: "always", search: "", days: 7, enabled: true, note: "", error: "", preview: null };
+  assert.equal(JSON.stringify(el.excDrafts(el.excForm).map(r => [r.kind, r.targets])), '[["area",["keller"]],["entity",["sensor.a","sensor.b"]]]');
+  assert.match(el.excCard(), /data-exc-kind="any"[^>]*aria-pressed="true"/);
 });

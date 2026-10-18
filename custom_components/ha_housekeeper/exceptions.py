@@ -1,4 +1,4 @@
-"""Exception rules: objects of an area, label, integration, domain, device or entity, or all objects, are left out.
+"""Exception rules: objects of an area, label, integration, domain, device or entity are left out.
 
 Stored by Housekeeper only; Home Assistant stays untouched. A rule names areas, labels,
 integrations, domains, devices or entities (one or more of them) and an action: ``hide`` hides
@@ -32,8 +32,7 @@ from homeassistant.helpers.storage import Store
 from .const import EXCEPTIONS_STORAGE_KEY, STORAGE_VERSION
 
 SAVE_DELAY = 5
-KINDS = ("area", "label", "integration", "domain", "device", "entity", "all")
-ALL_TARGET = "*"  # the one target of a rule of kind ``all``, which covers every object
+KINDS = ("area", "label", "integration", "domain", "device", "entity")
 ACTIONS = ("hide", "delay")
 SCOPES = ("always", "vacation")
 ITEM_LIMIT = 100
@@ -75,17 +74,14 @@ def clean_rule(raw: Any) -> dict[str, Any] | None:
     """One rule in its known shape, or None when it cannot be one."""
     if not isinstance(raw, dict) or raw.get("kind") not in KINDS:
         return None
-    if raw["kind"] == "all":
-        clean = [ALL_TARGET]
-    else:
-        targets = raw.get("targets")
-        if not isinstance(targets, list):
-            return None
-        clean = list(
-            dict.fromkeys(t for t in targets if isinstance(t, str) and 0 < len(t) <= TARGET_LENGTH)
-        )
-        if not clean or len(clean) > TARGET_LIMIT:
-            return None
+    targets = raw.get("targets")
+    if not isinstance(targets, list):
+        return None
+    clean = list(
+        dict.fromkeys(t for t in targets if isinstance(t, str) and 0 < len(t) <= TARGET_LENGTH)
+    )
+    if not clean or len(clean) > TARGET_LIMIT:
+        return None
     scope = raw.get("scope") if raw.get("scope") in SCOPES else "always"
     # A vacation rule only keeps quiet: how long to wait is for the rules that always apply.
     action = raw.get("action") if raw.get("action") in ACTIONS and scope == "always" else "hide"
@@ -148,8 +144,6 @@ def matches(rule: dict[str, Any], found: Traits) -> bool:
     if not rule["enabled"]:
         return False
     targets, kind = rule["targets"], rule["kind"]
-    if kind == "all":
-        return True
     if kind == "area":
         return found.area is not None and found.area in targets
     if kind == "integration":
@@ -250,13 +244,13 @@ def _result(
 
 def preview(
     hass: HomeAssistant,
-    rule: dict[str, Any],
+    rule: dict[str, Any] | list[dict[str, Any]],
     snapshot: dict[str, Any],
     now: datetime,
     vacation: Vacation = Vacation(),  # noqa: B008
     others: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    """What one rule does to the findings of the last scan; ``overlap`` names the other rules on the same objects.
+    """What a rule, or the rules made from one form, do to the findings of the last scan; ``overlap`` names the other rules on the same objects.
 
     A vacation rule is looked at as if the vacation were on, so its effect can be seen before it is.
     """
@@ -265,9 +259,11 @@ def preview(
     objects: set[str] = set()
     overlap: set[str] = set()
     important: list[dict[str, str]] = []
+    drafts = rule if isinstance(rule, list) else [rule]
+    own = {r["id"] for r in drafts}
     on = (
         Vacation(True, vacation.ended_at, vacation.grace_hours)
-        if rule["scope"] == "vacation"
+        if drafts[0]["scope"] == "vacation"
         else vacation
     )
     for finding in snapshot.get("findings", []):
@@ -275,12 +271,12 @@ def preview(
             continue
         object_id = finding["object_id"]
         found = traits(hass, "entity" if "." in object_id else "device", object_id)
-        result = verdict([rule], found, finding, now, on) if found is not None else None
+        result = verdict(drafts, found, finding, now, on) if found is not None else None
         if result is None:
             continue
         counts[result["state"]] += 1
         objects.add(object_id)
-        overlap.update(r["id"] for r in others or [] if r["id"] != rule["id"] and matches(r, found))
+        overlap.update(r["id"] for r in others or [] if r["id"] not in own and matches(r, found))
         if result["state"] != "due" and finding.get("impact") == "high" and len(important) < 5:
             important.append({"object_id": object_id, "name": names.get(object_id, object_id)})
     return {**counts, "objects": len(objects), "important": important, "overlap": sorted(overlap)}

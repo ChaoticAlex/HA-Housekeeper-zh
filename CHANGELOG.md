@@ -21,7 +21,7 @@
 - **Ausnahmeregeln und Urlaubsmodus, Oberfläche:**
   - Die Seite besteht aus zwei Karten: die Regeln mit einem Umschalter „Immer“ und „Im Urlaubsmodus“, einer Tabelle, einem Knopf „Regel hinzufügen“ und einem Leerzustand wie bei den Erinnerungen, darunter der Urlaubsmodus. „Speichern“ und „Abbrechen“ stehen unten rechts und erscheinen beim Urlaubsmodus erst nach einer Änderung („Nicht gespeichert“).
   - Regeln mit „Ausblenden“ ließen sich nicht mehr speichern („expected int at rules[0].days“); behoben. Fehler, Warnungen und Hinweise stehen in einheitlichen Kästen, Fehler erst nach dem Speichern und nur bis zur nächsten Änderung.
-  - Neue Art „Alles“: die Regel trifft jedes Objekt, ohne Auswahl; bei „Immer“ warnt die Vorschau mit der Zahl der betroffenen Objekte.
+  - Neue Art „Alle Typen“ (vorgewählt): Das Suchfeld wie im Kopf findet Bereiche, Labels, Integrationen, Geräte und Entitäten gleichzeitig; beim Speichern entsteht je Art eine Regel.
   - Ist noch nichts gewählt und gibt es einen Helfer wie `input_boolean.urlaubsmodus` oder `vacation_mode`, steht er als Vorschlag im Feld und gilt nach dem Speichern. Das Feld ist breiter.
   - Eine Kalender-Entität kann ein Stichwort bekommen: Dann schaltet in deinem normalen Kalender ein Termin mit „Urlaub“ im Titel den Modus ein, auch wenn gleichzeitig andere Termine laufen. Ohne Stichwort zählt jeder Termin, wie bisher.
 - **Oberfläche, Fehlermeldungen:** Fehler stehen überall im selben Kasten mit Symbol (Seiten, die nicht laden, und Formulare). Die schmale Fehlerzeile in den Speicherleisten ist ohne Fehler unsichtbar.
@@ -48,7 +48,7 @@
 - **Exception rules and vacation mode, interface:**
   - The page is made of two cards: the rules with a switch “Always” and “In vacation mode”, a table, one “Add rule” button and an empty state like the reminders, and below it the vacation mode. Save and Cancel sit at the bottom right and, for the vacation mode, appear only after a change (“Not saved”).
   - Rules with “Hide” could no longer be saved (“expected int at rules[0].days”); fixed. Errors, warnings and hints appear in uniform boxes, errors only after saving and only until the next change.
-  - New kind “Everything”: the rule covers every object, without a selection; with “Always” the preview warns with the number of objects.
+  - New kind “All types” (preselected): the search field like the one in the header finds areas, labels, integrations, devices and entities at once; saving makes one rule per kind.
   - If nothing is chosen and a helper like `input_boolean.urlaubsmodus` or `vacation_mode` exists, it is offered as a suggestion in the field and counts once saved. The field is wider.
   - A calendar entity can get a keyword: an event with “Vacation” in its title in your normal calendar then switches the mode on, even while other events run. Without a keyword every event counts, as before.
 - **Interface, error messages:** Errors appear in the same box with an icon everywhere (pages that do not load, and forms). The narrow error line in the save bars is invisible when there is no error.

@@ -828,7 +828,10 @@ _RULE_SCHEMA = {
 
 @websocket_api.require_admin
 @websocket_api.websocket_command(
-    {vol.Required("type"): f"{DOMAIN}/exceptions_preview", vol.Required("rule"): _RULE_SCHEMA}
+    {
+        vol.Required("type"): f"{DOMAIN}/exceptions_preview",
+        vol.Required("rules"): vol.All([_RULE_SCHEMA], vol.Length(min=1, max=20)),
+    }
 )
 @websocket_api.async_response
 @with_scanner
@@ -839,15 +842,15 @@ async def websocket_exceptions_preview(
     scanner: InventoryScanner,
 ) -> None:
     """What a rule that is not saved yet would do to the findings of the last scan."""
-    rule = clean_rule(msg["rule"])
-    if rule is None:
+    rules = [clean_rule(raw) for raw in msg["rules"]]
+    if any(rule is None for rule in rules):
         connection.send_error(msg["id"], "invalid", "The rule is not valid")
         return
     snapshot = await scanner.async_get_snapshot()
     store = scanner.exceptions
     connection.send_result(
         msg["id"],
-        preview(hass, rule, snapshot, datetime.now(UTC), store.vacation(), store.rules),
+        preview(hass, rules, snapshot, datetime.now(UTC), store.vacation(), store.rules),
     )
 
 

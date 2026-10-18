@@ -126,11 +126,9 @@ def test_rule_schema_takes_the_days_of_a_hide_rule_back_as_none() -> None:
     assert Schema(_RULE_SCHEMA)(rule)["days"] is None
 
 
-def test_a_rule_for_all_covers_every_object_and_needs_no_target() -> None:
-    rule = clean_rule({"kind": "all", "action": "hide", "scope": "vacation"})
-    assert rule is not None and rule["targets"] == ["*"]
-    assert matches(rule, Traits(None, frozenset()))
-    assert not matches({**rule, "enabled": False}, Traits(None, frozenset()))
+def test_a_rule_needs_a_kind_and_a_target() -> None:
+    assert clean_rule({"kind": "all", "targets": ["*"]}) is None
+    assert clean_rule({"kind": "area", "targets": []}) is None
 
 
 def _store(states: dict[str, Any], events: list[dict[str, Any]] | None = None) -> ExceptionStore:
