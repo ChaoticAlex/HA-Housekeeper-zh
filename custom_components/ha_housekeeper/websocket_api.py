@@ -73,6 +73,7 @@ from .writelock import write_holder
 from .ws_common import (
     _scanner,
     _versioned,
+    panel_session_only,
     scanner_plans,
     with_scanner,
 )
@@ -863,6 +864,8 @@ def websocket_plan_confirm(
     scanner: InventoryScanner,
 ) -> None:
     """Pick the actions that may run and return a short-lived confirmation token."""
+    if panel_session_only(hass, connection, msg):
+        return
     try:
         result = scanner.cleanup.confirm(msg["plan_id"], msg["acknowledged"], connection.user.id)
     except CleanupError as err:
@@ -888,6 +891,8 @@ def websocket_plan_execute(
     scanner: InventoryScanner,
 ) -> None:
     """Start a confirmed plan. It runs in the background; poll ``plan_status``."""
+    if panel_session_only(hass, connection, msg):
+        return
     try:
         scanner.cleanup.start(msg["plan_id"], msg["token"], connection.user.id)
     except CleanupError as err:
@@ -950,6 +955,8 @@ async def websocket_plan_undo(
     scanner: InventoryScanner,
 ) -> None:
     """Re-enable quarantined entities that are still as Housekeeper left them."""
+    if panel_session_only(hass, connection, msg):
+        return
     try:
         result = await scanner.cleanup.undo(msg["plan_id"], msg.get("object_ids"))
     except CleanupError as err:
