@@ -30,7 +30,7 @@ class MarksMixin {
   markLine(mark) {
     const until = mark.until ? ` · ${this.t("markReviewOn", { date: this.formatDate(mark.until) })}` : "";
     const window = mark.window ? ` · ${this.windowLine(mark)}` : "";
-    return `${this.t(`mark_${mark.kind}`)}${window}${until}${mark.reason ? ` · ${mark.reason}` : ""}${mark.target ? ` → ${mark.target}` : ""}`;
+    return `${this.t(`mark_${mark.kind}`)}${window}${until}${mark.reason ? ` · ${mark.reason}` : ""}${mark.target ? ` → ${mark.target}` : ""}${mark.via === "mcp" ? ` · ${this.t("viaMcp")}` : ""}`;
   }
 
   // The form to set or change a mark: labelled fields in two rows (what and why, then when it applies and when to review).

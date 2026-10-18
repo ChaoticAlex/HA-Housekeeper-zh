@@ -72,7 +72,7 @@ class NotesMixin {
   noteRow(n) {
     const name = this.noteTargetName(n.target);
     const sub = [this.esc(this.formatDate(n.at)), name ? this.esc(this.t("noteConcerns", { name })) : "", n.note ? this.esc(n.note) : ""].filter(Boolean).join(" · ");
-    const pill = n.source === "housekeeper" ? `<span class="pill ok">${this.t("noteSrcHk")}</span>` : "";
+    const pill = n.source === "housekeeper" ? `<span class="pill ok">${this.t("noteSrcHk")}</span>` : n.source === "agent" ? `<span class="pill ok">${this.t("noteSrcAgent")}</span>` : "";
     return `<button class="row rel" data-note-edit="${this.esc(n.id)}" title="${this.esc(this.t("noteEdit"))}"><span class="tile"><ha-icon icon="mdi:notebook-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(n.title)}</strong><small>${sub}</small></span>${pill}</button>`;
   }
 
@@ -115,7 +115,7 @@ class NotesMixin {
       sorts: [{ key: "at", label: "logColWhen", dir: "desc", get: n => n.at }, { key: "title", label: "logColTitle", dir: "asc", get: n => n.title }, { key: "target", label: "logColTarget", dir: "asc", get: n => this.noteTargetName(n.target) }, { key: "source", label: "logColSource", dir: "asc", get: sourceOf }],
       text: n => [n.title, n.note, this.noteTargetName(n.target), n.target].join(" "),
       filters: [
-        { name: "source", all: this.t("logAllSources"), options: [["me", this.t("noteMine")], ["housekeeper", this.t("noteSrcHk")]] },
+        { name: "source", all: this.t("logAllSources"), options: [["me", this.t("noteMine")], ["housekeeper", this.t("noteSrcHk")], ["agent", this.t("noteSrcAgent")]] },
         { name: "object", all: this.t("logAllObjects"), options: targets.map(t => [t, this.noteTargetName(t)]) },
       ],
       filterFns: { source: (n, v) => sourceOf(n) === v, object: (n, v) => n.target === v },
@@ -124,7 +124,7 @@ class NotesMixin {
         { key: "at", label: "logColWhen", dir: "desc", cell: n => this.esc(this.formatDate(n.at)) },
         { key: "title", label: "logColTitle", dir: "asc", cell: n => `<strong>${this.esc(n.title)}</strong>${n.note ? `<small>${this.esc(n.note)}</small>` : ""}` },
         { key: "target", label: "logColTarget", dir: "asc", cell: n => this.esc(this.noteTargetName(n.target) || "–") },
-        { key: "source", label: "logColSource", dir: "asc", cell: n => `<span class="pill ${n.source === "housekeeper" ? "ok" : "mute"}">${this.t(n.source === "housekeeper" ? "noteSrcHk" : "noteMine")}</span>` },
+        { key: "source", label: "logColSource", dir: "asc", cell: n => `<span class="pill ${n.source === "housekeeper" || n.source === "agent" ? "ok" : "mute"}">${this.t(n.source === "housekeeper" ? "noteSrcHk" : n.source === "agent" ? "noteSrcAgent" : "noteMine")}</span>` },
       ],
       header: [this.t("logColWhen"), this.t("logColTitle"), this.t("logColTarget"), this.t("logColSource"), this.t("noteText")], rows: n => [n.at, n.title, this.noteTargetName(n.target), sourceOf(n), n.note || ""],
     });

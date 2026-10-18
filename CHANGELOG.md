@@ -4,6 +4,10 @@
 
 ### Geändert
 
+- **KI-Zugriff (Issue 26):**
+  - Neuer Reiter Einstellungen → KI-Zugriff, standardmäßig aus: Programme und KI-Agenten, die Home-Assistant-Dienste aufrufen können (zum Beispiel ha-mcp), lesen Housekeeper über die Dienste `status`, `findings`, `object` und `audit`.
+  - Ein zweiter Schalter „Merkliste ändern“ erlaubt `finding_decide`, `mark`, `note_set` und `undo`; es ändern sich nur Housekeepers eigene Listen, nie Home Assistant.
+  - Ein Protokoll zeigt jeden Aufruf mit Benutzer und Ergebnis, Änderungen lassen sich dort zurücknehmen. Nur Administratoren, nie Geheimnisse.
 - **Urlaubsmodus:** Eine Entität deiner Wahl (z. B. `input_boolean.urlaub`) schaltet Regeln „nur im Urlaubsmodus“ ein. Dazu gibt es Regeln für einzelne Geräte und Entitäten, eine Nachfrist nach dem Urlaub (Standard 24 Stunden) und eine Leiste, solange etwas zurückgehalten wird.
 - **Ausnahmeregeln:** Unter Einstellungen → Schutz und Ausnahmen nimmst du Objekte nach Bereich, Label, Integration oder Typ (z. B. Bereich „Lager“, alle `media_player`) aus. Die Regel blendet ihre Befunde aus oder meldet einen Ausfall erst nach einer einstellbaren Zahl Tage.
 - **In HA öffnen:** Bei Entitäten mit Gerät öffnet der Knopf die Geräteseite statt der ganzen Entitätenliste.
@@ -16,6 +20,10 @@
 
 #### Changed
 
+- **AI access (issue 26):**
+  - New tab Settings → AI access, off by default: programs and AI agents that can call Home Assistant services (for example ha-mcp) read Housekeeper through the services `status`, `findings`, `object` and `audit`.
+  - A second switch “Change the list” allows `finding_decide`, `mark`, `note_set` and `undo`; only Housekeeper's own lists change, never Home Assistant.
+  - A log shows every call with user and result, and changes can be taken back there. Administrators only, never secrets.
 - **Vacation mode:** An entity of your choice (e.g. `input_boolean.vacation`) turns on rules “only in vacation mode”. Also rules for single devices and entities, a grace period after the vacation (default 24 hours) and a bar while something is held back.
 - **Exception rules:** Under Settings → Protection and exceptions you leave out objects by area, label, integration or type (e.g. area “Storage”, all `media_player`). A rule hides their findings or reports an outage only after a number of days you set.
 - **Open in HA:** For entities with a device the button opens the device page instead of the whole entity list.

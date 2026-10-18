@@ -1070,7 +1070,7 @@ Object.assign(TEXT.en, {
 const STORE_GROUPS = [
   ["history", ["observations", "history", "events", "runs", "replies", "load", "entry_states", "stale", "config_changes", "coverage", "scan_health", "signals"]],
   ["proof", ["journal", "attest"]],
-  ["yours", ["ignored", "exceptions", "marks", "notes", "reminders", "goals", "criteria", "batteries", "policies", "notify", "protection", "refactor"]],
+  ["yours", ["ignored", "exceptions", "marks", "notes", "reminders", "goals", "criteria", "batteries", "policies", "notify", "mcp", "protection", "refactor"]],
 ];
 
 Object.assign(TEXT.de, {
@@ -1109,6 +1109,7 @@ Object.assign(TEXT.de, {
   store_batteries: "Batterien", storeText_batteries: "Die Art je Sensor und erledigte Wechsel.",
   store_policies: "Richtlinien", storeText_policies: "Die Regeln, die du eingeschaltet hast.",
   store_notify: "Benachrichtigung", storeText_notify: "Deine Einstellung zur Meldung bei neuen kaputten Referenzen.",
+  store_mcp: "KI-Zugriff", storeText_mcp: "Deine zwei Schalter für den KI-Zugriff und das Protokoll der Aufrufe (ohne Inhalte der Antworten), höchstens 2.000 Einträge und 90 Tage.",
   store_protection: "Schutzmodus", storeText_protection: "Die Begrenzung dessen, was Housekeeper ändern darf.",
   store_refactor: "Verbesserungen", storeText_refactor: "Der Stand der kleinen Verbesserungen einzelner Automationen.",
 });
@@ -1148,6 +1149,7 @@ Object.assign(TEXT.en, {
   store_batteries: "Batteries", storeText_batteries: "The type per sensor and handled replacements.",
   store_policies: "Policies", storeText_policies: "The rules you switched on.",
   store_notify: "Notification", storeText_notify: "Your setting for the message about new broken references.",
+  store_mcp: "AI access", storeText_mcp: "Your two switches for AI access and the log of calls (without the content of the answers), at most 2,000 entries and 90 days.",
   store_protection: "Protection mode", storeText_protection: "The limit on what Housekeeper may change.",
   store_refactor: "Improvements", storeText_refactor: "The state of the small improvements of single automations.",
 });
@@ -2996,7 +2998,7 @@ class FindingsMixin {
     const info = f.ignore_info;
     if (!info) return this.t("ignoredLabel");
     const until = info.until ? ` · ${this.t("decideUntil", { date: this.formatDate(info.until) })}` : "";
-    return `${this.t(`decideKind_${info.kind}`)}${until}${info.reason ? ` · ${info.reason}` : ""}`;
+    return `${this.t(`decideKind_${info.kind}`)}${until}${info.reason ? ` · ${info.reason}` : ""}${info.via === "mcp" ? ` · ${this.t("viaMcp")}` : ""}`;
   }
 
   // The small form that asks what to do with a finding: hide it, keep it on purpose, or look again later.
@@ -3305,6 +3307,7 @@ class SettingsMixin {
       ["look", "mdi:palette-outline", "setTabLook", "setHintLook", ""],
       ["protection", "mdi:shield-lock-outline", "setTabProtection", "setHintProtection", this.t(`safeMode_${m.protection || "full"}`), (m.protection || "full") === "full" ? "ok" : "warn"],
       ["scan", "mdi:radar", "setTabScan", "setHintScan", m.scan_interval_hours ? this.t("setEveryHours", { n: m.scan_interval_hours }) : this.t("setManual"), "mute"],
+      ["mcp", "mdi:robot-outline", "setTabMcp", "setHintMcp", m.mcp?.enabled ? this.t(m.mcp.write ? "mcpFilterWrite" : "mcpFilterRead") : "", m.mcp?.write ? "warn" : "ok"],
       ["info", "mdi:information-outline", "setTabInfo", "setHintInfo", ""],
     ];
   }
@@ -3500,7 +3503,7 @@ class SettingsMixin {
     const tabs = this.settingsTabs();
     const tab = tabs.some(([id]) => id === this.settingsTab) ? this.settingsTab : "look";
     const tiles = tabs.map(([id, icon, label, hint, pill, tone]) => `<button class="taskcard t-${pill ? tone || "mute" : "ac"}${id === tab ? " on" : ""}" id="hk-set-${id}" aria-pressed="${id === tab}" aria-controls="hk-setpanel" data-set-tab="${id}"><ha-icon icon="${icon}"></ha-icon><strong>${this.t(label)}</strong><span class="setpill">${pill ? `<span class="pill ${tone || "mute"}">${this.esc(pill)}</span>` : ""}</span><small>${this.t(hint)}</small></button>`).join("");
-    const body = { look: () => `<div class="grid2">${this.lookCard()}<div class="stack">${this.readabilityCard()}${this.behaviorCard()}</div></div>`, protection: () => `${this.protectionCard()}${this.excCard()}${this.hiddenCard()}`, scan: () => `${this.scanCard()}${this.notifyCard()}${this.eventsCard()}`, info: () => this.infoCard() }[tab]();
+    const body = { look: () => `<div class="grid2">${this.lookCard()}<div class="stack">${this.readabilityCard()}${this.behaviorCard()}</div></div>`, protection: () => `${this.protectionCard()}${this.excCard()}${this.hiddenCard()}`, scan: () => `${this.scanCard()}${this.notifyCard()}${this.eventsCard()}`, mcp: () => this.mcpCard(), info: () => this.infoCard() }[tab]();
     return `${this.settingsBand()}<div class="taskgrid compactgrid setgrid" role="group" aria-label="${this.esc(this.t("settings"))}">${tiles}</div><div id="hk-setpanel">${body}</div>`;
   }
 
@@ -8327,7 +8330,7 @@ class MarksMixin {
   markLine(mark) {
     const until = mark.until ? ` · ${this.t("markReviewOn", { date: this.formatDate(mark.until) })}` : "";
     const window = mark.window ? ` · ${this.windowLine(mark)}` : "";
-    return `${this.t(`mark_${mark.kind}`)}${window}${until}${mark.reason ? ` · ${mark.reason}` : ""}${mark.target ? ` → ${mark.target}` : ""}`;
+    return `${this.t(`mark_${mark.kind}`)}${window}${until}${mark.reason ? ` · ${mark.reason}` : ""}${mark.target ? ` → ${mark.target}` : ""}${mark.via === "mcp" ? ` · ${this.t("viaMcp")}` : ""}`;
   }
 
   // The form to set or change a mark: labelled fields in two rows (what and why, then when it applies and when to review).
@@ -12896,7 +12899,7 @@ class NotesMixin {
   noteRow(n) {
     const name = this.noteTargetName(n.target);
     const sub = [this.esc(this.formatDate(n.at)), name ? this.esc(this.t("noteConcerns", { name })) : "", n.note ? this.esc(n.note) : ""].filter(Boolean).join(" · ");
-    const pill = n.source === "housekeeper" ? `<span class="pill ok">${this.t("noteSrcHk")}</span>` : "";
+    const pill = n.source === "housekeeper" ? `<span class="pill ok">${this.t("noteSrcHk")}</span>` : n.source === "agent" ? `<span class="pill ok">${this.t("noteSrcAgent")}</span>` : "";
     return `<button class="row rel" data-note-edit="${this.esc(n.id)}" title="${this.esc(this.t("noteEdit"))}"><span class="tile"><ha-icon icon="mdi:notebook-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(n.title)}</strong><small>${sub}</small></span>${pill}</button>`;
   }
 
@@ -12939,7 +12942,7 @@ class NotesMixin {
       sorts: [{ key: "at", label: "logColWhen", dir: "desc", get: n => n.at }, { key: "title", label: "logColTitle", dir: "asc", get: n => n.title }, { key: "target", label: "logColTarget", dir: "asc", get: n => this.noteTargetName(n.target) }, { key: "source", label: "logColSource", dir: "asc", get: sourceOf }],
       text: n => [n.title, n.note, this.noteTargetName(n.target), n.target].join(" "),
       filters: [
-        { name: "source", all: this.t("logAllSources"), options: [["me", this.t("noteMine")], ["housekeeper", this.t("noteSrcHk")]] },
+        { name: "source", all: this.t("logAllSources"), options: [["me", this.t("noteMine")], ["housekeeper", this.t("noteSrcHk")], ["agent", this.t("noteSrcAgent")]] },
         { name: "object", all: this.t("logAllObjects"), options: targets.map(t => [t, this.noteTargetName(t)]) },
       ],
       filterFns: { source: (n, v) => sourceOf(n) === v, object: (n, v) => n.target === v },
@@ -12948,7 +12951,7 @@ class NotesMixin {
         { key: "at", label: "logColWhen", dir: "desc", cell: n => this.esc(this.formatDate(n.at)) },
         { key: "title", label: "logColTitle", dir: "asc", cell: n => `<strong>${this.esc(n.title)}</strong>${n.note ? `<small>${this.esc(n.note)}</small>` : ""}` },
         { key: "target", label: "logColTarget", dir: "asc", cell: n => this.esc(this.noteTargetName(n.target) || "–") },
-        { key: "source", label: "logColSource", dir: "asc", cell: n => `<span class="pill ${n.source === "housekeeper" ? "ok" : "mute"}">${this.t(n.source === "housekeeper" ? "noteSrcHk" : "noteMine")}</span>` },
+        { key: "source", label: "logColSource", dir: "asc", cell: n => `<span class="pill ${n.source === "housekeeper" || n.source === "agent" ? "ok" : "mute"}">${this.t(n.source === "housekeeper" ? "noteSrcHk" : n.source === "agent" ? "noteSrcAgent" : "noteMine")}</span>` },
       ],
       header: [this.t("logColWhen"), this.t("logColTitle"), this.t("logColTarget"), this.t("logColSource"), this.t("noteText")], rows: n => [n.at, n.title, this.noteTargetName(n.target), sourceOf(n), n.note || ""],
     });
@@ -13038,6 +13041,111 @@ class NotesMixin {
     if (this._noteFocus && root.querySelector("[data-note-form]")) { this._noteFocus = false; root.querySelector("[data-note-title]")?.focus(); }
     root.querySelectorAll("[data-log-suggest]").forEach(el => el.onclick = () => this.noteSuggestAccept(this.plan));
     root.querySelectorAll("[data-log-suggest-no]").forEach(el => el.onclick = () => { (this.logDismissed ||= new Set()).add(el.dataset.logSuggestNo); this.render(); });
+  }
+}
+
+// AI access (MCP): the two switches, how to connect and the log of calls; mixed into the panel in 99-register.js.
+Object.assign(TEXT.de, {
+  setTabMcp: "KI-Zugriff", setHintMcp: "Programme und KI-Agenten Housekeeper lesen lassen",
+  mcpTitle: "KI-Zugriff (MCP)",
+  mcpHint: "Ein Programm oder KI-Agent, das Home-Assistant-Dienste aufrufen kann (zum Beispiel ha-mcp), kann Housekeeper dann wie das Panel nutzen: Befunde ansehen, prüfen, ignorieren und markieren. Housekeeper startet dafür keinen Server und öffnet keinen Port.",
+  mcpEnable: "KI-Zugriff aktivieren", mcpEnableDetail: "Nur lesend: Status, Befunde, Objekte und das Protokoll. Aus, solange du es nicht einschaltest.",
+  mcpWrite: "Merkliste ändern", mcpWriteDetail: "Befunde ignorieren, behalten oder zurückstellen, Objekte markieren und Logbuch-Einträge schreiben. Es ändert sich nur Housekeepers eigene Liste, nie Home Assistant, und jede Änderung lässt sich unten zurücknehmen. Braucht „KI-Zugriff aktivieren“.",
+  mcpPrivacy: "Was das Modell zu sehen bekommt: Namen und IDs von Geräten, Entitäten und Automationen, Bereiche, Befunde und die Struktur deiner Konfiguration. Läuft das Modell bei einem Anbieter in der Cloud, gehen diese Angaben dorthin. Nie übertragen werden Passwörter, Tokens, Webhook-IDs und Zugangsdaten. Nur Administratoren können die Dienste nutzen.",
+  mcpHowTitle: "So nutzt du es",
+  mcpHow1: "Oben „KI-Zugriff aktivieren“ einschalten.",
+  mcpHow2: "Dem Programm die Dienste ha_housekeeper.* geben (Antwort mit return_response): status, findings, object, audit; mit „Merkliste ändern“ auch finding_decide, mark, note_set und undo.",
+  mcpHow3: "Fragen, zum Beispiel: „Welche Sensoren sind seit Wochen weg, und braucht sie jemand?“",
+  mcpHowNote: "Die Befehle, die das Panel benutzt, gehen bei ha-mcp zwar auch über ws_command, sind aber nicht dokumentiert, und die Gesamtliste (inventory) ist bei großen Installationen über 10 MB. Nimm die Dienste.",
+  mcpLogTitle: "Protokoll", mcpLogHint: "Jeder Aufruf mit Zeit, Benutzer, Dienst und Ergebnis, nie die Inhalte der Antworten. Viele Lesezugriffe hintereinander stehen in einer Zeile. Höchstens 2000 Einträge und 90 Tage.",
+  mcpLogCalls: "{n} Aufrufe in 24 Stunden", mcpLogEmpty: "Noch keine Aufrufe.", mcpLogLoading: "Protokoll wird geladen …",
+  mcpFilterAll: "Alle", mcpFilterRead: "Lesen", mcpFilterWrite: "Ändern", mcpFilterDenied: "Abgewiesen", mcpFilterFailed: "Fehler",
+  mcpKind_read: "Lesen", mcpKind_write: "Ändern", mcpKind_denied: "Abgewiesen",
+  mcpResult_ok: "ok", mcpResult_disabled: "KI-Zugriff war aus", mcpResult_write_disabled: "Ändern war aus", mcpResult_not_admin: "kein Administrator", mcpResult_invalid_format: "ungültige Angaben", mcpResult_error: "Fehler",
+  mcpTimes: "{n} Aufrufe bis {date}", mcpCount: "{n} Treffer", mcpUndo: "Rückgängig", mcpUndone: "zurückgenommen", mcpUndoFailed: "Nicht zurückgenommen: {reason}",
+  mcpUserSystem: "Automation oder System", mcpUserYou: "du", mcpUserOther: "anderer Benutzer",
+  mcpFn_status: "Status", mcpFn_findings: "Befunde", mcpFn_object: "Objekt", mcpFn_finding_decide: "Befund entscheiden", mcpFn_mark: "Objekt markieren", mcpFn_note_set: "Logbuch-Eintrag", mcpFn_undo: "Zurücknehmen",
+  viaMcp: "über KI-Zugriff", noteSrcAgent: "Von KI-Zugriff geschrieben",
+});
+Object.assign(TEXT.en, {
+  setTabMcp: "AI access", setHintMcp: "Let programs and AI agents read Housekeeper",
+  mcpTitle: "AI access (MCP)",
+  mcpHint: "A program or AI agent that can call Home Assistant services (for example ha-mcp) can then use Housekeeper like the panel: look at findings, check them, ignore and mark them. Housekeeper starts no server and opens no port for this.",
+  mcpEnable: "Switch on AI access", mcpEnableDetail: "Read-only: status, findings, objects and the log. Off until you switch it on.",
+  mcpWrite: "Change the list", mcpWriteDetail: "Ignore, keep or put off findings, mark objects and write logbook entries. Only Housekeeper's own list changes, never Home Assistant, and every change can be taken back below. Needs “Switch on AI access”.",
+  mcpPrivacy: "What the model gets to see: names and ids of devices, entities and automations, areas, findings and the structure of your configuration. If the model runs at a cloud provider, these details go there. Passwords, tokens, webhook ids and credentials are never sent. Only administrators can use the services.",
+  mcpHowTitle: "How to use it",
+  mcpHow1: "Switch on “Switch on AI access” above.",
+  mcpHow2: "Give the program the services ha_housekeeper.* (answer with return_response): status, findings, object, audit; with “Change the list” also finding_decide, mark, note_set and undo.",
+  mcpHow3: "Ask, for example: “Which sensors have been gone for weeks, and does anyone use them?”",
+  mcpHowNote: "The commands the panel uses also work through ws_command in ha-mcp, but they are not documented, and the full list (inventory) is over 10 MB on large installations. Use the services.",
+  mcpLogTitle: "Log", mcpLogHint: "Every call with time, user, service and result, never the content of the answers. Many reads in a row are one line. At most 2,000 entries and 90 days.",
+  mcpLogCalls: "{n} calls in 24 hours", mcpLogEmpty: "No calls yet.", mcpLogLoading: "Loading the log …",
+  mcpFilterAll: "All", mcpFilterRead: "Reads", mcpFilterWrite: "Changes", mcpFilterDenied: "Refused", mcpFilterFailed: "Errors",
+  mcpKind_read: "Read", mcpKind_write: "Change", mcpKind_denied: "Refused",
+  mcpResult_ok: "ok", mcpResult_disabled: "AI access was off", mcpResult_write_disabled: "changing was off", mcpResult_not_admin: "not an administrator", mcpResult_invalid_format: "invalid parameters", mcpResult_error: "error",
+  mcpTimes: "{n} calls until {date}", mcpCount: "{n} results", mcpUndo: "Undo", mcpUndone: "taken back", mcpUndoFailed: "Not taken back: {reason}",
+  mcpUserSystem: "Automation or system", mcpUserYou: "you", mcpUserOther: "another user",
+  mcpFn_status: "Status", mcpFn_findings: "Findings", mcpFn_object: "Object", mcpFn_finding_decide: "Decide about a finding", mcpFn_mark: "Mark an object", mcpFn_note_set: "Logbook entry", mcpFn_undo: "Undo",
+  viaMcp: "via AI access", noteSrcAgent: "Written by AI access",
+});
+
+class McpMixin {
+  async loadMcp() {
+    if (this._mcpLoading) return;
+    this._mcpLoading = true;
+    try { this.mcp = await this._hass.callWS({ type: "ha_housekeeper/mcp_audit", limit: 100 }); } catch (err) { this.failed(err); this.mcp = this.mcp || { entries: [], calls_24h: 0 }; }
+    this._mcpLoading = false;
+    this.render();
+  }
+
+  mcpSwitch(attr, on, label, detail, icon, disabled = false) {
+    return `<div class="row"><span class="tile ${on ? "ok" : "mute"}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${label}</strong><small>${detail}</small></span><input class="policyswitch" type="checkbox" role="switch" aria-label="${this.esc(label)}" ${attr} ${on ? "checked" : ""} ${disabled ? "disabled" : ""}></div>`;
+  }
+
+  mcpEntryRow(e) {
+    const me = this._hass?.user?.id;
+    const who = !e.user ? this.t("mcpUserSystem") : e.user === me ? this.t("mcpUserYou") : this.t("mcpUserOther");
+    const tone = e.result !== "ok" ? "warn" : e.kind === "write" ? "ac" : "mute";
+    const n = e.n > 1 ? this.t("mcpTimes", { n: e.n, date: this.formatDate(e.last) }) : "";
+    const params = Object.entries(e.params || {}).map(([k, v]) => `${k}=${v}`).join(", ");
+    const bits = [this.formatDate(e.at), who, n, e.count != null && e.kind === "read" ? this.t("mcpCount", { n: e.count }) : "", e.result !== "ok" ? this.t(`mcpResult_${e.result}`) : ""].filter(Boolean).join(" · ");
+    const undo = e.undone ? `<span class="pill mute">${this.t("mcpUndone")}</span>` : e.undoable ? `<button class="btn" data-mcp-undo="${this.esc(e.at)}"><ha-icon icon="mdi:undo"></ha-icon>${this.t("mcpUndo")}</button>` : "";
+    return `<div class="row"><span class="tile ${tone}"><ha-icon icon="${e.kind === "write" ? "mdi:pencil-outline" : e.kind === "denied" ? "mdi:cancel" : "mdi:eye-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(this.t(`mcpFn_${e.fn}`) || e.fn)} <span class="pill ${tone}">${this.t(`mcpKind_${e.kind}`)}</span></strong><small>${this.esc(bits)}</small>${params ? `<small>${this.esc(params)}</small>` : ""}</span>${undo}</div>`;
+  }
+
+  mcpCard() {
+    const m = this.data?.meta?.mcp || {};
+    const on = Boolean(m.enabled), write = Boolean(m.write);
+    const switches = this.mcpSwitch("data-mcp-enabled", on, this.t("mcpEnable"), this.t("mcpEnableDetail"), "mdi:robot-outline")
+      + this.mcpSwitch("data-mcp-write", write && on, this.t("mcpWrite"), this.t("mcpWriteDetail"), "mdi:pencil-outline", !on);
+    const how = `<div class="pad"><h3>${this.t("mcpHowTitle")}</h3><ol><li>${this.t("mcpHow1")}</li><li>${this.t("mcpHow2")}</li><li>${this.t("mcpHow3")}</li></ol><p class="factnote">${this.t("mcpHowNote")}</p></div>`;
+    const main = `<section class="panel"><div class="panelhead"><div><h2>${this.t("mcpTitle")}</h2><p>${this.t("mcpHint")}</p></div></div>${switches}<div class="pad"><p class="factnote">${this.t("mcpPrivacy")}</p></div>${how}</section>`;
+    if (!this.mcp) { this.loadMcp(); return `${main}<section class="panel"><div class="panelhead"><h2>${this.t("mcpLogTitle")}</h2></div><div class="pad"><p class="factnote">${this.t("mcpLogLoading")}</p></div></section>`; }
+    const filter = this.mcpFilter || "all";
+    const shown = this.mcp.entries.filter(e => filter === "all" || (filter === "failed" ? e.result !== "ok" : e.kind === filter));
+    const tabs = ["all", "read", "write", "denied", "failed"].map(f => `<button class="btn${filter === f ? " primary" : ""}" data-mcp-filter="${f}" aria-pressed="${filter === f}">${this.t(`mcpFilter${f[0].toUpperCase()}${f.slice(1)}`)}</button>`).join("");
+    const rows = shown.length ? shown.map(e => this.mcpEntryRow(e)).join("") : `<div class="pad"><p class="factnote">${this.t("mcpLogEmpty")}</p></div>`;
+    return `${main}<section class="panel"><div class="panelhead"><div><h2>${this.t("mcpLogTitle")}</h2><p>${this.t("mcpLogHint")} ${this.t("mcpLogCalls", { n: this.formatNumber(this.mcp.calls_24h || 0) })}</p></div></div><div class="pad toolbar">${tabs}</div>${rows}</section>`;
+  }
+
+  bindMcp(root) {
+    const set = async changes => {
+      try {
+        const res = await this._hass.callWS({ type: "ha_housekeeper/mcp_set", ...changes });
+        this.data.meta.mcp = { enabled: res.enabled, write: res.write };
+        this.mcp = null;
+      } catch (err) { this.failed(err); }
+      this.render();
+    };
+    root.querySelector("[data-mcp-enabled]")?.addEventListener("change", ev => set({ enabled: ev.target.checked }));
+    root.querySelector("[data-mcp-write]")?.addEventListener("change", ev => set({ write: ev.target.checked }));
+    root.querySelectorAll("[data-mcp-filter]").forEach(el => el.onclick = () => { this.mcpFilter = el.dataset.mcpFilter; this.render(); });
+    root.querySelectorAll("[data-mcp-undo]").forEach(el => el.onclick = async () => {
+      try { await this._hass.callWS({ type: "ha_housekeeper/mcp_undo", at: el.dataset.mcpUndo }); this.mcp = null; this.data = await this._hass.callWS({ type: "ha_housekeeper/inventory" }); }
+      catch (err) { this.failed(err); }
+      this.render();
+    });
   }
 }
 
@@ -16977,6 +17085,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-finding-due]")?.addEventListener("click", () => { this.findingDue = !this.findingDue; this.pages = {}; this.render(); });
     this.bindMarks(root);
     this.bindExceptions(root);
+    this.bindMcp(root);
     this.bindStale(root);
     this.bindNotes(root);
     this.bindConfirm(root);
@@ -17238,7 +17347,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, SearchPagesMixin, LayoutMixin, FlowMixin, CorrelationMixin, WatchMixin, LifecycleMixin, BlueprintsMixin, MarksMixin, ExceptionsMixin, OftenMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, EntityStateMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, ScanCoverageMixin, ScanTimingMixin, SparklineMixin, BrokenCardsMixin, SystemMixin, ComponentsMixin, IntegrationPageMixin, MonitorMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, SearchPagesMixin, LayoutMixin, FlowMixin, CorrelationMixin, WatchMixin, LifecycleMixin, BlueprintsMixin, MarksMixin, ExceptionsMixin, McpMixin, OftenMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, EntityStateMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, ScanCoverageMixin, ScanTimingMixin, SparklineMixin, BrokenCardsMixin, SystemMixin, ComponentsMixin, IntegrationPageMixin, MonitorMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }

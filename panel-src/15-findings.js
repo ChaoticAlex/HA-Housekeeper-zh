@@ -330,7 +330,7 @@ class FindingsMixin {
     const info = f.ignore_info;
     if (!info) return this.t("ignoredLabel");
     const until = info.until ? ` · ${this.t("decideUntil", { date: this.formatDate(info.until) })}` : "";
-    return `${this.t(`decideKind_${info.kind}`)}${until}${info.reason ? ` · ${info.reason}` : ""}`;
+    return `${this.t(`decideKind_${info.kind}`)}${until}${info.reason ? ` · ${info.reason}` : ""}${info.via === "mcp" ? ` · ${this.t("viaMcp")}` : ""}`;
   }
 
   // The small form that asks what to do with a finding: hide it, keep it on purpose, or look again later.

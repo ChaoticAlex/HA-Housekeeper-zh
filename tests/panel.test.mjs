@@ -5872,3 +5872,18 @@ test("the configuration check runs on request only and an invalid result stops t
   assert.deepEqual(sent, ["ha_housekeeper/check_config"]);
   assert.ok(html.includes("Stop") && html.includes("To check: Configuration") && html.includes("Invalid config for [demo] &lt;b&gt;") && !html.includes("<b>"));
 });
+
+test("the AI access tab shows the two switches and the log with an undo for a change", () => {
+  const { el, shadow } = panel("en");
+  el.view = "settings"; el.settingsTab = "mcp";
+  el.data = { ...el.data, meta: { ...el.data.meta, mcp: { enabled: true, write: false } } };
+  el.mcp = { calls_24h: 4, entries: [
+    { at: "2026-10-18T10:00:00+00:00", last: "2026-10-18T10:00:00+00:00", n: 1, user: null, fn: "finding_decide", kind: "write", params: { key: "k" }, result: "ok", count: 1, undoable: true },
+    { at: "2026-10-18T09:00:00+00:00", last: "2026-10-18T09:30:00+00:00", n: 3, user: "u1", fn: "findings", kind: "read", params: {}, result: "ok", count: 12, undoable: false },
+  ] };
+  el.render();
+  const html = shadow.innerHTML;
+  assert.ok(html.includes("data-mcp-enabled") && /data-mcp-write[^>]*>/.test(html));
+  assert.ok(html.includes('data-mcp-undo="2026-10-18T10:00:00+00:00"') && html.includes("3 calls until"));
+  assert.ok(html.includes("data-set-tab=\"mcp\""));
+});

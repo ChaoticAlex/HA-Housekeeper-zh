@@ -62,7 +62,7 @@ Housekeeper combines registry data and the live Home Assistant runtime to provid
 - **Guided cleanup**: preview, explicit confirmation, backup, verification and undo, step by step. Nothing runs on its own.
 - **Maintenance views**: batteries, reliability of integrations, recorder load and database, backup protection, automation runs and more.
 - **Home functions**: put together important functions of your home (heating, alarm, photovoltaics) from your own objects and keep an eye on them, with history, availability and sensors. A mark such as “Offline on purpose” can apply only at night or at fixed times.
-- **Changes since the last scan**, sensors, repair hints, a scan button and the service `ha_housekeeper.scan` for your own dashboards and automations, and a watch after updates: what stopped working after an update or restart.
+- **Changes since the last scan**, sensors, repair hints, a scan button and the service `ha_housekeeper.scan` for your own dashboards and automations, optional read-only AI access through services (for ha-mcp and similar, off by default), and a watch after updates: what stopped working after an update or restart.
 
 ## Quick start
 

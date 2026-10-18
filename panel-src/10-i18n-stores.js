@@ -2,7 +2,7 @@
 const STORE_GROUPS = [
   ["history", ["observations", "history", "events", "runs", "replies", "load", "entry_states", "stale", "config_changes", "coverage", "scan_health", "signals"]],
   ["proof", ["journal", "attest"]],
-  ["yours", ["ignored", "exceptions", "marks", "notes", "reminders", "goals", "criteria", "batteries", "policies", "notify", "protection", "refactor"]],
+  ["yours", ["ignored", "exceptions", "marks", "notes", "reminders", "goals", "criteria", "batteries", "policies", "notify", "mcp", "protection", "refactor"]],
 ];
 
 Object.assign(TEXT.de, {
@@ -41,6 +41,7 @@ Object.assign(TEXT.de, {
   store_batteries: "Batterien", storeText_batteries: "Die Art je Sensor und erledigte Wechsel.",
   store_policies: "Richtlinien", storeText_policies: "Die Regeln, die du eingeschaltet hast.",
   store_notify: "Benachrichtigung", storeText_notify: "Deine Einstellung zur Meldung bei neuen kaputten Referenzen.",
+  store_mcp: "KI-Zugriff", storeText_mcp: "Deine zwei Schalter für den KI-Zugriff und das Protokoll der Aufrufe (ohne Inhalte der Antworten), höchstens 2.000 Einträge und 90 Tage.",
   store_protection: "Schutzmodus", storeText_protection: "Die Begrenzung dessen, was Housekeeper ändern darf.",
   store_refactor: "Verbesserungen", storeText_refactor: "Der Stand der kleinen Verbesserungen einzelner Automationen.",
 });
@@ -80,6 +81,7 @@ Object.assign(TEXT.en, {
   store_batteries: "Batteries", storeText_batteries: "The type per sensor and handled replacements.",
   store_policies: "Policies", storeText_policies: "The rules you switched on.",
   store_notify: "Notification", storeText_notify: "Your setting for the message about new broken references.",
+  store_mcp: "AI access", storeText_mcp: "Your two switches for AI access and the log of calls (without the content of the answers), at most 2,000 entries and 90 days.",
   store_protection: "Protection mode", storeText_protection: "The limit on what Housekeeper may change.",
   store_refactor: "Improvements", storeText_refactor: "The state of the small improvements of single automations.",
 });

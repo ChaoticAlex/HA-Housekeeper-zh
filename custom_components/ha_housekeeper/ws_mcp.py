@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant, callback
 
 from .const import DOMAIN
 from .inventory import InventoryScanner
-from .mcp_api import LIMIT_MAX
+from .mcp_api import LIMIT_MAX, McpError, undo
 from .ws_common import _versioned, with_scanner
 
 
@@ -73,6 +73,30 @@ def websocket_mcp_audit(
     )
 
 
+@websocket_api.require_admin
+@websocket_api.websocket_command(
+    {vol.Required("type"): f"{DOMAIN}/mcp_undo", vol.Required("at"): str}
+)
+@callback
+@with_scanner
+def websocket_mcp_undo(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """Take back one change from the log. It works with the switches off: the change is yours."""
+    user = connection.user.id if connection.user else None
+    try:
+        undo(scanner, {"at": msg["at"]}, user)
+    except McpError as err:
+        connection.send_error(msg["id"], err.reason, f"Not taken back: {err.reason}")
+        return
+    scanner.mcp.log(user, "undo", "write", {"at": msg["at"]}, "ok", 1)
+    connection.send_result(msg["id"], {"undone": True})
+
+
 def async_register(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_mcp_set)
     websocket_api.async_register_command(hass, websocket_mcp_audit)
+    websocket_api.async_register_command(hass, websocket_mcp_undo)
