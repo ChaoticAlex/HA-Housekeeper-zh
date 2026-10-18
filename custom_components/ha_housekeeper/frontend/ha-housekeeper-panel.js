@@ -1700,6 +1700,7 @@ class StylesMixin {
       @keyframes hkflip{0%,40%{transform:rotate(0)}60%,100%{transform:rotate(180deg)}}@keyframes hkpulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--hk-amber) 55%,transparent)}70%,100%{box-shadow:0 0 0 7px transparent}}
       @keyframes hkstripes{from{background-position:0 0}to{background-position:16px 0}}@keyframes hkslide{0%{margin-left:-35%}100%{margin-left:100%}}
       .optswitch{display:flex;gap:12px;align-items:flex-start;margin:12px 0 0;padding:12px 14px;border:2px solid var(--hk-blue);border-radius:12px;background:var(--hk-soft);cursor:pointer}.optswitch .policyswitch{margin-top:2px}.optswitch span{display:grid;gap:2px}.optswitch small{color:var(--hk-muted)}
+      .logline{display:grid;grid-template-columns:max-content 96px 150px minmax(0,1fr) auto;gap:4px 14px;align-items:center;padding:7px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.logline.undone{opacity:.55}.logtime{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);white-space:nowrap}.logbadge{justify-content:center;width:auto;text-transform:uppercase;letter-spacing:.04em;font-size:calc(10.5px*var(--hk-fs,1))}.logfn{font-weight:600}.logwhat{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;min-width:0}.logwhat code{overflow-wrap:anywhere}.logwhat small,.logn{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}@media(max-width:720px){.logline{grid-template-columns:max-content minmax(0,1fr) auto}.logline .logfn{grid-column:1 / span 2}.logline .logwhat{grid-column:1 / -1}}
       ${this.themeCss()}
     </style>`;
   }
@@ -13062,7 +13063,7 @@ Object.assign(TEXT.de, {
   mcpLogTitle: "Protokoll", mcpLogHint: "Jeder Aufruf mit Zeit, Benutzer, Dienst und Ergebnis, nie die Inhalte der Antworten. Viele Lesezugriffe hintereinander stehen in einer Zeile. Höchstens 2000 Einträge und 90 Tage.",
   mcpLogCalls: "{n} Aufrufe in 24 Stunden", mcpLogEmpty: "Noch keine Aufrufe.", mcpLogLoading: "Protokoll wird geladen …",
   mcpFilterAll: "Alle", mcpFilterRead: "Lesen", mcpFilterWrite: "Ändern", mcpFilterDenied: "Abgewiesen", mcpFilterFailed: "Fehler",
-  mcpKind_read: "Lesen", mcpKind_write: "Ändern", mcpKind_denied: "Abgewiesen",
+  mcpKind_read: "Lesen", mcpKind_write: "Ändern", mcpKind_denied: "Abgewiesen", mcpBadgeError: "Fehler",
   mcpResult_ok: "ok", mcpResult_disabled: "KI-Zugriff war aus", mcpResult_write_disabled: "Ändern war aus", mcpResult_not_admin: "kein Administrator", mcpResult_invalid_format: "ungültige Angaben", mcpResult_error: "Fehler",
   mcpTimes: "{n} Aufrufe bis {date}", mcpCount: "{n} Treffer", mcpUndo: "Rückgängig", mcpUndone: "zurückgenommen", mcpUndoFailed: "Nicht zurückgenommen: {reason}",
   mcpUserSystem: "Automation oder System", mcpUserYou: "du", mcpUserOther: "anderer Benutzer",
@@ -13084,7 +13085,7 @@ Object.assign(TEXT.en, {
   mcpLogTitle: "Log", mcpLogHint: "Every call with time, user, service and result, never the content of the answers. Many reads in a row are one line. At most 2,000 entries and 90 days.",
   mcpLogCalls: "{n} calls in 24 hours", mcpLogEmpty: "No calls yet.", mcpLogLoading: "Loading the log …",
   mcpFilterAll: "All", mcpFilterRead: "Reads", mcpFilterWrite: "Changes", mcpFilterDenied: "Refused", mcpFilterFailed: "Errors",
-  mcpKind_read: "Read", mcpKind_write: "Change", mcpKind_denied: "Refused",
+  mcpKind_read: "Read", mcpKind_write: "Change", mcpKind_denied: "Refused", mcpBadgeError: "Error",
   mcpResult_ok: "ok", mcpResult_disabled: "AI access was off", mcpResult_write_disabled: "changing was off", mcpResult_not_admin: "not an administrator", mcpResult_invalid_format: "invalid parameters", mcpResult_error: "error",
   mcpTimes: "{n} calls until {date}", mcpCount: "{n} results", mcpUndo: "Undo", mcpUndone: "taken back", mcpUndoFailed: "Not taken back: {reason}",
   mcpUserSystem: "Automation or system", mcpUserYou: "you", mcpUserOther: "another user",
@@ -13105,15 +13106,26 @@ class McpMixin {
     return `<div class="row"><span class="tile ${on ? "ok" : "mute"}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${label}</strong><small>${detail}</small></span><input class="policyswitch" type="checkbox" role="switch" aria-label="${this.esc(label)}" ${attr} ${on ? "checked" : ""} ${disabled ? "disabled" : ""}></div>`;
   }
 
-  mcpEntryRow(e) {
+  mcpTime(value) {
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return String(value ?? "");
+    const opts = { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" };
+    if (d.getFullYear() !== new Date().getFullYear()) opts.year = "numeric";
+    try { return new Intl.DateTimeFormat(this.lang, opts).format(d); } catch (_) { return String(value); }
+  }
+
+  mcpEntryRow(e, multi = false) {
     const me = this._hass?.user?.id;
-    const who = !e.user ? this.t("mcpUserSystem") : e.user === me ? this.t("mcpUserYou") : this.t("mcpUserOther");
-    const tone = e.result !== "ok" ? "warn" : e.kind === "write" ? "ac" : "mute";
-    const n = e.n > 1 ? this.t("mcpTimes", { n: e.n, date: this.formatDate(e.last) }) : "";
-    const params = Object.entries(e.params || {}).map(([k, v]) => `${k}=${v}`).join(", ");
-    const bits = [this.formatDate(e.at), who, n, e.count != null && e.kind === "read" ? this.t("mcpCount", { n: e.count }) : "", e.result !== "ok" ? this.t(`mcpResult_${e.result}`) : ""].filter(Boolean).join(" · ");
+    const failed = e.kind !== "denied" && e.result !== "ok";
+    const tone = e.kind === "denied" ? "warn" : failed ? "red" : e.kind === "write" ? "" : "mute";
+    const badge = failed ? this.t("mcpBadgeError") : this.t(`mcpKind_${e.kind}`);
+    const p = e.params || {};
+    const target = [p.object_id, p.key].find(v => typeof v === "string" && v) || "";
+    const notes = [e.result !== "ok" ? this.t(`mcpResult_${e.result}`) : "", e.count != null && e.kind === "read" ? this.t("mcpCount", { n: e.count }) : ""].filter(Boolean).join(" · ");
+    const who = !multi ? "" : !e.user ? this.t("mcpUserSystem") : e.user === me ? this.t("mcpUserYou") : this.t("mcpUserOther");
+    const times = e.n > 1 ? `<span class="logn" title="${this.esc(this.t("mcpTimes", { n: e.n, date: this.formatDate(e.last) }))}">×${e.n}</span>` : "";
     const undo = e.undone ? `<span class="pill mute">${this.t("mcpUndone")}</span>` : e.undoable ? `<button class="btn" data-mcp-undo="${this.esc(e.at)}"><ha-icon icon="mdi:undo"></ha-icon>${this.t("mcpUndo")}</button>` : "";
-    return `<div class="row"><span class="tile ${tone}"><ha-icon icon="${e.kind === "write" ? "mdi:pencil-outline" : e.kind === "denied" ? "mdi:cancel" : "mdi:eye-outline"}"></ha-icon></span><span class="row-text"><strong>${this.esc(this.t(`mcpFn_${e.fn}`) || e.fn)} <span class="pill ${tone}">${this.t(`mcpKind_${e.kind}`)}</span></strong><small>${this.esc(bits)}</small>${params ? `<small>${this.esc(params)}</small>` : ""}</span>${undo}</div>`;
+    return `<div class="logline${e.undone ? " undone" : ""}"><time class="logtime" datetime="${this.esc(e.at)}">${this.esc(this.mcpTime(e.at))}</time><span class="pill logbadge ${tone}">${badge}</span><span class="logfn">${this.esc(this.t(`mcpFn_${e.fn}`) || e.fn)}</span><span class="logwhat">${target ? `<code>${this.esc(target)}</code>` : ""}${notes ? `<small>${this.esc(notes)}</small>` : ""}${times}${who ? `<small>${this.esc(who)}</small>` : ""}</span>${undo}</div>`;
   }
 
   mcpCard() {
@@ -13127,7 +13139,7 @@ class McpMixin {
     const filter = this.mcpFilter || "all";
     const shown = this.mcp.entries.filter(e => filter === "all" || (filter === "failed" ? e.result !== "ok" : e.kind === filter));
     const tabs = ["all", "read", "write", "denied", "failed"].map(f => `<button class="btn${filter === f ? " primary" : ""}" data-mcp-filter="${f}" aria-pressed="${filter === f}">${this.t(`mcpFilter${f[0].toUpperCase()}${f.slice(1)}`)}</button>`).join("");
-    const rows = shown.length ? shown.map(e => this.mcpEntryRow(e)).join("") : `<div class="pad"><p class="factnote">${this.t("mcpLogEmpty")}</p></div>`;
+    const rows = shown.length ? shown.map(e => this.mcpEntryRow(e, new Set(shown.map(x => x.user)).size > 1)).join("") : `<div class="pad"><p class="factnote">${this.t("mcpLogEmpty")}</p></div>`;
     return `${main}<section class="panel"><div class="panelhead"><div><h2>${this.t("mcpLogTitle")}</h2><p>${this.t("mcpLogHint")} ${this.t("mcpLogCalls", { n: this.formatNumber(this.mcp.calls_24h || 0) })}</p></div></div><div class="pad toolbar">${tabs}</div>${rows}</section>`;
   }
 

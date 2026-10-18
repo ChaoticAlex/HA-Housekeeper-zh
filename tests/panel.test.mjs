@@ -5886,4 +5886,5 @@ test("the AI access tab shows the two switches and the log with an undo for a ch
   assert.ok(html.includes("data-mcp-enabled") && /data-mcp-write[^>]*>/.test(html));
   assert.ok(html.includes('data-mcp-undo="2026-10-18T10:00:00+00:00"') && html.includes("3 calls until"));
   assert.ok(html.includes("data-set-tab=\"mcp\""));
+  assert.ok(html.includes('class="logline"') && html.includes("×3") && html.includes("logbadge"));
 });
