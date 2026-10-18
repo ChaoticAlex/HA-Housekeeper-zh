@@ -38,7 +38,9 @@ def async_register_services(hass: HomeAssistant) -> None:
                 return await run(hass, scanner, name, dict(call.data), call.context.user_id)
             except McpError as err:
                 raise ServiceValidationError(
-                    translation_domain=DOMAIN, translation_key=err.reason
+                    translation_domain=DOMAIN,
+                    translation_key=err.reason,
+                    translation_placeholders={"detail": err.detail},
                 ) from err
 
         return _call

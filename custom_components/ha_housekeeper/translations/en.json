@@ -311,10 +311,10 @@
       "message": "There is no scan yet. Start one with ha_housekeeper.scan."
     },
     "invalid_format": {
-      "message": "The parameters are not valid."
+      "message": "The parameters are not valid: {detail}."
     },
     "not_found": {
-      "message": "The object is not in the last scan."
+      "message": "Nothing found for this key or id. Take keys and ids from \"findings\" or \"object\"; take \"at\" for \"undo\" from \"audit\"."
     },
     "reason_required": {
       "message": "Keeping a finding needs a reason."
@@ -323,7 +323,7 @@
       "message": "Putting a finding off needs a number of days."
     },
     "finding_not_found": {
-      "message": "The finding is not in the latest scan."
+      "message": "The finding is not in the latest scan. Take the key from \"findings\"."
     },
     "kind_not_allowed": {
       "message": "This kind of mark is not allowed for this object."

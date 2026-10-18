@@ -74,8 +74,12 @@ async def test_nothing_without_the_switch_and_every_call_is_logged(hass: HomeAss
     with pytest.raises(mcp_api.McpError) as bad:
         await mcp_api.run(hass, scanner, "findings", {"limit": 500}, None)
     assert bad.value.reason == "invalid_format"
+    assert bad.value.detail.startswith("limit:")
     for _ in range(3):
-        await mcp_api.run(hass, scanner, "status", {}, None)
+        first = await mcp_api.run(hass, scanner, "status", {}, None)
+    assert "findings" in first["guide"]
+    listed = await mcp_api.run(hass, scanner, "findings", {}, None)
+    assert "ha_housekeeper.object" in listed["next_steps"]["object"]
     log = await mcp_api.run(hass, scanner, "audit", {}, None)
     assert [(e["fn"], e["kind"], e["result"], e["n"]) for e in log["entries"]] == [
         ("status", "read", "ok", 3),

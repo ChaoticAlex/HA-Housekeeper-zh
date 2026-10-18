@@ -311,10 +311,10 @@
       "message": "Es gibt noch keinen Scan. Starte einen mit ha_housekeeper.scan."
     },
     "invalid_format": {
-      "message": "Die Parameter sind nicht gültig."
+      "message": "Die Parameter sind nicht gültig: {detail}."
     },
     "not_found": {
-      "message": "Das Objekt ist nicht im letzten Scan."
+      "message": "Dazu gibt es nichts. Schlüssel und IDs aus „findings“ oder „object“ nehmen, „at“ für „undo“ aus „audit“."
     },
     "reason_required": {
       "message": "Ein Befund zu behalten braucht einen Grund."
@@ -323,7 +323,7 @@
       "message": "Einen Befund zurückzustellen braucht eine Zahl von Tagen."
     },
     "finding_not_found": {
-      "message": "Der Befund ist nicht im letzten Scan."
+      "message": "Der Befund ist nicht im letzten Scan. Den Schlüssel aus „findings“ nehmen."
     },
     "kind_not_allowed": {
       "message": "Diese Art von Marke ist für dieses Objekt nicht erlaubt."
