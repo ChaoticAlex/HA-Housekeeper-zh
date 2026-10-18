@@ -3853,7 +3853,7 @@ test("the protection mode shows in the safety line and the settings, and is set 
   await el.setProtection("full");
   assert.equal(JSON.stringify(calls.find(c => c.type === "ha_housekeeper/protection_set")), JSON.stringify({ type: "ha_housekeeper/protection_set", mode: "full" }));
   assert.equal(el.data.meta.protection, "full");
-  assert.ok(el.safetyBar().includes("Protection mode: full"));
+  assert.ok(el.safetyBar().includes("Protection mode: everything allowed"));
   void shadow;
 });
 

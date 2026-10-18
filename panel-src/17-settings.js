@@ -16,7 +16,7 @@ class SettingsMixin {
     const m = this.data?.meta || {};
     return [
       ["look", "mdi:palette-outline", "setTabLook", "setHintLook", ""],
-      ["protection", "mdi:shield-lock-outline", "setTabProtection", "setHintProtection", this.t(`safeMode_${m.protection || "full"}`), (m.protection || "full") === "full" ? "ok" : "warn"],
+      ["protection", "mdi:shield-lock-outline", "setTabProtection", "setHintProtection", this.t(`modeBadge_${m.protection || "full"}`), (m.protection || "full") === "full" ? "ok" : "warn"],
       ["scan", "mdi:radar", "setTabScan", "setHintScan", m.scan_interval_hours ? this.t("setEveryHours", { n: m.scan_interval_hours }) : this.t("setManual"), "mute"],
       ["mcp", "mdi:robot-outline", "setTabMcp", "setHintMcp", m.mcp?.enabled ? this.t(m.mcp.write ? "mcpFilterWrite" : "mcpFilterRead") : "", m.mcp?.write ? "warn" : "ok"],
       ["info", "mdi:information-outline", "setTabInfo", "setHintInfo", ""],

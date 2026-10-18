@@ -3309,7 +3309,7 @@ class SettingsMixin {
     const m = this.data?.meta || {};
     return [
       ["look", "mdi:palette-outline", "setTabLook", "setHintLook", ""],
-      ["protection", "mdi:shield-lock-outline", "setTabProtection", "setHintProtection", this.t(`safeMode_${m.protection || "full"}`), (m.protection || "full") === "full" ? "ok" : "warn"],
+      ["protection", "mdi:shield-lock-outline", "setTabProtection", "setHintProtection", this.t(`modeBadge_${m.protection || "full"}`), (m.protection || "full") === "full" ? "ok" : "warn"],
       ["scan", "mdi:radar", "setTabScan", "setHintScan", m.scan_interval_hours ? this.t("setEveryHours", { n: m.scan_interval_hours }) : this.t("setManual"), "mute"],
       ["mcp", "mdi:robot-outline", "setTabMcp", "setHintMcp", m.mcp?.enabled ? this.t(m.mcp.write ? "mcpFilterWrite" : "mcpFilterRead") : "", m.mcp?.write ? "warn" : "ok"],
       ["info", "mdi:information-outline", "setTabInfo", "setHintInfo", ""],
@@ -9894,7 +9894,7 @@ class SafetyMixin {
     const mode = this.data?.meta?.protection || "full";
     const icons = { read_only: "mdi:eye-outline", quarantine: "mdi:archive-lock-outline", confirmed: "mdi:shield-check-outline", full: "mdi:shield-lock-outline" };
     const options = ["read_only", "quarantine", "confirmed", "full"].map(m => `<label class="modeopt${m === mode ? " on" : ""}"><input type="radio" name="hk-protection" value="${m}" data-protection ${m === mode ? "checked" : ""}><span class="tile ${m === mode ? (m === "full" ? "ok" : "warn") : "mute"}"><ha-icon icon="${icons[m]}"></ha-icon></span><span class="row-text"><strong>${this.t(`mode_${m}`)}</strong><small>${this.t(`modeText_${m}`)}</small></span></label>`).join("");
-    return `<section class="panel modepanel"><div class="panelhead"><div><h2>${this.t("modeTitle")}</h2><p>${this.t("modeHint")}</p></div><span class="pill ${mode === "full" ? "ok" : "warn"}">${this.t(`safeMode_${mode}`)}</span></div>
+    return `<section class="panel modepanel"><div class="panelhead"><div><h2>${this.t("modeTitle")}</h2><p>${this.t("modeHint")}</p></div><span class="pill ${mode === "full" ? "ok" : "warn"}">${this.t(`modeBadge_${mode}`)}</span></div>
       <div class="modeopts" role="radiogroup" aria-label="${this.esc(this.t("modeLabel"))}">${options}</div></section>`;
   }
 
@@ -9933,7 +9933,8 @@ Object.assign(TEXT.en, {
   causeCounts: "{parts} affected", causeN_entity: "{n} entities", causeN_automation: "{n} automations", causeN_script: "{n} scripts", causeN_dashboard: "{n} dashboards",
 });
 Object.assign(TEXT.de, {
-  safeMode_full: "Schutzmodus: voll", safeMode_read_only: "Schutzmodus: nur lesen", safeMode_quarantine: "Schutzmodus: nur Quarantäne", safeMode_confirmed: "Schutzmodus: ohne unumkehrbare Löschungen",
+  modeBadge_full: "Alles erlaubt", modeBadge_read_only: "Nur lesen", modeBadge_quarantine: "Nur Quarantäne", modeBadge_confirmed: "Ohne endgültiges Löschen",
+  safeMode_full: "Schutzmodus: alles erlaubt", safeMode_read_only: "Schutzmodus: nur lesen", safeMode_quarantine: "Schutzmodus: nur Quarantäne", safeMode_confirmed: "Schutzmodus: ohne endgültiges Löschen",
   modeTitle: "Schutzmodus", modeHint: "Legt auf dem Server fest, was Pläne ändern dürfen. Das gilt für Bestätigen, Starten und Rückgängig, nicht nur für Knöpfe im Panel. Pläne anlegen und alle Ansichten bleiben immer erlaubt.", modeLabel: "Was Housekeeper ändern darf",
   mode_read_only: "1 · Nur lesen", mode_quarantine: "2 · Quarantäne erlaubt", mode_confirmed: "3 · Bestätigte Änderungen mit Backup", mode_full: "4 · Voller Wartungsmodus",
   modeText_read_only: "Nichts wird geändert, auch kein Rückgängig.", modeText_quarantine: "Nur Deaktivieren (und dessen Rückgängig) ist erlaubt.", modeText_confirmed: "Alles mit Einzelbestätigung und Backup außer unumkehrbarem Löschen von Recorder-Daten.", modeText_full: "Alles, wie bisher.",
@@ -9945,7 +9946,8 @@ Object.assign(TEXT.de, {
   event_critical_finding: "neuer Befund mit hoher Auswirkung", event_backup_overdue: "Backup überfällig", event_quarantine_expired: "Quarantäne abgelaufen", event_followup_regression: "Nachkontrolle: Rückfall", event_integration_down: "Integration nicht geladen",
 });
 Object.assign(TEXT.en, {
-  safeMode_full: "Protection mode: full", safeMode_read_only: "Protection mode: read only", safeMode_quarantine: "Protection mode: quarantine only", safeMode_confirmed: "Protection mode: no irreversible deletions",
+  modeBadge_full: "Everything allowed", modeBadge_read_only: "Read only", modeBadge_quarantine: "Quarantine only", modeBadge_confirmed: "No irreversible deletions",
+  safeMode_full: "Protection mode: everything allowed", safeMode_read_only: "Protection mode: read only", safeMode_quarantine: "Protection mode: quarantine only", safeMode_confirmed: "Protection mode: no irreversible deletions",
   modeTitle: "Protection mode", modeHint: "Sets on the server what plans may change. It holds for confirming, starting and undoing, not only for buttons in the panel. Making plans and every view stay allowed.", modeLabel: "What Housekeeper may change",
   mode_read_only: "1 · Read only", mode_quarantine: "2 · Quarantine allowed", mode_confirmed: "3 · Confirmed changes with backup", mode_full: "4 · Full maintenance",
   modeText_read_only: "Nothing is changed, not even an undo.", modeText_quarantine: "Only disabling (and undoing it) is allowed.", modeText_confirmed: "Everything with one-by-one confirmation and backup except irreversible deletion of recorder data.", modeText_full: "Everything, as before.",
