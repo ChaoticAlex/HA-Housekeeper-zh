@@ -4,6 +4,7 @@
 
 ### Geändert
 
+- **HACS und Marketplace:** Ab Home Assistant 2026.11 ist HACS als „Marketplace“ eingebaut. Housekeeper liest installierte Integrationen, Updates, archivierte und entfernte Repositories aus beiden.
 - **KI-Zugriff (Issue 26):**
   - Neuer Reiter Einstellungen → KI-Zugriff, standardmäßig aus: Programme und KI-Agenten, die Home-Assistant-Dienste aufrufen können (zum Beispiel ha-mcp), lesen Housekeeper über die Dienste `status`, `findings`, `object` und `audit`.
   - Ein zweiter Schalter „Merkliste ändern“ erlaubt `finding_decide`, `mark`, `note_set` und `undo`; es ändern sich nur Housekeepers eigene Listen, nie Home Assistant.
@@ -24,6 +25,7 @@
 
 #### Changed
 
+- **HACS and Marketplace:** From Home Assistant 2026.11 HACS is built in as “Marketplace”. Housekeeper reads installed integrations, updates, archived and removed repositories from both.
 - **AI access (issue 26):**
   - New tab Settings → AI access, off by default: programs and AI agents that can call Home Assistant services (for example ha-mcp) read Housekeeper through the services `status`, `findings`, `object` and `audit`.
   - A second switch “Change the list” allows `finding_decide`, `mark`, `note_set` and `undo`; only Housekeeper's own lists change, never Home Assistant.
