@@ -1448,6 +1448,7 @@ class StylesMixin {
       .shell{min-height:100vh;display:block}
       .stickyhead{position:sticky;top:0;z-index:30}.modeopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;padding:12px 16px 16px}.modeopt{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-surface);cursor:pointer}.modeopt.on{border-color:var(--hk-blue);box-shadow:0 0 0 1px var(--hk-blue)}.modeopt input{position:absolute;opacity:0;pointer-events:none}.modeopt:focus-within{outline:2px solid var(--hk-blue);outline-offset:2px}.modepanel{border-left:4px solid var(--hk-blue)}.bulkform{padding:0 14px 10px}.safebar{display:flex;gap:6px 16px;flex-wrap:wrap;align-items:center;padding:6px clamp(16px,2.4vw,32px);border-bottom:1px solid var(--hk-border);background:var(--hk-surface);font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}
       .vacbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 16px;background:var(--hk-soft,#e6f0f8);border-bottom:1px solid var(--hk-border);border-left:4px solid #2f6fa3;font-size:14px}.vacbar b{color:#2f6fa3}.vacbar .sp{flex:1}.vacbar a{color:#2f6fa3;font-weight:600;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}.vacbar.warn{border-left-color:var(--hk-amber,#b57a0c)}.vacbar.warn b{color:var(--hk-amber,#b57a0c)}.vacbar.after{border-left-color:var(--hk-accent,#1d4a3f)}.vacbar.after b{color:var(--hk-accent,#1d4a3f)}
+      .exclist{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;max-height:16em;overflow:auto;padding:2px}.excopt{display:flex;align-items:center;gap:10px;min-height:36px;padding:0 10px;border:1px solid var(--hk-border);border-radius:8px;font-weight:400;font-size:calc(13px*var(--hk-fs,1));color:var(--hk-text);cursor:pointer;overflow:hidden}.excopt span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.markform .excopt input{flex:0 0 auto;width:16px;min-width:0;max-width:none;min-height:0;margin:0;padding:0}.excopt.on{background:var(--hk-soft);border-color:var(--hk-blue-text)}.excopt:hover{background:var(--hk-soft)}
       .safeitem{display:inline-flex;align-items:center;gap:6px;padding:2px 0;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
       .safeitem:hover{color:var(--hk-text)}.safeitem .dot{width:8px;height:8px;border-radius:50%;background:var(--hk-muted)}.safeitem .dot.ok{background:var(--hk-green,#2e7d32)}.safeitem .dot.warn{background:var(--hk-amber,#b26a00)}.safeitem .dot.red{background:var(--hk-red,#c62828)}
       @media(max-width:860px){.safebar{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;padding:6px 12px}}
@@ -11999,8 +12000,8 @@ class PlanWizardMixin {
 
 // Exception rules: objects in an area or with a label are left out of the findings; mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
-  excTitle: "Ausnahmeregeln", excHint: "Objekte in einem Bereich, mit einem Label, von einer Integration oder eines Typs (Domain) meldet Housekeeper nicht. Die Regeln gelten für Geräte und ihre Entitäten und nur in Housekeeper; Home Assistant bleibt unverändert. Das Label housekeeper_ignore wirkt zusätzlich fest.",
-  excNone: "Noch keine Regeln.", excAdd: "Regel hinzufügen", excEdit: "Ändern", excDelete: "Löschen", excLoading: "Regeln werden geladen …",
+  excTitle: "Ausnahmeregeln", excHint: "Housekeeper meldet Objekte nicht, auf die eine Regel passt: nach Bereich, Label, Integration, Typ (Domain), Gerät oder Entität. Die Regeln gelten nur in Housekeeper; Home Assistant bleibt unverändert. Das Label housekeeper_ignore wirkt zusätzlich fest.",
+  excNone: "Noch keine Regeln.", excFormNew: "Neue Regel", excFormEdit: "Regel ändern", excAdd: "Regel hinzufügen", excEdit: "Ändern", excDelete: "Löschen", excLoading: "Regeln werden geladen …",
   excKind: "Art", excKind_area: "Bereich", excKind_label: "Label", excKind_integration: "Integration", excKind_domain: "Domain (Typ)", excTargets: "Auswahl", excNoTargets: "In Home Assistant gibt es dafür noch nichts zur Auswahl.",
   excAction: "Aktion", excAction_hide: "Ausblenden", excAction_delay: "Erst melden nach", excDays: "Tage nicht verfügbar", excNote: "Notiz (optional)",
   excInherit: "Trifft Geräte und Entitäten. Eine Entität ohne eigenen Bereich erbt den Bereich ihres Geräts, ein Label am Gerät gilt auch für seine Entitäten. „Integration“ und „Domain“ treffen alle Entitäten dieser Integration oder dieses Typs (etwa media_player); eine breite Domain wie sensor deckt auch echte Störungen zu, die Vorschau zeigt die Treffer vorher.",
@@ -12028,8 +12029,8 @@ Object.assign(TEXT.de, {
   vacRuleAfter: "Urlaub beendet, zurückgehalten bis {date}", vacRuleActive: "Urlaubsmodus aktiv",
 });
 Object.assign(TEXT.en, {
-  excTitle: "Exception rules", excHint: "Housekeeper does not report objects in an area, with a label, from an integration or of a type (domain). The rules cover devices and their entities and apply only in Housekeeper; Home Assistant stays unchanged. The label housekeeper_ignore keeps working on top.",
-  excNone: "No rules yet.", excAdd: "Add rule", excEdit: "Change", excDelete: "Delete", excLoading: "Loading rules …",
+  excTitle: "Exception rules", excHint: "Housekeeper does not report objects that a rule matches: by area, label, integration, type (domain), device or entity. The rules apply only in Housekeeper; Home Assistant stays unchanged. The label housekeeper_ignore keeps working on top.",
+  excNone: "No rules yet.", excFormNew: "New rule", excFormEdit: "Change rule", excAdd: "Add rule", excEdit: "Change", excDelete: "Delete", excLoading: "Loading rules …",
   excKind: "Kind", excKind_area: "Area", excKind_label: "Label", excKind_integration: "Integration", excKind_domain: "Domain (type)", excTargets: "Selection", excNoTargets: "Home Assistant has nothing to choose from yet.",
   excAction: "Action", excAction_hide: "Hide", excAction_delay: "Report only after", excDays: "days not available", excNote: "Note (optional)",
   excInherit: "Covers devices and entities. An entity without an area of its own takes the area of its device, and a label on the device counts for its entities. “Integration” and “Domain” cover all entities of that integration or type (such as media_player); a broad domain like sensor also covers real faults, the preview shows the matches first.",
@@ -12150,15 +12151,16 @@ class ExceptionsMixin {
     const list = [...picked, ...shown.filter(x => !f.targets.includes(x.id))].slice(0, Math.max(100, picked.length));
     const more = shown.length + picked.length > list.length ? `<small class="factnote">${this.t("excMore")}</small>` : "";
     const search = all.length > 12 ? `<input data-exc-search placeholder="${this.esc(this.t("excSearch"))}" autocomplete="off" value="${this.esc(f.search || "")}">` : "";
-    const boxes = list.map(x => `<label class="inline"><input type="checkbox" data-exc-target="${this.esc(x.id)}" ${f.targets.includes(x.id) ? "checked" : ""}> ${this.esc(x.name)}</label>`).join("") || `<small class="factnote">${this.t("excNoTargets")}</small>`;
+    const boxes = list.map(x => `<label class="excopt${f.targets.includes(x.id) ? " on" : ""}"><input type="checkbox" data-exc-target="${this.esc(x.id)}" ${f.targets.includes(x.id) ? "checked" : ""}><span>${this.esc(x.name)}</span></label>`).join("") || `<small class="factnote">${this.t("excNoTargets")}</small>`;
     const kinds = ["area", "label", "integration", "domain", "device", "entity"].map(k => `<option value="${k}" ${f.kind === k ? "selected" : ""}>${this.t(`excKind_${k}`)}</option>`).join("");
     const pv = f.preview;
     const preview = pv ? `<div class="factnote" role="status"><strong>${this.t("excPreview")}:</strong> ${f.action === "delay" ? this.t("excPreviewDelay", { hold: pv.hold, due: pv.due }) : this.t("excPreviewHide", { objects: pv.objects, n: pv.hide })}
         ${pv.important?.length ? `<br><span class="error">${this.t("excImportant", { names: this.esc(pv.important.map(x => x.name).join(", ")) })}</span>` : ""}</div>` : "";
     return `<form class="pad markform" data-exc-form>
+      <strong>${this.t(f.id ? "excFormEdit" : "excFormNew")}</strong>
       <div class="mrow"><label class="mfield"><span>${this.t("excKind")}</span><select data-exc-kind>${kinds}</select></label>
         <label class="mfield grow"><span>${this.t("excNote")}</span><input data-exc-note maxlength="200" autocomplete="off" value="${this.esc(f.note)}"></label></div>
-      <div class="mfield"><span>${this.t("excTargets")}</span>${search}<div class="mrow" style="max-height:11em;overflow:auto">${boxes}</div>${more}</div>
+      <div class="mfield"><span>${this.t("excTargets")}</span>${search}<div class="exclist">${boxes}</div>${more}</div>
       <small class="factnote">${this.t("excInherit")}</small>
       <div class="mrow"><label class="mfield"><span>${this.t("excScope")}</span><select data-exc-scope><option value="always" ${f.scope === "always" ? "selected" : ""}>${this.t("excScope_always")}</option><option value="vacation" ${f.scope === "vacation" ? "selected" : ""}>${this.t("excScope_vacation")}</option></select></label></div>
       ${f.scope === "vacation" ? `<small class="factnote">${this.t("excScopeHint")}</small>` : ""}
