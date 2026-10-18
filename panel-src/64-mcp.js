@@ -17,6 +17,7 @@ Object.assign(TEXT.de, {
   mcpFilterAll: "Alle", mcpFilterRead: "Lesen", mcpFilterWrite: "Ändern", mcpFilterDenied: "Abgewiesen", mcpFilterFailed: "Fehler",
   mcpKind_read: "Lesen", mcpKind_write: "Ändern", mcpKind_denied: "Abgewiesen", mcpBadgeError: "Fehler",
   mcpResult_ok: "ok", mcpResult_disabled: "KI-Zugriff war aus", mcpResult_write_disabled: "Ändern war aus", mcpResult_not_admin: "kein Administrator", mcpResult_invalid_format: "Angaben unvollständig oder falsch", mcpResult_rate_limited: "zu viele Änderungen", mcpResult_too_many_calls: "zu viele Aufrufe", mcpResult_reason_required: "Grund fehlt", mcpResult_error: "Fehler",
+  mcpUndoAll: "Zurücknehmen", mcpUndoAllHint: "Änderungen durch KI-Zugriff", mcpUndoHour: "der letzten Stunde", mcpUndoDay: "der letzten 24 Stunden", mcpUndoEverything: "alle", mcpUndoneCount: "{n} Änderungen zurückgenommen", mcpFn_undo_all: "Alles zurücknehmen",
   mcpTimes: "{n} Aufrufe bis {date}", mcpCount: "{n} Treffer", mcpUndo: "Rückgängig", mcpUndone: "zurückgenommen", mcpUndoFailed: "Nicht zurückgenommen: {reason}",
   mcpUserSystem: "Automation oder System", mcpUserYou: "du", mcpUserOther: "anderer Benutzer",
   mcpFn_status: "Status", mcpFn_findings: "Befunde", mcpFn_object: "Objekt", mcpFn_finding_decide: "Befund entscheiden", mcpFn_mark: "Objekt markieren", mcpFn_note_set: "Logbuch-Eintrag", mcpFn_undo: "Zurücknehmen",
@@ -40,6 +41,7 @@ Object.assign(TEXT.en, {
   mcpFilterAll: "All", mcpFilterRead: "Reads", mcpFilterWrite: "Changes", mcpFilterDenied: "Refused", mcpFilterFailed: "Errors",
   mcpKind_read: "Read", mcpKind_write: "Change", mcpKind_denied: "Refused", mcpBadgeError: "Error",
   mcpResult_ok: "ok", mcpResult_disabled: "AI access was off", mcpResult_write_disabled: "changing was off", mcpResult_not_admin: "not an administrator", mcpResult_invalid_format: "invalid parameters", mcpResult_rate_limited: "too many changes", mcpResult_too_many_calls: "too many calls", mcpResult_reason_required: "reason missing", mcpResult_error: "error",
+  mcpUndoAll: "Take back", mcpUndoAllHint: "Changes through AI access", mcpUndoHour: "of the last hour", mcpUndoDay: "of the last 24 hours", mcpUndoEverything: "all", mcpUndoneCount: "{n} changes taken back", mcpFn_undo_all: "Take everything back",
   mcpTimes: "{n} calls until {date}", mcpCount: "{n} results", mcpUndo: "Undo", mcpUndone: "taken back", mcpUndoFailed: "Not taken back: {reason}",
   mcpUserSystem: "Automation or system", mcpUserYou: "you", mcpUserOther: "another user",
   mcpFn_status: "Status", mcpFn_findings: "Findings", mcpFn_object: "Object", mcpFn_finding_decide: "Decide about a finding", mcpFn_mark: "Mark an object", mcpFn_note_set: "Logbook entry", mcpFn_undo: "Undo",
@@ -120,7 +122,9 @@ class McpMixin {
       lastDay = day;
       return head + this.mcpEntryRow(e, multi);
     }).join("") : `<div class="pad"><p class="factnote">${this.t("mcpLogEmpty")}</p></div>`;
-    return `${main}<section class="panel"><div class="panelhead"><div><h2>${this.t("mcpLogTitle")}</h2><p>${this.t("mcpLogHint")} ${this.t("mcpLogCalls", { n: this.formatNumber(this.mcp.calls_24h || 0) })}.</p><p class="factnote">${this.t("mcpLogHint2")}</p></div></div><div class="pad toolbar">${tabs}</div>${rows}</section>`;
+    const standing = this.mcp.entries.some(e => e.undoable && !e.undone);
+    const bulk = standing ? `<div class="pad toolbar mcpbulk"><span>${this.t("mcpUndoAllHint")}</span><select data-mcp-undoall-hours aria-label="${this.esc(this.t("mcpUndoAllHint"))}"><option value="1">${this.t("mcpUndoHour")}</option><option value="24">${this.t("mcpUndoDay")}</option><option value="">${this.t("mcpUndoEverything")}</option></select><button class="btn small" data-mcp-undoall><ha-icon icon="mdi:undo"></ha-icon>${this.t("mcpUndoAll")}</button></div>` : "";
+    return `${main}<section class="panel"><div class="panelhead"><div><h2>${this.t("mcpLogTitle")}</h2><p>${this.t("mcpLogHint")} ${this.t("mcpLogCalls", { n: this.formatNumber(this.mcp.calls_24h || 0) })}.</p><p class="factnote">${this.t("mcpLogHint2")}</p></div></div><div class="pad toolbar">${tabs}</div>${bulk}${rows}</section>`;
   }
 
   bindMcp(root) {
@@ -135,6 +139,15 @@ class McpMixin {
     root.querySelector("[data-mcp-enabled]")?.addEventListener("change", ev => set({ enabled: ev.target.checked }));
     root.querySelector("[data-mcp-write]")?.addEventListener("change", ev => set({ write: ev.target.checked }));
     root.querySelectorAll("[data-mcp-filter]").forEach(el => el.onclick = () => { this.mcpFilter = el.dataset.mcpFilter; this.render(); });
+    root.querySelector("[data-mcp-undoall]")?.addEventListener("click", async () => {
+      const hours = Number(root.querySelector("[data-mcp-undoall-hours]")?.value) || undefined;
+      try {
+        const res = await this._hass.callWS({ type: "ha_housekeeper/mcp_undo_all", ...(hours ? { hours } : {}) });
+        this.mcp = null; this.data = await this._hass.callWS({ type: "ha_housekeeper/inventory" });
+        this.toast(this.t("mcpUndoneCount", { n: res.undone }));
+      } catch (err) { this.failed(err); }
+      this.render();
+    });
     root.querySelectorAll("[data-mcp-undo]").forEach(el => el.onclick = async ev => {
       ev.preventDefault();
       try { await this._hass.callWS({ type: "ha_housekeeper/mcp_undo", at: el.dataset.mcpUndo }); this.mcp = null; this.data = await this._hass.callWS({ type: "ha_housekeeper/inventory" }); }

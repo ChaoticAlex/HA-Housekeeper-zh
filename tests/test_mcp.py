@@ -211,6 +211,15 @@ async def test_changes_need_their_own_switch_and_can_be_taken_back(hass: HomeAss
     with pytest.raises(mcp_api.McpError) as twice:
         await mcp_api.run(hass, scanner, "undo", {"at": done[0]["at"]}, None)
     assert twice.value.reason == "not_found"
+    # everything at once, but only what the hours allow
+    now = datetime.now(UTC)
+    for hours_ago, title in ((5, "old"), (0, "new")):
+        await mcp_api.run(hass, scanner, "note_set", {"action": "save", "title": title}, None)
+        scanner.mcp.entries[-1]["at"] = (now - timedelta(hours=hours_ago)).isoformat()
+    assert mcp_api.undo_all(scanner, 2) == 1
+    assert [n["title"] for n in scanner.notes.items] == ["old"]
+    assert mcp_api.undo_all(scanner, None) == 1 and scanner.notes.items == []
+    assert mcp_api.undo_all(scanner, None) == 0
 
 
 async def test_changes_are_limited_and_a_refusal_is_logged_as_denied(hass: HomeAssistant) -> None:

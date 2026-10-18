@@ -14,7 +14,7 @@ from collections import Counter
 from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from fnmatch import fnmatchcase
 from typing import Any
 
@@ -448,6 +448,11 @@ def undo(scanner: InventoryScanner, data: dict[str, Any], user: str | None) -> d
     entry = next((e for e in scanner.mcp.entries if e["at"] == data["at"] and e.get("undo")), None)
     if entry is None or entry.get("undone"):
         raise McpError("not_found")
+    _take_back(scanner, entry)
+    return {"schema": API_SCHEMA, "changed": 1}
+
+
+def _take_back(scanner: InventoryScanner, entry: dict[str, Any]) -> None:
     step = entry["undo"]
     if step["what"] == "finding":
         scanner.restore_decision(step["key"], step["previous"])
@@ -456,7 +461,23 @@ def undo(scanner: InventoryScanner, data: dict[str, Any], user: str | None) -> d
     else:
         scanner.notes.restore(step["id"], step["previous"])
     scanner.mcp.mark_undone(entry)
-    return {"schema": API_SCHEMA, "changed": 1}
+
+
+def undo_all(scanner: InventoryScanner, hours: int | None, now: datetime | None = None) -> int:
+    """Take back every change still standing, newest first so a chain of changes unwinds in order.
+
+    ``hours`` limits it to the last hours; ``None`` takes back all the log holds.
+    """
+    start = (now or datetime.now(UTC)) - timedelta(hours=hours) if hours else None
+    count = 0
+    for entry in reversed(scanner.mcp.entries):
+        if not entry.get("undo") or entry.get("undone"):
+            continue
+        if start is not None and datetime.fromisoformat(entry["at"]) < start:
+            break
+        _take_back(scanner, entry)
+        count += 1
+    return count
 
 
 def audit(

@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant, callback
 
 from .const import DOMAIN
 from .inventory import InventoryScanner
-from .mcp_api import LIMIT_MAX, McpError, undo
+from .mcp_api import LIMIT_MAX, McpError, undo, undo_all
 from .ws_common import _versioned, panel_session_only, with_scanner
 
 
@@ -100,7 +100,32 @@ def websocket_mcp_undo(
     connection.send_result(msg["id"], {"undone": True})
 
 
+@websocket_api.require_admin
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): f"{DOMAIN}/mcp_undo_all",
+        vol.Optional("hours"): vol.All(int, vol.Range(min=1, max=24 * 90)),
+    }
+)
+@callback
+@with_scanner
+def websocket_mcp_undo_all(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """Take back every change made through AI access, of the last hours or all of them."""
+    if panel_session_only(hass, connection, msg):
+        return
+    user = connection.user.id if connection.user else None
+    count = undo_all(scanner, msg.get("hours"))
+    scanner.mcp.log(user, "undo_all", "write", {"hours": msg.get("hours")}, "ok", count)
+    connection.send_result(msg["id"], {"undone": count})
+
+
 def async_register(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_mcp_set)
     websocket_api.async_register_command(hass, websocket_mcp_audit)
     websocket_api.async_register_command(hass, websocket_mcp_undo)
+    websocket_api.async_register_command(hass, websocket_mcp_undo_all)
