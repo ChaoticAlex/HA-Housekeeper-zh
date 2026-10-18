@@ -118,7 +118,7 @@ class McpMixin {
     const auto = Number(m.auto_off_hours) || 0;
     const label = h => h === 0 ? this.t("mcpAutoNever") : h === 1 ? this.t("mcpAutoHour") : this.t("mcpAutoHours", { n: h });
     const offAt = on && m.off_at ? `<small class="mcpneeds">${this.t("mcpOffAt", { date: `${this.mcpDay(m.off_at)}, ${this.mcpTime(m.off_at).slice(0, 5)}` })}</small>` : "";
-    const timer = `<div class="row mcprow"><span class="tile ${auto ? "ok" : "mute"}"><ha-icon icon="mdi:timer-outline"></ha-icon></span><span class="row-text"><strong>${this.t("mcpAutoOff")}</strong><small>${this.t("mcpAutoOffDetail")}</small>${offAt}</span><select data-mcp-autooff aria-label="${this.esc(this.t("mcpAutoOff"))}">${[0, 1, 8, 24].map(h => `<option value="${h}"${h === auto ? " selected" : ""}>${label(h)}</option>`).join("")}</select></div>`;
+    const timer = `<div class="row mcprow"><span class="tile ${auto ? "ok" : "mute"}"><ha-icon icon="mdi:timer-outline"></ha-icon></span><span class="row-text"><strong>${this.t("mcpAutoOff")}</strong><small>${this.t("mcpAutoOffDetail")}</small>${offAt}</span><div class="seg" role="group" aria-label="${this.esc(this.t("mcpAutoOff"))}">${[0, 1, 8, 24].map(h => `<button class="chip${h === auto ? " active" : ""}" data-mcp-autooff="${h}" aria-pressed="${h === auto}">${label(h)}</button>`).join("")}</div></div>`;
     const hide = this.mcpSwitch("data-mcp-hide", m.hide_sensitive !== false, this.t("mcpHide"), this.t("mcpHideDetail"), "mdi:shield-account-outline");
     const state = !on ? ["mute", "mcpStateOff"] : write ? ["", "mcpStateWrite"] : ["ok", "mcpStateRead"];
     const calls = on && this.mcp ? ` <span class="mcpcalls">${this.t("mcpLogCalls", { n: this.formatNumber(this.mcp.calls_24h || 0) })}</span>` : "";
@@ -166,7 +166,7 @@ class McpMixin {
       try { await this.copyText(this.t("mcpPrompt")); this.toast(this.t("mcpPromptCopied")); } catch (err) { this.failed(err); }
     });
     root.querySelector("[data-mcp-hide]")?.addEventListener("change", ev => set({ hide_sensitive: ev.target.checked }));
-    root.querySelector("[data-mcp-autooff]")?.addEventListener("change", ev => set({ auto_off_hours: Number(ev.target.value) }));
+    root.querySelectorAll("[data-mcp-autooff]").forEach(el => el.addEventListener("click", () => set({ auto_off_hours: Number(el.dataset.mcpAutooff) })));
     root.querySelectorAll("[data-mcp-filter]").forEach(el => el.onclick = () => { this.mcpFilter = el.dataset.mcpFilter; this.render(); });
     root.querySelector("[data-mcp-undoall]")?.addEventListener("click", async () => {
       const hours = Number(root.querySelector("[data-mcp-undoall-hours]")?.value) || undefined;
