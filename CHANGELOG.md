@@ -15,6 +15,7 @@
 - **Kopieren:** Die Kopier-Knöpfe (z. B. „Angaben für eine Fehlermeldung kopieren“) funktionieren auch ohne HTTPS und melden einen Fehlschlag statt „Kopiert“.
 - **Links nach Home Assistant:** Alle Sprünge nach Home Assistant (Apps, Integrationen, HACS, Benutzer, Cloud) öffnen in einem neuen Tab statt im selben.
 - **Schutzmodus und Ausnahmen:** Die Einstellungen trennen beides in zwei Reiter. Der Schutzmodus nennt die Wirkung statt der Stufe: „Alles erlaubt“, „Ohne endgültiges Löschen“, „Nur Quarantäne“, „Nur lesen“.
+- **Einstellungen, Kacheln:** Die Kacheln stehen in neuer Reihenfolge (Schutzmodus, Ausnahmen, Scan und Meldungen, KI-Zugriff, Darstellung, Info) in drei Spalten. Jede Kachel zeigt ihren Stand, der Randstreifen folgt ihm (z. B. KI-Zugriff: aus grau, Lesen grün, Ändern gelb).
 - **Updates:** Die ausstehenden Updates stehen in der gewohnten Tabelle mit Suche, Sortierung, Filter nach Bereich und Seiten.
 
 ### English
@@ -32,6 +33,7 @@
 - **Copying:** The copy buttons (e.g. “Copy details for a bug report”) also work without HTTPS and report a failure instead of “Copied”.
 - **Links into Home Assistant:** All jumps into Home Assistant (apps, integrations, HACS, users, cloud) now open in a new tab instead of the current one.
 - **Protection mode and exceptions:** Settings now split them into two tabs. The protection mode names the effect instead of the level: “Everything allowed”, “No irreversible deletions”, “Quarantine only”, “Read only”.
+- **Settings, tiles:** The tiles come in a new order (protection mode, exceptions, scan and messages, AI access, appearance, info) in three columns. Every tile shows its state, and the edge stripe follows it (e.g. AI access: off grey, reads green, changes amber).
 - **Updates:** Pending updates are shown in the usual table with search, sorting, an area filter and pages.
 
 ## 1.9.0 - 2026-10-17

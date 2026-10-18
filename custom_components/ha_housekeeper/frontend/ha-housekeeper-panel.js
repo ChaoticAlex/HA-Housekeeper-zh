@@ -1654,6 +1654,7 @@ class StylesMixin {
       .pagebar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.pb-left,.pb-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--hk-muted);font-size:calc(13px*var(--hk-fs,1))}.pb-right{margin-left:auto}.pagebar .btn{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.pagebar ha-icon{--mdc-icon-size:18px}.pagebar ha-icon.spin{animation:hkspin 1s linear infinite}@keyframes hkspin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.pagebar ha-icon.spin{animation:none}}
       .navtiles.compact{grid-template-columns:repeat(auto-fit,minmax(max(200px,calc(100%/var(--cols,4) - 12px)),1fr));grid-auto-rows:1fr;gap:10px}.navtiles.compact .taskcard{display:grid;grid-template-columns:38px 1fr;grid-template-rows:auto auto auto auto;column-gap:14px;row-gap:3px;align-content:center;align-items:center;padding:10px 8px 10px 16px}.navtiles.compact .taskcard>ha-icon{grid-row:1 / span 4;margin:0}.navtiles.compact .taskcard>.navfacts{grid-column:2;display:flex;flex-wrap:nowrap;gap:6px;margin-top:4px;min-height:24px;overflow:hidden;min-width:0}.navtiles.compact .taskcard>.navfacts .pill{flex:none}.navtiles.fixed .taskcard>small{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}@media(min-width:641px){.navtiles.compact.five{grid-template-columns:repeat(6,minmax(0,1fr))}.navtiles.compact.five .taskcard{grid-column:span 2}.navtiles.compact.five .taskcard:nth-child(n+4){grid-column:span 3}}@media(max-width:640px){.navtiles.compact .taskcard>.navfacts{flex-wrap:wrap;min-height:0}.navtiles.compact .taskcard>.navfacts:empty{display:none}}.navtiles.compact .taskcard>strong{grid-column:2;grid-row:1}.navtiles.compact .taskcard>.setpill{grid-column:2;grid-row:2;flex-wrap:wrap;gap:6px;min-height:0;justify-self:start}.navtiles.compact .taskcard>.setpill:empty{display:none}.navtiles.compact .taskcard>small{grid-column:2;grid-row:3}
       @media(max-width:640px){.navtiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.navtiles .taskcard{grid-template-rows:auto auto;padding:10px}.navtiles .taskcard>ha-icon,.navtiles .taskcard>small{display:none}.navtiles.compact{grid-template-columns:repeat(2,minmax(0,1fr))}.navtiles.compact .taskcard{grid-template-columns:1fr}.navtiles.compact .taskcard>strong,.navtiles.compact .taskcard>.setpill{grid-column:1}.toolbar.nosel [data-fsel-clear],.toolbar.nosel [data-sel-clear],.toolbar.nosel [data-sel-only],.toolbar.nosel .fbtns{display:none}}
+      .setgrid3{grid-template-columns:repeat(3,minmax(0,1fr))}@media(max-width:860px){.setgrid3{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.setgrid3{grid-template-columns:minmax(0,1fr)}}
       .hkmodal{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:16px;background:rgba(10,14,20,.55)}.hkdialog{width:min(520px,100%);max-height:calc(100vh - 32px);overflow:auto;border:1px solid var(--hk-border);border-radius:16px;background:var(--hk-surface);box-shadow:0 14px 40px rgba(0,0,0,.35)}.hkdialog .dhead{padding:16px 18px 4px}.hkdialog .dhead h2{margin:0}.hkdialog .dbody{display:grid;gap:12px;padding:10px 18px 14px}.hkdialog .dbody label{display:block;margin-bottom:4px;font-weight:600;font-size:calc(12.5px*var(--hk-fs,1))}.hkdialog .dbody input[type=text],.hkdialog .dbody input[type=datetime-local],.hkdialog .dbody textarea{width:100%;box-sizing:border-box}.hkdialog .dfoot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;border-top:1px solid var(--hk-border);background:var(--hk-soft)}.hkdialog .dbtns,.logsuggest .dbtns{display:flex;gap:8px;margin-left:auto}.hkdialog .dquestion{font-weight:600}.hkdialog .danger-t{color:var(--hk-red)}.notechips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.notechips .chip{cursor:pointer}.notetwo{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:560px){.notetwo{grid-template-columns:1fr}}
       .kngrp{padding:9px 16px 4px;border-top:1px solid var(--hk-border);background:var(--hk-soft);color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));font-weight:700;letter-spacing:.05em;text-transform:uppercase}.kngrp:first-child{border-top:0}.knline{display:grid;grid-template-columns:20px minmax(110px,170px) minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 16px;border-top:1px solid var(--hk-border)}.kngrp+.knline{border-top:0}.knline .kk{color:var(--hk-muted)}.knline .kval{min-width:0;overflow-wrap:anywhere}.knline .kval small{display:block;margin-top:2px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.knline .ksrc{padding:1px 6px;border:1px solid var(--hk-border);border-radius:6px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));white-space:nowrap}.kdot{font-weight:700;text-align:center}.k-ok{color:var(--hk-green)}.k-warn{color:var(--hk-amber)}.k-red{color:var(--hk-red)}.k-mute{color:var(--hk-muted)}@media(max-width:640px){.knline{grid-template-columns:20px minmax(0,1fr)}.knline .kval{grid-column:2}.knline .ksrc{display:none}}
       .nextstep{display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:12px 16px;background:color-mix(in srgb,var(--hk-blue) 9%,transparent)}.nextstep small{display:block;margin-top:2px;color:var(--hk-muted)}.nextstep .dbtns{display:flex;gap:8px;margin-left:auto}.actgrp{margin:6px 0 -4px;color:var(--hk-muted);font-size:calc(11.5px*var(--hk-fs,1));font-weight:700;letter-spacing:.05em;text-transform:uppercase}
@@ -3307,13 +3308,14 @@ class SettingsMixin {
   // Each group has a tile with its state; the tile opens only that group's settings.
   settingsTabs() {
     const m = this.data?.meta || {}, hidden = (this.data?.findings || []).filter(f => f.ignored).length;
+    const mcp = m.mcp || {};
     return [
-      ["look", "mdi:palette-outline", "setTabLook", "setHintLook", ""],
       ["protection", "mdi:shield-lock-outline", "setTabProtection", "setHintProtection", this.t(`modeBadge_${m.protection || "full"}`), (m.protection || "full") === "full" ? "ok" : "warn"],
-      ["exceptions", "mdi:eye-off-outline", "setTabExceptions", "setHintExceptions", hidden ? this.t("setHiddenCount", { n: hidden }) : "", "mute"],
+      ["exceptions", "mdi:eye-off-outline", "setTabExceptions", "setHintExceptions", hidden ? this.t("setHiddenCount", { n: hidden }) : this.t("setNoneHidden"), "mute"],
       ["scan", "mdi:radar", "setTabScan", "setHintScan", m.scan_interval_hours ? this.t("setEveryHours", { n: m.scan_interval_hours }) : this.t("setManual"), "mute"],
-      ["mcp", "mdi:robot-outline", "setTabMcp", "setHintMcp", m.mcp?.enabled ? this.t(m.mcp.write ? "mcpFilterWrite" : "mcpFilterRead") : "", m.mcp?.write ? "warn" : "ok"],
-      ["info", "mdi:information-outline", "setTabInfo", "setHintInfo", ""],
+      ["mcp", "mdi:robot-outline", "setTabMcp", "setHintMcp", !mcp.enabled ? this.t("setOff") : this.t(mcp.write ? "mcpFilterWrite" : "mcpFilterRead"), !mcp.enabled ? "mute" : mcp.write ? "warn" : "ok"],
+      ["look", "mdi:palette-outline", "setTabLook", "setHintLook", this.t(`scheme${(this.prefs.scheme || "standard").replace(/^./, c => c.toUpperCase())}`), "mute"],
+      ["info", "mdi:information-outline", "setTabInfo", "setHintInfo", m.version ? `v${m.version}` : "–", "mute"],
     ];
   }
 
@@ -3511,10 +3513,10 @@ class SettingsMixin {
 
   settingsView() {
     const tabs = this.settingsTabs();
-    const tab = tabs.some(([id]) => id === this.settingsTab) ? this.settingsTab : "look";
+    const tab = tabs.some(([id]) => id === this.settingsTab) ? this.settingsTab : "protection";
     const tiles = tabs.map(([id, icon, label, hint, pill, tone]) => `<button class="taskcard t-${pill ? tone || "mute" : "ac"}${id === tab ? " on" : ""}" id="hk-set-${id}" aria-pressed="${id === tab}" aria-controls="hk-setpanel" data-set-tab="${id}"><ha-icon icon="${icon}"></ha-icon><strong>${this.t(label)}</strong><span class="setpill">${pill ? `<span class="pill ${tone || "mute"}">${this.esc(pill)}</span>` : ""}</span><small>${this.t(hint)}</small></button>`).join("");
     const body = { look: () => `<div class="grid2">${this.lookCard()}<div class="stack">${this.readabilityCard()}${this.behaviorCard()}</div></div>`, protection: () => this.protectionCard(), exceptions: () => `${this.excCard()}${this.hiddenCard()}`, scan: () => `${this.scanCard()}${this.notifyCard()}${this.eventsCard()}`, mcp: () => this.mcpCard(), info: () => this.infoCard() }[tab]();
-    return `${this.settingsBand()}<div class="taskgrid compactgrid setgrid" role="group" aria-label="${this.esc(this.t("settings"))}">${tiles}</div><div id="hk-setpanel">${body}</div>`;
+    return `${this.settingsBand()}<div class="taskgrid compactgrid setgrid setgrid3" role="group" aria-label="${this.esc(this.t("settings"))}">${tiles}</div><div id="hk-setpanel">${body}</div>`;
   }
 
   // "168 h" read as "= 7 days": only where the unit is minutes or hours and the number is large enough to say more.
@@ -11075,7 +11077,7 @@ Object.assign(TEXT.de, {
   stepChoose: "Auswahl", stepSetup: "Einstellen", stepPreview: "Vorschau",
   setLanguage: "Sprache", setLanguageHint: "Gilt für dieses Panel und wird in deinem Benutzerprofil gespeichert. Automatisch folgt der Sprache von Home Assistant.", langAuto: "Automatisch",
   setTabProtection: "Schutzmodus", setTabExceptions: "Ausnahmen", setHintExceptions: "Ausnahmeregeln und ausgeblendete Befunde.", setHiddenCount: "{n} ausgeblendet", setHintLook: "Sprache, Dichte und Darstellung.", setHintProtection: "Was Aufräumpläne ändern dürfen.", setHintScan: "Wann geprüft wird, Grenzwerte und Meldungen.", setHintInfo: "Version, Diagnose und Support.",
-  setEveryHours: "alle {n} h", setManual: "von Hand", setOn: "an", setOff: "aus",
+  setEveryHours: "alle {n} h", setManual: "von Hand", setNoneHidden: "nichts ausgeblendet", setOn: "an", setOff: "aus",
   maintHintBackup: "Backups prüfen, schützen und aufräumen.", maintHintUpdates: "Offene Updates und was vorher zu prüfen ist.", maintHintBlueprints: "Blueprints, die fehlen oder defekt sind.", maintHintGoals: "Eigene Grenzen für „in Ordnung“.",
   actRepairValues: "Werte reparieren", actHintRepair: "Falsche Werte im Verlauf und in der Statistik ersetzen.", actMeter: "Zähler wechseln", actHintMeter: "Die Statistik bei einem neuen Zähler fortführen.", actExchange: "Gerät austauschen", actHintExchange: "Durch ein neues Gerät ersetzen und alles übernehmen.",
   actHintReplace: "Überall durch eine andere Entität ersetzen.", actHintDisable: "Erst deaktivieren; nach der Wartezeit entfernen.",
@@ -11118,7 +11120,7 @@ Object.assign(TEXT.en, {
   stepChoose: "Choose", stepSetup: "Set up", stepPreview: "Preview",
   setLanguage: "Language", setLanguageHint: "Applies to this panel and is saved in your user profile. Automatic follows the language of Home Assistant.", langAuto: "Automatic",
   setTabProtection: "Protection mode", setTabExceptions: "Exceptions", setHintExceptions: "Exception rules and hidden findings.", setHiddenCount: "{n} hidden", setHintLook: "Language, density and appearance.", setHintProtection: "What cleanup plans may change.", setHintScan: "When it checks, limits and messages.", setHintInfo: "Version, diagnostics and support.",
-  setEveryHours: "every {n} h", setManual: "manual", setOn: "on", setOff: "off",
+  setEveryHours: "every {n} h", setManual: "manual", setNoneHidden: "nothing hidden", setOn: "on", setOff: "off",
   maintHintBackup: "Check, protect and tidy up backups.", maintHintUpdates: "Open updates and what to check first.", maintHintBlueprints: "Blueprints that are missing or broken.", maintHintGoals: "Your own limits for what in order means.",
   actRepairValues: "Repair values", actHintRepair: "Replace wrong values in the history and the statistics.", actMeter: "Replace the meter", actHintMeter: "Carry the statistics on with a new meter.", actExchange: "Exchange the device", actHintExchange: "Replace it with a new device and carry everything over.",
   actHintReplace: "Replace it with another entity everywhere.", actHintDisable: "Disable first; remove after the waiting time.",
@@ -16266,7 +16268,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this._urlApplied = false;
     this.selected = null;
     this.detailTab = "overview";
-    this.settingsTab = "look";
+    this.settingsTab = "protection";
     this.trail = [];
     this.compare = null;
     this.compareBaseline = "previous";

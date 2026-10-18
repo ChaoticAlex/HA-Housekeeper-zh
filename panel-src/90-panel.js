@@ -13,7 +13,7 @@ class HAHousekeeperPanel extends HTMLElement {
     this._urlApplied = false;
     this.selected = null;
     this.detailTab = "overview";
-    this.settingsTab = "look";
+    this.settingsTab = "protection";
     this.trail = [];
     this.compare = null;
     this.compareBaseline = "previous";

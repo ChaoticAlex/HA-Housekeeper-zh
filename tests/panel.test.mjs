@@ -859,6 +859,7 @@ test("settings are available before data has loaded", () => {
   const { el, shadow } = panel("de");
   el.data = null;
   el.view = "settings";
+  el.settingsTab = "look";
   el.render();
   assert.ok(shadow.innerHTML.includes("Schriftgröße") && shadow.innerHTML.includes("Farbschema"));
 });
