@@ -23,7 +23,7 @@ Object.assign(TEXT.de, {
   excOverlap: "Diese Objekte trifft schon: {rules}. Im Urlaub gilt das Ausblenden, danach wieder die Frist der anderen Regel, gezählt ab dem Ende des Urlaubs.",
   vacTitle: "Urlaubsmodus", vacHint: "Solange die gewählte Entität „an“ ist, gelten die Regeln „nur im Urlaubsmodus“. Ist sie nicht verfügbar oder unbekannt, gilt der Modus als aus. Schalten kannst du sie in Home Assistant, zum Beispiel per Kalender oder Automation.",
   vacEntity: "Entität für den Urlaubsmodus", vacEntityHint: "Jede Entität, die „an“ sein kann: Helfer, Schalter, Binärsensor, Zeitplan, Kalender. Leer lassen schaltet den Urlaubsmodus aus.",
-  vacAuto: "Automatisch gewählt, weil es sie gibt. Leere das Feld oder wähle eine andere, um das zu ändern.", vacKeyword: "Stichwort im Termin", vacKeywordExample: "Urlaub", vacKeywordHint: "Nur Termine, deren Titel dieses Wort enthält, schalten den Urlaubsmodus ein, so lässt sich dein normaler Kalender nutzen. Leer: jeder laufende Termin zählt, für einen eigenen Urlaubskalender.",
+  vacAuto: "Vorschlag, weil es diese Entität gibt. Sie gilt erst, wenn du speicherst; ändere oder leere das Feld, wenn du sie nicht willst.", vacKeyword: "Stichwort im Termin", vacKeywordExample: "Urlaub", vacKeywordHint: "Nur Termine, deren Titel dieses Wort enthält, schalten den Urlaubsmodus ein, so lässt sich dein normaler Kalender nutzen. Leer: jeder laufende Termin zählt, für einen eigenen Urlaubskalender.",
   vacGrace: "Nachfrist nach dem Urlaub", vacGraceUnit: "Stunden", vacGraceHint: "Standard 24 Stunden. Wie lange Befunde nach dem Ende zurückgehalten werden, wenn für das Objekt keine eigene Frist gilt.",
   vacSave: "Speichern", vacUnsaved: "Nicht gespeichert", vacEntityInvalid: "Eine Entität hat die Form bereich.name, zum Beispiel input_boolean.urlaub.", vacGraceInvalid: "Die Nachfrist muss eine ganze Zahl von 0 bis {max} Stunden sein.", vacStateOn: "Aktuell: an", vacStateOff: "Aktuell: aus", vacStateMissing: "Aktuell: nicht verfügbar", vacEnded: "Zuletzt beendet am {date}.", vacFailed: "Nicht gespeichert: {reason}",
   vacBarOn: "Urlaubsmodus aktiv", vacBarHeld: "{n} Befunde zurückgehalten", vacBarHeld1: "1 Befund zurückgehalten",
@@ -55,7 +55,7 @@ Object.assign(TEXT.en, {
   excOverlap: "These objects are already hit by: {rules}. In the vacation hiding applies, afterwards the delay of the other rule, counted from the end of the vacation.",
   vacTitle: "Vacation mode", vacHint: "While the chosen entity is “on” the rules “only in vacation mode” apply. If it is unavailable or unknown the mode counts as off. You can switch it in Home Assistant, for example by calendar or automation.",
   vacEntity: "Entity for vacation mode", vacEntityHint: "Any entity that can be “on”: helper, switch, binary sensor, schedule, calendar. Leave empty to turn vacation mode off.",
-  vacAuto: "Chosen automatically because it exists. Clear the field or choose another to change that.", vacKeyword: "Keyword in the event", vacKeywordExample: "Vacation", vacKeywordHint: "Only events whose title contains this word switch vacation mode on, so your normal calendar works. Empty: every running event counts, for a calendar of its own.",
+  vacAuto: "Suggestion, because this entity exists. It counts only once you save; change or clear the field if you do not want it.", vacKeyword: "Keyword in the event", vacKeywordExample: "Vacation", vacKeywordHint: "Only events whose title contains this word switch vacation mode on, so your normal calendar works. Empty: every running event counts, for a calendar of its own.",
   vacGrace: "Grace period after the vacation", vacGraceUnit: "hours", vacGraceHint: "Default 24 hours. How long findings are held back after the end when the object has no delay of its own.",
   vacSave: "Save", vacUnsaved: "Not saved", vacEntityInvalid: "An entity looks like domain.name, for example input_boolean.vacation.", vacGraceInvalid: "The grace period must be a whole number from 0 to {max} hours.", vacStateOn: "Now: on", vacStateOff: "Now: off", vacStateMissing: "Now: unavailable", vacEnded: "Last ended on {date}.", vacFailed: "Not saved: {reason}",
   vacBarOn: "Vacation mode on", vacBarHeld: "{n} findings held back", vacBarHeld1: "1 finding held back",
@@ -152,12 +152,12 @@ class ExceptionsMixin {
   }
 
   vacationHtml() {
-    const v = this.exc.vacation || {}, form = this.vacForm || (this.vacForm = { entity: v.entity || "", keyword: v.keyword || "", grace: v.grace_hours ?? 24, error: "" });
+    const v = this.exc.vacation || {}, form = this.vacForm || (this.vacForm = { entity: v.entity || v.suggestion || "", keyword: v.keyword || "", grace: v.grace_hours ?? 24, error: "" });
     const dirty = this.vacDirty();
     const ids = Object.keys(this._hass?.states || {}).filter(id => /^(input_boolean|binary_sensor|switch|schedule|calendar)\./.test(id)).sort();
     return `<form data-vac-form><div class="setrow"><div><strong>${this.t("vacEntity")}</strong><small>${this.t("vacEntityHint")}</small></div>
         <div><input list="hk-vac-ids" data-vac-entity autocomplete="off" value="${this.esc(form.entity)}"><datalist id="hk-vac-ids">${ids.map(id => `<option value="${this.esc(id)}">`).join("")}</datalist>
-        ${v.automatic && form.entity === v.entity ? `<small role="status">${this.t("vacAuto")}</small>` : ""}${v.entity && v.ended_at ? `<small role="status">${this.t("vacEnded", { date: this.formatDate(v.ended_at) })}</small>` : ""}</div></div>
+        ${v.suggestion && !v.entity && form.entity === v.suggestion ? `<small role="status">${this.t("vacAuto")}</small>` : ""}${v.entity && v.ended_at ? `<small role="status">${this.t("vacEnded", { date: this.formatDate(v.ended_at) })}</small>` : ""}</div></div>
       ${form.entity.trim().startsWith("calendar.") ? `<div class="setrow"><div><strong>${this.t("vacKeyword")}</strong><small>${this.t("vacKeywordHint")}</small></div>
         <div><input data-vac-keyword maxlength="60" autocomplete="off" placeholder="${this.esc(this.t("vacKeywordExample"))}" value="${this.esc(form.keyword)}"></div></div>` : ""}
       <div class="setrow"><div><strong>${this.t("vacGrace")}</strong><small>${this.t("vacGraceHint")}</small></div>

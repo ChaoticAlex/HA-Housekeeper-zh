@@ -146,11 +146,13 @@ def _state(value: str, message: str = "") -> Any:
     return SimpleNamespace(state=value, attributes={"message": message})
 
 
-def test_the_default_switch_is_used_until_one_is_chosen() -> None:
-    store = _store({"input_boolean.urlaubsmodus": _state("on")})
-    assert store.entity == "input_boolean.urlaubsmodus" and store.automatic and store.active()
+def test_a_helper_is_only_suggested_until_one_is_chosen() -> None:
+    store = _store({"input_boolean.vacation_mode": _state("on")})
+    store.hass.config.language = "en"
+    assert store.suggestion() == "input_boolean.vacation_mode"
+    assert store.entity is None and not store.active()  # it counts once it is saved
     store.set_vacation(None, 24, NOW)
-    assert store.entity is None and not store.automatic  # left empty on purpose
+    assert store.suggestion() is None  # left empty on purpose
 
 
 def test_a_calendar_keyword_looks_at_every_running_event() -> None:

@@ -317,7 +317,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     @callback
     def _vacation_follow() -> None:
-        entity = scanner.exceptions.watched()
+        entity = scanner.exceptions.entity
         if vacation["entity"] != entity:
             if vacation["unsub"] is not None:
                 vacation["unsub"]()

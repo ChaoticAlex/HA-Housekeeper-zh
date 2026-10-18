@@ -14,7 +14,8 @@ the grace period (hours) then holds the finding back unless a delay rule of its 
 The switch can be a calendar. Without a keyword every running event counts as vacation; with one,
 only an event whose title contains it, found by asking the calendar for the events of this moment
 (a calendar shows just one running event in its attributes, so that alone could miss it).
-Until a switch has been chosen, ``input_boolean.urlaubsmodus`` is used when it exists.
+Until a switch has been chosen, a helper with a name like ``urlaubsmodus`` or ``vacation_mode`` is only
+suggested in the panel; it counts once the user has saved it.
 """
 
 from __future__ import annotations
@@ -45,7 +46,8 @@ GRACE_DEFAULT = (
     24  # hours a finding is held back after the vacation, without a delay rule of its own
 )
 GRACE_MAX = 720
-DEFAULT_ENTITY = "input_boolean.urlaubsmodus"  # used until the user has chosen a switch
+GERMAN_NAMES = ("urlaubsmodus", "urlaub")  # helpers offered as the vacation switch, in this order
+ENGLISH_NAMES = ("vacation_mode", "vacation", "holiday_mode", "holiday")
 KEYWORD_MAX = 60
 AVAILABILITY = frozenset({"unavailable", "unknown", "stale"})  # what a delay rule holds back
 
@@ -354,19 +356,19 @@ class ExceptionStore:
 
     @property
     def entity(self) -> str | None:
-        """The vacation switch: the chosen one, or the default while none was chosen and it exists."""
+        """The vacation switch chosen by the user."""
+        return self._entity
+
+    def suggestion(self) -> str | None:
+        """A helper that looks like a vacation switch, offered while none was chosen; never used unasked."""
         if self._chosen:
-            return self._entity
-        return DEFAULT_ENTITY if self.hass.states.get(DEFAULT_ENTITY) is not None else None
-
-    @property
-    def automatic(self) -> bool:
-        """Whether the switch is the default one, not chosen by the user."""
-        return not self._chosen and self.entity is not None
-
-    def watched(self) -> str | None:
-        """The entity whose state changes matter: the chosen switch, or the default while none is chosen."""
-        return self._entity if self._chosen else DEFAULT_ENTITY
+            return None
+        german = str(self.hass.config.language).startswith("de")
+        names = GERMAN_NAMES + ENGLISH_NAMES if german else ENGLISH_NAMES + GERMAN_NAMES
+        return next(
+            (f"input_boolean.{n}" for n in names if self.hass.states.get(f"input_boolean.{n}")),
+            None,
+        )
 
     def set_vacation(
         self, entity: str | None, grace_hours: int, now: datetime, keyword: str = ""

@@ -793,7 +793,7 @@ async def websocket_exceptions(
             ],
             "vacation": {
                 "entity": store.entity,
-                "automatic": store.automatic,
+                "suggestion": store.suggestion(),
                 "keyword": store.keyword,
                 "grace_hours": store.grace_hours,
                 "grace_max": VACATION_GRACE_MAX,
