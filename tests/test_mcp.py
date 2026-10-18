@@ -339,6 +339,7 @@ async def test_summary_names_the_heaviest_groups(hass: HomeAssistant) -> None:
     assert result["groups"] == 2 and len(result["top"]) == 2
     first = result["top"][0]
     assert first["level"] == "high" and len(first["examples"]) == 3
+    assert first["examples"][0]["type"] == "entity"
     assert first["next"].startswith("ha_housekeeper.findings with rule=")
     assert len(json.dumps(result)) < 4_000
 

@@ -26,11 +26,15 @@ async def test_services_answer_and_refuse_with_a_translated_error(hass: HomeAssi
 
 
 def test_panel_session_only_refuses_long_lived_tokens() -> None:
-    """The switches for AI access cannot be flipped with a long-lived token, as ha-mcp brings."""
+    """The switches for AI access need a signed-in session: no long-lived and no system token."""
     from types import SimpleNamespace
     from unittest.mock import MagicMock
 
-    from homeassistant.auth.models import TOKEN_TYPE_LONG_LIVED_ACCESS_TOKEN, TOKEN_TYPE_NORMAL
+    from homeassistant.auth.models import (
+        TOKEN_TYPE_LONG_LIVED_ACCESS_TOKEN,
+        TOKEN_TYPE_NORMAL,
+        TOKEN_TYPE_SYSTEM,
+    )
 
     from custom_components.ha_housekeeper.ws_common import panel_session_only
 
@@ -43,5 +47,6 @@ def test_panel_session_only_refuses_long_lived_tokens() -> None:
     refused_long, connection = refused(TOKEN_TYPE_LONG_LIVED_ACCESS_TOKEN)
     assert refused_long
     assert connection.send_error.call_args.args[:2] == (7, "panel_only")
+    assert refused(TOKEN_TYPE_SYSTEM)[0]  # ha-mcp as an app runs as the Supervisor
     assert not refused(TOKEN_TYPE_NORMAL)[0]
     assert not refused(None)[0]

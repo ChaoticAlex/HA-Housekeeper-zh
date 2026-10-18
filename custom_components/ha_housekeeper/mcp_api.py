@@ -246,6 +246,7 @@ def summary(
                 "count": len(rows),
                 "examples": [
                     {
+                        "type": objects.get(f["object_id"], {}).get("object_type"),
                         "object_id": f["object_id"],
                         "name": clean_text(objects.get(f["object_id"], {}).get("name")),
                         "level": f.get("impact") or "none",
@@ -282,9 +283,6 @@ def findings(
     kept = 0
     rows: list[tuple[dict[str, Any], dict[str, Any]]] = []
     for finding in snapshot["findings"]:
-        if finding["object_id"] in skip:
-            kept += 1
-            continue
         hidden = bool(finding.get("ignored"))
         if (mode == "hide" and hidden) or (mode == "only" and not hidden):
             continue
@@ -302,6 +300,9 @@ def findings(
             and needle not in finding["object_id"].lower()
             and needle not in str(target.get("name") or "").lower()
         ):
+            continue
+        if finding["object_id"] in skip:
+            kept += 1  # it matches the filters, but is not given out
             continue
         rows.append((finding, target))
     rows.sort(
