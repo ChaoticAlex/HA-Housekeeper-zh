@@ -1449,6 +1449,7 @@ class StylesMixin {
       .stickyhead{position:sticky;top:0;z-index:30}.modeopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;padding:12px 16px 16px}.modeopt{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-surface);cursor:pointer}.modeopt.on{border-color:var(--hk-blue);box-shadow:0 0 0 1px var(--hk-blue)}.modeopt input{position:absolute;opacity:0;pointer-events:none}.modeopt:focus-within{outline:2px solid var(--hk-blue);outline-offset:2px}.modepanel{border-left:4px solid var(--hk-blue)}.bulkform{padding:0 14px 10px}.safebar{display:flex;gap:6px 16px;flex-wrap:wrap;align-items:center;padding:6px clamp(16px,2.4vw,32px);border-bottom:1px solid var(--hk-border);background:var(--hk-surface);font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}
       .vacbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 16px;background:var(--hk-soft,#e6f0f8);border-bottom:1px solid var(--hk-border);border-left:4px solid #2f6fa3;font-size:14px}.vacbar b{color:#2f6fa3}.vacbar .sp{flex:1}.vacbar a{color:#2f6fa3;font-weight:600;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}.vacbar.warn{border-left-color:var(--hk-amber,#b57a0c)}.vacbar.warn b{color:var(--hk-amber,#b57a0c)}.vacbar.after{border-left-color:var(--hk-accent,#1d4a3f)}.vacbar.after b{color:var(--hk-accent,#1d4a3f)}
       .exclist{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;max-height:16em;overflow:auto;padding:2px}.excopt{display:flex;align-items:center;gap:10px;min-height:36px;padding:0 10px;border:1px solid var(--hk-border);border-radius:8px;font-weight:400;font-size:calc(13px*var(--hk-fs,1));color:var(--hk-text);cursor:pointer;overflow:hidden}.excopt span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.markform .excopt input{flex:0 0 auto;width:16px;min-width:0;max-width:none;min-height:0;margin:0;padding:0}.excopt.on{background:var(--hk-soft);border-color:var(--hk-blue-text)}.excopt:hover{background:var(--hk-soft)}
+      .excgroup{margin:14px 16px;border:1px solid var(--hk-border);border-radius:12px;overflow:hidden}.excghead{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;background:var(--hk-soft);border-bottom:1px solid var(--hk-border)}.excghead h3{margin:0;font-size:calc(15px*var(--hk-fs,1))}.excghead.vac{border-left:4px solid #2f6fa3}.excgroup .markform{border-bottom:1px solid var(--hk-border)}
       .safeitem{display:inline-flex;align-items:center;gap:6px;padding:2px 0;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
       .safeitem:hover{color:var(--hk-text)}.safeitem .dot{width:8px;height:8px;border-radius:50%;background:var(--hk-muted)}.safeitem .dot.ok{background:var(--hk-green,#2e7d32)}.safeitem .dot.warn{background:var(--hk-amber,#b26a00)}.safeitem .dot.red{background:var(--hk-red,#c62828)}
       @media(max-width:860px){.safebar{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;padding:6px 12px}}
@@ -12018,8 +12019,9 @@ Object.assign(TEXT.de, {
   hidByRule: "Durch eine Regel", ignoredByRule: "Ausgeblendet durch eine Ausnahmeregel: {rule}", heldByRule: "Zurückgehalten durch eine Ausnahmeregel: {rule}, wird ab {date} gemeldet", dueByRule: "Frist abgelaufen · Ausnahmeregel: {rule}",
   hidRuleLink: "Regel",
   excKind_device: "Gerät", excKind_entity: "Entität", excRuleDevice: "Gerät {names}", excRuleEntity: "Entität {names}", excSearch: "Suchen …", excMore: "Weitere über die Suche",
+  excGroupAlways: "Immer", excGroupAlwaysHint: "gilt dauerhaft", excGroupVacation: "Im Urlaubsmodus", excGroupVacationHint: "blendet aus, solange der Schalter „an“ ist", excAddVacation: "Urlaubsregel hinzufügen",
   excScope: "Gilt", excScope_always: "Immer", excScope_vacation: "Nur im Urlaubsmodus", excScopeChip_vacation: "nur im Urlaub", excScopeChip_always: "immer",
-  excScopeHint: "Im Urlaubsmodus werden diese Objekte nicht gemeldet. Ein Gerät, das im Urlaub kaputtgeht, bleibt dann ebenfalls still; nach dem Urlaub zählt die Ausfalldauer neu.",
+  excScopeHint: "Im Urlaubsmodus bleiben diese Objekte still, auch wenn ein Gerät kaputtgeht. Nach dem Urlaub zählt der Ausfall neu: mit eigener Frist deren Tage, sonst die Nachfrist.",
   excOverlap: "Diese Objekte trifft schon: {rules}. Im Urlaub gilt das Ausblenden, danach wieder die Frist der anderen Regel, gezählt ab dem Ende des Urlaubs.",
   vacTitle: "Urlaubsmodus", vacHint: "Solange die gewählte Entität „an“ ist, gelten die Regeln „nur im Urlaubsmodus“. Ist sie nicht verfügbar oder unbekannt, gilt der Modus als aus. Schalten kannst du sie in Home Assistant, zum Beispiel per Kalender oder Automation.",
   vacEntity: "Entität für den Urlaubsmodus", vacEntityHint: "Jede Entität, die „an“ sein kann: Helfer, Schalter, Binärsensor, Zeitplan, Kalender. Leer lassen schaltet den Urlaubsmodus aus.",
@@ -12047,8 +12049,9 @@ Object.assign(TEXT.en, {
   hidByRule: "By a rule", ignoredByRule: "Hidden by an exception rule: {rule}", heldByRule: "Held back by an exception rule: {rule}, reported from {date}", dueByRule: "Time has passed · exception rule: {rule}",
   hidRuleLink: "Rule",
   excKind_device: "Device", excKind_entity: "Entity", excRuleDevice: "Device {names}", excRuleEntity: "Entity {names}", excSearch: "Search …", excMore: "More through the search",
+  excGroupAlways: "Always", excGroupAlwaysHint: "applies permanently", excGroupVacation: "In vacation mode", excGroupVacationHint: "hides while the switch is “on”", excAddVacation: "Add vacation rule",
   excScope: "Applies", excScope_always: "Always", excScope_vacation: "Only in vacation mode", excScopeChip_vacation: "vacation only", excScopeChip_always: "always",
-  excScopeHint: "In vacation mode these objects are not reported. A device that breaks during the vacation stays quiet too; after the vacation the outage counts anew.",
+  excScopeHint: "In vacation mode these objects stay quiet, even if a device breaks. After the vacation the outage counts anew: with a delay of its own that delay, otherwise the grace period.",
   excOverlap: "These objects are already hit by: {rules}. In the vacation hiding applies, afterwards the delay of the other rule, counted from the end of the vacation.",
   vacTitle: "Vacation mode", vacHint: "While the chosen entity is “on” the rules “only in vacation mode” apply. If it is unavailable or unknown the mode counts as off. You can switch it in Home Assistant, for example by calendar or automation.",
   vacEntity: "Entity for vacation mode", vacEntityHint: "Any entity that can be “on”: helper, switch, binary sensor, schedule, calendar. Leave empty to turn vacation mode off.",
@@ -12097,24 +12100,37 @@ class ExceptionsMixin {
     return e.hide ? this.t("excEffectHide", { objects: e.objects, n: e.hide }) : this.t("excEffectNone");
   }
 
+  excRow(rule) {
+    const icons = { area: "mdi:floor-plan", label: "mdi:label-outline", integration: "mdi:puzzle-outline", domain: "mdi:shape-outline", device: "mdi:devices", entity: "mdi:shape-outline" };
+    return `<div class="row"><span class="tile ${rule.enabled ? (rule.effect?.due ? "warn" : "ok") : "mute"}"><ha-icon icon="${icons[rule.kind]}"></ha-icon></span>
+        <span class="row-text"><strong>${this.esc(this.excRuleName(rule))}</strong><small>${this.esc(this.excRuleLine(rule))} · ${this.esc(this.excEffect(rule))}${rule.note ? ` · ${this.esc(rule.note)}` : ""}</small></span>
+        <label class="inline"><input type="checkbox" data-exc-toggle="${this.esc(rule.id)}" ${rule.enabled ? "checked" : ""} aria-label="${this.esc(this.t("excOn"))}"></label>
+        <button class="btn quiet" data-exc-edit="${this.esc(rule.id)}">${this.t("excEdit")}</button><button class="btn quiet" data-exc-delete="${this.esc(rule.id)}">${this.t("excDelete")}</button></div>`;
+  }
+
+  // One of the two groups of the card: the rules that always apply, and the ones of the vacation mode.
+  excGroup(scope) {
+    const rules = this.exc.rules.filter(r => (r.scope || "always") === scope);
+    const open = this.excForm && this.excForm.scope === scope;
+    const vacation = scope === "vacation", v = this.exc.vacation || {};
+    const state = !v.entity ? "" : v.state === "on" ? "vacStateOn" : v.state && v.state !== "unavailable" && v.state !== "unknown" ? "vacStateOff" : "vacStateMissing";
+    const head = `<div class="excghead${vacation ? " vac" : ""}"><h3>${this.t(vacation ? "excGroupVacation" : "excGroupAlways")}</h3>${state ? `<span class="pill ${v.state === "on" ? "ok" : "mute"}">${this.t(state)}</span>` : ""}<span class="grow"></span><small class="factnote">${this.t(vacation ? "excGroupVacationHint" : "excGroupAlwaysHint")}</small></div>`;
+    const body = rules.map(r => this.excRow(r)).join("") || `<div class="pad"><p class="factnote">${this.t("excNone")}</p></div>`;
+    const add = open ? this.excFormHtml(this.excForm) : `<div class="pad"><button class="btn" data-exc-edit="" data-exc-new="${scope}"><ha-icon icon="mdi:plus"></ha-icon>${this.t(vacation ? "excAddVacation" : "excAdd")}</button></div>`;
+    return `<div class="excgroup">${head}${vacation ? this.vacationHtml() : ""}${body}${add}</div>`;
+  }
+
   excCard() {
     const head = `<div class="panelhead"><div><h2>${this.t("excTitle")}</h2><p>${this.t("excHint")}</p></div></div>`;
     if (!this.exc) { this.loadExceptions(); return `<section class="panel">${head}<div class="pad"><p class="factnote">${this.t("excLoading")}</p></div></section>`; }
-    const rows = this.exc.rules.map(rule => `<div class="row"><span class="tile ${rule.enabled ? (rule.effect?.due ? "warn" : "ok") : "mute"}"><ha-icon icon="${{ area: "mdi:floor-plan", label: "mdi:label-outline", integration: "mdi:puzzle-outline", domain: "mdi:shape-outline", device: "mdi:devices", entity: "mdi:shape-outline" }[rule.kind]}"></ha-icon></span>
-        <span class="row-text"><strong>${this.esc(this.excRuleName(rule))}</strong><small>${this.esc(this.excRuleLine(rule))} · <b>${this.t(`excScopeChip_${rule.scope || "always"}`)}</b> · ${this.esc(this.excEffect(rule))}${rule.note ? ` · ${this.esc(rule.note)}` : ""}</small></span>
-        <label class="inline"><input type="checkbox" data-exc-toggle="${this.esc(rule.id)}" ${rule.enabled ? "checked" : ""} aria-label="${this.esc(this.t("excOn"))}"></label>
-        <button class="btn quiet" data-exc-edit="${this.esc(rule.id)}">${this.t("excEdit")}</button><button class="btn quiet" data-exc-delete="${this.esc(rule.id)}">${this.t("excDelete")}</button></div>`).join("");
-    const vac = this.vacationHtml();
-    const form = this.excForm ? this.excFormHtml(this.excForm) : `<div class="pad"><button class="btn" data-exc-edit=""><ha-icon icon="mdi:plus"></ha-icon>${this.t("excAdd")}</button></div>`;
-    return `<section class="panel">${vac}</section><section class="panel">${head}${rows || `<div class="pad"><p class="factnote">${this.t("excNone")}</p></div>`}${form}</section>`;
+    return `<section class="panel">${head}${this.excGroup("always")}${this.excGroup("vacation")}</section>`;
   }
 
   vacationHtml() {
     const v = this.exc.vacation || {}, form = this.vacForm || (this.vacForm = { entity: v.entity || "", grace: v.grace_hours ?? 24, error: "" });
     const ids = Object.keys(this._hass?.states || {}).filter(id => /^(input_boolean|binary_sensor|switch|schedule|calendar)\./.test(id)).sort();
     const state = v.state === "on" ? "vacStateOn" : v.state && v.state !== "unavailable" && v.state !== "unknown" ? "vacStateOff" : "vacStateMissing";
-    return `<div class="panelhead"><div><h2>${this.t("vacTitle")}</h2><p>${this.t("vacHint")}</p></div></div>
-      <form class="pad markform" data-vac-form><div class="mrow"><label class="mfield grow"><span>${this.t("vacEntity")}</span><input list="hk-vac-ids" data-vac-entity autocomplete="off" value="${this.esc(form.entity)}"><datalist id="hk-vac-ids">${ids.map(id => `<option value="${this.esc(id)}">`).join("")}</datalist></label>
+    return `<form class="pad markform" data-vac-form><small class="factnote">${this.t("vacHint")}</small><div class="mrow"><label class="mfield grow"><span>${this.t("vacEntity")}</span><input list="hk-vac-ids" data-vac-entity autocomplete="off" value="${this.esc(form.entity)}"><datalist id="hk-vac-ids">${ids.map(id => `<option value="${this.esc(id)}">`).join("")}</datalist></label>
         <label class="mfield"><span>${this.t("vacGrace")}</span><span><input type="number" min="0" max="${v.grace_max || 720}" data-vac-grace value="${this.esc(form.grace)}" style="width:5em"> ${this.t("vacGraceUnit")}</span></label></div>
         <small class="factnote">${this.t("vacEntityHint")} ${this.t("vacGraceHint")}</small>
         ${v.entity ? `<small class="factnote" role="status">${this.t(state)}${v.ended_at ? ` · ${this.t("vacEnded", { date: this.formatDate(v.ended_at) })}` : ""}</small>` : ""}
@@ -12164,23 +12180,22 @@ class ExceptionsMixin {
         <label class="mfield grow"><span>${this.t("excNote")}</span><input data-exc-note maxlength="200" autocomplete="off" value="${this.esc(f.note)}"></label></div>
       <div class="mfield"><span>${this.t("excTargets")}</span>${search}<div class="exclist">${boxes}</div>${more}</div>
       <small class="factnote">${this.t("excInherit")}</small>
-      <div class="mrow"><label class="mfield"><span>${this.t("excScope")}</span><select data-exc-scope><option value="always" ${f.scope === "always" ? "selected" : ""}>${this.t("excScope_always")}</option><option value="vacation" ${f.scope === "vacation" ? "selected" : ""}>${this.t("excScope_vacation")}</option></select></label></div>
       ${f.scope === "vacation" ? `<small class="factnote">${this.t("excScopeHint")}</small>` : ""}
-      <div class="mrow"><label class="mfield"><span>${this.t("excAction")}</span><select data-exc-action><option value="hide" ${f.action === "hide" ? "selected" : ""}>${this.t("excAction_hide")}</option><option value="delay" ${f.action === "delay" ? "selected" : ""}>${this.t("excAction_delay")}</option></select></label>
-        ${f.action === "delay" ? `<label class="mfield"><span>${this.t("excDays")}</span><input type="number" min="1" max="${this.exc.days_max || 365}" data-exc-days value="${this.esc(f.days)}"></label>` : ""}</div>
+      ${f.scope === "vacation" ? "" : `<div class="mrow"><label class="mfield"><span>${this.t("excAction")}</span><select data-exc-action><option value="hide" ${f.action === "hide" ? "selected" : ""}>${this.t("excAction_hide")}</option><option value="delay" ${f.action === "delay" ? "selected" : ""}>${this.t("excAction_delay")}</option></select></label>
+        ${f.action === "delay" ? `<label class="mfield"><span>${this.t("excDays")}</span><input type="number" min="1" max="${this.exc.days_max || 365}" data-exc-days value="${this.esc(f.days)}"></label>` : ""}</div>`}
       ${f.action === "delay" ? `<small class="factnote">${this.t("excDelayHint")}</small>` : ""}<small class="factnote">${this.t("excWinner")}</small>
       ${preview}${pv?.overlap?.length ? `<small class="factnote">${this.esc(this.t("excOverlap", { rules: pv.overlap.map(id => { const r = this.exc.rules.find(x => x.id === id); return r ? this.excRuleName(r) : id; }).join(", ") }))}</small>` : ""}${f.error ? `<small class="error" role="alert">${this.esc(f.error)}</small>` : ""}
       <div class="mbtns"><button type="button" class="btn quiet" data-exc-cancel>${this.t("excCancel")}</button><button type="submit" class="btn primary">${this.t("excSave")}</button></div></form>`;
   }
 
   excDraft(f) {
-    return { ...(f.id ? { id: f.id } : {}), kind: f.kind, targets: f.targets, action: f.action, scope: f.scope || "always", ...(f.action === "delay" ? { days: Math.max(1, Number(f.days) || 7) } : {}), enabled: f.enabled !== false, note: f.note.trim() };
+    return { ...(f.id ? { id: f.id } : {}), kind: f.kind, targets: f.targets, action: f.scope === "vacation" ? "hide" : f.action, scope: f.scope || "always", ...(f.scope !== "vacation" && f.action === "delay" ? { days: Math.max(1, Number(f.days) || 7) } : {}), enabled: f.enabled !== false, note: f.note.trim() };
   }
 
-  openException(id) {
+  openException(id, scope) {
     const rule = this.exc.rules.find(r => r.id === id);
     this.excForm = rule ? { id, kind: rule.kind, targets: [...rule.targets], action: rule.action, scope: rule.scope || "always", search: "", days: rule.days || 7, enabled: rule.enabled, note: rule.note || "", error: "", preview: null }
-      : { id: "", kind: "area", targets: [], action: "hide", scope: "always", search: "", days: 7, enabled: true, note: "", error: "", preview: null };
+      : { id: "", kind: "area", targets: [], action: "hide", scope: scope || "always", search: "", days: 7, enabled: true, note: "", error: "", preview: null };
     this.render();
     this.excPreview();
   }
@@ -12219,7 +12234,7 @@ class ExceptionsMixin {
 
   bindExceptions(root) {
     const rules = () => this.exc.rules.map(({ effect, ...rule }) => rule);
-    root.querySelectorAll("[data-exc-edit]").forEach(el => el.onclick = () => this.openException(el.dataset.excEdit));
+    root.querySelectorAll("[data-exc-edit]").forEach(el => el.onclick = () => this.openException(el.dataset.excEdit, el.dataset.excNew));
     root.querySelectorAll("[data-exc-delete]").forEach(el => el.onclick = () => this.saveExceptions(rules().filter(r => r.id !== el.dataset.excDelete), null));
     root.querySelectorAll("[data-exc-toggle]").forEach(el => el.onchange = () => this.saveExceptions(rules().map(r => (r.id === el.dataset.excToggle ? { ...r, enabled: el.checked } : r)), null));
     root.querySelectorAll("[data-vac-form]").forEach(form => {
@@ -12239,11 +12254,11 @@ class ExceptionsMixin {
       const f = this.excForm;
       form.onsubmit = ev => { ev.preventDefault(); this.commitException(); };
       form.querySelector("[data-exc-kind]").onchange = ev => { f.kind = ev.target.value; f.targets = []; f.preview = null; this.render(); };
-      form.querySelector("[data-exc-scope]").onchange = ev => { f.scope = ev.target.value; this.render(); this.excPreview(); };
       const search = form.querySelector("[data-exc-search]");
       if (search) search.oninput = ev => { f.search = ev.target.value; this.render(); this.shadowRoot.querySelector("[data-exc-search]")?.focus(); };
       form.querySelector("[data-exc-note]").oninput = ev => { f.note = ev.target.value; };
-      form.querySelector("[data-exc-action]").onchange = ev => { f.action = ev.target.value; this.render(); this.excPreview(); };
+      const act = form.querySelector("[data-exc-action]");
+      if (act) act.onchange = ev => { f.action = ev.target.value; this.render(); this.excPreview(); };
       const days = form.querySelector("[data-exc-days]");
       if (days) days.onchange = ev => { f.days = ev.target.value; this.excPreview(); };
       form.querySelectorAll("[data-exc-target]").forEach(el => el.onchange = () => {

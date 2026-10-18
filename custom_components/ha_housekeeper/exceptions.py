@@ -73,7 +73,9 @@ def clean_rule(raw: Any) -> dict[str, Any] | None:
     )
     if not clean or len(clean) > TARGET_LIMIT:
         return None
-    action = raw.get("action") if raw.get("action") in ACTIONS else "hide"
+    scope = raw.get("scope") if raw.get("scope") in SCOPES else "always"
+    # A vacation rule only keeps quiet: how long to wait is for the rules that always apply.
+    action = raw.get("action") if raw.get("action") in ACTIONS and scope == "always" else "hide"
     days = raw.get("days")
     days = (
         min(max(days, 1), DAYS_MAX)
@@ -89,7 +91,7 @@ def clean_rule(raw: Any) -> dict[str, Any] | None:
         "targets": clean,
         "action": action,
         "days": days if action == "delay" else None,
-        "scope": raw.get("scope") if raw.get("scope") in SCOPES else "always",
+        "scope": scope,
         "enabled": raw.get("enabled") is not False,
         "note": str(raw.get("note") or "").strip()[:NOTE_MAX],
     }

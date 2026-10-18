@@ -74,6 +74,11 @@ def test_a_delay_leaves_other_findings_alone() -> None:
     )
 
 
+def test_a_vacation_rule_always_hides() -> None:
+    rule = _rule("area", ["keller"], "delay", 5, scope="vacation")
+    assert rule["action"] == "hide" and rule["days"] is None
+
+
 def test_device_and_entity_rules_match_by_id() -> None:
     found = Traits(None, frozenset(), frozenset(), "media_player", "dev1", "media_player.tv")
     assert matches(_rule("device", ["dev1"]), found)
@@ -98,7 +103,7 @@ def test_after_the_vacation_the_outage_counts_from_its_end() -> None:
     assert verdict(rules, found, _outage(14), NOW, vacation)["state"] == "hold"
     assert verdict(rules, found, _outage(14), NOW + timedelta(hours=15), vacation) is None
     # an own delay replaces the grace period and counts from the end, not from the outage
-    rules.append(_rule("domain", ["x"], "delay", 3))
+    rules.append(_rule("domain", ["x"], "delay", 3))  # always applies: the own delay
     found = Traits("keller", frozenset(), frozenset(), "x")
     held = verdict(rules, found, _outage(14), NOW, vacation)
     assert held["state"] == "hold" and held["phase"] == "after"
