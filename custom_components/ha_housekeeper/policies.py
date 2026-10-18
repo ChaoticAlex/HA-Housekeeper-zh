@@ -270,6 +270,7 @@ def evaluate(
     assistants that reach it), ``battery_percent`` and ``db`` (the kept database numbers or ``None``).
     """
     extra = extra or {}
+    excepted = extra.get("excepted") or frozenset()
     by_type: dict[str, list[dict[str, Any]]] = {}
     for item in snapshot["objects"]:
         by_type.setdefault(item["object_type"], []).append(item)
@@ -361,7 +362,11 @@ def evaluate(
         items, ignored = [], 0
         for item in found[rule]():
             key = policy_key(rule, item["object_id"])
-            hidden = item["object_id"] in labelled or key in ignored_keys
+            hidden = (
+                item["object_id"] in labelled
+                or item["object_id"] in excepted
+                or key in ignored_keys
+            )
             ignored += hidden
             items.append(
                 {
@@ -370,7 +375,13 @@ def evaluate(
                     "name": item.get("name") or item["object_id"],
                     "key": key,
                     "ignored": bool(hidden),
-                    "by": "label" if item["object_id"] in labelled else "user" if hidden else None,
+                    "by": "label"
+                    if item["object_id"] in labelled
+                    else "rule"
+                    if item["object_id"] in excepted
+                    else "user"
+                    if hidden
+                    else None,
                     "ignore_info": (extra.get("decisions") or {}).get(key),
                     "resurfaced": key in (extra.get("due") or ()),
                     **{
@@ -427,6 +438,11 @@ def policies(
         if item["object_type"] in ("entity", "device")
         and IGNORE_LABEL in (item.get("labels") or [])
     }
+    excepted = {
+        item["object_id"]
+        for item in snapshot["objects"]
+        if item["object_type"] in ("entity", "device") and item.get("excepted")
+    }
     for item in snapshot["objects"]:
         if item["object_type"] in ("automation", "script"):
             entry = registry.async_get(item["object_id"])
@@ -470,6 +486,7 @@ def policies(
             "auth": auth,
             "decisions": decisions,
             "due": due,
+            "excepted": excepted,
         },
     )
 

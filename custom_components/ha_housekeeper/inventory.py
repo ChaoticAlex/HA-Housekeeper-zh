@@ -79,6 +79,8 @@ from .dashboard_analysis import (
 from .db_health import database_summary
 from .entry_states import EntryStateHistory
 from .events import EventLog
+from .exceptions import ExceptionStore, traits, verdict
+from .exceptions import matches as _hits
 from .goals import GoalStore
 from .hacs import hacs_by_domain, removed_issues
 from .history import ScanHistory
@@ -798,6 +800,7 @@ STORE_NAMES = (
     "observations",
     "history",
     "ignored",
+    "exceptions",
     "policies",
     "replies",
     "journal",
@@ -833,6 +836,7 @@ class InventoryScanner:
         self.observations = ObservationStore(hass)
         self.history = ScanHistory(hass)
         self.ignored = IgnoreStore(hass)
+        self.exceptions = ExceptionStore(hass)
         self.policies = PolicyStore(hass)
         self.replies = ReplyStore(hass)
         self.journal = JournalStore(hass)
@@ -1682,10 +1686,45 @@ class InventoryScanner:
     def _mark_ignored(self, finding: dict[str, Any], registry: Any) -> None:
         """Set what hides a finding, the decision behind it and whether one ran out."""
         finding["ignored_by"] = self._ignored_by(finding, registry)
+        finding["ignore_rule"] = None
+        finding["rule_due"] = False
+        if finding["ignored_by"] is None:
+            self._apply_exception(finding)
         finding["ignored"] = finding["ignored_by"] is not None
         info = self.ignored.info(finding["key"])
         finding["ignore_info"] = info if finding["ignored_by"] == "user" else None
         finding["resurfaced"] = not finding["ignored"] and self.ignored.is_due(finding["key"])
+
+    def _apply_exception(self, finding: dict[str, Any]) -> None:
+        """Let the exception rules hide or hold back a finding, or mark it as due after a delay."""
+        if not self.exceptions.rules:
+            return
+        kind = "entity" if "." in finding["object_id"] else "device"
+        found = traits(self.hass, kind, finding["object_id"])
+        if found is None:
+            return
+        result = verdict(self.exceptions.rules, found, finding, datetime.now(UTC))
+        if result is None:
+            return
+        finding["ignore_rule"] = {**result["rule"], "until": result["until"]}
+        if result["state"] == "due":
+            finding["rule_due"] = True
+        else:
+            finding["ignored_by"] = "rule"
+
+    def _mark_excepted(self, objects: list[dict[str, Any]]) -> None:
+        """Flag the objects a hiding rule covers, so lists and cleanup plans leave them out."""
+        hiding = [r for r in self.exceptions.rules if r["action"] == "hide"]
+        for item in objects:
+            found = traits(self.hass, item["object_type"], item["object_id"]) if hiding else None
+            item["excepted"] = bool(found) and any(r["enabled"] and _hits(r, found) for r in hiding)
+
+    def set_exceptions(self, rules: list[Any]) -> str | None:
+        """Replace the exception rules and bring the cached snapshot up to date; the failure, or None."""
+        if (error := self.exceptions.set_rules(rules)) is not None:
+            return error
+        self._refresh_marks()
+        return None
 
     def set_finding_ignored(
         self,
@@ -1832,6 +1871,7 @@ class InventoryScanner:
     def _apply_marks(self, objects: list[dict[str, Any]], findings: list[dict[str, Any]]) -> None:
         sun = self._sun()
         apply_marks(objects, findings, self.marks.items, sun=sun)
+        self._mark_excepted(objects)
         self._window_seen = self._window_states(sun)
 
     @callback

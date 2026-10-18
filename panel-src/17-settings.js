@@ -85,15 +85,15 @@ class SettingsMixin {
 
   hiddenCard() {
     const hidden = (this.data?.findings || []).filter(f => f.ignored);
-    const by = f => (f.ignored_by === "label" || f.ignored_by === "mark" ? f.ignored_by : "manual");
+    const by = f => (f.ignored_by === "label" || f.ignored_by === "mark" || f.ignored_by === "rule" ? f.ignored_by : "manual");
     const objectName = f => this.findObject(this.findingKey(f))?.name || f.object_id;
-    const decision = f => (f.ignore_info ? this.decisionLabel(f) : "") + (f.mark ? ` ${this.markLine(f.mark)}` : "");
-    const action = f => (by(f) === "manual" ? `<button class="btn" data-ignore="${this.esc(f.key)}" data-ignore-value="0">${this.t("showFinding")}</button>` : `<span class="pill mute">${this.t(f.ignored_by === "mark" ? "mark_" + f.mark.kind : "ignoredByLabel")}</span>`);
+    const decision = f => (f.ignore_info ? this.decisionLabel(f) : "") + (f.mark ? ` ${this.markLine(f.mark)}` : "") + (f.ignored_by === "rule" ? this.findingRuleLine(f) : "");
+    const action = f => (by(f) === "manual" ? `<button class="btn" data-ignore="${this.esc(f.key)}" data-ignore-value="0">${this.t("showFinding")}</button>` : `<span class="pill mute">${this.t(f.ignored_by === "mark" ? "mark_" + f.mark.kind : f.ignored_by === "rule" ? "hidRuleLink" : "ignoredByLabel")}</span>`);
     const table = this.sysList("hidden", hidden, {
       sort: "name", dir: "asc", cls: "hid", tie: f => f.key, empty: "hiddenNone", exportName: "hidden-findings",
       sorts: [{ key: "name", label: "hidColObject", dir: "asc", get: objectName }, { key: "finding", label: "hidColFinding", dir: "asc", get: f => this.findingTitle(f) }],
       text: f => [objectName(f), f.object_id, this.findingTitle(f), decision(f)].join(" "),
-      filters: [{ name: "by", all: this.t("hidAllWays"), options: [["manual", this.t("hidByManual")], ["label", this.t("hidByLabel")], ["mark", this.t("hidByMark")]] }],
+      filters: [{ name: "by", all: this.t("hidAllWays"), options: [["manual", this.t("hidByManual")], ["label", this.t("hidByLabel")], ["mark", this.t("hidByMark")], ["rule", this.t("hidByRule")]] }],
       filterFns: { by: (f, v) => by(f) === v },
       columns: [
         { key: "name", label: "hidColObject", dir: "asc", cell: f => `<strong>${this.esc(objectName(f))}</strong><small>${this.esc(f.object_id)}</small>` },
@@ -213,7 +213,7 @@ class SettingsMixin {
     const tabs = this.settingsTabs();
     const tab = tabs.some(([id]) => id === this.settingsTab) ? this.settingsTab : "look";
     const tiles = tabs.map(([id, icon, label, hint, pill, tone]) => `<button class="taskcard t-${pill ? tone || "mute" : "ac"}${id === tab ? " on" : ""}" id="hk-set-${id}" aria-pressed="${id === tab}" aria-controls="hk-setpanel" data-set-tab="${id}"><ha-icon icon="${icon}"></ha-icon><strong>${this.t(label)}</strong><span class="setpill">${pill ? `<span class="pill ${tone || "mute"}">${this.esc(pill)}</span>` : ""}</span><small>${this.t(hint)}</small></button>`).join("");
-    const body = { look: () => `<div class="grid2">${this.lookCard()}<div class="stack">${this.readabilityCard()}${this.behaviorCard()}</div></div>`, protection: () => `${this.protectionCard()}${this.hiddenCard()}`, scan: () => `${this.scanCard()}${this.notifyCard()}${this.eventsCard()}`, info: () => this.infoCard() }[tab]();
+    const body = { look: () => `<div class="grid2">${this.lookCard()}<div class="stack">${this.readabilityCard()}${this.behaviorCard()}</div></div>`, protection: () => `${this.protectionCard()}${this.excCard()}${this.hiddenCard()}`, scan: () => `${this.scanCard()}${this.notifyCard()}${this.eventsCard()}`, info: () => this.infoCard() }[tab]();
     return `${this.settingsBand()}<div class="taskgrid compactgrid setgrid" role="group" aria-label="${this.esc(this.t("settings"))}">${tiles}</div><div id="hk-setpanel">${body}</div>`;
   }
 

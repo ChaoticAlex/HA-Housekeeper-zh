@@ -185,7 +185,7 @@ class PolicyItem(TypedDict):
     name: str
     key: str  # the key for the ignore list
     ignored: bool
-    by: str | None  # "label", "user" or None
+    by: str | None  # "label", "rule", "user" or None
     also: NotRequired[list[str]]  # duplicate_name: the other entities with the same name
     expected: NotRequired[str]  # naming_scheme: the prefix the id should start with
     rate: NotRequired[int]  # state_rate: state changes per day

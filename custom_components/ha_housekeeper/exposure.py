@@ -414,6 +414,7 @@ def exposure(hass: HomeAssistant, snapshot: dict[str, Any]) -> ExposureResult:
     ignored = {f["object_id"] for f in snapshot.get("findings", []) if f.get("ignored")} | {
         item["object_id"]
         for item in snapshot["objects"]
-        if item["object_type"] == "entity" and IGNORE_LABEL in (item.get("labels") or [])
+        if item["object_type"] == "entity"
+        and (IGNORE_LABEL in (item.get("labels") or []) or item.get("excepted"))
     }
     return {"available": True, **evaluate(collect(hass, list(entities)), entities, ignored)}  # type: ignore[typeddict-item]

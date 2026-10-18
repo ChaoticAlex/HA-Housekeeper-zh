@@ -17,6 +17,11 @@ from .battery_care import BatteryError, noted_types
 from .battery_kind import excluded
 from .const import DOMAIN
 from .db_health import growth
+from .exceptions import ACTIONS as EXCEPTION_ACTIONS
+from .exceptions import DAYS_MAX as EXCEPTION_DAYS_MAX
+from .exceptions import KINDS as EXCEPTION_KINDS
+from .exceptions import NOTE_MAX as EXCEPTION_NOTE_MAX
+from .exceptions import clean_rule, preview
 from .exposure import exposure
 from .goals import CATALOG as GOAL_CATALOG
 from .goals import evaluate as evaluate_goals
@@ -743,6 +748,93 @@ def websocket_goal_set(
 
 
 @websocket_api.require_admin
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/exceptions"})
+@websocket_api.async_response
+@with_scanner
+async def websocket_exceptions(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """The exception rules with what each does, and the areas and labels to choose from."""
+    snapshot = await scanner.async_get_snapshot()
+    now = datetime.now(UTC)
+    pick = lambda kind: sorted(  # noqa: E731
+        (
+            {"id": i["object_id"], "name": i["name"]}
+            for i in snapshot.get("objects", [])
+            if i["object_type"] == kind
+        ),
+        key=lambda i: str(i["name"]).casefold(),
+    )
+    connection.send_result(
+        msg["id"],
+        {
+            "rules": [
+                {**rule, "effect": preview(hass, rule, snapshot, now)}
+                for rule in scanner.exceptions.rules
+            ],
+            "areas": pick("area"),
+            "labels": pick("label"),
+            "days_max": EXCEPTION_DAYS_MAX,
+        },
+    )
+
+
+_RULE_SCHEMA = {
+    vol.Optional("id"): str,
+    vol.Required("kind"): vol.In(EXCEPTION_KINDS),
+    vol.Required("targets"): [str],
+    vol.Optional("action", default="hide"): vol.In(EXCEPTION_ACTIONS),
+    vol.Optional("days"): vol.All(int, vol.Range(min=1, max=EXCEPTION_DAYS_MAX)),
+    vol.Optional("enabled", default=True): bool,
+    vol.Optional("note", default=""): vol.All(str, vol.Length(max=EXCEPTION_NOTE_MAX)),
+}
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command(
+    {vol.Required("type"): f"{DOMAIN}/exceptions_preview", vol.Required("rule"): _RULE_SCHEMA}
+)
+@websocket_api.async_response
+@with_scanner
+async def websocket_exceptions_preview(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """What a rule that is not saved yet would do to the findings of the last scan."""
+    rule = clean_rule(msg["rule"])
+    if rule is None:
+        connection.send_error(msg["id"], "invalid", "The rule is not valid")
+        return
+    snapshot = await scanner.async_get_snapshot()
+    connection.send_result(msg["id"], preview(hass, rule, snapshot, datetime.now(UTC)))
+
+
+@websocket_api.require_admin
+@websocket_api.websocket_command(
+    {vol.Required("type"): f"{DOMAIN}/exceptions_set", vol.Required("rules"): [_RULE_SCHEMA]}
+)
+@callback
+@with_scanner
+def websocket_exceptions_set(
+    hass: HomeAssistant,
+    connection: websocket_api.ActiveConnection,
+    msg: dict[str, Any],
+    scanner: InventoryScanner,
+) -> None:
+    """Replace the exception rules. Only Housekeeper's own list changes."""
+    error = scanner.set_exceptions(msg["rules"])
+    if error:
+        connection.send_error(msg["id"], error, f"Rules not saved: {error}")
+        return
+    connection.send_result(msg["id"], {"saved": True})
+
+
+@websocket_api.require_admin
 @websocket_api.websocket_command(
     {
         vol.Required("type"): f"{DOMAIN}/mark_clear",
@@ -846,6 +938,9 @@ def async_register(hass: HomeAssistant) -> None:
     websocket_api.async_register_command(hass, websocket_lifecycle)
     websocket_api.async_register_command(hass, websocket_mark_set)
     websocket_api.async_register_command(hass, websocket_mark_clear)
+    websocket_api.async_register_command(hass, websocket_exceptions)
+    websocket_api.async_register_command(hass, websocket_exceptions_preview)
+    websocket_api.async_register_command(hass, websocket_exceptions_set)
     websocket_api.async_register_command(hass, websocket_set_stale_limit)
     websocket_api.async_register_command(hass, websocket_goals)
     websocket_api.async_register_command(hass, websocket_goal_set)

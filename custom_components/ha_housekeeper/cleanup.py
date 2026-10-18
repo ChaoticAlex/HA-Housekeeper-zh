@@ -460,8 +460,12 @@ def judge_device_action(
         reasons.append("used_probable")
     if action["has_statistics"]:
         reasons.append("has_statistics")
-    if IGNORE_LABEL in (device.get("labels") or []) or any(
-        IGNORE_LABEL in (item.get("labels") or []) for item in members
+    if (
+        IGNORE_LABEL in (device.get("labels") or [])
+        or device.get("excepted")
+        or any(
+            IGNORE_LABEL in (item.get("labels") or []) or item.get("excepted") for item in members
+        )
     ):
         reasons.append("ignored_by_label")
     if kind != "disable_device":
@@ -1107,7 +1111,7 @@ def judge_entity_action(
         reasons.append("used_probable")
     if action["has_statistics"]:
         reasons.append("has_statistics")
-    if item.get("labels") and IGNORE_LABEL in item["labels"]:
+    if (item.get("labels") and IGNORE_LABEL in item["labels"]) or item.get("excepted"):
         reasons.append("ignored_by_label")
     if item.get("marked_keep"):
         reasons.append("marked_keep")

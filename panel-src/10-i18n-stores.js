@@ -2,7 +2,7 @@
 const STORE_GROUPS = [
   ["history", ["observations", "history", "events", "runs", "replies", "load", "entry_states", "stale", "config_changes", "coverage", "scan_health", "signals"]],
   ["proof", ["journal", "attest"]],
-  ["yours", ["ignored", "marks", "notes", "reminders", "goals", "criteria", "batteries", "policies", "notify", "protection", "refactor"]],
+  ["yours", ["ignored", "exceptions", "marks", "notes", "reminders", "goals", "criteria", "batteries", "policies", "notify", "protection", "refactor"]],
 ];
 
 Object.assign(TEXT.de, {
@@ -32,6 +32,7 @@ Object.assign(TEXT.de, {
   store_journal: "Journal", storeText_journal: "Pläne des Aufräumens mit Ergebnis und Rückgängig-Angaben. Nie ausgeführte Pläne kannst du löschen; ausgeführte bleiben als Nachweis. Alte Dateisnapshots werden verdichtet, wenn die Größenbegrenzung erreicht ist.",
   store_attest: "Backup-Bestätigungen", storeText_attest: "Zwei Angaben, die nur du kennst: Notfall-Set sicher verwahrt und eine Wiederherstellung ausprobiert.",
   store_ignored: "Entscheidungen zu Befunden", storeText_ignored: "Ausgeblendet, bewusst behalten oder verschoben, mit Grund. Bleibt, bis du es änderst.",
+  store_exceptions: "Ausnahmeregeln", storeText_exceptions: "Regeln für Bereiche und Labels, deren Objekte nicht gemeldet werden.",
   store_marks: "Markierungen", storeText_marks: "Hinweise an Objekten: absichtlich offline, saisonal, Reserve, behalten.",
   store_notes: "Logbuch", storeText_notes: "Einträge, die du selbst schreibst.",
   store_reminders: "Erinnerungen", storeText_reminders: "Wartungen mit Intervall, Fälligkeit und den Tagen, an denen sie erledigt wurden.",
@@ -70,6 +71,7 @@ Object.assign(TEXT.en, {
   store_journal: "Journal", storeText_journal: "Cleanup plans with their result and undo details. You can delete plans that were never run; executed ones stay as the audit trail. Old file snapshots are condensed when the size limit is reached.",
   store_attest: "Backup confirmations", storeText_attest: "Two facts only you know: the emergency kit is stored safely and a restore was tried.",
   store_ignored: "Decisions about findings", storeText_ignored: "Hidden, deliberately kept or put off, with the reason. Stays until you change it.",
+  store_exceptions: "Exception rules", storeText_exceptions: "Rules for areas and labels whose objects are not reported.",
   store_marks: "Marks", storeText_marks: "Notes on objects: offline on purpose, seasonal, spare, keep.",
   store_notes: "Logbook", storeText_notes: "Entries you write yourself.",
   store_reminders: "Reminders", storeText_reminders: "Maintenance with its interval, due day and the days it was done.",

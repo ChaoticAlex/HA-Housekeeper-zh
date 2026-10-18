@@ -1070,7 +1070,7 @@ Object.assign(TEXT.en, {
 const STORE_GROUPS = [
   ["history", ["observations", "history", "events", "runs", "replies", "load", "entry_states", "stale", "config_changes", "coverage", "scan_health", "signals"]],
   ["proof", ["journal", "attest"]],
-  ["yours", ["ignored", "marks", "notes", "reminders", "goals", "criteria", "batteries", "policies", "notify", "protection", "refactor"]],
+  ["yours", ["ignored", "exceptions", "marks", "notes", "reminders", "goals", "criteria", "batteries", "policies", "notify", "protection", "refactor"]],
 ];
 
 Object.assign(TEXT.de, {
@@ -1100,6 +1100,7 @@ Object.assign(TEXT.de, {
   store_journal: "Journal", storeText_journal: "Pläne des Aufräumens mit Ergebnis und Rückgängig-Angaben. Nie ausgeführte Pläne kannst du löschen; ausgeführte bleiben als Nachweis. Alte Dateisnapshots werden verdichtet, wenn die Größenbegrenzung erreicht ist.",
   store_attest: "Backup-Bestätigungen", storeText_attest: "Zwei Angaben, die nur du kennst: Notfall-Set sicher verwahrt und eine Wiederherstellung ausprobiert.",
   store_ignored: "Entscheidungen zu Befunden", storeText_ignored: "Ausgeblendet, bewusst behalten oder verschoben, mit Grund. Bleibt, bis du es änderst.",
+  store_exceptions: "Ausnahmeregeln", storeText_exceptions: "Regeln für Bereiche und Labels, deren Objekte nicht gemeldet werden.",
   store_marks: "Markierungen", storeText_marks: "Hinweise an Objekten: absichtlich offline, saisonal, Reserve, behalten.",
   store_notes: "Logbuch", storeText_notes: "Einträge, die du selbst schreibst.",
   store_reminders: "Erinnerungen", storeText_reminders: "Wartungen mit Intervall, Fälligkeit und den Tagen, an denen sie erledigt wurden.",
@@ -1138,6 +1139,7 @@ Object.assign(TEXT.en, {
   store_journal: "Journal", storeText_journal: "Cleanup plans with their result and undo details. You can delete plans that were never run; executed ones stay as the audit trail. Old file snapshots are condensed when the size limit is reached.",
   store_attest: "Backup confirmations", storeText_attest: "Two facts only you know: the emergency kit is stored safely and a restore was tried.",
   store_ignored: "Decisions about findings", storeText_ignored: "Hidden, deliberately kept or put off, with the reason. Stays until you change it.",
+  store_exceptions: "Exception rules", storeText_exceptions: "Rules for areas and labels whose objects are not reported.",
   store_marks: "Marks", storeText_marks: "Notes on objects: offline on purpose, seasonal, spare, keep.",
   store_notes: "Logbook", storeText_notes: "Entries you write yourself.",
   store_reminders: "Reminders", storeText_reminders: "Maintenance with its interval, due day and the days it was done.",
@@ -3038,7 +3040,7 @@ class FindingsMixin {
     if (!list.length) return "";
     const hideButton = f => this.decide && this.decide.key === f.key ? this.decideForm(f)
       : `<div class="fbtns">${f.rule_id === "entity.possible_duplicate" ? `<button class="btn" data-notdup="${this.esc(f.key)}"><ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("notDuplicate")}</button><button class="btn" data-object="entity:${this.esc(f.affected_object)}"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("openTwin")}</button>` : ""}<button class="btn" data-decide-open="${this.esc(f.key)}" data-decide-preset="keep"><ha-icon icon="mdi:bookmark-check-outline"></ha-icon>${this.t("markKnown")}</button><button class="btn" data-decide-open="${this.esc(f.key)}" data-decide-preset="snooze"><ha-icon icon="mdi:clock-outline"></ha-icon>${this.t("fselSnooze")}</button><button class="btn" data-decide-open="${this.esc(f.key)}"><ha-icon icon="mdi:eye-off-outline"></ha-icon>${this.t("hideFinding")}</button></div>`;
-    const rows = list.map(f => `<div class="finding"><div><strong>${this.esc(this.findingTitle(f))}</strong><small class="fmeta">${this.pill(f.classification)}<span class="nw">${this.t("certainty")}: ${Math.round(f.confidence * 100)} %</span>${f.ignored ? ` · ${this.esc(f.mark ? this.markLine(f.mark) : this.decisionLabel(f))}` : ""}${f.resurfaced ? ` · ${this.t("dueLabel")}` : ""}</small>${f.impact ? `<small>${this.esc(this.impactLine(f))}</small>` : ""}${this.corrLine(f.key) ? `<small>${this.corrLine(f.key)}</small>` : ""}${f.ignored_by === "label" ? `<small>${this.t("ignoredByLabel")}</small>` : ""}</div>${f.ignored_by === "label" || f.ignored_by === "mark" ? "" : f.ignored ? `<button class="btn" data-ignore="${this.esc(f.key)}" data-ignore-value="0"><ha-icon icon="mdi:eye-outline"></ha-icon>${this.t("showFinding")}</button>` : hideButton(f)}</div>`).join("");
+    const rows = list.map(f => `<div class="finding"><div><strong>${this.esc(this.findingTitle(f))}</strong><small class="fmeta">${this.pill(f.classification)}<span class="nw">${this.t("certainty")}: ${Math.round(f.confidence * 100)} %</span>${f.ignored ? ` · ${this.esc(f.mark ? this.markLine(f.mark) : this.decisionLabel(f))}` : ""}${f.resurfaced ? ` · ${this.t("dueLabel")}` : ""}</small>${f.impact ? `<small>${this.esc(this.impactLine(f))}</small>` : ""}${this.corrLine(f.key) ? `<small>${this.corrLine(f.key)}</small>` : ""}${f.ignored_by === "label" ? `<small>${this.t("ignoredByLabel")}</small>` : ""}${f.ignore_rule ? `<small>${this.esc(this.findingRuleLine(f))}</small>` : ""}</div>${f.ignored_by === "label" || f.ignored_by === "mark" || f.ignored_by === "rule" ? "" : f.ignored ? `<button class="btn" data-ignore="${this.esc(f.key)}" data-ignore-value="0"><ha-icon icon="mdi:eye-outline"></ha-icon>${this.t("showFinding")}</button>` : hideButton(f)}</div>`).join("");
     return rows;
   }
 }
@@ -3369,15 +3371,15 @@ class SettingsMixin {
 
   hiddenCard() {
     const hidden = (this.data?.findings || []).filter(f => f.ignored);
-    const by = f => (f.ignored_by === "label" || f.ignored_by === "mark" ? f.ignored_by : "manual");
+    const by = f => (f.ignored_by === "label" || f.ignored_by === "mark" || f.ignored_by === "rule" ? f.ignored_by : "manual");
     const objectName = f => this.findObject(this.findingKey(f))?.name || f.object_id;
-    const decision = f => (f.ignore_info ? this.decisionLabel(f) : "") + (f.mark ? ` ${this.markLine(f.mark)}` : "");
-    const action = f => (by(f) === "manual" ? `<button class="btn" data-ignore="${this.esc(f.key)}" data-ignore-value="0">${this.t("showFinding")}</button>` : `<span class="pill mute">${this.t(f.ignored_by === "mark" ? "mark_" + f.mark.kind : "ignoredByLabel")}</span>`);
+    const decision = f => (f.ignore_info ? this.decisionLabel(f) : "") + (f.mark ? ` ${this.markLine(f.mark)}` : "") + (f.ignored_by === "rule" ? this.findingRuleLine(f) : "");
+    const action = f => (by(f) === "manual" ? `<button class="btn" data-ignore="${this.esc(f.key)}" data-ignore-value="0">${this.t("showFinding")}</button>` : `<span class="pill mute">${this.t(f.ignored_by === "mark" ? "mark_" + f.mark.kind : f.ignored_by === "rule" ? "hidRuleLink" : "ignoredByLabel")}</span>`);
     const table = this.sysList("hidden", hidden, {
       sort: "name", dir: "asc", cls: "hid", tie: f => f.key, empty: "hiddenNone", exportName: "hidden-findings",
       sorts: [{ key: "name", label: "hidColObject", dir: "asc", get: objectName }, { key: "finding", label: "hidColFinding", dir: "asc", get: f => this.findingTitle(f) }],
       text: f => [objectName(f), f.object_id, this.findingTitle(f), decision(f)].join(" "),
-      filters: [{ name: "by", all: this.t("hidAllWays"), options: [["manual", this.t("hidByManual")], ["label", this.t("hidByLabel")], ["mark", this.t("hidByMark")]] }],
+      filters: [{ name: "by", all: this.t("hidAllWays"), options: [["manual", this.t("hidByManual")], ["label", this.t("hidByLabel")], ["mark", this.t("hidByMark")], ["rule", this.t("hidByRule")]] }],
       filterFns: { by: (f, v) => by(f) === v },
       columns: [
         { key: "name", label: "hidColObject", dir: "asc", cell: f => `<strong>${this.esc(objectName(f))}</strong><small>${this.esc(f.object_id)}</small>` },
@@ -3497,7 +3499,7 @@ class SettingsMixin {
     const tabs = this.settingsTabs();
     const tab = tabs.some(([id]) => id === this.settingsTab) ? this.settingsTab : "look";
     const tiles = tabs.map(([id, icon, label, hint, pill, tone]) => `<button class="taskcard t-${pill ? tone || "mute" : "ac"}${id === tab ? " on" : ""}" id="hk-set-${id}" aria-pressed="${id === tab}" aria-controls="hk-setpanel" data-set-tab="${id}"><ha-icon icon="${icon}"></ha-icon><strong>${this.t(label)}</strong><span class="setpill">${pill ? `<span class="pill ${tone || "mute"}">${this.esc(pill)}</span>` : ""}</span><small>${this.t(hint)}</small></button>`).join("");
-    const body = { look: () => `<div class="grid2">${this.lookCard()}<div class="stack">${this.readabilityCard()}${this.behaviorCard()}</div></div>`, protection: () => `${this.protectionCard()}${this.hiddenCard()}`, scan: () => `${this.scanCard()}${this.notifyCard()}${this.eventsCard()}`, info: () => this.infoCard() }[tab]();
+    const body = { look: () => `<div class="grid2">${this.lookCard()}<div class="stack">${this.readabilityCard()}${this.behaviorCard()}</div></div>`, protection: () => `${this.protectionCard()}${this.excCard()}${this.hiddenCard()}`, scan: () => `${this.scanCard()}${this.notifyCard()}${this.eventsCard()}`, info: () => this.infoCard() }[tab]();
     return `${this.settingsBand()}<div class="taskgrid compactgrid setgrid" role="group" aria-label="${this.esc(this.t("settings"))}">${tiles}</div><div id="hk-setpanel">${body}</div>`;
   }
 
@@ -7552,9 +7554,9 @@ class PoliciesMixin {
 
   // The pieces of a violation that the compact row (the object's own page) and the table of the policies page share.
   polItemParts(item) {
-    const pill = item.ignored ? `<span class="pill mute">${this.t(item.by === "label" ? "polByLabel" : "polHiddenLabel")}</span>` : "";
+    const pill = item.ignored ? `<span class="pill mute">${this.t(item.by === "label" ? "polByLabel" : item.by === "rule" ? "hidByRule" : "polHiddenLabel")}</span>` : "";
     const due = item.resurfaced ? `<span class="pill warn">${this.t("dueLabel")}</span>` : "";
-    const button = item.by === "label" ? ""
+    const button = item.by === "label" || item.by === "rule" ? ""
       : item.ignored ? `<button class="btn" data-policy-ignore="${this.esc(item.key)}" data-policy-value="0">${this.t("polShow")}</button>`
       : `<button class="btn" data-decide-open="${this.esc(item.key)}">${this.t("polHide")}</button>`;
     const decision = item.ignored && item.by === "user" ? `<small>${this.esc(this.decisionLabel(item))}</small>` : "";
@@ -10518,9 +10520,9 @@ class FindingStatusMixin {
     const change = this.hasActionsTab(item, key) ? `<button class="btn" data-detail-tab="actions">${this.t("bandChange")}</button>` : "";
     const rows = (this.data?.findings || []).filter(f => f.ignored && f.ignored_by !== "mark" && this.findingKey(f) === key).map(f => {
       const info = f.ignore_info, byLabel = f.ignored_by === "label";
-      const title = byLabel ? this.t("bandByLabel") : info ? this.t(`decideKind_${info.kind}`) : this.t("ignoredLabel");
+      const title = f.ignored_by === "rule" ? this.t("hidByRule") : byLabel ? this.t("bandByLabel") : info ? this.t(`decideKind_${info.kind}`) : this.t("ignoredLabel");
       const until = info?.until ? this.t("decideUntil", { date: this.formatDate(info.until) }) : "";
-      const note = [until, info?.reason].filter(Boolean).join(" · ");
+      const note = [until, info?.reason, f.ignored_by === "rule" ? this.findingRuleLine(f) : ""].filter(Boolean).join(" · ");
       const undo = f.ignored_by === "user" ? `<button class="btn" data-ignore="${this.esc(f.key)}" data-ignore-value="0">${this.t("bandUndo")}</button>` : "";
       return `<div class="row" data-status-band="finding"><span class="tile mute"><ha-icon icon="mdi:bookmark-check-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(title)}</strong><small>${this.esc([this.findingTitle(f), note].filter(Boolean).join(" · "))}</small></span>${change}${undo}</div>`;
     });
@@ -10997,6 +10999,8 @@ const ERR_MESSAGE_KEYS = {
   "Not accepted: the plan has not run": "err_plan_not_run",
   "invalid window": "err_invalid_window",
   "not_found": "err_not_found",
+  "Rules not saved: too_many": "err_rules_too_many",
+  "Rules not saved: invalid": "err_rules_invalid",
   "The date does not exist": "err_date_invalid",
   "The date lies in the future": "err_date_future",
 };
@@ -11010,6 +11014,7 @@ Object.assign(TEXT.de, {
   err_date_invalid: "Dieses Datum gibt es nicht.", err_date_future: "Das Datum liegt in der Zukunft.",
   err_not_loaded: "HA Housekeeper ist nicht geladen.", err_days_required: "Zum Zurückstellen eines Befunds braucht es Tage.", err_reason_required: "Zum Behalten eines Befunds braucht es einen Grund.",
   err_invalid_limit: "Der Grenzwert liegt außerhalb des erlaubten Bereichs.", err_no_recorder: "Der Recorder ist nicht verfügbar.", err_nothing_to_merge: "Nach den Konflikten bleibt nichts übrig.",
+  err_rules_too_many: "Zu viele Regeln.", err_rules_invalid: "Die Regel ist nicht gültig.", err_invalid: "Die Eingabe ist nicht gültig.",
   err_too_many: "Zu viele Aktionen in einem Plan.", err_thresholds_order: "Info, niedrig, mittel und hoch müssen ansteigen.",
   err_failed: "Fehlgeschlagen: {detail}", err_not_accepted: "Nicht angenommen: {detail}",
 });
@@ -11022,6 +11027,7 @@ Object.assign(TEXT.en, {
   err_date_invalid: "This date does not exist.", err_date_future: "The date lies in the future.",
   err_not_loaded: "HA Housekeeper is not loaded.", err_days_required: "Putting a finding off needs days.", err_reason_required: "Keeping a finding needs a reason.",
   err_invalid_limit: "The limit is outside the allowed range.", err_no_recorder: "The recorder is not available.", err_nothing_to_merge: "Nothing is left after the conflicts.",
+  err_rules_too_many: "Too many rules.", err_rules_invalid: "The rule is not valid.", err_invalid: "The input is not valid.",
   err_too_many: "Too many actions in one plan.", err_thresholds_order: "Info, low, medium and high must rise.",
   err_failed: "Failed: {detail}", err_not_accepted: "Not accepted: {detail}",
 });
@@ -11983,6 +11989,174 @@ class PlanWizardMixin {
 
   bindPlanWizard(root) {
     root.querySelector("[data-plan-back]")?.addEventListener("click", () => { this.confirmation = null; this.confirmWord = ""; this.render(); });
+  }
+}
+
+// Exception rules: objects in an area or with a label are left out of the findings; mixed into the panel in 99-register.js.
+Object.assign(TEXT.de, {
+  excTitle: "Ausnahmeregeln", excHint: "Objekte in einem Bereich oder mit einem Label meldet Housekeeper nicht. Die Regeln gelten für Geräte und ihre Entitäten und nur in Housekeeper; Home Assistant bleibt unverändert. Das Label housekeeper_ignore wirkt zusätzlich fest.",
+  excNone: "Noch keine Regeln.", excAdd: "Regel hinzufügen", excEdit: "Ändern", excDelete: "Löschen", excLoading: "Regeln werden geladen …",
+  excKind: "Art", excKind_area: "Bereich", excKind_label: "Label", excTargets: "Bereiche oder Labels", excNoTargets: "In Home Assistant gibt es dafür noch nichts zur Auswahl.",
+  excAction: "Aktion", excAction_hide: "Ausblenden", excAction_delay: "Erst melden nach", excDays: "Tage nicht verfügbar", excNote: "Notiz (optional)",
+  excInherit: "Trifft Geräte und Entitäten. Eine Entität ohne eigenen Bereich erbt den Bereich ihres Geräts, ein Label am Gerät gilt auch für seine Entitäten.",
+  excDelayHint: "Hält nur „nicht verfügbar“, „unbekannt“ und „veraltet“ zurück. Alle anderen Befunde dieser Objekte (leere Batterie, defekter Verweis) erscheinen weiter normal; wer alles unterdrücken will, wählt „Ausblenden“. Nach Ablauf der Frist erscheint der Befund mit der Stufe seiner Ausfalldauer. Gemessen ab dem Ausfallbeginn, soweit bekannt; nach einem Neustart kann die Meldung später kommen, nie früher.",
+  excWinner: "Passen mehrere Regeln, schlägt „Ausblenden“ die Fristen; bei mehreren Fristen gilt die längste.",
+  excRuleArea: "Bereich {names}", excRuleLabel: "Label {names}", excRuleDelayLine: "Erst melden nach {n} Tagen", excRuleHideLine: "Ausblenden",
+  excEffectHide: "{objects} Objekte, {n} Befunde ausgeblendet", excEffectDelay: "{hold} Befunde zurückgehalten, {due} fällig", excEffectNone: "Trifft gerade nichts",
+  excPreview: "Vorschau", excPreviewHide: "{objects} Objekte, {n} Befunde würden ausgeblendet", excPreviewDelay: "{hold} Befunde würden zurückgehalten, {due} wären sofort fällig (schon länger ausgefallen)",
+  excImportant: "Dabei sind Befunde mit hoher Wirkung: {names}. Prüfe, ob sie wirklich ausgenommen sein sollen.",
+  excSave: "Regel speichern", excCancel: "Abbrechen", excNeedTarget: "Wähle mindestens einen Eintrag.", excFailed: "Nicht gespeichert: {reason}",
+  excOn: "Regel aktiv", excDue: "Frist abgelaufen",
+  hidByRule: "Durch eine Regel", ignoredByRule: "Ausgeblendet durch eine Ausnahmeregel: {rule}", heldByRule: "Zurückgehalten durch eine Ausnahmeregel: {rule}, wird ab {date} gemeldet", dueByRule: "Frist abgelaufen · Ausnahmeregel: {rule}",
+  hidRuleLink: "Regel",
+});
+Object.assign(TEXT.en, {
+  excTitle: "Exception rules", excHint: "Housekeeper does not report objects in an area or with a label. The rules cover devices and their entities and apply only in Housekeeper; Home Assistant stays unchanged. The label housekeeper_ignore keeps working on top.",
+  excNone: "No rules yet.", excAdd: "Add rule", excEdit: "Change", excDelete: "Delete", excLoading: "Loading rules …",
+  excKind: "Kind", excKind_area: "Area", excKind_label: "Label", excTargets: "Areas or labels", excNoTargets: "Home Assistant has nothing to choose from yet.",
+  excAction: "Action", excAction_hide: "Hide", excAction_delay: "Report only after", excDays: "days not available", excNote: "Note (optional)",
+  excInherit: "Covers devices and entities. An entity without an area of its own takes the area of its device, and a label on the device counts for its entities.",
+  excDelayHint: "Holds back only “not available”, “unknown” and “stale”. All other findings of these objects (empty battery, broken reference) still show as usual; to suppress everything choose “Hide”. When the time has passed the finding shows with the level of its outage. Counted from the start of the outage as far as known; after a restart the report can come later, never earlier.",
+  excWinner: "Where several rules match, “Hide” beats the delays; of several delays the longest counts.",
+  excRuleArea: "Area {names}", excRuleLabel: "Label {names}", excRuleDelayLine: "Report only after {n} days", excRuleHideLine: "Hide",
+  excEffectHide: "{objects} objects, {n} findings hidden", excEffectDelay: "{hold} findings held back, {due} due", excEffectNone: "Matches nothing right now",
+  excPreview: "Preview", excPreviewHide: "{objects} objects, {n} findings would be hidden", excPreviewDelay: "{hold} findings would be held back, {due} would be due at once (down for longer already)",
+  excImportant: "Findings with a high impact are among them: {names}. Check that they should really be left out.",
+  excSave: "Save rule", excCancel: "Cancel", excNeedTarget: "Choose at least one entry.", excFailed: "Not saved: {reason}",
+  excOn: "Rule active", excDue: "Time has passed",
+  hidByRule: "By a rule", ignoredByRule: "Hidden by an exception rule: {rule}", heldByRule: "Held back by an exception rule: {rule}, reported from {date}", dueByRule: "Time has passed · exception rule: {rule}",
+  hidRuleLink: "Rule",
+});
+
+class ExceptionsMixin {
+  // "Area Lager" or "Label ignore_status, other": what a rule names, in the words of Home Assistant.
+  excRuleName(rule) {
+    const type = rule.kind === "area" ? "area" : "label", list = this.data?.objects || [];
+    const names = rule.targets.map(id => list.find(x => x.object_type === type && x.object_id === id)?.name || id).join(", ");
+    return this.t(rule.kind === "area" ? "excRuleArea" : "excRuleLabel", { names });
+  }
+
+  // What a rule did to a finding: hidden, held back until a date, or its time has passed; "" for a finding no rule touched.
+  findingRuleLine(f) {
+    const info = f.ignore_rule;
+    if (!info) return "";
+    const rule = this.excRuleName(info);
+    if (f.rule_due) return this.t("dueByRule", { rule });
+    return f.ignored_by === "rule" ? this.t(info.action === "delay" ? "heldByRule" : "ignoredByRule", { rule, date: info.until ? this.formatDate(info.until) : "" }) : "";
+  }
+
+  excRuleLine(rule) {
+    return rule.action === "delay" ? this.t("excRuleDelayLine", { n: rule.days }) : this.t("excRuleHideLine");
+  }
+
+  async loadExceptions() {
+    if (this._excLoading) return;
+    this._excLoading = true;
+    try { this.exc = await this._hass.callWS({ type: "ha_housekeeper/exceptions" }); } catch (err) { this.failed(err); this.exc = this.exc || { rules: [], areas: [], labels: [] }; }
+    this._excLoading = false;
+    this.render();
+  }
+
+  excEffect(rule) {
+    const e = rule.effect || {};
+    if (rule.action === "delay") return e.hold || e.due ? this.t("excEffectDelay", { hold: e.hold, due: e.due }) : this.t("excEffectNone");
+    return e.hide ? this.t("excEffectHide", { objects: e.objects, n: e.hide }) : this.t("excEffectNone");
+  }
+
+  excCard() {
+    const head = `<div class="panelhead"><div><h2>${this.t("excTitle")}</h2><p>${this.t("excHint")}</p></div></div>`;
+    if (!this.exc) { this.loadExceptions(); return `<section class="panel">${head}<div class="pad"><p class="factnote">${this.t("excLoading")}</p></div></section>`; }
+    const rows = this.exc.rules.map(rule => `<div class="row"><span class="tile ${rule.enabled ? (rule.effect?.due ? "warn" : "ok") : "mute"}"><ha-icon icon="${rule.kind === "area" ? "mdi:floor-plan" : "mdi:label-outline"}"></ha-icon></span>
+        <span class="row-text"><strong>${this.esc(this.excRuleName(rule))}</strong><small>${this.esc(this.excRuleLine(rule))} · ${this.esc(this.excEffect(rule))}${rule.note ? ` · ${this.esc(rule.note)}` : ""}</small></span>
+        <label class="inline"><input type="checkbox" data-exc-toggle="${this.esc(rule.id)}" ${rule.enabled ? "checked" : ""} aria-label="${this.esc(this.t("excOn"))}"></label>
+        <button class="btn quiet" data-exc-edit="${this.esc(rule.id)}">${this.t("excEdit")}</button><button class="btn quiet" data-exc-delete="${this.esc(rule.id)}">${this.t("excDelete")}</button></div>`).join("");
+    const form = this.excForm ? this.excFormHtml(this.excForm) : `<div class="pad"><button class="btn" data-exc-edit=""><ha-icon icon="mdi:plus"></ha-icon>${this.t("excAdd")}</button></div>`;
+    return `<section class="panel">${head}${rows || `<div class="pad"><p class="factnote">${this.t("excNone")}</p></div>`}${form}</section>`;
+  }
+
+  excFormHtml(f) {
+    const list = (f.kind === "area" ? this.exc.areas : this.exc.labels) || [];
+    const boxes = list.map(x => `<label class="inline"><input type="checkbox" data-exc-target="${this.esc(x.id)}" ${f.targets.includes(x.id) ? "checked" : ""}> ${this.esc(x.name)}</label>`).join("") || `<small class="factnote">${this.t("excNoTargets")}</small>`;
+    const kinds = ["area", "label"].map(k => `<option value="${k}" ${f.kind === k ? "selected" : ""}>${this.t(`excKind_${k}`)}</option>`).join("");
+    const pv = f.preview;
+    const preview = pv ? `<div class="factnote" role="status"><strong>${this.t("excPreview")}:</strong> ${f.action === "delay" ? this.t("excPreviewDelay", { hold: pv.hold, due: pv.due }) : this.t("excPreviewHide", { objects: pv.objects, n: pv.hide })}
+        ${pv.important?.length ? `<br><span class="error">${this.t("excImportant", { names: this.esc(pv.important.map(x => x.name).join(", ")) })}</span>` : ""}</div>` : "";
+    return `<form class="pad markform" data-exc-form>
+      <div class="mrow"><label class="mfield"><span>${this.t("excKind")}</span><select data-exc-kind>${kinds}</select></label>
+        <label class="mfield grow"><span>${this.t("excNote")}</span><input data-exc-note maxlength="200" autocomplete="off" value="${this.esc(f.note)}"></label></div>
+      <div class="mfield"><span>${this.t("excTargets")}</span><div class="mrow" style="max-height:11em;overflow:auto">${boxes}</div></div>
+      <small class="factnote">${this.t("excInherit")}</small>
+      <div class="mrow"><label class="mfield"><span>${this.t("excAction")}</span><select data-exc-action><option value="hide" ${f.action === "hide" ? "selected" : ""}>${this.t("excAction_hide")}</option><option value="delay" ${f.action === "delay" ? "selected" : ""}>${this.t("excAction_delay")}</option></select></label>
+        ${f.action === "delay" ? `<label class="mfield"><span>${this.t("excDays")}</span><input type="number" min="1" max="${this.exc.days_max || 365}" data-exc-days value="${this.esc(f.days)}"></label>` : ""}</div>
+      ${f.action === "delay" ? `<small class="factnote">${this.t("excDelayHint")}</small>` : ""}<small class="factnote">${this.t("excWinner")}</small>
+      ${preview}${f.error ? `<small class="error" role="alert">${this.esc(f.error)}</small>` : ""}
+      <div class="mbtns"><button type="button" class="btn quiet" data-exc-cancel>${this.t("excCancel")}</button><button type="submit" class="btn primary">${this.t("excSave")}</button></div></form>`;
+  }
+
+  excDraft(f) {
+    return { ...(f.id ? { id: f.id } : {}), kind: f.kind, targets: f.targets, action: f.action, ...(f.action === "delay" ? { days: Math.max(1, Number(f.days) || 7) } : {}), enabled: f.enabled !== false, note: f.note.trim() };
+  }
+
+  openException(id) {
+    const rule = this.exc.rules.find(r => r.id === id);
+    this.excForm = rule ? { id, kind: rule.kind, targets: [...rule.targets], action: rule.action, days: rule.days || 7, enabled: rule.enabled, note: rule.note || "", error: "", preview: null }
+      : { id: "", kind: "area", targets: [], action: "hide", days: 7, enabled: true, note: "", error: "", preview: null };
+    this.render();
+    this.excPreview();
+  }
+
+  async excPreview() {
+    const f = this.excForm;
+    if (!f || !f.targets.length) { if (f) { f.preview = null; this.render(); } return; }
+    const seq = (this._excSeq = (this._excSeq || 0) + 1);
+    try {
+      const preview = await this._hass.callWS({ type: "ha_housekeeper/exceptions_preview", rule: this.excDraft(f) });
+      if (seq !== this._excSeq || this.excForm !== f) return;
+      f.preview = preview;
+    } catch (_) { f.preview = null; }
+    this.render();
+  }
+
+  async saveExceptions(rules, form) {
+    try {
+      await this._hass.callWS({ type: "ha_housekeeper/exceptions_set", rules });
+      this.excForm = null;
+      this.exc = await this._hass.callWS({ type: "ha_housekeeper/exceptions" });
+      await this.refreshData();
+    } catch (err) { if (form) form.error = this.t("excFailed", { reason: this.errText(err) }); else this.failed(err); }
+    this.render();
+  }
+
+  commitException() {
+    const f = this.excForm;
+    if (!f) return;
+    if (!f.targets.length) { f.error = this.t("excNeedTarget"); this.render(); return; }
+    const draft = this.excDraft(f), rules = this.exc.rules.map(({ effect, ...rule }) => rule);
+    const at = rules.findIndex(r => r.id === f.id);
+    if (at >= 0) rules[at] = draft; else rules.push(draft);
+    this.saveExceptions(rules, f);
+  }
+
+  bindExceptions(root) {
+    const rules = () => this.exc.rules.map(({ effect, ...rule }) => rule);
+    root.querySelectorAll("[data-exc-edit]").forEach(el => el.onclick = () => this.openException(el.dataset.excEdit));
+    root.querySelectorAll("[data-exc-delete]").forEach(el => el.onclick = () => this.saveExceptions(rules().filter(r => r.id !== el.dataset.excDelete), null));
+    root.querySelectorAll("[data-exc-toggle]").forEach(el => el.onchange = () => this.saveExceptions(rules().map(r => (r.id === el.dataset.excToggle ? { ...r, enabled: el.checked } : r)), null));
+    root.querySelectorAll("[data-exc-cancel]").forEach(el => el.onclick = () => { this.excForm = null; this.render(); });
+    root.querySelectorAll("[data-exc-form]").forEach(form => {
+      const f = this.excForm;
+      form.onsubmit = ev => { ev.preventDefault(); this.commitException(); };
+      form.querySelector("[data-exc-kind]").onchange = ev => { f.kind = ev.target.value; f.targets = []; f.preview = null; this.render(); };
+      form.querySelector("[data-exc-note]").oninput = ev => { f.note = ev.target.value; };
+      form.querySelector("[data-exc-action]").onchange = ev => { f.action = ev.target.value; this.render(); this.excPreview(); };
+      const days = form.querySelector("[data-exc-days]");
+      if (days) days.onchange = ev => { f.days = ev.target.value; this.excPreview(); };
+      form.querySelectorAll("[data-exc-target]").forEach(el => el.onchange = () => {
+        f.targets = [...form.querySelectorAll("[data-exc-target]")].filter(x => x.checked).map(x => x.dataset.excTarget);
+        this.excPreview();
+      });
+      form.onkeydown = ev => { if (ev.key === "Escape") { ev.preventDefault(); this.excForm = null; this.render(); } };
+    });
   }
 }
 
@@ -16714,6 +16888,7 @@ class HAHousekeeperPanel extends HTMLElement {
     root.querySelector("[data-done-days]")?.addEventListener("change", e => { this.doneDaysSel = Number(e.target.value); this.pages = {}; this.render(); });
     root.querySelector("[data-finding-due]")?.addEventListener("click", () => { this.findingDue = !this.findingDue; this.pages = {}; this.render(); });
     this.bindMarks(root);
+    this.bindExceptions(root);
     this.bindStale(root);
     this.bindNotes(root);
     this.bindConfirm(root);
@@ -16913,7 +17088,7 @@ class HAHousekeeperPanel extends HTMLElement {
       if (input && field) { input.value = field[4]; input.dispatchEvent(new Event("input")); }
     });
     root.querySelectorAll("[data-set-tab]").forEach(el => {
-      el.onclick = () => { this.settingsTab = el.dataset.setTab; this.optionsMessage = ""; this.render(); };
+      el.onclick = () => { this.settingsTab = el.dataset.setTab; this.optionsMessage = ""; if (this.settingsTab === "protection" && this.exc) this.loadExceptions(); this.render(); };
       el.onkeydown = ev => {
         const ids = [...root.querySelectorAll("[data-set-tab]")].map(b => b.dataset.setTab), at = ids.indexOf(el.dataset.setTab);
         const next = { ArrowRight: ids[(at + 1) % ids.length], ArrowLeft: ids[(at - 1 + ids.length) % ids.length], Home: ids[0], End: ids[ids.length - 1] }[ev.key];
@@ -16975,7 +17150,7 @@ class HAHousekeeperPanel extends HTMLElement {
 }
 
 // Mix the grouped methods into the panel element and register it.
-for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, SearchPagesMixin, LayoutMixin, FlowMixin, CorrelationMixin, WatchMixin, LifecycleMixin, BlueprintsMixin, MarksMixin, OftenMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, EntityStateMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, ScanCoverageMixin, ScanTimingMixin, SparklineMixin, BrokenCardsMixin, SystemMixin, ComponentsMixin, IntegrationPageMixin, MonitorMixin]) {
+for (const mixin of [ThemeMixin, StylesMixin, ListsMixin, OverviewMixin, FindingsMixin, ChangesMixin, SettingsMixin, CleanupMixin, InventoryMixin, GraphMixin, UnusedMixin, DiagnosisMixin, PropertiesMixin, MaintenanceMixin, BackupMixin, ReliabilityMixin, RunsMixin, StormsMixin, DbHealthMixin, ExposureMixin, PoliciesMixin, SearchMixin, SearchPagesMixin, LayoutMixin, FlowMixin, CorrelationMixin, WatchMixin, LifecycleMixin, BlueprintsMixin, MarksMixin, ExceptionsMixin, OftenMixin, CausesMixin, GoalsMixin, ExchangeMixin, DiagnosticsMixin, TraceDiagMixin, DryRunMixin, RefactorMixin, SafetyMixin, BatteryCareMixin, BatteryTypeMixin, BatteryKindMixin, BatteryTableMixin, PolicyRowMixin, HistoryTabMixin, ConfirmMixin, CriteriaHistoryMixin, BackupCleanupMixin, AreaAssignMixin, EntityStateMixin, DetailEditMixin, FindingStatusMixin, DetailActionsMixin, CounterMixin, PickerMixin, StaleMixin, EntityRecorderMixin, EntityTrimMixin, ExcludeMixin, PlanWizardMixin, ExportMixin, NotesMixin, KnownMixin, ScanPointsMixin, ScanCoverageMixin, ScanTimingMixin, SparklineMixin, BrokenCardsMixin, SystemMixin, ComponentsMixin, IntegrationPageMixin, MonitorMixin]) {
   for (const name of Object.getOwnPropertyNames(mixin.prototype)) {
     if (name !== "constructor") Object.defineProperty(HAHousekeeperPanel.prototype, name, Object.getOwnPropertyDescriptor(mixin.prototype, name));
   }

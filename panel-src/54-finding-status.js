@@ -18,9 +18,9 @@ class FindingStatusMixin {
     const change = this.hasActionsTab(item, key) ? `<button class="btn" data-detail-tab="actions">${this.t("bandChange")}</button>` : "";
     const rows = (this.data?.findings || []).filter(f => f.ignored && f.ignored_by !== "mark" && this.findingKey(f) === key).map(f => {
       const info = f.ignore_info, byLabel = f.ignored_by === "label";
-      const title = byLabel ? this.t("bandByLabel") : info ? this.t(`decideKind_${info.kind}`) : this.t("ignoredLabel");
+      const title = f.ignored_by === "rule" ? this.t("hidByRule") : byLabel ? this.t("bandByLabel") : info ? this.t(`decideKind_${info.kind}`) : this.t("ignoredLabel");
       const until = info?.until ? this.t("decideUntil", { date: this.formatDate(info.until) }) : "";
-      const note = [until, info?.reason].filter(Boolean).join(" · ");
+      const note = [until, info?.reason, f.ignored_by === "rule" ? this.findingRuleLine(f) : ""].filter(Boolean).join(" · ");
       const undo = f.ignored_by === "user" ? `<button class="btn" data-ignore="${this.esc(f.key)}" data-ignore-value="0">${this.t("bandUndo")}</button>` : "";
       return `<div class="row" data-status-band="finding"><span class="tile mute"><ha-icon icon="mdi:bookmark-check-outline"></ha-icon></span><span class="row-text"><strong>${this.esc(title)}</strong><small>${this.esc([this.findingTitle(f), note].filter(Boolean).join(" · "))}</small></span>${change}${undo}</div>`;
     });

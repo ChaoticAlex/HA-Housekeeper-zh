@@ -13,6 +13,7 @@ FONTS_URL: Final = "/ha_housekeeper/fonts"
 
 STORAGE_KEY: Final = f"{DOMAIN}.observations"
 IGNORED_STORAGE_KEY: Final = f"{DOMAIN}.ignored"
+EXCEPTIONS_STORAGE_KEY: Final = f"{DOMAIN}.exceptions"
 HISTORY_STORAGE_KEY: Final = f"{DOMAIN}.history"
 PREFLIGHT_STORAGE_KEY: Final = (
     f"{DOMAIN}.preflight"  # removed feature: the file is deleted on start

@@ -19,6 +19,8 @@ const ERR_MESSAGE_KEYS = {
   "Not accepted: the plan has not run": "err_plan_not_run",
   "invalid window": "err_invalid_window",
   "not_found": "err_not_found",
+  "Rules not saved: too_many": "err_rules_too_many",
+  "Rules not saved: invalid": "err_rules_invalid",
   "The date does not exist": "err_date_invalid",
   "The date lies in the future": "err_date_future",
 };
@@ -32,6 +34,7 @@ Object.assign(TEXT.de, {
   err_date_invalid: "Dieses Datum gibt es nicht.", err_date_future: "Das Datum liegt in der Zukunft.",
   err_not_loaded: "HA Housekeeper ist nicht geladen.", err_days_required: "Zum Zurückstellen eines Befunds braucht es Tage.", err_reason_required: "Zum Behalten eines Befunds braucht es einen Grund.",
   err_invalid_limit: "Der Grenzwert liegt außerhalb des erlaubten Bereichs.", err_no_recorder: "Der Recorder ist nicht verfügbar.", err_nothing_to_merge: "Nach den Konflikten bleibt nichts übrig.",
+  err_rules_too_many: "Zu viele Regeln.", err_rules_invalid: "Die Regel ist nicht gültig.", err_invalid: "Die Eingabe ist nicht gültig.",
   err_too_many: "Zu viele Aktionen in einem Plan.", err_thresholds_order: "Info, niedrig, mittel und hoch müssen ansteigen.",
   err_failed: "Fehlgeschlagen: {detail}", err_not_accepted: "Nicht angenommen: {detail}",
 });
@@ -44,6 +47,7 @@ Object.assign(TEXT.en, {
   err_date_invalid: "This date does not exist.", err_date_future: "The date lies in the future.",
   err_not_loaded: "HA Housekeeper is not loaded.", err_days_required: "Putting a finding off needs days.", err_reason_required: "Keeping a finding needs a reason.",
   err_invalid_limit: "The limit is outside the allowed range.", err_no_recorder: "The recorder is not available.", err_nothing_to_merge: "Nothing is left after the conflicts.",
+  err_rules_too_many: "Too many rules.", err_rules_invalid: "The rule is not valid.", err_invalid: "The input is not valid.",
   err_too_many: "Too many actions in one plan.", err_thresholds_order: "Info, low, medium and high must rise.",
   err_failed: "Failed: {detail}", err_not_accepted: "Not accepted: {detail}",
 });
