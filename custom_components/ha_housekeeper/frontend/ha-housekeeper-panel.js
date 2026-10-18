@@ -16144,8 +16144,15 @@ class HAHousekeeperPanel extends HTMLElement {
 
   // HA's dialog puts its own entry into the history and removes it on close; that pop must not step the panel back.
   moreInfo(entityId) {
+    // The dialog may load lazily, so watch for its entry (its marker in the history state, or a longer history) for a few seconds.
     const before = window.history?.length;
-    globalThis.setTimeout?.(() => { if (window.history?.length > before) this._dialogPop = true; }, 300);
+    globalThis.clearInterval?.(this._dialogWatch);
+    let waited = 0;
+    this._dialogWatch = globalThis.setInterval?.(() => {
+      waited += 100;
+      if (window.history?.state?.dialog || window.history?.length > before) { this._dialogPop = true; globalThis.clearInterval(this._dialogWatch); }
+      else if (waited >= 5000) globalThis.clearInterval(this._dialogWatch);
+    }, 100);
     this.dispatchEvent(new CustomEvent("hass-more-info", { detail: { entityId }, bubbles: true, composed: true }));
   }
 

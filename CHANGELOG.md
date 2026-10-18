@@ -4,6 +4,7 @@
 
 ### Geändert
 
+- **Mehr Infos:** Beim Schließen des Dialogs „Mehr Infos“ bleibt das Panel auf der Detailseite, statt zurück zur Liste zu springen.
 - **Kopieren:** Die Kopier-Knöpfe (z. B. „Angaben für eine Fehlermeldung kopieren“) funktionieren auch ohne HTTPS und melden einen Fehlschlag statt „Kopiert“.
 - **Links nach Home Assistant:** Alle Sprünge nach Home Assistant (Apps, Integrationen, HACS, Benutzer, Cloud) öffnen in einem neuen Tab statt im selben.
 - **Updates:** Die ausstehenden Updates stehen in der gewohnten Tabelle mit Suche, Sortierung, Filter nach Bereich und Seiten.
@@ -12,6 +13,7 @@
 
 #### Changed
 
+- **More info:** Closing the “More info” dialog keeps the panel on the detail page instead of jumping back to the list.
 - **Copying:** The copy buttons (e.g. “Copy details for a bug report”) also work without HTTPS and report a failure instead of “Copied”.
 - **Links into Home Assistant:** All jumps into Home Assistant (apps, integrations, HACS, users, cloud) now open in a new tab instead of the current one.
 - **Updates:** Pending updates are shown in the usual table with search, sorting, an area filter and pages.
