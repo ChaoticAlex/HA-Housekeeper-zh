@@ -190,6 +190,102 @@
           "description": "The id of the object, e.g. sensor.keller_temperatur."
         }
       }
+    },
+    "finding_decide": {
+      "name": "AI access: decide about a finding",
+      "description": "Hides, keeps or puts off one finding in Housekeeper, or shows it again. Only Housekeeper's own list changes, never Home Assistant; the change can be taken back with \"undo\" or in the panel. Needs \"AI access\" and \"Change the list\" to be switched on. Get the key from \"findings\".",
+      "fields": {
+        "key": {
+          "name": "Finding key",
+          "description": "The key of the finding, as listed by \"findings\"."
+        },
+        "action": {
+          "name": "Action",
+          "description": "decide to hide, keep or put off, restore to show it again."
+        },
+        "kind": {
+          "name": "Decision",
+          "description": "ignore hides it for good, keep says it is meant to be so (needs a reason), snooze puts it off (needs days)."
+        },
+        "reason": {
+          "name": "Reason",
+          "description": "Why, up to 200 characters."
+        },
+        "days": {
+          "name": "Days",
+          "description": "How long a snooze or another decision holds, 1 to 3650."
+        }
+      }
+    },
+    "mark": {
+      "name": "AI access: mark an object",
+      "description": "Tells Housekeeper what to expect of an object (offline on purpose, seasonal, a spare, keep, replaced), or takes the mark away. Only Housekeeper's own list changes; the change can be taken back. Needs \"AI access\" and \"Change the list\" to be switched on.",
+      "fields": {
+        "action": {
+          "name": "Action",
+          "description": "set or clear."
+        },
+        "object_type": {
+          "name": "Object type",
+          "description": "entity, device, config_entry or app."
+        },
+        "object_id": {
+          "name": "Object id",
+          "description": "The id of the object."
+        },
+        "kind": {
+          "name": "Mark",
+          "description": "expected_offline, seasonal, spare, keep or replaced. Integrations and apps accept only the first three."
+        },
+        "reason": {
+          "name": "Reason",
+          "description": "Why, up to 200 characters."
+        },
+        "days": {
+          "name": "Days",
+          "description": "Until when the mark holds, 1 to 3650. Without it the mark has no end."
+        },
+        "target": {
+          "name": "Replacement",
+          "description": "For replaced: the object that takes its place."
+        }
+      }
+    },
+    "note_set": {
+      "name": "AI access: logbook entry",
+      "description": "Adds, changes or deletes an entry of Housekeeper's logbook, marked as written by an agent. Only Housekeeper's own list changes; the change can be taken back. Needs \"AI access\" and \"Change the list\" to be switched on.",
+      "fields": {
+        "action": {
+          "name": "Action",
+          "description": "save or delete."
+        },
+        "note_id": {
+          "name": "Entry id",
+          "description": "The entry to change or delete. Without it a new entry is added."
+        },
+        "title": {
+          "name": "Title",
+          "description": "Up to 80 characters."
+        },
+        "note": {
+          "name": "Text",
+          "description": "Up to 500 characters."
+        },
+        "target": {
+          "name": "Object",
+          "description": "The id of the object the entry is about, optional."
+        }
+      }
+    },
+    "undo": {
+      "name": "AI access: take back a change",
+      "description": "Takes back one change from the log of AI access, as it was before. Get the time of the entry from \"audit\". Needs \"AI access\" and \"Change the list\" to be switched on.",
+      "fields": {
+        "at": {
+          "name": "Time of the entry",
+          "description": "The \"at\" of the log entry."
+        }
+      }
     }
   },
   "exceptions": {
@@ -219,6 +315,24 @@
     },
     "not_found": {
       "message": "The object is not in the last scan."
+    },
+    "reason_required": {
+      "message": "Keeping a finding needs a reason."
+    },
+    "days_required": {
+      "message": "Putting a finding off needs a number of days."
+    },
+    "finding_not_found": {
+      "message": "The finding is not in the latest scan."
+    },
+    "kind_not_allowed": {
+      "message": "This kind of mark is not allowed for this object."
+    },
+    "target_unknown": {
+      "message": "The replacement is not in the latest scan."
+    },
+    "too_many": {
+      "message": "The list is full."
     }
   }
 }

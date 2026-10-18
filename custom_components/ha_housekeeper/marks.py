@@ -19,7 +19,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
 from .const import MARKS_STORAGE_KEY, STORAGE_VERSION
-from .ignored import REASON_LIMIT, due
+from .ignored import REASON_LIMIT, VIAS, due
 
 SAVE_DELAY = 10
 KINDS = ("expected_offline", "seasonal", "spare", "keep", "replaced")
@@ -137,6 +137,7 @@ def _clean(value: Any) -> dict[str, Any] | None:
         "until": _text(value, "until"),
         "target": (_text(value, "target") or "")[:TARGET_LIMIT] or None,
         "by": _text(value, "by"),
+        "via": value["via"] if value.get("via") in VIAS else None,
         "window": clean_window(value.get("window")),
         "grace": clean_grace(value.get("grace")),
     }
@@ -173,6 +174,7 @@ class MarkStore:
         by: str | None = None,
         window: dict[str, Any] | None = None,
         grace: int = GRACE_DEFAULT,
+        via: str | None = None,
     ) -> bool:
         """Record a mark; False when the kind is unknown, the window is invalid or the store is full."""
         if window is not None and clean_window(window) is None:
@@ -186,11 +188,20 @@ class MarkStore:
             "until": until.isoformat() if until else None,
             "target": (target or "")[:TARGET_LIMIT] or None,
             "by": by,
+            "via": via,
             "window": clean_window(window),
             "grace": clean_grace(grace),
         }
         self._save()
         return True
+
+    def restore(self, key: str, entry: dict[str, Any] | None) -> None:
+        """Put a mark back exactly as it was, or take it away when there was none."""
+        if entry is None:
+            self.items.pop(key, None)
+        elif (cleaned := _clean(entry)) is not None:
+            self.items[key] = cleaned
+        self._save()
 
     def clear(self, key: str) -> bool:
         if self.items.pop(key, None) is None:

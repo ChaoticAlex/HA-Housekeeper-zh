@@ -1795,6 +1795,7 @@ class InventoryScanner:
         reason: str = "",
         days: int | None = None,
         by: str | None = None,
+        via: str | None = None,
     ) -> bool:
         """Hide or show one finding in the stored state and the cached snapshot.
 
@@ -1808,7 +1809,7 @@ class InventoryScanner:
                 self.ignored.set_ignored(key, False, now)
                 return True
             until = now + timedelta(days=days) if days else None
-            return self.ignored.decide(key, kind, now, reason=reason, until=until, by=by)
+            return self.ignored.decide(key, kind, now, reason=reason, until=until, by=by, via=via)
 
         if key.startswith(POLICY_KEY_PREFIX):
             return store()
@@ -1819,13 +1820,26 @@ class InventoryScanner:
             return False
         if not store():
             return False
+        self._refresh_finding(finding)
+        return True
+
+    def restore_decision(self, key: str, entry: dict[str, Any] | None) -> None:
+        """Put the decision about a finding back as it was (``None``: there was none)."""
+        self.ignored.restore(key, entry)
+        finding = next(
+            (f for f in (self._snapshot or {}).get("findings", []) if f["key"] == key), None
+        )
+        if finding is not None:
+            self._refresh_finding(finding)
+
+    def _refresh_finding(self, finding: dict[str, Any]) -> None:
+        assert self._snapshot is not None
         self._mark_ignored(finding, er.async_get(self.hass))
         self._snapshot["causes"] = apply_causes(
             self._snapshot["objects"], self._snapshot["edges"], self._snapshot["findings"]
         )
         async_sync_issues(self.hass, self._snapshot["findings"])
         async_dispatcher_send(self.hass, SIGNAL_SCAN_COMPLETE)
-        return True
 
     def set_mark(
         self,
@@ -1839,6 +1853,7 @@ class InventoryScanner:
         by: str | None = None,
         window: dict[str, str] | None = None,
         grace: int = GRACE_DEFAULT,
+        via: str | None = None,
     ) -> str | None:
         """Mark an entity, device, integration or app; the reason it failed, or None."""
         if kind not in KINDS_OF.get(object_type, KINDS):
@@ -1863,10 +1878,16 @@ class InventoryScanner:
             by=by,
             window=window,
             grace=grace,
+            via=via,
         ):
             return "too_many"
         self._refresh_marks()
         return None
+
+    def restore_mark(self, object_type: str, object_id: str, entry: dict[str, Any] | None) -> None:
+        """Put the mark of an object back as it was (``None``: there was none)."""
+        self.marks.restore(mark_key(object_type, object_id), entry)
+        self._refresh_marks()
 
     async def set_stale_limit(self, entity_id: str, hours: int | None) -> str | None:
         """Set the "no new report" limit of one sensor (0 = off, ``None`` = default); the failure, or None."""

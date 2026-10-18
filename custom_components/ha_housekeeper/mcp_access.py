@@ -121,6 +121,10 @@ class McpStore:
         self.entries = [e for e in self.entries if (_time(e["at"]) or now) >= cutoff][-ENTRY_LIMIT:]
         self._save()
 
+    def mark_undone(self, entry: dict[str, Any]) -> None:
+        entry["undone"] = True
+        self._save()
+
     def recent(self, kind: str | None = None, only_failed: bool = False) -> list[dict[str, Any]]:
         """The log, newest first, optionally one kind or only calls that did not go through."""
         rows = reversed(self.entries)

@@ -84,3 +84,101 @@ audit:
           min: 1
           max: 50
           mode: box
+
+finding_decide:
+  fields:
+    key:
+      required: true
+      selector:
+        text:
+    action:
+      required: true
+      selector:
+        select:
+          options: [decide, restore]
+    kind:
+      required: false
+      default: ignore
+      selector:
+        select:
+          options: [ignore, keep, snooze]
+    reason:
+      required: false
+      selector:
+        text:
+    days:
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 3650
+          mode: box
+
+mark:
+  fields:
+    action:
+      required: true
+      selector:
+        select:
+          options: [set, clear]
+    object_type:
+      required: true
+      selector:
+        select:
+          options: [entity, device, config_entry, app]
+    object_id:
+      required: true
+      selector:
+        text:
+    kind:
+      required: false
+      selector:
+        select:
+          options: [expected_offline, seasonal, spare, keep, replaced]
+    reason:
+      required: false
+      selector:
+        text:
+    days:
+      required: false
+      selector:
+        number:
+          min: 1
+          max: 3650
+          mode: box
+    target:
+      required: false
+      selector:
+        text:
+
+note_set:
+  fields:
+    action:
+      required: true
+      selector:
+        select:
+          options: [save, delete]
+    note_id:
+      required: false
+      selector:
+        text:
+    title:
+      required: false
+      selector:
+        text:
+    note:
+      required: false
+      selector:
+        text:
+          multiline: true
+    target:
+      required: false
+      selector:
+        text:
+
+undo:
+  fields:
+    at:
+      required: true
+      selector:
+        text:

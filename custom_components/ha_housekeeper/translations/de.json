@@ -190,6 +190,102 @@
           "description": "Die ID des Objekts, z. B. sensor.keller_temperatur."
         }
       }
+    },
+    "finding_decide": {
+      "name": "KI-Zugriff: über einen Befund entscheiden",
+      "description": "Blendet einen Befund in Housekeeper aus, behält ihn oder stellt ihn zurück, oder zeigt ihn wieder. Nur Housekeepers eigene Liste ändert sich, nie Home Assistant; die Änderung lässt sich mit „undo“ oder im Panel zurücknehmen. Braucht „KI-Zugriff aktivieren“ und „Merkliste ändern“. Den Schlüssel liefert „findings“.",
+      "fields": {
+        "key": {
+          "name": "Schlüssel des Befunds",
+          "description": "Der Schlüssel des Befunds, wie ihn „findings“ liefert."
+        },
+        "action": {
+          "name": "Aktion",
+          "description": "decide zum Ausblenden, Behalten oder Zurückstellen, restore zum Wiedereinblenden."
+        },
+        "kind": {
+          "name": "Entscheidung",
+          "description": "ignore blendet aus, keep sagt, dass es so gewollt ist (braucht einen Grund), snooze stellt zurück (braucht Tage)."
+        },
+        "reason": {
+          "name": "Grund",
+          "description": "Warum, bis 200 Zeichen."
+        },
+        "days": {
+          "name": "Tage",
+          "description": "Wie lange eine Zurückstellung oder andere Entscheidung gilt, 1 bis 3650."
+        }
+      }
+    },
+    "mark": {
+      "name": "KI-Zugriff: Objekt markieren",
+      "description": "Sagt Housekeeper, was bei einem Objekt zu erwarten ist (absichtlich offline, saisonal, Reserve, behalten, ersetzt), oder nimmt die Marke weg. Nur Housekeepers eigene Liste ändert sich; die Änderung lässt sich zurücknehmen. Braucht „KI-Zugriff aktivieren“ und „Merkliste ändern“.",
+      "fields": {
+        "action": {
+          "name": "Aktion",
+          "description": "set oder clear."
+        },
+        "object_type": {
+          "name": "Objektart",
+          "description": "entity, device, config_entry oder app."
+        },
+        "object_id": {
+          "name": "Objekt-ID",
+          "description": "Die ID des Objekts."
+        },
+        "kind": {
+          "name": "Marke",
+          "description": "expected_offline, seasonal, spare, keep oder replaced. Integrationen und Apps kennen nur die ersten drei."
+        },
+        "reason": {
+          "name": "Grund",
+          "description": "Warum, bis 200 Zeichen."
+        },
+        "days": {
+          "name": "Tage",
+          "description": "Bis wann die Marke gilt, 1 bis 3650. Ohne Angabe hat sie kein Ende."
+        },
+        "target": {
+          "name": "Ersatz",
+          "description": "Bei replaced: das Objekt, das den Platz einnimmt."
+        }
+      }
+    },
+    "note_set": {
+      "name": "KI-Zugriff: Logbuch-Eintrag",
+      "description": "Legt einen Eintrag in Housekeepers Logbuch an, ändert oder löscht ihn, gekennzeichnet als von einem Agenten geschrieben. Nur Housekeepers eigene Liste ändert sich; die Änderung lässt sich zurücknehmen. Braucht „KI-Zugriff aktivieren“ und „Merkliste ändern“.",
+      "fields": {
+        "action": {
+          "name": "Aktion",
+          "description": "save oder delete."
+        },
+        "note_id": {
+          "name": "Eintrags-ID",
+          "description": "Der Eintrag, der geändert oder gelöscht wird. Ohne Angabe entsteht ein neuer."
+        },
+        "title": {
+          "name": "Titel",
+          "description": "Bis 80 Zeichen."
+        },
+        "note": {
+          "name": "Text",
+          "description": "Bis 500 Zeichen."
+        },
+        "target": {
+          "name": "Objekt",
+          "description": "Die ID des Objekts, um das es geht, optional."
+        }
+      }
+    },
+    "undo": {
+      "name": "KI-Zugriff: Änderung zurücknehmen",
+      "description": "Nimmt eine Änderung aus dem Protokoll des KI-Zugriffs zurück, so wie es vorher war. Die Zeit des Eintrags liefert „audit“. Braucht „KI-Zugriff aktivieren“ und „Merkliste ändern“.",
+      "fields": {
+        "at": {
+          "name": "Zeit des Eintrags",
+          "description": "Das „at“ des Protokolleintrags."
+        }
+      }
     }
   },
   "exceptions": {
@@ -219,6 +315,24 @@
     },
     "not_found": {
       "message": "Das Objekt ist nicht im letzten Scan."
+    },
+    "reason_required": {
+      "message": "Ein Befund zu behalten braucht einen Grund."
+    },
+    "days_required": {
+      "message": "Einen Befund zurückzustellen braucht eine Zahl von Tagen."
+    },
+    "finding_not_found": {
+      "message": "Der Befund ist nicht im letzten Scan."
+    },
+    "kind_not_allowed": {
+      "message": "Diese Art von Marke ist für dieses Objekt nicht erlaubt."
+    },
+    "target_unknown": {
+      "message": "Der Ersatz ist nicht im letzten Scan."
+    },
+    "too_many": {
+      "message": "Die Liste ist voll."
     }
   }
 }

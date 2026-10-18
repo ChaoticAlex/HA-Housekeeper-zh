@@ -12,7 +12,9 @@ from __future__ import annotations
 import re
 from collections import Counter
 from collections.abc import Callable
+from copy import deepcopy
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from fnmatch import fnmatchcase
 from typing import Any
 
@@ -20,9 +22,12 @@ import voluptuous as vol
 from homeassistant.core import HomeAssistant
 
 from .const import API_SCHEMA
+from .ignored import REASON_LIMIT as IGNORE_REASON_LIMIT
 from .inventory import InventoryScanner
-from .marks import mark_key
+from .marks import KINDS as MARK_KINDS
+from .marks import OBJECT_TYPES, mark_key
 from .mcp_access import short_params
+from .notes import NOTE_MAX, TARGET_MAX, TITLE_MAX, NoteError
 
 LEVELS = ("info", "low", "medium", "high")
 RANK = {"none": 0, "info": 1, "low": 2, "medium": 3, "high": 4}
@@ -31,6 +36,8 @@ LIMIT_MAX = 50
 TEXT_LIMIT = 80
 REASON_SHOWN = 120
 DECISIONS = ("hide", "include", "only")
+VIA = "mcp"
+IGNORE_KINDS = ("ignore", "keep", "snooze")
 
 _CONTROL = re.compile(r"[\x00-\x1f\x7f]+")
 
@@ -68,6 +75,38 @@ OBJECT_SCHEMA = vol.Schema(
         vol.Required("object_id"): vol.All(str, vol.Length(min=1, max=255)),
     }
 )
+_REASON = vol.All(str, vol.Length(max=IGNORE_REASON_LIMIT))
+_DAYS = vol.All(int, vol.Range(min=1, max=3650))
+DECIDE_SCHEMA = vol.Schema(
+    {
+        vol.Required("key"): vol.All(str, vol.Length(min=1, max=300)),
+        vol.Required("action"): vol.In(("decide", "restore")),
+        vol.Optional("kind", default="ignore"): vol.In(IGNORE_KINDS),
+        vol.Optional("reason", default=""): _REASON,
+        vol.Optional("days"): _DAYS,
+    }
+)
+MARK_SCHEMA = vol.Schema(
+    {
+        vol.Required("action"): vol.In(("set", "clear")),
+        vol.Required("object_type"): vol.In(OBJECT_TYPES),
+        vol.Required("object_id"): vol.All(str, vol.Length(min=1, max=255)),
+        vol.Optional("kind"): vol.In(MARK_KINDS),
+        vol.Optional("reason", default=""): _REASON,
+        vol.Optional("days"): _DAYS,
+        vol.Optional("target"): vol.All(str, vol.Length(max=255)),
+    }
+)
+NOTE_SCHEMA = vol.Schema(
+    {
+        vol.Required("action"): vol.In(("save", "delete")),
+        vol.Optional("note_id"): vol.All(str, vol.Length(max=64)),
+        vol.Optional("title", default=""): vol.All(str, vol.Length(max=TITLE_MAX)),
+        vol.Optional("note", default=""): vol.All(str, vol.Length(max=NOTE_MAX)),
+        vol.Optional("target", default=""): vol.All(str, vol.Length(max=TARGET_MAX)),
+    }
+)
+UNDO_SCHEMA = vol.Schema({vol.Required("at"): vol.All(str, vol.Length(max=40))})
 RELATION_LIMIT = 25
 USED = ("TRIGGERS_ON", "USES_AS_CONDITION", "TARGETS", "REFERENCES", "SHOWS", "INCLUDES")
 BELONGS = ("OWNS", "PROVIDES", "CONTAINS", "VIA_DEVICE")
@@ -105,7 +144,9 @@ def _snapshot(scanner: InventoryScanner) -> dict[str, Any]:
     return snapshot
 
 
-def status(scanner: InventoryScanner, data: dict[str, Any]) -> dict[str, Any]:
+def status(
+    scanner: InventoryScanner, data: dict[str, Any], _user: str | None = None
+) -> dict[str, Any]:
     """Where the last scan stands and how many findings there are, no names."""
     snapshot = scanner.snapshot
     result: dict[str, Any] = {
@@ -128,7 +169,9 @@ def status(scanner: InventoryScanner, data: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
-def findings(scanner: InventoryScanner, data: dict[str, Any]) -> dict[str, Any]:
+def findings(
+    scanner: InventoryScanner, data: dict[str, Any], _user: str | None = None
+) -> dict[str, Any]:
     """Findings, most important first, filtered and in pages of at most ``LIMIT_MAX``."""
     snapshot = _snapshot(scanner)
     objects: dict[str, dict[str, Any]] = {}
@@ -228,7 +271,9 @@ def _related(
     return {"total": len(rows), "items": items}
 
 
-def object_card(scanner: InventoryScanner, data: dict[str, Any]) -> dict[str, Any]:
+def object_card(
+    scanner: InventoryScanner, data: dict[str, Any], _user: str | None = None
+) -> dict[str, Any]:
     """One object: what it is, what was decided about it, its findings and how it is connected."""
     snapshot = _snapshot(scanner)
     kind, ident = data["object_type"], data["object_id"]
@@ -291,20 +336,125 @@ def object_card(scanner: InventoryScanner, data: dict[str, Any]) -> dict[str, An
     }
 
 
-def audit(scanner: InventoryScanner, data: dict[str, Any]) -> dict[str, Any]:
+def finding_decide(
+    scanner: InventoryScanner, data: dict[str, Any], user: str | None
+) -> dict[str, Any]:
+    """Hide, keep or put off one finding, or show it again. Only Housekeeper's own list changes."""
+    key, deciding = data["key"], data["action"] == "decide"
+    if deciding and data["kind"] == "keep" and not data["reason"].strip():
+        raise McpError("reason_required")
+    if deciding and data["kind"] == "snooze" and "days" not in data:
+        raise McpError("days_required")
+    previous = scanner.ignored.entry(key)
+    if not scanner.set_finding_ignored(
+        key,
+        deciding,
+        kind=data["kind"],
+        reason=data["reason"],
+        days=data.get("days"),
+        by=user,
+        via=VIA,
+    ):
+        raise McpError("finding_not_found")
+    return {
+        "schema": API_SCHEMA,
+        "changed": 1,
+        "_undo": {"what": "finding", "key": key, "previous": previous},
+    }
+
+
+def mark(scanner: InventoryScanner, data: dict[str, Any], user: str | None) -> dict[str, Any]:
+    """Tell Housekeeper what to expect of an object, or take that back. Only its own list changes."""
+    kind, ident = data["object_type"], data["object_id"]
+    previous = deepcopy(scanner.marks.items.get(mark_key(kind, ident)))
+    if data["action"] == "set":
+        if "kind" not in data:
+            raise McpError("invalid_format")
+        error = scanner.set_mark(
+            kind,
+            ident,
+            data["kind"],
+            reason=data["reason"],
+            days=data.get("days"),
+            target=data.get("target"),
+            by=user,
+            via=VIA,
+        )
+        if error:
+            raise McpError(error)
+    elif not scanner.clear_mark(kind, ident):
+        raise McpError("not_found")
+    return {
+        "schema": API_SCHEMA,
+        "changed": 1,
+        "_undo": {"what": "mark", "type": kind, "id": ident, "previous": previous},
+    }
+
+
+def note_set(scanner: InventoryScanner, data: dict[str, Any], user: str | None) -> dict[str, Any]:
+    """Add, change or delete an entry of the logbook. Only Housekeeper's own list changes."""
+    note_id = data.get("note_id")
+    previous = deepcopy(next((i for i in scanner.notes.items if i["id"] == note_id), None))
+    try:
+        if data["action"] == "save":
+            note_id = scanner.notes.upsert(
+                note_id,
+                data["title"],
+                datetime.now(UTC).isoformat(),
+                data["target"],
+                data["note"],
+                datetime.now(UTC),
+                "agent",
+            )
+        elif previous is None:
+            raise McpError("not_found")
+        else:
+            scanner.notes.delete(note_id or "")
+    except NoteError as err:
+        raise McpError("not_found" if str(err) == "not_found" else "invalid_format") from err
+    return {
+        "schema": API_SCHEMA,
+        "changed": 1,
+        "note_id": note_id,
+        "_undo": {"what": "note", "id": note_id, "previous": previous},
+    }
+
+
+def undo(scanner: InventoryScanner, data: dict[str, Any], user: str | None) -> dict[str, Any]:
+    """Take back one change from the log, as it was before."""
+    entry = next((e for e in scanner.mcp.entries if e["at"] == data["at"] and e.get("undo")), None)
+    if entry is None or entry.get("undone"):
+        raise McpError("not_found")
+    step = entry["undo"]
+    if step["what"] == "finding":
+        scanner.restore_decision(step["key"], step["previous"])
+    elif step["what"] == "mark":
+        scanner.restore_mark(step["type"], step["id"], step["previous"])
+    else:
+        scanner.notes.restore(step["id"], step["previous"])
+    scanner.mcp.mark_undone(entry)
+    return {"schema": API_SCHEMA, "changed": 1}
+
+
+def audit(
+    scanner: InventoryScanner, data: dict[str, Any], _user: str | None = None
+) -> dict[str, Any]:
     """The log of calls, newest first."""
     rows = scanner.mcp.recent(data.get("kind"), data["failed"])
     return {
         "schema": API_SCHEMA,
         "total": len(rows),
         "calls_24h": scanner.mcp.calls_since(24),
-        "entries": rows[: data["limit"]],
+        "entries": [
+            {**{k: v for k, v in e.items() if k != "undo"}, "undoable": bool(e.get("undo"))}
+            for e in rows[: data["limit"]]
+        ],
     }
 
 
 @dataclass(frozen=True)
 class Function:
-    handler: Callable[[InventoryScanner, dict[str, Any]], dict[str, Any]]
+    handler: Callable[[InventoryScanner, dict[str, Any], str | None], dict[str, Any]]
     schema: vol.Schema
     kind: str = "read"  # read or write
     logged: bool = True
@@ -314,6 +464,10 @@ FUNCTIONS: dict[str, Function] = {
     "status": Function(status, STATUS_SCHEMA),
     "findings": Function(findings, FINDINGS_SCHEMA),
     "object": Function(object_card, OBJECT_SCHEMA),
+    "finding_decide": Function(finding_decide, DECIDE_SCHEMA, kind="write"),
+    "mark": Function(mark, MARK_SCHEMA, kind="write"),
+    "note_set": Function(note_set, NOTE_SCHEMA, kind="write"),
+    "undo": Function(undo, UNDO_SCHEMA, kind="write"),
     "audit": Function(audit, AUDIT_SCHEMA, logged=False),
 }
 
@@ -339,7 +493,7 @@ async def run(
         raise McpError("not_loaded")
     function = FUNCTIONS[name]
     params = short_params(data)
-    result, count = "ok", None
+    result, count, undo = "ok", None, None
     try:
         await _check_user(hass, user_id)
         if not scanner.mcp.enabled:
@@ -350,7 +504,8 @@ async def run(
             clean = function.schema(data)
         except vol.Invalid as err:
             raise McpError("invalid_format") from err
-        response = function.handler(scanner, clean)
+        response = function.handler(scanner, clean, user_id)
+        undo = response.pop("_undo", None)
         count = response.get("total", response.get("changed"))
         return response
     except McpError as err:
@@ -364,4 +519,4 @@ async def run(
             kind = (
                 "denied" if result in ("disabled", "write_disabled", "not_admin") else function.kind
             )
-            scanner.mcp.log(user_id, name, kind, params, result, count)
+            scanner.mcp.log(user_id, name, kind, params, result, count, undo)

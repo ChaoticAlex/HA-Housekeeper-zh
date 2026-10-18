@@ -152,3 +152,56 @@ async def test_the_object_card_gathers_findings_and_connections(hass: HomeAssist
             hass, scanner, "object", {"object_type": "entity", "object_id": "x"}, None
         )
     assert unknown.value.reason == "not_found"
+
+
+async def test_changes_need_their_own_switch_and_can_be_taken_back(hass: HomeAssistant) -> None:
+    from custom_components.ha_housekeeper.ignored import IgnoreStore
+    from custom_components.ha_housekeeper.marks import MarkStore
+    from custom_components.ha_housekeeper.notes import NoteStore
+
+    scanner = scanner_with(hass, 3)
+    scanner.mcp.enabled = True
+    scanner.ignored, scanner.marks, scanner.notes = (
+        IgnoreStore(hass),
+        MarkStore(hass),
+        NoteStore(hass),
+    )
+    scanner.snapshot["objects"].append(
+        {"object_type": "entity", "object_id": "sensor.s2", "name": "S2"}
+    )
+    scanner.set_finding_ignored = lambda key, ignored, **kw: (
+        scanner.ignored.decide(
+            key, kw["kind"], datetime.now(UTC), reason=kw["reason"], via=kw["via"]
+        )
+        if ignored
+        else scanner.ignored.set_ignored(key, False, datetime.now(UTC)) or True
+    )
+    scanner.restore_decision = scanner.ignored.restore
+    key = "entity.state_unavailable|sensor.s1|"
+    with pytest.raises(mcp_api.McpError) as off:
+        await mcp_api.run(hass, scanner, "note_set", {"action": "save", "title": "t"}, None)
+    assert off.value.reason == "write_disabled"
+    scanner.mcp.write = True
+    with pytest.raises(mcp_api.McpError) as reason:
+        await mcp_api.run(
+            hass, scanner, "finding_decide", {"key": key, "action": "decide", "kind": "keep"}, None
+        )
+    assert reason.value.reason == "reason_required"
+    await mcp_api.run(
+        hass, scanner, "finding_decide", {"key": key, "action": "decide", "reason": "spare"}, None
+    )
+    assert scanner.ignored.entry(key)["via"] == "mcp"
+    note = await mcp_api.run(
+        hass, scanner, "note_set", {"action": "save", "title": "Checked"}, None
+    )
+    assert scanner.notes.items[0]["source"] == "agent" and note["note_id"]
+    log = await mcp_api.run(hass, scanner, "audit", {"kind": "write"}, None)
+    done = [e for e in log["entries"] if e["result"] == "ok"]
+    assert [e["fn"] for e in done] == ["note_set", "finding_decide"]
+    assert all(e["undoable"] and "undo" not in e for e in done)
+    for entry in done:
+        await mcp_api.run(hass, scanner, "undo", {"at": entry["at"]}, None)
+    assert scanner.ignored.entry(key) is None and scanner.notes.items == []
+    with pytest.raises(mcp_api.McpError) as twice:
+        await mcp_api.run(hass, scanner, "undo", {"at": done[0]["at"]}, None)
+    assert twice.value.reason == "not_found"

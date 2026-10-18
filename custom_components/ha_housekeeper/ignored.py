@@ -18,6 +18,7 @@ from .const import IGNORED_STORAGE_KEY, STORAGE_VERSION
 SAVE_DELAY = 10
 KINDS = ("ignore", "keep", "snooze")
 REASON_LIMIT = 200  # characters
+VIAS = ("mcp",)  # how a decision was made when it was not the panel
 ITEM_LIMIT = 5000
 
 
@@ -35,6 +36,7 @@ def _clean(value: Any) -> dict[str, Any] | None:
         "reason": str(value.get("reason") or "")[:REASON_LIMIT],
         "until": until if isinstance(until, str) else None,
         "by": by if isinstance(by, str) else None,
+        "via": value["via"] if value.get("via") in VIAS else None,
     }
 
 
@@ -87,6 +89,7 @@ class IgnoreStore:
         reason: str = "",
         until: datetime | None = None,
         by: str | None = None,
+        via: str | None = None,
     ) -> bool:
         """Record a decision; False when the store is full."""
         if kind not in KINDS or (key not in self._items and len(self._items) >= ITEM_LIMIT):
@@ -97,9 +100,22 @@ class IgnoreStore:
             "reason": reason.strip()[:REASON_LIMIT],
             "until": until.isoformat() if until else None,
             "by": by,
+            "via": via,
         }
         self._save()
         return True
+
+    def entry(self, key: str) -> dict[str, Any] | None:
+        """A copy of the stored decision, whether it holds or has run out; None if there is none."""
+        return dict(self._items[key]) if key in self._items else None
+
+    def restore(self, key: str, entry: dict[str, Any] | None) -> None:
+        """Put a decision back exactly as it was, or take it away when there was none."""
+        if entry is None:
+            self._items.pop(key, None)
+        elif (cleaned := _clean(entry)) is not None:
+            self._items[key] = cleaned
+        self._save()
 
     def set_ignored(self, key: str, ignored: bool, now: datetime) -> None:
         """Hide a finding for good or show it again."""
