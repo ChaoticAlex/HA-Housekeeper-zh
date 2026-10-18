@@ -53,6 +53,7 @@ async def test_answers_are_short_sorted_and_paged(hass: HomeAssistant) -> None:
     scanner = scanner_with(hass)
     scanner.mcp.enabled = True
     first = await mcp_api.run(hass, scanner, "findings", {}, None)
+    assert "ha_housekeeper.object" in first["next_steps"]["object"]
     assert len(json.dumps(first)) < 20_000  # 600 findings, one page
     assert first["total"] == 540 and first["returned"] == 20 and first["next_cursor"] == "20"
     assert {f["level"] for f in first["findings"]} == {"high"}  # most important first
@@ -78,8 +79,6 @@ async def test_nothing_without_the_switch_and_every_call_is_logged(hass: HomeAss
     for _ in range(3):
         first = await mcp_api.run(hass, scanner, "status", {}, None)
     assert "findings" in first["guide"]
-    listed = await mcp_api.run(hass, scanner, "findings", {}, None)
-    assert "ha_housekeeper.object" in listed["next_steps"]["object"]
     log = await mcp_api.run(hass, scanner, "audit", {}, None)
     assert [(e["fn"], e["kind"], e["result"], e["n"]) for e in log["entries"]] == [
         ("status", "read", "ok", 3),
