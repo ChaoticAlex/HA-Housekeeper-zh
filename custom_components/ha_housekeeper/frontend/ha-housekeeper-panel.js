@@ -1450,6 +1450,7 @@ class StylesMixin {
       .vacbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 16px;background:var(--hk-soft,#e6f0f8);border-bottom:1px solid var(--hk-border);border-left:4px solid #2f6fa3;font-size:14px}.vacbar b{color:#2f6fa3}.vacbar .sp{flex:1}.vacbar a{color:#2f6fa3;font-weight:600;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}.vacbar.warn{border-left-color:var(--hk-amber,#b57a0c)}.vacbar.warn b{color:var(--hk-amber,#b57a0c)}.vacbar.after{border-left-color:var(--hk-accent,#1d4a3f)}.vacbar.after b{color:var(--hk-accent,#1d4a3f)}
       .excrow .excacts{display:flex;gap:2px}.excrow .policyswitch{justify-self:end}.excrow{grid-template-columns:auto minmax(0,1fr) auto auto}.excform{display:grid;gap:14px;padding:14px 16px;border-top:2px solid var(--hk-blue);border-bottom:1px solid var(--hk-border);background:color-mix(in srgb,var(--hk-soft) 55%,var(--hk-surface))}.excform .mfield{display:grid;gap:6px;min-width:0}.excform .mfield>span{font-size:calc(12px*var(--hk-fs,1));font-weight:600;color:var(--hk-muted)}.excform .chip{display:inline-flex;align-items:center;gap:4px;cursor:pointer}.excform .chip ha-icon{--mdc-icon-size:14px}.excform input[data-exc-search],.excform input[data-exc-note]{width:100%;box-sizing:border-box}.excact{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.excact input{width:5em}.excprev{padding:10px 12px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-soft);font-size:calc(13px*var(--hk-fs,1))}.excnum{display:flex;gap:8px;align-items:center}.excnum input{width:6em}
       .excghead{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 16px;background:var(--hk-soft);border-top:1px solid var(--hk-border);border-bottom:1px solid var(--hk-border)}.excghead h3{margin:0;font-size:calc(12px*var(--hk-fs,1));letter-spacing:.04em;text-transform:uppercase;color:var(--hk-muted)}.excghead .factnote{margin:0}.excghead.vac{border-left:4px solid #2f6fa3}.excgroup .setrow small{display:block}
+      .excrules td:nth-child(n+4),.excrules th:nth-child(n+4){width:1%;white-space:nowrap}.excrules .excacts{display:inline-flex;gap:2px}
       .safeitem{display:inline-flex;align-items:center;gap:6px;padding:2px 0;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
       .safeitem:hover{color:var(--hk-text)}.safeitem .dot{width:8px;height:8px;border-radius:50%;background:var(--hk-muted)}.safeitem .dot.ok{background:var(--hk-green,#2e7d32)}.safeitem .dot.warn{background:var(--hk-amber,#b26a00)}.safeitem .dot.red{background:var(--hk-red,#c62828)}
       @media(max-width:860px){.safebar{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;padding:6px 12px}}
@@ -12040,7 +12041,7 @@ Object.assign(TEXT.de, {
   hidByRule: "Durch eine Regel", ignoredByRule: "Ausgeblendet durch eine Ausnahmeregel: {rule}", heldByRule: "Zurückgehalten durch eine Ausnahmeregel: {rule}, wird ab {date} gemeldet", dueByRule: "Frist abgelaufen · Ausnahmeregel: {rule}",
   hidRuleLink: "Regel",
   excKind_device: "Gerät", excKind_entity: "Entität", excRuleDevice: "Gerät {names}", excRuleEntity: "Entität {names}", excSearch: "Suchen …", excMore: "Weitere über die Suche",
-  excGroupAlways: "Immer", excGroupAlwaysHint: "gilt dauerhaft", excGroupVacation: "Im Urlaubsmodus", excGroupVacationHint: "blendet aus, solange der Schalter „an“ ist", excAddShort: "Regel", excChosen: "{n} gewählt",
+  excColRule: "Regel", excColAction: "Aktion", excColEffect: "Wirkung jetzt", excColOn: "An", excColActions: "Aktionen", excGroupAlways: "Immer", excGroupAlwaysHint: "gilt dauerhaft", excGroupVacation: "Im Urlaubsmodus", excGroupVacationHint: "blendet aus, solange der Schalter „an“ ist", excAddShort: "Regel", excChosen: "{n} gewählt",
   excScope: "Gilt", excScope_always: "Immer", excScope_vacation: "Nur im Urlaubsmodus", excScopeChip_vacation: "nur im Urlaub", excScopeChip_always: "immer",
   excScopeHint: "Im Urlaubsmodus bleiben diese Objekte still, auch wenn ein Gerät kaputtgeht. Nach dem Urlaub zählt der Ausfall neu: mit eigener Frist deren Tage, sonst die Nachfrist.",
   excOverlap: "Diese Objekte trifft schon: {rules}. Im Urlaub gilt das Ausblenden, danach wieder die Frist der anderen Regel, gezählt ab dem Ende des Urlaubs.",
@@ -12070,7 +12071,7 @@ Object.assign(TEXT.en, {
   hidByRule: "By a rule", ignoredByRule: "Hidden by an exception rule: {rule}", heldByRule: "Held back by an exception rule: {rule}, reported from {date}", dueByRule: "Time has passed · exception rule: {rule}",
   hidRuleLink: "Rule",
   excKind_device: "Device", excKind_entity: "Entity", excRuleDevice: "Device {names}", excRuleEntity: "Entity {names}", excSearch: "Search …", excMore: "More through the search",
-  excGroupAlways: "Always", excGroupAlwaysHint: "applies permanently", excGroupVacation: "In vacation mode", excGroupVacationHint: "hides while the switch is “on”", excAddShort: "Rule", excChosen: "{n} chosen",
+  excColRule: "Rule", excColAction: "Action", excColEffect: "Effect now", excColOn: "On", excColActions: "Actions", excGroupAlways: "Always", excGroupAlwaysHint: "applies permanently", excGroupVacation: "In vacation mode", excGroupVacationHint: "hides while the switch is “on”", excAddShort: "Rule", excChosen: "{n} chosen",
   excScope: "Applies", excScope_always: "Always", excScope_vacation: "Only in vacation mode", excScopeChip_vacation: "vacation only", excScopeChip_always: "always",
   excScopeHint: "In vacation mode these objects stay quiet, even if a device breaks. After the vacation the outage counts anew: with a delay of its own that delay, otherwise the grace period.",
   excOverlap: "These objects are already hit by: {rules}. In the vacation hiding applies, afterwards the delay of the other rule, counted from the end of the vacation.",
@@ -12121,30 +12122,43 @@ class ExceptionsMixin {
     return e.hide ? this.t("excEffectHide", { objects: e.objects, n: e.hide }) : this.t("excEffectNone");
   }
 
-  excRow(rule) {
+  // One rule as the cells of a table row: what it names, what it does, what that does now, the switch and the two buttons.
+  excRuleCells(rule) {
     const icons = { area: "mdi:floor-plan", label: "mdi:label-outline", integration: "mdi:puzzle-outline", domain: "mdi:shape-outline", device: "mdi:devices", entity: "mdi:shape-outline" };
-    const id = this.esc(rule.id);
-    return `<div class="row excrow"><span class="tile ${rule.enabled ? (rule.effect?.due ? "warn" : "ok") : "mute"}"><ha-icon icon="${icons[rule.kind]}"></ha-icon></span>
-        <span class="row-text"><strong>${this.esc(this.excRuleName(rule))}</strong><small>${this.esc(this.excRuleLine(rule))} · ${this.esc(this.excEffect(rule))}${rule.note ? ` · ${this.esc(rule.note)}` : ""}</small></span>
-        <input type="checkbox" class="policyswitch" data-exc-toggle="${id}" ${rule.enabled ? "checked" : ""} aria-label="${this.esc(this.t("excOn"))}">
-        <span class="excacts"><button class="iconbtn" data-exc-edit="${id}" aria-label="${this.esc(this.t("excEdit"))}" title="${this.esc(this.t("excEdit"))}"><ha-icon icon="mdi:pencil-outline"></ha-icon></button><button class="iconbtn" data-exc-delete="${id}" aria-label="${this.esc(this.t("excDelete"))}" title="${this.esc(this.t("excDelete"))}"><ha-icon icon="mdi:delete-outline"></ha-icon></button></span></div>`;
+    const id = this.esc(rule.id), tone = rule.enabled ? (rule.effect?.due ? "warn" : "ok") : "mute";
+    return [
+      { key: "target", label: "excColRule", cell: () => `<div class="statcell"><span class="tile ${tone}"><ha-icon icon="${icons[rule.kind]}"></ha-icon></span><div><strong>${this.esc(this.excRuleName(rule))}</strong>${rule.note ? `<small>${this.esc(rule.note)}</small>` : ""}</div></div>` },
+      { key: "action", label: "excColAction", cell: () => this.esc(this.excRuleLine(rule)) },
+      { key: "effect", label: "excColEffect", cell: () => this.esc(this.excEffect(rule)) },
+      { key: "on", label: "excColOn", cell: () => `<input type="checkbox" class="policyswitch" data-exc-toggle="${id}" ${rule.enabled ? "checked" : ""} aria-label="${this.esc(this.t("excOn"))}">` },
+      { key: "acts", label: "excColActions", cell: () => `<span class="excacts"><button class="iconbtn" data-exc-edit="${id}" aria-label="${this.esc(this.t("excEdit"))}" title="${this.esc(this.t("excEdit"))}"><ha-icon icon="mdi:pencil-outline"></ha-icon></button><button class="iconbtn" data-exc-delete="${id}" aria-label="${this.esc(this.t("excDelete"))}" title="${this.esc(this.t("excDelete"))}"><ha-icon icon="mdi:delete-outline"></ha-icon></button></span>` },
+    ];
   }
 
-  // One of the two groups of the card: the rules that always apply, and the ones of the vacation mode.
+  // The rules of one group as a table; the columns are the same for every row, the cells come from the rule.
+  excTable(scope, rules) {
+    if (!rules.length) return `<div class="emptymsg">${this.t("excNone")}</div>`;
+    const id = `exc-${scope}`;
+    this.lvState(id, "target", "asc");
+    const columns = this.excRuleCells(rules[0]).map((c, i) => ({ key: c.key, label: c.label, sortable: false, cell: rule => this.excRuleCells(rule)[i].cell() }));
+    return this.listTable(id, columns, rules, { cls: "excrules", rowAttrs: () => 'class="static"' });
+  }
+
+  // One of the two groups, each in a card of its own: the rules that always apply, and the ones of the vacation mode.
   excGroup(scope) {
     const rules = this.exc.rules.filter(r => (r.scope || "always") === scope);
     const open = this.excForm && this.excForm.scope === scope;
     const vacation = scope === "vacation", v = this.exc.vacation || {};
-    const state = !v.entity ? "" : v.state === "on" ? "vacStateOn" : v.state && v.state !== "unavailable" && v.state !== "unknown" ? "vacStateOff" : "vacStateMissing";
-    const head = `<div class="excghead${vacation ? " vac" : ""}"><h3>${this.t(vacation ? "excGroupVacation" : "excGroupAlways")}</h3>${state ? `<span class="pill ${v.state === "on" ? "ok" : "mute"}">${this.t(state)}</span>` : ""}<small class="factnote">${this.t(vacation ? "excGroupVacationHint" : "excGroupAlwaysHint")}</small><span class="grow"></span>${open ? "" : `<button class="btn" data-exc-edit="" data-exc-new="${scope}"><ha-icon icon="mdi:plus"></ha-icon>${this.t("excAddShort")}</button>`}</div>`;
-    const body = rules.map(r => this.excRow(r)).join("") || `<div class="emptyrel">${this.t("excNone")}</div>`;
-    return `<div class="excgroup">${head}${vacation ? this.vacationHtml() : ""}${open ? this.excFormHtml(this.excForm) : ""}${body}</div>`;
+    const state = !vacation || !v.entity ? "" : v.state === "on" ? "vacStateOn" : v.state && v.state !== "unavailable" && v.state !== "unknown" ? "vacStateOff" : "vacStateMissing";
+    const add = open ? "" : `<button class="btn" data-exc-edit="" data-exc-new="${scope}"><ha-icon icon="mdi:plus"></ha-icon>${this.t("excAddShort")}</button>`;
+    const head = `<div class="panelhead"><div><h2>${this.t(vacation ? "excGroupVacation" : "excGroupAlways")}${state ? ` <span class="pill ${v.state === "on" ? "ok" : "mute"}">${this.t(state)}</span>` : ""}</h2><p>${this.t(vacation ? "excGroupVacationHint" : "excGroupAlwaysHint")}</p></div>${add}</div>`;
+    return `<section class="panel excgroup">${head}${open ? this.excFormHtml(this.excForm) : ""}${this.excTable(scope, rules)}</section>`;
   }
 
   excCard() {
-    const head = `<div class="panelhead"><div><h2>${this.t("excTitle")}</h2><p>${this.t("excHint")}</p></div></div>`;
-    if (!this.exc) { this.loadExceptions(); return `<section class="panel">${head}<div class="pad"><p class="factnote">${this.t("excLoading")}</p></div></section>`; }
-    return `<section class="panel">${head}${this.excGroup("always")}${this.excGroup("vacation")}</section>`;
+    const head = `<section class="panel"><div class="panelhead"><div><h2>${this.t("excTitle")}</h2><p>${this.t("excHint")}</p></div></div><div class="pad"><p class="factnote">${this.t("excWinner")}</p></div></section>`;
+    if (!this.exc) { this.loadExceptions(); return `<section class="panel"><div class="panelhead"><div><h2>${this.t("excTitle")}</h2><p>${this.t("excHint")}</p></div></div><div class="pad"><p class="factnote">${this.t("excLoading")}</p></div></section>`; }
+    return `${head}${this.excGroup("always")}<section class="panel"><div class="panelhead"><div><h2>${this.t("vacTitle")}</h2><p>${this.t("vacHint")}</p></div></div>${this.vacationHtml()}</section>${this.excGroup("vacation")}`;
   }
 
   vacationHtml() {
@@ -12218,7 +12232,6 @@ class ExceptionsMixin {
       <div class="mfield"><span>${this.t("excTargets")}${f.targets.length ? ` (${this.t("excChosen", { n: f.targets.length })})` : ""}</span>${choices}<small class="factnote">${this.t("excInherit")}</small></div>
       ${action}
       <label class="mfield"><span>${this.t("excNote")}</span><input data-exc-note maxlength="200" autocomplete="off" value="${this.esc(f.note)}"></label>
-      <small class="factnote">${this.t("excWinner")}</small>
       ${preview}${f.error ? this.notice("err", f.error) : ""}
       <div class="mbtns"><button type="button" class="btn quiet" data-exc-cancel>${this.t("excCancel")}</button><button type="submit" class="btn primary">${this.t("excSave")}</button></div></form>`;
   }

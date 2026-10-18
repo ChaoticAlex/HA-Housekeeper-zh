@@ -19,6 +19,7 @@
 - **Schutzmodus und Ausnahmen:** Die Einstellungen trennen beides in zwei Reiter. Der Schutzmodus nennt die Wirkung statt der Stufe: „Alles erlaubt“, „Ohne endgültiges Löschen“, „Nur Quarantäne“, „Nur lesen“.
 - **Einstellungen, Kacheln:** Die Kacheln stehen in neuer Reihenfolge (Schutzmodus, Ausnahmen, Scan und Meldungen, KI-Zugriff, Darstellung, Info) in drei Spalten. Jede Kachel zeigt ihren Stand, der Randstreifen folgt ihm (z. B. KI-Zugriff: aus grau, Lesen grün, Ändern gelb).
 - **Ausnahmeregeln, Speichern und Meldungen:** Regeln mit „Ausblenden“ ließen sich nicht mehr speichern („expected int at rules[0].days“); das ist behoben. Fehler, Warnungen und Hinweise stehen in einheitlichen Kästen, Fehler erst nach dem Speichern und nur bis zur nächsten Änderung. Der Urlaubsmodus zeigt „Nicht gespeichert“, solange etwas vom Gespeicherten abweicht.
+- **Ausnahmeregeln, Aufbau:** Die Seite besteht aus eigenen Karten: Einleitung, Regeln „Immer“, Urlaubsmodus (Entität und Nachfrist) und Regeln „Im Urlaubsmodus“. Die Regeln stehen in einer Tabelle mit Kopfzeile (Regel, Aktion, Wirkung jetzt, An, Aktionen).
 - **Updates:** Die ausstehenden Updates stehen in der gewohnten Tabelle mit Suche, Sortierung, Filter nach Bereich und Seiten.
 
 ### English
@@ -40,6 +41,7 @@
 - **Protection mode and exceptions:** Settings now split them into two tabs. The protection mode names the effect instead of the level: “Everything allowed”, “No irreversible deletions”, “Quarantine only”, “Read only”.
 - **Settings, tiles:** The tiles come in a new order (protection mode, exceptions, scan and messages, AI access, appearance, info) in three columns. Every tile shows its state, and the edge stripe follows it (e.g. AI access: off grey, reads green, changes amber).
 - **Exception rules, saving and messages:** Rules with “Hide” could no longer be saved (“expected int at rules[0].days”); fixed. Errors, warnings and notes use uniform boxes, errors only after saving and only until the next change. The vacation mode shows “Not saved” while anything differs from what is saved.
+- **Exception rules, layout:** The page is made of cards of their own: introduction, rules “Always”, vacation mode (entity and grace period) and rules “In vacation mode”. The rules sit in a table with a header (rule, action, effect now, on, actions).
 - **Updates:** Pending updates are shown in the usual table with search, sorting, an area filter and pages.
 
 ## 1.9.0 - 2026-10-17
