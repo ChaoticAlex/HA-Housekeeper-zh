@@ -768,6 +768,15 @@ async def websocket_exceptions(
         ),
         key=lambda i: str(i["name"]).casefold(),
     )
+    entities = [i for i in snapshot.get("objects", []) if i["object_type"] == "entity"]
+
+    def distinct(field: str) -> list[dict[str, str]]:
+        values = {
+            (i["object_id"].partition(".")[0] if field == "domain" else i.get(field))
+            for i in entities
+        }
+        return [{"id": v, "name": v} for v in sorted(v for v in values if v)]
+
     connection.send_result(
         msg["id"],
         {
@@ -777,6 +786,8 @@ async def websocket_exceptions(
             ],
             "areas": pick("area"),
             "labels": pick("label"),
+            "integrations": distinct("platform"),
+            "domains": distinct("domain"),
             "days_max": EXCEPTION_DAYS_MAX,
         },
     )

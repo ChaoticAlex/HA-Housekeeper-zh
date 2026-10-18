@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from custom_components.ha_housekeeper.exceptions import clean_rule, matches, verdict
+from custom_components.ha_housekeeper.exceptions import Traits, clean_rule, matches, verdict
 
 NOW = datetime(2026, 10, 18, 12, tzinfo=UTC)
 
@@ -30,15 +30,19 @@ def test_clean_rule_rejects_what_names_nothing() -> None:
 
 
 def test_area_and_label_match_their_own_kind_only() -> None:
-    assert matches(_rule("area", ["lager"]), ("lager", frozenset()))
-    assert not matches(_rule("area", ["lager"]), (None, frozenset({"lager"})))
-    assert matches(_rule("label", ["ignore_status"]), (None, frozenset({"ignore_status"})))
+    assert matches(_rule("area", ["lager"]), Traits("lager", frozenset()))
+    assert not matches(_rule("area", ["lager"]), Traits(None, frozenset({"lager"})))
+    assert matches(_rule("label", ["ignore_status"]), Traits(None, frozenset({"ignore_status"})))
+    tv = Traits(None, frozenset(), frozenset({"cast"}), "media_player")
+    assert matches(_rule("integration", ["cast"]), tv)
+    assert matches(_rule("domain", ["media_player"]), tv)
+    assert not matches(_rule("domain", ["cast"]), tv)
     off = {**_rule("area", ["lager"]), "enabled": False}
-    assert not matches(off, ("lager", frozenset()))
+    assert not matches(off, Traits("lager", frozenset()))
 
 
 def test_hide_beats_delay_and_the_longest_delay_counts() -> None:
-    found = ("keller", frozenset({"slow"}))
+    found = Traits("keller", frozenset({"slow"}))
     rules = [_rule("area", ["keller"], "delay", 3), _rule("label", ["slow"], "delay", 10)]
     assert verdict(rules, found, _outage(5), NOW)["state"] == "hold"
     assert verdict(rules, found, _outage(11), NOW)["state"] == "due"
@@ -47,7 +51,7 @@ def test_hide_beats_delay_and_the_longest_delay_counts() -> None:
 
 
 def test_a_delay_leaves_other_findings_alone() -> None:
-    found = ("keller", frozenset())
+    found = Traits("keller", frozenset())
     battery = {"classification": "problem", "rule_id": "entity.battery_low"}
     assert verdict([_rule("area", ["keller"], "delay", 7)], found, battery, NOW) is None
     assert (

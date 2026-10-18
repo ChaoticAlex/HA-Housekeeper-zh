@@ -1,18 +1,20 @@
-"""Exception rules: objects in an area or with a label are left out of the findings.
+"""Exception rules: objects in an area, with a label, of an integration or of a type are left out.
 
-Stored by Housekeeper only; Home Assistant stays untouched. A rule names an area or a label (one or
+Stored by Housekeeper only; Home Assistant stays untouched. A rule names areas, labels, integrations or domains (one or
 more of them) and an action: ``hide`` hides every finding of the matching objects, ``delay``
 holds back only the findings about an outage until it lasted ``days`` days. An entity counts with
 its own area, or the one of its device when it has none, and with its own labels and those of
 its device. A finding of a matching object that is hidden by a rule cannot be shown again one by
-one: the area or the label of the object is what decides.
+one: what the object is (its area, label, integration or domain) is what decides.
+An ``integration`` rule matches the platform of an entity, or the integrations of a device; a ``domain``
+rule the part of the entity id before the dot.
 """
 
 from __future__ import annotations
 
 import secrets
 from datetime import datetime, timedelta
-from typing import Any
+from typing import Any, NamedTuple
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr
@@ -22,7 +24,7 @@ from homeassistant.helpers.storage import Store
 from .const import EXCEPTIONS_STORAGE_KEY, STORAGE_VERSION
 
 SAVE_DELAY = 5
-KINDS = ("area", "label")
+KINDS = ("area", "label", "integration", "domain")
 ACTIONS = ("hide", "delay")
 ITEM_LIMIT = 100
 TARGET_LIMIT = 50
@@ -32,7 +34,14 @@ DAYS_MAX = 365
 DAYS_DEFAULT = 7
 AVAILABILITY = frozenset({"unavailable", "unknown", "stale"})  # what a delay rule holds back
 
-Traits = tuple["str | None", frozenset[str]]
+
+class Traits(NamedTuple):
+    """What a rule can look at: the area, the labels, the integrations and the domain."""
+
+    area: str | None
+    labels: frozenset[str]
+    platforms: frozenset[str] = frozenset()
+    domain: str | None = None
 
 
 def clean_rule(raw: Any) -> dict[str, Any] | None:
@@ -73,7 +82,14 @@ def traits(hass: HomeAssistant, object_type: str, object_id: str) -> Traits | No
     devices = dr.async_get(hass)
     if object_type == "device":
         device = devices.async_get(object_id)
-        return (device.area_id, frozenset(device.labels)) if device is not None else None
+        if device is None:
+            return None
+        entries = (hass.config_entries.async_get_entry(i) for i in device.config_entries)
+        return Traits(
+            device.area_id,
+            frozenset(device.labels),
+            frozenset(e.domain for e in entries if e is not None),
+        )
     if object_type != "entity":
         return None
     entry = er.async_get(hass).async_get(object_id)
@@ -81,17 +97,26 @@ def traits(hass: HomeAssistant, object_type: str, object_id: str) -> Traits | No
         return None
     device = devices.async_get(entry.device_id) if entry.device_id else None
     area = entry.area_id or (device.area_id if device is not None else None)
-    return area, frozenset(entry.labels) | frozenset(device.labels if device is not None else ())
+    return Traits(
+        area,
+        frozenset(entry.labels) | frozenset(device.labels if device is not None else ()),
+        frozenset({entry.platform}),
+        entry.entity_id.partition(".")[0],
+    )
 
 
 def matches(rule: dict[str, Any], found: Traits) -> bool:
     """Whether an enabled rule covers an object with this area and these labels."""
     if not rule["enabled"]:
         return False
-    area, labels = found
+    targets = rule["targets"]
     if rule["kind"] == "area":
-        return area is not None and area in rule["targets"]
-    return not labels.isdisjoint(rule["targets"])
+        return found.area is not None and found.area in targets
+    if rule["kind"] == "integration":
+        return not found.platforms.isdisjoint(targets)
+    if rule["kind"] == "domain":
+        return found.domain is not None and found.domain in targets
+    return not found.labels.isdisjoint(targets)
 
 
 def _since(finding: dict[str, Any]) -> datetime | None:

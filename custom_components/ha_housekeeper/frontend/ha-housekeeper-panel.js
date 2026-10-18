@@ -11994,14 +11994,14 @@ class PlanWizardMixin {
 
 // Exception rules: objects in an area or with a label are left out of the findings; mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
-  excTitle: "Ausnahmeregeln", excHint: "Objekte in einem Bereich oder mit einem Label meldet Housekeeper nicht. Die Regeln gelten für Geräte und ihre Entitäten und nur in Housekeeper; Home Assistant bleibt unverändert. Das Label housekeeper_ignore wirkt zusätzlich fest.",
+  excTitle: "Ausnahmeregeln", excHint: "Objekte in einem Bereich, mit einem Label, von einer Integration oder eines Typs (Domain) meldet Housekeeper nicht. Die Regeln gelten für Geräte und ihre Entitäten und nur in Housekeeper; Home Assistant bleibt unverändert. Das Label housekeeper_ignore wirkt zusätzlich fest.",
   excNone: "Noch keine Regeln.", excAdd: "Regel hinzufügen", excEdit: "Ändern", excDelete: "Löschen", excLoading: "Regeln werden geladen …",
-  excKind: "Art", excKind_area: "Bereich", excKind_label: "Label", excTargets: "Bereiche oder Labels", excNoTargets: "In Home Assistant gibt es dafür noch nichts zur Auswahl.",
+  excKind: "Art", excKind_area: "Bereich", excKind_label: "Label", excKind_integration: "Integration", excKind_domain: "Domain (Typ)", excTargets: "Auswahl", excNoTargets: "In Home Assistant gibt es dafür noch nichts zur Auswahl.",
   excAction: "Aktion", excAction_hide: "Ausblenden", excAction_delay: "Erst melden nach", excDays: "Tage nicht verfügbar", excNote: "Notiz (optional)",
-  excInherit: "Trifft Geräte und Entitäten. Eine Entität ohne eigenen Bereich erbt den Bereich ihres Geräts, ein Label am Gerät gilt auch für seine Entitäten.",
+  excInherit: "Trifft Geräte und Entitäten. Eine Entität ohne eigenen Bereich erbt den Bereich ihres Geräts, ein Label am Gerät gilt auch für seine Entitäten. „Integration“ und „Domain“ treffen alle Entitäten dieser Integration oder dieses Typs (etwa media_player); eine breite Domain wie sensor deckt auch echte Störungen zu, die Vorschau zeigt die Treffer vorher.",
   excDelayHint: "Hält nur „nicht verfügbar“, „unbekannt“ und „veraltet“ zurück. Alle anderen Befunde dieser Objekte (leere Batterie, defekter Verweis) erscheinen weiter normal; wer alles unterdrücken will, wählt „Ausblenden“. Nach Ablauf der Frist erscheint der Befund mit der Stufe seiner Ausfalldauer. Gemessen ab dem Ausfallbeginn, soweit bekannt; nach einem Neustart kann die Meldung später kommen, nie früher.",
   excWinner: "Passen mehrere Regeln, schlägt „Ausblenden“ die Fristen; bei mehreren Fristen gilt die längste.",
-  excRuleArea: "Bereich {names}", excRuleLabel: "Label {names}", excRuleDelayLine: "Erst melden nach {n} Tagen", excRuleHideLine: "Ausblenden",
+  excRuleArea: "Bereich {names}", excRuleLabel: "Label {names}", excRuleIntegration: "Integration {names}", excRuleDomain: "Domain {names}", excRuleDelayLine: "Erst melden nach {n} Tagen", excRuleHideLine: "Ausblenden",
   excEffectHide: "{objects} Objekte, {n} Befunde ausgeblendet", excEffectDelay: "{hold} Befunde zurückgehalten, {due} fällig", excEffectNone: "Trifft gerade nichts",
   excPreview: "Vorschau", excPreviewHide: "{objects} Objekte, {n} Befunde würden ausgeblendet", excPreviewDelay: "{hold} Befunde würden zurückgehalten, {due} wären sofort fällig (schon länger ausgefallen)",
   excImportant: "Dabei sind Befunde mit hoher Wirkung: {names}. Prüfe, ob sie wirklich ausgenommen sein sollen.",
@@ -12011,14 +12011,14 @@ Object.assign(TEXT.de, {
   hidRuleLink: "Regel",
 });
 Object.assign(TEXT.en, {
-  excTitle: "Exception rules", excHint: "Housekeeper does not report objects in an area or with a label. The rules cover devices and their entities and apply only in Housekeeper; Home Assistant stays unchanged. The label housekeeper_ignore keeps working on top.",
+  excTitle: "Exception rules", excHint: "Housekeeper does not report objects in an area, with a label, from an integration or of a type (domain). The rules cover devices and their entities and apply only in Housekeeper; Home Assistant stays unchanged. The label housekeeper_ignore keeps working on top.",
   excNone: "No rules yet.", excAdd: "Add rule", excEdit: "Change", excDelete: "Delete", excLoading: "Loading rules …",
-  excKind: "Kind", excKind_area: "Area", excKind_label: "Label", excTargets: "Areas or labels", excNoTargets: "Home Assistant has nothing to choose from yet.",
+  excKind: "Kind", excKind_area: "Area", excKind_label: "Label", excKind_integration: "Integration", excKind_domain: "Domain (type)", excTargets: "Selection", excNoTargets: "Home Assistant has nothing to choose from yet.",
   excAction: "Action", excAction_hide: "Hide", excAction_delay: "Report only after", excDays: "days not available", excNote: "Note (optional)",
-  excInherit: "Covers devices and entities. An entity without an area of its own takes the area of its device, and a label on the device counts for its entities.",
+  excInherit: "Covers devices and entities. An entity without an area of its own takes the area of its device, and a label on the device counts for its entities. “Integration” and “Domain” cover all entities of that integration or type (such as media_player); a broad domain like sensor also covers real faults, the preview shows the matches first.",
   excDelayHint: "Holds back only “not available”, “unknown” and “stale”. All other findings of these objects (empty battery, broken reference) still show as usual; to suppress everything choose “Hide”. When the time has passed the finding shows with the level of its outage. Counted from the start of the outage as far as known; after a restart the report can come later, never earlier.",
   excWinner: "Where several rules match, “Hide” beats the delays; of several delays the longest counts.",
-  excRuleArea: "Area {names}", excRuleLabel: "Label {names}", excRuleDelayLine: "Report only after {n} days", excRuleHideLine: "Hide",
+  excRuleArea: "Area {names}", excRuleLabel: "Label {names}", excRuleIntegration: "Integration {names}", excRuleDomain: "Domain {names}", excRuleDelayLine: "Report only after {n} days", excRuleHideLine: "Hide",
   excEffectHide: "{objects} objects, {n} findings hidden", excEffectDelay: "{hold} findings held back, {due} due", excEffectNone: "Matches nothing right now",
   excPreview: "Preview", excPreviewHide: "{objects} objects, {n} findings would be hidden", excPreviewDelay: "{hold} findings would be held back, {due} would be due at once (down for longer already)",
   excImportant: "Findings with a high impact are among them: {names}. Check that they should really be left out.",
@@ -12031,9 +12031,9 @@ Object.assign(TEXT.en, {
 class ExceptionsMixin {
   // "Area Lager" or "Label ignore_status, other": what a rule names, in the words of Home Assistant.
   excRuleName(rule) {
-    const type = rule.kind === "area" ? "area" : "label", list = this.data?.objects || [];
-    const names = rule.targets.map(id => list.find(x => x.object_type === type && x.object_id === id)?.name || id).join(", ");
-    return this.t(rule.kind === "area" ? "excRuleArea" : "excRuleLabel", { names });
+    const list = this.data?.objects || [], lookup = rule.kind === "area" || rule.kind === "label";
+    const names = rule.targets.map(id => (lookup ? list.find(x => x.object_type === rule.kind && x.object_id === id)?.name : "") || id).join(", ");
+    return this.t({ area: "excRuleArea", label: "excRuleLabel", integration: "excRuleIntegration", domain: "excRuleDomain" }[rule.kind], { names });
   }
 
   // What a rule did to a finding: hidden, held back until a date, or its time has passed; "" for a finding no rule touched.
@@ -12066,7 +12066,7 @@ class ExceptionsMixin {
   excCard() {
     const head = `<div class="panelhead"><div><h2>${this.t("excTitle")}</h2><p>${this.t("excHint")}</p></div></div>`;
     if (!this.exc) { this.loadExceptions(); return `<section class="panel">${head}<div class="pad"><p class="factnote">${this.t("excLoading")}</p></div></section>`; }
-    const rows = this.exc.rules.map(rule => `<div class="row"><span class="tile ${rule.enabled ? (rule.effect?.due ? "warn" : "ok") : "mute"}"><ha-icon icon="${rule.kind === "area" ? "mdi:floor-plan" : "mdi:label-outline"}"></ha-icon></span>
+    const rows = this.exc.rules.map(rule => `<div class="row"><span class="tile ${rule.enabled ? (rule.effect?.due ? "warn" : "ok") : "mute"}"><ha-icon icon="${{ area: "mdi:floor-plan", label: "mdi:label-outline", integration: "mdi:puzzle-outline", domain: "mdi:shape-outline" }[rule.kind]}"></ha-icon></span>
         <span class="row-text"><strong>${this.esc(this.excRuleName(rule))}</strong><small>${this.esc(this.excRuleLine(rule))} · ${this.esc(this.excEffect(rule))}${rule.note ? ` · ${this.esc(rule.note)}` : ""}</small></span>
         <label class="inline"><input type="checkbox" data-exc-toggle="${this.esc(rule.id)}" ${rule.enabled ? "checked" : ""} aria-label="${this.esc(this.t("excOn"))}"></label>
         <button class="btn quiet" data-exc-edit="${this.esc(rule.id)}">${this.t("excEdit")}</button><button class="btn quiet" data-exc-delete="${this.esc(rule.id)}">${this.t("excDelete")}</button></div>`).join("");
@@ -12075,9 +12075,9 @@ class ExceptionsMixin {
   }
 
   excFormHtml(f) {
-    const list = (f.kind === "area" ? this.exc.areas : this.exc.labels) || [];
+    const list = { area: this.exc.areas, label: this.exc.labels, integration: this.exc.integrations, domain: this.exc.domains }[f.kind] || [];
     const boxes = list.map(x => `<label class="inline"><input type="checkbox" data-exc-target="${this.esc(x.id)}" ${f.targets.includes(x.id) ? "checked" : ""}> ${this.esc(x.name)}</label>`).join("") || `<small class="factnote">${this.t("excNoTargets")}</small>`;
-    const kinds = ["area", "label"].map(k => `<option value="${k}" ${f.kind === k ? "selected" : ""}>${this.t(`excKind_${k}`)}</option>`).join("");
+    const kinds = ["area", "label", "integration", "domain"].map(k => `<option value="${k}" ${f.kind === k ? "selected" : ""}>${this.t(`excKind_${k}`)}</option>`).join("");
     const pv = f.preview;
     const preview = pv ? `<div class="factnote" role="status"><strong>${this.t("excPreview")}:</strong> ${f.action === "delay" ? this.t("excPreviewDelay", { hold: pv.hold, due: pv.due }) : this.t("excPreviewHide", { objects: pv.objects, n: pv.hide })}
         ${pv.important?.length ? `<br><span class="error">${this.t("excImportant", { names: this.esc(pv.important.map(x => x.name).join(", ")) })}</span>` : ""}</div>` : "";
