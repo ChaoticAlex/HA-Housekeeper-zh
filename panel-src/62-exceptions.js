@@ -23,6 +23,7 @@ Object.assign(TEXT.de, {
   excOverlap: "Diese Objekte trifft schon: {rules}. Im Urlaub gilt das Ausblenden, danach wieder die Frist der anderen Regel, gezählt ab dem Ende des Urlaubs.",
   vacTitle: "Urlaubsmodus", vacHint: "Solange die gewählte Entität „an“ ist, gelten die Regeln „nur im Urlaubsmodus“. Ist sie nicht verfügbar oder unbekannt, gilt der Modus als aus. Schalten kannst du sie in Home Assistant, zum Beispiel per Kalender oder Automation.",
   vacEntity: "Entität für den Urlaubsmodus", vacEntityHint: "Jede Entität, die „an“ sein kann: Helfer, Schalter, Binärsensor, Zeitplan, Kalender. Leer lassen schaltet den Urlaubsmodus aus.",
+  vacAuto: "Automatisch gewählt, weil es sie gibt. Leere das Feld oder wähle eine andere, um das zu ändern.", vacKeyword: "Stichwort im Termin", vacKeywordExample: "Urlaub", vacKeywordHint: "Nur Termine, deren Titel dieses Wort enthält, schalten den Urlaubsmodus ein, so lässt sich dein normaler Kalender nutzen. Leer: jeder laufende Termin zählt, für einen eigenen Urlaubskalender.",
   vacGrace: "Nachfrist nach dem Urlaub", vacGraceUnit: "Stunden", vacGraceHint: "Standard 24 Stunden. Wie lange Befunde nach dem Ende zurückgehalten werden, wenn für das Objekt keine eigene Frist gilt.",
   vacSave: "Speichern", vacUnsaved: "Nicht gespeichert", vacEntityInvalid: "Eine Entität hat die Form bereich.name, zum Beispiel input_boolean.urlaub.", vacGraceInvalid: "Die Nachfrist muss eine ganze Zahl von 0 bis {max} Stunden sein.", vacStateOn: "Aktuell: an", vacStateOff: "Aktuell: aus", vacStateMissing: "Aktuell: nicht verfügbar", vacEnded: "Zuletzt beendet am {date}.", vacFailed: "Nicht gespeichert: {reason}",
   vacBarOn: "Urlaubsmodus aktiv", vacBarHeld: "{n} Befunde zurückgehalten", vacBarHeld1: "1 Befund zurückgehalten",
@@ -54,6 +55,7 @@ Object.assign(TEXT.en, {
   excOverlap: "These objects are already hit by: {rules}. In the vacation hiding applies, afterwards the delay of the other rule, counted from the end of the vacation.",
   vacTitle: "Vacation mode", vacHint: "While the chosen entity is “on” the rules “only in vacation mode” apply. If it is unavailable or unknown the mode counts as off. You can switch it in Home Assistant, for example by calendar or automation.",
   vacEntity: "Entity for vacation mode", vacEntityHint: "Any entity that can be “on”: helper, switch, binary sensor, schedule, calendar. Leave empty to turn vacation mode off.",
+  vacAuto: "Chosen automatically because it exists. Clear the field or choose another to change that.", vacKeyword: "Keyword in the event", vacKeywordExample: "Vacation", vacKeywordHint: "Only events whose title contains this word switch vacation mode on, so your normal calendar works. Empty: every running event counts, for a calendar of its own.",
   vacGrace: "Grace period after the vacation", vacGraceUnit: "hours", vacGraceHint: "Default 24 hours. How long findings are held back after the end when the object has no delay of its own.",
   vacSave: "Save", vacUnsaved: "Not saved", vacEntityInvalid: "An entity looks like domain.name, for example input_boolean.vacation.", vacGraceInvalid: "The grace period must be a whole number from 0 to {max} hours.", vacStateOn: "Now: on", vacStateOff: "Now: off", vacStateMissing: "Now: unavailable", vacEnded: "Last ended on {date}.", vacFailed: "Not saved: {reason}",
   vacBarOn: "Vacation mode on", vacBarHeld: "{n} findings held back", vacBarHeld1: "1 finding held back",
@@ -150,12 +152,14 @@ class ExceptionsMixin {
   }
 
   vacationHtml() {
-    const v = this.exc.vacation || {}, form = this.vacForm || (this.vacForm = { entity: v.entity || "", grace: v.grace_hours ?? 24, error: "" });
+    const v = this.exc.vacation || {}, form = this.vacForm || (this.vacForm = { entity: v.entity || "", keyword: v.keyword || "", grace: v.grace_hours ?? 24, error: "" });
     const dirty = this.vacDirty();
     const ids = Object.keys(this._hass?.states || {}).filter(id => /^(input_boolean|binary_sensor|switch|schedule|calendar)\./.test(id)).sort();
     return `<form data-vac-form><div class="setrow"><div><strong>${this.t("vacEntity")}</strong><small>${this.t("vacEntityHint")}</small></div>
         <div><input list="hk-vac-ids" data-vac-entity autocomplete="off" value="${this.esc(form.entity)}"><datalist id="hk-vac-ids">${ids.map(id => `<option value="${this.esc(id)}">`).join("")}</datalist>
-        ${v.entity && v.ended_at ? `<small role="status">${this.t("vacEnded", { date: this.formatDate(v.ended_at) })}</small>` : ""}</div></div>
+        ${v.automatic && form.entity === v.entity ? `<small role="status">${this.t("vacAuto")}</small>` : ""}${v.entity && v.ended_at ? `<small role="status">${this.t("vacEnded", { date: this.formatDate(v.ended_at) })}</small>` : ""}</div></div>
+      ${form.entity.trim().startsWith("calendar.") ? `<div class="setrow"><div><strong>${this.t("vacKeyword")}</strong><small>${this.t("vacKeywordHint")}</small></div>
+        <div><input data-vac-keyword maxlength="60" autocomplete="off" placeholder="${this.esc(this.t("vacKeywordExample"))}" value="${this.esc(form.keyword)}"></div></div>` : ""}
       <div class="setrow"><div><strong>${this.t("vacGrace")}</strong><small>${this.t("vacGraceHint")}</small></div>
         <div class="excnum"><input type="number" min="0" max="${v.grace_max || 720}" data-vac-grace value="${this.esc(form.grace)}"> <span>${this.t("vacGraceUnit")}</span></div></div>
       ${form.error ? `<div class="pad">${this.notice("err", form.error)}</div>` : ""}
@@ -165,7 +169,7 @@ class ExceptionsMixin {
   // Whether the vacation fields differ from what is saved; reverting a change makes it clean again.
   vacDirty() {
     const v = this.exc?.vacation || {}, f = this.vacForm;
-    return Boolean(f) && (f.entity.trim() !== (v.entity || "") || Number(f.grace) !== (v.grace_hours ?? 24));
+    return Boolean(f) && (f.entity.trim() !== (v.entity || "") || f.keyword.trim() !== (v.keyword || "") || Number(f.grace) !== (v.grace_hours ?? 24));
   }
 
   async saveVacation() {
@@ -174,7 +178,7 @@ class ExceptionsMixin {
     if (entity && !/^[a-z0-9_]+\.[a-z0-9_]+$/.test(entity)) { form.error = this.t("vacEntityInvalid"); this.render(); return; }
     if (String(form.grace).trim() === "" || !Number.isInteger(grace) || grace < 0 || grace > max) { form.error = this.t("vacGraceInvalid", { max }); this.render(); return; }
     try {
-      await this._hass.callWS({ type: "ha_housekeeper/vacation_set", entity: entity || null, grace_hours: grace });
+      await this._hass.callWS({ type: "ha_housekeeper/vacation_set", entity: entity || null, grace_hours: grace, keyword: entity.startsWith("calendar.") ? form.keyword.trim() : "" });
       this.vacForm = null;
       this.exc = await this._hass.callWS({ type: "ha_housekeeper/exceptions" });
       await this.refreshData();
@@ -290,7 +294,14 @@ class ExceptionsMixin {
         form.querySelector("[data-vac-dirty]").hidden = !dirty; form.querySelector("[data-vac-save]").hidden = !dirty; form.querySelector("[data-vac-cancel]").hidden = !dirty;
       };
       form.querySelector("[data-vac-cancel]").onclick = () => { this.vacForm = null; this.render(); };
-      form.querySelector("[data-vac-entity]").oninput = ev => { v.entity = ev.target.value; sync(); };
+      form.querySelector("[data-vac-entity]").oninput = ev => {
+        const calendar = x => x.trim().startsWith("calendar.");
+        const switched = calendar(v.entity) !== calendar(ev.target.value);
+        v.entity = ev.target.value;
+        if (switched) { this.render(); this.shadowRoot.querySelector("[data-vac-entity]")?.focus(); } else sync();
+      };
+      const keyword = form.querySelector("[data-vac-keyword]");
+      if (keyword) keyword.oninput = ev => { v.keyword = ev.target.value; sync(); };
       form.querySelector("[data-vac-grace]").oninput = ev => { v.grace = ev.target.value; sync(); };
     });
     root.querySelectorAll("[data-vac-go]").forEach(el => el.onclick = ev => {

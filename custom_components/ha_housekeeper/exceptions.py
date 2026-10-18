@@ -10,6 +10,11 @@ hidden by a rule cannot be shown again one by one: what the object is decides.
 A rule applies ``always`` or only ``vacation``: while the entity chosen as the vacation switch is
 ``on``. The outage of an object that a vacation rule covers counts from the end of the vacation;
 the grace period (hours) then holds the finding back unless a delay rule of its own says how long.
+
+The switch can be a calendar. Without a keyword every running event counts as vacation; with one,
+only an event whose title contains it, found by asking the calendar for the events of this moment
+(a calendar shows just one running event in its attributes, so that alone could miss it).
+Until a switch has been chosen, ``input_boolean.urlaubsmodus`` is used when it exists.
 """
 
 from __future__ import annotations
@@ -40,6 +45,8 @@ GRACE_DEFAULT = (
     24  # hours a finding is held back after the vacation, without a delay rule of its own
 )
 GRACE_MAX = 720
+DEFAULT_ENTITY = "input_boolean.urlaubsmodus"  # used until the user has chosen a switch
+KEYWORD_MAX = 60
 AVAILABILITY = frozenset({"unavailable", "unknown", "stale"})  # what a delay rule holds back
 
 
@@ -284,7 +291,10 @@ class ExceptionStore:
         self.hass = hass
         self._store: Store[dict[str, Any]] = Store(hass, STORAGE_VERSION, EXCEPTIONS_STORAGE_KEY)
         self.rules: list[dict[str, Any]] = []
-        self.entity: str | None = None
+        self._entity: str | None = None
+        self._chosen = False  # whether the switch was chosen (or left empty) by the user
+        self.keyword = ""  # for a calendar: the word an event title must contain
+        self._keyword_hit: bool | None = None  # whether such an event runs now; None until asked
         self.grace_hours = GRACE_DEFAULT
         self.was_active = False
         self.ended_at: datetime | None = None
@@ -298,7 +308,13 @@ class ExceptionStore:
         self.rules = [rule for rule in cleaned if rule is not None][:ITEM_LIMIT]
         vac = data.get("vacation")
         if isinstance(vac, dict):
-            self.entity = vac["entity"] if isinstance(vac.get("entity"), str) else None
+            self._entity = vac["entity"] if isinstance(vac.get("entity"), str) else None
+            # Older data has no "chosen": a stored entity was chosen, an empty one is taken as never chosen.
+            self._chosen = vac.get("chosen") is True or (
+                "chosen" not in vac and self._entity is not None
+            )
+            keyword = vac.get("keyword")
+            self.keyword = keyword.strip()[:KEYWORD_MAX] if isinstance(keyword, str) else ""
             grace = vac.get("grace_hours")
             self.grace_hours = (
                 min(max(grace, 0), GRACE_MAX) if isinstance(grace, int) else GRACE_DEFAULT
@@ -316,7 +332,9 @@ class ExceptionStore:
         return {
             "rules": self.rules,
             "vacation": {
-                "entity": self.entity,
+                "entity": self._entity,
+                "chosen": self._chosen,
+                "keyword": self.keyword,
                 "grace_hours": self.grace_hours,
                 "was_active": self.was_active,
                 "ended_at": self.ended_at.isoformat() if self.ended_at else None,
@@ -334,22 +352,93 @@ class ExceptionStore:
         self._save()
         return None
 
-    def set_vacation(self, entity: str | None, grace_hours: int, now: datetime) -> str | None:
+    @property
+    def entity(self) -> str | None:
+        """The vacation switch: the chosen one, or the default while none was chosen and it exists."""
+        if self._chosen:
+            return self._entity
+        return DEFAULT_ENTITY if self.hass.states.get(DEFAULT_ENTITY) is not None else None
+
+    @property
+    def automatic(self) -> bool:
+        """Whether the switch is the default one, not chosen by the user."""
+        return not self._chosen and self.entity is not None
+
+    def watched(self) -> str | None:
+        """The entity whose state changes matter: the chosen switch, or the default while none is chosen."""
+        return self._entity if self._chosen else DEFAULT_ENTITY
+
+    def set_vacation(
+        self, entity: str | None, grace_hours: int, now: datetime, keyword: str = ""
+    ) -> str | None:
         """Choose the vacation switch and the grace period; the reason it failed, or None."""
         if entity is not None and (
             "." not in entity or len(entity) > TARGET_LENGTH or not 0 <= grace_hours <= GRACE_MAX
         ):
             return "invalid"
-        self.entity = entity or None
+        self._entity = entity or None
+        self._chosen = True
+        self.keyword = keyword.strip()[:KEYWORD_MAX]
+        self._keyword_hit = None
         self.grace_hours = grace_hours
         self.was_active = False
         self.sync(now)
         return None
 
+    def _calendar_keyword(self) -> str:
+        """The keyword to look for, or "" when the switch is no calendar or takes every event."""
+        entity = self.entity
+        return self.keyword.casefold() if entity and entity.startswith("calendar.") else ""
+
+    def needs_calendar(self) -> bool:
+        """Whether the calendar has to be asked for the events of this moment."""
+        return bool(self._calendar_keyword())
+
+    async def async_refresh_calendar(self, now: datetime) -> None:
+        """Ask the calendar which events run now and note whether one of them has the keyword."""
+        word, entity = self._calendar_keyword(), self.entity
+        if not word or entity is None:
+            self._keyword_hit = None
+            return
+        state = self.hass.states.get(entity)
+        if state is None or state.state != "on":
+            self._keyword_hit = False
+            return
+        try:
+            result = await self.hass.services.async_call(
+                "calendar",
+                "get_events",
+                {
+                    "entity_id": entity,
+                    "start_date_time": now,
+                    "end_date_time": now + timedelta(seconds=1),
+                },
+                blocking=True,
+                return_response=True,
+            )
+            events = (result or {}).get(entity, {}).get("events", [])
+            self._keyword_hit = any(
+                word in str(event.get("summary") or "").casefold() for event in events
+            )
+        except Exception:  # the calendar cannot be asked: the title it shows may still tell
+            self._keyword_hit = None
+
     def switch_state(self) -> str | None:
-        """The state of the vacation switch, or None when none is chosen or it is missing."""
-        state = self.hass.states.get(self.entity) if self.entity else None
-        return state.state if state is not None else None
+        """The state of the vacation switch, or None when none is chosen or it is missing.
+
+        A calendar with a keyword reads "off" while it has events but none with the keyword.
+        """
+        entity = self.entity
+        state = self.hass.states.get(entity) if entity else None
+        if state is None:
+            return None
+        word = self._calendar_keyword()
+        if word and state.state == "on":
+            hit = self._keyword_hit
+            if hit is None:  # not asked yet, or the calendar could not be asked: the shown title
+                hit = word in str(state.attributes.get("message") or "").casefold()
+            return "on" if hit else "off"
+        return state.state
 
     def active(self) -> bool:
         """Whether the vacation is on; a switch that is missing or has no state counts as off."""

@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
+from typing import Any
+from unittest.mock import AsyncMock, MagicMock
 
 from custom_components.ha_housekeeper.exceptions import (
+    ExceptionStore,
     Traits,
     Vacation,
     clean_rule,
@@ -126,3 +131,39 @@ def test_a_rule_for_all_covers_every_object_and_needs_no_target() -> None:
     assert rule is not None and rule["targets"] == ["*"]
     assert matches(rule, Traits(None, frozenset()))
     assert not matches({**rule, "enabled": False}, Traits(None, frozenset()))
+
+
+def _store(states: dict[str, Any], events: list[dict[str, Any]] | None = None) -> ExceptionStore:
+    hass = MagicMock()
+    hass.states.get.side_effect = states.get
+    hass.services.async_call = AsyncMock(return_value={"calendar.main": {"events": events or []}})
+    store = ExceptionStore(hass)
+    store._store = MagicMock()
+    return store
+
+
+def _state(value: str, message: str = "") -> Any:
+    return SimpleNamespace(state=value, attributes={"message": message})
+
+
+def test_the_default_switch_is_used_until_one_is_chosen() -> None:
+    store = _store({"input_boolean.urlaubsmodus": _state("on")})
+    assert store.entity == "input_boolean.urlaubsmodus" and store.automatic and store.active()
+    store.set_vacation(None, 24, NOW)
+    assert store.entity is None and not store.automatic  # left empty on purpose
+
+
+def test_a_calendar_keyword_looks_at_every_running_event() -> None:
+    states = {"calendar.main": _state("on", "Zahnarzt")}
+    store = _store(states, [{"summary": "Zahnarzt"}, {"summary": "Urlaub Mallorca"}])
+    store.set_vacation("calendar.main", 24, NOW, "urlaub")
+    assert not store.active()  # the title shown is only the dentist, until the calendar is asked
+    asyncio.run(store.async_refresh_calendar(NOW))
+    assert store.active()
+    store.hass.services.async_call.return_value = {
+        "calendar.main": {"events": [{"summary": "Zahnarzt"}]}
+    }
+    asyncio.run(store.async_refresh_calendar(NOW))
+    assert store.switch_state() == "off"
+    store.set_vacation("calendar.main", 24, NOW, "")
+    assert store.active()  # no keyword: every running event counts

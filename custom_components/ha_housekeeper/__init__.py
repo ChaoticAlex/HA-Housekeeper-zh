@@ -298,14 +298,26 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         vacation["timer"] = None
         scanner.vacation_changed()
 
+    async def _vacation_look() -> None:
+        # A calendar with a keyword has to be asked for the events of this moment first.
+        try:
+            await scanner.exceptions.async_refresh_calendar(datetime.now(UTC))
+        finally:
+            scanner.vacation_changed()
+            _vacation_timer()
+
     @callback
     def _vacation_moved(_: Any = None) -> None:
+        _vacation_follow()
+        if scanner.exceptions.needs_calendar():
+            entry.async_create_background_task(hass, _vacation_look(), "ha_housekeeper_vacation")
+            return
         scanner.vacation_changed()
         _vacation_timer()
 
     @callback
     def _vacation_follow() -> None:
-        entity = scanner.exceptions.entity
+        entity = scanner.exceptions.watched()
         if vacation["entity"] != entity:
             if vacation["unsub"] is not None:
                 vacation["unsub"]()
@@ -315,9 +327,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             )
         _vacation_timer()
 
-    scanner.vacation_hook = _vacation_follow
+    @callback
+    def _vacation_hook() -> None:
+        _vacation_moved()
+
+    scanner.vacation_hook = _vacation_hook
     _vacation_follow()
-    scanner.vacation_changed()
+    _vacation_moved()
     entry.async_on_unload(lambda: vacation["unsub"]() if vacation["unsub"] else None)
     entry.async_on_unload(lambda: vacation["timer"]() if vacation["timer"] else None)
     entry.async_on_unload(criteria_module.async_listen(hass, scanner.criteria))

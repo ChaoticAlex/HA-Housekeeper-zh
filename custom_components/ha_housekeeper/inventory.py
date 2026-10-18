@@ -1754,6 +1754,7 @@ class InventoryScanner:
         after = [f for f in held if f["ignore_rule"]["phase"] == "after"]
         return {
             "entity": store.entity,
+            "keyword": store.keyword,
             "active": store.active(),
             "missing": state in (None, "unavailable", "unknown"),
             "ended_at": store.ended_at.isoformat() if store.ended_at else None,
@@ -1762,10 +1763,10 @@ class InventoryScanner:
             "after_until": max((f["ignore_rule"]["until"] for f in after), default=None),
         }
 
-    def set_vacation(self, entity: str | None, grace_hours: int) -> str | None:
-        """Choose the vacation switch and the grace period; the failure, or None."""
+    def set_vacation(self, entity: str | None, grace_hours: int, keyword: str = "") -> str | None:
+        """Choose the vacation switch, its keyword and the grace period; the failure, or None."""
         if (
-            error := self.exceptions.set_vacation(entity, grace_hours, datetime.now(UTC))
+            error := self.exceptions.set_vacation(entity, grace_hours, datetime.now(UTC), keyword)
         ) is not None:
             return error
         self._refresh_marks()

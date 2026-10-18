@@ -20,6 +20,7 @@ from .db_health import growth
 from .exceptions import ACTIONS as EXCEPTION_ACTIONS
 from .exceptions import DAYS_MAX as EXCEPTION_DAYS_MAX
 from .exceptions import GRACE_MAX as VACATION_GRACE_MAX
+from .exceptions import KEYWORD_MAX as VACATION_KEYWORD_MAX
 from .exceptions import KINDS as EXCEPTION_KINDS
 from .exceptions import NOTE_MAX as EXCEPTION_NOTE_MAX
 from .exceptions import SCOPES as EXCEPTION_SCOPES
@@ -792,6 +793,8 @@ async def websocket_exceptions(
             ],
             "vacation": {
                 "entity": store.entity,
+                "automatic": store.automatic,
+                "keyword": store.keyword,
                 "grace_hours": store.grace_hours,
                 "grace_max": VACATION_GRACE_MAX,
                 "active": store.active(),
@@ -854,6 +857,7 @@ async def websocket_exceptions_preview(
         vol.Required("type"): f"{DOMAIN}/vacation_set",
         vol.Required("entity"): vol.Any(None, "", vol.All(str, vol.Length(max=255))),
         vol.Required("grace_hours"): vol.All(int, vol.Range(min=0, max=VACATION_GRACE_MAX)),
+        vol.Optional("keyword", default=""): vol.All(str, vol.Length(max=VACATION_KEYWORD_MAX)),
     }
 )
 @callback
@@ -865,7 +869,7 @@ def websocket_vacation_set(
     scanner: InventoryScanner,
 ) -> None:
     """Choose the entity that switches the vacation mode on, and the grace period after it."""
-    error = scanner.set_vacation(msg["entity"] or None, msg["grace_hours"])
+    error = scanner.set_vacation(msg["entity"] or None, msg["grace_hours"], msg["keyword"])
     if error:
         connection.send_error(msg["id"], error, f"Vacation not saved: {error}")
         return
