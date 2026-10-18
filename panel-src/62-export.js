@@ -316,7 +316,7 @@ class ExportMixin {
     });
     root.querySelector("[data-xp-download]")?.addEventListener("click", () => this.xpDownload());
     root.querySelector("[data-xp-copy]")?.addEventListener("click", async () => {
-      try { await globalThis.navigator?.clipboard?.writeText(this.xpBuild().text.replace(/^﻿/, "")); x.copied = true; } catch (_) { x.copied = false; }
+      try { await this.copyText(this.xpBuild().text.replace(/^﻿/, "")); x.copied = true; } catch (_) { x.copied = false; }
       go();
       setTimeout(() => { x.copied = false; if (this.xp === x) this.render(); }, 1500);
     });

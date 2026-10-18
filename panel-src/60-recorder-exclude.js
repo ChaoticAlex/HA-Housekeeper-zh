@@ -128,7 +128,7 @@ class ExcludeMixin {
     root.querySelector("[data-ex-only]")?.addEventListener("click", () => { this.exOnlySug = !this.exOnlySug; this.pages.costs = 1; this.pages.stormentities = 1; this.render(); });
     root.querySelector("[data-ex-clear]")?.addEventListener("click", () => { this.excludeSel.clear(); this.render(); });
     root.querySelector("[data-copy-snippet]")?.addEventListener("click", async () => {
-      try { await globalThis.navigator?.clipboard?.writeText(this.excludeSnippet()); this.snippetCopied = true; } catch (_) { this.snippetCopied = false; }
+      try { await this.copyText(this.excludeSnippet()); this.snippetCopied = true; } catch (_) { this.snippetCopied = false; }
       this.render();
       setTimeout(() => { this.snippetCopied = false; this.render(); }, 1500);
     });

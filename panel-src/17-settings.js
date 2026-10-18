@@ -131,7 +131,7 @@ class SettingsMixin {
   }
 
   async copyIssueText() {
-    try { await globalThis.navigator?.clipboard?.writeText(this.issueText()); this.toast(this.t("diagCopied")); } catch (err) { this.failed(err); }
+    try { await this.copyText(this.issueText()); this.toast(this.t("diagCopied")); } catch (err) { this.failed(err); }
   }
 
   storedFiles(m) {

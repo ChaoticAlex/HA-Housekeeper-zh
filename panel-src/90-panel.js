@@ -387,6 +387,20 @@ class HAHousekeeperPanel extends HTMLElement {
     this.dispatchEvent(new CustomEvent("hass-more-info", { detail: { entityId }, bubbles: true, composed: true }));
   }
 
+  // The clipboard API needs HTTPS; over plain http or in some app web views it is missing, so fall back to a hidden textarea. Throws when neither works.
+  async copyText(text) {
+    try { if (globalThis.navigator?.clipboard?.writeText) { await globalThis.navigator.clipboard.writeText(text); return; } } catch (_) { /* fall through */ }
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+    document.body.appendChild(area);
+    try {
+      area.select();
+      if (!document.execCommand("copy")) throw new Error("copy not available");
+    } finally { area.remove(); }
+  }
+
   navigateHA(path) {
     window.open(new URL(path, window.location.origin).href, "_blank", "noopener");
   }
@@ -1142,12 +1156,12 @@ class HAHousekeeperPanel extends HTMLElement {
     });
     root.querySelector("[data-pref-reset]")?.addEventListener("click", () => { this.prefs = { ...DEFAULT_PREFS }; this.pageSize = DEFAULT_PREFS.pageSize; this.pages = {}; this.savePrefs(); this.render(); });
     root.querySelectorAll("[data-copy-event]").forEach(el => el.onclick = async () => {
-      try { await globalThis.navigator?.clipboard?.writeText(el.dataset.copyEvent); this.copiedEvent = el.dataset.copyEvent.replace("ha_housekeeper_", ""); } catch (_) { this.copiedEvent = ""; }
+      try { await this.copyText(el.dataset.copyEvent); this.copiedEvent = el.dataset.copyEvent.replace("ha_housekeeper_", ""); } catch (_) { this.copiedEvent = ""; }
       this.render();
       setTimeout(() => { this.copiedEvent = ""; this.render(); }, 1500);
     });
     root.querySelector("[data-copy-info]")?.addEventListener("click", async () => {
-      try { await globalThis.navigator?.clipboard?.writeText(this.infoText()); this.copied = true; } catch (_) { this.copied = false; }
+      try { await this.copyText(this.infoText()); this.copied = true; } catch (_) { this.copied = false; }
       this.render();
       setTimeout(() => { this.copied = false; this.render(); }, 1500);
     });

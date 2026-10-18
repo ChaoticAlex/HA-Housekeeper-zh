@@ -208,7 +208,7 @@ class ExchangeMixin {
   }
 
   async copyReport() {
-    try { await navigator.clipboard.writeText(this.report.markdown); this.reportMessage = this.t("reportCopied"); }
+    try { await this.copyText(this.report.markdown); this.reportMessage = this.t("reportCopied"); }
     catch (err) { this.reportMessage = this.t("reportFailed", { reason: this.errText(err) }); }
     this.render();
   }

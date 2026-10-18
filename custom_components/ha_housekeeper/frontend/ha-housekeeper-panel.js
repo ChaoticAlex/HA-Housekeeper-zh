@@ -3415,7 +3415,7 @@ class SettingsMixin {
   }
 
   async copyIssueText() {
-    try { await globalThis.navigator?.clipboard?.writeText(this.issueText()); this.toast(this.t("diagCopied")); } catch (err) { this.failed(err); }
+    try { await this.copyText(this.issueText()); this.toast(this.t("diagCopied")); } catch (err) { this.failed(err); }
   }
 
   storedFiles(m) {
@@ -9174,7 +9174,7 @@ class ExchangeMixin {
   }
 
   async copyReport() {
-    try { await navigator.clipboard.writeText(this.report.markdown); this.reportMessage = this.t("reportCopied"); }
+    try { await this.copyText(this.report.markdown); this.reportMessage = this.t("reportCopied"); }
     catch (err) { this.reportMessage = this.t("reportFailed", { reason: this.errText(err) }); }
     this.render();
   }
@@ -11906,7 +11906,7 @@ class ExcludeMixin {
     root.querySelector("[data-ex-only]")?.addEventListener("click", () => { this.exOnlySug = !this.exOnlySug; this.pages.costs = 1; this.pages.stormentities = 1; this.render(); });
     root.querySelector("[data-ex-clear]")?.addEventListener("click", () => { this.excludeSel.clear(); this.render(); });
     root.querySelector("[data-copy-snippet]")?.addEventListener("click", async () => {
-      try { await globalThis.navigator?.clipboard?.writeText(this.excludeSnippet()); this.snippetCopied = true; } catch (_) { this.snippetCopied = false; }
+      try { await this.copyText(this.excludeSnippet()); this.snippetCopied = true; } catch (_) { this.snippetCopied = false; }
       this.render();
       setTimeout(() => { this.snippetCopied = false; this.render(); }, 1500);
     });
@@ -12304,7 +12304,7 @@ class ExportMixin {
     });
     root.querySelector("[data-xp-download]")?.addEventListener("click", () => this.xpDownload());
     root.querySelector("[data-xp-copy]")?.addEventListener("click", async () => {
-      try { await globalThis.navigator?.clipboard?.writeText(this.xpBuild().text.replace(/^﻿/, "")); x.copied = true; } catch (_) { x.copied = false; }
+      try { await this.copyText(this.xpBuild().text.replace(/^﻿/, "")); x.copied = true; } catch (_) { x.copied = false; }
       go();
       setTimeout(() => { x.copied = false; if (this.xp === x) this.render(); }, 1500);
     });
@@ -16149,6 +16149,20 @@ class HAHousekeeperPanel extends HTMLElement {
     this.dispatchEvent(new CustomEvent("hass-more-info", { detail: { entityId }, bubbles: true, composed: true }));
   }
 
+  // The clipboard API needs HTTPS; over plain http or in some app web views it is missing, so fall back to a hidden textarea. Throws when neither works.
+  async copyText(text) {
+    try { if (globalThis.navigator?.clipboard?.writeText) { await globalThis.navigator.clipboard.writeText(text); return; } } catch (_) { /* fall through */ }
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.setAttribute("readonly", "");
+    area.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+    document.body.appendChild(area);
+    try {
+      area.select();
+      if (!document.execCommand("copy")) throw new Error("copy not available");
+    } finally { area.remove(); }
+  }
+
   navigateHA(path) {
     window.open(new URL(path, window.location.origin).href, "_blank", "noopener");
   }
@@ -16904,12 +16918,12 @@ class HAHousekeeperPanel extends HTMLElement {
     });
     root.querySelector("[data-pref-reset]")?.addEventListener("click", () => { this.prefs = { ...DEFAULT_PREFS }; this.pageSize = DEFAULT_PREFS.pageSize; this.pages = {}; this.savePrefs(); this.render(); });
     root.querySelectorAll("[data-copy-event]").forEach(el => el.onclick = async () => {
-      try { await globalThis.navigator?.clipboard?.writeText(el.dataset.copyEvent); this.copiedEvent = el.dataset.copyEvent.replace("ha_housekeeper_", ""); } catch (_) { this.copiedEvent = ""; }
+      try { await this.copyText(el.dataset.copyEvent); this.copiedEvent = el.dataset.copyEvent.replace("ha_housekeeper_", ""); } catch (_) { this.copiedEvent = ""; }
       this.render();
       setTimeout(() => { this.copiedEvent = ""; this.render(); }, 1500);
     });
     root.querySelector("[data-copy-info]")?.addEventListener("click", async () => {
-      try { await globalThis.navigator?.clipboard?.writeText(this.infoText()); this.copied = true; } catch (_) { this.copied = false; }
+      try { await this.copyText(this.infoText()); this.copied = true; } catch (_) { this.copied = false; }
       this.render();
       setTimeout(() => { this.copied = false; this.render(); }, 1500);
     });
