@@ -78,7 +78,7 @@ Housekeeper verbindet Registry-Daten mit der laufenden Home-Assistant-Instanz un
 3. Als Administrator **Housekeeper** in der Seitenleiste öffnen. Der erste Scan läuft automatisch; **Neu scannen** aktualisiert ihn.
 4. Mit **Befunde** beginnen und einen Befund öffnen: Ursache und Abhängigkeiten stehen oben. Unter **Aufräumen** baust du einen Plan, der bis zu deiner Bestätigung nur eine Vorschau zeigt.
 
-> Neue Installationen starten im Schutzmodus **nur lesen**. Damit Housekeeper etwas ändern darf, erhöhe ihn unter **Einstellungen → Schutz und Ausnahmen**.
+> Neue Installationen starten im Schutzmodus **nur lesen**. Damit Housekeeper etwas ändern darf, erhöhe ihn unter **Einstellungen → Schutzmodus**.
 
 Mehr zur Installation (manuell, eigenes Repository), zu allen Ansichten und Einstellungen steht im **[Benutzerhandbuch](docs/USER-GUIDE.de.md)**.
 

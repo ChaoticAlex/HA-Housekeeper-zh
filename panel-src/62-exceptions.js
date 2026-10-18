@@ -247,7 +247,7 @@ class ExceptionsMixin {
     });
     root.querySelectorAll("[data-vac-go]").forEach(el => el.onclick = ev => {
       ev.preventDefault();
-      this.selected = null; this.view = "settings"; this.settingsTab = "protection"; this.pages = {};
+      this.selected = null; this.view = "settings"; this.settingsTab = "exceptions"; this.pages = {};
       if (el.dataset.vacGo === "hidden") { this.lvState("hidden", "name", "asc"); this.lv.hidden.f.by = "rule"; }
       this.render();
     });

@@ -9,12 +9,12 @@
   - Ein zweiter Schalter „Merkliste ändern“ erlaubt `finding_decide`, `mark`, `note_set` und `undo`; es ändern sich nur Housekeepers eigene Listen, nie Home Assistant.
   - Ein Protokoll zeigt jeden Aufruf mit Benutzer und Ergebnis, Änderungen lassen sich dort zurücknehmen. Nur Administratoren, nie Geheimnisse.
 - **Urlaubsmodus:** Eine Entität deiner Wahl (z. B. `input_boolean.urlaub`) schaltet Regeln „nur im Urlaubsmodus“ ein. Dazu gibt es Regeln für einzelne Geräte und Entitäten, eine Nachfrist nach dem Urlaub (Standard 24 Stunden) und eine Leiste, solange etwas zurückgehalten wird.
-- **Ausnahmeregeln:** Unter Einstellungen → Schutz und Ausnahmen nimmst du Objekte nach Bereich, Label, Integration oder Typ (z. B. Bereich „Lager“, alle `media_player`) aus. Die Regel blendet ihre Befunde aus oder meldet einen Ausfall erst nach einer einstellbaren Zahl Tage.
+- **Ausnahmeregeln:** Unter Einstellungen → Ausnahmen nimmst du Objekte nach Bereich, Label, Integration oder Typ (z. B. Bereich „Lager“, alle `media_player`) aus. Die Regel blendet ihre Befunde aus oder meldet einen Ausfall erst nach einer einstellbaren Zahl Tage.
 - **In HA öffnen:** Bei Entitäten mit Gerät öffnet der Knopf die Geräteseite statt der ganzen Entitätenliste.
 - **Mehr Infos:** Beim Schließen des Dialogs „Mehr Infos“ bleibt das Panel auf der Detailseite, statt zurück zur Liste zu springen.
 - **Kopieren:** Die Kopier-Knöpfe (z. B. „Angaben für eine Fehlermeldung kopieren“) funktionieren auch ohne HTTPS und melden einen Fehlschlag statt „Kopiert“.
 - **Links nach Home Assistant:** Alle Sprünge nach Home Assistant (Apps, Integrationen, HACS, Benutzer, Cloud) öffnen in einem neuen Tab statt im selben.
-- **Schutzmodus:** Die Anzeige nennt die Wirkung statt der Stufe: „Alles erlaubt“, „Ohne endgültiges Löschen“, „Nur Quarantäne“, „Nur lesen“.
+- **Schutzmodus und Ausnahmen:** Die Einstellungen trennen beides in zwei Reiter. Der Schutzmodus nennt die Wirkung statt der Stufe: „Alles erlaubt“, „Ohne endgültiges Löschen“, „Nur Quarantäne“, „Nur lesen“.
 - **Updates:** Die ausstehenden Updates stehen in der gewohnten Tabelle mit Suche, Sortierung, Filter nach Bereich und Seiten.
 
 ### English
@@ -31,7 +31,7 @@
 - **More info:** Closing the “More info” dialog keeps the panel on the detail page instead of jumping back to the list.
 - **Copying:** The copy buttons (e.g. “Copy details for a bug report”) also work without HTTPS and report a failure instead of “Copied”.
 - **Links into Home Assistant:** All jumps into Home Assistant (apps, integrations, HACS, users, cloud) now open in a new tab instead of the current one.
-- **Protection mode:** The label names the effect instead of the level: “Everything allowed”, “No irreversible deletions”, “Quarantine only”, “Read only”.
+- **Protection mode and exceptions:** Settings now split them into two tabs. The protection mode names the effect instead of the level: “Everything allowed”, “No irreversible deletions”, “Quarantine only”, “Read only”.
 - **Updates:** Pending updates are shown in the usual table with search, sorting, an area filter and pages.
 
 ## 1.9.0 - 2026-10-17

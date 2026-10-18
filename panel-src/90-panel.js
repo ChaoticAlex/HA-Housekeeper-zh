@@ -1153,7 +1153,7 @@ class HAHousekeeperPanel extends HTMLElement {
       if (input && field) { input.value = field[4]; input.dispatchEvent(new Event("input")); }
     });
     root.querySelectorAll("[data-set-tab]").forEach(el => {
-      el.onclick = () => { this.settingsTab = el.dataset.setTab; this.optionsMessage = ""; if (this.settingsTab === "protection" && this.exc) this.loadExceptions(); this.render(); };
+      el.onclick = () => { this.settingsTab = el.dataset.setTab; this.optionsMessage = ""; if (this.settingsTab === "exceptions" && this.exc) this.loadExceptions(); this.render(); };
       el.onkeydown = ev => {
         const ids = [...root.querySelectorAll("[data-set-tab]")].map(b => b.dataset.setTab), at = ids.indexOf(el.dataset.setTab);
         const next = { ArrowRight: ids[(at + 1) % ids.length], ArrowLeft: ids[(at - 1 + ids.length) % ids.length], Home: ids[0], End: ids[ids.length - 1] }[ev.key];
