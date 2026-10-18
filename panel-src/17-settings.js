@@ -98,6 +98,7 @@ class SettingsMixin {
       text: f => [objectName(f), f.object_id, this.findingTitle(f), decision(f)].join(" "),
       filters: [{ name: "by", all: this.t("hidAllWays"), options: [["manual", this.t("hidByManual")], ["label", this.t("hidByLabel")], ["mark", this.t("hidByMark")], ["rule", this.t("hidByRule")]] }],
       filterFns: { by: (f, v) => by(f) === v },
+      rowAttrs: f => (this.findObject(this.findingKey(f)) ? `data-object="${this.esc(this.findingKey(f))}" tabindex="0" role="button" aria-label="${this.esc(objectName(f))}"` : 'class="static"'),
       columns: [
         { key: "name", label: "hidColObject", dir: "asc", cell: f => `<strong>${this.esc(objectName(f))}</strong><small>${this.esc(f.object_id)}</small>` },
         { key: "finding", label: "hidColFinding", dir: "asc", cell: f => this.esc(this.findingTitle(f)) },

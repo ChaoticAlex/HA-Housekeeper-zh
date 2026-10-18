@@ -17,6 +17,7 @@
 - **Schutzmodus und Ausnahmen:** Die Einstellungen trennen beides in zwei Reiter. Der Schutzmodus nennt die Wirkung statt der Stufe: „Alles erlaubt“, „Ohne endgültiges Löschen“, „Nur Quarantäne“, „Nur lesen“.
 - **Einstellungen, Kacheln:** Die Kacheln stehen in neuer Reihenfolge (Schutzmodus, Ausnahmen, Scan und Meldungen, KI-Zugriff, Darstellung, Info) in drei Spalten. Jede Kachel zeigt ihren Stand, der Randstreifen folgt ihm (z. B. KI-Zugriff: aus grau, Lesen grün, Ändern gelb).
 - **KI-Zugriff, Zeitlimit:** „Automatisch ausschalten“ wählst du wie andere Einstellungen mit Chips (Nie, 1, 8, 24 Stunden) statt im Dropdown.
+- **KI-Zugriff, Protokoll:** Das Protokoll ist eine Standard-Tabelle wie die anderen Listen: Suche, Filter nach Art, Sortierung, Seiten und aufklappbare Zeilen mit den Parametern.
 - **Updates:** Die ausstehenden Updates stehen in der gewohnten Tabelle mit Suche, Sortierung, Filter nach Bereich und Seiten.
 
 ### English
@@ -36,6 +37,7 @@
 - **Protection mode and exceptions:** Settings now split them into two tabs. The protection mode names the effect instead of the level: “Everything allowed”, “No irreversible deletions”, “Quarantine only”, “Read only”.
 - **Settings, tiles:** The tiles come in a new order (protection mode, exceptions, scan and messages, AI access, appearance, info) in three columns. Every tile shows its state, and the edge stripe follows it (e.g. AI access: off grey, reads green, changes amber).
 - **AI access, time limit:** “Switch off automatically” uses chips (never, 1, 8, 24 hours) like other settings instead of a dropdown.
+- **AI access, log:** The log is a standard table like the other lists: search, filter by kind, sorting, pages and expandable rows with the parameters.
 - **Updates:** Pending updates are shown in the usual table with search, sorting, an area filter and pages.
 
 ## 1.9.0 - 2026-10-17

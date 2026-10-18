@@ -1702,7 +1702,7 @@ class StylesMixin {
       @keyframes hkflip{0%,40%{transform:rotate(0)}60%,100%{transform:rotate(180deg)}}@keyframes hkpulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--hk-amber) 55%,transparent)}70%,100%{box-shadow:0 0 0 7px transparent}}
       @keyframes hkstripes{from{background-position:0 0}to{background-position:16px 0}}@keyframes hkslide{0%{margin-left:-35%}100%{margin-left:100%}}
       .optswitch{display:flex;gap:12px;align-items:flex-start;margin:12px 0 0;padding:12px 14px;border:2px solid var(--hk-blue);border-radius:12px;background:var(--hk-soft);cursor:pointer}.optswitch .policyswitch{margin-top:2px}.optswitch span{display:grid;gap:2px}.optswitch small{color:var(--hk-muted)}
-      .logitem{border-top:1px solid var(--hk-border);border-left:3px solid transparent}.logitem.warn{border-left-color:var(--hk-amber)}.logitem.red{border-left-color:var(--hk-red)}.logitem.undone{opacity:.55}.logday{padding:10px 16px 4px;font-size:calc(11px*var(--hk-fs,1));font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--hk-muted);background:var(--hk-soft)}.logline{display:grid;grid-template-columns:max-content max-content max-content minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:4px 16px 4px 13px;min-height:34px;font-size:calc(13px*var(--hk-fs,1));cursor:pointer;list-style:none}.logline::-webkit-details-marker{display:none}.logitem[open]>.logline,.logline:hover{background:var(--hk-soft)}.logtime{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;font-size:calc(11.5px*var(--hk-fs,1));color:var(--hk-muted);white-space:nowrap}.logbadge{justify-content:center;width:auto;min-width:78px;padding:1px 8px;text-transform:uppercase;letter-spacing:.04em;font-size:calc(10px*var(--hk-fs,1))}.logfn{font-weight:600}.logwhat{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;min-width:0}.logwhat code{overflow-wrap:anywhere}.logwhat small,.logn{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.logdetail{padding:4px 16px 12px 16px}.logdetail small{color:var(--hk-muted)}.logdetail pre{margin:4px 0 0;padding:8px 10px;border-radius:8px;background:var(--hk-soft);font-size:calc(12px*var(--hk-fs,1));overflow:auto}.mcpbulk{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1));color:var(--hk-muted)}.mcprow select,.mcpbulk select{font:inherit;padding:4px 8px;border-radius:8px;border:1px solid var(--hk-border);background:var(--hk-card,transparent);color:var(--hk-text)}.logcount{opacity:.7;font-weight:400}@media(max-width:720px){.logline{grid-template-columns:max-content max-content minmax(0,1fr) auto}.logline .logwhat{grid-column:1 / -1}}
+      .mcplog tr.undone td{opacity:.55}.logwhat{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;min-width:0}.logwhat code{overflow-wrap:anywhere}.logwhat small,.logn{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.logdetail{padding:4px 0 8px}.logdetail small{color:var(--hk-muted)}.logdetail pre{margin:4px 0 0;padding:8px 10px;border-radius:8px;background:var(--hk-soft);font-size:calc(12px*var(--hk-fs,1));overflow:auto}.mcpbulk{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1));color:var(--hk-muted)}.mcprow select,.mcpbulk select{font:inherit;padding:4px 8px;border-radius:8px;border:1px solid var(--hk-border);background:var(--hk-card,transparent);color:var(--hk-text)}
       .mcprow .row-text small{white-space:normal;overflow:visible;text-overflow:clip}.mcprow .seg{flex-wrap:nowrap;justify-content:flex-end}@media(max-width:640px){.mcprow .seg{grid-column:1/-1;grid-row:2;justify-content:flex-start;padding-left:52px}}.mcpneeds{color:var(--hk-amber)}.mcpnote{display:flex;gap:10px;align-items:flex-start;margin:12px 16px;padding:10px 12px;border-radius:10px;background:var(--hk-soft);font-size:calc(13px*var(--hk-fs,1));line-height:1.5}.mcpnote ha-icon{--mdc-icon-size:18px;flex:none;margin-top:1px;color:var(--hk-muted)}.mcpcalls{margin-left:8px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));font-weight:400}.mcphow .mcpsteps{display:grid;gap:8px;margin:6px 0 0;padding-left:20px;font-size:calc(13px*var(--hk-fs,1));line-height:1.6}.mcpchip{display:inline-block;margin:1px 2px;padding:1px 7px;border-radius:6px;background:var(--hk-soft);border:1px solid var(--hk-border);font-size:calc(12px*var(--hk-fs,1))}
       ${this.themeCss()}
     </style>`;
@@ -3392,6 +3392,7 @@ class SettingsMixin {
       text: f => [objectName(f), f.object_id, this.findingTitle(f), decision(f)].join(" "),
       filters: [{ name: "by", all: this.t("hidAllWays"), options: [["manual", this.t("hidByManual")], ["label", this.t("hidByLabel")], ["mark", this.t("hidByMark")], ["rule", this.t("hidByRule")]] }],
       filterFns: { by: (f, v) => by(f) === v },
+      rowAttrs: f => (this.findObject(this.findingKey(f)) ? `data-object="${this.esc(this.findingKey(f))}" tabindex="0" role="button" aria-label="${this.esc(objectName(f))}"` : 'class="static"'),
       columns: [
         { key: "name", label: "hidColObject", dir: "asc", cell: f => `<strong>${this.esc(objectName(f))}</strong><small>${this.esc(f.object_id)}</small>` },
         { key: "finding", label: "hidColFinding", dir: "asc", cell: f => this.esc(this.findingTitle(f)) },
@@ -13100,7 +13101,7 @@ Object.assign(TEXT.de, {
   mcpHowNote: "Bei ha-mcp die Dienste über ha_call_service aufrufen, nicht über ws_command: Die Panel-Befehle sind nicht dokumentiert, und die Gesamtliste kann bei großen Installationen über 10 MB groß werden.",
   mcpLogTitle: "Protokoll", mcpLogHint: "Jeder Aufruf mit Zeit, Dienst und Ergebnis, nie die Inhalte der Antworten.", mcpLogHint2: "Viele Lesezugriffe hintereinander stehen in einer Zeile. Höchstens 2000 Einträge und 90 Tage.", mcpToday: "Heute", mcpYesterday: "Gestern", mcpNoParams: "Keine Angaben übermittelt.", mcpParams: "Übermittelte Angaben",
   mcpLogCalls: "{n} Aufrufe in 24 Stunden", mcpLogEmpty: "Noch keine Aufrufe.", mcpLogLoading: "Protokoll wird geladen …",
-  mcpFilterAll: "Alle", mcpFilterRead: "Lesen", mcpFilterWrite: "Ändern", mcpFilterDenied: "Abgewiesen", mcpFilterFailed: "Fehler",
+  mcpAllKinds: "Alle Arten", mcpColTime: "Zeit", mcpColKind: "Art", mcpColFn: "Dienst", mcpColWhat: "Objekt und Ergebnis", mcpColUndo: "Zurücknehmen", mcpFilterAll: "Alle", mcpFilterRead: "Lesen", mcpFilterWrite: "Ändern", mcpFilterDenied: "Abgewiesen", mcpFilterFailed: "Fehler",
   mcpKind_read: "Lesen", mcpKind_write: "Ändern", mcpKind_denied: "Abgewiesen", mcpBadgeError: "Fehler",
   mcpResult_ok: "ok", mcpResult_disabled: "KI-Zugriff war aus", mcpResult_write_disabled: "Ändern war aus", mcpResult_not_admin: "kein Administrator", mcpResult_invalid_format: "Angaben unvollständig oder falsch", mcpResult_rate_limited: "zu viele Änderungen", mcpResult_too_many_calls: "zu viele Aufrufe", mcpResult_reason_required: "Grund fehlt", mcpResult_error: "Fehler",
   mcpUndoAll: "Zurücknehmen", mcpUndoAllHint: "Änderungen durch KI-Zugriff", mcpUndoHour: "der letzten Stunde", mcpUndoDay: "der letzten 24 Stunden", mcpUndoEverything: "alle", mcpUndoneCount: "{n} Änderungen zurückgenommen", mcpFn_undo_all: "Alles zurücknehmen",
@@ -13127,7 +13128,7 @@ Object.assign(TEXT.en, {
   mcpHowNote: "With ha-mcp call the services through ha_call_service, not ws_command: the panel commands are not documented, and the full list can be over 10 MB on large installations.",
   mcpLogTitle: "Log", mcpLogHint: "Every call with time, service and result, never the content of the answers.", mcpLogHint2: "Many reads in a row are one line. At most 2,000 entries and 90 days.", mcpToday: "Today", mcpYesterday: "Yesterday", mcpNoParams: "No parameters sent.", mcpParams: "Parameters sent",
   mcpLogCalls: "{n} calls in 24 hours", mcpLogEmpty: "No calls yet.", mcpLogLoading: "Loading the log …",
-  mcpFilterAll: "All", mcpFilterRead: "Reads", mcpFilterWrite: "Changes", mcpFilterDenied: "Refused", mcpFilterFailed: "Errors",
+  mcpAllKinds: "All kinds", mcpColTime: "Time", mcpColKind: "Kind", mcpColFn: "Service", mcpColWhat: "Object and result", mcpColUndo: "Undo", mcpFilterAll: "All", mcpFilterRead: "Reads", mcpFilterWrite: "Changes", mcpFilterDenied: "Refused", mcpFilterFailed: "Errors",
   mcpKind_read: "Read", mcpKind_write: "Change", mcpKind_denied: "Refused", mcpBadgeError: "Error",
   mcpResult_ok: "ok", mcpResult_disabled: "AI access was off", mcpResult_write_disabled: "changing was off", mcpResult_not_admin: "not an administrator", mcpResult_invalid_format: "invalid parameters", mcpResult_rate_limited: "too many changes", mcpResult_too_many_calls: "too many calls", mcpResult_reason_required: "reason missing", mcpResult_error: "error",
   mcpUndoAll: "Take back", mcpUndoAllHint: "Changes through AI access", mcpUndoHour: "of the last hour", mcpUndoDay: "of the last 24 hours", mcpUndoEverything: "all", mcpUndoneCount: "{n} changes taken back", mcpFn_undo_all: "Take everything back",
@@ -13171,20 +13172,59 @@ class McpMixin {
     try { return new Intl.DateTimeFormat(this.lang, opts).format(d); } catch (_) { return String(value); }
   }
 
-  mcpEntryRow(e, multi = false) {
-    const me = this._hass?.user?.id;
-    const failed = e.kind !== "denied" && e.result !== "ok";
-    const tone = e.kind === "denied" ? "warn" : failed ? "red" : e.kind === "write" ? "" : "mute";
-    const badge = failed ? this.t("mcpBadgeError") : this.t(`mcpKind_${e.kind}`);
-    const p = e.params || {};
+  mcpFailed(e) { return e.kind !== "denied" && e.result !== "ok"; }
+
+  mcpKindCell(e) {
+    const tone = e.kind === "denied" ? "warn" : this.mcpFailed(e) ? "red" : e.kind === "write" ? "" : "mute";
+    return `<span class="pill ${tone}">${this.t(this.mcpFailed(e) ? "mcpBadgeError" : `mcpKind_${e.kind}`)}</span>`;
+  }
+
+  mcpWhatCell(e, multi) {
+    const me = this._hass?.user?.id, p = e.params || {};
     const target = [p.object_id, p.key].find(v => typeof v === "string" && v) || "";
     const notes = [e.result !== "ok" ? this.t(`mcpResult_${e.result}`) : "", e.count != null && e.kind === "read" ? this.t("mcpCount", { n: e.count }) : ""].filter(Boolean).join(" · ");
     const who = !multi ? "" : !e.user ? this.t("mcpUserSystem") : e.user === me ? this.t("mcpUserYou") : this.t("mcpUserOther");
     const times = e.n > 1 ? `<span class="logn" title="${this.esc(this.t("mcpTimes", { n: e.n, date: this.formatDate(e.last) }))}">×${e.n}</span>` : "";
-    const undo = e.undone ? `<span class="pill mute">${this.t("mcpUndone")}</span>` : e.undoable ? `<button class="btn" data-mcp-undo="${this.esc(e.at)}"><ha-icon icon="mdi:undo"></ha-icon>${this.t("mcpUndo")}</button>` : "";
-    const tint = e.kind === "denied" ? " warn" : failed ? " red" : "";
-    const params = Object.keys(p).length ? `<pre>${this.esc(JSON.stringify(p, null, 2))}</pre>` : `<p class="factnote">${this.t("mcpNoParams")}</p>`;
-    return `<details class="logitem${tint}${e.undone ? " undone" : ""}"><summary class="logline"><time class="logtime" datetime="${this.esc(e.at)}">${this.esc(this.mcpTime(e.at))}</time><span class="pill logbadge ${tone}">${badge}</span><span class="logfn">${this.esc(this.t(`mcpFn_${e.fn}`) || e.fn)}</span><span class="logwhat">${target ? `<code>${this.esc(target)}</code>` : ""}${notes ? `<small>${this.esc(notes)}</small>` : ""}${times}${who ? `<small>${this.esc(who)}</small>` : ""}</span>${undo}</summary><div class="logdetail"><small>${this.t("mcpParams")}</small>${params}</div></details>`;
+    return `<div class="logwhat">${target ? `<code>${this.esc(target)}</code>` : ""}${notes ? `<small>${this.esc(notes)}</small>` : ""}${times}${who ? `<small>${this.esc(who)}</small>` : ""}</div>`;
+  }
+
+  mcpUndoCell(e) {
+    return e.undone ? `<span class="pill mute">${this.t("mcpUndone")}</span>` : e.undoable ? `<button class="btn" data-mcp-undo="${this.esc(e.at)}"><ha-icon icon="mdi:undo"></ha-icon>${this.t("mcpUndo")}</button>` : "";
+  }
+
+  // The row under an open call: the parameters it was made with.
+  mcpDetail(e) {
+    if (!(this.mcpOpen || []).includes(e.at)) return "";
+    const p = e.params || {};
+    return `<tr class="static remhist"><td colspan="5"><div class="logdetail"><small>${this.t("mcpParams")}</small>${Object.keys(p).length ? `<pre>${this.esc(JSON.stringify(p, null, 2))}</pre>` : `<p class="factnote">${this.t("mcpNoParams")}</p>`}</div></td></tr>`;
+  }
+
+  // The calls as the standard list: time, kind, service, what, and the undo.
+  mcpLogTable(entries, multi) {
+    const id = "mcplog";
+    this.lvState(id, "at", "desc");
+    const kinds = ["read", "write", "denied", "failed"];
+    const match = (e, k) => (k === "failed" ? this.mcpFailed(e) : e.kind === k);
+    const sorts = [
+      { key: "at", label: "mcpColTime", dir: "desc", get: e => Date.parse(e.at) || 0 },
+      { key: "kind", label: "mcpColKind", dir: "asc", get: e => kinds.findIndex(k => match(e, k)) },
+      { key: "fn", label: "mcpColFn", dir: "asc", get: e => this.t(`mcpFn_${e.fn}`) || e.fn },
+    ];
+    const bar = this.listBar(id, { table: true, dense: true, sorts, filters: [
+      { name: "kind", all: this.t("mcpAllKinds"), options: kinds.map(k => [k, this.t(`mcpFilter${k[0].toUpperCase()}${k.slice(1)}`)]) },
+    ] });
+    const rows = this.refine(id, entries, { text: e => [this.t(`mcpFn_${e.fn}`) || e.fn, e.fn, e.params?.object_id, e.params?.key, e.result].join(" "), filters: { kind: match }, sorts, tie: e => e.at });
+    const pg = this.paginate(id, rows, [10, 20]);
+    const open = e => (this.mcpOpen || []).includes(e.at);
+    const columns = [
+      { key: "at", label: "mcpColTime", dir: "desc", cell: e => `<div class="statcell">${this.expandBtn("data-mcp-more", e.at, open(e), this.t(open(e) ? "bhClose" : "bhOpen"))}<time datetime="${this.esc(e.at)}">${this.esc(`${this.mcpDay(e.at)}, ${this.mcpTime(e.at)}`)}</time></div>` },
+      { key: "kind", label: "mcpColKind", cell: e => this.mcpKindCell(e) },
+      { key: "fn", label: "mcpColFn", cell: e => this.esc(this.t(`mcpFn_${e.fn}`) || e.fn) },
+      { key: "what", label: "mcpColWhat", sortable: false, cell: e => this.mcpWhatCell(e, multi) },
+      { key: "undo", label: "mcpColUndo", sortable: false, cell: e => this.mcpUndoCell(e) },
+    ];
+    const table = rows.length ? this.listTable(id, columns, pg.rows, { cls: "mcplog", rowAttrs: e => `data-mcp-row="${this.esc(e.at)}" tabindex="0" role="button" aria-expanded="${open(e)}"${e.undone ? ' class="undone"' : ""}`, after: e => this.mcpDetail(e) }) : `<div class="emptymsg">${entries.length ? this.noMatches(id) : this.t("mcpLogEmpty")}</div>`;
+    return `${bar}${table}${pg.footer}`;
   }
 
   // A strip under the header while AI access is on, so it is not forgotten; not on its own page.
@@ -13212,24 +13252,10 @@ class McpMixin {
     const how = `<details class="howto mcphow"><summary>${this.t("mcpHowTitle")}</summary><ol class="mcpsteps"><li>${this.t("mcpHow1")}</li><li>${this.t("mcpHow2")} ${chips(["status", "summary", "findings", "object", "audit"])}<br>${this.t("mcpHowWrite")} ${chips(["finding_decide", "mark", "note_set", "undo"])}</li><li>${this.t("mcpHow3")}</li></ol><p class="factnote">${this.t("mcpHowNote")}</p><button class="btn small" data-mcp-prompt><ha-icon icon="mdi:content-copy"></ha-icon>${this.t("mcpPromptButton")}</button></details>`;
     const main = `<section class="panel"><div class="panelhead"><div><h2>${this.t("mcpTitle")} <span class="pill ${state[0]}">${this.t(state[1])}</span>${calls}</h2><p>${this.t("mcpHint")}</p></div></div>${switches}${hide}${timer}${privacy}${how}</section>`;
     if (!this.mcp) { this.loadMcp(); return `${main}<section class="panel"><div class="panelhead"><h2>${this.t("mcpLogTitle")}</h2></div><div class="pad"><p class="factnote">${this.t("mcpLogLoading")}</p></div></section>`; }
-    const filter = this.mcpFilter || "all";
-    const shown = this.mcp.entries.filter(e => filter === "all" || (filter === "failed" ? e.result !== "ok" : e.kind === filter));
-    const match = (e, f) => f === "all" || (f === "failed" ? e.result !== "ok" : e.kind === f);
-    const tabs = ["all", "read", "write", "denied", "failed"].map(f => {
-      const n = this.mcp.entries.filter(e => match(e, f)).length;
-      return `<button class="btn small${filter === f ? " primary" : ""}" data-mcp-filter="${f}" aria-pressed="${filter === f}">${this.t(`mcpFilter${f[0].toUpperCase()}${f.slice(1)}`)} <span class="logcount">${n}</span></button>`;
-    }).join("");
-    const multi = new Set(shown.map(x => x.user)).size > 1;
-    let lastDay = null;
-    const rows = shown.length ? shown.map(e => {
-      const day = this.mcpDay(e.at);
-      const head = day !== lastDay ? `<div class="logday">${this.esc(day)}</div>` : "";
-      lastDay = day;
-      return head + this.mcpEntryRow(e, multi);
-    }).join("") : `<div class="pad"><p class="factnote">${this.t("mcpLogEmpty")}</p></div>`;
+    const multi = new Set(this.mcp.entries.map(x => x.user)).size > 1;
     const standing = this.mcp.entries.some(e => e.undoable && !e.undone);
     const bulk = standing ? `<div class="pad toolbar mcpbulk"><span>${this.t("mcpUndoAllHint")}</span><select data-mcp-undoall-hours aria-label="${this.esc(this.t("mcpUndoAllHint"))}"><option value="1">${this.t("mcpUndoHour")}</option><option value="24">${this.t("mcpUndoDay")}</option><option value="">${this.t("mcpUndoEverything")}</option></select><button class="btn small" data-mcp-undoall><ha-icon icon="mdi:undo"></ha-icon>${this.t("mcpUndoAll")}</button></div>` : "";
-    return `${main}<section class="panel"><div class="panelhead"><div><h2>${this.t("mcpLogTitle")}</h2><p>${this.t("mcpLogHint")} ${this.t("mcpLogCalls", { n: this.formatNumber(this.mcp.calls_24h || 0) })}.</p><p class="factnote">${this.t("mcpLogHint2")}</p></div></div><div class="pad toolbar">${tabs}</div>${bulk}${rows}</section>`;
+    return `${main}<section class="panel"><div class="panelhead"><div><h2>${this.t("mcpLogTitle")}</h2><p>${this.t("mcpLogHint")} ${this.t("mcpLogCalls", { n: this.formatNumber(this.mcp.calls_24h || 0) })}.</p><p class="factnote">${this.t("mcpLogHint2")}</p></div></div>${bulk}${this.mcpLogTable(this.mcp.entries, multi)}</section>`;
   }
 
   bindMcp(root) {
@@ -13253,7 +13279,13 @@ class McpMixin {
     });
     root.querySelector("[data-mcp-hide]")?.addEventListener("change", ev => set({ hide_sensitive: ev.target.checked }));
     root.querySelectorAll("[data-mcp-autooff]").forEach(el => el.addEventListener("click", () => set({ auto_off_hours: Number(el.dataset.mcpAutooff) })));
-    root.querySelectorAll("[data-mcp-filter]").forEach(el => el.onclick = () => { this.mcpFilter = el.dataset.mcpFilter; this.render(); });
+    root.querySelectorAll("[data-mcp-more], [data-mcp-row]").forEach(el => el.addEventListener("click", ev => {
+      const inner = ev.target?.closest?.("button, select, input, a, label");
+      if (el.dataset.mcpRow !== undefined && inner && inner !== el && el.contains(inner)) return;
+      const key = el.dataset.mcpMore ?? el.dataset.mcpRow, open = this.mcpOpen || [];
+      this.mcpOpen = open.includes(key) ? open.filter(x => x !== key) : [...open, key];
+      this.render();
+    }));
     root.querySelector("[data-mcp-undoall]")?.addEventListener("click", async () => {
       const hours = Number(root.querySelector("[data-mcp-undoall-hours]")?.value) || undefined;
       try {
