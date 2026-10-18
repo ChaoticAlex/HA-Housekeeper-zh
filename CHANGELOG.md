@@ -2,9 +2,8 @@
 
 ## Unreleased
 
-### Geändert
+### Neu
 
-- **HACS und Marketplace:** Ab Home Assistant 2026.11 ist HACS als „Marketplace“ eingebaut. Housekeeper liest installierte Integrationen, Updates, archivierte und entfernte Repositories aus beiden.
 - **KI-Zugriff:**
   - Neuer Reiter Einstellungen → KI-Zugriff, standardmäßig aus: Programme und KI-Agenten, die Home-Assistant-Dienste aufrufen können (zum Beispiel ha-mcp), lesen Housekeeper über die Dienste `status`, `findings`, `object` und `audit`.
   - Ein zweiter Schalter „Merkliste ändern“ erlaubt `finding_decide`, `mark`, `note_set` und `undo`; es ändern sich nur Housekeepers eigene Listen, nie Home Assistant.
@@ -12,28 +11,32 @@
   - Grenzen gegen Schleifen: standardmäßig 200 Änderungen in 5 Minuten und 120 Lesezugriffe pro Minute, im Reiter einstellbar.
   - Ein Protokoll zeigt jeden Aufruf mit Benutzer und Ergebnis, Änderungen lassen sich dort zurücknehmen. Es ist eine Standard-Tabelle wie die anderen Listen: Suche, Filter nach Art, Sortierung, Seiten, Export (CSV, Markdown, JSON) und aufklappbare Zeilen mit den Parametern. Nur Administratoren, nie Geheimnisse.
 - **Urlaubsmodus:** Eine Entität deiner Wahl (z. B. `input_boolean.urlaub`) schaltet Regeln „nur im Urlaubsmodus“ ein. Dazu gibt es Regeln für einzelne Geräte und Entitäten, eine Nachfrist nach dem Urlaub (Standard 24 Stunden) und eine Leiste, solange etwas zurückgehalten wird.
+  - Ist noch nichts gewählt und gibt es einen Helfer wie `input_boolean.urlaubsmodus` oder `vacation_mode`, steht er als Vorschlag im Feld und gilt nach dem Speichern.
+  - Eine Kalender-Entität kann ein Stichwort bekommen: Dann schaltet in deinem normalen Kalender ein Termin mit „Urlaub“ im Titel den Modus ein, auch wenn gleichzeitig andere Termine laufen. Ohne Stichwort zählt jeder Termin.
 - **Ausnahmeregeln:** Unter Einstellungen → Ausnahmen nimmst du Objekte nach Bereich, Label, Integration oder Typ (z. B. Bereich „Lager“, alle `media_player`) aus. Die Regel blendet ihre Befunde aus oder meldet einen Ausfall erst nach einer einstellbaren Zahl Tage.
+  - Die Regeln stehen mit einem Umschalter „Immer“ und „Im Urlaubsmodus“ in einer Tabelle, darunter der Urlaubsmodus.
+  - Die Art „Alle Typen“ (vorgewählt) findet Bereiche, Labels, Integrationen, Geräte und Entitäten gleichzeitig; beim Speichern entsteht je Art eine Regel.
+  - Die Kachel „Ausnahmen“ in den Einstellungen zeigt die Zahl der Regeln, die Zahl der ausgeblendeten Befunde und den Urlaubsmodus: an, aus oder „nicht eingerichtet“.
+
+### Geändert
+
+- **HACS und Marketplace:** Ab Home Assistant 2026.11 ist HACS als „Marketplace“ eingebaut. Housekeeper liest installierte Integrationen, Updates, archivierte und entfernte Repositories aus beiden.
 - **In HA öffnen:** Bei Entitäten mit Gerät öffnet der Knopf die Geräteseite statt der ganzen Entitätenliste.
-- **Mehr Infos:** Beim Schließen des Dialogs „Mehr Infos“ bleibt das Panel auf der Detailseite, statt zurück zur Liste zu springen.
-- **Kopieren:** Die Kopier-Knöpfe (z. B. „Angaben für eine Fehlermeldung kopieren“) funktionieren auch ohne HTTPS und melden einen Fehlschlag statt „Kopiert“.
 - **Links nach Home Assistant:** Alle Sprünge nach Home Assistant (Apps, Integrationen, HACS, Benutzer, Cloud) öffnen in einem neuen Tab statt im selben.
-- **Schutzmodus und Ausnahmen:** Die Einstellungen trennen beides in zwei Reiter. Der Schutzmodus nennt die Wirkung statt der Stufe: „Alles erlaubt“, „Ohne endgültiges Löschen“, „Nur Quarantäne“, „Nur lesen“.
+- **Schutzmodus:** Der Schutzmodus nennt die Wirkung statt der Stufe: „Alles erlaubt“, „Ohne endgültiges Löschen“, „Nur Quarantäne“, „Nur lesen“.
 - **Einstellungen, Kacheln:** Die Kacheln stehen in neuer Reihenfolge (Schutzmodus, Ausnahmen, Scan und Meldungen, KI-Zugriff, Darstellung, Info) in drei Spalten. Jede Kachel zeigt ihren Stand, der Randstreifen folgt ihm (z. B. KI-Zugriff: aus grau, Lesen grün, Ändern gelb).
-- **Ausnahmeregeln und Urlaubsmodus, Oberfläche:**
-  - Die Seite besteht aus zwei Karten: die Regeln mit einem Umschalter „Immer“ und „Im Urlaubsmodus“, einer Tabelle, einem Knopf „Regel hinzufügen“ und einem Leerzustand wie bei den Erinnerungen, darunter der Urlaubsmodus. „Speichern“ und „Abbrechen“ stehen unten rechts und erscheinen beim Urlaubsmodus erst nach einer Änderung („Nicht gespeichert“).
-  - Regeln mit „Ausblenden“ ließen sich nicht mehr speichern („expected int at rules[0].days“); behoben. Fehler, Warnungen und Hinweise stehen in einheitlichen Kästen, Fehler erst nach dem Speichern und nur bis zur nächsten Änderung.
-  - Neue Art „Alle Typen“ (vorgewählt): Das Suchfeld wie im Kopf findet Bereiche, Labels, Integrationen, Geräte und Entitäten gleichzeitig; beim Speichern entsteht je Art eine Regel.
-  - Ist noch nichts gewählt und gibt es einen Helfer wie `input_boolean.urlaubsmodus` oder `vacation_mode`, steht er als Vorschlag im Feld und gilt nach dem Speichern. Das Feld ist breiter.
-  - Eine Kalender-Entität kann ein Stichwort bekommen: Dann schaltet in deinem normalen Kalender ein Termin mit „Urlaub“ im Titel den Modus ein, auch wenn gleichzeitig andere Termine laufen. Ohne Stichwort zählt jeder Termin, wie bisher.
-  - Die Kachel „Ausnahmen“ in den Einstellungen zeigt die Zahl der Regeln, die Zahl der ausgeblendeten Befunde und den Urlaubsmodus: an, aus oder „nicht eingerichtet“. Dasselbe steht als Status neben der Überschrift „Urlaubsmodus“.
 - **Oberfläche, Fehlermeldungen:** Fehler stehen überall im selben Kasten mit Symbol (Seiten, die nicht laden, und Formulare). Die schmale Fehlerzeile in den Speicherleisten ist ohne Fehler unsichtbar.
 - **Updates:** Die ausstehenden Updates stehen in der gewohnten Tabelle mit Suche, Sortierung, Filter nach Bereich und Seiten.
 
+### Behoben
+
+- **Mehr Infos:** Beim Schließen des Dialogs „Mehr Infos“ bleibt das Panel auf der Detailseite, statt zurück zur Liste zu springen.
+- **Kopieren:** Die Kopier-Knöpfe (z. B. „Angaben für eine Fehlermeldung kopieren“) funktionieren auch ohne HTTPS und melden einen Fehlschlag statt „Kopiert“.
+
 ### English
 
-#### Changed
+#### New
 
-- **HACS and Marketplace:** From Home Assistant 2026.11 HACS is built in as “Marketplace”. Housekeeper reads installed integrations, updates, archived and removed repositories from both.
 - **AI access:**
   - New tab Settings → AI access, off by default: programs and AI agents that can call Home Assistant services (for example ha-mcp) read Housekeeper through the services `status`, `findings`, `object` and `audit`.
   - A second switch “Change the list” allows `finding_decide`, `mark`, `note_set` and `undo`; only Housekeeper's own lists change, never Home Assistant.
@@ -41,22 +44,27 @@
   - Limits against loops: by default 200 changes in 5 minutes and 120 reads per minute, adjustable in the tab.
   - A log shows every call with user and result, and changes can be taken back there. It is a standard table like the other lists: search, filter by kind, sorting, pages, export (CSV, Markdown, JSON) and expandable rows with the parameters. Administrators only, never secrets.
 - **Vacation mode:** An entity of your choice (e.g. `input_boolean.vacation`) turns on rules “only in vacation mode”. Also rules for single devices and entities, a grace period after the vacation (default 24 hours) and a bar while something is held back.
-- **Exception rules:** Under Settings → Protection and exceptions you leave out objects by area, label, integration or type (e.g. area “Storage”, all `media_player`). A rule hides their findings or reports an outage only after a number of days you set.
+  - If nothing is chosen and a helper like `input_boolean.urlaubsmodus` or `vacation_mode` exists, it is offered as a suggestion in the field and counts once saved.
+  - A calendar entity can get a keyword: an event with “Vacation” in its title in your normal calendar then switches the mode on, even while other events run. Without a keyword every event counts.
+- **Exception rules:** Under Settings → Exceptions you leave out objects by area, label, integration or type (e.g. area “Storage”, all `media_player`). A rule hides their findings or reports an outage only after a number of days you set.
+  - The rules sit in a table with a switch “Always” and “In vacation mode”, and below it the vacation mode.
+  - The kind “All types” (preselected) finds areas, labels, integrations, devices and entities at once; saving makes one rule per kind.
+  - The “Exceptions” tile in the settings shows the number of rules, the number of hidden findings and the vacation mode: on, off or “not set up”.
+
+#### Changed
+
+- **HACS and Marketplace:** From Home Assistant 2026.11 HACS is built in as “Marketplace”. Housekeeper reads installed integrations, updates, archived and removed repositories from both.
 - **Open in HA:** For entities with a device the button opens the device page instead of the whole entity list.
+- **Links into Home Assistant:** All jumps into Home Assistant (apps, integrations, HACS, users, cloud) now open in a new tab instead of the current one.
+- **Protection mode:** The protection mode names the effect instead of the level: “Everything allowed”, “No irreversible deletions”, “Quarantine only”, “Read only”.
+- **Settings, tiles:** The tiles come in a new order (protection mode, exceptions, scan and messages, AI access, appearance, info) in three columns. Every tile shows its state, and the edge stripe follows it (e.g. AI access: off grey, reads green, changes amber).
+- **Interface, error messages:** Errors appear in the same box with an icon everywhere (pages that do not load, and forms). The narrow error line in the save bars is invisible when there is no error.
+- **Updates:** The pending updates sit in the usual table with search, sorting, filter by area and pages.
+
+#### Fixed
+
 - **More info:** Closing the “More info” dialog keeps the panel on the detail page instead of jumping back to the list.
 - **Copying:** The copy buttons (e.g. “Copy details for a bug report”) also work without HTTPS and report a failure instead of “Copied”.
-- **Links into Home Assistant:** All jumps into Home Assistant (apps, integrations, HACS, users, cloud) now open in a new tab instead of the current one.
-- **Protection mode and exceptions:** Settings now split them into two tabs. The protection mode names the effect instead of the level: “Everything allowed”, “No irreversible deletions”, “Quarantine only”, “Read only”.
-- **Settings, tiles:** The tiles come in a new order (protection mode, exceptions, scan and messages, AI access, appearance, info) in three columns. Every tile shows its state, and the edge stripe follows it (e.g. AI access: off grey, reads green, changes amber).
-- **Exception rules and vacation mode, interface:**
-  - The page is made of two cards: the rules with a switch “Always” and “In vacation mode”, a table, one “Add rule” button and an empty state like the reminders, and below it the vacation mode. Save and Cancel sit at the bottom right and, for the vacation mode, appear only after a change (“Not saved”).
-  - Rules with “Hide” could no longer be saved (“expected int at rules[0].days”); fixed. Errors, warnings and hints appear in uniform boxes, errors only after saving and only until the next change.
-  - New kind “All types” (preselected): the search field like the one in the header finds areas, labels, integrations, devices and entities at once; saving makes one rule per kind.
-  - If nothing is chosen and a helper like `input_boolean.urlaubsmodus` or `vacation_mode` exists, it is offered as a suggestion in the field and counts once saved. The field is wider.
-  - A calendar entity can get a keyword: an event with “Vacation” in its title in your normal calendar then switches the mode on, even while other events run. Without a keyword every event counts, as before.
-  - The “Exceptions” tile in the settings shows the number of rules, the number of hidden findings and the vacation mode: on, off or “not set up”. The same status stands next to the “Vacation mode” heading.
-- **Interface, error messages:** Errors appear in the same box with an icon everywhere (pages that do not load, and forms). The narrow error line in the save bars is invisible when there is no error.
-- **Updates:** Pending updates are shown in the usual table with search, sorting, an area filter and pages.
 
 ## 1.9.0 - 2026-10-17
 
