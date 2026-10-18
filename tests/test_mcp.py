@@ -303,10 +303,8 @@ async def test_sensitive_objects_stay_out_of_every_answer(hass: HomeAssistant) -
     listed = await mcp_api.run(hass, scanner, "findings", {"limit": 50}, None)
     assert "lock.front" not in json.dumps(listed) and listed["withheld"] == 1
     status = await mcp_api.run(hass, scanner, "status", {}, None)
-    assert (
-        status["findings"]
-        == 3 * 0 + len([f for f in scanner.snapshot["findings"] if not f.get("ignored")]) - 1
-    )
+    open_findings = [f for f in scanner.snapshot["findings"] if not f.get("ignored")]
+    assert status["findings"] == len(open_findings) - 1  # the lock's finding is not counted
     with pytest.raises(mcp_api.McpError) as card:
         await mcp_api.run(
             hass, scanner, "object", {"object_type": "entity", "object_id": "lock.front"}, None
