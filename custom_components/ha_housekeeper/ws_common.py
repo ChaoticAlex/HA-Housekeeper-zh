@@ -70,7 +70,8 @@ def panel_session_only(
     """Refuse a command that did not come from a signed-in session; True when it was refused.
 
     The panel runs in a signed-in session (a normal token). Programs bring other tokens: ha-mcp as
-    an app uses the Supervisor's system token, others a long-lived access token. The switches for AI
+    an app connects through the Supervisor's socket, which has no token at all, others use a
+    long-lived access token. The switches for AI
     access must not be flipped by the program they are meant to limit. This is a guard for the usual
     setup, not a seal: any signed-in administrator session can still use them.
     """
@@ -79,7 +80,7 @@ def panel_session_only(
         if connection.refresh_token_id
         else None
     )
-    if token is not None and token.token_type != TOKEN_TYPE_NORMAL:
+    if token is None or token.token_type != TOKEN_TYPE_NORMAL:
         connection.send_error(msg["id"], "panel_only", "Only the panel may do this")
         return True
     return False

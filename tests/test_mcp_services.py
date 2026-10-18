@@ -49,4 +49,4 @@ def test_panel_session_only_refuses_long_lived_tokens() -> None:
     assert connection.send_error.call_args.args[:2] == (7, "panel_only")
     assert refused(TOKEN_TYPE_SYSTEM)[0]  # ha-mcp as an app runs as the Supervisor
     assert not refused(TOKEN_TYPE_NORMAL)[0]
-    assert not refused(None)[0]
+    assert refused(None)[0]  # the Supervisor socket (ha-mcp as an app) has no token
