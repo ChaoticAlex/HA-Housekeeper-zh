@@ -5889,7 +5889,7 @@ test("the AI access tab shows the two switches and the log with an undo for a ch
   assert.ok(html.includes("data-set-tab=\"mcp\""));
   assert.ok(html.includes('class="logline"') && html.includes("×3") && html.includes("logbadge"));
   assert.ok(html.includes("data-mcp-undoall") && html.includes("data-mcp-undoall-hours"));
-  assert.ok(html.includes("data-mcp-autooff") && html.includes("after 8 hours") && html.includes("data-mcp-hide"));
+  assert.ok(html.includes("data-mcp-autooff") && html.includes("after 8 hours") && html.includes("data-mcp-hide") && html.includes("data-mcp-prompt"));
   el.settingsTab = "look"; el.render();
   assert.ok(shadow.innerHTML.includes("data-ai-go") && shadow.innerHTML.includes("AI access on"));
 });
