@@ -16120,7 +16120,8 @@ class HAHousekeeperPanel extends HTMLElement {
 
   haPath(item) {
     switch (item.object_type) {
-      case "entity": return `/config/entities?search=${encodeURIComponent(item.object_id)}`;
+      // HA ignores ?search=, so an entity with a device opens the device page that lists it
+      case "entity": return item.device_id ? `/config/devices/device/${encodeURIComponent(item.device_id)}` : `/config/entities?search=${encodeURIComponent(item.object_id)}`;
       case "device": return `/config/devices/device/${encodeURIComponent(item.object_id)}`;
       case "area": return `/config/areas/area/${encodeURIComponent(item.object_id)}`;
       case "automation": return item.automation_id

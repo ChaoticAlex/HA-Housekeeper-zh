@@ -409,6 +409,7 @@ test("automation diagnosis lists missing references", () => {
 test("haPath builds Home Assistant paths", () => {
   const { el } = panel();
   assert.equal(el.haPath({ object_type: "entity", object_id: "sensor.a b" }), "/config/entities?search=sensor.a%20b");
+  assert.equal(el.haPath({ object_type: "entity", object_id: "sensor.a", device_id: "d9" }), "/config/devices/device/d9");
   assert.equal(el.haPath({ object_type: "automation", object_id: "automation.c", automation_id: "123" }), "/config/automation/edit/123");
   assert.equal(el.haPath({ object_type: "automation", object_id: "automation.c" }), "/config/entities?search=automation.c");
   assert.equal(el.haPath({ object_type: "device", object_id: "d1" }), "/config/devices/device/d1");
