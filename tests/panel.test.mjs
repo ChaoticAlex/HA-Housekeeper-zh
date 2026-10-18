@@ -4030,6 +4030,7 @@ test("the details for a bug report hold versions, browser and the last panel err
   el.failed(new Error("plan refused"));
   const text = el.issueText();
   assert.ok(text.includes("**Home Assistant:**") && text.includes("**Browser / app:**") && /action: plan refused/.test(text));
+  assert.ok(text.includes("**AI access:** off") && el.issueText({ calls_24h: 4, changes_24h: 1 }).includes("4 calls and 1 changes in 24 hours"));
   assert.equal(el.diagnosticsData().recent_errors.length, 1);
 });
 

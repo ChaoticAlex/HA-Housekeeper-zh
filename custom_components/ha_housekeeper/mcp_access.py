@@ -116,6 +116,10 @@ class McpStore:
         self.log(None, "auto_off", "write", {"hours": hours}, "ok", None)
         return True
 
+    def changes_since(self, hours: int) -> int:
+        """How many changes the log holds from the last hours."""
+        return self.writes_since(hours * 60)
+
     def meta(self) -> dict[str, Any]:
         """The state the panel shows next to the page: switches and the time limit."""
         return {

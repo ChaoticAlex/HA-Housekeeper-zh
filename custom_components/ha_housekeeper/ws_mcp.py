@@ -68,6 +68,7 @@ def websocket_mcp_audit(
             {
                 **scanner.mcp.meta(),
                 "calls_24h": scanner.mcp.calls_since(24),
+                "changes_24h": scanner.mcp.changes_since(24),
                 "total": len(rows),
                 "entries": rows[: msg["limit"]],
             }

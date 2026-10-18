@@ -120,19 +120,24 @@ class SettingsMixin {
       storage: storage || null, database: database || null,
       hacs_housekeeper: m.hacs_housekeeper || null,
       panel: { language: this.lang, size: this.prefs?.size, mode: this.prefs?.mode, scheme: this.prefs?.scheme, page_size: this.pageSize },
+      ai_access: { enabled: Boolean(m.mcp?.enabled), write: Boolean(m.mcp?.write), auto_off_hours: m.mcp?.auto_off_hours || 0 },
       browser: globalThis.navigator?.userAgent || null, recent_errors: this._recentErrors || [],
     };
   }
 
   // The few lines an issue needs, ready to paste: versions, browser or app, language and the last errors.
-  issueText() {
+  issueText(ai = null) {
     const d = this.diagnosticsData();
+    const mode = !d.ai_access.enabled ? "off" : d.ai_access.write ? "on, with changes" : "on, read-only";
+    const aiLine = `**AI access:** ${mode}${ai ? `, ${ai.calls_24h} calls and ${ai.changes_24h} changes in 24 hours` : ""}\n`;
     const errors = d.recent_errors.length ? d.recent_errors.map(e => `- ${e.at} ${e.where}: ${e.message}`).join("\n") : "- none";
-    return `**HA-Housekeeper:** ${d.housekeeper || "?"}\n**Home Assistant:** ${d.home_assistant || "?"}\n**Browser / app:** ${d.browser || "?"}\n**Language:** ${d.panel.language}\n**Recent panel errors:**\n${errors}\n`;
+    return `**HA-Housekeeper:** ${d.housekeeper || "?"}\n**Home Assistant:** ${d.home_assistant || "?"}\n**Browser / app:** ${d.browser || "?"}\n**Language:** ${d.panel.language}\n${aiLine}**Recent panel errors:**\n${errors}\n`;
   }
 
   async copyIssueText() {
-    try { await this.copyText(this.issueText()); this.toast(this.t("diagCopied")); } catch (err) { this.failed(err); }
+    let ai = null;
+    try { ai = await this._hass.callWS({ type: "ha_housekeeper/mcp_audit", limit: 1 }); } catch (_) { /* the line is shorter without counts */ }
+    try { await this.copyText(this.issueText(ai)); this.toast(this.t("diagCopied")); } catch (err) { this.failed(err); }
   }
 
   storedFiles(m) {
