@@ -9,7 +9,7 @@
   - Neuer Reiter Einstellungen → KI-Zugriff, standardmäßig aus: Programme und KI-Agenten, die Home-Assistant-Dienste aufrufen können (zum Beispiel ha-mcp), lesen Housekeeper über die Dienste `status`, `findings`, `object` und `audit`.
   - Ein zweiter Schalter „Merkliste ändern“ erlaubt `finding_decide`, `mark`, `note_set` und `undo`; es ändern sich nur Housekeepers eigene Listen, nie Home Assistant.
   - „Automatisch ausschalten“ wählst du mit Chips (Nie, 1, 8, 24 Stunden).
-  - Ein Protokoll zeigt jeden Aufruf mit Benutzer und Ergebnis, Änderungen lassen sich dort zurücknehmen. Es ist eine Standard-Tabelle wie die anderen Listen: Suche, Filter nach Art, Sortierung, Seiten und aufklappbare Zeilen mit den Parametern. Nur Administratoren, nie Geheimnisse.
+  - Ein Protokoll zeigt jeden Aufruf mit Benutzer und Ergebnis, Änderungen lassen sich dort zurücknehmen. Es ist eine Standard-Tabelle wie die anderen Listen: Suche, Filter nach Art, Sortierung, Seiten, Export (CSV, Markdown, JSON) und aufklappbare Zeilen mit den Parametern. Nur Administratoren, nie Geheimnisse.
 - **Urlaubsmodus:** Eine Entität deiner Wahl (z. B. `input_boolean.urlaub`) schaltet Regeln „nur im Urlaubsmodus“ ein. Dazu gibt es Regeln für einzelne Geräte und Entitäten, eine Nachfrist nach dem Urlaub (Standard 24 Stunden) und eine Leiste, solange etwas zurückgehalten wird.
 - **Ausnahmeregeln:** Unter Einstellungen → Ausnahmen nimmst du Objekte nach Bereich, Label, Integration oder Typ (z. B. Bereich „Lager“, alle `media_player`) aus. Die Regel blendet ihre Befunde aus oder meldet einen Ausfall erst nach einer einstellbaren Zahl Tage.
 - **In HA öffnen:** Bei Entitäten mit Gerät öffnet der Knopf die Geräteseite statt der ganzen Entitätenliste.
@@ -36,7 +36,7 @@
   - New tab Settings → AI access, off by default: programs and AI agents that can call Home Assistant services (for example ha-mcp) read Housekeeper through the services `status`, `findings`, `object` and `audit`.
   - A second switch “Change the list” allows `finding_decide`, `mark`, `note_set` and `undo`; only Housekeeper's own lists change, never Home Assistant.
   - “Switch off automatically” uses chips (never, 1, 8, 24 hours).
-  - A log shows every call with user and result, and changes can be taken back there. It is a standard table like the other lists: search, filter by kind, sorting, pages and expandable rows with the parameters. Administrators only, never secrets.
+  - A log shows every call with user and result, and changes can be taken back there. It is a standard table like the other lists: search, filter by kind, sorting, pages, export (CSV, Markdown, JSON) and expandable rows with the parameters. Administrators only, never secrets.
 - **Vacation mode:** An entity of your choice (e.g. `input_boolean.vacation`) turns on rules “only in vacation mode”. Also rules for single devices and entities, a grace period after the vacation (default 24 hours) and a bar while something is held back.
 - **Exception rules:** Under Settings → Protection and exceptions you leave out objects by area, label, integration or type (e.g. area “Storage”, all `media_player`). A rule hides their findings or reports an outage only after a number of days you set.
 - **Open in HA:** For entities with a device the button opens the device page instead of the whole entity list.

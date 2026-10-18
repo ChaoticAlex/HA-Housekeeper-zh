@@ -14,6 +14,7 @@ Object.assign(TEXT.de, {
   mcpHowNote: "Bei ha-mcp die Dienste über ha_call_service aufrufen, nicht über ws_command: Die Panel-Befehle sind nicht dokumentiert, und die Gesamtliste kann bei großen Installationen über 10 MB groß werden.",
   mcpLogTitle: "Protokoll", mcpLogHint: "Jeder Aufruf mit Zeit, Dienst und Ergebnis, nie die Inhalte der Antworten.", mcpLogHint2: "Viele Lesezugriffe hintereinander stehen in einer Zeile. Höchstens 2000 Einträge und 90 Tage.", mcpToday: "Heute", mcpYesterday: "Gestern", mcpNoParams: "Keine Angaben übermittelt.", mcpParams: "Übermittelte Angaben",
   mcpLogCalls: "{n} Aufrufe in 24 Stunden", mcpLogEmpty: "Noch keine Aufrufe.", mcpLogLoading: "Protokoll wird geladen …",
+  mcpExObject: "Objekt", mcpExUser: "Benutzer", mcpExResult: "Ergebnis", mcpExCalls: "Aufrufe",
   mcpAllKinds: "Alle Arten", mcpColTime: "Zeit", mcpColKind: "Art", mcpColFn: "Dienst", mcpColWhat: "Objekt und Ergebnis", mcpColUndo: "Zurücknehmen", mcpFilterAll: "Alle", mcpFilterRead: "Lesen", mcpFilterWrite: "Ändern", mcpFilterDenied: "Abgewiesen", mcpFilterFailed: "Fehler",
   mcpKind_read: "Lesen", mcpKind_write: "Ändern", mcpKind_denied: "Abgewiesen", mcpBadgeError: "Fehler",
   mcpResult_ok: "ok", mcpResult_disabled: "KI-Zugriff war aus", mcpResult_write_disabled: "Ändern war aus", mcpResult_not_admin: "kein Administrator", mcpResult_invalid_format: "Angaben unvollständig oder falsch", mcpResult_rate_limited: "zu viele Änderungen", mcpResult_too_many_calls: "zu viele Aufrufe", mcpResult_reason_required: "Grund fehlt", mcpResult_error: "Fehler",
@@ -41,6 +42,7 @@ Object.assign(TEXT.en, {
   mcpHowNote: "With ha-mcp call the services through ha_call_service, not ws_command: the panel commands are not documented, and the full list can be over 10 MB on large installations.",
   mcpLogTitle: "Log", mcpLogHint: "Every call with time, service and result, never the content of the answers.", mcpLogHint2: "Many reads in a row are one line. At most 2,000 entries and 90 days.", mcpToday: "Today", mcpYesterday: "Yesterday", mcpNoParams: "No parameters sent.", mcpParams: "Parameters sent",
   mcpLogCalls: "{n} calls in 24 hours", mcpLogEmpty: "No calls yet.", mcpLogLoading: "Loading the log …",
+  mcpExObject: "Object", mcpExUser: "User", mcpExResult: "Result", mcpExCalls: "Calls",
   mcpAllKinds: "All kinds", mcpColTime: "Time", mcpColKind: "Kind", mcpColFn: "Service", mcpColWhat: "Object and result", mcpColUndo: "Undo", mcpFilterAll: "All", mcpFilterRead: "Reads", mcpFilterWrite: "Changes", mcpFilterDenied: "Refused", mcpFilterFailed: "Errors",
   mcpKind_read: "Read", mcpKind_write: "Change", mcpKind_denied: "Refused", mcpBadgeError: "Error",
   mcpResult_ok: "ok", mcpResult_disabled: "AI access was off", mcpResult_write_disabled: "changing was off", mcpResult_not_admin: "not an administrator", mcpResult_invalid_format: "invalid parameters", mcpResult_rate_limited: "too many changes", mcpResult_too_many_calls: "too many calls", mcpResult_reason_required: "reason missing", mcpResult_error: "error",
@@ -123,10 +125,13 @@ class McpMixin {
       { key: "kind", label: "mcpColKind", dir: "asc", get: e => kinds.findIndex(k => match(e, k)) },
       { key: "fn", label: "mcpColFn", dir: "asc", get: e => this.t(`mcpFn_${e.fn}`) || e.fn },
     ];
+    const rows = this.refine(id, entries, { text: e => [this.t(`mcpFn_${e.fn}`) || e.fn, e.fn, e.params?.object_id, e.params?.key, e.result].join(" "), filters: { kind: match }, sorts, tie: e => e.at });
+    const me = this._hass?.user?.id;
+    this.setExporter(id, "ai-access-log", [this.t("mcpColTime"), this.t("mcpColKind"), this.t("mcpColFn"), this.t("mcpExObject"), this.t("mcpExUser"), this.t("mcpExResult"), this.t("mcpExCalls"), this.t("mcpUndone")],
+      () => rows.map(e => [e.at, this.t(this.mcpFailed(e) ? "mcpBadgeError" : `mcpKind_${e.kind}`), this.t(`mcpFn_${e.fn}`) || e.fn, [e.params?.object_id, e.params?.key].find(v => typeof v === "string" && v) || "", !e.user ? this.t("mcpUserSystem") : e.user === me ? this.t("mcpUserYou") : this.t("mcpUserOther"), e.result === "ok" ? "ok" : this.t(`mcpResult_${e.result}`), e.n || 1, e.undone ? "x" : ""]));
     const bar = this.listBar(id, { table: true, dense: true, sorts, filters: [
       { name: "kind", all: this.t("mcpAllKinds"), options: kinds.map(k => [k, this.t(`mcpFilter${k[0].toUpperCase()}${k.slice(1)}`)]) },
     ] });
-    const rows = this.refine(id, entries, { text: e => [this.t(`mcpFn_${e.fn}`) || e.fn, e.fn, e.params?.object_id, e.params?.key, e.result].join(" "), filters: { kind: match }, sorts, tie: e => e.at });
     const pg = this.paginate(id, rows, [10, 20]);
     const open = e => (this.mcpOpen || []).includes(e.at);
     const columns = [
