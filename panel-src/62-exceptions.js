@@ -1,7 +1,7 @@
 // Exception rules: objects in an area or with a label are left out of the findings; mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
   excTitle: "Ausnahmeregeln", excHint: "Housekeeper meldet Objekte nicht, auf die eine Regel passt: nach Bereich, Label, Integration, Typ (Domain), Gerät oder Entität. Die Regeln gelten nur in Housekeeper; Home Assistant bleibt unverändert. Das Label housekeeper_ignore wirkt zusätzlich fest.",
-  excNone: "Noch keine Regeln.", excFormNew: "Regel anlegen", excFormEdit: "Regel bearbeiten", excAdd: "Regel hinzufügen", excEdit: "Ändern", excDelete: "Löschen", excLoading: "Regeln werden geladen …",
+  excFormNew: "Regel anlegen", excFormEdit: "Regel bearbeiten", excAdd: "Regel hinzufügen", excEdit: "Ändern", excDelete: "Löschen", excLoading: "Regeln werden geladen …",
   excKind: "Art", excKind_area: "Bereich", excKind_label: "Label", excKind_integration: "Integration", excKind_domain: "Domain (Typ)", excTargets: "Auswahl", excNoTargets: "In Home Assistant gibt es dafür noch nichts zur Auswahl.",
   excAction: "Aktion", excAction_hide: "Ausblenden", excAction_delay: "Erst melden nach", excDays: "Tage nicht verfügbar", excNote: "Notiz (optional)",
   excInherit: "Trifft Geräte und Entitäten. Eine Entität ohne eigenen Bereich erbt den Bereich ihres Geräts, ein Label am Gerät gilt auch für seine Entitäten. „Integration“ und „Domain“ treffen alle Entitäten dieser Integration oder dieses Typs (etwa media_player); eine breite Domain wie sensor deckt auch echte Störungen zu, die Vorschau zeigt die Treffer vorher.",
@@ -16,7 +16,8 @@ Object.assign(TEXT.de, {
   hidByRule: "Durch eine Regel", ignoredByRule: "Ausgeblendet durch eine Ausnahmeregel: {rule}", heldByRule: "Zurückgehalten durch eine Ausnahmeregel: {rule}, wird ab {date} gemeldet", dueByRule: "Frist abgelaufen · Ausnahmeregel: {rule}",
   hidRuleLink: "Regel",
   excKind_device: "Gerät", excKind_entity: "Entität", excRuleDevice: "Gerät {names}", excRuleEntity: "Entität {names}", excSearch: "Suchen …", excMore: "Weitere über die Suche",
-  excColRule: "Regel", excColAction: "Aktion", excColEffect: "Wirkung jetzt", excColOn: "An", excColActions: "Aktionen", excKind_all: "Alles", excRuleAll: "Alle Objekte", excAllHint: "Die Regel trifft jedes Objekt, ohne Auswahl.", excAllWarn: "Die Regel trifft jedes Objekt ({n} mit Befunden). Prüfe, ob das gewollt ist.", excGroupAlways: "Immer", excGroupAlwaysHint: "gilt dauerhaft", excGroupVacation: "Im Urlaubsmodus", excGroupVacationHint: "blendet aus, solange der Schalter „an“ ist", excAddShort: "Regel hinzufügen", excChosen: "{n} gewählt",
+  excColRule: "Regel", excColAction: "Aktion", excColEffect: "Wirkung jetzt", excColOn: "An", excColActions: "Aktionen", excKind_all: "Alles", excRuleAll: "Alle Objekte", excAllHint: "Die Regel trifft jedes Objekt, ohne Auswahl.", excAllWarn: "Die Regel trifft jedes Objekt ({n} mit Befunden). Prüfe, ob das gewollt ist.", excGroupAlways: "Immer", excGroupVacation: "Im Urlaubsmodus", excAddShort: "Regel hinzufügen", excChosen: "{n} gewählt",
+  excEmptyAlways: "Noch keine dauerhafte Regel", excEmptyAlwaysNext: "Zum Beispiel einen Bereich oder ein Label dauerhaft ausblenden.", excEmptyVacation: "Noch keine Regel für den Urlaubsmodus", excEmptyVacationNext: "Zum Beispiel das Gewächshaus ausblenden, solange du weg bist.", excVacNoEntity: "Ohne Entität für den Urlaubsmodus greifen diese Regeln nie. Wähle sie unten bei „Urlaubsmodus“.",
   excScope: "Gilt", excScope_always: "Immer", excScope_vacation: "Nur im Urlaubsmodus", excScopeChip_vacation: "nur im Urlaub", excScopeChip_always: "immer",
   excScopeHint: "Im Urlaubsmodus bleiben diese Objekte still, auch wenn ein Gerät kaputtgeht. Nach dem Urlaub zählt der Ausfall neu: mit eigener Frist deren Tage, sonst die Nachfrist.",
   excOverlap: "Diese Objekte trifft schon: {rules}. Im Urlaub gilt das Ausblenden, danach wieder die Frist der anderen Regel, gezählt ab dem Ende des Urlaubs.",
@@ -31,7 +32,7 @@ Object.assign(TEXT.de, {
 });
 Object.assign(TEXT.en, {
   excTitle: "Exception rules", excHint: "Housekeeper does not report objects that a rule matches: by area, label, integration, type (domain), device or entity. The rules apply only in Housekeeper; Home Assistant stays unchanged. The label housekeeper_ignore keeps working on top.",
-  excNone: "No rules yet.", excFormNew: "Add rule", excFormEdit: "Edit rule", excAdd: "Add rule", excEdit: "Change", excDelete: "Delete", excLoading: "Loading rules …",
+  excFormNew: "Add rule", excFormEdit: "Edit rule", excAdd: "Add rule", excEdit: "Change", excDelete: "Delete", excLoading: "Loading rules …",
   excKind: "Kind", excKind_area: "Area", excKind_label: "Label", excKind_integration: "Integration", excKind_domain: "Domain (type)", excTargets: "Selection", excNoTargets: "Home Assistant has nothing to choose from yet.",
   excAction: "Action", excAction_hide: "Hide", excAction_delay: "Report only after", excDays: "days not available", excNote: "Note (optional)",
   excInherit: "Covers devices and entities. An entity without an area of its own takes the area of its device, and a label on the device counts for its entities. “Integration” and “Domain” cover all entities of that integration or type (such as media_player); a broad domain like sensor also covers real faults, the preview shows the matches first.",
@@ -46,7 +47,8 @@ Object.assign(TEXT.en, {
   hidByRule: "By a rule", ignoredByRule: "Hidden by an exception rule: {rule}", heldByRule: "Held back by an exception rule: {rule}, reported from {date}", dueByRule: "Time has passed · exception rule: {rule}",
   hidRuleLink: "Rule",
   excKind_device: "Device", excKind_entity: "Entity", excRuleDevice: "Device {names}", excRuleEntity: "Entity {names}", excSearch: "Search …", excMore: "More through the search",
-  excColRule: "Rule", excColAction: "Action", excColEffect: "Effect now", excColOn: "On", excColActions: "Actions", excKind_all: "Everything", excRuleAll: "All objects", excAllHint: "The rule covers every object, without a selection.", excAllWarn: "The rule covers every object ({n} with findings). Check that this is what you want.", excGroupAlways: "Always", excGroupAlwaysHint: "applies permanently", excGroupVacation: "In vacation mode", excGroupVacationHint: "hides while the switch is “on”", excAddShort: "Add rule", excChosen: "{n} chosen",
+  excColRule: "Rule", excColAction: "Action", excColEffect: "Effect now", excColOn: "On", excColActions: "Actions", excKind_all: "Everything", excRuleAll: "All objects", excAllHint: "The rule covers every object, without a selection.", excAllWarn: "The rule covers every object ({n} with findings). Check that this is what you want.", excGroupAlways: "Always", excGroupVacation: "In vacation mode", excAddShort: "Add rule", excChosen: "{n} chosen",
+  excEmptyAlways: "No permanent rule yet", excEmptyAlwaysNext: "For example hide an area or a label for good.", excEmptyVacation: "No vacation mode rule yet", excEmptyVacationNext: "For example hide the greenhouse while you are away.", excVacNoEntity: "Without an entity for the vacation mode these rules never apply. Choose it below under “Vacation mode”.",
   excScope: "Applies", excScope_always: "Always", excScope_vacation: "Only in vacation mode", excScopeChip_vacation: "vacation only", excScopeChip_always: "always",
   excScopeHint: "In vacation mode these objects stay quiet, even if a device breaks. After the vacation the outage counts anew: with a delay of its own that delay, otherwise the grace period.",
   excOverlap: "These objects are already hit by: {rules}. In the vacation hiding applies, afterwards the delay of the other rule, counted from the end of the vacation.",
@@ -113,42 +115,51 @@ class ExceptionsMixin {
 
   // The rules of one group as a table; the columns are the same for every row, the cells come from the rule.
   excTable(scope, rules) {
-    if (!rules.length) return `<div class="emptymsg">${this.t("excNone")}</div>`;
     const id = `exc-${scope}`;
     this.lvState(id, "target", "asc");
     const columns = this.excRuleCells(rules[0]).map((c, i) => ({ key: c.key, label: c.label, sortable: false, cell: rule => this.excRuleCells(rule)[i].cell() }));
     return this.listTable(id, columns, rules, { cls: "excrules", rowAttrs: () => 'class="static"' });
   }
 
-  // One of the two groups, each in a card of its own: the rules that always apply, and the ones of the vacation mode.
-  excGroup(scope) {
+  // Nothing yet in this group: the same empty state as the reminders, with the way to the first rule.
+  excEmpty(scope) {
+    const vacation = scope === "vacation";
+    return `<div class="emptymsg mute"><ha-icon icon="${vacation ? "mdi:beach" : "mdi:eye-off-outline"}"></ha-icon><strong>${this.t(vacation ? "excEmptyVacation" : "excEmptyAlways")}</strong>${this.t(vacation ? "excEmptyVacationNext" : "excEmptyAlwaysNext")}<button class="btn" data-exc-edit="" data-exc-new="${scope}">${this.t("excAddShort")}</button></div>`;
+  }
+
+  // One card for all rules: a switch between the two groups, then the form, the table or the empty state.
+  excRulesCard() {
+    const form = this.excForm, scope = form ? form.scope || "always" : this.excScope || "always";
+    const count = s => this.exc.rules.filter(r => (r.scope || "always") === s).length;
     const rules = this.exc.rules.filter(r => (r.scope || "always") === scope);
-    const open = this.excForm && this.excForm.scope === scope;
-    const vacation = scope === "vacation", v = this.exc.vacation || {};
-    const state = !vacation || !v.entity ? "" : v.state === "on" ? "vacStateOn" : v.state && v.state !== "unavailable" && v.state !== "unknown" ? "vacStateOff" : "vacStateMissing";
-    const add = open ? "" : `<button class="btn" data-exc-edit="" data-exc-new="${scope}"><ha-icon icon="mdi:plus"></ha-icon>${this.t("excAddShort")}</button>`;
-    const head = `<div class="panelhead"><div><h2>${this.t(vacation ? "excGroupVacation" : "excGroupAlways")}${state ? ` <span class="pill ${v.state === "on" ? "ok" : "mute"}">${this.t(state)}</span>` : ""}</h2><p>${this.t(vacation ? "excGroupVacationHint" : "excGroupAlwaysHint")}</p></div>${add}</div>`;
-    return `<section class="panel excgroup">${head}${open ? this.excFormHtml(this.excForm) : ""}${this.excTable(scope, rules)}</section>`;
+    const v = this.exc.vacation || {};
+    const seg = `<div class="pad"><div class="seg">${["always", "vacation"].map(s => `<button type="button" class="chip${scope === s ? " active" : ""}" data-exc-scope="${s}" aria-pressed="${scope === s}">${this.t(s === "vacation" ? "excGroupVacation" : "excGroupAlways")} (${count(s)})</button>`).join("")}</div></div>`;
+    const add = form ? "" : `<button class="btn" data-exc-edit="" data-exc-new="${scope}"><ha-icon icon="mdi:plus"></ha-icon>${this.t("excAddShort")}</button>`;
+    const warn = scope === "vacation" && !v.entity ? `<div class="pad">${this.notice("warn", this.t("excVacNoEntity"))}</div>` : "";
+    const body = `${form ? this.excFormHtml(form) : ""}${rules.length ? this.excTable(scope, rules) : form ? "" : this.excEmpty(scope)}`;
+    const foot = rules.length ? `<div class="pad"><p class="factnote">${this.t("excWinner")}</p></div>` : "";
+    return `<section class="panel excgroup"><div class="panelhead"><div><h2>${this.t("excTitle")}</h2><p>${this.t("excHint")}</p></div>${add}</div>${seg}${warn}${body}${foot}</section>`;
   }
 
   excCard() {
-    const head = `<section class="panel"><div class="panelhead"><div><h2>${this.t("excTitle")}</h2><p>${this.t("excHint")}</p></div></div><div class="pad"><p class="factnote">${this.t("excWinner")}</p></div></section>`;
     if (!this.exc) { this.loadExceptions(); return `<section class="panel"><div class="panelhead"><div><h2>${this.t("excTitle")}</h2><p>${this.t("excHint")}</p></div></div><div class="pad"><p class="factnote">${this.t("excLoading")}</p></div></section>`; }
-    return `${head}${this.excGroup("always")}<section class="panel"><div class="panelhead"><div><h2>${this.t("vacTitle")}</h2><p>${this.t("vacHint")}</p></div></div>${this.vacationHtml()}</section>${this.excGroup("vacation")}`;
+    const v = this.exc.vacation || {};
+    const state = !v.entity ? "" : v.state === "on" ? "vacStateOn" : v.state && v.state !== "unavailable" && v.state !== "unknown" ? "vacStateOff" : "vacStateMissing";
+    const pill = state ? ` <span class="pill ${v.state === "on" ? "ok" : "mute"}">${this.t(state)}</span>` : "";
+    return `${this.excRulesCard()}<section class="panel"><div class="panelhead"><div><h2>${this.t("vacTitle")}${pill}</h2><p>${this.t("vacHint")}</p></div></div>${this.vacationHtml()}</section>`;
   }
 
   vacationHtml() {
     const v = this.exc.vacation || {}, form = this.vacForm || (this.vacForm = { entity: v.entity || "", grace: v.grace_hours ?? 24, error: "" });
     const dirty = this.vacDirty();
     const ids = Object.keys(this._hass?.states || {}).filter(id => /^(input_boolean|binary_sensor|switch|schedule|calendar)\./.test(id)).sort();
-    const state = v.state === "on" ? "vacStateOn" : v.state && v.state !== "unavailable" && v.state !== "unknown" ? "vacStateOff" : "vacStateMissing";
     return `<form data-vac-form><div class="setrow"><div><strong>${this.t("vacEntity")}</strong><small>${this.t("vacEntityHint")}</small></div>
         <div><input list="hk-vac-ids" data-vac-entity autocomplete="off" value="${this.esc(form.entity)}"><datalist id="hk-vac-ids">${ids.map(id => `<option value="${this.esc(id)}">`).join("")}</datalist>
-        ${v.entity ? `<small role="status">${this.t(state)}${v.ended_at ? ` · ${this.t("vacEnded", { date: this.formatDate(v.ended_at) })}` : ""}</small>` : ""}</div></div>
+        ${v.entity && v.ended_at ? `<small role="status">${this.t("vacEnded", { date: this.formatDate(v.ended_at) })}</small>` : ""}</div></div>
       <div class="setrow"><div><strong>${this.t("vacGrace")}</strong><small>${this.t("vacGraceHint")}</small></div>
         <div class="excnum"><input type="number" min="0" max="${v.grace_max || 720}" data-vac-grace value="${this.esc(form.grace)}"> <span>${this.t("vacGraceUnit")}</span></div></div>
       ${form.error ? `<div class="pad">${this.notice("err", form.error)}</div>` : ""}
-      <div class="formfoot"><small class="vacdirty" data-vac-dirty ${dirty ? "" : "hidden"}>${this.t("vacUnsaved")}</small><button type="submit" class="btn primary" data-vac-save ${dirty ? "" : "disabled"}>${this.t("vacSave")}</button></div></form>`;
+      <div class="formfoot"><small class="vacdirty" data-vac-dirty ${dirty ? "" : "hidden"}>${this.t("vacUnsaved")}</small><button type="button" class="btn quiet" data-vac-cancel ${dirty ? "" : "hidden"}>${this.t("excCancel")}</button><button type="submit" class="btn primary" data-vac-save ${dirty ? "" : "hidden"}>${this.t("vacSave")}</button></div></form>`;
   }
 
   // Whether the vacation fields differ from what is saved; reverting a change makes it clean again.
@@ -276,8 +287,9 @@ class ExceptionsMixin {
       const sync = () => {
         v.error = ""; form.querySelector(".notice")?.remove();
         const dirty = this.vacDirty();
-        form.querySelector("[data-vac-dirty]").hidden = !dirty; form.querySelector("[data-vac-save]").disabled = !dirty;
+        form.querySelector("[data-vac-dirty]").hidden = !dirty; form.querySelector("[data-vac-save]").hidden = !dirty; form.querySelector("[data-vac-cancel]").hidden = !dirty;
       };
+      form.querySelector("[data-vac-cancel]").onclick = () => { this.vacForm = null; this.render(); };
       form.querySelector("[data-vac-entity]").oninput = ev => { v.entity = ev.target.value; sync(); };
       form.querySelector("[data-vac-grace]").oninput = ev => { v.grace = ev.target.value; sync(); };
     });
@@ -287,6 +299,7 @@ class ExceptionsMixin {
       if (el.dataset.vacGo === "hidden") { this.lvState("hidden", "name", "asc"); this.lv.hidden.f.by = "rule"; }
       this.render();
     });
+    root.querySelectorAll("[data-exc-scope]").forEach(el => el.onclick = () => { this.excScope = el.dataset.excScope; this.render(); });
     root.querySelectorAll("[data-exc-cancel]").forEach(el => el.onclick = () => { this.excForm = null; this.render(); });
     root.querySelectorAll("[data-exc-form]").forEach(form => {
       const f = this.excForm;
