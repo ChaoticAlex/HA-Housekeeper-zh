@@ -138,6 +138,19 @@ class HousekeeperSensor(SensorEntity):
         scanner = self.hass.data.get(DOMAIN, {}).get("scanner")
         values = compute_values(scanner.snapshot if scanner else None)
         self._attr_native_value = values.get(self.entity_description.key)
+        if self.entity_description.key == "findings":
+            vacation = (
+                ((scanner.snapshot if scanner else None) or {}).get("meta", {}).get("vacation")
+            )
+            self._attr_extra_state_attributes = (
+                {
+                    "vacation_mode": vacation["active"],
+                    "vacation_held": vacation["held"],
+                    "vacation_entity": vacation["entity"],
+                }
+                if vacation
+                else {}
+            )
 
 
 class ScanHealthSensor(HousekeeperSensor):

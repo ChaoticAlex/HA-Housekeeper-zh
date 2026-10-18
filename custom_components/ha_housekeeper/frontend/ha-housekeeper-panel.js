@@ -1445,6 +1445,7 @@ class StylesMixin {
       ha-icon{--mdc-icon-size:20px}
       .shell{min-height:100vh;display:block}
       .stickyhead{position:sticky;top:0;z-index:30}.modeopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;padding:12px 16px 16px}.modeopt{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-surface);cursor:pointer}.modeopt.on{border-color:var(--hk-blue);box-shadow:0 0 0 1px var(--hk-blue)}.modeopt input{position:absolute;opacity:0;pointer-events:none}.modeopt:focus-within{outline:2px solid var(--hk-blue);outline-offset:2px}.modepanel{border-left:4px solid var(--hk-blue)}.bulkform{padding:0 14px 10px}.safebar{display:flex;gap:6px 16px;flex-wrap:wrap;align-items:center;padding:6px clamp(16px,2.4vw,32px);border-bottom:1px solid var(--hk-border);background:var(--hk-surface);font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}
+      .vacbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 16px;background:var(--hk-soft,#e6f0f8);border-bottom:1px solid var(--hk-border);border-left:4px solid #2f6fa3;font-size:14px}.vacbar b{color:#2f6fa3}.vacbar .sp{flex:1}.vacbar a{color:#2f6fa3;font-weight:600;text-decoration:underline;text-underline-offset:2px;white-space:nowrap}.vacbar.warn{border-left-color:var(--hk-amber,#b57a0c)}.vacbar.warn b{color:var(--hk-amber,#b57a0c)}.vacbar.after{border-left-color:var(--hk-accent,#1d4a3f)}.vacbar.after b{color:var(--hk-accent,#1d4a3f)}
       .safeitem{display:inline-flex;align-items:center;gap:6px;padding:2px 0;border:0;background:none;color:inherit;font:inherit;cursor:pointer}
       .safeitem:hover{color:var(--hk-text)}.safeitem .dot{width:8px;height:8px;border-radius:50%;background:var(--hk-muted)}.safeitem .dot.ok{background:var(--hk-green,#2e7d32)}.safeitem .dot.warn{background:var(--hk-amber,#b26a00)}.safeitem .dot.red{background:var(--hk-red,#c62828)}
       @media(max-width:860px){.safebar{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;padding:6px 12px}}
@@ -11001,6 +11002,7 @@ const ERR_MESSAGE_KEYS = {
   "not_found": "err_not_found",
   "Rules not saved: too_many": "err_rules_too_many",
   "Rules not saved: invalid": "err_rules_invalid",
+  "Vacation not saved: invalid": "err_rules_invalid",
   "The date does not exist": "err_date_invalid",
   "The date lies in the future": "err_date_future",
 };
@@ -12009,6 +12011,18 @@ Object.assign(TEXT.de, {
   excOn: "Regel aktiv", excDue: "Frist abgelaufen",
   hidByRule: "Durch eine Regel", ignoredByRule: "Ausgeblendet durch eine Ausnahmeregel: {rule}", heldByRule: "Zurückgehalten durch eine Ausnahmeregel: {rule}, wird ab {date} gemeldet", dueByRule: "Frist abgelaufen · Ausnahmeregel: {rule}",
   hidRuleLink: "Regel",
+  excKind_device: "Gerät", excKind_entity: "Entität", excRuleDevice: "Gerät {names}", excRuleEntity: "Entität {names}", excSearch: "Suchen …", excMore: "Weitere über die Suche",
+  excScope: "Gilt", excScope_always: "Immer", excScope_vacation: "Nur im Urlaubsmodus", excScopeChip_vacation: "nur im Urlaub", excScopeChip_always: "immer",
+  excScopeHint: "Im Urlaubsmodus werden diese Objekte nicht gemeldet. Ein Gerät, das im Urlaub kaputtgeht, bleibt dann ebenfalls still; nach dem Urlaub zählt die Ausfalldauer neu.",
+  excOverlap: "Diese Objekte trifft schon: {rules}. Im Urlaub gilt das Ausblenden, danach wieder die Frist der anderen Regel, gezählt ab dem Ende des Urlaubs.",
+  vacTitle: "Urlaubsmodus", vacHint: "Solange die gewählte Entität „an“ ist, gelten die Regeln „nur im Urlaubsmodus“. Ist sie nicht verfügbar oder unbekannt, gilt der Modus als aus. Schalten kannst du sie in Home Assistant, zum Beispiel per Kalender oder Automation.",
+  vacEntity: "Entität für den Urlaubsmodus", vacEntityHint: "Jede Entität, die „an“ sein kann: Helfer, Schalter, Binärsensor, Zeitplan, Kalender. Leer lassen schaltet den Urlaubsmodus aus.",
+  vacGrace: "Nachfrist nach dem Urlaub", vacGraceUnit: "Stunden", vacGraceHint: "Standard 24 Stunden. Wie lange Befunde nach dem Ende zurückgehalten werden, wenn für das Objekt keine eigene Frist gilt.",
+  vacSave: "Speichern", vacStateOn: "Aktuell: an", vacStateOff: "Aktuell: aus", vacStateMissing: "Aktuell: nicht verfügbar", vacEnded: "Zuletzt beendet am {date}.", vacFailed: "Nicht gespeichert: {reason}",
+  vacBarOn: "Urlaubsmodus aktiv", vacBarHeld: "{n} Befunde zurückgehalten", vacBarHeld1: "1 Befund zurückgehalten",
+  vacBarAfter: "Urlaub beendet", vacBarAfterLine: "Frist bis {date} · {n} Befunde noch zurückgehalten", vacBarAfterLine1: "Frist bis {date} · 1 Befund noch zurückgehalten",
+  vacBarMissing: "Urlaubsmodus-Entität nicht verfügbar", vacBarMissingLine: "{entity} meldet keinen Zustand. Der Modus gilt als aus.", vacBarShow: "Zurückgehaltene anzeigen", vacBarRules: "Regeln", vacBarSettings: "Einstellung",
+  vacRuleAfter: "Urlaub beendet, zurückgehalten bis {date}", vacRuleActive: "Urlaubsmodus aktiv",
 });
 Object.assign(TEXT.en, {
   excTitle: "Exception rules", excHint: "Housekeeper does not report objects in an area, with a label, from an integration or of a type (domain). The rules cover devices and their entities and apply only in Housekeeper; Home Assistant stays unchanged. The label housekeeper_ignore keeps working on top.",
@@ -12026,20 +12040,34 @@ Object.assign(TEXT.en, {
   excOn: "Rule active", excDue: "Time has passed",
   hidByRule: "By a rule", ignoredByRule: "Hidden by an exception rule: {rule}", heldByRule: "Held back by an exception rule: {rule}, reported from {date}", dueByRule: "Time has passed · exception rule: {rule}",
   hidRuleLink: "Rule",
+  excKind_device: "Device", excKind_entity: "Entity", excRuleDevice: "Device {names}", excRuleEntity: "Entity {names}", excSearch: "Search …", excMore: "More through the search",
+  excScope: "Applies", excScope_always: "Always", excScope_vacation: "Only in vacation mode", excScopeChip_vacation: "vacation only", excScopeChip_always: "always",
+  excScopeHint: "In vacation mode these objects are not reported. A device that breaks during the vacation stays quiet too; after the vacation the outage counts anew.",
+  excOverlap: "These objects are already hit by: {rules}. In the vacation hiding applies, afterwards the delay of the other rule, counted from the end of the vacation.",
+  vacTitle: "Vacation mode", vacHint: "While the chosen entity is “on” the rules “only in vacation mode” apply. If it is unavailable or unknown the mode counts as off. You can switch it in Home Assistant, for example by calendar or automation.",
+  vacEntity: "Entity for vacation mode", vacEntityHint: "Any entity that can be “on”: helper, switch, binary sensor, schedule, calendar. Leave empty to turn vacation mode off.",
+  vacGrace: "Grace period after the vacation", vacGraceUnit: "hours", vacGraceHint: "Default 24 hours. How long findings are held back after the end when the object has no delay of its own.",
+  vacSave: "Save", vacStateOn: "Now: on", vacStateOff: "Now: off", vacStateMissing: "Now: unavailable", vacEnded: "Last ended on {date}.", vacFailed: "Not saved: {reason}",
+  vacBarOn: "Vacation mode on", vacBarHeld: "{n} findings held back", vacBarHeld1: "1 finding held back",
+  vacBarAfter: "Vacation over", vacBarAfterLine: "Delay until {date} · {n} findings still held back", vacBarAfterLine1: "Delay until {date} · 1 finding still held back",
+  vacBarMissing: "Vacation mode entity unavailable", vacBarMissingLine: "{entity} reports no state. The mode counts as off.", vacBarShow: "Show held back", vacBarRules: "Rules", vacBarSettings: "Settings",
+  vacRuleAfter: "Vacation over, held back until {date}", vacRuleActive: "Vacation mode on",
 });
 
 class ExceptionsMixin {
   // "Area Lager" or "Label ignore_status, other": what a rule names, in the words of Home Assistant.
   excRuleName(rule) {
-    const list = this.data?.objects || [], lookup = rule.kind === "area" || rule.kind === "label";
+    const list = this.data?.objects || [], lookup = ["area", "label", "device", "entity"].includes(rule.kind);
     const names = rule.targets.map(id => (lookup ? list.find(x => x.object_type === rule.kind && x.object_id === id)?.name : "") || id).join(", ");
-    return this.t({ area: "excRuleArea", label: "excRuleLabel", integration: "excRuleIntegration", domain: "excRuleDomain" }[rule.kind], { names });
+    return this.t({ area: "excRuleArea", label: "excRuleLabel", integration: "excRuleIntegration", domain: "excRuleDomain", device: "excRuleDevice", entity: "excRuleEntity" }[rule.kind], { names });
   }
 
   // What a rule did to a finding: hidden, held back until a date, or its time has passed; "" for a finding no rule touched.
   findingRuleLine(f) {
     const info = f.ignore_rule;
     if (!info) return "";
+    if (info.phase === "after" && !f.rule_due) return this.t("vacRuleAfter", { date: this.formatDate(info.until) });
+    if (info.phase === "vacation" && f.ignored_by === "rule") return this.t("vacRuleActive");
     const rule = this.excRuleName(info);
     if (f.rule_due) return this.t("dueByRule", { rule });
     return f.ignored_by === "rule" ? this.t(info.action === "delay" ? "heldByRule" : "ignoredByRule", { rule, date: info.until ? this.formatDate(info.until) : "" }) : "";
@@ -12066,41 +12094,86 @@ class ExceptionsMixin {
   excCard() {
     const head = `<div class="panelhead"><div><h2>${this.t("excTitle")}</h2><p>${this.t("excHint")}</p></div></div>`;
     if (!this.exc) { this.loadExceptions(); return `<section class="panel">${head}<div class="pad"><p class="factnote">${this.t("excLoading")}</p></div></section>`; }
-    const rows = this.exc.rules.map(rule => `<div class="row"><span class="tile ${rule.enabled ? (rule.effect?.due ? "warn" : "ok") : "mute"}"><ha-icon icon="${{ area: "mdi:floor-plan", label: "mdi:label-outline", integration: "mdi:puzzle-outline", domain: "mdi:shape-outline" }[rule.kind]}"></ha-icon></span>
-        <span class="row-text"><strong>${this.esc(this.excRuleName(rule))}</strong><small>${this.esc(this.excRuleLine(rule))} · ${this.esc(this.excEffect(rule))}${rule.note ? ` · ${this.esc(rule.note)}` : ""}</small></span>
+    const rows = this.exc.rules.map(rule => `<div class="row"><span class="tile ${rule.enabled ? (rule.effect?.due ? "warn" : "ok") : "mute"}"><ha-icon icon="${{ area: "mdi:floor-plan", label: "mdi:label-outline", integration: "mdi:puzzle-outline", domain: "mdi:shape-outline", device: "mdi:devices", entity: "mdi:shape-outline" }[rule.kind]}"></ha-icon></span>
+        <span class="row-text"><strong>${this.esc(this.excRuleName(rule))}</strong><small>${this.esc(this.excRuleLine(rule))} · <b>${this.t(`excScopeChip_${rule.scope || "always"}`)}</b> · ${this.esc(this.excEffect(rule))}${rule.note ? ` · ${this.esc(rule.note)}` : ""}</small></span>
         <label class="inline"><input type="checkbox" data-exc-toggle="${this.esc(rule.id)}" ${rule.enabled ? "checked" : ""} aria-label="${this.esc(this.t("excOn"))}"></label>
         <button class="btn quiet" data-exc-edit="${this.esc(rule.id)}">${this.t("excEdit")}</button><button class="btn quiet" data-exc-delete="${this.esc(rule.id)}">${this.t("excDelete")}</button></div>`).join("");
+    const vac = this.vacationHtml();
     const form = this.excForm ? this.excFormHtml(this.excForm) : `<div class="pad"><button class="btn" data-exc-edit=""><ha-icon icon="mdi:plus"></ha-icon>${this.t("excAdd")}</button></div>`;
-    return `<section class="panel">${head}${rows || `<div class="pad"><p class="factnote">${this.t("excNone")}</p></div>`}${form}</section>`;
+    return `<section class="panel">${vac}</section><section class="panel">${head}${rows || `<div class="pad"><p class="factnote">${this.t("excNone")}</p></div>`}${form}</section>`;
+  }
+
+  vacationHtml() {
+    const v = this.exc.vacation || {}, form = this.vacForm || (this.vacForm = { entity: v.entity || "", grace: v.grace_hours ?? 24, error: "" });
+    const ids = Object.keys(this._hass?.states || {}).filter(id => /^(input_boolean|binary_sensor|switch|schedule|calendar)\./.test(id)).sort();
+    const state = v.state === "on" ? "vacStateOn" : v.state && v.state !== "unavailable" && v.state !== "unknown" ? "vacStateOff" : "vacStateMissing";
+    return `<div class="panelhead"><div><h2>${this.t("vacTitle")}</h2><p>${this.t("vacHint")}</p></div></div>
+      <form class="pad markform" data-vac-form><div class="mrow"><label class="mfield grow"><span>${this.t("vacEntity")}</span><input list="hk-vac-ids" data-vac-entity autocomplete="off" value="${this.esc(form.entity)}"><datalist id="hk-vac-ids">${ids.map(id => `<option value="${this.esc(id)}">`).join("")}</datalist></label>
+        <label class="mfield"><span>${this.t("vacGrace")}</span><span><input type="number" min="0" max="${v.grace_max || 720}" data-vac-grace value="${this.esc(form.grace)}" style="width:5em"> ${this.t("vacGraceUnit")}</span></label></div>
+        <small class="factnote">${this.t("vacEntityHint")} ${this.t("vacGraceHint")}</small>
+        ${v.entity ? `<small class="factnote" role="status">${this.t(state)}${v.ended_at ? ` · ${this.t("vacEnded", { date: this.formatDate(v.ended_at) })}` : ""}</small>` : ""}
+        ${form.error ? `<small class="error" role="alert">${this.esc(form.error)}</small>` : ""}
+        <div class="mbtns"><button type="submit" class="btn primary">${this.t("vacSave")}</button></div></form>`;
+  }
+
+  async saveVacation() {
+    const form = this.vacForm;
+    try {
+      await this._hass.callWS({ type: "ha_housekeeper/vacation_set", entity: form.entity.trim() || null, grace_hours: Math.max(0, Number(form.grace) || 0) });
+      this.vacForm = null;
+      this.exc = await this._hass.callWS({ type: "ha_housekeeper/exceptions" });
+      await this.refreshData();
+    } catch (err) { form.error = this.t("vacFailed", { reason: this.errText(err) }); }
+    this.render();
+  }
+
+  // The bar under the top bar: on every page while the vacation mode holds something back.
+  vacationBar() {
+    const v = this.data?.meta?.vacation;
+    if (!v) return "";
+    const date = value => this.formatDate(value), n = v.held;
+    const go = `<a href="#" data-vac-go="hidden">${this.t("vacBarShow")}</a><a href="#" data-vac-go="rules">${this.t("vacBarRules")}</a>`;
+    if (v.missing) return `<div class="vacbar warn" role="status"><b>${this.t("vacBarMissing")}</b><span>${this.esc(this.t("vacBarMissingLine", { entity: v.entity }))}</span><span class="sp"></span><a href="#" data-vac-go="rules">${this.t("vacBarSettings")}</a></div>`;
+    if (v.active) return `<div class="vacbar" role="status"><b>${this.t("vacBarOn")}</b><span>${n === 1 ? this.t("vacBarHeld1") : this.t("vacBarHeld", { n })} · ${this.esc(v.entity)}</span><span class="sp"></span>${go}</div>`;
+    if (v.after_until && n) return `<div class="vacbar after" role="status"><b>${this.t("vacBarAfter")}</b><span>${n === 1 ? this.t("vacBarAfterLine1", { date: date(v.after_until) }) : this.t("vacBarAfterLine", { date: date(v.after_until), n })}</span><span class="sp"></span>${go}</div>`;
+    return "";
   }
 
   excFormHtml(f) {
-    const list = { area: this.exc.areas, label: this.exc.labels, integration: this.exc.integrations, domain: this.exc.domains }[f.kind] || [];
+    const all = { area: this.exc.areas, label: this.exc.labels, integration: this.exc.integrations, domain: this.exc.domains, device: this.exc.devices, entity: this.exc.entities }[f.kind] || [];
+    const needle = (f.search || "").trim().toLowerCase();
+    const picked = all.filter(x => f.targets.includes(x.id));
+    const shown = needle ? all.filter(x => `${x.name} ${x.id}`.toLowerCase().includes(needle)) : all;
+    const list = [...picked, ...shown.filter(x => !f.targets.includes(x.id))].slice(0, Math.max(100, picked.length));
+    const more = shown.length + picked.length > list.length ? `<small class="factnote">${this.t("excMore")}</small>` : "";
+    const search = all.length > 12 ? `<input data-exc-search placeholder="${this.esc(this.t("excSearch"))}" autocomplete="off" value="${this.esc(f.search || "")}">` : "";
     const boxes = list.map(x => `<label class="inline"><input type="checkbox" data-exc-target="${this.esc(x.id)}" ${f.targets.includes(x.id) ? "checked" : ""}> ${this.esc(x.name)}</label>`).join("") || `<small class="factnote">${this.t("excNoTargets")}</small>`;
-    const kinds = ["area", "label", "integration", "domain"].map(k => `<option value="${k}" ${f.kind === k ? "selected" : ""}>${this.t(`excKind_${k}`)}</option>`).join("");
+    const kinds = ["area", "label", "integration", "domain", "device", "entity"].map(k => `<option value="${k}" ${f.kind === k ? "selected" : ""}>${this.t(`excKind_${k}`)}</option>`).join("");
     const pv = f.preview;
     const preview = pv ? `<div class="factnote" role="status"><strong>${this.t("excPreview")}:</strong> ${f.action === "delay" ? this.t("excPreviewDelay", { hold: pv.hold, due: pv.due }) : this.t("excPreviewHide", { objects: pv.objects, n: pv.hide })}
         ${pv.important?.length ? `<br><span class="error">${this.t("excImportant", { names: this.esc(pv.important.map(x => x.name).join(", ")) })}</span>` : ""}</div>` : "";
     return `<form class="pad markform" data-exc-form>
       <div class="mrow"><label class="mfield"><span>${this.t("excKind")}</span><select data-exc-kind>${kinds}</select></label>
         <label class="mfield grow"><span>${this.t("excNote")}</span><input data-exc-note maxlength="200" autocomplete="off" value="${this.esc(f.note)}"></label></div>
-      <div class="mfield"><span>${this.t("excTargets")}</span><div class="mrow" style="max-height:11em;overflow:auto">${boxes}</div></div>
+      <div class="mfield"><span>${this.t("excTargets")}</span>${search}<div class="mrow" style="max-height:11em;overflow:auto">${boxes}</div>${more}</div>
       <small class="factnote">${this.t("excInherit")}</small>
+      <div class="mrow"><label class="mfield"><span>${this.t("excScope")}</span><select data-exc-scope><option value="always" ${f.scope === "always" ? "selected" : ""}>${this.t("excScope_always")}</option><option value="vacation" ${f.scope === "vacation" ? "selected" : ""}>${this.t("excScope_vacation")}</option></select></label></div>
+      ${f.scope === "vacation" ? `<small class="factnote">${this.t("excScopeHint")}</small>` : ""}
       <div class="mrow"><label class="mfield"><span>${this.t("excAction")}</span><select data-exc-action><option value="hide" ${f.action === "hide" ? "selected" : ""}>${this.t("excAction_hide")}</option><option value="delay" ${f.action === "delay" ? "selected" : ""}>${this.t("excAction_delay")}</option></select></label>
         ${f.action === "delay" ? `<label class="mfield"><span>${this.t("excDays")}</span><input type="number" min="1" max="${this.exc.days_max || 365}" data-exc-days value="${this.esc(f.days)}"></label>` : ""}</div>
       ${f.action === "delay" ? `<small class="factnote">${this.t("excDelayHint")}</small>` : ""}<small class="factnote">${this.t("excWinner")}</small>
-      ${preview}${f.error ? `<small class="error" role="alert">${this.esc(f.error)}</small>` : ""}
+      ${preview}${pv?.overlap?.length ? `<small class="factnote">${this.esc(this.t("excOverlap", { rules: pv.overlap.map(id => { const r = this.exc.rules.find(x => x.id === id); return r ? this.excRuleName(r) : id; }).join(", ") }))}</small>` : ""}${f.error ? `<small class="error" role="alert">${this.esc(f.error)}</small>` : ""}
       <div class="mbtns"><button type="button" class="btn quiet" data-exc-cancel>${this.t("excCancel")}</button><button type="submit" class="btn primary">${this.t("excSave")}</button></div></form>`;
   }
 
   excDraft(f) {
-    return { ...(f.id ? { id: f.id } : {}), kind: f.kind, targets: f.targets, action: f.action, ...(f.action === "delay" ? { days: Math.max(1, Number(f.days) || 7) } : {}), enabled: f.enabled !== false, note: f.note.trim() };
+    return { ...(f.id ? { id: f.id } : {}), kind: f.kind, targets: f.targets, action: f.action, scope: f.scope || "always", ...(f.action === "delay" ? { days: Math.max(1, Number(f.days) || 7) } : {}), enabled: f.enabled !== false, note: f.note.trim() };
   }
 
   openException(id) {
     const rule = this.exc.rules.find(r => r.id === id);
-    this.excForm = rule ? { id, kind: rule.kind, targets: [...rule.targets], action: rule.action, days: rule.days || 7, enabled: rule.enabled, note: rule.note || "", error: "", preview: null }
-      : { id: "", kind: "area", targets: [], action: "hide", days: 7, enabled: true, note: "", error: "", preview: null };
+    this.excForm = rule ? { id, kind: rule.kind, targets: [...rule.targets], action: rule.action, scope: rule.scope || "always", search: "", days: rule.days || 7, enabled: rule.enabled, note: rule.note || "", error: "", preview: null }
+      : { id: "", kind: "area", targets: [], action: "hide", scope: "always", search: "", days: 7, enabled: true, note: "", error: "", preview: null };
     this.render();
     this.excPreview();
   }
@@ -12142,11 +12215,26 @@ class ExceptionsMixin {
     root.querySelectorAll("[data-exc-edit]").forEach(el => el.onclick = () => this.openException(el.dataset.excEdit));
     root.querySelectorAll("[data-exc-delete]").forEach(el => el.onclick = () => this.saveExceptions(rules().filter(r => r.id !== el.dataset.excDelete), null));
     root.querySelectorAll("[data-exc-toggle]").forEach(el => el.onchange = () => this.saveExceptions(rules().map(r => (r.id === el.dataset.excToggle ? { ...r, enabled: el.checked } : r)), null));
+    root.querySelectorAll("[data-vac-form]").forEach(form => {
+      const v = this.vacForm;
+      form.onsubmit = ev => { ev.preventDefault(); this.saveVacation(); };
+      form.querySelector("[data-vac-entity]").oninput = ev => { v.entity = ev.target.value; };
+      form.querySelector("[data-vac-grace]").oninput = ev => { v.grace = ev.target.value; };
+    });
+    root.querySelectorAll("[data-vac-go]").forEach(el => el.onclick = ev => {
+      ev.preventDefault();
+      this.selected = null; this.view = "settings"; this.settingsTab = "protection"; this.pages = {};
+      if (el.dataset.vacGo === "hidden") { this.lvState("hidden", "name", "asc"); this.lv.hidden.f.by = "rule"; }
+      this.render();
+    });
     root.querySelectorAll("[data-exc-cancel]").forEach(el => el.onclick = () => { this.excForm = null; this.render(); });
     root.querySelectorAll("[data-exc-form]").forEach(form => {
       const f = this.excForm;
       form.onsubmit = ev => { ev.preventDefault(); this.commitException(); };
       form.querySelector("[data-exc-kind]").onchange = ev => { f.kind = ev.target.value; f.targets = []; f.preview = null; this.render(); };
+      form.querySelector("[data-exc-scope]").onchange = ev => { f.scope = ev.target.value; this.render(); this.excPreview(); };
+      const search = form.querySelector("[data-exc-search]");
+      if (search) search.oninput = ev => { f.search = ev.target.value; this.render(); this.shadowRoot.querySelector("[data-exc-search]")?.focus(); };
       form.querySelector("[data-exc-note]").oninput = ev => { f.note = ev.target.value; };
       form.querySelector("[data-exc-action]").onchange = ev => { f.action = ev.target.value; this.render(); this.excPreview(); };
       const days = form.querySelector("[data-exc-days]");
@@ -16520,7 +16608,7 @@ class HAHousekeeperPanel extends HTMLElement {
     let page;
     if (this.view !== "maintenance") this.bpOpen = "";
     try { page = this.selected && this.data ? this.detail() : this.bpOpen ? this.blueprintPage() : `${this.heading()}${this.content()}`; } catch (err) { page = this.renderFailed(err); }
-    const shell = `<div class="shell"><div class="stickyhead">${this.topbar()}${this.safetyBar()}</div><main class="main">${page}</main>${this.confirmDialog()}<div class="sr-only" role="status" aria-live="polite">${this.esc(this.liveStatus())}</div></div>`;
+    const shell = `<div class="shell"><div class="stickyhead">${this.topbar()}${this.safetyBar()}${this.vacationBar()}</div><main class="main">${page}</main>${this.confirmDialog()}<div class="sr-only" role="status" aria-live="polite">${this.esc(this.liveStatus())}</div></div>`;
     // The style sheet is only parsed again when the theme changed; otherwise just the page is replaced.
     const root = this.shadowRoot, css = this.themeCss(), current = root.querySelector?.(".shell");
     let swapped = false;

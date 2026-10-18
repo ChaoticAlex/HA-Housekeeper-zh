@@ -17,6 +17,7 @@ from homeassistant.core import CoreState, HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.event import (
     async_call_later,
+    async_track_point_in_utc_time,
     async_track_state_change_event,
     async_track_time_interval,
 )
@@ -273,6 +274,50 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     entry.async_on_unload(async_track_time_interval(hass, _sample_load, timedelta(minutes=5)))
     entry.async_on_unload(scanner.outage_scans.start())
+
+    # The vacation switch: look at the findings again when it moves, and once more when the grace
+    # period after its end has passed. The switch can be chosen later in the panel, so the hook follows it.
+    vacation: dict[str, Any] = {"entity": None, "unsub": None, "timer": None}
+
+    @callback
+    def _vacation_timer() -> None:
+        if vacation["timer"] is not None:
+            vacation["timer"]()
+            vacation["timer"] = None
+        store = scanner.exceptions
+        if store.active() or store.ended_at is None or not store.grace_hours:
+            return
+        due = store.ended_at + timedelta(hours=store.grace_hours)
+        if due > datetime.now(UTC):
+            vacation["timer"] = async_track_point_in_utc_time(hass, _vacation_due, due)
+
+    @callback
+    def _vacation_due(_: Any) -> None:
+        vacation["timer"] = None
+        scanner.vacation_changed()
+
+    @callback
+    def _vacation_moved(_: Any = None) -> None:
+        scanner.vacation_changed()
+        _vacation_timer()
+
+    @callback
+    def _vacation_follow() -> None:
+        entity = scanner.exceptions.entity
+        if vacation["entity"] != entity:
+            if vacation["unsub"] is not None:
+                vacation["unsub"]()
+            vacation["entity"] = entity
+            vacation["unsub"] = (
+                async_track_state_change_event(hass, [entity], _vacation_moved) if entity else None
+            )
+        _vacation_timer()
+
+    scanner.vacation_hook = _vacation_follow
+    _vacation_follow()
+    scanner.vacation_changed()
+    entry.async_on_unload(lambda: vacation["unsub"]() if vacation["unsub"] else None)
+    entry.async_on_unload(lambda: vacation["timer"]() if vacation["timer"] else None)
     entry.async_on_unload(criteria_module.async_listen(hass, scanner.criteria))
     entry.async_on_unload(scanner.criteria.cancel_all)
 

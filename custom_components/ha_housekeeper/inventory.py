@@ -6,6 +6,7 @@ import asyncio
 import logging
 import time
 from collections import Counter
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -837,6 +838,9 @@ class InventoryScanner:
         self.history = ScanHistory(hass)
         self.ignored = IgnoreStore(hass)
         self.exceptions = ExceptionStore(hass)
+        self.vacation_hook: Callable[[], None] | None = (
+            None  # set by __init__.py: follow the switch
+        )
         self.policies = PolicyStore(hass)
         self.replies = ReplyStore(hass)
         self.journal = JournalStore(hass)
@@ -1659,6 +1663,7 @@ class InventoryScanner:
                 "status_counts": dict(Counter(item["status"] for item in objects)),
                 "marked_status_counts": marked_status_counts(objects),
                 "type_counts": dict(Counter(item["object_type"] for item in objects)),
+                "vacation": self.vacation_meta(findings),
             },
             "objects": objects,
             "edges": edges,
@@ -1703,10 +1708,16 @@ class InventoryScanner:
         found = traits(self.hass, kind, finding["object_id"])
         if found is None:
             return
-        result = verdict(self.exceptions.rules, found, finding, datetime.now(UTC))
+        result = verdict(
+            self.exceptions.rules, found, finding, datetime.now(UTC), self.exceptions.vacation()
+        )
         if result is None:
             return
-        finding["ignore_rule"] = {**result["rule"], "until": result["until"]}
+        finding["ignore_rule"] = {
+            **result["rule"],
+            "until": result["until"],
+            "phase": result["phase"],
+        }
         if result["state"] == "due":
             finding["rule_due"] = True
         else:
@@ -1714,10 +1725,55 @@ class InventoryScanner:
 
     def _mark_excepted(self, objects: list[dict[str, Any]]) -> None:
         """Flag the objects a hiding rule covers, so lists and cleanup plans leave them out."""
-        hiding = [r for r in self.exceptions.rules if r["action"] == "hide"]
+        vacation = self.exceptions.active()
+        hiding = [
+            r
+            for r in self.exceptions.rules
+            if r["action"] == "hide" and (r["scope"] == "always" or vacation)
+        ]
         for item in objects:
             found = traits(self.hass, item["object_type"], item["object_id"]) if hiding else None
             item["excepted"] = bool(found) and any(r["enabled"] and _hits(r, found) for r in hiding)
+
+    def vacation_meta(self, findings: list[dict[str, Any]]) -> dict[str, Any] | None:
+        """What the panel shows about the vacation mode; None while no switch is chosen."""
+        store = self.exceptions
+        if not store.entity:
+            return None
+        held = [
+            f
+            for f in findings
+            if f.get("ignored_by") == "rule"
+            and (f.get("ignore_rule") or {}).get("phase") in ("vacation", "after")
+        ]
+        state = store.switch_state()
+        after = [f for f in held if f["ignore_rule"]["phase"] == "after"]
+        return {
+            "entity": store.entity,
+            "active": store.active(),
+            "missing": state in (None, "unavailable", "unknown"),
+            "ended_at": store.ended_at.isoformat() if store.ended_at else None,
+            "grace_hours": store.grace_hours,
+            "held": len(held),
+            "after_until": max((f["ignore_rule"]["until"] for f in after), default=None),
+        }
+
+    def set_vacation(self, entity: str | None, grace_hours: int) -> str | None:
+        """Choose the vacation switch and the grace period; the failure, or None."""
+        if (
+            error := self.exceptions.set_vacation(entity, grace_hours, datetime.now(UTC))
+        ) is not None:
+            return error
+        self._refresh_marks()
+        if self.vacation_hook is not None:
+            self.vacation_hook()
+        return None
+
+    @callback
+    def vacation_changed(self) -> None:
+        """The vacation switch moved: look at every finding again, without a scan."""
+        if self.exceptions.sync(datetime.now(UTC)) or self.exceptions.entity:
+            self._refresh_marks()
 
     def set_exceptions(self, rules: list[Any]) -> str | None:
         """Replace the exception rules and bring the cached snapshot up to date; the failure, or None."""
@@ -1902,6 +1958,7 @@ class InventoryScanner:
         for finding in snapshot["findings"]:
             self._mark_ignored(finding, registry)
         self._apply_marks(snapshot["objects"], snapshot["findings"])
+        snapshot["meta"]["vacation"] = self.vacation_meta(snapshot["findings"])
         snapshot["meta"]["marked_status_counts"] = marked_status_counts(snapshot["objects"])
         snapshot["causes"] = apply_causes(
             snapshot["objects"], snapshot["edges"], snapshot["findings"]

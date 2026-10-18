@@ -4,6 +4,7 @@
 
 ### Geändert
 
+- **Urlaubsmodus:** Eine Entität deiner Wahl (z. B. `input_boolean.urlaub`) schaltet Regeln „nur im Urlaubsmodus“ ein. Dazu gibt es Regeln für einzelne Geräte und Entitäten, eine Nachfrist nach dem Urlaub (Standard 24 Stunden) und eine Leiste, solange etwas zurückgehalten wird.
 - **Ausnahmeregeln:** Unter Einstellungen → Schutz und Ausnahmen nimmst du Objekte nach Bereich, Label, Integration oder Typ (z. B. Bereich „Lager“, alle `media_player`) aus. Die Regel blendet ihre Befunde aus oder meldet einen Ausfall erst nach einer einstellbaren Zahl Tage.
 - **In HA öffnen:** Bei Entitäten mit Gerät öffnet der Knopf die Geräteseite statt der ganzen Entitätenliste.
 - **Mehr Infos:** Beim Schließen des Dialogs „Mehr Infos“ bleibt das Panel auf der Detailseite, statt zurück zur Liste zu springen.
@@ -15,6 +16,7 @@
 
 #### Changed
 
+- **Vacation mode:** An entity of your choice (e.g. `input_boolean.vacation`) turns on rules “only in vacation mode”. Also rules for single devices and entities, a grace period after the vacation (default 24 hours) and a bar while something is held back.
 - **Exception rules:** Under Settings → Protection and exceptions you leave out objects by area, label, integration or type (e.g. area “Storage”, all `media_player`). A rule hides their findings or reports an outage only after a number of days you set.
 - **Open in HA:** For entities with a device the button opens the device page instead of the whole entity list.
 - **More info:** Closing the “More info” dialog keeps the panel on the detail page instead of jumping back to the list.

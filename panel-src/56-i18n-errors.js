@@ -21,6 +21,7 @@ const ERR_MESSAGE_KEYS = {
   "not_found": "err_not_found",
   "Rules not saved: too_many": "err_rules_too_many",
   "Rules not saved: invalid": "err_rules_invalid",
+  "Vacation not saved: invalid": "err_rules_invalid",
   "The date does not exist": "err_date_invalid",
   "The date lies in the future": "err_date_future",
 };

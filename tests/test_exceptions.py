@@ -4,13 +4,27 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 
-from custom_components.ha_housekeeper.exceptions import Traits, clean_rule, matches, verdict
+from custom_components.ha_housekeeper.exceptions import (
+    Traits,
+    Vacation,
+    clean_rule,
+    matches,
+    verdict,
+)
 
 NOW = datetime(2026, 10, 18, 12, tzinfo=UTC)
 
 
-def _rule(kind: str, targets: list[str], action: str = "hide", days: int | None = None):
-    rule = clean_rule({"kind": kind, "targets": targets, "action": action, "days": days})
+def _rule(
+    kind: str,
+    targets: list[str],
+    action: str = "hide",
+    days: int | None = None,
+    scope: str = "always",
+):
+    rule = clean_rule(
+        {"kind": kind, "targets": targets, "action": action, "days": days, "scope": scope}
+    )
     assert rule is not None
     return rule
 
@@ -58,3 +72,36 @@ def test_a_delay_leaves_other_findings_alone() -> None:
         verdict([_rule("area", ["keller"], "delay", 7)], found, {"classification": "unknown"}, NOW)
         is None
     )
+
+
+def test_device_and_entity_rules_match_by_id() -> None:
+    found = Traits(None, frozenset(), frozenset(), "media_player", "dev1", "media_player.tv")
+    assert matches(_rule("device", ["dev1"]), found)
+    assert matches(_rule("entity", ["media_player.tv"]), found)
+    assert not matches(_rule("entity", ["media_player.other"]), found)
+
+
+def test_a_vacation_rule_works_only_while_the_vacation_is_on() -> None:
+    found = Traits("keller", frozenset())
+    rules = [_rule("area", ["keller"], scope="vacation")]
+    assert verdict(rules, found, _outage(5), NOW, Vacation(False)) is None
+    result = verdict(rules, found, _outage(5), NOW, Vacation(True))
+    assert result["state"] == "hide" and result["phase"] == "vacation"
+
+
+def test_after_the_vacation_the_outage_counts_from_its_end() -> None:
+    found = Traits("keller", frozenset())
+    ended = NOW - timedelta(hours=10)
+    vacation = Vacation(False, ended, 24)
+    rules = [_rule("area", ["keller"], scope="vacation")]
+    # no delay rule of its own: the grace period holds it back
+    assert verdict(rules, found, _outage(14), NOW, vacation)["state"] == "hold"
+    assert verdict(rules, found, _outage(14), NOW + timedelta(hours=15), vacation) is None
+    # an own delay replaces the grace period and counts from the end, not from the outage
+    rules.append(_rule("domain", ["x"], "delay", 3))
+    found = Traits("keller", frozenset(), frozenset(), "x")
+    held = verdict(rules, found, _outage(14), NOW, vacation)
+    assert held["state"] == "hold" and held["phase"] == "after"
+    assert verdict(rules, found, _outage(14), NOW + timedelta(days=3), vacation)["state"] == "due"
+    # an outage that began after the vacation is not shifted
+    assert verdict(rules, found, _outage(0.1), NOW, vacation)["state"] == "hold"
