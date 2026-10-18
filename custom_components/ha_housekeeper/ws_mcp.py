@@ -11,7 +11,7 @@ from homeassistant.core import HomeAssistant, callback
 from .const import DOMAIN
 from .inventory import InventoryScanner
 from .mcp_api import LIMIT_MAX, McpError, undo
-from .ws_common import _versioned, with_scanner
+from .ws_common import _versioned, panel_session_only, with_scanner
 
 
 @websocket_api.require_admin
@@ -31,6 +31,8 @@ def websocket_mcp_set(
     scanner: InventoryScanner,
 ) -> None:
     """Switch AI access and the right to change Housekeeper's lists. Both are off by default."""
+    if panel_session_only(hass, connection, msg):
+        return
     scanner.mcp.set_switches(msg.get("enabled"), msg.get("write"))
     if scanner.snapshot:
         scanner.snapshot["meta"]["mcp"] = {
@@ -86,6 +88,8 @@ def websocket_mcp_undo(
     scanner: InventoryScanner,
 ) -> None:
     """Take back one change from the log. It works with the switches off: the change is yours."""
+    if panel_session_only(hass, connection, msg):
+        return
     user = connection.user.id if connection.user else None
     try:
         undo(scanner, {"at": msg["at"]}, user)

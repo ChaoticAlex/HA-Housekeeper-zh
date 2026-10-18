@@ -7,6 +7,7 @@ import inspect
 from collections.abc import Callable
 from typing import Any
 
+from homeassistant.auth.models import TOKEN_TYPE_LONG_LIVED_ACCESS_TOKEN
 from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant
 
@@ -61,6 +62,26 @@ def scanner_plans(hass: HomeAssistant) -> list[dict[str, Any]]:
     """The plans of the journal, or none while the entry is not loaded."""
     scanner = _scanner(hass)
     return scanner.journal.plans if scanner else []
+
+
+def panel_session_only(
+    hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
+) -> bool:
+    """Refuse a command that came with a long-lived access token; True when it was refused.
+
+    The panel runs in a signed-in session. Programs such as ha-mcp bring a long-lived token. The
+    switches for AI access must not be flipped by the program they are meant to limit. This is a
+    guard for the usual setup, not a seal: any admin session can still use them.
+    """
+    token = (
+        hass.auth.async_get_refresh_token(connection.refresh_token_id)
+        if connection.refresh_token_id
+        else None
+    )
+    if token is not None and token.token_type == TOKEN_TYPE_LONG_LIVED_ACCESS_TOKEN:
+        connection.send_error(msg["id"], "panel_only", "Only the panel may do this")
+        return True
+    return False
 
 
 def _versioned(result: dict[str, Any]) -> dict[str, Any]:

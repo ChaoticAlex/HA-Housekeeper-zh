@@ -23,3 +23,25 @@ async def test_services_answer_and_refuse_with_a_translated_error(hass: HomeAssi
     with pytest.raises(ServiceValidationError) as refused:
         await hass.services.async_call(DOMAIN, "findings", {}, blocking=True, return_response=True)
     assert refused.value.translation_key == "not_loaded"
+
+
+def test_panel_session_only_refuses_long_lived_tokens() -> None:
+    """The switches for AI access cannot be flipped with a long-lived token, as ha-mcp brings."""
+    from types import SimpleNamespace
+    from unittest.mock import MagicMock
+
+    from homeassistant.auth.models import TOKEN_TYPE_LONG_LIVED_ACCESS_TOKEN, TOKEN_TYPE_NORMAL
+
+    from custom_components.ha_housekeeper.ws_common import panel_session_only
+
+    def refused(token_type: str | None) -> tuple[bool, MagicMock]:
+        token = SimpleNamespace(token_type=token_type) if token_type else None
+        hass = SimpleNamespace(auth=SimpleNamespace(async_get_refresh_token=lambda _id: token))
+        connection = MagicMock(refresh_token_id="t1")
+        return panel_session_only(hass, connection, {"id": 7}), connection
+
+    refused_long, connection = refused(TOKEN_TYPE_LONG_LIVED_ACCESS_TOKEN)
+    assert refused_long
+    assert connection.send_error.call_args.args[:2] == (7, "panel_only")
+    assert not refused(TOKEN_TYPE_NORMAL)[0]
+    assert not refused(None)[0]
