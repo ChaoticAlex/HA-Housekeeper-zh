@@ -12,11 +12,11 @@ Object.assign(TEXT.de, {
   mcpHow2: "Dem KI-Agenten erlauben, diese Dienste der Integration ha_housekeeper aufzurufen (die Antwort kommt mit return_response):", mcpHowWrite: "Zusätzlich, wenn „Merkliste ändern“ an ist:",
   mcpHow3: "Fragen, zum Beispiel: „Welche Sensoren sind seit Wochen weg, und braucht sie jemand?“",
   mcpHowNote: "Bei ha-mcp die Dienste über ha_call_service aufrufen, nicht über ws_command: Die Panel-Befehle sind nicht dokumentiert, und die Gesamtliste kann bei großen Installationen über 10 MB groß werden.",
-  mcpLogTitle: "Protokoll", mcpLogHint: "Jeder Aufruf mit Zeit, Benutzer, Dienst und Ergebnis, nie die Inhalte der Antworten. Viele Lesezugriffe hintereinander stehen in einer Zeile. Höchstens 2000 Einträge und 90 Tage.",
+  mcpLogTitle: "Protokoll", mcpLogHint: "Jeder Aufruf mit Zeit, Dienst und Ergebnis, nie die Inhalte der Antworten.", mcpLogHint2: "Viele Lesezugriffe hintereinander stehen in einer Zeile. Höchstens 2000 Einträge und 90 Tage.", mcpToday: "Heute", mcpYesterday: "Gestern", mcpNoParams: "Keine Angaben übermittelt.", mcpParams: "Übermittelte Angaben",
   mcpLogCalls: "{n} Aufrufe in 24 Stunden", mcpLogEmpty: "Noch keine Aufrufe.", mcpLogLoading: "Protokoll wird geladen …",
   mcpFilterAll: "Alle", mcpFilterRead: "Lesen", mcpFilterWrite: "Ändern", mcpFilterDenied: "Abgewiesen", mcpFilterFailed: "Fehler",
   mcpKind_read: "Lesen", mcpKind_write: "Ändern", mcpKind_denied: "Abgewiesen", mcpBadgeError: "Fehler",
-  mcpResult_ok: "ok", mcpResult_disabled: "KI-Zugriff war aus", mcpResult_write_disabled: "Ändern war aus", mcpResult_not_admin: "kein Administrator", mcpResult_invalid_format: "ungültige Angaben", mcpResult_error: "Fehler",
+  mcpResult_ok: "ok", mcpResult_disabled: "KI-Zugriff war aus", mcpResult_write_disabled: "Ändern war aus", mcpResult_not_admin: "kein Administrator", mcpResult_invalid_format: "Angaben unvollständig oder falsch", mcpResult_error: "Fehler",
   mcpTimes: "{n} Aufrufe bis {date}", mcpCount: "{n} Treffer", mcpUndo: "Rückgängig", mcpUndone: "zurückgenommen", mcpUndoFailed: "Nicht zurückgenommen: {reason}",
   mcpUserSystem: "Automation oder System", mcpUserYou: "du", mcpUserOther: "anderer Benutzer",
   mcpFn_status: "Status", mcpFn_findings: "Befunde", mcpFn_object: "Objekt", mcpFn_finding_decide: "Befund entscheiden", mcpFn_mark: "Objekt markieren", mcpFn_note_set: "Logbuch-Eintrag", mcpFn_undo: "Zurücknehmen",
@@ -35,7 +35,7 @@ Object.assign(TEXT.en, {
   mcpHow2: "Allow the AI agent to call these services of the ha_housekeeper integration (the answer comes with return_response):", mcpHowWrite: "Additionally, when “Change the list” is on:",
   mcpHow3: "Ask, for example: “Which sensors have been gone for weeks, and does anyone use them?”",
   mcpHowNote: "With ha-mcp call the services through ha_call_service, not ws_command: the panel commands are not documented, and the full list can be over 10 MB on large installations.",
-  mcpLogTitle: "Log", mcpLogHint: "Every call with time, user, service and result, never the content of the answers. Many reads in a row are one line. At most 2,000 entries and 90 days.",
+  mcpLogTitle: "Log", mcpLogHint: "Every call with time, service and result, never the content of the answers.", mcpLogHint2: "Many reads in a row are one line. At most 2,000 entries and 90 days.", mcpToday: "Today", mcpYesterday: "Yesterday", mcpNoParams: "No parameters sent.", mcpParams: "Parameters sent",
   mcpLogCalls: "{n} calls in 24 hours", mcpLogEmpty: "No calls yet.", mcpLogLoading: "Loading the log …",
   mcpFilterAll: "All", mcpFilterRead: "Reads", mcpFilterWrite: "Changes", mcpFilterDenied: "Refused", mcpFilterFailed: "Errors",
   mcpKind_read: "Read", mcpKind_write: "Change", mcpKind_denied: "Refused", mcpBadgeError: "Error",
@@ -62,7 +62,17 @@ class McpMixin {
   mcpTime(value) {
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return String(value ?? "");
-    const opts = { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" };
+    try { return new Intl.DateTimeFormat(this.lang, { hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }).format(d); } catch (_) { return String(value); }
+  }
+
+  mcpDay(value) {
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "";
+    const day = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+    const diff = Math.round((day(new Date()) - day(d)) / 86400000);
+    if (diff === 0) return this.t("mcpToday");
+    if (diff === 1) return this.t("mcpYesterday");
+    const opts = { day: "2-digit", month: "2-digit" };
     if (d.getFullYear() !== new Date().getFullYear()) opts.year = "numeric";
     try { return new Intl.DateTimeFormat(this.lang, opts).format(d); } catch (_) { return String(value); }
   }
@@ -78,7 +88,9 @@ class McpMixin {
     const who = !multi ? "" : !e.user ? this.t("mcpUserSystem") : e.user === me ? this.t("mcpUserYou") : this.t("mcpUserOther");
     const times = e.n > 1 ? `<span class="logn" title="${this.esc(this.t("mcpTimes", { n: e.n, date: this.formatDate(e.last) }))}">×${e.n}</span>` : "";
     const undo = e.undone ? `<span class="pill mute">${this.t("mcpUndone")}</span>` : e.undoable ? `<button class="btn" data-mcp-undo="${this.esc(e.at)}"><ha-icon icon="mdi:undo"></ha-icon>${this.t("mcpUndo")}</button>` : "";
-    return `<div class="logline${e.undone ? " undone" : ""}"><time class="logtime" datetime="${this.esc(e.at)}">${this.esc(this.mcpTime(e.at))}</time><span class="pill logbadge ${tone}">${badge}</span><span class="logfn">${this.esc(this.t(`mcpFn_${e.fn}`) || e.fn)}</span><span class="logwhat">${target ? `<code>${this.esc(target)}</code>` : ""}${notes ? `<small>${this.esc(notes)}</small>` : ""}${times}${who ? `<small>${this.esc(who)}</small>` : ""}</span>${undo}</div>`;
+    const tint = e.kind === "denied" ? " warn" : failed ? " red" : "";
+    const params = Object.keys(p).length ? `<pre>${this.esc(JSON.stringify(p, null, 2))}</pre>` : `<p class="factnote">${this.t("mcpNoParams")}</p>`;
+    return `<details class="logitem${tint}${e.undone ? " undone" : ""}"><summary class="logline"><time class="logtime" datetime="${this.esc(e.at)}">${this.esc(this.mcpTime(e.at))}</time><span class="pill logbadge ${tone}">${badge}</span><span class="logfn">${this.esc(this.t(`mcpFn_${e.fn}`) || e.fn)}</span><span class="logwhat">${target ? `<code>${this.esc(target)}</code>` : ""}${notes ? `<small>${this.esc(notes)}</small>` : ""}${times}${who ? `<small>${this.esc(who)}</small>` : ""}</span>${undo}</summary><div class="logdetail"><small>${this.t("mcpParams")}</small>${params}</div></details>`;
   }
 
   mcpCard() {
@@ -95,9 +107,20 @@ class McpMixin {
     if (!this.mcp) { this.loadMcp(); return `${main}<section class="panel"><div class="panelhead"><h2>${this.t("mcpLogTitle")}</h2></div><div class="pad"><p class="factnote">${this.t("mcpLogLoading")}</p></div></section>`; }
     const filter = this.mcpFilter || "all";
     const shown = this.mcp.entries.filter(e => filter === "all" || (filter === "failed" ? e.result !== "ok" : e.kind === filter));
-    const tabs = ["all", "read", "write", "denied", "failed"].map(f => `<button class="btn${filter === f ? " primary" : ""}" data-mcp-filter="${f}" aria-pressed="${filter === f}">${this.t(`mcpFilter${f[0].toUpperCase()}${f.slice(1)}`)}</button>`).join("");
-    const rows = shown.length ? shown.map(e => this.mcpEntryRow(e, new Set(shown.map(x => x.user)).size > 1)).join("") : `<div class="pad"><p class="factnote">${this.t("mcpLogEmpty")}</p></div>`;
-    return `${main}<section class="panel"><div class="panelhead"><div><h2>${this.t("mcpLogTitle")}</h2><p>${this.t("mcpLogHint")} ${this.t("mcpLogCalls", { n: this.formatNumber(this.mcp.calls_24h || 0) })}</p></div></div><div class="pad toolbar">${tabs}</div>${rows}</section>`;
+    const match = (e, f) => f === "all" || (f === "failed" ? e.result !== "ok" : e.kind === f);
+    const tabs = ["all", "read", "write", "denied", "failed"].map(f => {
+      const n = this.mcp.entries.filter(e => match(e, f)).length;
+      return `<button class="btn small${filter === f ? " primary" : ""}" data-mcp-filter="${f}" aria-pressed="${filter === f}">${this.t(`mcpFilter${f[0].toUpperCase()}${f.slice(1)}`)} <span class="logcount">${n}</span></button>`;
+    }).join("");
+    const multi = new Set(shown.map(x => x.user)).size > 1;
+    let lastDay = null;
+    const rows = shown.length ? shown.map(e => {
+      const day = this.mcpDay(e.at);
+      const head = day !== lastDay ? `<div class="logday">${this.esc(day)}</div>` : "";
+      lastDay = day;
+      return head + this.mcpEntryRow(e, multi);
+    }).join("") : `<div class="pad"><p class="factnote">${this.t("mcpLogEmpty")}</p></div>`;
+    return `${main}<section class="panel"><div class="panelhead"><div><h2>${this.t("mcpLogTitle")}</h2><p>${this.t("mcpLogHint")} ${this.t("mcpLogCalls", { n: this.formatNumber(this.mcp.calls_24h || 0) })}.</p><p class="factnote">${this.t("mcpLogHint2")}</p></div></div><div class="pad toolbar">${tabs}</div>${rows}</section>`;
   }
 
   bindMcp(root) {
@@ -112,7 +135,8 @@ class McpMixin {
     root.querySelector("[data-mcp-enabled]")?.addEventListener("change", ev => set({ enabled: ev.target.checked }));
     root.querySelector("[data-mcp-write]")?.addEventListener("change", ev => set({ write: ev.target.checked }));
     root.querySelectorAll("[data-mcp-filter]").forEach(el => el.onclick = () => { this.mcpFilter = el.dataset.mcpFilter; this.render(); });
-    root.querySelectorAll("[data-mcp-undo]").forEach(el => el.onclick = async () => {
+    root.querySelectorAll("[data-mcp-undo]").forEach(el => el.onclick = async ev => {
+      ev.preventDefault();
       try { await this._hass.callWS({ type: "ha_housekeeper/mcp_undo", at: el.dataset.mcpUndo }); this.mcp = null; this.data = await this._hass.callWS({ type: "ha_housekeeper/inventory" }); }
       catch (err) { this.failed(err); }
       this.render();
