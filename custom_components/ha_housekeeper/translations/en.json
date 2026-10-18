@@ -209,7 +209,7 @@
         },
         "reason": {
           "name": "Reason",
-          "description": "Why, up to 200 characters."
+          "description": "Why, up to 200 characters. Needed for every decision."
         },
         "days": {
           "name": "Days",
@@ -304,6 +304,9 @@
     "write_disabled": {
       "message": "Changing Housekeeper's lists is switched off. Switch it on in the Housekeeper settings."
     },
+    "rate_limited": {
+      "message": "Too many changes: at most 200 in 5 minutes. Wait a few minutes."
+    },
     "not_admin": {
       "message": "Only an administrator may use AI access."
     },
@@ -317,7 +320,7 @@
       "message": "Nothing found for this key or id. Take keys and ids from \"findings\" or \"object\"; take \"at\" for \"undo\" from \"audit\"."
     },
     "reason_required": {
-      "message": "Keeping a finding needs a reason."
+      "message": "A decision needs a reason."
     },
     "days_required": {
       "message": "Putting a finding off needs a number of days."

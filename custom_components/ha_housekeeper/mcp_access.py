@@ -134,6 +134,15 @@ class McpStore:
             if (kind is None or e["kind"] == kind) and (not only_failed or e["result"] != "ok")
         ]
 
+    def writes_since(self, minutes: int, now: datetime | None = None) -> int:
+        """How many changes the log holds from the last minutes (an undo is a change too)."""
+        start = (now or datetime.now(UTC)) - timedelta(minutes=minutes)
+        return sum(
+            1
+            for e in self.entries
+            if e["kind"] == "write" and (seen := _time(e["at"])) is not None and seen >= start
+        )
+
     def calls_since(self, hours: int = 24, now: datetime | None = None) -> int:
         """How many calls the log holds from the last hours (a merged line counts all its calls)."""
         start = (now or datetime.now(UTC)) - timedelta(hours=hours)

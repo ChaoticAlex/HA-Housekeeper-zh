@@ -190,6 +190,9 @@ async def test_changes_need_their_own_switch_and_can_be_taken_back(hass: HomeAss
             hass, scanner, "finding_decide", {"key": key, "action": "decide", "kind": "keep"}, None
         )
     assert reason.value.reason == "reason_required"
+    with pytest.raises(mcp_api.McpError) as plain:
+        await mcp_api.run(hass, scanner, "finding_decide", {"key": key, "action": "decide"}, None)
+    assert plain.value.reason == "reason_required"
     await mcp_api.run(
         hass, scanner, "finding_decide", {"key": key, "action": "decide", "reason": "spare"}, None
     )
@@ -208,3 +211,42 @@ async def test_changes_need_their_own_switch_and_can_be_taken_back(hass: HomeAss
     with pytest.raises(mcp_api.McpError) as twice:
         await mcp_api.run(hass, scanner, "undo", {"at": done[0]["at"]}, None)
     assert twice.value.reason == "not_found"
+
+
+async def test_changes_are_limited_and_a_refusal_is_logged_as_denied(hass: HomeAssistant) -> None:
+    scanner = scanner_with(hass, 3)
+    scanner.mcp.enabled = scanner.mcp.write = True
+    scanner.notes = SimpleNamespace(items=[])
+    now = datetime.now(UTC)
+    for _ in range(mcp_api.WRITE_LIMIT):
+        scanner.mcp.log(None, "note_set", "write", {}, "ok", 1, now=now - timedelta(minutes=6))
+    assert scanner.mcp.writes_since(5) == 0
+    for _ in range(mcp_api.WRITE_LIMIT):
+        scanner.mcp.log(None, "note_set", "write", {}, "ok", 1)
+    with pytest.raises(mcp_api.McpError) as limited:
+        await mcp_api.run(hass, scanner, "note_set", {"action": "save", "title": "t"}, None)
+    assert limited.value.reason == "rate_limited"
+    assert scanner.mcp.entries[-1]["kind"] == "denied"
+
+
+async def test_no_secret_reaches_an_answer(hass: HomeAssistant) -> None:
+    """Answers are built field by field: a secret kept on an object or a finding is not copied."""
+    scanner = scanner_with(hass, 3)
+    scanner.mcp.enabled = True
+    secret = "S3CRET-VALUE"
+    scanner.snapshot["objects"][1].update(
+        token=secret, webhook_id=secret, password=secret, options={"api_key": secret}
+    )
+    scanner.snapshot["findings"][1].update(secret=secret, evidence=[{"value": secret}])
+    scanner.snapshot["edges"] = []
+    scanner.marks = SimpleNamespace(items={})
+    scanner.notes = SimpleNamespace(view=lambda: [])
+    answers = [
+        await mcp_api.run(hass, scanner, "status", {}, None),
+        await mcp_api.run(hass, scanner, "findings", {"ignored": "include"}, None),
+        await mcp_api.run(
+            hass, scanner, "object", {"object_type": "entity", "object_id": "sensor.s1"}, None
+        ),
+        await mcp_api.run(hass, scanner, "audit", {}, None),
+    ]
+    assert secret not in json.dumps(answers)

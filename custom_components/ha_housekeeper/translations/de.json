@@ -209,7 +209,7 @@
         },
         "reason": {
           "name": "Grund",
-          "description": "Warum, bis 200 Zeichen."
+          "description": "Warum, bis 200 Zeichen. Bei jeder Entscheidung nötig."
         },
         "days": {
           "name": "Tage",
@@ -304,6 +304,9 @@
     "write_disabled": {
       "message": "Das Ändern von Housekeepers Listen ist ausgeschaltet. Schalte es in den Housekeeper-Einstellungen ein."
     },
+    "rate_limited": {
+      "message": "Zu viele Änderungen: höchstens 200 in 5 Minuten. Ein paar Minuten warten."
+    },
     "not_admin": {
       "message": "Nur ein Administrator darf den KI-Zugriff nutzen."
     },
@@ -317,7 +320,7 @@
       "message": "Dazu gibt es nichts. Schlüssel und IDs aus „findings“ oder „object“ nehmen, „at“ für „undo“ aus „audit“."
     },
     "reason_required": {
-      "message": "Ein Befund zu behalten braucht einen Grund."
+      "message": "Eine Entscheidung braucht einen Grund."
     },
     "days_required": {
       "message": "Einen Befund zurückzustellen braucht eine Zahl von Tagen."
