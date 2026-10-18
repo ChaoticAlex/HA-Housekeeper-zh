@@ -8,6 +8,8 @@ scan:
 
 status:
 
+summary:
+
 findings:
   fields:
     rule:

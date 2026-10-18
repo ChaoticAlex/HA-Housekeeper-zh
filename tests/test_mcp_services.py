@@ -17,7 +17,7 @@ from custom_components.ha_housekeeper.services import async_register_services  #
 async def test_services_answer_and_refuse_with_a_translated_error(hass: HomeAssistant) -> None:
     hass.data.setdefault(DOMAIN, {})
     async_register_services(hass)
-    for name in ("status", "findings", "audit"):
+    for name in ("status", "summary", "findings", "audit"):
         assert hass.services.supports_response(DOMAIN, name) is SupportsResponse.ONLY
     assert hass.services.supports_response(DOMAIN, "scan") is SupportsResponse.OPTIONAL
     with pytest.raises(ServiceValidationError) as refused:

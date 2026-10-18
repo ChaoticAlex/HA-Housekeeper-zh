@@ -329,6 +329,20 @@ async def test_sensitive_objects_stay_out_of_every_answer(hass: HomeAssistant) -
     )
 
 
+async def test_summary_names_the_heaviest_groups(hass: HomeAssistant) -> None:
+    scanner = scanner_with(hass, 40)
+    scanner.mcp.enabled = True
+    for i, finding in enumerate(scanner.snapshot["findings"]):
+        if i % 2:
+            finding["rule_id"] = "entity.orphaned"
+    result = await mcp_api.run(hass, scanner, "summary", {}, None)
+    assert result["groups"] == 2 and len(result["top"]) == 2
+    first = result["top"][0]
+    assert first["level"] == "high" and len(first["examples"]) == 3
+    assert first["next"].startswith("ha_housekeeper.findings with rule=")
+    assert len(json.dumps(result)) < 4_000
+
+
 async def test_reads_are_limited_per_minute(hass: HomeAssistant) -> None:
     scanner = scanner_with(hass, 3)
     scanner.mcp.enabled = True
