@@ -1701,6 +1701,7 @@ class StylesMixin {
       @keyframes hkstripes{from{background-position:0 0}to{background-position:16px 0}}@keyframes hkslide{0%{margin-left:-35%}100%{margin-left:100%}}
       .optswitch{display:flex;gap:12px;align-items:flex-start;margin:12px 0 0;padding:12px 14px;border:2px solid var(--hk-blue);border-radius:12px;background:var(--hk-soft);cursor:pointer}.optswitch .policyswitch{margin-top:2px}.optswitch span{display:grid;gap:2px}.optswitch small{color:var(--hk-muted)}
       .logline{display:grid;grid-template-columns:max-content 96px 150px minmax(0,1fr) auto;gap:4px 14px;align-items:center;padding:7px 16px;border-top:1px solid var(--hk-border);font-size:calc(13px*var(--hk-fs,1))}.logline.undone{opacity:.55}.logtime{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);white-space:nowrap}.logbadge{justify-content:center;width:auto;text-transform:uppercase;letter-spacing:.04em;font-size:calc(10.5px*var(--hk-fs,1))}.logfn{font-weight:600}.logwhat{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;min-width:0}.logwhat code{overflow-wrap:anywhere}.logwhat small,.logn{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}@media(max-width:720px){.logline{grid-template-columns:max-content minmax(0,1fr) auto}.logline .logfn{grid-column:1 / span 2}.logline .logwhat{grid-column:1 / -1}}
+      .mcprow .row-text small{white-space:normal;overflow:visible;text-overflow:clip}.mcpneeds{color:var(--hk-amber)}.mcpnote{display:flex;gap:10px;align-items:flex-start;margin:12px 16px;padding:10px 12px;border-radius:10px;background:var(--hk-soft);font-size:calc(13px*var(--hk-fs,1));line-height:1.5}.mcpnote ha-icon{--mdc-icon-size:18px;flex:none;margin-top:1px;color:var(--hk-muted)}.mcpcalls{margin-left:8px;color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));font-weight:400}.mcphow .mcpsteps{display:grid;gap:8px;margin:6px 0 0;padding-left:20px;font-size:calc(13px*var(--hk-fs,1));line-height:1.6}.mcpchip{display:inline-block;margin:1px 2px;padding:1px 7px;border-radius:6px;background:var(--hk-soft);border:1px solid var(--hk-border);font-size:calc(12px*var(--hk-fs,1))}
       ${this.themeCss()}
     </style>`;
   }
@@ -13053,13 +13054,14 @@ Object.assign(TEXT.de, {
   mcpTitle: "KI-Zugriff (MCP)",
   mcpHint: "Ein Programm oder KI-Agent, das Home-Assistant-Dienste aufrufen kann (zum Beispiel ha-mcp), kann Housekeeper dann wie das Panel nutzen: Befunde ansehen, prüfen, ignorieren und markieren. Housekeeper startet dafür keinen Server und öffnet keinen Port.",
   mcpEnable: "KI-Zugriff aktivieren", mcpEnableDetail: "Nur lesend: Status, Befunde, Objekte und das Protokoll. Aus, solange du es nicht einschaltest.",
-  mcpWrite: "Merkliste ändern", mcpWriteDetail: "Befunde ignorieren, behalten oder zurückstellen, Objekte markieren und Logbuch-Einträge schreiben. Es ändert sich nur Housekeepers eigene Liste, nie Home Assistant, und jede Änderung lässt sich unten zurücknehmen. Braucht „KI-Zugriff aktivieren“.",
-  mcpPrivacy: "Was das Modell zu sehen bekommt: Namen und IDs von Geräten, Entitäten und Automationen, Bereiche, Befunde und die Struktur deiner Konfiguration. Läuft das Modell bei einem Anbieter in der Cloud, gehen diese Angaben dorthin. Nie übertragen werden Passwörter, Tokens, Webhook-IDs und Zugangsdaten. Nur Administratoren können die Dienste nutzen.",
+  mcpWrite: "Merkliste ändern", mcpWriteDetail: "Befunde ignorieren, behalten oder zurückstellen, Objekte markieren, Logbuch-Einträge schreiben. Nur Housekeepers eigene Liste, nie Home Assistant; alles lässt sich im Protokoll zurücknehmen.", mcpWriteNeeds: "Zuerst „KI-Zugriff aktivieren“ einschalten.",
+  mcpStateOff: "Aus", mcpStateRead: "Aktiv, nur lesend", mcpStateWrite: "Aktiv, mit Ändern",
+  mcpPrivacy: "Das Modell sieht Namen und IDs, Bereiche, Befunde und die Struktur deiner Konfiguration; läuft es in der Cloud, gehen diese Angaben dorthin. Nie übertragen werden Passwörter, Tokens, Webhook-IDs und Zugangsdaten. Nur Administratoren können die Dienste nutzen.",
   mcpHowTitle: "So nutzt du es",
-  mcpHow1: "Oben „KI-Zugriff aktivieren“ einschalten.",
-  mcpHow2: "Dem Programm die Dienste ha_housekeeper.* geben (Antwort mit return_response): status, findings, object, audit; mit „Merkliste ändern“ auch finding_decide, mark, note_set und undo.",
+  mcpHow1: "„KI-Zugriff aktivieren“ einschalten.",
+  mcpHow2: "Dem Programm diese Dienste von ha_housekeeper geben (Antwort mit return_response):", mcpHowWrite: "mit „Merkliste ändern“ zusätzlich:",
   mcpHow3: "Fragen, zum Beispiel: „Welche Sensoren sind seit Wochen weg, und braucht sie jemand?“",
-  mcpHowNote: "Die Befehle, die das Panel benutzt, gehen bei ha-mcp zwar auch über ws_command, sind aber nicht dokumentiert, und die Gesamtliste (inventory) ist bei großen Installationen über 10 MB. Nimm die Dienste.",
+  mcpHowNote: "Bei ha-mcp nimm die Dienste, nicht ws_command: Die Panel-Befehle sind nicht dokumentiert, und die Gesamtliste ist bei großen Installationen über 10 MB.",
   mcpLogTitle: "Protokoll", mcpLogHint: "Jeder Aufruf mit Zeit, Benutzer, Dienst und Ergebnis, nie die Inhalte der Antworten. Viele Lesezugriffe hintereinander stehen in einer Zeile. Höchstens 2000 Einträge und 90 Tage.",
   mcpLogCalls: "{n} Aufrufe in 24 Stunden", mcpLogEmpty: "Noch keine Aufrufe.", mcpLogLoading: "Protokoll wird geladen …",
   mcpFilterAll: "Alle", mcpFilterRead: "Lesen", mcpFilterWrite: "Ändern", mcpFilterDenied: "Abgewiesen", mcpFilterFailed: "Fehler",
@@ -13075,13 +13077,14 @@ Object.assign(TEXT.en, {
   mcpTitle: "AI access (MCP)",
   mcpHint: "A program or AI agent that can call Home Assistant services (for example ha-mcp) can then use Housekeeper like the panel: look at findings, check them, ignore and mark them. Housekeeper starts no server and opens no port for this.",
   mcpEnable: "Switch on AI access", mcpEnableDetail: "Read-only: status, findings, objects and the log. Off until you switch it on.",
-  mcpWrite: "Change the list", mcpWriteDetail: "Ignore, keep or put off findings, mark objects and write logbook entries. Only Housekeeper's own list changes, never Home Assistant, and every change can be taken back below. Needs “Switch on AI access”.",
-  mcpPrivacy: "What the model gets to see: names and ids of devices, entities and automations, areas, findings and the structure of your configuration. If the model runs at a cloud provider, these details go there. Passwords, tokens, webhook ids and credentials are never sent. Only administrators can use the services.",
+  mcpWrite: "Change the list", mcpWriteDetail: "Ignore, keep or put off findings, mark objects, write logbook entries. Only Housekeeper's own list, never Home Assistant; everything can be taken back in the log.", mcpWriteNeeds: "Switch on “Switch on AI access” first.",
+  mcpStateOff: "Off", mcpStateRead: "On, read-only", mcpStateWrite: "On, with changes",
+  mcpPrivacy: "The model sees names and ids, areas, findings and the structure of your configuration; if it runs in the cloud, these details go there. Passwords, tokens, webhook ids and credentials are never sent. Only administrators can use the services.",
   mcpHowTitle: "How to use it",
-  mcpHow1: "Switch on “Switch on AI access” above.",
-  mcpHow2: "Give the program the services ha_housekeeper.* (answer with return_response): status, findings, object, audit; with “Change the list” also finding_decide, mark, note_set and undo.",
+  mcpHow1: "Switch on “Switch on AI access”.",
+  mcpHow2: "Give the program these ha_housekeeper services (answer with return_response):", mcpHowWrite: "with “Change the list” also:",
   mcpHow3: "Ask, for example: “Which sensors have been gone for weeks, and does anyone use them?”",
-  mcpHowNote: "The commands the panel uses also work through ws_command in ha-mcp, but they are not documented, and the full list (inventory) is over 10 MB on large installations. Use the services.",
+  mcpHowNote: "With ha-mcp use the services, not ws_command: the panel commands are not documented, and the full list is over 10 MB on large installations.",
   mcpLogTitle: "Log", mcpLogHint: "Every call with time, user, service and result, never the content of the answers. Many reads in a row are one line. At most 2,000 entries and 90 days.",
   mcpLogCalls: "{n} calls in 24 hours", mcpLogEmpty: "No calls yet.", mcpLogLoading: "Loading the log …",
   mcpFilterAll: "All", mcpFilterRead: "Reads", mcpFilterWrite: "Changes", mcpFilterDenied: "Refused", mcpFilterFailed: "Errors",
@@ -13102,8 +13105,8 @@ class McpMixin {
     this.render();
   }
 
-  mcpSwitch(attr, on, label, detail, icon, disabled = false) {
-    return `<div class="row"><span class="tile ${on ? "ok" : "mute"}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${label}</strong><small>${detail}</small></span><input class="policyswitch" type="checkbox" role="switch" aria-label="${this.esc(label)}" ${attr} ${on ? "checked" : ""} ${disabled ? "disabled" : ""}></div>`;
+  mcpSwitch(attr, on, label, detail, icon, disabled = false, needs = "") {
+    return `<div class="row mcprow"><span class="tile ${on ? "ok" : "mute"}"><ha-icon icon="${icon}"></ha-icon></span><span class="row-text"><strong>${label}</strong><small>${detail}</small>${needs ? `<small class="mcpneeds">${needs}</small>` : ""}</span><input class="policyswitch" type="checkbox" role="switch" aria-label="${this.esc(label)}" ${attr} ${on ? "checked" : ""} ${disabled ? "disabled" : ""}></div>`;
   }
 
   mcpTime(value) {
@@ -13131,10 +13134,14 @@ class McpMixin {
   mcpCard() {
     const m = this.data?.meta?.mcp || {};
     const on = Boolean(m.enabled), write = Boolean(m.write);
+    const chips = list => list.map(n => `<code class="mcpchip">${n}</code>`).join("");
     const switches = this.mcpSwitch("data-mcp-enabled", on, this.t("mcpEnable"), this.t("mcpEnableDetail"), "mdi:robot-outline")
-      + this.mcpSwitch("data-mcp-write", write && on, this.t("mcpWrite"), this.t("mcpWriteDetail"), "mdi:pencil-outline", !on);
-    const how = `<div class="pad"><h3>${this.t("mcpHowTitle")}</h3><ol><li>${this.t("mcpHow1")}</li><li>${this.t("mcpHow2")}</li><li>${this.t("mcpHow3")}</li></ol><p class="factnote">${this.t("mcpHowNote")}</p></div>`;
-    const main = `<section class="panel"><div class="panelhead"><div><h2>${this.t("mcpTitle")}</h2><p>${this.t("mcpHint")}</p></div></div>${switches}<div class="pad"><p class="factnote">${this.t("mcpPrivacy")}</p></div>${how}</section>`;
+      + this.mcpSwitch("data-mcp-write", write && on, this.t("mcpWrite"), this.t("mcpWriteDetail"), "mdi:pencil-outline", !on, on ? "" : this.t("mcpWriteNeeds"));
+    const state = !on ? ["mute", "mcpStateOff"] : write ? ["", "mcpStateWrite"] : ["ok", "mcpStateRead"];
+    const calls = on && this.mcp ? ` <span class="mcpcalls">${this.t("mcpLogCalls", { n: this.formatNumber(this.mcp.calls_24h || 0) })}</span>` : "";
+    const privacy = `<div class="mcpnote"><ha-icon icon="mdi:shield-lock-outline"></ha-icon><span>${this.t("mcpPrivacy")}</span></div>`;
+    const how = `<details class="howto mcphow"${on ? "" : " open"}><summary>${this.t("mcpHowTitle")}</summary><ol class="mcpsteps"><li>${this.t("mcpHow1")}</li><li>${this.t("mcpHow2")} ${chips(["status", "findings", "object", "audit"])}<br>${this.t("mcpHowWrite")} ${chips(["finding_decide", "mark", "note_set", "undo"])}</li><li>${this.t("mcpHow3")}</li></ol><p class="factnote">${this.t("mcpHowNote")}</p></details>`;
+    const main = `<section class="panel"><div class="panelhead"><div><h2>${this.t("mcpTitle")} <span class="pill ${state[0]}">${this.t(state[1])}</span>${calls}</h2><p>${this.t("mcpHint")}</p></div></div>${switches}${privacy}${how}</section>`;
     if (!this.mcp) { this.loadMcp(); return `${main}<section class="panel"><div class="panelhead"><h2>${this.t("mcpLogTitle")}</h2></div><div class="pad"><p class="factnote">${this.t("mcpLogLoading")}</p></div></section>`; }
     const filter = this.mcpFilter || "all";
     const shown = this.mcp.entries.filter(e => filter === "all" || (filter === "failed" ? e.result !== "ok" : e.kind === filter));
