@@ -21,6 +21,7 @@ PREFLIGHT_STORAGE_KEY: Final = (
 POLICIES_STORAGE_KEY: Final = f"{DOMAIN}.policies"
 REPLIES_STORAGE_KEY: Final = f"{DOMAIN}.replies"
 ATTEST_STORAGE_KEY: Final = f"{DOMAIN}.attest"
+EVENT_AI_CHANGE: Final = f"{DOMAIN}_ai_change"  # fired for every change made through AI access
 EVENTS_STORAGE_KEY: Final = f"{DOMAIN}.events"
 RUNS_STORAGE_KEY: Final = f"{DOMAIN}.runs"
 CHANGES_STORAGE_KEY: Final = f"{DOMAIN}.config_changes"

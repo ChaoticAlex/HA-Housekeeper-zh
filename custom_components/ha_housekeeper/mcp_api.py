@@ -21,7 +21,7 @@ from typing import Any
 import voluptuous as vol
 from homeassistant.core import HomeAssistant
 
-from .const import API_SCHEMA
+from .const import API_SCHEMA, EVENT_AI_CHANGE
 from .ignored import REASON_LIMIT as IGNORE_REASON_LIMIT
 from .inventory import InventoryScanner
 from .marks import KINDS as MARK_KINDS
@@ -516,6 +516,16 @@ FUNCTIONS: dict[str, Function] = {
 }
 
 
+def announce(
+    hass: HomeAssistant, name: str, user_id: str | None, params: dict[str, Any], changed: Any
+) -> None:
+    """Tell Home Assistant about a change, so an automation can notify: function, user, short params."""
+    hass.bus.async_fire(
+        EVENT_AI_CHANGE,
+        {"function": name, "user_id": user_id, "params": params, "changed": changed},
+    )
+
+
 async def _check_user(hass: HomeAssistant, user_id: str | None) -> None:
     """Only an administrator may call; a call without a user (automation, script) is the system's."""
     if user_id is None:
@@ -566,6 +576,8 @@ async def run(
         response = function.handler(scanner, clean, user_id)
         undo = response.pop("_undo", None)
         count = response.get("total", response.get("changed"))
+        if function.kind == "write":
+            announce(hass, name, user_id, params, count)
         return response
     except McpError as err:
         result = err.reason

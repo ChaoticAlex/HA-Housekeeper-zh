@@ -11,7 +11,7 @@ from homeassistant.core import HomeAssistant, callback
 from .const import DOMAIN
 from .inventory import InventoryScanner
 from .mcp_access import AUTO_OFF_CHOICES
-from .mcp_api import LIMIT_MAX, McpError, undo, undo_all
+from .mcp_api import LIMIT_MAX, McpError, announce, undo, undo_all
 from .ws_common import _versioned, panel_session_only, with_scanner
 
 
@@ -97,6 +97,7 @@ def websocket_mcp_undo(
         connection.send_error(msg["id"], err.reason, f"Not taken back: {err.reason}")
         return
     scanner.mcp.log(user, "undo", "write", {"at": msg["at"]}, "ok", 1)
+    announce(hass, "undo", user, {"at": msg["at"]}, 1)
     connection.send_result(msg["id"], {"undone": True})
 
 
@@ -121,6 +122,7 @@ def websocket_mcp_undo_all(
     user = connection.user.id if connection.user else None
     count = undo_all(scanner, msg.get("hours"))
     scanner.mcp.log(user, "undo_all", "write", {"hours": msg.get("hours")}, "ok", count)
+    announce(hass, "undo_all", user, {"hours": msg.get("hours")}, count)
     connection.send_result(msg["id"], {"undone": count})
 
 

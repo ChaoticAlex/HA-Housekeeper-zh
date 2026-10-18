@@ -12,6 +12,7 @@ pytest.importorskip("homeassistant")
 pytest.importorskip("pytest_homeassistant_custom_component")
 
 from homeassistant.core import HomeAssistant  # noqa: E402
+from pytest_homeassistant_custom_component.common import async_capture_events  # noqa: E402
 
 from custom_components.ha_housekeeper import mcp_api  # noqa: E402
 from custom_components.ha_housekeeper.mcp_access import McpStore, short_params  # noqa: E402
@@ -185,6 +186,7 @@ async def test_changes_need_their_own_switch_and_can_be_taken_back(hass: HomeAss
         await mcp_api.run(hass, scanner, "note_set", {"action": "save", "title": "t"}, None)
     assert off.value.reason == "write_disabled"
     scanner.mcp.write = True
+    seen = async_capture_events(hass, "ha_housekeeper_ai_change")
     with pytest.raises(mcp_api.McpError) as reason:
         await mcp_api.run(
             hass, scanner, "finding_decide", {"key": key, "action": "decide", "kind": "keep"}, None
@@ -197,6 +199,7 @@ async def test_changes_need_their_own_switch_and_can_be_taken_back(hass: HomeAss
         hass, scanner, "finding_decide", {"key": key, "action": "decide", "reason": "spare"}, None
     )
     assert scanner.ignored.entry(key)["via"] == "mcp"
+    assert [(e.data["function"], e.data["changed"]) for e in seen] == [("finding_decide", 1)]
     note = await mcp_api.run(
         hass, scanner, "note_set", {"action": "save", "title": "Checked"}, None
     )
