@@ -24,7 +24,7 @@
   - Neue Art „Alle Typen“ (vorgewählt): Das Suchfeld wie im Kopf findet Bereiche, Labels, Integrationen, Geräte und Entitäten gleichzeitig; beim Speichern entsteht je Art eine Regel.
   - Ist noch nichts gewählt und gibt es einen Helfer wie `input_boolean.urlaubsmodus` oder `vacation_mode`, steht er als Vorschlag im Feld und gilt nach dem Speichern. Das Feld ist breiter.
   - Eine Kalender-Entität kann ein Stichwort bekommen: Dann schaltet in deinem normalen Kalender ein Termin mit „Urlaub“ im Titel den Modus ein, auch wenn gleichzeitig andere Termine laufen. Ohne Stichwort zählt jeder Termin, wie bisher.
-  - Die Kachel „Ausnahmen“ in den Einstellungen zeigt die Zahl der Regeln, die Zahl der ausgeblendeten Befunde und, wenn ein Schalter gewählt ist, ob der Urlaubsmodus an oder aus ist.
+  - Die Kachel „Ausnahmen“ in den Einstellungen zeigt die Zahl der Regeln, die Zahl der ausgeblendeten Befunde und den Urlaubsmodus: an, aus oder „nicht eingerichtet“. Dasselbe steht als Status neben der Überschrift „Urlaubsmodus“.
 - **Oberfläche, Fehlermeldungen:** Fehler stehen überall im selben Kasten mit Symbol (Seiten, die nicht laden, und Formulare). Die schmale Fehlerzeile in den Speicherleisten ist ohne Fehler unsichtbar.
 - **Updates:** Die ausstehenden Updates stehen in der gewohnten Tabelle mit Suche, Sortierung, Filter nach Bereich und Seiten.
 
@@ -52,7 +52,7 @@
   - New kind “All types” (preselected): the search field like the one in the header finds areas, labels, integrations, devices and entities at once; saving makes one rule per kind.
   - If nothing is chosen and a helper like `input_boolean.urlaubsmodus` or `vacation_mode` exists, it is offered as a suggestion in the field and counts once saved. The field is wider.
   - A calendar entity can get a keyword: an event with “Vacation” in its title in your normal calendar then switches the mode on, even while other events run. Without a keyword every event counts, as before.
-  - The “Exceptions” tile in the settings shows the number of rules, the number of hidden findings and, once a switch is chosen, whether the vacation mode is on or off.
+  - The “Exceptions” tile in the settings shows the number of rules, the number of hidden findings and the vacation mode: on, off or “not set up”. The same status stands next to the “Vacation mode” heading.
 - **Interface, error messages:** Errors appear in the same box with an icon everywhere (pages that do not load, and forms). The narrow error line in the save bars is invisible when there is no error.
 - **Updates:** Pending updates are shown in the usual table with search, sorting, an area filter and pages.
 

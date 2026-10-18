@@ -57,7 +57,7 @@ Object.assign(TEXT.en, {
   vacEntity: "Entity for vacation mode", vacEntityHint: "Any entity that can be “on”: helper, switch, binary sensor, schedule, calendar. Leave empty to turn vacation mode off.",
   vacAuto: "Suggestion, because this entity exists. It counts only once you save; change or clear the field if you do not want it.", vacKeyword: "Keyword in the event", vacKeywordExample: "Vacation", vacKeywordHint: "Only events whose title contains this word switch vacation mode on, so your normal calendar works. Empty: every running event counts, for a calendar of its own.",
   vacGrace: "Grace period after the vacation", vacGraceUnit: "hours", vacGraceHint: "Default 24 hours. How long findings are held back after the end when the object has no delay of its own.",
-  vacSave: "Save", vacUnsaved: "Not saved", vacEntityInvalid: "An entity looks like domain.name, for example input_boolean.vacation.", vacGraceInvalid: "The grace period must be a whole number from 0 to {max} hours.", vacStateOn: "Now: on", vacStateOff: "Now: off", vacStateMissing: "Now: unavailable", vacEnded: "Last ended on {date}.", vacFailed: "Not saved: {reason}",
+  vacSave: "Save", vacUnsaved: "Not saved", vacEntityInvalid: "An entity looks like domain.name, for example input_boolean.vacation.", vacGraceInvalid: "The grace period must be a whole number from 0 to {max} hours.", vacStateOn: "Now: on", vacStateNone: "Not set up", vacStateOff: "Now: off", vacStateMissing: "Now: unavailable", vacEnded: "Last ended on {date}.", vacFailed: "Not saved: {reason}",
   vacBarOn: "Vacation mode on", vacBarHeld: "{n} findings held back", vacBarHeld1: "1 finding held back",
   vacBarAfter: "Vacation over", vacBarAfterLine: "Delay until {date} · {n} findings still held back", vacBarAfterLine1: "Delay until {date} · 1 finding still held back",
   vacBarMissing: "Vacation mode entity unavailable", vacBarMissingLine: "{entity} reports no state. The mode counts as off.", vacBarShow: "Show held back", vacBarRules: "Rules", vacBarSettings: "Settings",
@@ -145,8 +145,8 @@ class ExceptionsMixin {
   excCard() {
     if (!this.exc) { this.loadExceptions(); return `<section class="panel"><div class="panelhead"><div><h2>${this.t("excTitle")}</h2><p>${this.t("excHint")}</p></div></div><div class="pad"><p class="factnote">${this.t("excLoading")}</p></div></section>`; }
     const v = this.exc.vacation || {};
-    const state = !v.entity ? "" : v.state === "on" ? "vacStateOn" : v.state && v.state !== "unavailable" && v.state !== "unknown" ? "vacStateOff" : "vacStateMissing";
-    const pill = state ? ` <span class="pill ${v.state === "on" ? "ok" : "mute"}">${this.t(state)}</span>` : "";
+    const state = !v.entity ? "vacStateNone" : v.state === "on" ? "vacStateOn" : v.state && v.state !== "unavailable" && v.state !== "unknown" ? "vacStateOff" : "vacStateMissing";
+    const pill = state ? ` <span class="pill ${!v.entity ? "warn" : v.state === "on" ? "ok" : "mute"}">${this.t(state)}</span>` : "";
     return `${this.excRulesCard()}<section class="panel"><div class="panelhead"><div><h2>${this.t("vacTitle")}${pill}</h2><p>${this.t("vacHint")}</p></div></div>${this.vacationHtml()}</section>`;
   }
 

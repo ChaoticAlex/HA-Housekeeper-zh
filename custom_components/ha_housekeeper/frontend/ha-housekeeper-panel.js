@@ -3330,7 +3330,7 @@ class SettingsMixin {
   exceptionPills(m, hidden) {
     const v = m.vacation, rules = this.exc?.rules ? this.exc.rules.length : m.exception_rules || 0;
     const pills = [{ text: this.t(rules === 1 ? "setRuleOne" : "setRulesCount", { n: rules }) }, { text: hidden ? this.t("setHiddenCount", { n: hidden }) : this.t("setNoneHidden") }];
-    if (v) pills.push({ text: this.t(v.active ? "setVacationOn" : "setVacationOff"), tone: v.active ? "warn" : "mute" });
+    pills.push(v ? { text: this.t(v.active ? "setVacationOn" : "setVacationOff"), tone: v.active ? "warn" : "mute" } : { text: this.t("setVacationNone"), tone: "warn" });
     return pills;
   }
 
@@ -11091,7 +11091,7 @@ Object.assign(TEXT.de, {
   stepChoose: "Auswahl", stepSetup: "Einstellen", stepPreview: "Vorschau",
   setLanguage: "Sprache", setLanguageHint: "Gilt für dieses Panel und wird in deinem Benutzerprofil gespeichert. Automatisch folgt der Sprache von Home Assistant.", langAuto: "Automatisch",
   setTabProtection: "Schutzmodus", setTabExceptions: "Ausnahmen", setHintExceptions: "Ausnahmeregeln und ausgeblendete Befunde.", setHiddenCount: "{n} ausgeblendet", setHintLook: "Sprache, Dichte und Darstellung.", setHintProtection: "Was Aufräumpläne ändern dürfen.", setHintScan: "Wann geprüft wird, Grenzwerte und Meldungen.", setHintInfo: "Version, Diagnose und Support.",
-  setEveryHours: "alle {n} h", setManual: "von Hand", setNoneHidden: "nichts ausgeblendet", setRuleOne: "1 Regel", setRulesCount: "{n} Regeln", setVacationOn: "Urlaubsmodus an", setVacationOff: "Urlaubsmodus aus", setOn: "an", setOff: "aus",
+  setEveryHours: "alle {n} h", setManual: "von Hand", setNoneHidden: "nichts ausgeblendet", setRuleOne: "1 Regel", setRulesCount: "{n} Regeln", setVacationOn: "Urlaubsmodus an", setVacationOff: "Urlaubsmodus aus", setVacationNone: "Urlaubsmodus nicht eingerichtet", setOn: "an", setOff: "aus",
   maintHintBackup: "Backups prüfen, schützen und aufräumen.", maintHintUpdates: "Offene Updates und was vorher zu prüfen ist.", maintHintBlueprints: "Blueprints, die fehlen oder defekt sind.", maintHintGoals: "Eigene Grenzen für „in Ordnung“.",
   actRepairValues: "Werte reparieren", actHintRepair: "Falsche Werte im Verlauf und in der Statistik ersetzen.", actMeter: "Zähler wechseln", actHintMeter: "Die Statistik bei einem neuen Zähler fortführen.", actExchange: "Gerät austauschen", actHintExchange: "Durch ein neues Gerät ersetzen und alles übernehmen.",
   actHintReplace: "Überall durch eine andere Entität ersetzen.", actHintDisable: "Erst deaktivieren; nach der Wartezeit entfernen.",
@@ -11134,7 +11134,7 @@ Object.assign(TEXT.en, {
   stepChoose: "Choose", stepSetup: "Set up", stepPreview: "Preview",
   setLanguage: "Language", setLanguageHint: "Applies to this panel and is saved in your user profile. Automatic follows the language of Home Assistant.", langAuto: "Automatic",
   setTabProtection: "Protection mode", setTabExceptions: "Exceptions", setHintExceptions: "Exception rules and hidden findings.", setHiddenCount: "{n} hidden", setHintLook: "Language, density and appearance.", setHintProtection: "What cleanup plans may change.", setHintScan: "When it checks, limits and messages.", setHintInfo: "Version, diagnostics and support.",
-  setEveryHours: "every {n} h", setManual: "manual", setNoneHidden: "nothing hidden", setRuleOne: "1 rule", setRulesCount: "{n} rules", setVacationOn: "Vacation mode on", setVacationOff: "Vacation mode off", setOn: "on", setOff: "off",
+  setEveryHours: "every {n} h", setManual: "manual", setNoneHidden: "nothing hidden", setRuleOne: "1 rule", setRulesCount: "{n} rules", setVacationOn: "Vacation mode on", setVacationOff: "Vacation mode off", setVacationNone: "Vacation mode not set up", setOn: "on", setOff: "off",
   maintHintBackup: "Check, protect and tidy up backups.", maintHintUpdates: "Open updates and what to check first.", maintHintBlueprints: "Blueprints that are missing or broken.", maintHintGoals: "Your own limits for what in order means.",
   actRepairValues: "Repair values", actHintRepair: "Replace wrong values in the history and the statistics.", actMeter: "Replace the meter", actHintMeter: "Carry the statistics on with a new meter.", actExchange: "Exchange the device", actHintExchange: "Replace it with a new device and carry everything over.",
   actHintReplace: "Replace it with another entity everywhere.", actHintDisable: "Disable first; remove after the waiting time.",
@@ -12101,7 +12101,7 @@ Object.assign(TEXT.en, {
   vacEntity: "Entity for vacation mode", vacEntityHint: "Any entity that can be “on”: helper, switch, binary sensor, schedule, calendar. Leave empty to turn vacation mode off.",
   vacAuto: "Suggestion, because this entity exists. It counts only once you save; change or clear the field if you do not want it.", vacKeyword: "Keyword in the event", vacKeywordExample: "Vacation", vacKeywordHint: "Only events whose title contains this word switch vacation mode on, so your normal calendar works. Empty: every running event counts, for a calendar of its own.",
   vacGrace: "Grace period after the vacation", vacGraceUnit: "hours", vacGraceHint: "Default 24 hours. How long findings are held back after the end when the object has no delay of its own.",
-  vacSave: "Save", vacUnsaved: "Not saved", vacEntityInvalid: "An entity looks like domain.name, for example input_boolean.vacation.", vacGraceInvalid: "The grace period must be a whole number from 0 to {max} hours.", vacStateOn: "Now: on", vacStateOff: "Now: off", vacStateMissing: "Now: unavailable", vacEnded: "Last ended on {date}.", vacFailed: "Not saved: {reason}",
+  vacSave: "Save", vacUnsaved: "Not saved", vacEntityInvalid: "An entity looks like domain.name, for example input_boolean.vacation.", vacGraceInvalid: "The grace period must be a whole number from 0 to {max} hours.", vacStateOn: "Now: on", vacStateNone: "Not set up", vacStateOff: "Now: off", vacStateMissing: "Now: unavailable", vacEnded: "Last ended on {date}.", vacFailed: "Not saved: {reason}",
   vacBarOn: "Vacation mode on", vacBarHeld: "{n} findings held back", vacBarHeld1: "1 finding held back",
   vacBarAfter: "Vacation over", vacBarAfterLine: "Delay until {date} · {n} findings still held back", vacBarAfterLine1: "Delay until {date} · 1 finding still held back",
   vacBarMissing: "Vacation mode entity unavailable", vacBarMissingLine: "{entity} reports no state. The mode counts as off.", vacBarShow: "Show held back", vacBarRules: "Rules", vacBarSettings: "Settings",
@@ -12189,8 +12189,8 @@ class ExceptionsMixin {
   excCard() {
     if (!this.exc) { this.loadExceptions(); return `<section class="panel"><div class="panelhead"><div><h2>${this.t("excTitle")}</h2><p>${this.t("excHint")}</p></div></div><div class="pad"><p class="factnote">${this.t("excLoading")}</p></div></section>`; }
     const v = this.exc.vacation || {};
-    const state = !v.entity ? "" : v.state === "on" ? "vacStateOn" : v.state && v.state !== "unavailable" && v.state !== "unknown" ? "vacStateOff" : "vacStateMissing";
-    const pill = state ? ` <span class="pill ${v.state === "on" ? "ok" : "mute"}">${this.t(state)}</span>` : "";
+    const state = !v.entity ? "vacStateNone" : v.state === "on" ? "vacStateOn" : v.state && v.state !== "unavailable" && v.state !== "unknown" ? "vacStateOff" : "vacStateMissing";
+    const pill = state ? ` <span class="pill ${!v.entity ? "warn" : v.state === "on" ? "ok" : "mute"}">${this.t(state)}</span>` : "";
     return `${this.excRulesCard()}<section class="panel"><div class="panelhead"><div><h2>${this.t("vacTitle")}${pill}</h2><p>${this.t("vacHint")}</p></div></div>${this.vacationHtml()}</section>`;
   }
 

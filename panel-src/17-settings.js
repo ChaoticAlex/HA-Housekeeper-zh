@@ -29,7 +29,7 @@ class SettingsMixin {
   exceptionPills(m, hidden) {
     const v = m.vacation, rules = this.exc?.rules ? this.exc.rules.length : m.exception_rules || 0;
     const pills = [{ text: this.t(rules === 1 ? "setRuleOne" : "setRulesCount", { n: rules }) }, { text: hidden ? this.t("setHiddenCount", { n: hidden }) : this.t("setNoneHidden") }];
-    if (v) pills.push({ text: this.t(v.active ? "setVacationOn" : "setVacationOff"), tone: v.active ? "warn" : "mute" });
+    pills.push(v ? { text: this.t(v.active ? "setVacationOn" : "setVacationOff"), tone: v.active ? "warn" : "mute" } : { text: this.t("setVacationNone"), tone: "warn" });
     return pills;
   }
 
