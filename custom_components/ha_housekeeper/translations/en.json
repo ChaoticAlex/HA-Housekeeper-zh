@@ -322,6 +322,9 @@
     "not_found": {
       "message": "Nothing found for this key or id. Take keys and ids from \"findings\" or \"object\"; take \"at\" for \"undo\" from \"audit\"."
     },
+    "withheld": {
+      "message": "This object is not given out: sensitive objects (locks, alarms, cameras, people) are kept back. Change that in the AI access settings of Housekeeper."
+    },
     "reason_required": {
       "message": "A decision needs a reason."
     },

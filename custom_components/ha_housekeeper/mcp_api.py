@@ -22,6 +22,7 @@ import voluptuous as vol
 from homeassistant.core import HomeAssistant
 
 from .const import API_SCHEMA, EVENT_AI_CHANGE
+from .exposure import SENSITIVE_COVERS, SENSITIVE_DOMAINS
 from .ignored import REASON_LIMIT as IGNORE_REASON_LIMIT
 from .inventory import InventoryScanner
 from .marks import KINDS as MARK_KINDS
@@ -154,6 +155,28 @@ AUDIT_SCHEMA = vol.Schema(
 )
 
 
+def withheld(scanner: InventoryScanner) -> set[str]:
+    """Ids of the entities that are not given out: locks, alarms, cameras, people and the like.
+
+    A model in the cloud would read their names and states; the setting keeps them out of every answer.
+    """
+    snapshot = scanner.snapshot
+    if snapshot is None or not scanner.mcp.hide_sensitive:
+        return set()
+    return {
+        item["object_id"]
+        for item in snapshot["objects"]
+        if item["object_type"] == "entity"
+        and (
+            item["object_id"].partition(".")[0] in SENSITIVE_DOMAINS
+            or (
+                item["object_id"].startswith("cover.")
+                and item.get("device_class") in SENSITIVE_COVERS
+            )
+        )
+    }
+
+
 def _snapshot(scanner: InventoryScanner) -> dict[str, Any]:
     snapshot = scanner.snapshot
     if snapshot is None:
@@ -176,12 +199,17 @@ def status(
         "scanned_at": None,
     }
     if snapshot is not None:
-        active = [f for f in snapshot["findings"] if not f.get("ignored")]
+        skip = withheld(scanner)
+        active = [
+            f for f in snapshot["findings"] if not f.get("ignored") and f["object_id"] not in skip
+        ]
         result.update(
             scanned_at=snapshot["meta"]["scanned_at"],
             preliminary=bool(snapshot["meta"].get("preliminary")),
             findings=len(active),
-            hidden=len(snapshot["findings"]) - len(active),
+            hidden=sum(
+                1 for f in snapshot["findings"] if f.get("ignored") and f["object_id"] not in skip
+            ),
             by_level=dict(Counter(f.get("impact") or "none" for f in active)),
         )
     return result
@@ -199,8 +227,13 @@ def findings(
     needle = data.get("search", "").lower()
     floor = RANK[data["level"]] if "level" in data else 0
     mode = data["ignored"]
+    skip = withheld(scanner)
+    kept = 0
     rows: list[tuple[dict[str, Any], dict[str, Any]]] = []
     for finding in snapshot["findings"]:
+        if finding["object_id"] in skip:
+            kept += 1
+            continue
         hidden = bool(finding.get("ignored"))
         if (mode == "hide" and hidden) or (mode == "only" and not hidden):
             continue
@@ -262,6 +295,7 @@ def findings(
         "by_level": dict(Counter(r[0].get("impact") or "none" for r in rows)),
         "by_rule": dict(Counter(r[0]["rule_id"] for r in rows)),
         "findings": items,
+        **({"withheld": kept} if kept else {}),
         "next_steps": NEXT_STEPS,
     }
 
@@ -272,10 +306,16 @@ def _related(
     me: str,
     relations: tuple[str, ...],
     outgoing: bool,
+    skip: set[str],
 ) -> dict[str, Any]:
     """The objects at the other end of the edges of one kind, a page of them and the total."""
     own, other = ("source", "target") if outgoing else ("target", "source")
-    rows = [(e[other], e["relation"]) for e in edges if e[own] == me and e["relation"] in relations]
+    kept_back = {f"entity:{ident}" for ident in skip}
+    rows = [
+        (e[other], e["relation"])
+        for e in edges
+        if e[own] == me and e["relation"] in relations and e[other] not in kept_back
+    ]
     items = []
     for ref, relation in rows[:RELATION_LIMIT]:
         kind, _, ident = ref.partition(":")
@@ -296,6 +336,9 @@ def object_card(
     """One object: what it is, what was decided about it, its findings and how it is connected."""
     snapshot = _snapshot(scanner)
     kind, ident = data["object_type"], data["object_id"]
+    skip = withheld(scanner)
+    if kind == "entity" and ident in skip:
+        raise McpError("withheld")
     me = f"{kind}:{ident}"
     objects = {f"{o['object_type']}:{o['object_id']}": o for o in snapshot["objects"]}
     item = objects.get(me)
@@ -310,7 +353,7 @@ def object_card(
         (RANK.get(f.get("impact") or "none", 0) for f in found if not f.get("ignored")), default=0
     )
     mark = scanner.marks.items.get(mark_key(kind, ident))
-    used_by = _related(snapshot["edges"], objects, me, USED, outgoing=False)
+    used_by = _related(snapshot["edges"], objects, me, USED, outgoing=False, skip=skip)
     return {
         "schema": API_SCHEMA,
         "object": card,
@@ -350,9 +393,9 @@ def object_card(
             "critical": bool(item.get("critical")),
         },
         "used_by": used_by,
-        "uses": _related(snapshot["edges"], objects, me, USED, outgoing=True),
-        "belongs_to": _related(snapshot["edges"], objects, me, BELONGS, outgoing=False),
-        "contains": _related(snapshot["edges"], objects, me, BELONGS, outgoing=True),
+        "uses": _related(snapshot["edges"], objects, me, USED, outgoing=True, skip=skip),
+        "belongs_to": _related(snapshot["edges"], objects, me, BELONGS, outgoing=False, skip=skip),
+        "contains": _related(snapshot["edges"], objects, me, BELONGS, outgoing=True, skip=skip),
     }
 
 
@@ -365,6 +408,11 @@ def finding_decide(
         raise McpError("reason_required")
     if deciding and data["kind"] == "snooze" and "days" not in data:
         raise McpError("days_required")
+    skip = withheld(scanner)
+    if skip and any(
+        f["key"] == key and f["object_id"] in skip for f in _snapshot(scanner)["findings"]
+    ):
+        raise McpError("finding_not_found")
     previous = scanner.ignored.entry(key)
     if not scanner.set_finding_ignored(
         key,
@@ -386,6 +434,8 @@ def finding_decide(
 def mark(scanner: InventoryScanner, data: dict[str, Any], user: str | None) -> dict[str, Any]:
     """Tell Housekeeper what to expect of an object, or take that back. Only its own list changes."""
     kind, ident = data["object_type"], data["object_id"]
+    if kind == "entity" and ident in withheld(scanner):
+        raise McpError("withheld")
     previous = deepcopy(scanner.marks.items.get(mark_key(kind, ident)))
     if data["action"] == "set":
         if "kind" not in data:

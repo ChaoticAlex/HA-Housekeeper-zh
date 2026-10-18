@@ -322,6 +322,9 @@
     "not_found": {
       "message": "Dazu gibt es nichts. Schlüssel und IDs aus „findings“ oder „object“ nehmen, „at“ für „undo“ aus „audit“."
     },
+    "withheld": {
+      "message": "Dieses Objekt wird nicht herausgegeben: Sensible Objekte (Schlösser, Alarm, Kameras, Personen) bleiben zurück. Das lässt sich in den Einstellungen zum KI-Zugriff ändern."
+    },
     "reason_required": {
       "message": "Eine Entscheidung braucht einen Grund."
     },

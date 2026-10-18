@@ -22,6 +22,7 @@ from .ws_common import _versioned, panel_session_only, with_scanner
         vol.Optional("enabled"): bool,
         vol.Optional("write"): bool,
         vol.Optional("auto_off_hours"): vol.In(AUTO_OFF_CHOICES),
+        vol.Optional("hide_sensitive"): bool,
     }
 )
 @callback
@@ -35,7 +36,12 @@ def websocket_mcp_set(
     """Switch AI access and the right to change Housekeeper's lists. Both are off by default."""
     if panel_session_only(hass, connection, msg):
         return
-    scanner.mcp.set_switches(msg.get("enabled"), msg.get("write"), msg.get("auto_off_hours"))
+    scanner.mcp.set_switches(
+        msg.get("enabled"),
+        msg.get("write"),
+        msg.get("auto_off_hours"),
+        msg.get("hide_sensitive"),
+    )
     if scanner.snapshot:
         scanner.snapshot["meta"]["mcp"] = scanner.mcp.meta()
     connection.send_result(msg["id"], scanner.mcp.meta())

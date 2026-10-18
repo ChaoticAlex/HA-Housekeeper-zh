@@ -279,6 +279,58 @@ async def test_ai_access_switches_itself_off_after_its_time(hass: HomeAssistant)
     assert store.off_at is None and not store.expire(datetime.now(UTC) + timedelta(days=9))
 
 
+async def test_sensitive_objects_stay_out_of_every_answer(hass: HomeAssistant) -> None:
+    scanner = scanner_with(hass, 3)
+    scanner.mcp.enabled = scanner.mcp.write = True
+    scanner.snapshot["objects"].append(
+        {"object_type": "entity", "object_id": "lock.front", "name": "Front door"}
+    )
+    scanner.snapshot["findings"].append(
+        {
+            "key": "entity.state_unavailable|lock.front|",
+            "rule_id": "entity.state_unavailable",
+            "object_id": "lock.front",
+            "classification": "unavailable",
+            "impact": "high",
+        }
+    )
+    scanner.snapshot["edges"] = [
+        {"source": "automation:a", "target": "entity:lock.front", "relation": "TRIGGERS_ON"},
+        {"source": "entity:lock.front", "target": "entity:sensor.s1", "relation": "TARGETS"},
+    ]
+    scanner.marks = SimpleNamespace(items={})
+    scanner.notes = SimpleNamespace(view=lambda: [])
+    listed = await mcp_api.run(hass, scanner, "findings", {"limit": 50}, None)
+    assert "lock.front" not in json.dumps(listed) and listed["withheld"] == 1
+    status = await mcp_api.run(hass, scanner, "status", {}, None)
+    assert (
+        status["findings"]
+        == 3 * 0 + len([f for f in scanner.snapshot["findings"] if not f.get("ignored")]) - 1
+    )
+    with pytest.raises(mcp_api.McpError) as card:
+        await mcp_api.run(
+            hass, scanner, "object", {"object_type": "entity", "object_id": "lock.front"}, None
+        )
+    assert card.value.reason == "withheld"
+    with pytest.raises(mcp_api.McpError) as decide:
+        await mcp_api.run(
+            hass,
+            scanner,
+            "finding_decide",
+            {"key": "entity.state_unavailable|lock.front|", "action": "decide", "reason": "x"},
+            None,
+        )
+    assert decide.value.reason == "finding_not_found"
+    other = await mcp_api.run(
+        hass, scanner, "object", {"object_type": "entity", "object_id": "sensor.s1"}, None
+    )
+    assert "lock.front" not in json.dumps(other)
+    scanner.mcp.hide_sensitive = False
+    assert "lock.front" in json.dumps(
+        await mcp_api.run(hass, scanner, "findings", {"limit": 50}, None)
+    )
+
+
 async def test_reads_are_limited_per_minute(hass: HomeAssistant) -> None:
     scanner = scanner_with(hass, 3)
     scanner.mcp.enabled = True

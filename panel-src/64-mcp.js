@@ -20,6 +20,7 @@ Object.assign(TEXT.de, {
   mcpUndoAll: "Zurücknehmen", mcpUndoAllHint: "Änderungen durch KI-Zugriff", mcpUndoHour: "der letzten Stunde", mcpUndoDay: "der letzten 24 Stunden", mcpUndoEverything: "alle", mcpUndoneCount: "{n} Änderungen zurückgenommen", mcpFn_undo_all: "Alles zurücknehmen",
   mcpAutoOff: "Automatisch ausschalten", mcpAutoOffDetail: "Schaltet KI-Zugriff und „Merkliste ändern“ nach dieser Zeit selbst aus, damit sie nicht aus Versehen an bleiben.", mcpAutoNever: "nie", mcpAutoHours: "nach {n} Stunden", mcpAutoHour: "nach 1 Stunde", mcpOffAt: "Schaltet sich aus: {date}", mcpFn_auto_off: "Automatisch ausgeschaltet",
   mcpBarOn: "KI-Zugriff aktiv", mcpBarRead: "nur lesend", mcpBarWrite: "mit Ändern der Merkliste", mcpBarOpen: "Protokoll ansehen",
+  mcpHide: "Sensible Objekte zurückhalten", mcpHideDetail: "Schlösser, Alarmanlagen, Kameras, Sirenen, Ventile, Personen, Standort-Tracker sowie Garagen- und Tortore kommen in keiner Antwort vor. Empfohlen, vor allem bei einem Modell in der Cloud.",
   mcpTimes: "{n} Aufrufe bis {date}", mcpCount: "{n} Treffer", mcpUndo: "Rückgängig", mcpUndone: "zurückgenommen", mcpUndoFailed: "Nicht zurückgenommen: {reason}",
   mcpUserSystem: "Automation oder System", mcpUserYou: "du", mcpUserOther: "anderer Benutzer",
   mcpFn_status: "Status", mcpFn_findings: "Befunde", mcpFn_object: "Objekt", mcpFn_finding_decide: "Befund entscheiden", mcpFn_mark: "Objekt markieren", mcpFn_note_set: "Logbuch-Eintrag", mcpFn_undo: "Zurücknehmen",
@@ -46,6 +47,7 @@ Object.assign(TEXT.en, {
   mcpUndoAll: "Take back", mcpUndoAllHint: "Changes through AI access", mcpUndoHour: "of the last hour", mcpUndoDay: "of the last 24 hours", mcpUndoEverything: "all", mcpUndoneCount: "{n} changes taken back", mcpFn_undo_all: "Take everything back",
   mcpAutoOff: "Switch off automatically", mcpAutoOffDetail: "Switches AI access and “Change the list” off by itself after this time, so they do not stay on by mistake.", mcpAutoNever: "never", mcpAutoHours: "after {n} hours", mcpAutoHour: "after 1 hour", mcpOffAt: "Switches off: {date}", mcpFn_auto_off: "Switched off automatically",
   mcpBarOn: "AI access on", mcpBarRead: "read-only", mcpBarWrite: "with changes to the list", mcpBarOpen: "Show the log",
+  mcpHide: "Keep sensitive objects back", mcpHideDetail: "Locks, alarm panels, cameras, sirens, valves, people, location trackers and garage doors and gates appear in no answer. Recommended, above all with a model in the cloud.",
   mcpTimes: "{n} calls until {date}", mcpCount: "{n} results", mcpUndo: "Undo", mcpUndone: "taken back", mcpUndoFailed: "Not taken back: {reason}",
   mcpUserSystem: "Automation or system", mcpUserYou: "you", mcpUserOther: "another user",
   mcpFn_status: "Status", mcpFn_findings: "Findings", mcpFn_object: "Object", mcpFn_finding_decide: "Decide about a finding", mcpFn_mark: "Mark an object", mcpFn_note_set: "Logbook entry", mcpFn_undo: "Undo",
@@ -117,11 +119,12 @@ class McpMixin {
     const label = h => h === 0 ? this.t("mcpAutoNever") : h === 1 ? this.t("mcpAutoHour") : this.t("mcpAutoHours", { n: h });
     const offAt = on && m.off_at ? `<small class="mcpneeds">${this.t("mcpOffAt", { date: `${this.mcpDay(m.off_at)}, ${this.mcpTime(m.off_at).slice(0, 5)}` })}</small>` : "";
     const timer = `<div class="row mcprow"><span class="tile ${auto ? "ok" : "mute"}"><ha-icon icon="mdi:timer-outline"></ha-icon></span><span class="row-text"><strong>${this.t("mcpAutoOff")}</strong><small>${this.t("mcpAutoOffDetail")}</small>${offAt}</span><select data-mcp-autooff aria-label="${this.esc(this.t("mcpAutoOff"))}">${[0, 1, 8, 24].map(h => `<option value="${h}"${h === auto ? " selected" : ""}>${label(h)}</option>`).join("")}</select></div>`;
+    const hide = this.mcpSwitch("data-mcp-hide", m.hide_sensitive !== false, this.t("mcpHide"), this.t("mcpHideDetail"), "mdi:shield-account-outline");
     const state = !on ? ["mute", "mcpStateOff"] : write ? ["", "mcpStateWrite"] : ["ok", "mcpStateRead"];
     const calls = on && this.mcp ? ` <span class="mcpcalls">${this.t("mcpLogCalls", { n: this.formatNumber(this.mcp.calls_24h || 0) })}</span>` : "";
     const privacy = `<div class="mcpnote"><ha-icon icon="mdi:shield-lock-outline"></ha-icon><span>${this.t("mcpPrivacy")}</span></div>`;
     const how = `<details class="howto mcphow"><summary>${this.t("mcpHowTitle")}</summary><ol class="mcpsteps"><li>${this.t("mcpHow1")}</li><li>${this.t("mcpHow2")} ${chips(["status", "findings", "object", "audit"])}<br>${this.t("mcpHowWrite")} ${chips(["finding_decide", "mark", "note_set", "undo"])}</li><li>${this.t("mcpHow3")}</li></ol><p class="factnote">${this.t("mcpHowNote")}</p></details>`;
-    const main = `<section class="panel"><div class="panelhead"><div><h2>${this.t("mcpTitle")} <span class="pill ${state[0]}">${this.t(state[1])}</span>${calls}</h2><p>${this.t("mcpHint")}</p></div></div>${switches}${timer}${privacy}${how}</section>`;
+    const main = `<section class="panel"><div class="panelhead"><div><h2>${this.t("mcpTitle")} <span class="pill ${state[0]}">${this.t(state[1])}</span>${calls}</h2><p>${this.t("mcpHint")}</p></div></div>${switches}${hide}${timer}${privacy}${how}</section>`;
     if (!this.mcp) { this.loadMcp(); return `${main}<section class="panel"><div class="panelhead"><h2>${this.t("mcpLogTitle")}</h2></div><div class="pad"><p class="factnote">${this.t("mcpLogLoading")}</p></div></section>`; }
     const filter = this.mcpFilter || "all";
     const shown = this.mcp.entries.filter(e => filter === "all" || (filter === "failed" ? e.result !== "ok" : e.kind === filter));
@@ -159,6 +162,7 @@ class McpMixin {
     };
     root.querySelector("[data-mcp-enabled]")?.addEventListener("change", ev => set({ enabled: ev.target.checked }));
     root.querySelector("[data-mcp-write]")?.addEventListener("change", ev => set({ write: ev.target.checked }));
+    root.querySelector("[data-mcp-hide]")?.addEventListener("change", ev => set({ hide_sensitive: ev.target.checked }));
     root.querySelector("[data-mcp-autooff]")?.addEventListener("change", ev => set({ auto_off_hours: Number(ev.target.value) }));
     root.querySelectorAll("[data-mcp-filter]").forEach(el => el.onclick = () => { this.mcpFilter = el.dataset.mcpFilter; this.render(); });
     root.querySelector("[data-mcp-undoall]")?.addEventListener("click", async () => {

@@ -54,6 +54,7 @@ class McpStore:
         self._store: Store[dict[str, Any]] = Store(hass, STORAGE_VERSION, MCP_STORAGE_KEY)
         self.enabled = False
         self.write = False
+        self.hide_sensitive = True
         self.auto_off_hours = 0
         self.enabled_at: str | None = None
         self.entries: list[dict[str, Any]] = []
@@ -64,6 +65,7 @@ class McpStore:
             return
         self.enabled = data.get("enabled") is True
         self.write = data.get("write") is True
+        self.hide_sensitive = data.get("hide_sensitive") is not False
         if data.get("auto_off_hours") in AUTO_OFF_CHOICES:
             self.auto_off_hours = data["auto_off_hours"]
         if self.enabled and _time(data.get("enabled_at")) is not None:
@@ -84,6 +86,7 @@ class McpStore:
         enabled: bool | None = None,
         write: bool | None = None,
         auto_off_hours: int | None = None,
+        hide_sensitive: bool | None = None,
     ) -> None:
         if enabled is not None:
             if enabled and not self.enabled:
@@ -95,6 +98,8 @@ class McpStore:
             self.write = write
         if auto_off_hours in AUTO_OFF_CHOICES:
             self.auto_off_hours = auto_off_hours
+        if hide_sensitive is not None:
+            self.hide_sensitive = hide_sensitive
         self._save()
 
     @property
@@ -125,6 +130,7 @@ class McpStore:
         return {
             "enabled": self.enabled,
             "write": self.write,
+            "hide_sensitive": self.hide_sensitive,
             "auto_off_hours": self.auto_off_hours,
             "off_at": self.off_at,
         }
@@ -218,6 +224,7 @@ class McpStore:
             lambda: {
                 "enabled": self.enabled,
                 "write": self.write,
+                "hide_sensitive": self.hide_sensitive,
                 "auto_off_hours": self.auto_off_hours,
                 "enabled_at": self.enabled_at,
                 "entries": self.entries,
