@@ -230,14 +230,19 @@ async def test_changes_are_limited_and_a_refusal_is_logged_as_denied(hass: HomeA
     scanner.mcp.enabled = scanner.mcp.write = True
     scanner.notes = SimpleNamespace(items=[])
     now = datetime.now(UTC)
-    for _ in range(mcp_api.WRITE_LIMIT):
+    for _ in range(scanner.mcp.write_limit):
         scanner.mcp.log(None, "note_set", "write", {}, "ok", 1, now=now - timedelta(minutes=6))
     assert scanner.mcp.writes_since(5) == 0
-    for _ in range(mcp_api.WRITE_LIMIT):
+    for _ in range(scanner.mcp.write_limit):
         scanner.mcp.log(None, "note_set", "write", {}, "ok", 1)
     with pytest.raises(mcp_api.McpError) as limited:
         await mcp_api.run(hass, scanner, "note_set", {"action": "save", "title": "t"}, None)
     assert limited.value.reason == "rate_limited"
+    assert limited.value.detail == "200"
+    scanner.mcp.set_switches(write_limit=500)  # a higher limit lets the call through
+    assert scanner.mcp.meta()["write_limit"] == 500
+    scanner.mcp.set_switches(write_limit=7)  # not one of the choices: ignored
+    assert scanner.mcp.write_limit == 500
     assert scanner.mcp.entries[-1]["kind"] == "denied"
 
 
@@ -347,7 +352,7 @@ async def test_summary_names_the_heaviest_groups(hass: HomeAssistant) -> None:
 async def test_reads_are_limited_per_minute(hass: HomeAssistant) -> None:
     scanner = scanner_with(hass, 3)
     scanner.mcp.enabled = True
-    for _ in range(mcp_api.READ_LIMIT):
+    for _ in range(scanner.mcp.read_limit):
         scanner.mcp.log(None, "status", "read", {}, "ok", None)
     with pytest.raises(mcp_api.McpError) as limited:
         await mcp_api.run(hass, scanner, "status", {}, None)

@@ -22,6 +22,8 @@ KEEP_DAYS = 90
 MERGE_SECONDS = 60  # reads of one caller within this time are one line
 PARAM_TEXT = 60
 KINDS = ("read", "write", "denied")
+WRITE_LIMIT_CHOICES = (50, 100, 200, 500)  # changes allowed in five minutes
+READ_LIMIT_CHOICES = (60, 120, 300)  # reads allowed per minute
 AUTO_OFF_CHOICES = (0, 1, 8, 24)  # hours until AI access switches itself off; 0 is never
 
 
@@ -56,6 +58,8 @@ class McpStore:
         self.write = False
         self.hide_sensitive = True
         self.auto_off_hours = 0
+        self.write_limit = 200
+        self.read_limit = 120
         self.enabled_at: str | None = None
         self.entries: list[dict[str, Any]] = []
 
@@ -68,6 +72,10 @@ class McpStore:
         self.hide_sensitive = data.get("hide_sensitive") is not False
         if data.get("auto_off_hours") in AUTO_OFF_CHOICES:
             self.auto_off_hours = data["auto_off_hours"]
+        if data.get("write_limit") in WRITE_LIMIT_CHOICES:
+            self.write_limit = data["write_limit"]
+        if data.get("read_limit") in READ_LIMIT_CHOICES:
+            self.read_limit = data["read_limit"]
         if self.enabled and _time(data.get("enabled_at")) is not None:
             self.enabled_at = data["enabled_at"]
         entries = data.get("entries")
@@ -87,6 +95,8 @@ class McpStore:
         write: bool | None = None,
         auto_off_hours: int | None = None,
         hide_sensitive: bool | None = None,
+        write_limit: int | None = None,
+        read_limit: int | None = None,
     ) -> None:
         if enabled is not None:
             if enabled and not self.enabled:
@@ -100,6 +110,10 @@ class McpStore:
             self.auto_off_hours = auto_off_hours
         if hide_sensitive is not None:
             self.hide_sensitive = hide_sensitive
+        if write_limit in WRITE_LIMIT_CHOICES:
+            self.write_limit = write_limit
+        if read_limit in READ_LIMIT_CHOICES:
+            self.read_limit = read_limit
         self._save()
 
     @property
@@ -132,6 +146,8 @@ class McpStore:
             "write": self.write,
             "hide_sensitive": self.hide_sensitive,
             "auto_off_hours": self.auto_off_hours,
+            "write_limit": self.write_limit,
+            "read_limit": self.read_limit,
             "off_at": self.off_at,
         }
 
@@ -226,6 +242,8 @@ class McpStore:
                 "write": self.write,
                 "hide_sensitive": self.hide_sensitive,
                 "auto_off_hours": self.auto_off_hours,
+                "write_limit": self.write_limit,
+                "read_limit": self.read_limit,
                 "enabled_at": self.enabled_at,
                 "entries": self.entries,
             },

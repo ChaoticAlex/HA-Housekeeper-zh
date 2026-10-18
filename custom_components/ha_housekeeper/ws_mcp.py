@@ -10,7 +10,7 @@ from homeassistant.core import HomeAssistant, callback
 
 from .const import DOMAIN
 from .inventory import InventoryScanner
-from .mcp_access import AUTO_OFF_CHOICES
+from .mcp_access import AUTO_OFF_CHOICES, READ_LIMIT_CHOICES, WRITE_LIMIT_CHOICES
 from .mcp_api import LIMIT_MAX, McpError, announce, undo, undo_all
 from .ws_common import _versioned, panel_session_only, with_scanner
 
@@ -23,6 +23,8 @@ from .ws_common import _versioned, panel_session_only, with_scanner
         vol.Optional("write"): bool,
         vol.Optional("auto_off_hours"): vol.In(AUTO_OFF_CHOICES),
         vol.Optional("hide_sensitive"): bool,
+        vol.Optional("write_limit"): vol.In(WRITE_LIMIT_CHOICES),
+        vol.Optional("read_limit"): vol.In(READ_LIMIT_CHOICES),
     }
 )
 @callback
@@ -41,6 +43,8 @@ def websocket_mcp_set(
         msg.get("write"),
         msg.get("auto_off_hours"),
         msg.get("hide_sensitive"),
+        msg.get("write_limit"),
+        msg.get("read_limit"),
     )
     if scanner.snapshot:
         scanner.snapshot["meta"]["mcp"] = scanner.mcp.meta()

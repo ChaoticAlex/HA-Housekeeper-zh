@@ -310,10 +310,10 @@
       "message": "Changing Housekeeper's lists is switched off. Switch it on in the Housekeeper settings."
     },
     "rate_limited": {
-      "message": "Too many changes: at most 200 in 5 minutes. Wait a few minutes."
+      "message": "Too many changes: at most {detail} in 5 minutes. Wait a few minutes."
     },
     "too_many_calls": {
-      "message": "Too many calls: at most 120 reads per minute. Wait a moment."
+      "message": "Too many calls: at most {detail} reads per minute. Wait a moment."
     },
     "not_admin": {
       "message": "Only an administrator may use AI access."
