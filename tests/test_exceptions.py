@@ -110,3 +110,12 @@ def test_after_the_vacation_the_outage_counts_from_its_end() -> None:
     assert verdict(rules, found, _outage(14), NOW + timedelta(days=3), vacation)["state"] == "due"
     # an outage that began after the vacation is not shifted
     assert verdict(rules, found, _outage(0.1), NOW, vacation)["state"] == "hold"
+
+
+def test_rule_schema_takes_the_days_of_a_hide_rule_back_as_none() -> None:
+    from voluptuous import Schema
+
+    from custom_components.ha_housekeeper.ws_care import _RULE_SCHEMA
+
+    rule = {"kind": "area", "targets": ["a"], "action": "hide", "days": None, "scope": "always"}
+    assert Schema(_RULE_SCHEMA)(rule)["days"] is None

@@ -1513,7 +1513,7 @@ class StylesMixin {
       .object{display:flex;align-items:center;gap:11px;min-width:260px}.object .tile{width:34px;height:34px}.object strong{display:block;font-weight:600}.id{display:block;color:var(--hk-muted);font-family:ui-monospace,SFMono-Regular,monospace;font-size:calc(11px*var(--hk-fs,1));margin-top:2px;max-width:390px;overflow:hidden;text-overflow:ellipsis}
       .tablefoot{padding:12px 16px;border-top:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));display:flex;align-items:center;justify-content:space-between;gap:10px}.pager{display:flex;align-items:center;gap:8px}.pager button{border:1px solid var(--hk-border);background:var(--hk-surface);border-radius:7px;padding:5px 10px}.pager button:disabled{opacity:.4}
       .viewswitch{display:inline-flex;gap:4px}.chip:disabled{opacity:.55;cursor:not-allowed}.chip em{font-style:normal;opacity:.7;margin-left:4px}.chip .tabdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:6px;background:var(--hk-red)}.chips .spacer{flex:1}.chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.chip{border:1px solid var(--hk-border);background:var(--hk-surface);border-radius:99px;padding:5px 12px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}.chip.active{color:var(--hk-blue-text);border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 11%,transparent);font-weight:600}
-      .emptymsg,.loading{padding:46px;text-align:center;color:var(--hk-muted)}.viewgroup{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}.skeleton{display:grid;gap:10px;padding:18px 16px}.skeleton i{display:block;height:14px;border-radius:7px;background:linear-gradient(90deg,var(--hk-soft),color-mix(in srgb,var(--hk-soft) 55%,var(--hk-surface)),var(--hk-soft)) 0 0/200% 100%;animation:hk-shimmer 1.4s ease-in-out infinite}.skeleton i:nth-of-type(2){width:80%}.skeleton i:nth-of-type(3){width:60%}@keyframes hk-shimmer{to{background-position:-200% 0}}@media(prefers-reduced-motion:reduce){.skeleton i{animation:none}}.coverage{display:flex;gap:6px;align-items:flex-start}.coverage ha-icon{--mdc-icon-size:16px;flex:none;margin-top:1px}.fline{display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin-top:6px}.fline .fnote{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.emptymsg ha-icon{--mdc-icon-size:34px;color:var(--hk-green);display:block;margin:0 auto 8px}.error{padding:18px;border-radius:12px;background:color-mix(in srgb,var(--hk-red) 12%,transparent);color:var(--hk-red)}
+      .emptymsg,.loading{padding:46px;text-align:center;color:var(--hk-muted)}.viewgroup{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}.skeleton{display:grid;gap:10px;padding:18px 16px}.skeleton i{display:block;height:14px;border-radius:7px;background:linear-gradient(90deg,var(--hk-soft),color-mix(in srgb,var(--hk-soft) 55%,var(--hk-surface)),var(--hk-soft)) 0 0/200% 100%;animation:hk-shimmer 1.4s ease-in-out infinite}.skeleton i:nth-of-type(2){width:80%}.skeleton i:nth-of-type(3){width:60%}@keyframes hk-shimmer{to{background-position:-200% 0}}@media(prefers-reduced-motion:reduce){.skeleton i{animation:none}}.coverage{display:flex;gap:6px;align-items:flex-start}.coverage ha-icon{--mdc-icon-size:16px;flex:none;margin-top:1px}.fline{display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin-top:6px}.fline .fnote{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.emptymsg ha-icon{--mdc-icon-size:34px;color:var(--hk-green);display:block;margin:0 auto 8px}.error{padding:12px 14px;border-radius:10px;border-left:3px solid var(--hk-red);background:color-mix(in srgb,var(--hk-red) 10%,transparent);color:var(--hk-red);font-size:calc(13px*var(--hk-fs,1));line-height:1.45}.notice{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:10px;border-left:3px solid var(--nc,var(--hk-blue));background:color-mix(in srgb,var(--nc,var(--hk-blue)) 10%,transparent);font-size:calc(13px*var(--hk-fs,1));line-height:1.45;color:var(--hk-text)}.notice ha-icon{--mdc-icon-size:18px;flex:none;margin-top:1px;color:var(--nc,var(--hk-blue))}.notice.err{--nc:var(--hk-red)}.notice.warn{--nc:var(--hk-amber)}
       .bh.open{background:var(--hk-soft)}.bhactions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}.bhopen{min-height:30px;padding:4px 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit;font-size:calc(11px*var(--hk-fs,1));font-weight:600;white-space:nowrap;cursor:pointer}.bhopen:hover{background:var(--hk-soft);border-color:var(--hk-muted)}.bhopen:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px}.bhattest{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:4px 16px 14px 62px;background:var(--hk-soft)}.bhattest label{display:flex;align-items:center;gap:8px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}.bhattest input{padding:6px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.bhcancel,.bhtake{border:0;background:none;padding:4px 2px;font:inherit;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);cursor:pointer;text-decoration:underline}.bhtake{margin-left:auto;color:var(--hk-red)}.bhcancel:hover{color:var(--hk-text)}
       .viewpop{min-width:220px;gap:2px;padding:6px}.viewrow{display:flex;align-items:center;gap:2px}.viewitem{display:flex;flex:1;gap:8px;align-items:center;padding:8px 10px;border:0;border-radius:6px;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}.viewitem:hover,.viewdel:hover{background:var(--hk-soft)}.viewitem.on{font-weight:700;color:var(--hk-blue)}.viewdel{display:grid;place-items:center;padding:6px;border:0;border-radius:6px;background:none;color:var(--hk-muted);cursor:pointer}.viewitem ha-icon,.viewdel ha-icon{--mdc-icon-size:18px}.dirbtn.withname{display:inline-flex;align-items:center;gap:6px;max-width:170px}.viewname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.viewpop .viewitem[data-lview-save]{border-top:1px solid var(--hk-border);border-radius:0 0 6px 6px;margin-top:4px}.dirbtn[aria-pressed="true"]{border-color:var(--hk-blue);color:var(--hk-blue)}details>summary{display:flex;align-items:center;gap:8px;list-style:none}.storegrp>summary{padding:10px 16px}details>summary::-webkit-details-marker{display:none}details>summary::before{content:"";flex:none;box-sizing:border-box;width:7px;height:7px;margin:0 5px 2px 3px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;opacity:.65;transform:rotate(-45deg);transition:transform .15s ease}details[open]>summary::before{transform:rotate(45deg) translate(-1px,-1px)}.rowmenu>summary::before{display:none}@media(prefers-reduced-motion:reduce){details>summary::before{transition:none}}
       .bh .row-text small{overflow:visible;white-space:normal;text-overflow:clip}
@@ -1841,6 +1841,12 @@ class ListsMixin {
   }
 
   // A click that failed says so and leaves the page as it is; only a failed load replaces the page.
+  // A message in a box: "err" (something failed), "warn" (check this before you go on) or "info". `text` is escaped here.
+  notice(tone, text, { attrs = "" } = {}) {
+    const icon = { err: "mdi:alert-circle-outline", warn: "mdi:alert-outline", info: "mdi:information-outline" }[tone] || "mdi:information-outline";
+    return `<div class="notice ${tone}" role="${tone === "err" ? "alert" : "status"}" ${attrs}><ha-icon icon="${icon}"></ha-icon><span>${this.esc(text)}</span></div>`;
+  }
+
   failed(err) {
     this.noteError("action", err);
     this.toast(this.t("actionFailed", { detail: this.errText(err) }), true);
@@ -11033,7 +11039,7 @@ Object.assign(TEXT.de, {
   err_date_invalid: "Dieses Datum gibt es nicht.", err_date_future: "Das Datum liegt in der Zukunft.",
   err_not_loaded: "HA Housekeeper ist nicht geladen.", err_panel_only: "Das geht nur im Panel, nicht über Programme, Apps oder langlebige Zugriffstoken.", err_days_required: "Zum Zurückstellen eines Befunds braucht es Tage.", err_reason_required: "Zum Behalten eines Befunds braucht es einen Grund.",
   err_invalid_limit: "Der Grenzwert liegt außerhalb des erlaubten Bereichs.", err_no_recorder: "Der Recorder ist nicht verfügbar.", err_nothing_to_merge: "Nach den Konflikten bleibt nichts übrig.",
-  err_rules_too_many: "Zu viele Regeln.", err_rules_invalid: "Die Regel ist nicht gültig.", err_invalid: "Die Eingabe ist nicht gültig.",
+  err_invalid_format: "Eine Angabe ist nicht gültig. Prüfe die Eingaben und versuche es noch einmal.", err_rules_too_many: "Zu viele Regeln.", err_rules_invalid: "Die Regel ist nicht gültig.", err_invalid: "Die Eingabe ist nicht gültig.",
   err_too_many: "Zu viele Aktionen in einem Plan.", err_thresholds_order: "Info, niedrig, mittel und hoch müssen ansteigen.",
   err_failed: "Fehlgeschlagen: {detail}", err_not_accepted: "Nicht angenommen: {detail}",
 });
@@ -11046,7 +11052,7 @@ Object.assign(TEXT.en, {
   err_date_invalid: "This date does not exist.", err_date_future: "The date lies in the future.",
   err_not_loaded: "HA Housekeeper is not loaded.", err_panel_only: "This works only in the panel, not through programs, apps or long-lived access tokens.", err_days_required: "Putting a finding off needs days.", err_reason_required: "Keeping a finding needs a reason.",
   err_invalid_limit: "The limit is outside the allowed range.", err_no_recorder: "The recorder is not available.", err_nothing_to_merge: "Nothing is left after the conflicts.",
-  err_rules_too_many: "Too many rules.", err_rules_invalid: "The rule is not valid.", err_invalid: "The input is not valid.",
+  err_invalid_format: "A value is not valid. Check the entries and try again.", err_rules_too_many: "Too many rules.", err_rules_invalid: "The rule is not valid.", err_invalid: "The input is not valid.",
   err_too_many: "Too many actions in one plan.", err_thresholds_order: "Info, low, medium and high must rise.",
   err_failed: "Failed: {detail}", err_not_accepted: "Not accepted: {detail}",
 });
@@ -12029,7 +12035,7 @@ Object.assign(TEXT.de, {
   excEffectHide: "{objects} Objekte, {n} Befunde ausgeblendet", excEffectDelay: "{hold} Befunde zurückgehalten, {due} fällig", excEffectNone: "Trifft gerade nichts",
   excPreview: "Vorschau", excPreviewHide: "{objects} Objekte, {n} Befunde würden ausgeblendet", excPreviewDelay: "{hold} Befunde würden zurückgehalten, {due} wären sofort fällig (schon länger ausgefallen)",
   excImportant: "Dabei sind Befunde mit hoher Wirkung: {names}. Prüfe, ob sie wirklich ausgenommen sein sollen.",
-  excSave: "Regel speichern", excCancel: "Abbrechen", excNeedTarget: "Wähle mindestens einen Eintrag.", excFailed: "Nicht gespeichert: {reason}",
+  excSave: "Regel speichern", excCancel: "Abbrechen", excNeedTarget: "Wähle mindestens einen Eintrag.", excDaysInvalid: "Die Frist muss eine ganze Zahl von 1 bis {max} Tagen sein.", excFailed: "Nicht gespeichert: {reason}",
   excOn: "Regel aktiv", excDue: "Frist abgelaufen",
   hidByRule: "Durch eine Regel", ignoredByRule: "Ausgeblendet durch eine Ausnahmeregel: {rule}", heldByRule: "Zurückgehalten durch eine Ausnahmeregel: {rule}, wird ab {date} gemeldet", dueByRule: "Frist abgelaufen · Ausnahmeregel: {rule}",
   hidRuleLink: "Regel",
@@ -12041,7 +12047,7 @@ Object.assign(TEXT.de, {
   vacTitle: "Urlaubsmodus", vacHint: "Solange die gewählte Entität „an“ ist, gelten die Regeln „nur im Urlaubsmodus“. Ist sie nicht verfügbar oder unbekannt, gilt der Modus als aus. Schalten kannst du sie in Home Assistant, zum Beispiel per Kalender oder Automation.",
   vacEntity: "Entität für den Urlaubsmodus", vacEntityHint: "Jede Entität, die „an“ sein kann: Helfer, Schalter, Binärsensor, Zeitplan, Kalender. Leer lassen schaltet den Urlaubsmodus aus.",
   vacGrace: "Nachfrist nach dem Urlaub", vacGraceUnit: "Stunden", vacGraceHint: "Standard 24 Stunden. Wie lange Befunde nach dem Ende zurückgehalten werden, wenn für das Objekt keine eigene Frist gilt.",
-  vacSave: "Speichern", vacStateOn: "Aktuell: an", vacStateOff: "Aktuell: aus", vacStateMissing: "Aktuell: nicht verfügbar", vacEnded: "Zuletzt beendet am {date}.", vacFailed: "Nicht gespeichert: {reason}",
+  vacSave: "Speichern", vacUnsaved: "Nicht gespeichert", vacEntityInvalid: "Eine Entität hat die Form bereich.name, zum Beispiel input_boolean.urlaub.", vacGraceInvalid: "Die Nachfrist muss eine ganze Zahl von 0 bis {max} Stunden sein.", vacStateOn: "Aktuell: an", vacStateOff: "Aktuell: aus", vacStateMissing: "Aktuell: nicht verfügbar", vacEnded: "Zuletzt beendet am {date}.", vacFailed: "Nicht gespeichert: {reason}",
   vacBarOn: "Urlaubsmodus aktiv", vacBarHeld: "{n} Befunde zurückgehalten", vacBarHeld1: "1 Befund zurückgehalten",
   vacBarAfter: "Urlaub beendet", vacBarAfterLine: "Frist bis {date} · {n} Befunde noch zurückgehalten", vacBarAfterLine1: "Frist bis {date} · 1 Befund noch zurückgehalten",
   vacBarMissing: "Urlaubsmodus-Entität nicht verfügbar", vacBarMissingLine: "{entity} meldet keinen Zustand. Der Modus gilt als aus.", vacBarShow: "Zurückgehaltene anzeigen", vacBarRules: "Regeln", vacBarSettings: "Einstellung",
@@ -12059,7 +12065,7 @@ Object.assign(TEXT.en, {
   excEffectHide: "{objects} objects, {n} findings hidden", excEffectDelay: "{hold} findings held back, {due} due", excEffectNone: "Matches nothing right now",
   excPreview: "Preview", excPreviewHide: "{objects} objects, {n} findings would be hidden", excPreviewDelay: "{hold} findings would be held back, {due} would be due at once (down for longer already)",
   excImportant: "Findings with a high impact are among them: {names}. Check that they should really be left out.",
-  excSave: "Save rule", excCancel: "Cancel", excNeedTarget: "Choose at least one entry.", excFailed: "Not saved: {reason}",
+  excSave: "Save rule", excCancel: "Cancel", excNeedTarget: "Choose at least one entry.", excDaysInvalid: "The delay must be a whole number from 1 to {max} days.", excFailed: "Not saved: {reason}",
   excOn: "Rule active", excDue: "Time has passed",
   hidByRule: "By a rule", ignoredByRule: "Hidden by an exception rule: {rule}", heldByRule: "Held back by an exception rule: {rule}, reported from {date}", dueByRule: "Time has passed · exception rule: {rule}",
   hidRuleLink: "Rule",
@@ -12071,7 +12077,7 @@ Object.assign(TEXT.en, {
   vacTitle: "Vacation mode", vacHint: "While the chosen entity is “on” the rules “only in vacation mode” apply. If it is unavailable or unknown the mode counts as off. You can switch it in Home Assistant, for example by calendar or automation.",
   vacEntity: "Entity for vacation mode", vacEntityHint: "Any entity that can be “on”: helper, switch, binary sensor, schedule, calendar. Leave empty to turn vacation mode off.",
   vacGrace: "Grace period after the vacation", vacGraceUnit: "hours", vacGraceHint: "Default 24 hours. How long findings are held back after the end when the object has no delay of its own.",
-  vacSave: "Save", vacStateOn: "Now: on", vacStateOff: "Now: off", vacStateMissing: "Now: unavailable", vacEnded: "Last ended on {date}.", vacFailed: "Not saved: {reason}",
+  vacSave: "Save", vacUnsaved: "Not saved", vacEntityInvalid: "An entity looks like domain.name, for example input_boolean.vacation.", vacGraceInvalid: "The grace period must be a whole number from 0 to {max} hours.", vacStateOn: "Now: on", vacStateOff: "Now: off", vacStateMissing: "Now: unavailable", vacEnded: "Last ended on {date}.", vacFailed: "Not saved: {reason}",
   vacBarOn: "Vacation mode on", vacBarHeld: "{n} findings held back", vacBarHeld1: "1 finding held back",
   vacBarAfter: "Vacation over", vacBarAfterLine: "Delay until {date} · {n} findings still held back", vacBarAfterLine1: "Delay until {date} · 1 finding still held back",
   vacBarMissing: "Vacation mode entity unavailable", vacBarMissingLine: "{entity} reports no state. The mode counts as off.", vacBarShow: "Show held back", vacBarRules: "Rules", vacBarSettings: "Settings",
@@ -12143,20 +12149,30 @@ class ExceptionsMixin {
 
   vacationHtml() {
     const v = this.exc.vacation || {}, form = this.vacForm || (this.vacForm = { entity: v.entity || "", grace: v.grace_hours ?? 24, error: "" });
+    const dirty = this.vacDirty();
     const ids = Object.keys(this._hass?.states || {}).filter(id => /^(input_boolean|binary_sensor|switch|schedule|calendar)\./.test(id)).sort();
     const state = v.state === "on" ? "vacStateOn" : v.state && v.state !== "unavailable" && v.state !== "unknown" ? "vacStateOff" : "vacStateMissing";
     return `<form data-vac-form><div class="setrow"><div><strong>${this.t("vacEntity")}</strong><small>${this.t("vacEntityHint")}</small></div>
         <div><input list="hk-vac-ids" data-vac-entity autocomplete="off" value="${this.esc(form.entity)}"><datalist id="hk-vac-ids">${ids.map(id => `<option value="${this.esc(id)}">`).join("")}</datalist>
         ${v.entity ? `<small role="status">${this.t(state)}${v.ended_at ? ` · ${this.t("vacEnded", { date: this.formatDate(v.ended_at) })}` : ""}</small>` : ""}</div></div>
       <div class="setrow"><div><strong>${this.t("vacGrace")}</strong><small>${this.t("vacGraceHint")}</small></div>
-        <div class="excnum"><input type="number" min="0" max="${v.grace_max || 720}" data-vac-grace value="${this.esc(form.grace)}"> <span>${this.t("vacGraceUnit")}</span><span class="grow"></span><button type="submit" class="btn primary">${this.t("vacSave")}</button></div></div>
-      ${form.error ? `<div class="emptyrel error" role="alert">${this.esc(form.error)}</div>` : ""}</form>`;
+        <div class="excnum"><input type="number" min="0" max="${v.grace_max || 720}" data-vac-grace value="${this.esc(form.grace)}"> <span>${this.t("vacGraceUnit")}</span><span class="grow"></span><small class="vacdirty" data-vac-dirty ${dirty ? "" : "hidden"}>${this.t("vacUnsaved")}</small><button type="submit" class="btn primary" data-vac-save ${dirty ? "" : "disabled"}>${this.t("vacSave")}</button></div></div>
+      ${form.error ? `<div class="pad">${this.notice("err", form.error)}</div>` : ""}</form>`;
+  }
+
+  // Whether the vacation fields differ from what is saved; reverting a change makes it clean again.
+  vacDirty() {
+    const v = this.exc?.vacation || {}, f = this.vacForm;
+    return Boolean(f) && (f.entity.trim() !== (v.entity || "") || Number(f.grace) !== (v.grace_hours ?? 24));
   }
 
   async saveVacation() {
-    const form = this.vacForm;
+    const form = this.vacForm, v = this.exc?.vacation || {}, max = v.grace_max || 720, grace = Number(form.grace);
+    const entity = form.entity.trim();
+    if (entity && !/^[a-z0-9_]+\.[a-z0-9_]+$/.test(entity)) { form.error = this.t("vacEntityInvalid"); this.render(); return; }
+    if (String(form.grace).trim() === "" || !Number.isInteger(grace) || grace < 0 || grace > max) { form.error = this.t("vacGraceInvalid", { max }); this.render(); return; }
     try {
-      await this._hass.callWS({ type: "ha_housekeeper/vacation_set", entity: form.entity.trim() || null, grace_hours: Math.max(0, Number(form.grace) || 0) });
+      await this._hass.callWS({ type: "ha_housekeeper/vacation_set", entity: entity || null, grace_hours: grace });
       this.vacForm = null;
       this.exc = await this._hass.callWS({ type: "ha_housekeeper/exceptions" });
       await this.refreshData();
@@ -12191,8 +12207,7 @@ class ExceptionsMixin {
     const kinds = ["area", "label", "integration", "domain", "device", "entity"].map(k => `<button type="button" class="chip${f.kind === k ? " active" : ""}" data-exc-kind="${k}" aria-pressed="${f.kind === k}">${this.t(`excKind_${k}`)}</button>`).join("");
     const pv = f.preview;
     const preview = pv ? `<div class="excprev" role="status"><strong>${this.t("excPreview")}:</strong> ${f.action === "delay" ? this.t("excPreviewDelay", { hold: pv.hold, due: pv.due }) : this.t("excPreviewHide", { objects: pv.objects, n: pv.hide })}
-        ${pv.important?.length ? `<br><span class="error">${this.t("excImportant", { names: this.esc(pv.important.map(x => x.name).join(", ")) })}</span>` : ""}
-        ${pv.overlap?.length ? `<br><small class="factnote">${this.esc(this.t("excOverlap", { rules: pv.overlap.map(id => { const r = this.exc.rules.find(x => x.id === id); return r ? this.excRuleName(r) : id; }).join(", ") }))}</small>` : ""}</div>` : "";
+        ${pv.overlap?.length ? `<br><small class="factnote">${this.esc(this.t("excOverlap", { rules: pv.overlap.map(id => { const r = this.exc.rules.find(x => x.id === id); return r ? this.excRuleName(r) : id; }).join(", ") }))}</small>` : ""}</div>${pv.important?.length ? this.notice("warn", this.t("excImportant", { names: pv.important.map(x => x.name).join(", ") })) : ""}` : "";
     const action = f.scope === "vacation" ? `<small class="factnote">${this.t("excScopeHint")}</small>`
       : `<div class="mfield"><span>${this.t("excAction")}</span><div class="excact"><button type="button" class="chip${f.action === "hide" ? " active" : ""}" data-exc-action="hide" aria-pressed="${f.action === "hide"}">${this.t("excAction_hide")}</button><button type="button" class="chip${f.action === "delay" ? " active" : ""}" data-exc-action="delay" aria-pressed="${f.action === "delay"}">${this.t("excAction_delay")}</button>
         ${f.action === "delay" ? `<input type="number" min="1" max="${this.exc.days_max || 365}" data-exc-days value="${this.esc(f.days)}" aria-label="${this.esc(this.t("excDays"))}"> <span>${this.t("excDays")}</span>` : ""}</div>
@@ -12204,12 +12219,17 @@ class ExceptionsMixin {
       ${action}
       <label class="mfield"><span>${this.t("excNote")}</span><input data-exc-note maxlength="200" autocomplete="off" value="${this.esc(f.note)}"></label>
       <small class="factnote">${this.t("excWinner")}</small>
-      ${preview}${f.error ? `<small class="error" role="alert">${this.esc(f.error)}</small>` : ""}
+      ${preview}${f.error ? this.notice("err", f.error) : ""}
       <div class="mbtns"><button type="button" class="btn quiet" data-exc-cancel>${this.t("excCancel")}</button><button type="submit" class="btn primary">${this.t("excSave")}</button></div></form>`;
   }
 
   excDraft(f) {
     return { ...(f.id ? { id: f.id } : {}), kind: f.kind, targets: f.targets, action: f.scope === "vacation" ? "hide" : f.action, scope: f.scope || "always", ...(f.scope !== "vacation" && f.action === "delay" ? { days: Math.max(1, Number(f.days) || 7) } : {}), enabled: f.enabled !== false, note: f.note.trim() };
+  }
+
+  // The stored rules as the server takes them back: no effect, and days only where a delay has them.
+  excRules() {
+    return this.exc.rules.map(({ effect, days, ...rule }) => (days == null ? rule : { ...rule, days }));
   }
 
   openException(id, scope) {
@@ -12246,22 +12266,29 @@ class ExceptionsMixin {
     const f = this.excForm;
     if (!f) return;
     if (!f.targets.length) { f.error = this.t("excNeedTarget"); this.render(); return; }
-    const draft = this.excDraft(f), rules = this.exc.rules.map(({ effect, ...rule }) => rule);
+    const max = this.exc.days_max || 365, days = Number(f.days);
+    if (f.scope !== "vacation" && f.action === "delay" && !(Number.isInteger(days) && days >= 1 && days <= max)) { f.error = this.t("excDaysInvalid", { max }); this.render(); return; }
+    const draft = this.excDraft(f), rules = this.excRules();
     const at = rules.findIndex(r => r.id === f.id);
     if (at >= 0) rules[at] = draft; else rules.push(draft);
     this.saveExceptions(rules, f);
   }
 
   bindExceptions(root) {
-    const rules = () => this.exc.rules.map(({ effect, ...rule }) => rule);
+    const rules = () => this.excRules();
     root.querySelectorAll("[data-exc-edit]").forEach(el => el.onclick = () => this.openException(el.dataset.excEdit, el.dataset.excNew));
     root.querySelectorAll("[data-exc-delete]").forEach(el => el.onclick = () => this.saveExceptions(rules().filter(r => r.id !== el.dataset.excDelete), null));
     root.querySelectorAll("[data-exc-toggle]").forEach(el => el.onchange = () => this.saveExceptions(rules().map(r => (r.id === el.dataset.excToggle ? { ...r, enabled: el.checked } : r)), null));
     root.querySelectorAll("[data-vac-form]").forEach(form => {
       const v = this.vacForm;
       form.onsubmit = ev => { ev.preventDefault(); this.saveVacation(); };
-      form.querySelector("[data-vac-entity]").oninput = ev => { v.entity = ev.target.value; };
-      form.querySelector("[data-vac-grace]").oninput = ev => { v.grace = ev.target.value; };
+      const sync = () => {
+        v.error = ""; form.querySelector(".notice")?.remove();
+        const dirty = this.vacDirty();
+        form.querySelector("[data-vac-dirty]").hidden = !dirty; form.querySelector("[data-vac-save]").disabled = !dirty;
+      };
+      form.querySelector("[data-vac-entity]").oninput = ev => { v.entity = ev.target.value; sync(); };
+      form.querySelector("[data-vac-grace]").oninput = ev => { v.grace = ev.target.value; sync(); };
     });
     root.querySelectorAll("[data-vac-go]").forEach(el => el.onclick = ev => {
       ev.preventDefault();
@@ -12273,15 +12300,16 @@ class ExceptionsMixin {
     root.querySelectorAll("[data-exc-form]").forEach(form => {
       const f = this.excForm;
       form.onsubmit = ev => { ev.preventDefault(); this.commitException(); };
-      form.querySelectorAll("[data-exc-kind]").forEach(el => el.onclick = () => { f.kind = el.dataset.excKind; f.targets = []; f.search = ""; f.preview = null; this._picker = null; this.render(); });
+      form.querySelectorAll("[data-exc-kind]").forEach(el => el.onclick = () => { f.error = ""; f.kind = el.dataset.excKind; f.targets = []; f.search = ""; f.preview = null; this._picker = null; this.render(); });
       const search = form.querySelector("[data-exc-search]");
       if (search) search.oninput = ev => { f.search = ev.target.value; this.render(); this.shadowRoot.querySelector("[data-exc-search]")?.focus(); };
-      form.querySelector("[data-exc-note]").oninput = ev => { f.note = ev.target.value; };
-      form.querySelectorAll("[data-exc-action]").forEach(el => el.onclick = () => { f.action = el.dataset.excAction; this.render(); this.excPreview(); });
+      form.querySelector("[data-exc-note]").oninput = ev => { f.error = ""; f.note = ev.target.value; };
+      form.querySelectorAll("[data-exc-action]").forEach(el => el.onclick = () => { f.error = ""; f.action = el.dataset.excAction; this.render(); this.excPreview(); });
       const days = form.querySelector("[data-exc-days]");
-      if (days) days.onchange = ev => { f.days = ev.target.value; this.excPreview(); };
+      if (days) days.onchange = ev => { f.error = ""; f.days = ev.target.value; this.excPreview(); };
       form.querySelectorAll("[data-exc-target]").forEach(el => el.onclick = () => {
         const id = el.dataset.excTarget;
+        f.error = "";
         f.targets = f.targets.includes(id) ? f.targets.filter(x => x !== id) : [...f.targets, id];
         this.render(); this.excPreview();
       });

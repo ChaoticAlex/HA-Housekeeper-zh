@@ -816,7 +816,7 @@ _RULE_SCHEMA = {
     vol.Required("kind"): vol.In(EXCEPTION_KINDS),
     vol.Required("targets"): [str],
     vol.Optional("action", default="hide"): vol.In(EXCEPTION_ACTIONS),
-    vol.Optional("days"): vol.All(int, vol.Range(min=1, max=EXCEPTION_DAYS_MAX)),
+    vol.Optional("days"): vol.Any(None, vol.All(int, vol.Range(min=1, max=EXCEPTION_DAYS_MAX))),
     vol.Optional("scope", default="always"): vol.In(EXCEPTION_SCOPES),
     vol.Optional("enabled", default=True): bool,
     vol.Optional("note", default=""): vol.All(str, vol.Length(max=EXCEPTION_NOTE_MAX)),

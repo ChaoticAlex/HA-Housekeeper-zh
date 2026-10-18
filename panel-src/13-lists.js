@@ -82,6 +82,12 @@ class ListsMixin {
   }
 
   // A click that failed says so and leaves the page as it is; only a failed load replaces the page.
+  // A message in a box: "err" (something failed), "warn" (check this before you go on) or "info". `text` is escaped here.
+  notice(tone, text, { attrs = "" } = {}) {
+    const icon = { err: "mdi:alert-circle-outline", warn: "mdi:alert-outline", info: "mdi:information-outline" }[tone] || "mdi:information-outline";
+    return `<div class="notice ${tone}" role="${tone === "err" ? "alert" : "status"}" ${attrs}><ha-icon icon="${icon}"></ha-icon><span>${this.esc(text)}</span></div>`;
+  }
+
   failed(err) {
     this.noteError("action", err);
     this.toast(this.t("actionFailed", { detail: this.errText(err) }), true);
