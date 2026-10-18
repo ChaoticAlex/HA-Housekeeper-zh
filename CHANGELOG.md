@@ -5,10 +5,11 @@
 ### Geändert
 
 - **HACS und Marketplace:** Ab Home Assistant 2026.11 ist HACS als „Marketplace“ eingebaut. Housekeeper liest installierte Integrationen, Updates, archivierte und entfernte Repositories aus beiden.
-- **KI-Zugriff (Issue 26):**
+- **KI-Zugriff:**
   - Neuer Reiter Einstellungen → KI-Zugriff, standardmäßig aus: Programme und KI-Agenten, die Home-Assistant-Dienste aufrufen können (zum Beispiel ha-mcp), lesen Housekeeper über die Dienste `status`, `findings`, `object` und `audit`.
   - Ein zweiter Schalter „Merkliste ändern“ erlaubt `finding_decide`, `mark`, `note_set` und `undo`; es ändern sich nur Housekeepers eigene Listen, nie Home Assistant.
-  - Ein Protokoll zeigt jeden Aufruf mit Benutzer und Ergebnis, Änderungen lassen sich dort zurücknehmen. Nur Administratoren, nie Geheimnisse.
+  - „Automatisch ausschalten“ wählst du mit Chips (Nie, 1, 8, 24 Stunden).
+  - Ein Protokoll zeigt jeden Aufruf mit Benutzer und Ergebnis, Änderungen lassen sich dort zurücknehmen. Es ist eine Standard-Tabelle wie die anderen Listen: Suche, Filter nach Art, Sortierung, Seiten und aufklappbare Zeilen mit den Parametern. Nur Administratoren, nie Geheimnisse.
 - **Urlaubsmodus:** Eine Entität deiner Wahl (z. B. `input_boolean.urlaub`) schaltet Regeln „nur im Urlaubsmodus“ ein. Dazu gibt es Regeln für einzelne Geräte und Entitäten, eine Nachfrist nach dem Urlaub (Standard 24 Stunden) und eine Leiste, solange etwas zurückgehalten wird.
 - **Ausnahmeregeln:** Unter Einstellungen → Ausnahmen nimmst du Objekte nach Bereich, Label, Integration oder Typ (z. B. Bereich „Lager“, alle `media_player`) aus. Die Regel blendet ihre Befunde aus oder meldet einen Ausfall erst nach einer einstellbaren Zahl Tage.
 - **In HA öffnen:** Bei Entitäten mit Gerät öffnet der Knopf die Geräteseite statt der ganzen Entitätenliste.
@@ -17,8 +18,6 @@
 - **Links nach Home Assistant:** Alle Sprünge nach Home Assistant (Apps, Integrationen, HACS, Benutzer, Cloud) öffnen in einem neuen Tab statt im selben.
 - **Schutzmodus und Ausnahmen:** Die Einstellungen trennen beides in zwei Reiter. Der Schutzmodus nennt die Wirkung statt der Stufe: „Alles erlaubt“, „Ohne endgültiges Löschen“, „Nur Quarantäne“, „Nur lesen“.
 - **Einstellungen, Kacheln:** Die Kacheln stehen in neuer Reihenfolge (Schutzmodus, Ausnahmen, Scan und Meldungen, KI-Zugriff, Darstellung, Info) in drei Spalten. Jede Kachel zeigt ihren Stand, der Randstreifen folgt ihm (z. B. KI-Zugriff: aus grau, Lesen grün, Ändern gelb).
-- **KI-Zugriff, Zeitlimit:** „Automatisch ausschalten“ wählst du wie andere Einstellungen mit Chips (Nie, 1, 8, 24 Stunden) statt im Dropdown.
-- **KI-Zugriff, Protokoll:** Das Protokoll ist eine Standard-Tabelle wie die anderen Listen: Suche, Filter nach Art, Sortierung, Seiten und aufklappbare Zeilen mit den Parametern.
 - **Updates:** Die ausstehenden Updates stehen in der gewohnten Tabelle mit Suche, Sortierung, Filter nach Bereich und Seiten.
 
 ### English
@@ -26,10 +25,11 @@
 #### Changed
 
 - **HACS and Marketplace:** From Home Assistant 2026.11 HACS is built in as “Marketplace”. Housekeeper reads installed integrations, updates, archived and removed repositories from both.
-- **AI access (issue 26):**
+- **AI access:**
   - New tab Settings → AI access, off by default: programs and AI agents that can call Home Assistant services (for example ha-mcp) read Housekeeper through the services `status`, `findings`, `object` and `audit`.
   - A second switch “Change the list” allows `finding_decide`, `mark`, `note_set` and `undo`; only Housekeeper's own lists change, never Home Assistant.
-  - A log shows every call with user and result, and changes can be taken back there. Administrators only, never secrets.
+  - “Switch off automatically” uses chips (never, 1, 8, 24 hours).
+  - A log shows every call with user and result, and changes can be taken back there. It is a standard table like the other lists: search, filter by kind, sorting, pages and expandable rows with the parameters. Administrators only, never secrets.
 - **Vacation mode:** An entity of your choice (e.g. `input_boolean.vacation`) turns on rules “only in vacation mode”. Also rules for single devices and entities, a grace period after the vacation (default 24 hours) and a bar while something is held back.
 - **Exception rules:** Under Settings → Protection and exceptions you leave out objects by area, label, integration or type (e.g. area “Storage”, all `media_player`). A rule hides their findings or reports an outage only after a number of days you set.
 - **Open in HA:** For entities with a device the button opens the device page instead of the whole entity list.
@@ -38,8 +38,6 @@
 - **Links into Home Assistant:** All jumps into Home Assistant (apps, integrations, HACS, users, cloud) now open in a new tab instead of the current one.
 - **Protection mode and exceptions:** Settings now split them into two tabs. The protection mode names the effect instead of the level: “Everything allowed”, “No irreversible deletions”, “Quarantine only”, “Read only”.
 - **Settings, tiles:** The tiles come in a new order (protection mode, exceptions, scan and messages, AI access, appearance, info) in three columns. Every tile shows its state, and the edge stripe follows it (e.g. AI access: off grey, reads green, changes amber).
-- **AI access, time limit:** “Switch off automatically” uses chips (never, 1, 8, 24 hours) like other settings instead of a dropdown.
-- **AI access, log:** The log is a standard table like the other lists: search, filter by kind, sorting, pages and expandable rows with the parameters.
 - **Updates:** Pending updates are shown in the usual table with search, sorting, an area filter and pages.
 
 ## 1.9.0 - 2026-10-17
