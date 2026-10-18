@@ -160,7 +160,7 @@ class PoliciesMixin {
     const anyHidden = r?.rules?.some(rule => rule.ignored);
     const left = anyHidden ? `<button class="chip ${this.policyShowHidden ? "active" : ""}" data-policy-hidden aria-pressed="${Boolean(this.policyShowHidden)}">${this.t(this.policyShowHidden ? "polHideHidden" : "polShowHidden")}</button>` : "";
     const head = this.pageBar({ left, at: this.policiesAt, loading: this.policiesLoading, attr: "data-policy-refresh" });
-    if (this.policiesError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.policiesError)}</div></div></div>`;
+    if (this.policiesError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.policiesError)}</div></div>`;
     if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("polLoading")}</div></div>`;
     const on = r.rules.filter(rule => rule.enabled);
     const violations = on.reduce((n, rule) => n + rule.count, 0);

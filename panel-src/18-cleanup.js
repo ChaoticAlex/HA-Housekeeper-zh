@@ -281,7 +281,7 @@ class CleanupMixin {
         : [...this.cleanupSel].map(object_id => ({ kind: this.cleanupKind, object_id, ...(REMOVAL_KINDS.includes(this.cleanupKind) && this.recorderFor(object_id) !== "keep" ? { recorder: this.recorderFor(object_id) } : {}) }));
       const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_create", actions });
       this.openNewPlan(plan, null); this.toast(this.t("previewReady"));
-    } catch (err) { this.cleanupError = err?.message || String(err); }
+    } catch (err) { this.cleanupError = this.errText(err); }
     this.cleanupBusy = false; this.render();
   }
 
@@ -926,7 +926,7 @@ class CleanupMixin {
     ];
     const open = this.viewTabOf("journal", tabs, "plans");
     const head = this.pageBar({ at: this.loadedAt("journal"), loading: this.journal === null, attr: "data-journal-refresh" });
-    const failed = this.journalError ? `<div class="panel"><div class="error">${this.esc(this.journalError)}</div></div>` : "";
+    const failed = this.journalError ? `<div class="panel">${this.notice("err", this.journalError)}</div>` : "";
     const body = this.journalError ? "" : open === "devices" ? this.removedCard() : open === "purges" ? this.purgeJournalCard() : journalCard;
     return `<div class="stack">${this.planHeader()}${head}${this.navTiles("journal", tabs, open, this.t("journal"), true)}${failed}${body}</div>`;
   }

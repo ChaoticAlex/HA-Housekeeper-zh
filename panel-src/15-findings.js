@@ -342,7 +342,7 @@ class FindingsMixin {
       <input data-decide-reason maxlength="200" autocomplete="off" value="${this.esc(d.reason)}" aria-label="${this.esc(this.t("decideReason"))}" placeholder="${this.esc(this.t(d.kind === "keep" ? "decideReasonNeeded" : "decideReason"))}">
       <select data-decide-days aria-label="${this.esc(this.t("decideHow"))}">${days}</select>
       <button type="submit" class="btn primary">${this.t("saveOptions")}</button><button type="button" class="btn quiet" data-decide-cancel>${this.t("cancelRun")}</button>
-      ${d.error ? `<small class="error" role="alert">${this.esc(this.t(d.error))}</small>` : ""}</form>`;
+      ${d.error ? `${this.notice("err", this.t(d.error))}` : ""}</form>`;
   }
 
   openDecide(key, kind = "ignore") { this.decide = { key, kind, days: kind === "snooze" ? 30 : 0, reason: "", error: "" }; this.render(); this.shadowRoot?.querySelector?.("[data-decide-kind]")?.focus?.(); }

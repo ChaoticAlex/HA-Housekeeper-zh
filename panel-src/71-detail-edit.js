@@ -33,7 +33,7 @@ class DetailEditMixin {
     const assign = hasAreas ? `<form class="deform" data-de-area><label for="de-area"><strong>${this.t("deArea")}</strong><small class="denow${now ? "" : " none"}">${this.t("deAreaNow", { area: now || this.t("deNoArea") })}</small></label>${areaControls}
         ${suggest ? `<small class="factnote">${this.t("areaNote")}</small>` : ""}</form>` : `<small class="factnote">${this.t("areaNone")}</small>`;
     // Rarely needed, so it starts closed; an error from the last try keeps it open.
-    const body = `<div class="pad">${rename}${assign}${e.error ? `<small class="error" role="alert">${this.esc(this.t(e.error))}</small>` : ""}</div>`;
+    const body = `<div class="pad">${rename}${assign}${e.error ? `${this.notice("err", this.t(e.error))}` : ""}</div>`;
     return `<section class="panel">${this.fold("detail_edit", { title: this.t("deTitle") }, body, false, e.error ? true : undefined)}</section>`;
   }
 
@@ -45,7 +45,7 @@ class DetailEditMixin {
     if (renameControls) rows.push(this.actRow(this.t("deNewId"), this.t("deRenameNote"), `<form class="deform" data-de-rename>${renameControls}</form>`));
     const areaHint = [this.t("deAreaNow", { area: now || this.t("deNoArea") }), suggest && hasAreas ? this.t("areaNote") : ""].filter(Boolean).join(" · ");
     rows.push(hasAreas ? this.actRow(this.t("deArea"), areaHint, `<form class="deform" data-de-area>${areaControls}</form>`) : this.actRow(this.t("deArea"), this.t("areaNone"), ""));
-    if (e.error) rows.push(`<div class="actblock"><small class="error" role="alert">${this.esc(this.t(e.error))}</small></div>`);
+    if (e.error) rows.push(`<div class="actblock">${this.notice("err", this.t(e.error))}</div>`);
     return rows;
   }
 

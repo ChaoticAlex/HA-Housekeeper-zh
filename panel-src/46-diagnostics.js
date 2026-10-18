@@ -129,7 +129,7 @@ class DiagnosticsMixin {
     this.ensureRuns();
     const d = this.diagState(), q = d.quality;
     const head = this.pageBar({ at: this.loadedAt("quality"), loading: d.loading, attr: "data-quality-refresh" });
-    if (d.error) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(d.error)}</div></div></div>`;
+    if (d.error) return `<div class="stack">${head}<div class="panel">${this.notice("err", d.error)}</div></div>`;
     if (!q) return `<div class="stack">${head}<div class="panel">${this.skeleton("qualityLoading")}</div></div>`;
     return build(q, head);
   }

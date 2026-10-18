@@ -150,7 +150,7 @@ class BackupMixin {
 
   backupCard() {
     const head = this.pageBar({ at: this.loadedAt("backup"), loading: this.backupLoading, attr: "data-bh-refresh" });
-    if (this.backupError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.backupError)}</div></div></div>`;
+    if (this.backupError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.backupError)}</div></div>`;
     const b = this.backup;
     if (!b) return `<div class="stack">${head}<div class="panel">${this.skeleton("backupLoading")}</div></div>`;
     if (!b.available) return `<div class="stack">${head}<div class="panel"><div class="emptymsg">${this.t("backupUnavailable")}</div></div></div>`;

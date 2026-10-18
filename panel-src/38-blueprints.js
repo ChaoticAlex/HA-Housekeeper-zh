@@ -38,7 +38,7 @@ class BlueprintsMixin {
   blueprintsCard() {
     this.ensureBlueprints();
     const head = this.pageBar({ at: this.loadedAt("blueprints"), loading: !this.blueprints && !this.blueprintsError, attr: "data-bp-refresh" });
-    if (this.blueprintsError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.blueprintsError)}</div></div></div>`;
+    if (this.blueprintsError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.blueprintsError)}</div></div>`;
     if (!this.blueprints) return `<div class="stack">${head}<div class="panel">${this.skeleton("loading")}</div></div>`;
     const items = this.bpItems();
     const rank = { missing: 0, broken: 1, unused: 2 }, label = { missing: "bpMissing", broken: "bpBroken", unused: "bpUnused" }, tone = { missing: "red", broken: "red", unused: "mute" };
@@ -105,7 +105,7 @@ class BlueprintsMixin {
     return `${head}<section class="panel">${this.viewTabBar("blueprint", tabs, open)}${body}</section>`;
   }
 
-  bpLoading() { return this.bpDetailError ? `<div class="error pad">${this.esc(this.bpDetailError)}</div>` : this.skeleton("loading"); }
+  bpLoading() { return this.bpDetailError ? `<div class="pad">${this.notice("err", this.bpDetailError)}</div>` : this.skeleton("loading"); }
 
   blueprintInputs(d) {
     if (!d.inputs.length) return `<div class="emptymsg">${this.t("bpNoInputs")}</div>`;

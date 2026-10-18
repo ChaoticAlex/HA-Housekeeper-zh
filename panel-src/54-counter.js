@@ -121,7 +121,7 @@ class CounterMixin {
   rangeChart() {
     const sr = this.rangeSeries, win = this.rangeWin;
     if (this.rangeSeriesLoading) return this.skeleton("counterScanning");
-    if (this.rangeSeriesError) return `<div class="error">${this.esc(this.rangeSeriesError)}</div>`;
+    if (this.rangeSeriesError) return `${this.notice("err", this.rangeSeriesError)}`;
     if (!sr || !win || !sr.points.length) return sr ? `<p class="factnote">${this.t("rangeNoData")}</p>` : "";
     const w = 640, h = 150, pad = 4, span = Math.max(1, win.to - win.from);
     const ys = sr.points.map(p => p[1]), y0 = Math.min(...ys), y1 = Math.max(...ys);
@@ -180,7 +180,7 @@ class CounterMixin {
       <div class="setrow"><div><label>${this.t("counterMode")}</label></div><select class="w460" data-counter-mode>${["hold", "interpolate"].map(m => `<option value="${m}" ${mode === m ? "selected" : ""}>${this.t(`counterMode_${m}`)}</option>`).join("")}</select></div>
       <div class="setrow planfoot"><small class="u-m0">${this.t("counterScanNote")}</small><button class="btn primary" data-counter-scan ${this.counterLoading ? 'disabled aria-busy="true"' : ""}>${this.counterLoading ? this.t("counterScanning") : this.t("counterScan")}</button></div>`;
     let body = "";
-    if (this.counterError) body = `<div class="error">${this.esc(this.counterError)}</div>`;
+    if (this.counterError) body = `${this.notice("err", this.counterError)}`;
     else if (s && !s.available) body = `<div class="emptymsg">${this.t("counterNoRecorder")}</div>`;
     else if (s?.busy) body = `<p class="factnote">${this.t("relBusy")}</p>`;
     else if (s) {

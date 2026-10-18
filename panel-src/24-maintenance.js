@@ -39,7 +39,7 @@ class MaintenanceMixin {
     const bar = (extra = "", attr = "", exportId = "") => this.pageBar({ left: extra, at: this.isoOf(c?.computed_at) || this.loadedAt("costs"), loading: this.costsLoading, attr, refresh: Boolean(attr), exportId });
     const head = (extra = "", attr = "") => `${bar(extra, attr)}<div class="panel">`; // the states without a list: the card holds the message
     if (this.costsLoading) return `<div class="stack">${head("", "data-costs-load")}${this.skeleton("recorderLoading")}</div></div>`;
-    if (this.costsError) return `<div class="stack">${head("", "data-costs-load")}<div class="error">${this.esc(this.costsError)}</div></div></div>`;
+    if (this.costsError) return `<div class="stack">${head("", "data-costs-load")}${this.notice("err", this.costsError)}</div></div>`;
     if (!c) return `<div class="stack">${head(`<button class="btn primary" data-costs-load>${this.t("recorderLoad")}</button>`)}</div></div>`;
     if (c.busy) return `<div class="stack">${head("", "data-costs-load")}<p class="factnote">${this.t("relBusy")}</p></div></div>`;
     if (!c.available) return `<div class="stack">${head()}<div class="emptymsg"><ha-icon icon="mdi:database-off-outline"></ha-icon>${this.t("recorderUnavailable")}</div></div></div>`;
@@ -202,7 +202,7 @@ class MaintenanceMixin {
   updatesCard() {
     const p = this.preflight;
     const head = this.pageBar({ at: this.loadedAt("preflight"), loading: this.preflightLoading, attr: "data-pf-refresh" });
-    if (this.preflightError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.preflightError)}</div></div></div>`;
+    if (this.preflightError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.preflightError)}</div></div>`;
     if (!p) return `<div class="stack">${head}<div class="panel">${this.skeleton("preflightLoading")}</div></div>`;
     const updates = p.state.updates || [], counts = p.counts || {};
     const total = counts.total ?? updates.length;

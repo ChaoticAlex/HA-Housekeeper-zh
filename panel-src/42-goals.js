@@ -75,7 +75,7 @@ class GoalsMixin {
     return `<form class="pad polform" data-goal-form="${g.id}"><label>${this.t("goalLimitLabel")} <input type="number" data-goal-limit min="0" step="1" value="${this.esc(String(f.limit))}"></label>
       <label><input type="checkbox" data-goal-enabled ${f.enabled ? "checked" : ""}> ${this.t("goalEnabled")}</label><small>${this.t("goalDefault", { n: this.goalAmount(g, g.default) })}</small>
       <button type="submit" class="btn primary">${this.t("goalSave")}</button><button type="button" class="btn quiet" data-goal-cancel>${this.t("cancelRun")}</button>
-      ${f.error ? `<small class="error" role="alert">${this.esc(f.error)}</small>` : ""}</form>`;
+      ${f.error ? `${this.notice("err", f.error)}` : ""}</form>`;
   }
 
   // The overview shows only what is missed (or that all is met) and leads to Maintenance, where the limits are set.
@@ -85,7 +85,7 @@ class GoalsMixin {
     if (!compact) {
       // The tab in Maintenance says what is going on instead of staying empty.
       const head = this.pageBar({ at: this.loadedAt("goals"), loading: this.goalsLoading, attr: "data-goals-refresh" });
-      if (this.goalsError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.goalsError)}</div></div></div>`;
+      if (this.goalsError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.goalsError)}</div></div>`;
       if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("loading")}</div></div>`;
       if (!r.goals?.length) return `<div class="stack">${head}<div class="panel"><div class="emptymsg">${this.t("goalsNone")}</div></div></div>`;
     }

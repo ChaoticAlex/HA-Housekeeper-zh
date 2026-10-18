@@ -78,7 +78,7 @@ class TraceDiagMixin {
     const option = (run, selected) => `<option value="${this.esc(run.run_id)}" ${run.run_id === selected ? "selected" : ""}>${this.esc(this.formatDate(run.start))} · ${this.esc(run.execution || "")}${run.trigger ? ` · ${this.esc(run.trigger)}` : ""}</option>`;
     const picker = (attr, label, selected) => `<div class="setrow"><div><label>${label}</label></div><select ${attr} class="w460"><option value=""></option>${c.runs.map(r => option(r, selected)).join("")}</select></div>`;
     const body = c.runs.length ? `${picker("data-cmp-a", this.t("cmpOlder"), c.a)}${picker("data-cmp-b", this.t("cmpNewer"), c.b)}<div class="setrow planfoot"><small class="u-m0"></small><button class="btn" data-cmp-run ${c.a && c.b && c.a !== c.b ? "" : "disabled"}>${this.t("cmpRun")}</button></div>` : `<div class="emptymsg">${this.t("cmpNoRuns")}</div>`;
-    return `<div class="panelhead"><div><h2>${this.t("cmpTitle")}</h2><p>${this.t("cmpHint")}</p></div></div>${body}${c.error ? `<div class="error">${this.esc(c.error)}</div>` : ""}${c.result ? this.compareLines(c.result) : ""}`;
+    return `<div class="panelhead"><div><h2>${this.t("cmpTitle")}</h2><p>${this.t("cmpHint")}</p></div></div>${body}${c.error ? `${this.notice("err", c.error)}` : ""}${c.result ? this.compareLines(c.result) : ""}`;
   }
 
   bindTraceDiag(root) {

@@ -48,7 +48,7 @@ class AreaAssignMixin {
       <select data-bulk-area aria-label="${this.esc(this.t("areaChoose"))}"><option value="">${this.t("areaSuggest")}</option>${areas.map(a => `<option value="${this.esc(a.object_id)}" ${b.area === a.object_id ? "selected" : ""}>${this.esc(a.name)}</option>`).join("")}</select>
       <button type="submit" class="btn primary" ${this.planBusy ? 'disabled aria-busy="true"' : ""}>${this.t("refactorPlan")}</button><button type="button" class="btn quiet" data-bulk-cancel>${this.t("cancelRun")}</button>
       <small class="factnote">${this.t("areaNote")}</small>
-      ${b.error ? `<small class="error" role="alert">${this.esc(this.t(b.error))}</small>` : ""}</form>`;
+      ${b.error ? `${this.notice("err", this.t(b.error))}` : ""}</form>`;
   }
 
   async makeAreaPlan() {

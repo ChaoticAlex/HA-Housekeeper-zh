@@ -65,7 +65,7 @@ class BackupCleanupMixin {
   backupCleanupCard() {
     this.ensureBackupCleanup();
     const head = `<p class="factnote pad">${this.t("bkcHint")}</p>`;  // the title is on the head of the fold
-    if (this.bkcError) return `<div class="panel">${head}<div class="error">${this.esc(this.bkcError)}</div></div>`;
+    if (this.bkcError) return `<div class="panel">${head}${this.notice("err", this.bkcError)}</div>`;
     const d = this.bkc;
     if (!d) return `<div class="panel">${head}${this.skeleton("bkcLoading")}</div>`;
     if (!d.available) return `<div class="panel">${head}<div class="emptymsg">${this.t("bkcUnavailable")}</div></div>`;

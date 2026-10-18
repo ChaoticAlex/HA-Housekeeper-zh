@@ -248,7 +248,7 @@ class ComponentsMixin {
     const open = this.viewTabOf("components", tabs, "core");
     if (apps.length || custom.length) this.sysEnsure("storage"); // CPU, RAM and data of the apps, folder sizes of custom integrations
     this.sysEnsure("flows");
-    const hacsBody = !hacsSt?.data ? (hacsSt?.error ? `<div class="error">${this.esc(hacsSt.error)}</div>` : this.skeleton("hacsLoading")) : `${this.hacsAdvice(repos)}${this.compHacsList(repos)}`;
+    const hacsBody = !hacsSt?.data ? (hacsSt?.error ? `${this.notice("err", hacsSt.error)}` : this.skeleton("hacsLoading")) : `${this.hacsAdvice(repos)}${this.compHacsList(repos)}`;
     const body = open === "apps" ? this.compAppsList(apps) : open === "hacs" ? hacsBody : this.compIntegrationsList(open === "custom" ? custom : core, open);
     const st = this.sysState(open === "hacs" ? "hacs" : "storage");
     const bar = this.pageBar({ at: st.at, loading: st.loading, attr: `data-sys-refresh="${open === "hacs" ? "hacs" : "storage"}"` });

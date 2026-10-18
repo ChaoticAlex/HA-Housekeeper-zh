@@ -134,7 +134,7 @@ class ExposureMixin {
     this.ensureExposure();
     const r = this.exposure;
     const head = this.pageBar({ at: this.exposureAt, loading: this.exposureLoading, attr: "data-expo-refresh" });
-    if (this.exposureError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.exposureError)}</div></div></div>`;
+    if (this.exposureError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.exposureError)}</div></div>`;
     if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("expoLoading")}</div></div>`;
     const sources = this.expoSources(r);
     const live = sources.filter(x => x.status === "ok");

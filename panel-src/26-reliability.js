@@ -179,7 +179,7 @@ class ReliabilityMixin {
     const aged = Boolean(r?.computed_at && (r.stale || r.age_seconds >= 60)), took = aged ? "" : this.tookNote(r).replace(/^ · /, "");
     const head = this.pageBar({ left: `${windows}${took ? `<span>${this.esc(took)}</span>` : ""}`, at: r?.computed_at ? new Date(r.computed_at * 1000).toISOString() : null, loading: this.relLoading, attr: "data-rel-refresh" });
     const alone = inner => `<div class="stack">${head}<div class="panel">${inner}</div></div>`;
-    if (this.relError) return alone(`<div class="error">${this.esc(this.relError)}</div>`);
+    if (this.relError) return alone(`${this.notice("err", this.relError)}`);
     if (!r) return alone(this.skeleton("relLoading"));
     if (!r.available) return alone(`<p class="factnote">${this.t("relNoRecorder")}</p>`);
     if (r.busy) return alone(`${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p>`);

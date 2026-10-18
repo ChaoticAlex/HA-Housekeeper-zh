@@ -95,7 +95,7 @@ class DbHealthMixin {
     const took = this.tookNote(r);
     const ready = Boolean(r?.available && !r.busy);
     const head = this.pageBar({ left: took ? `<span>${this.esc(took.replace(/^ · /, ""))}</span>` : "", at: this.isoOf(r?.computed_at), loading: this.dbLoading, attr: "data-db-refresh", exportId: ready && !this.dbError ? "recdb" : "" });
-    if (this.dbError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.dbError)}</div></div></div>`;
+    if (this.dbError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.dbError)}</div></div>`;
     if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("dbLoading")}</div></div>`;
     if (!r.available) return `<div class="stack">${head}<div class="panel"><p class="factnote">${this.t("relNoRecorder")}</p></div></div>`;
     if (r.busy) return `<div class="stack">${head}<div class="panel">${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p></div></div>`;

@@ -236,7 +236,7 @@ class StormsMixin {
     const ready = Boolean(r?.available && !r.busy);
     if (ready) this.stormsExporter(r);
     const head = this.pageBar({ left: `${windows}${took ? `<span>${this.esc(took)}</span>` : ""}`, at: this.isoOf(r?.computed_at) || this.loadedAt("storms"), loading: this.stormsLoading, attr: "data-storm-refresh", exportId: ready ? "recload" : "" });
-    if (this.stormsError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.stormsError)}</div></div></div>`;
+    if (this.stormsError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.stormsError)}</div></div>`;
     if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("stormLoading")}</div></div>`;
     if (!r.available) return `<div class="stack">${head}<div class="panel"><p class="factnote">${this.t("relNoRecorder")}</p></div></div>`;
     if (r.busy) return `<div class="stack">${head}<div class="panel">${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p></div></div>`;

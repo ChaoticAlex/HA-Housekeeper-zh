@@ -45,7 +45,7 @@ class SystemMixin {
   sysFrame(name, loading, build, left = () => "") {
     const st = this.sysEnsure(name);
     const bar = this.pageBar({ left: st.data ? left(st.data) : "", at: st.at, loading: st.loading, attr: `data-sys-refresh="${name}"` });
-    if (st.error) return `<div class="stack">${bar}<div class="panel"><div class="error">${this.esc(st.error)}</div></div></div>`;
+    if (st.error) return `<div class="stack">${bar}<div class="panel">${this.notice("err", st.error)}</div></div>`;
     if (!st.data) return `<div class="stack">${bar}<div class="panel">${this.skeleton(loading)}</div></div>`;
     return build(st.data, bar);
   }
@@ -429,7 +429,7 @@ class SystemMixin {
 
   appAccessCard(item) {
     const df = this.sysState("dataflow");
-    if (df.error) return `<div class="panel"><div class="error">${this.esc(df.error)}</div></div>`;
+    if (df.error) return `<div class="panel">${this.notice("err", df.error)}</div>`;
     if (!df.data) return `<div class="panel">${this.skeleton("accLoading")}</div>`;
     const app = this.appRights(item);
     if (!df.data.apps_available || !app) return `<div class="panel"><div class="emptymsg">${this.t("accAppsNoSupervisor")}</div></div>`;
@@ -443,7 +443,7 @@ class SystemMixin {
 
   appLoadCard(item) {
     const st = this.sysState("storage");
-    if (st.error) return `<div class="panel"><div class="error">${this.esc(st.error)}</div></div>`;
+    if (st.error) return `<div class="panel">${this.notice("err", st.error)}</div>`;
     if (!st.data) return `<div class="panel">${this.skeleton("sysLoading")}</div>`;
     const app = this.appUsage(item);
     if (!st.data.supervisor || !app) return `<div class="panel"><div class="emptymsg">${this.t("accAppsNoSupervisor")}</div></div>`;
@@ -479,7 +479,7 @@ class SystemMixin {
   accessDetailCard(item) {
     const df = this.sysState("dataflow"), se = this.sysState("secrets");
     const err = df.error || se.error;
-    if (err) return `<div class="panel"><div class="error">${this.esc(err)}</div></div>`;
+    if (err) return `<div class="panel">${this.notice("err", err)}</div>`;
     if (!df.data || !se.data) return `<div class="panel">${this.skeleton("accLoading")}</div>`;
     const e = this.accessEntryOf(item), cred = this.credentialsOf(item);
     const section = (title, body) => `<section class="panel"><div class="panelhead"><h2>${this.t(title)}</h2></div>${body}</section>`;

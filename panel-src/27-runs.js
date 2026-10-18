@@ -177,7 +177,7 @@ class RunsMixin {
     const r = this.runs;
     const since = r?.since ? ` · ${this.t("runsSince", { date: this.formatDate(r.since) })}` : "";
     const head = this.pageBar({ left: since ? `<span>${this.esc(since.replace(/^ · /, ""))}</span>` : "", at: this.loadedAt("runs"), loading: this.runsLoading, attr: "data-runs-refresh" });
-    if (this.runsError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.runsError)}</div></div></div>`;
+    if (this.runsError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.runsError)}</div></div>`;
     if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("runsLoading")}</div></div>`;
     this.lvState("runs", "runs", "desc");
     const lower = r.items.filter(row => row.lower_bound).length;

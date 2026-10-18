@@ -78,7 +78,7 @@ class EntityTrimMixin {
     const energy = this.usageTags(id).includes(this.t("energyDashboard"));
     const warn = e.tables.has("long_term") ? `<p class="etwarn">${this.t(energy ? "etWarnEnergy" : "etWarnLong")}</p>` : "";
     const ready = e.tables.size && (e.mode !== "range" || !only || this.entityTrimRange(e)) && !e.busy;
-    return `<div class="etkinds">${kinds}</div><div class="etbody">${mode}${timeline}</div>${warn}${e.error ? `<div class="error">${this.esc(e.error)}</div>` : ""}
+    return `<div class="etkinds">${kinds}</div><div class="etbody">${mode}${timeline}</div>${warn}${e.error ? `${this.notice("err", e.error)}` : ""}
       <div class="trimfoot"><p class="factnote">${this.t("etFoot")}</p><button class="btn primary" data-et-plan="${this.esc(id)}" ${ready ? "" : "disabled"}>${e.busy ? this.t("etBusy") : this.t("etPreview")}</button></div>`;
   }
 

@@ -132,7 +132,7 @@ class BatteryTableMixin {
   batteryNeed(rows = this.batteryTableRows()) {
     const b = this.batteryTrend;
     const head = `<div class="panelhead"><div><h2>${this.t("fcTitle")}</h2><p>${this.t("fcHint")}</p></div></div>`;
-    if (this.batteryTrendError) return `<div class="panel"><div class="error">${this.esc(this.batteryTrendError)}</div></div>`;
+    if (this.batteryTrendError) return `<div class="panel">${this.notice("err", this.batteryTrendError)}</div>`;
     if (!b) return `<div class="panel">${head}${this.skeleton("btLoading")}</div>`;
     if (b.busy) return `<div class="panel"><p class="factnote">${this.t("relBusy")}</p></div>`;
     const soon = this.batteryNeedRows();

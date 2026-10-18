@@ -1514,7 +1514,7 @@ class StylesMixin {
       .object{display:flex;align-items:center;gap:11px;min-width:260px}.object .tile{width:34px;height:34px}.object strong{display:block;font-weight:600}.id{display:block;color:var(--hk-muted);font-family:ui-monospace,SFMono-Regular,monospace;font-size:calc(11px*var(--hk-fs,1));margin-top:2px;max-width:390px;overflow:hidden;text-overflow:ellipsis}
       .tablefoot{padding:12px 16px;border-top:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));display:flex;align-items:center;justify-content:space-between;gap:10px}.pager{display:flex;align-items:center;gap:8px}.pager button{border:1px solid var(--hk-border);background:var(--hk-surface);border-radius:7px;padding:5px 10px}.pager button:disabled{opacity:.4}
       .viewswitch{display:inline-flex;gap:4px}.chip:disabled{opacity:.55;cursor:not-allowed}.chip em{font-style:normal;opacity:.7;margin-left:4px}.chip .tabdot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:6px;background:var(--hk-red)}.chips .spacer{flex:1}.chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px 16px;border-bottom:1px solid var(--hk-border)}.chip{border:1px solid var(--hk-border);background:var(--hk-surface);border-radius:99px;padding:5px 12px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}.chip.active{color:var(--hk-blue-text);border-color:var(--hk-blue);background:color-mix(in srgb,var(--hk-blue) 11%,transparent);font-weight:600}
-      .emptymsg,.loading{padding:46px;text-align:center;color:var(--hk-muted)}.viewgroup{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}.skeleton{display:grid;gap:10px;padding:18px 16px}.skeleton i{display:block;height:14px;border-radius:7px;background:linear-gradient(90deg,var(--hk-soft),color-mix(in srgb,var(--hk-soft) 55%,var(--hk-surface)),var(--hk-soft)) 0 0/200% 100%;animation:hk-shimmer 1.4s ease-in-out infinite}.skeleton i:nth-of-type(2){width:80%}.skeleton i:nth-of-type(3){width:60%}@keyframes hk-shimmer{to{background-position:-200% 0}}@media(prefers-reduced-motion:reduce){.skeleton i{animation:none}}.coverage{display:flex;gap:6px;align-items:flex-start}.coverage ha-icon{--mdc-icon-size:16px;flex:none;margin-top:1px}.fline{display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin-top:6px}.fline .fnote{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.emptymsg ha-icon{--mdc-icon-size:34px;color:var(--hk-green);display:block;margin:0 auto 8px}.error{padding:12px 14px;border-radius:10px;border-left:3px solid var(--hk-red);background:color-mix(in srgb,var(--hk-red) 10%,transparent);color:var(--hk-red);font-size:calc(13px*var(--hk-fs,1));line-height:1.45}.notice{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:10px;border-left:3px solid var(--nc,var(--hk-blue));background:color-mix(in srgb,var(--nc,var(--hk-blue)) 10%,transparent);font-size:calc(13px*var(--hk-fs,1));line-height:1.45;color:var(--hk-text)}.notice ha-icon{--mdc-icon-size:18px;flex:none;margin-top:1px;color:var(--nc,var(--hk-blue))}.notice.err{--nc:var(--hk-red)}.notice.warn{--nc:var(--hk-amber)}
+      .emptymsg,.loading{padding:46px;text-align:center;color:var(--hk-muted)}.viewgroup{display:inline-flex;gap:8px;align-items:center;flex-wrap:wrap}.skeleton{display:grid;gap:10px;padding:18px 16px}.skeleton i{display:block;height:14px;border-radius:7px;background:linear-gradient(90deg,var(--hk-soft),color-mix(in srgb,var(--hk-soft) 55%,var(--hk-surface)),var(--hk-soft)) 0 0/200% 100%;animation:hk-shimmer 1.4s ease-in-out infinite}.skeleton i:nth-of-type(2){width:80%}.skeleton i:nth-of-type(3){width:60%}@keyframes hk-shimmer{to{background-position:-200% 0}}@media(prefers-reduced-motion:reduce){.skeleton i{animation:none}}.coverage{display:flex;gap:6px;align-items:flex-start}.coverage ha-icon{--mdc-icon-size:16px;flex:none;margin-top:1px}.fline{display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin-top:6px}.fline .fnote{color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1))}.emptymsg ha-icon{--mdc-icon-size:34px;color:var(--hk-green);display:block;margin:0 auto 8px}.error{padding:12px 14px;border-radius:10px;border-left:3px solid var(--hk-red);background:color-mix(in srgb,var(--hk-red) 10%,transparent);color:var(--hk-red);font-size:calc(13px*var(--hk-fs,1));line-height:1.45}span.error{padding:0;border:0;border-radius:0;background:none;font-size:calc(13px*var(--hk-fs,1))}span.error:empty{display:none}.notice{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:10px;border-left:3px solid var(--nc,var(--hk-blue));background:color-mix(in srgb,var(--nc,var(--hk-blue)) 10%,transparent);font-size:calc(13px*var(--hk-fs,1));line-height:1.45;color:var(--hk-text)}.notice ha-icon{--mdc-icon-size:18px;flex:none;margin-top:1px;color:var(--nc,var(--hk-blue))}.notice.err{--nc:var(--hk-red)}.notice.warn{--nc:var(--hk-amber)}
       .bh.open{background:var(--hk-soft)}.bhactions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}.bhopen{min-height:30px;padding:4px 10px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit;font-size:calc(11px*var(--hk-fs,1));font-weight:600;white-space:nowrap;cursor:pointer}.bhopen:hover{background:var(--hk-soft);border-color:var(--hk-muted)}.bhopen:focus-visible{outline:2px solid var(--hk-blue);outline-offset:2px}.bhattest{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:4px 16px 14px 62px;background:var(--hk-soft)}.bhattest label{display:flex;align-items:center;gap:8px;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted)}.bhattest input{padding:6px 8px;border:1px solid var(--hk-border);border-radius:8px;background:var(--hk-surface);color:var(--hk-text);font:inherit}.bhcancel,.bhtake{border:0;background:none;padding:4px 2px;font:inherit;font-size:calc(12px*var(--hk-fs,1));color:var(--hk-muted);cursor:pointer;text-decoration:underline}.bhtake{margin-left:auto;color:var(--hk-red)}.bhcancel:hover{color:var(--hk-text)}
       .viewpop{min-width:220px;gap:2px;padding:6px}.viewrow{display:flex;align-items:center;gap:2px}.viewitem{display:flex;flex:1;gap:8px;align-items:center;padding:8px 10px;border:0;border-radius:6px;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}.viewitem:hover,.viewdel:hover{background:var(--hk-soft)}.viewitem.on{font-weight:700;color:var(--hk-blue)}.viewdel{display:grid;place-items:center;padding:6px;border:0;border-radius:6px;background:none;color:var(--hk-muted);cursor:pointer}.viewitem ha-icon,.viewdel ha-icon{--mdc-icon-size:18px}.dirbtn.withname{display:inline-flex;align-items:center;gap:6px;max-width:170px}.viewname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.viewpop .viewitem[data-lview-save]{border-top:1px solid var(--hk-border);border-radius:0 0 6px 6px;margin-top:4px}.dirbtn[aria-pressed="true"]{border-color:var(--hk-blue);color:var(--hk-blue)}details>summary{display:flex;align-items:center;gap:8px;list-style:none}.storegrp>summary{padding:10px 16px}details>summary::-webkit-details-marker{display:none}details>summary::before{content:"";flex:none;box-sizing:border-box;width:7px;height:7px;margin:0 5px 2px 3px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;opacity:.65;transform:rotate(-45deg);transition:transform .15s ease}details[open]>summary::before{transform:rotate(45deg) translate(-1px,-1px)}.rowmenu>summary::before{display:none}@media(prefers-reduced-motion:reduce){details>summary::before{transition:none}}
       .bh .row-text small{overflow:visible;white-space:normal;text-overflow:clip}
@@ -3022,7 +3022,7 @@ class FindingsMixin {
       <input data-decide-reason maxlength="200" autocomplete="off" value="${this.esc(d.reason)}" aria-label="${this.esc(this.t("decideReason"))}" placeholder="${this.esc(this.t(d.kind === "keep" ? "decideReasonNeeded" : "decideReason"))}">
       <select data-decide-days aria-label="${this.esc(this.t("decideHow"))}">${days}</select>
       <button type="submit" class="btn primary">${this.t("saveOptions")}</button><button type="button" class="btn quiet" data-decide-cancel>${this.t("cancelRun")}</button>
-      ${d.error ? `<small class="error" role="alert">${this.esc(this.t(d.error))}</small>` : ""}</form>`;
+      ${d.error ? `${this.notice("err", this.t(d.error))}` : ""}</form>`;
   }
 
   openDecide(key, kind = "ignore") { this.decide = { key, kind, days: kind === "snooze" ? 30 : 0, reason: "", error: "" }; this.render(); this.shadowRoot?.querySelector?.("[data-decide-kind]")?.focus?.(); }
@@ -3837,7 +3837,7 @@ class CleanupMixin {
         : [...this.cleanupSel].map(object_id => ({ kind: this.cleanupKind, object_id, ...(REMOVAL_KINDS.includes(this.cleanupKind) && this.recorderFor(object_id) !== "keep" ? { recorder: this.recorderFor(object_id) } : {}) }));
       const plan = await this._hass.callWS({ type: "ha_housekeeper/plan_create", actions });
       this.openNewPlan(plan, null); this.toast(this.t("previewReady"));
-    } catch (err) { this.cleanupError = err?.message || String(err); }
+    } catch (err) { this.cleanupError = this.errText(err); }
     this.cleanupBusy = false; this.render();
   }
 
@@ -4482,7 +4482,7 @@ class CleanupMixin {
     ];
     const open = this.viewTabOf("journal", tabs, "plans");
     const head = this.pageBar({ at: this.loadedAt("journal"), loading: this.journal === null, attr: "data-journal-refresh" });
-    const failed = this.journalError ? `<div class="panel"><div class="error">${this.esc(this.journalError)}</div></div>` : "";
+    const failed = this.journalError ? `<div class="panel">${this.notice("err", this.journalError)}</div>` : "";
     const body = this.journalError ? "" : open === "devices" ? this.removedCard() : open === "purges" ? this.purgeJournalCard() : journalCard;
     return `<div class="stack">${this.planHeader()}${head}${this.navTiles("journal", tabs, open, this.t("journal"), true)}${failed}${body}</div>`;
   }
@@ -5829,7 +5829,7 @@ class MaintenanceMixin {
     const bar = (extra = "", attr = "", exportId = "") => this.pageBar({ left: extra, at: this.isoOf(c?.computed_at) || this.loadedAt("costs"), loading: this.costsLoading, attr, refresh: Boolean(attr), exportId });
     const head = (extra = "", attr = "") => `${bar(extra, attr)}<div class="panel">`; // the states without a list: the card holds the message
     if (this.costsLoading) return `<div class="stack">${head("", "data-costs-load")}${this.skeleton("recorderLoading")}</div></div>`;
-    if (this.costsError) return `<div class="stack">${head("", "data-costs-load")}<div class="error">${this.esc(this.costsError)}</div></div></div>`;
+    if (this.costsError) return `<div class="stack">${head("", "data-costs-load")}${this.notice("err", this.costsError)}</div></div>`;
     if (!c) return `<div class="stack">${head(`<button class="btn primary" data-costs-load>${this.t("recorderLoad")}</button>`)}</div></div>`;
     if (c.busy) return `<div class="stack">${head("", "data-costs-load")}<p class="factnote">${this.t("relBusy")}</p></div></div>`;
     if (!c.available) return `<div class="stack">${head()}<div class="emptymsg"><ha-icon icon="mdi:database-off-outline"></ha-icon>${this.t("recorderUnavailable")}</div></div></div>`;
@@ -5992,7 +5992,7 @@ class MaintenanceMixin {
   updatesCard() {
     const p = this.preflight;
     const head = this.pageBar({ at: this.loadedAt("preflight"), loading: this.preflightLoading, attr: "data-pf-refresh" });
-    if (this.preflightError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.preflightError)}</div></div></div>`;
+    if (this.preflightError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.preflightError)}</div></div>`;
     if (!p) return `<div class="stack">${head}<div class="panel">${this.skeleton("preflightLoading")}</div></div>`;
     const updates = p.state.updates || [], counts = p.counts || {};
     const total = counts.total ?? updates.length;
@@ -6193,7 +6193,7 @@ class BackupMixin {
 
   backupCard() {
     const head = this.pageBar({ at: this.loadedAt("backup"), loading: this.backupLoading, attr: "data-bh-refresh" });
-    if (this.backupError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.backupError)}</div></div></div>`;
+    if (this.backupError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.backupError)}</div></div>`;
     const b = this.backup;
     if (!b) return `<div class="stack">${head}<div class="panel">${this.skeleton("backupLoading")}</div></div>`;
     if (!b.available) return `<div class="stack">${head}<div class="panel"><div class="emptymsg">${this.t("backupUnavailable")}</div></div></div>`;
@@ -6431,7 +6431,7 @@ class ReliabilityMixin {
     const aged = Boolean(r?.computed_at && (r.stale || r.age_seconds >= 60)), took = aged ? "" : this.tookNote(r).replace(/^ · /, "");
     const head = this.pageBar({ left: `${windows}${took ? `<span>${this.esc(took)}</span>` : ""}`, at: r?.computed_at ? new Date(r.computed_at * 1000).toISOString() : null, loading: this.relLoading, attr: "data-rel-refresh" });
     const alone = inner => `<div class="stack">${head}<div class="panel">${inner}</div></div>`;
-    if (this.relError) return alone(`<div class="error">${this.esc(this.relError)}</div>`);
+    if (this.relError) return alone(`${this.notice("err", this.relError)}`);
     if (!r) return alone(this.skeleton("relLoading"));
     if (!r.available) return alone(`<p class="factnote">${this.t("relNoRecorder")}</p>`);
     if (r.busy) return alone(`${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p>`);
@@ -6717,7 +6717,7 @@ class RunsMixin {
     const r = this.runs;
     const since = r?.since ? ` · ${this.t("runsSince", { date: this.formatDate(r.since) })}` : "";
     const head = this.pageBar({ left: since ? `<span>${this.esc(since.replace(/^ · /, ""))}</span>` : "", at: this.loadedAt("runs"), loading: this.runsLoading, attr: "data-runs-refresh" });
-    if (this.runsError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.runsError)}</div></div></div>`;
+    if (this.runsError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.runsError)}</div></div>`;
     if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("runsLoading")}</div></div>`;
     this.lvState("runs", "runs", "desc");
     const lower = r.items.filter(row => row.lower_bound).length;
@@ -6978,7 +6978,7 @@ class StormsMixin {
     const ready = Boolean(r?.available && !r.busy);
     if (ready) this.stormsExporter(r);
     const head = this.pageBar({ left: `${windows}${took ? `<span>${this.esc(took)}</span>` : ""}`, at: this.isoOf(r?.computed_at) || this.loadedAt("storms"), loading: this.stormsLoading, attr: "data-storm-refresh", exportId: ready ? "recload" : "" });
-    if (this.stormsError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.stormsError)}</div></div></div>`;
+    if (this.stormsError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.stormsError)}</div></div>`;
     if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("stormLoading")}</div></div>`;
     if (!r.available) return `<div class="stack">${head}<div class="panel"><p class="factnote">${this.t("relNoRecorder")}</p></div></div>`;
     if (r.busy) return `<div class="stack">${head}<div class="panel">${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p></div></div>`;
@@ -7116,7 +7116,7 @@ class DbHealthMixin {
     const took = this.tookNote(r);
     const ready = Boolean(r?.available && !r.busy);
     const head = this.pageBar({ left: took ? `<span>${this.esc(took.replace(/^ · /, ""))}</span>` : "", at: this.isoOf(r?.computed_at), loading: this.dbLoading, attr: "data-db-refresh", exportId: ready && !this.dbError ? "recdb" : "" });
-    if (this.dbError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.dbError)}</div></div></div>`;
+    if (this.dbError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.dbError)}</div></div>`;
     if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("dbLoading")}</div></div>`;
     if (!r.available) return `<div class="stack">${head}<div class="panel"><p class="factnote">${this.t("relNoRecorder")}</p></div></div>`;
     if (r.busy) return `<div class="stack">${head}<div class="panel">${this.skeleton("relBusy")}<p class="factnote">${this.t("relBusy")}</p></div></div>`;
@@ -7283,7 +7283,7 @@ class ExposureMixin {
     this.ensureExposure();
     const r = this.exposure;
     const head = this.pageBar({ at: this.exposureAt, loading: this.exposureLoading, attr: "data-expo-refresh" });
-    if (this.exposureError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.exposureError)}</div></div></div>`;
+    if (this.exposureError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.exposureError)}</div></div>`;
     if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("expoLoading")}</div></div>`;
     const sources = this.expoSources(r);
     const live = sources.filter(x => x.status === "ok");
@@ -7675,7 +7675,7 @@ class PoliciesMixin {
     const anyHidden = r?.rules?.some(rule => rule.ignored);
     const left = anyHidden ? `<button class="chip ${this.policyShowHidden ? "active" : ""}" data-policy-hidden aria-pressed="${Boolean(this.policyShowHidden)}">${this.t(this.policyShowHidden ? "polHideHidden" : "polShowHidden")}</button>` : "";
     const head = this.pageBar({ left, at: this.policiesAt, loading: this.policiesLoading, attr: "data-policy-refresh" });
-    if (this.policiesError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.policiesError)}</div></div></div>`;
+    if (this.policiesError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.policiesError)}</div></div>`;
     if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("polLoading")}</div></div>`;
     const on = r.rules.filter(rule => rule.enabled);
     const violations = on.reduce((n, rule) => n + rule.count, 0);
@@ -8226,7 +8226,7 @@ class BlueprintsMixin {
   blueprintsCard() {
     this.ensureBlueprints();
     const head = this.pageBar({ at: this.loadedAt("blueprints"), loading: !this.blueprints && !this.blueprintsError, attr: "data-bp-refresh" });
-    if (this.blueprintsError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.blueprintsError)}</div></div></div>`;
+    if (this.blueprintsError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.blueprintsError)}</div></div>`;
     if (!this.blueprints) return `<div class="stack">${head}<div class="panel">${this.skeleton("loading")}</div></div>`;
     const items = this.bpItems();
     const rank = { missing: 0, broken: 1, unused: 2 }, label = { missing: "bpMissing", broken: "bpBroken", unused: "bpUnused" }, tone = { missing: "red", broken: "red", unused: "mute" };
@@ -8293,7 +8293,7 @@ class BlueprintsMixin {
     return `${head}<section class="panel">${this.viewTabBar("blueprint", tabs, open)}${body}</section>`;
   }
 
-  bpLoading() { return this.bpDetailError ? `<div class="error pad">${this.esc(this.bpDetailError)}</div>` : this.skeleton("loading"); }
+  bpLoading() { return this.bpDetailError ? `<div class="pad">${this.notice("err", this.bpDetailError)}</div>` : this.skeleton("loading"); }
 
   blueprintInputs(d) {
     if (!d.inputs.length) return `<div class="emptymsg">${this.t("bpNoInputs")}</div>`;
@@ -8371,8 +8371,8 @@ class MarksMixin {
       + (windowed ? field("markGrace", `<select data-mark-grace>${graces}</select>`) : "")
       + field("markReview", `<select data-mark-days>${days}</select>`);
     return `<form class="pad markform" data-mark-form="${this.esc(key)}"><div class="mrow">${row1}</div><div class="mrow">${row2}</div>
-        ${windowed ? `<small class="factnote">${this.t("markWindowHint")}</small>` : ""}${noSun ? `<small class="error" role="alert">${this.t("markNoSun")}</small>` : ""}
-        ${f.error ? `<small class="error" role="alert">${this.esc(f.error)}</small>` : ""}
+        ${windowed ? `<small class="factnote">${this.t("markWindowHint")}</small>` : ""}${noSun ? `${this.notice("err", this.t("markNoSun"))}` : ""}
+        ${f.error ? `${this.notice("err", f.error)}` : ""}
         <div class="mbtns"><button type="button" class="btn quiet" data-mark-cancel>${this.t("cancelRun")}</button><button type="submit" class="btn primary">${this.t("saveOptions")}</button></div></form>`;
   }
 
@@ -8909,7 +8909,7 @@ class GoalsMixin {
     return `<form class="pad polform" data-goal-form="${g.id}"><label>${this.t("goalLimitLabel")} <input type="number" data-goal-limit min="0" step="1" value="${this.esc(String(f.limit))}"></label>
       <label><input type="checkbox" data-goal-enabled ${f.enabled ? "checked" : ""}> ${this.t("goalEnabled")}</label><small>${this.t("goalDefault", { n: this.goalAmount(g, g.default) })}</small>
       <button type="submit" class="btn primary">${this.t("goalSave")}</button><button type="button" class="btn quiet" data-goal-cancel>${this.t("cancelRun")}</button>
-      ${f.error ? `<small class="error" role="alert">${this.esc(f.error)}</small>` : ""}</form>`;
+      ${f.error ? `${this.notice("err", f.error)}` : ""}</form>`;
   }
 
   // The overview shows only what is missed (or that all is met) and leads to Maintenance, where the limits are set.
@@ -8919,7 +8919,7 @@ class GoalsMixin {
     if (!compact) {
       // The tab in Maintenance says what is going on instead of staying empty.
       const head = this.pageBar({ at: this.loadedAt("goals"), loading: this.goalsLoading, attr: "data-goals-refresh" });
-      if (this.goalsError) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(this.goalsError)}</div></div></div>`;
+      if (this.goalsError) return `<div class="stack">${head}<div class="panel">${this.notice("err", this.goalsError)}</div></div>`;
       if (!r) return `<div class="stack">${head}<div class="panel">${this.skeleton("loading")}</div></div>`;
       if (!r.goals?.length) return `<div class="stack">${head}<div class="panel"><div class="emptymsg">${this.t("goalsNone")}</div></div></div>`;
     }
@@ -9207,7 +9207,7 @@ class ExchangeMixin {
   // `extra` adds a button after the report button, e.g. "Close" on a preview with nothing to run.
   reportBlock(plan, extra = "") {
     const shown = this.report?.plan_id === plan.plan_id ? this.report : null;
-    const body = shown ? `<div class="reportbox"><div class="reporthead"><strong><ha-icon icon="mdi:file-document-outline"></ha-icon>${this.t("reportTitle")}</strong><span class="reportbtns"><button class="btn accent" data-report-copy><ha-icon icon="mdi:content-copy"></ha-icon>${this.t("reportCopy")}</button><button class="btn accent" data-report-download><ha-icon icon="mdi:download"></ha-icon>${this.t("reportDownload")}</button></span></div><pre class="reportpre">${this.esc(shown.markdown)}</pre>${shown.anonymized || this.reportMessage ? `<p class="reportnote">${this.esc(shown.anonymized ? this.t("reportAnonymous") : "")} ${this.esc(this.reportMessage || "")}</p>` : ""}</div>` : (this.reportMessage ? `<small class="error">${this.esc(this.reportMessage)}</small>` : "");
+    const body = shown ? `<div class="reportbox"><div class="reporthead"><strong><ha-icon icon="mdi:file-document-outline"></ha-icon>${this.t("reportTitle")}</strong><span class="reportbtns"><button class="btn accent" data-report-copy><ha-icon icon="mdi:content-copy"></ha-icon>${this.t("reportCopy")}</button><button class="btn accent" data-report-download><ha-icon icon="mdi:download"></ha-icon>${this.t("reportDownload")}</button></span></div><pre class="reportpre">${this.esc(shown.markdown)}</pre>${shown.anonymized || this.reportMessage ? `<p class="reportnote">${this.esc(shown.anonymized ? this.t("reportAnonymous") : "")} ${this.esc(this.reportMessage || "")}</p>` : ""}</div>` : (this.reportMessage ? `${this.notice("err", this.reportMessage)}` : "");
     return `<div class="setrow planfoot"><label class="factnote reportopt"><input type="checkbox" data-report-names ${this.reportClear ? "checked" : ""}><span><strong>${this.t("reportNames")}</strong><small>${this.t("reportNamesHint")}</small></span></label>${extra ? `<span class="reportextra">` : ""}<button class="btn accent" data-report="${this.esc(plan.plan_id)}"><ha-icon icon="mdi:${shown ? "chevron-up" : "file-document-outline"}"></ha-icon>${this.t("reportButton")}</button>${extra ? `${extra}</span>` : ""}</div>${body}`;
   }
 
@@ -9380,7 +9380,7 @@ class DiagnosticsMixin {
     this.ensureRuns();
     const d = this.diagState(), q = d.quality;
     const head = this.pageBar({ at: this.loadedAt("quality"), loading: d.loading, attr: "data-quality-refresh" });
-    if (d.error) return `<div class="stack">${head}<div class="panel"><div class="error">${this.esc(d.error)}</div></div></div>`;
+    if (d.error) return `<div class="stack">${head}<div class="panel">${this.notice("err", d.error)}</div></div>`;
     if (!q) return `<div class="stack">${head}<div class="panel">${this.skeleton("qualityLoading")}</div></div>`;
     return build(q, head);
   }
@@ -9638,7 +9638,7 @@ class TraceDiagMixin {
     const option = (run, selected) => `<option value="${this.esc(run.run_id)}" ${run.run_id === selected ? "selected" : ""}>${this.esc(this.formatDate(run.start))} · ${this.esc(run.execution || "")}${run.trigger ? ` · ${this.esc(run.trigger)}` : ""}</option>`;
     const picker = (attr, label, selected) => `<div class="setrow"><div><label>${label}</label></div><select ${attr} class="w460"><option value=""></option>${c.runs.map(r => option(r, selected)).join("")}</select></div>`;
     const body = c.runs.length ? `${picker("data-cmp-a", this.t("cmpOlder"), c.a)}${picker("data-cmp-b", this.t("cmpNewer"), c.b)}<div class="setrow planfoot"><small class="u-m0"></small><button class="btn" data-cmp-run ${c.a && c.b && c.a !== c.b ? "" : "disabled"}>${this.t("cmpRun")}</button></div>` : `<div class="emptymsg">${this.t("cmpNoRuns")}</div>`;
-    return `<div class="panelhead"><div><h2>${this.t("cmpTitle")}</h2><p>${this.t("cmpHint")}</p></div></div>${body}${c.error ? `<div class="error">${this.esc(c.error)}</div>` : ""}${c.result ? this.compareLines(c.result) : ""}`;
+    return `<div class="panelhead"><div><h2>${this.t("cmpTitle")}</h2><p>${this.t("cmpHint")}</p></div></div>${body}${c.error ? `${this.notice("err", c.error)}` : ""}${c.result ? this.compareLines(c.result) : ""}`;
   }
 
   bindTraceDiag(root) {
@@ -9702,7 +9702,7 @@ class DryRunMixin {
   dryRunCard() {
     const dry = this.dryState();
     const rows = dry.states.map((s, i) => `<div class="setrow"><input type="text" data-dry-entity="${i}" value="${this.esc(s.entity_id)}" placeholder="binary_sensor.door" aria-label="${this.esc(this.t("dryStateEntity"))}" class="w260"><input type="text" data-dry-state="${i}" value="${this.esc(s.state)}" placeholder="on" aria-label="${this.esc(this.t("dryStateValue"))}" class="w140">${dry.states.length > 1 ? `<button class="btn quiet" data-dry-del="${i}">${this.t("dryRemove")}</button>` : ""}</div>`).join("");
-    return `<div class="panelhead"><div><h2>${this.t("dryTitle")}</h2><p>${this.t("dryHint")}</p></div></div><div class="pad polform">${rows}<div class="acts"><button class="btn quiet" data-dry-add>${this.t("dryAddState")}</button><button class="btn primary" data-dry-run ${dry.busy ? "disabled" : ""}>${dry.busy ? this.t("dryRunning") : this.t("dryRun")}</button></div></div>${dry.error ? `<div class="error">${this.esc(dry.error)}</div>` : ""}${dry.result ? this.dryResult(dry.result) : ""}`;
+    return `<div class="panelhead"><div><h2>${this.t("dryTitle")}</h2><p>${this.t("dryHint")}</p></div></div><div class="pad polform">${rows}<div class="acts"><button class="btn quiet" data-dry-add>${this.t("dryAddState")}</button><button class="btn primary" data-dry-run ${dry.busy ? "disabled" : ""}>${dry.busy ? this.t("dryRunning") : this.t("dryRun")}</button></div></div>${dry.error ? `${this.notice("err", dry.error)}` : ""}${dry.result ? this.dryResult(dry.result) : ""}`;
   }
 
   bindDryRun(root) {
@@ -10334,7 +10334,7 @@ class CounterMixin {
   rangeChart() {
     const sr = this.rangeSeries, win = this.rangeWin;
     if (this.rangeSeriesLoading) return this.skeleton("counterScanning");
-    if (this.rangeSeriesError) return `<div class="error">${this.esc(this.rangeSeriesError)}</div>`;
+    if (this.rangeSeriesError) return `${this.notice("err", this.rangeSeriesError)}`;
     if (!sr || !win || !sr.points.length) return sr ? `<p class="factnote">${this.t("rangeNoData")}</p>` : "";
     const w = 640, h = 150, pad = 4, span = Math.max(1, win.to - win.from);
     const ys = sr.points.map(p => p[1]), y0 = Math.min(...ys), y1 = Math.max(...ys);
@@ -10393,7 +10393,7 @@ class CounterMixin {
       <div class="setrow"><div><label>${this.t("counterMode")}</label></div><select class="w460" data-counter-mode>${["hold", "interpolate"].map(m => `<option value="${m}" ${mode === m ? "selected" : ""}>${this.t(`counterMode_${m}`)}</option>`).join("")}</select></div>
       <div class="setrow planfoot"><small class="u-m0">${this.t("counterScanNote")}</small><button class="btn primary" data-counter-scan ${this.counterLoading ? 'disabled aria-busy="true"' : ""}>${this.counterLoading ? this.t("counterScanning") : this.t("counterScan")}</button></div>`;
     let body = "";
-    if (this.counterError) body = `<div class="error">${this.esc(this.counterError)}</div>`;
+    if (this.counterError) body = `${this.notice("err", this.counterError)}`;
     else if (s && !s.available) body = `<div class="emptymsg">${this.t("counterNoRecorder")}</div>`;
     else if (s?.busy) body = `<p class="factnote">${this.t("relBusy")}</p>`;
     else if (s) {
@@ -10733,14 +10733,14 @@ class FindingStatusMixin {
       return `<form class="polform bulkform" data-bulk-form><strong>${this.t("state_label")}</strong>
         <select data-bulk-label aria-label="${this.esc(this.t("labelChoose"))}">${labels.map(l => `<option value="${this.esc(l.object_id)}" ${b.label === l.object_id ? "selected" : ""}>${this.esc(l.name)}</option>`).join("")}</select>
         <button type="submit" class="btn primary" ${this.planBusy ? 'disabled aria-busy="true"' : ""}>${this.t("refactorPlan")}</button><button type="button" class="btn quiet" data-bulk-cancel>${this.t("cancelRun")}</button>
-        ${b.error ? `<small class="error" role="alert">${this.esc(this.t(b.error))}</small>` : ""}</form>`;
+        ${b.error ? `${this.notice("err", this.t(b.error))}` : ""}</form>`;
     }
     const days = [7, 30, 90, 365].map(n => `<option value="${n}" ${Number(b.days) === n ? "selected" : ""}>${this.t("decideDays", { n })}</option>`).join("");
     return `<form class="polform bulkform" data-bulk-form><strong>${this.t(`state_${b.kind}`)}</strong>
       <input data-bulk-reason maxlength="200" autocomplete="off" value="${this.esc(b.reason)}" aria-label="${this.esc(this.t("decideReason"))}" placeholder="${this.esc(this.t(b.kind === "known" ? "decideReasonNeeded" : "decideReason"))}">
       ${b.kind === "snoozed" ? `<select data-bulk-days aria-label="${this.esc(this.t("decideHow"))}">${days}</select>` : ""}
       <button type="submit" class="btn primary">${this.t("saveOptions")}</button><button type="button" class="btn quiet" data-bulk-cancel>${this.t("cancelRun")}</button>
-      ${b.error ? `<small class="error" role="alert">${this.esc(this.t(b.error))}</small>` : ""}</form>`;
+      ${b.error ? `${this.notice("err", this.t(b.error))}` : ""}</form>`;
   }
 
   // Adding a label is a plan like any other: it opens under Cleanup with a preview and an undo.
@@ -11359,7 +11359,7 @@ class EntityTrimMixin {
     const energy = this.usageTags(id).includes(this.t("energyDashboard"));
     const warn = e.tables.has("long_term") ? `<p class="etwarn">${this.t(energy ? "etWarnEnergy" : "etWarnLong")}</p>` : "";
     const ready = e.tables.size && (e.mode !== "range" || !only || this.entityTrimRange(e)) && !e.busy;
-    return `<div class="etkinds">${kinds}</div><div class="etbody">${mode}${timeline}</div>${warn}${e.error ? `<div class="error">${this.esc(e.error)}</div>` : ""}
+    return `<div class="etkinds">${kinds}</div><div class="etbody">${mode}${timeline}</div>${warn}${e.error ? `${this.notice("err", e.error)}` : ""}
       <div class="trimfoot"><p class="factnote">${this.t("etFoot")}</p><button class="btn primary" data-et-plan="${this.esc(id)}" ${ready ? "" : "disabled"}>${e.busy ? this.t("etBusy") : this.t("etPreview")}</button></div>`;
   }
 
@@ -13678,7 +13678,7 @@ class BackupCleanupMixin {
   backupCleanupCard() {
     this.ensureBackupCleanup();
     const head = `<p class="factnote pad">${this.t("bkcHint")}</p>`;  // the title is on the head of the fold
-    if (this.bkcError) return `<div class="panel">${head}<div class="error">${this.esc(this.bkcError)}</div></div>`;
+    if (this.bkcError) return `<div class="panel">${head}${this.notice("err", this.bkcError)}</div>`;
     const d = this.bkc;
     if (!d) return `<div class="panel">${head}${this.skeleton("bkcLoading")}</div>`;
     if (!d.available) return `<div class="panel">${head}<div class="emptymsg">${this.t("bkcUnavailable")}</div></div>`;
@@ -13818,7 +13818,7 @@ class AreaAssignMixin {
       <select data-bulk-area aria-label="${this.esc(this.t("areaChoose"))}"><option value="">${this.t("areaSuggest")}</option>${areas.map(a => `<option value="${this.esc(a.object_id)}" ${b.area === a.object_id ? "selected" : ""}>${this.esc(a.name)}</option>`).join("")}</select>
       <button type="submit" class="btn primary" ${this.planBusy ? 'disabled aria-busy="true"' : ""}>${this.t("refactorPlan")}</button><button type="button" class="btn quiet" data-bulk-cancel>${this.t("cancelRun")}</button>
       <small class="factnote">${this.t("areaNote")}</small>
-      ${b.error ? `<small class="error" role="alert">${this.esc(this.t(b.error))}</small>` : ""}</form>`;
+      ${b.error ? `${this.notice("err", this.t(b.error))}` : ""}</form>`;
   }
 
   async makeAreaPlan() {
@@ -13884,7 +13884,7 @@ class DetailEditMixin {
     const assign = hasAreas ? `<form class="deform" data-de-area><label for="de-area"><strong>${this.t("deArea")}</strong><small class="denow${now ? "" : " none"}">${this.t("deAreaNow", { area: now || this.t("deNoArea") })}</small></label>${areaControls}
         ${suggest ? `<small class="factnote">${this.t("areaNote")}</small>` : ""}</form>` : `<small class="factnote">${this.t("areaNone")}</small>`;
     // Rarely needed, so it starts closed; an error from the last try keeps it open.
-    const body = `<div class="pad">${rename}${assign}${e.error ? `<small class="error" role="alert">${this.esc(this.t(e.error))}</small>` : ""}</div>`;
+    const body = `<div class="pad">${rename}${assign}${e.error ? `${this.notice("err", this.t(e.error))}` : ""}</div>`;
     return `<section class="panel">${this.fold("detail_edit", { title: this.t("deTitle") }, body, false, e.error ? true : undefined)}</section>`;
   }
 
@@ -13896,7 +13896,7 @@ class DetailEditMixin {
     if (renameControls) rows.push(this.actRow(this.t("deNewId"), this.t("deRenameNote"), `<form class="deform" data-de-rename>${renameControls}</form>`));
     const areaHint = [this.t("deAreaNow", { area: now || this.t("deNoArea") }), suggest && hasAreas ? this.t("areaNote") : ""].filter(Boolean).join(" · ");
     rows.push(hasAreas ? this.actRow(this.t("deArea"), areaHint, `<form class="deform" data-de-area>${areaControls}</form>`) : this.actRow(this.t("deArea"), this.t("areaNone"), ""));
-    if (e.error) rows.push(`<div class="actblock"><small class="error" role="alert">${this.esc(this.t(e.error))}</small></div>`);
+    if (e.error) rows.push(`<div class="actblock">${this.notice("err", this.t(e.error))}</div>`);
     return rows;
   }
 
@@ -14351,7 +14351,7 @@ class BatteryTableMixin {
   batteryNeed(rows = this.batteryTableRows()) {
     const b = this.batteryTrend;
     const head = `<div class="panelhead"><div><h2>${this.t("fcTitle")}</h2><p>${this.t("fcHint")}</p></div></div>`;
-    if (this.batteryTrendError) return `<div class="panel"><div class="error">${this.esc(this.batteryTrendError)}</div></div>`;
+    if (this.batteryTrendError) return `<div class="panel">${this.notice("err", this.batteryTrendError)}</div>`;
     if (!b) return `<div class="panel">${head}${this.skeleton("btLoading")}</div>`;
     if (b.busy) return `<div class="panel"><p class="factnote">${this.t("relBusy")}</p></div>`;
     const soon = this.batteryNeedRows();
@@ -14444,7 +14444,7 @@ class SystemMixin {
   sysFrame(name, loading, build, left = () => "") {
     const st = this.sysEnsure(name);
     const bar = this.pageBar({ left: st.data ? left(st.data) : "", at: st.at, loading: st.loading, attr: `data-sys-refresh="${name}"` });
-    if (st.error) return `<div class="stack">${bar}<div class="panel"><div class="error">${this.esc(st.error)}</div></div></div>`;
+    if (st.error) return `<div class="stack">${bar}<div class="panel">${this.notice("err", st.error)}</div></div>`;
     if (!st.data) return `<div class="stack">${bar}<div class="panel">${this.skeleton(loading)}</div></div>`;
     return build(st.data, bar);
   }
@@ -14828,7 +14828,7 @@ class SystemMixin {
 
   appAccessCard(item) {
     const df = this.sysState("dataflow");
-    if (df.error) return `<div class="panel"><div class="error">${this.esc(df.error)}</div></div>`;
+    if (df.error) return `<div class="panel">${this.notice("err", df.error)}</div>`;
     if (!df.data) return `<div class="panel">${this.skeleton("accLoading")}</div>`;
     const app = this.appRights(item);
     if (!df.data.apps_available || !app) return `<div class="panel"><div class="emptymsg">${this.t("accAppsNoSupervisor")}</div></div>`;
@@ -14842,7 +14842,7 @@ class SystemMixin {
 
   appLoadCard(item) {
     const st = this.sysState("storage");
-    if (st.error) return `<div class="panel"><div class="error">${this.esc(st.error)}</div></div>`;
+    if (st.error) return `<div class="panel">${this.notice("err", st.error)}</div>`;
     if (!st.data) return `<div class="panel">${this.skeleton("sysLoading")}</div>`;
     const app = this.appUsage(item);
     if (!st.data.supervisor || !app) return `<div class="panel"><div class="emptymsg">${this.t("accAppsNoSupervisor")}</div></div>`;
@@ -14878,7 +14878,7 @@ class SystemMixin {
   accessDetailCard(item) {
     const df = this.sysState("dataflow"), se = this.sysState("secrets");
     const err = df.error || se.error;
-    if (err) return `<div class="panel"><div class="error">${this.esc(err)}</div></div>`;
+    if (err) return `<div class="panel">${this.notice("err", err)}</div>`;
     if (!df.data || !se.data) return `<div class="panel">${this.skeleton("accLoading")}</div>`;
     const e = this.accessEntryOf(item), cred = this.credentialsOf(item);
     const section = (title, body) => `<section class="panel"><div class="panelhead"><h2>${this.t(title)}</h2></div>${body}</section>`;
@@ -15605,7 +15605,7 @@ class ComponentsMixin {
     const open = this.viewTabOf("components", tabs, "core");
     if (apps.length || custom.length) this.sysEnsure("storage"); // CPU, RAM and data of the apps, folder sizes of custom integrations
     this.sysEnsure("flows");
-    const hacsBody = !hacsSt?.data ? (hacsSt?.error ? `<div class="error">${this.esc(hacsSt.error)}</div>` : this.skeleton("hacsLoading")) : `${this.hacsAdvice(repos)}${this.compHacsList(repos)}`;
+    const hacsBody = !hacsSt?.data ? (hacsSt?.error ? `${this.notice("err", hacsSt.error)}` : this.skeleton("hacsLoading")) : `${this.hacsAdvice(repos)}${this.compHacsList(repos)}`;
     const body = open === "apps" ? this.compAppsList(apps) : open === "hacs" ? hacsBody : this.compIntegrationsList(open === "custom" ? custom : core, open);
     const st = this.sysState(open === "hacs" ? "hacs" : "storage");
     const bar = this.pageBar({ at: st.at, loading: st.loading, attr: `data-sys-refresh="${open === "hacs" ? "hacs" : "storage"}"` });

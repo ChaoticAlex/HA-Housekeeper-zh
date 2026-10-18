@@ -52,8 +52,8 @@ class MarksMixin {
       + (windowed ? field("markGrace", `<select data-mark-grace>${graces}</select>`) : "")
       + field("markReview", `<select data-mark-days>${days}</select>`);
     return `<form class="pad markform" data-mark-form="${this.esc(key)}"><div class="mrow">${row1}</div><div class="mrow">${row2}</div>
-        ${windowed ? `<small class="factnote">${this.t("markWindowHint")}</small>` : ""}${noSun ? `<small class="error" role="alert">${this.t("markNoSun")}</small>` : ""}
-        ${f.error ? `<small class="error" role="alert">${this.esc(f.error)}</small>` : ""}
+        ${windowed ? `<small class="factnote">${this.t("markWindowHint")}</small>` : ""}${noSun ? `${this.notice("err", this.t("markNoSun"))}` : ""}
+        ${f.error ? `${this.notice("err", f.error)}` : ""}
         <div class="mbtns"><button type="button" class="btn quiet" data-mark-cancel>${this.t("cancelRun")}</button><button type="submit" class="btn primary">${this.t("saveOptions")}</button></div></form>`;
   }
 
