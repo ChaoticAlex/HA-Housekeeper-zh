@@ -5,3 +5,69 @@ scan:
       default: false
       selector:
         boolean:
+
+status:
+
+findings:
+  fields:
+    rule:
+      required: false
+      example: "entity.*"
+      selector:
+        text:
+    level:
+      required: false
+      selector:
+        select:
+          options: [info, low, medium, high]
+    classification:
+      required: false
+      selector:
+        text:
+    object_type:
+      required: false
+      selector:
+        text:
+    search:
+      required: false
+      selector:
+        text:
+    ignored:
+      required: false
+      default: hide
+      selector:
+        select:
+          options: [hide, include, only]
+    limit:
+      required: false
+      default: 20
+      selector:
+        number:
+          min: 1
+          max: 50
+          mode: box
+    cursor:
+      required: false
+      selector:
+        text:
+
+audit:
+  fields:
+    kind:
+      required: false
+      selector:
+        select:
+          options: [read, write, denied]
+    failed:
+      required: false
+      default: false
+      selector:
+        boolean:
+    limit:
+      required: false
+      default: 20
+      selector:
+        number:
+          min: 1
+          max: 50
+          mode: box

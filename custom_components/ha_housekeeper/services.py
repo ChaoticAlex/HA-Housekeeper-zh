@@ -1,4 +1,4 @@
-"""The service ``ha_housekeeper.scan``: start a scan from an automation or a script."""
+"""The services: ``scan`` from an automation or a script, and the AI access functions."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.service import async_register_admin_service
 
 from .const import DOMAIN
+from .mcp_api import FUNCTIONS, McpError, run
 from .scan_trigger import ScanRefused
 
 SERVICE_SCAN = "scan"
@@ -29,6 +30,29 @@ def async_register_services(hass: HomeAssistant) -> None:
             raise ServiceValidationError(
                 translation_domain=DOMAIN, translation_key=err.reason
             ) from err
+
+    def ai_service(name: str) -> Any:
+        async def _call(call: ServiceCall) -> dict[str, Any]:
+            scanner = hass.data.get(DOMAIN, {}).get("scanner")
+            try:
+                return await run(hass, scanner, name, dict(call.data), call.context.user_id)
+            except McpError as err:
+                raise ServiceValidationError(
+                    translation_domain=DOMAIN, translation_key=err.reason
+                ) from err
+
+        return _call
+
+    # The schema is checked in ``run`` so that a wrong call is refused in the log too.
+    for name in FUNCTIONS:
+        async_register_admin_service(
+            hass,
+            DOMAIN,
+            name,
+            ai_service(name),
+            schema=vol.Schema({}, extra=vol.ALLOW_EXTRA),
+            supports_response=SupportsResponse.ONLY,
+        )
 
     async_register_admin_service(
         hass,
