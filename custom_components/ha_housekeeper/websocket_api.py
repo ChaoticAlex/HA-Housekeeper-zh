@@ -18,6 +18,7 @@ from . import (
     rename,
     ws_automations,
     ws_care,
+    ws_mcp,
     ws_recorder,
     ws_system,
 )
@@ -1176,6 +1177,7 @@ def async_register(hass: HomeAssistant) -> None:
     """Register Housekeeper WebSocket commands."""
     ws_automations.async_register(hass)
     ws_care.async_register(hass)
+    ws_mcp.async_register(hass)
     ws_recorder.async_register(hass)
     ws_system.async_register(hass)
     websocket_api.async_register_command(hass, websocket_inventory)

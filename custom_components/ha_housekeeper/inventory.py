@@ -112,6 +112,7 @@ from .marks import (
     mark_key,
     window_active,
 )
+from .mcp_access import McpStore
 from .monitor import MonitorStore
 from .notes import NoteStore
 from .notify import NotifyStore, async_announce
@@ -823,6 +824,7 @@ STORE_NAMES = (
     "notes",
     "batteries",
     "notify",
+    "mcp",
     "monitor",
     "runs",
     "config_changes",
@@ -868,6 +870,7 @@ class InventoryScanner:
         self.notes = NoteStore(hass)
         self.batteries = BatteryStore(hass)
         self.notify = NotifyStore(hass)
+        self.mcp = McpStore(hass)
         self.monitor = MonitorStore(hass)
         self.runs = RunStore(hass)
         self.config_changes = ChangeStore(hass)
@@ -1637,6 +1640,7 @@ class InventoryScanner:
                 "ignore_label": IGNORE_LABEL,
                 "version": self.version,
                 "notify": self.notify.enabled,
+                "mcp": {"enabled": self.mcp.enabled, "write": self.mcp.write},
                 "protection": self.protection.mode,
                 "protection_rules": protection_rules(),
                 "recorder_available": self._recorder_available,
