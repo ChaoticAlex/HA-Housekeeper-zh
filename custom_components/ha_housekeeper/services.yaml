@@ -51,6 +51,19 @@ findings:
       selector:
         text:
 
+object:
+  fields:
+    object_type:
+      required: true
+      example: entity
+      selector:
+        text:
+    object_id:
+      required: true
+      example: sensor.keller_temperatur
+      selector:
+        text:
+
 audit:
   fields:
     kind:

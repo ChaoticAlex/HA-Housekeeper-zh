@@ -118,3 +118,37 @@ async def test_the_log_is_limited_in_size_and_age(hass: HomeAssistant) -> None:
     assert len(store.entries) == 2000 and all(
         e["at"] >= (now - timedelta(days=90)).isoformat() for e in store.entries
     )
+
+
+async def test_the_object_card_gathers_findings_and_connections(hass: HomeAssistant) -> None:
+    scanner = scanner_with(hass, 3)
+    scanner.mcp.enabled = True
+    scanner.snapshot["objects"].append(
+        {"object_type": "automation", "object_id": "automation.a", "name": "Lights"}
+    )
+    scanner.snapshot["edges"] = [
+        {
+            "source": "automation:automation.a",
+            "target": "entity:sensor.s1",
+            "relation": "TRIGGERS_ON",
+        },
+        {"source": "device:d", "target": "entity:sensor.s1", "relation": "PROVIDES"},
+    ]
+    scanner.marks = SimpleNamespace(items={})
+    scanner.notes = SimpleNamespace(view=lambda: [])
+    card = await mcp_api.run(
+        hass, scanner, "object", {"object_type": "entity", "object_id": "sensor.s1"}, None
+    )
+    assert card["object"]["name"].startswith("Sensor 1") and card["impact"]["used_by"] == 1
+    assert card["used_by"]["items"][0] == {
+        "type": "automation",
+        "id": "automation.a",
+        "name": "Lights",
+        "relation": "TRIGGERS_ON",
+    }
+    assert card["belongs_to"]["total"] == 1 and card["findings"][0]["rule"].startswith("entity.")
+    with pytest.raises(mcp_api.McpError) as unknown:
+        await mcp_api.run(
+            hass, scanner, "object", {"object_type": "entity", "object_id": "x"}, None
+        )
+    assert unknown.value.reason == "not_found"

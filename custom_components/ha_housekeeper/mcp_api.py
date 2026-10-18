@@ -21,6 +21,7 @@ from homeassistant.core import HomeAssistant
 
 from .const import API_SCHEMA
 from .inventory import InventoryScanner
+from .marks import mark_key
 from .mcp_access import short_params
 
 LEVELS = ("info", "low", "medium", "high")
@@ -61,6 +62,33 @@ FINDINGS_SCHEMA = vol.Schema(
     }
 )
 STATUS_SCHEMA = vol.Schema({})
+OBJECT_SCHEMA = vol.Schema(
+    {
+        vol.Required("object_type"): vol.All(str, vol.Length(min=1, max=40)),
+        vol.Required("object_id"): vol.All(str, vol.Length(min=1, max=255)),
+    }
+)
+RELATION_LIMIT = 25
+USED = ("TRIGGERS_ON", "USES_AS_CONDITION", "TARGETS", "REFERENCES", "SHOWS", "INCLUDES")
+BELONGS = ("OWNS", "PROVIDES", "CONTAINS", "VIA_DEVICE")
+OBJECT_FIELDS = (
+    "status",
+    "reason",
+    "status_since",
+    "platform",
+    "domain",
+    "device_class",
+    "area_id",
+    "device_id",
+    "config_entry_id",
+    "disabled_by",
+    "hidden_by",
+    "critical",
+    "integration_name",
+    "manufacturer",
+    "model",
+)
+NOTES_SHOWN = 5
 AUDIT_SCHEMA = vol.Schema(
     {
         vol.Optional("kind"): vol.In(("read", "write", "denied")),
@@ -176,6 +204,93 @@ def findings(scanner: InventoryScanner, data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _related(
+    edges: list[dict[str, Any]],
+    objects: dict[str, dict[str, Any]],
+    me: str,
+    relations: tuple[str, ...],
+    outgoing: bool,
+) -> dict[str, Any]:
+    """The objects at the other end of the edges of one kind, a page of them and the total."""
+    own, other = ("source", "target") if outgoing else ("target", "source")
+    rows = [(e[other], e["relation"]) for e in edges if e[own] == me and e["relation"] in relations]
+    items = []
+    for ref, relation in rows[:RELATION_LIMIT]:
+        kind, _, ident = ref.partition(":")
+        items.append(
+            {
+                "type": kind,
+                "id": ident,
+                "name": clean_text(objects.get(ref, {}).get("name")),
+                "relation": relation,
+            }
+        )
+    return {"total": len(rows), "items": items}
+
+
+def object_card(scanner: InventoryScanner, data: dict[str, Any]) -> dict[str, Any]:
+    """One object: what it is, what was decided about it, its findings and how it is connected."""
+    snapshot = _snapshot(scanner)
+    kind, ident = data["object_type"], data["object_id"]
+    me = f"{kind}:{ident}"
+    objects = {f"{o['object_type']}:{o['object_id']}": o for o in snapshot["objects"]}
+    item = objects.get(me)
+    if item is None:
+        raise McpError("not_found")
+    card = {k: item[k] for k in OBJECT_FIELDS if item.get(k) not in (None, "")}
+    card.update(type=kind, id=ident, name=clean_text(item.get("name")))
+    if item.get("labels"):
+        card["labels"] = [clean_text(label, 40) for label in item["labels"][:10]]
+    found = [f for f in snapshot["findings"] if f["object_id"] == ident]
+    best = max(
+        (RANK.get(f.get("impact") or "none", 0) for f in found if not f.get("ignored")), default=0
+    )
+    mark = scanner.marks.items.get(mark_key(kind, ident))
+    used_by = _related(snapshot["edges"], objects, me, USED, outgoing=False)
+    return {
+        "schema": API_SCHEMA,
+        "object": card,
+        "mark": (
+            {
+                "kind": mark.get("kind"),
+                "reason": clean_text(mark.get("reason"), REASON_SHOWN),
+                "until": mark.get("until"),
+            }
+            if mark
+            else None
+        ),
+        "notes": [
+            {
+                "at": n["at"],
+                "title": clean_text(n.get("title")),
+                "note": clean_text(n.get("note"), 300),
+            }
+            for n in scanner.notes.view()
+            if n.get("target") == ident
+        ][:NOTES_SHOWN],
+        "findings": [
+            {
+                "key": f["key"],
+                "rule": f["rule_id"],
+                "level": f.get("impact") or "none",
+                "state": f["classification"],
+                "since": f.get("first_detected_at"),
+                "hidden": bool(f.get("ignored")),
+            }
+            for f in found[:RELATION_LIMIT]
+        ],
+        "impact": {
+            "level": next((lv for lv, rank in RANK.items() if rank == best), "none"),
+            "used_by": used_by["total"],
+            "critical": bool(item.get("critical")),
+        },
+        "used_by": used_by,
+        "uses": _related(snapshot["edges"], objects, me, USED, outgoing=True),
+        "belongs_to": _related(snapshot["edges"], objects, me, BELONGS, outgoing=False),
+        "contains": _related(snapshot["edges"], objects, me, BELONGS, outgoing=True),
+    }
+
+
 def audit(scanner: InventoryScanner, data: dict[str, Any]) -> dict[str, Any]:
     """The log of calls, newest first."""
     rows = scanner.mcp.recent(data.get("kind"), data["failed"])
@@ -198,6 +313,7 @@ class Function:
 FUNCTIONS: dict[str, Function] = {
     "status": Function(status, STATUS_SCHEMA),
     "findings": Function(findings, FINDINGS_SCHEMA),
+    "object": Function(object_card, OBJECT_SCHEMA),
     "audit": Function(audit, AUDIT_SCHEMA, logged=False),
 }
 
