@@ -13074,9 +13074,9 @@ Object.assign(TEXT.de, {
   mcpPrivacy: "Das Modell sieht Namen und IDs, Bereiche, Befunde und die Struktur deiner Konfiguration; läuft es in der Cloud, gehen diese Angaben dorthin. Nie übertragen werden Passwörter, Tokens, Webhook-IDs und Zugangsdaten. Nur Administratoren können die Dienste nutzen.",
   mcpHowTitle: "So nutzt du es",
   mcpHow1: "„KI-Zugriff aktivieren“ einschalten.",
-  mcpHow2: "Dem Programm diese Dienste von ha_housekeeper geben (Antwort mit return_response):", mcpHowWrite: "mit „Merkliste ändern“ zusätzlich:",
+  mcpHow2: "Dem KI-Agenten erlauben, diese Dienste der Integration ha_housekeeper aufzurufen (die Antwort kommt mit return_response):", mcpHowWrite: "Zusätzlich, wenn „Merkliste ändern“ an ist:",
   mcpHow3: "Fragen, zum Beispiel: „Welche Sensoren sind seit Wochen weg, und braucht sie jemand?“",
-  mcpHowNote: "Bei ha-mcp nimm die Dienste, nicht ws_command: Die Panel-Befehle sind nicht dokumentiert, und die Gesamtliste ist bei großen Installationen über 10 MB.",
+  mcpHowNote: "Bei ha-mcp die Dienste über ha_call_service aufrufen, nicht über ws_command: Die Panel-Befehle sind nicht dokumentiert, und die Gesamtliste kann bei großen Installationen über 10 MB groß werden.",
   mcpLogTitle: "Protokoll", mcpLogHint: "Jeder Aufruf mit Zeit, Benutzer, Dienst und Ergebnis, nie die Inhalte der Antworten. Viele Lesezugriffe hintereinander stehen in einer Zeile. Höchstens 2000 Einträge und 90 Tage.",
   mcpLogCalls: "{n} Aufrufe in 24 Stunden", mcpLogEmpty: "Noch keine Aufrufe.", mcpLogLoading: "Protokoll wird geladen …",
   mcpFilterAll: "Alle", mcpFilterRead: "Lesen", mcpFilterWrite: "Ändern", mcpFilterDenied: "Abgewiesen", mcpFilterFailed: "Fehler",
@@ -13097,9 +13097,9 @@ Object.assign(TEXT.en, {
   mcpPrivacy: "The model sees names and ids, areas, findings and the structure of your configuration; if it runs in the cloud, these details go there. Passwords, tokens, webhook ids and credentials are never sent. Only administrators can use the services.",
   mcpHowTitle: "How to use it",
   mcpHow1: "Switch on “Switch on AI access”.",
-  mcpHow2: "Give the program these ha_housekeeper services (answer with return_response):", mcpHowWrite: "with “Change the list” also:",
+  mcpHow2: "Allow the AI agent to call these services of the ha_housekeeper integration (the answer comes with return_response):", mcpHowWrite: "Additionally, when “Change the list” is on:",
   mcpHow3: "Ask, for example: “Which sensors have been gone for weeks, and does anyone use them?”",
-  mcpHowNote: "With ha-mcp use the services, not ws_command: the panel commands are not documented, and the full list is over 10 MB on large installations.",
+  mcpHowNote: "With ha-mcp call the services through ha_call_service, not ws_command: the panel commands are not documented, and the full list can be over 10 MB on large installations.",
   mcpLogTitle: "Log", mcpLogHint: "Every call with time, user, service and result, never the content of the answers. Many reads in a row are one line. At most 2,000 entries and 90 days.",
   mcpLogCalls: "{n} calls in 24 hours", mcpLogEmpty: "No calls yet.", mcpLogLoading: "Loading the log …",
   mcpFilterAll: "All", mcpFilterRead: "Reads", mcpFilterWrite: "Changes", mcpFilterDenied: "Refused", mcpFilterFailed: "Errors",
@@ -13155,7 +13155,7 @@ class McpMixin {
     const state = !on ? ["mute", "mcpStateOff"] : write ? ["", "mcpStateWrite"] : ["ok", "mcpStateRead"];
     const calls = on && this.mcp ? ` <span class="mcpcalls">${this.t("mcpLogCalls", { n: this.formatNumber(this.mcp.calls_24h || 0) })}</span>` : "";
     const privacy = `<div class="mcpnote"><ha-icon icon="mdi:shield-lock-outline"></ha-icon><span>${this.t("mcpPrivacy")}</span></div>`;
-    const how = `<details class="howto mcphow"${on ? "" : " open"}><summary>${this.t("mcpHowTitle")}</summary><ol class="mcpsteps"><li>${this.t("mcpHow1")}</li><li>${this.t("mcpHow2")} ${chips(["status", "findings", "object", "audit"])}<br>${this.t("mcpHowWrite")} ${chips(["finding_decide", "mark", "note_set", "undo"])}</li><li>${this.t("mcpHow3")}</li></ol><p class="factnote">${this.t("mcpHowNote")}</p></details>`;
+    const how = `<details class="howto mcphow"><summary>${this.t("mcpHowTitle")}</summary><ol class="mcpsteps"><li>${this.t("mcpHow1")}</li><li>${this.t("mcpHow2")} ${chips(["status", "findings", "object", "audit"])}<br>${this.t("mcpHowWrite")} ${chips(["finding_decide", "mark", "note_set", "undo"])}</li><li>${this.t("mcpHow3")}</li></ol><p class="factnote">${this.t("mcpHowNote")}</p></details>`;
     const main = `<section class="panel"><div class="panelhead"><div><h2>${this.t("mcpTitle")} <span class="pill ${state[0]}">${this.t(state[1])}</span>${calls}</h2><p>${this.t("mcpHint")}</p></div></div>${switches}${privacy}${how}</section>`;
     if (!this.mcp) { this.loadMcp(); return `${main}<section class="panel"><div class="panelhead"><h2>${this.t("mcpLogTitle")}</h2></div><div class="pad"><p class="factnote">${this.t("mcpLogLoading")}</p></div></section>`; }
     const filter = this.mcpFilter || "all";
