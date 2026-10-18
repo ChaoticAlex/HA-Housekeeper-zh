@@ -365,7 +365,7 @@ def update_group(entity_id: str, platform: str | None) -> str:
     """Where an update belongs: the system itself, an app, a HACS repository or a device."""
     if entity_id in UPDATE_ENTITIES:
         return "system"
-    return {"hassio": "app", "hacs": "hacs"}.get(platform or "", "device")
+    return {"hassio": "app", "hacs": "hacs", "marketplace": "hacs"}.get(platform or "", "device")
 
 
 def _text_attr(value: Any) -> str | None:

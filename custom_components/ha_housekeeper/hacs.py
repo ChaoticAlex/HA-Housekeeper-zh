@@ -1,8 +1,9 @@
 """What HACS knows about the custom integrations it installed: version, newest version, pending update.
 
-HACS keeps its repository index in memory under ``hass.data["hacs"]``. That object is HACS's own and
-has no public interface, so everything is read defensively: without HACS, or with a layout this code
-does not know, the answer is ``None`` and the panel simply shows nothing about HACS. Nothing is
+HACS keeps its repository index in memory under ``hass.data["hacs"]``; from Home Assistant 2026.11 the
+built-in Marketplace holds it in the ``runtime_data`` of its config entry. That object is not public,
+so everything is read defensively: without HACS or Marketplace, or with a layout this code does not
+know, the answer is ``None`` and the panel simply shows nothing about HACS. Nothing is
 called that talks to GitHub, and nothing is changed.
 """
 
@@ -15,6 +16,8 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 
 HACS_KEY = "hacs"
+MARKETPLACE_KEY = "marketplace"
+ISSUE_DOMAINS = (HACS_KEY, MARKETPLACE_KEY)
 FULL_NAME = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 
 
@@ -67,7 +70,7 @@ def removed_issues(hass: HomeAssistant) -> dict[str, dict[str, Any]]:
         return {}
     found: dict[str, dict[str, Any]] = {}
     for (domain, issue_id), issue in issues.items():
-        if domain != HACS_KEY or not str(issue_id).startswith("removed_"):
+        if domain not in ISSUE_DOMAINS or not str(issue_id).startswith("removed_"):
             continue
         placeholders = getattr(issue, "translation_placeholders", None) or {}
         found[str(issue_id).removeprefix("removed_")] = {
@@ -125,14 +128,25 @@ def repository_row(repository: Any, removed: dict[str, dict[str, Any]]) -> dict[
     }
 
 
-def hacs_by_domain(hass: HomeAssistant) -> dict[str, dict[str, Any]] | None:
-    """Installed HACS integrations by domain; ``None`` when HACS is missing or cannot be read."""
-    hacs = hass.data.get(HACS_KEY)
-    if hacs is None:
-        return None
+def _repositories(hass: HomeAssistant) -> list[Any] | None:
+    """The repositories of HACS or of the Marketplace; ``None`` when neither is there or readable."""
     try:
-        repositories = list(hacs.repositories.list_all)
+        hacs = hass.data.get(HACS_KEY)
+        if hacs is not None:
+            return list(hacs.repositories.list_all)
+        for entry in hass.config_entries.async_entries(MARKETPLACE_KEY):
+            manager = getattr(entry, "runtime_data", None)
+            if manager is not None:
+                return list(manager.repositories.list_installed)
     except Exception:  # noqa: BLE001 - a layout this code does not know is not an error of ours
+        return None
+    return None
+
+
+def hacs_by_domain(hass: HomeAssistant) -> dict[str, dict[str, Any]] | None:
+    """Installed HACS integrations by domain; ``None`` when HACS and Marketplace are missing or cannot be read."""
+    repositories = _repositories(hass)
+    if repositories is None:
         return None
     found: dict[str, dict[str, Any]] = {}
     removed = removed_issues(hass)
@@ -148,12 +162,8 @@ def hacs_by_domain(hass: HomeAssistant) -> dict[str, dict[str, Any]] | None:
 
 def hacs_repositories(hass: HomeAssistant) -> list[dict[str, Any]] | None:
     """Every installed HACS repository; ``None`` when HACS is missing or cannot be read."""
-    hacs = hass.data.get(HACS_KEY)
-    if hacs is None:
-        return None
-    try:
-        repositories = list(hacs.repositories.list_all)
-    except Exception:  # noqa: BLE001 - a layout this code does not know is not an error of ours
+    repositories = _repositories(hass)
+    if repositories is None:
         return None
     removed = removed_issues(hass)
     rows = []
@@ -169,12 +179,8 @@ def hacs_repositories(hass: HomeAssistant) -> list[dict[str, Any]] | None:
 
 def blocked_repository_ids(hass: HomeAssistant) -> set[str]:
     """Ids of the installed repositories whose pending update HACS cannot install; empty without HACS."""
-    hacs = hass.data.get(HACS_KEY)
-    if hacs is None:
-        return set()
-    try:
-        repositories = list(hacs.repositories.list_all)
-    except Exception:  # noqa: BLE001 - a layout this code does not know is not an error of ours
+    repositories = _repositories(hass)
+    if repositories is None:
         return set()
     found = set()
     for repository in repositories:

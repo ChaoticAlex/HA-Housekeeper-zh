@@ -119,3 +119,11 @@ def test_every_installed_repository_is_listed_with_what_hacs_removed(monkeypatch
 
 def test_the_repository_list_is_none_without_hacs() -> None:
     assert hacs_repositories(SimpleNamespace(data={})) is None
+
+
+def test_the_marketplace_of_ha_2026_11_is_read_like_hacs() -> None:
+    repository = repo(installed_version="1.0", last_version="1.1")
+    manager = SimpleNamespace(repositories=SimpleNamespace(list_installed=[repository]))
+    entries = SimpleNamespace(async_entries=lambda domain: [SimpleNamespace(runtime_data=manager)])
+    hass = SimpleNamespace(data={}, config_entries=entries)
+    assert hacs_by_domain(hass)["demo"]["pending_update"] is True

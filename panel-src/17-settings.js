@@ -91,23 +91,21 @@ class SettingsMixin {
     const by = f => (f.ignored_by === "label" || f.ignored_by === "mark" || f.ignored_by === "rule" ? f.ignored_by : "manual");
     const objectName = f => this.findObject(this.findingKey(f))?.name || f.object_id;
     const decision = f => (f.ignore_info ? this.decisionLabel(f) : "") + (f.mark ? ` ${this.markLine(f.mark)}` : "") + (f.ignored_by === "rule" ? this.findingRuleLine(f) : "");
-    const action = f => (by(f) === "manual" ? `<button class="btn" data-ignore="${this.esc(f.key)}" data-ignore-value="0">${this.t("showFinding")}</button>` : `<span class="pill mute">${this.t(f.ignored_by === "mark" ? "mark_" + f.mark.kind : f.ignored_by === "rule" ? "hidRuleLink" : "ignoredByLabel")}</span>`);
-    const table = this.sysList("hidden", hidden, {
-      sort: "name", dir: "asc", cls: "hid", tie: f => f.key, empty: "hiddenNone", exportName: "hidden-findings",
-      sorts: [{ key: "name", label: "hidColObject", dir: "asc", get: objectName }, { key: "finding", label: "hidColFinding", dir: "asc", get: f => this.findingTitle(f) }],
-      text: f => [objectName(f), f.object_id, this.findingTitle(f), decision(f)].join(" "),
-      filters: [{ name: "by", all: this.t("hidAllWays"), options: [["manual", this.t("hidByManual")], ["label", this.t("hidByLabel")], ["mark", this.t("hidByMark")], ["rule", this.t("hidByRule")]] }],
-      filterFns: { by: (f, v) => by(f) === v },
-      rowAttrs: f => (this.findObject(this.findingKey(f)) ? `data-object="${this.esc(this.findingKey(f))}" tabindex="0" role="button" aria-label="${this.esc(objectName(f))}"` : 'class="static"'),
-      columns: [
-        { key: "name", label: "hidColObject", dir: "asc", cell: f => `<strong>${this.esc(objectName(f))}</strong><small>${this.esc(f.object_id)}</small>` },
-        { key: "finding", label: "hidColFinding", dir: "asc", cell: f => this.esc(this.findingTitle(f)) },
-        { key: "why", label: "hidColDecision", sortable: false, cell: f => this.esc(decision(f).trim() || "–") },
-        { key: "act", label: "hidColAction", sortable: false, cell: action },
-      ],
-      header: [this.t("hidColObject"), "ID", this.t("hidColFinding"), this.t("hidColDecision")], rows: f => [objectName(f), f.object_id, this.findingTitle(f), decision(f).trim()],
-    });
-    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("hiddenFindings")} (${hidden.length})</h2><p>${this.t("hiddenHint")}</p></div></div>${table}</section>`;
+    const action = f => (by(f) === "manual" ? `<button class="btn quiet" data-ignore="${this.esc(f.key)}" data-ignore-value="0"><ha-icon icon="mdi:eye-outline"></ha-icon>${this.t("showFinding")}</button>` : `<span class="pill mute">${this.t(f.ignored_by === "mark" ? "mark_" + f.mark.kind : f.ignored_by === "rule" ? "hidRuleLink" : "ignoredByLabel")}</span>`);
+    const sorts = [{ key: "name", label: "hidColObject", dir: "asc", get: objectName }, { key: "finding", label: "hidColFinding", dir: "asc", get: f => this.findingTitle(f) }];
+    const filters = [{ name: "by", all: this.t("hidAllWays"), options: [["manual", this.t("hidByManual")], ["label", this.t("hidByLabel")], ["mark", this.t("hidByMark")], ["rule", this.t("hidByRule")]] }];
+    const st = this.lvState("hidden", "name", "asc");
+    this.setExporter("hidden", "hidden-findings", [this.t("hidColObject"), "ID", this.t("hidColFinding"), this.t("hidColDecision")], () => refined.map(f => [objectName(f), f.object_id, this.findingTitle(f), decision(f).trim()]));
+    const bar = hidden.length >= 6 || st.q || Object.values(st.f).some(Boolean) ? this.listBar("hidden", { sorts, filters }) : "";
+    const refined = this.refine("hidden", hidden, { text: f => [objectName(f), f.object_id, this.findingTitle(f), decision(f)].join(" "), filters: { by: (f, v) => by(f) === v }, sorts, tie: f => f.key });
+    const pg = this.paginate("hidden", refined);
+    st.shown = refined.length;
+    const row = f => {
+      const key = this.findingKey(f), object = this.findObject(key), why = decision(f).trim();
+      return `<div class="row" ${object ? `data-object="${this.esc(key)}" tabindex="0" role="button" aria-label="${this.esc(objectName(f))}"` : ""} title="${this.esc(f.object_id)}">${this.tile(object?.object_type || "entity", this.tone(f.classification))}<span class="row-text"><strong>${this.esc(objectName(f))}</strong><small>${this.esc(this.findingTitle(f))}${why ? ` · ${this.esc(why)}` : ""}</small></span>${action(f)}</div>`;
+    };
+    const table = refined.length ? pg.rows.map(row).join("") : `<div class="emptymsg">${hidden.length ? this.noMatches("hidden") : `<ha-icon icon="mdi:check-circle-outline"></ha-icon>${this.t("hiddenNone")}`}</div>`;
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("hiddenFindings")} (${hidden.length})</h2><p>${this.t("hiddenHint")}</p></div></div>${bar}${table}${pg.footer}</section>`;
   }
 
   // Numbers only, no names, ids or attributes: safe to attach to an issue on GitHub.
