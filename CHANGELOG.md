@@ -21,6 +21,7 @@
 - **Ausnahmeregeln, Speichern und Meldungen:** Regeln mit „Ausblenden“ ließen sich nicht mehr speichern („expected int at rules[0].days“); das ist behoben. Fehler, Warnungen und Hinweise stehen in einheitlichen Kästen, Fehler erst nach dem Speichern und nur bis zur nächsten Änderung. Der Urlaubsmodus zeigt „Nicht gespeichert“, solange etwas vom Gespeicherten abweicht.
 - **Ausnahmeregeln, Aufbau:** Die Seite besteht aus eigenen Karten: Einleitung, Regeln „Immer“, Urlaubsmodus (Entität und Nachfrist) und Regeln „Im Urlaubsmodus“. Die Regeln stehen in einer Tabelle mit Kopfzeile (Regel, Aktion, Wirkung jetzt, An, Aktionen).
 - **Ausnahmeregeln, Knöpfe:** „+ Regel“ steht rechts im Kopf der Karte, Speichern und Abbrechen unten rechts wie in den anderen Formularen, auch beim Urlaubsmodus (dort mit „Nicht gespeichert“ links daneben).
+- **Urlaubsmodus, Feld:** Das Feld für die Entität ist breiter, lange Namen wie `input_boolean.urlaub_haus` passen hinein.
 - **Updates:** Die ausstehenden Updates stehen in der gewohnten Tabelle mit Suche, Sortierung, Filter nach Bereich und Seiten.
 
 ### English
@@ -44,6 +45,7 @@
 - **Exception rules, saving and messages:** Rules with “Hide” could no longer be saved (“expected int at rules[0].days”); fixed. Errors, warnings and notes use uniform boxes, errors only after saving and only until the next change. The vacation mode shows “Not saved” while anything differs from what is saved.
 - **Exception rules, layout:** The page is made of cards of their own: introduction, rules “Always”, vacation mode (entity and grace period) and rules “In vacation mode”. The rules sit in a table with a header (rule, action, effect now, on, actions).
 - **Exception rules, buttons:** “+ Rule” sits at the right of the card header, Save and Cancel at the bottom right as in the other forms, also for the vacation mode (with “Not saved” on the left).
+- **Vacation mode, field:** The entity field is wider, long names such as `input_boolean.vacation_house` fit.
 - **Updates:** Pending updates are shown in the usual table with search, sorting, an area filter and pages.
 
 ## 1.9.0 - 2026-10-17
