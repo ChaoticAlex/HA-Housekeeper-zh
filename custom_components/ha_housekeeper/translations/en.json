@@ -307,6 +307,9 @@
     "rate_limited": {
       "message": "Too many changes: at most 200 in 5 minutes. Wait a few minutes."
     },
+    "too_many_calls": {
+      "message": "Too many calls: at most 120 reads per minute. Wait a moment."
+    },
     "not_admin": {
       "message": "Only an administrator may use AI access."
     },

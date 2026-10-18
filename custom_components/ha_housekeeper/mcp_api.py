@@ -40,6 +40,7 @@ VIA = "mcp"
 IGNORE_KINDS = ("ignore", "keep", "snooze")
 WRITE_LIMIT = 200
 WRITE_WINDOW_MINUTES = 5
+READ_LIMIT = 120  # per minute
 
 _CONTROL = re.compile(r"[\x00-\x1f\x7f]+")
 
@@ -527,6 +528,12 @@ async def run(
             and scanner.mcp.writes_since(WRITE_WINDOW_MINUTES) >= WRITE_LIMIT
         ):
             raise McpError("rate_limited")
+        if (
+            function.logged
+            and function.kind == "read"
+            and scanner.mcp.reads_since(60) >= READ_LIMIT
+        ):
+            raise McpError("too_many_calls")
         try:
             clean = function.schema(data)
         except vol.Invalid as err:
@@ -548,7 +555,8 @@ async def run(
         if function.logged:
             kind = (
                 "denied"
-                if result in ("disabled", "write_disabled", "not_admin", "rate_limited")
+                if result
+                in ("disabled", "write_disabled", "not_admin", "rate_limited", "too_many_calls")
                 else function.kind
             )
             scanner.mcp.log(user_id, name, kind, params, result, count, undo)

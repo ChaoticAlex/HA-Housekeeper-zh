@@ -250,3 +250,14 @@ async def test_no_secret_reaches_an_answer(hass: HomeAssistant) -> None:
         await mcp_api.run(hass, scanner, "audit", {}, None),
     ]
     assert secret not in json.dumps(answers)
+
+
+async def test_reads_are_limited_per_minute(hass: HomeAssistant) -> None:
+    scanner = scanner_with(hass, 3)
+    scanner.mcp.enabled = True
+    for _ in range(mcp_api.READ_LIMIT):
+        scanner.mcp.log(None, "status", "read", {}, "ok", None)
+    with pytest.raises(mcp_api.McpError) as limited:
+        await mcp_api.run(hass, scanner, "status", {}, None)
+    assert limited.value.reason == "too_many_calls"
+    await mcp_api.run(hass, scanner, "audit", {}, None)  # the log can always be read

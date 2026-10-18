@@ -307,6 +307,9 @@
     "rate_limited": {
       "message": "Zu viele Änderungen: höchstens 200 in 5 Minuten. Ein paar Minuten warten."
     },
+    "too_many_calls": {
+      "message": "Zu viele Aufrufe: höchstens 120 Lesezugriffe pro Minute. Einen Moment warten."
+    },
     "not_admin": {
       "message": "Nur ein Administrator darf den KI-Zugriff nutzen."
     },
