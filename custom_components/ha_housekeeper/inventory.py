@@ -1668,6 +1668,7 @@ class InventoryScanner:
                 "marked_status_counts": marked_status_counts(objects),
                 "type_counts": dict(Counter(item["object_type"] for item in objects)),
                 "vacation": self.vacation_meta(findings),
+                "exception_rules": len(self.exceptions.rules),
             },
             "objects": objects,
             "edges": edges,
