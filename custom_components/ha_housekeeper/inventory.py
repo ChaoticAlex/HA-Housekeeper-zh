@@ -1073,8 +1073,9 @@ class InventoryScanner:
                 if not preliminary:
                     self.outage_scans.after_scan(snapshot)
                 self.monitor.refresh(snapshot, self.health_report(), new_scan=not preliminary)
-                self.async_check_health()
+                # Not running any more before the signal goes out: the button reads it then.
                 self.status.update(running=False, phase="complete", progress=100)
+                self.async_check_health()
                 self._last_scan_end = time.monotonic()
                 return snapshot
             except Exception as err:

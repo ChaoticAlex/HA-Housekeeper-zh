@@ -543,6 +543,20 @@ async def test_sensors_expose_counts_and_follow_scans(hass: HomeAssistant) -> No
     assert hass.states.get("sensor.ha_housekeeper_findings").state == "0"
 
 
+async def test_scan_button_is_available_after_a_scan(hass: HomeAssistant) -> None:
+    """The button reads the status when the scan ends, so it must not still say running."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    await hass.config_entries.flow.async_configure(result["flow_id"], {})
+    await hass.async_block_till_done(wait_background_tasks=True)
+    scanner = hass.data[DOMAIN]["scanner"]
+    await scanner.async_scan()
+    await hass.async_block_till_done(wait_background_tasks=True)
+    button = next(state for state in hass.states.async_all("button"))
+    assert button.state != "unavailable"
+
+
 async def _ws_setup(hass: HomeAssistant, hass_ws_client):
     from homeassistant.setup import async_setup_component
 

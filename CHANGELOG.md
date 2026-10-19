@@ -4,6 +4,7 @@
 
 ### Behoben
 
+- **Scan-Button:** „Scan starten“ bleibt nach einem Scan nicht mehr nicht verfügbar.
 - **Backup-Schutz:** Backups anderer Werkzeuge (zum Beispiel Google Drive Backup) werden erkannt und zählen für die Prüfungen.
 
 ### Geändert
@@ -14,6 +15,7 @@
 
 #### Fixed
 
+- **Scan button:** “Start scan” no longer stays unavailable after a scan.
 - **Backup protection:** Backups made by other tools (for example Google Drive Backup) are recognised and count for the checks.
 
 #### Changed
