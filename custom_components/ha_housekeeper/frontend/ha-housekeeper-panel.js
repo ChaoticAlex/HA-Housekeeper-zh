@@ -1560,7 +1560,7 @@ class StylesMixin {
 .w300{max-width:300px}.w460{max-width:460px}.reportextra{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.code.codefull{max-height:none}.panelhead.topline{border-top:1px solid var(--hk-border)}.planchips{padding:6px 0 0;border:0}.planresult{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.planfootbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.panel.ovvis{overflow:visible}.compentry td{padding-left:62px;cursor:pointer}.hacsadvice ol{margin:0;padding:0 16px 12px 40px}.hacsadvice li{margin:2px 0}.compname{display:flex;align-items:center;gap:8px}.compname>.namecell{flex:1;min-width:0}.compgap{visibility:hidden}.compentrymeta{display:block;color:var(--hk-muted);font-size:12px}.invsubrow td:first-child{padding-left:28px}.invsubrow .invsub{color:var(--hk-muted)}.hist-bar{margin-top:4px}.hist-hint{margin:10px 16px}.hist-hint0{margin:10px 0 0}.changes-pick{grid-template-columns:auto minmax(220px,360px)}.baselbl{color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1))}.u-m0{margin:0!important}.u-block{display:block!important}.u-mb14{margin-bottom:14px!important}.u-pt6{padding:6px 0 0!important}.u-dim{opacity:.8!important}.u-ic14{--mdc-icon-size:14px!important}.u-amber{color:var(--hk-amber)!important}
       .factnote{padding:12px 16px;border-top:1px solid var(--hk-border);color:var(--hk-muted);font-size:calc(12px*var(--hk-fs,1));line-height:1.5}:where(:not(.panel))>.factnote{border-top:0;padding:0}.panel>.factnote:first-child{border-top:0}
       .diagcard{display:grid;gap:12px;padding:16px}.checks{display:grid;gap:8px}
-      .check{display:grid;grid-template-columns:22px minmax(100px,150px) minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-soft);font-size:calc(13px*var(--hk-fs,1))}.check b{font-weight:600}.check .val{color:var(--hk-muted);overflow-wrap:anywhere}
+      .check{display:grid;grid-template-columns:22px minmax(100px,150px) minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-soft);font-size:calc(13px*var(--hk-fs,1))}.check b{font-weight:600}.check .val{color:var(--hk-muted);overflow-wrap:anywhere}.check button.val{justify-self:start;text-align:left;color:var(--hk-blue);font-weight:400}
       .check ha-icon{--mdc-icon-size:20px}.check.ok ha-icon{color:var(--hk-green)}.check.warn ha-icon{color:var(--hk-amber)}.check.red ha-icon{color:var(--hk-red)}.check.mute ha-icon{color:var(--hk-gray)}.check.violet ha-icon{color:var(--hk-violet)}
       .cause,.hintbox{display:grid;grid-template-columns:auto 1fr;gap:12px;padding:14px;border:1px solid var(--hk-border);border-radius:10px;background:var(--hk-soft)}.cause strong,.hintbox strong{display:block;margin-bottom:4px;color:var(--hk-muted);font-size:calc(11px*var(--hk-fs,1));letter-spacing:.07em;text-transform:uppercase}.cause p,.hintbox p{font-size:calc(13px*var(--hk-fs,1));line-height:1.55}
       .cause.ok{background:color-mix(in srgb,var(--hk-green) 9%,transparent);border-color:color-mix(in srgb,var(--hk-green) 35%,transparent)}.cause.warn{background:color-mix(in srgb,var(--hk-amber) 10%,transparent);border-color:color-mix(in srgb,var(--hk-amber) 35%,transparent)}.cause.red{background:color-mix(in srgb,var(--hk-red) 9%,transparent);border-color:color-mix(in srgb,var(--hk-red) 35%,transparent)}.cause.violet{background:color-mix(in srgb,var(--hk-violet) 9%,transparent);border-color:color-mix(in srgb,var(--hk-violet) 35%,transparent)}
@@ -5299,10 +5299,10 @@ class DiagnosisMixin {
   integrationCheck(entryId) {
     const entry = this.findObject(`config_entry:${entryId}`), label = this.t("integration");
     if (!entry) return { row: this.check(label, "red", entryId, this.t("missing")), entry };
-    if (entry.disabled_by) return { row: this.check(label, "mute", entry.name, this.t("disabled")), entry };
+    if (entry.disabled_by) return { row: this.check(label, "mute", entry.name, this.t("disabled"), this.objectKey(entry)), entry };
     const state = entry.state || "not_loaded";
     const tone = state === "loaded" ? "ok" : ["setup_error", "migration_error", "failed_unload"].includes(state) ? "red" : "warn";
-    return { row: this.check(label, tone, entry.name, this.t(`cs_${state}`)), entry, broken: state !== "loaded", state };
+    return { row: this.check(label, tone, entry.name, this.t(`cs_${state}`), this.objectKey(entry)), entry, broken: state !== "loaded", state };
   }
 
   // Builds the check list and the plain-language cause for one object. Returns null when nothing is worth explaining.
@@ -5318,8 +5318,8 @@ class DiagnosisMixin {
       const device = item.device_id ? this.findObject(`device:${item.device_id}`) : null;
       if (item.device_id) {
         rows.push(!device ? this.check(t("device"), "red", item.device_id, t("missing"))
-          : device.status === "disabled" ? this.check(t("device"), "mute", device.name, t("disabled"))
-          : this.check(t("device"), "ok", device.name, t("active")));
+          : device.status === "disabled" ? this.check(t("device"), "mute", device.name, t("disabled"), this.objectKey(device))
+          : this.check(t("device"), "ok", device.name, t("active"), this.objectKey(device)));
       }
       if (item.disabled_by) rows.push(this.check(t("entity"), "mute", t("entity_disabled"), t("disabled")));
       const state = item.state;
@@ -5349,7 +5349,7 @@ class DiagnosisMixin {
       const brokenMembers = this.data.findings.filter(f => f.rule_id === "entity.missing_member" && f.object_id === item.object_id);
       brokenMembers.forEach(f => rows.push(this.check(t("missing_member"), "red", f.affected_object, t("missing"))));
       if (item.duplicate_of) {
-        rows.push(this.check(t("duplicateTwin"), "violet", item.duplicate_of, t("possible_duplicate")));
+        rows.push(this.check(t("duplicateTwin"), "violet", item.duplicate_of, t("possible_duplicate"), `entity:${item.duplicate_of}`));
         cause = `${t("cause_duplicate", { twin: item.duplicate_of })} ${cause}`;
       }
       if (item.reason === "state_unavailable") hint = broken ? t("hint_integration") : t("hint_state_unavailable");
@@ -5414,7 +5414,7 @@ class DiagnosisMixin {
     const d = this.diagnose(item);
     if (!d) return "";
     const icon = { ok: "mdi:check-circle", warn: "mdi:alert-circle", red: "mdi:close-circle", mute: "mdi:minus-circle", violet: "mdi:help-circle" };
-    const rows = d.rows.map(r => `<div class="check ${r.tone}"><ha-icon icon="${icon[r.tone] || icon.ok}"></ha-icon><b>${this.esc(r.label)}</b><span class="val">${this.esc(r.value)}</span><i class="pill ${r.tone}">${this.esc(r.badge)}</i></div>`).join("");
+    const rows = d.rows.map(r => `<div class="check ${r.tone}"><ha-icon icon="${icon[r.tone] || icon.ok}"></ha-icon><b>${this.esc(r.label)}</b>${r.link && this.findObject(r.link) ? `<button type="button" class="linkbtn val" data-object="${this.esc(r.link)}">${this.esc(r.value)}</button>` : `<span class="val">${this.esc(r.value)}</span>`}<i class="pill ${r.tone}">${this.esc(r.badge)}</i></div>`).join("");
     return `<section class="panel"><div class="panelhead"><div><h2>${this.t("diagnosis")}</h2></div></div>
       <div class="diagcard">${this.ratingBlock(item, this.objectKey(item))}<div class="checks">${rows}</div>
       ${d.cause ? `<div class="cause ${d.tone}"><ha-icon icon="mdi:text-search"></ha-icon><div><strong>${this.t("causeLabel")}</strong><p>${this.esc(d.cause)}</p></div></div>` : ""}
@@ -17224,7 +17224,8 @@ class HAHousekeeperPanel extends HTMLElement {
 
   findingType(f) { return this.findObject(this.findingKey(f))?.object_type || f.rule_id.split(".")[0]; }
 
-  check(label, tone, value, badge) { return { label, tone, value, badge }; }
+  // ``link`` is the key of the object the value names; the diagnosis shows it as a link to that object.
+  check(label, tone, value, badge, link = null) { return { label, tone, value, badge, link }; }
 
   bind() {
     const root = this.shadowRoot;

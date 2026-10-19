@@ -808,7 +808,8 @@ class HAHousekeeperPanel extends HTMLElement {
 
   findingType(f) { return this.findObject(this.findingKey(f))?.object_type || f.rule_id.split(".")[0]; }
 
-  check(label, tone, value, badge) { return { label, tone, value, badge }; }
+  // ``link`` is the key of the object the value names; the diagnosis shows it as a link to that object.
+  check(label, tone, value, badge, link = null) { return { label, tone, value, badge, link }; }
 
   bind() {
     const root = this.shadowRoot;

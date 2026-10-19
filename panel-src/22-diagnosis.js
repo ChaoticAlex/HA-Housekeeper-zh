@@ -14,10 +14,10 @@ class DiagnosisMixin {
   integrationCheck(entryId) {
     const entry = this.findObject(`config_entry:${entryId}`), label = this.t("integration");
     if (!entry) return { row: this.check(label, "red", entryId, this.t("missing")), entry };
-    if (entry.disabled_by) return { row: this.check(label, "mute", entry.name, this.t("disabled")), entry };
+    if (entry.disabled_by) return { row: this.check(label, "mute", entry.name, this.t("disabled"), this.objectKey(entry)), entry };
     const state = entry.state || "not_loaded";
     const tone = state === "loaded" ? "ok" : ["setup_error", "migration_error", "failed_unload"].includes(state) ? "red" : "warn";
-    return { row: this.check(label, tone, entry.name, this.t(`cs_${state}`)), entry, broken: state !== "loaded", state };
+    return { row: this.check(label, tone, entry.name, this.t(`cs_${state}`), this.objectKey(entry)), entry, broken: state !== "loaded", state };
   }
 
   // Builds the check list and the plain-language cause for one object. Returns null when nothing is worth explaining.
@@ -33,8 +33,8 @@ class DiagnosisMixin {
       const device = item.device_id ? this.findObject(`device:${item.device_id}`) : null;
       if (item.device_id) {
         rows.push(!device ? this.check(t("device"), "red", item.device_id, t("missing"))
-          : device.status === "disabled" ? this.check(t("device"), "mute", device.name, t("disabled"))
-          : this.check(t("device"), "ok", device.name, t("active")));
+          : device.status === "disabled" ? this.check(t("device"), "mute", device.name, t("disabled"), this.objectKey(device))
+          : this.check(t("device"), "ok", device.name, t("active"), this.objectKey(device)));
       }
       if (item.disabled_by) rows.push(this.check(t("entity"), "mute", t("entity_disabled"), t("disabled")));
       const state = item.state;
@@ -64,7 +64,7 @@ class DiagnosisMixin {
       const brokenMembers = this.data.findings.filter(f => f.rule_id === "entity.missing_member" && f.object_id === item.object_id);
       brokenMembers.forEach(f => rows.push(this.check(t("missing_member"), "red", f.affected_object, t("missing"))));
       if (item.duplicate_of) {
-        rows.push(this.check(t("duplicateTwin"), "violet", item.duplicate_of, t("possible_duplicate")));
+        rows.push(this.check(t("duplicateTwin"), "violet", item.duplicate_of, t("possible_duplicate"), `entity:${item.duplicate_of}`));
         cause = `${t("cause_duplicate", { twin: item.duplicate_of })} ${cause}`;
       }
       if (item.reason === "state_unavailable") hint = broken ? t("hint_integration") : t("hint_state_unavailable");
@@ -129,7 +129,7 @@ class DiagnosisMixin {
     const d = this.diagnose(item);
     if (!d) return "";
     const icon = { ok: "mdi:check-circle", warn: "mdi:alert-circle", red: "mdi:close-circle", mute: "mdi:minus-circle", violet: "mdi:help-circle" };
-    const rows = d.rows.map(r => `<div class="check ${r.tone}"><ha-icon icon="${icon[r.tone] || icon.ok}"></ha-icon><b>${this.esc(r.label)}</b><span class="val">${this.esc(r.value)}</span><i class="pill ${r.tone}">${this.esc(r.badge)}</i></div>`).join("");
+    const rows = d.rows.map(r => `<div class="check ${r.tone}"><ha-icon icon="${icon[r.tone] || icon.ok}"></ha-icon><b>${this.esc(r.label)}</b>${r.link && this.findObject(r.link) ? `<button type="button" class="linkbtn val" data-object="${this.esc(r.link)}">${this.esc(r.value)}</button>` : `<span class="val">${this.esc(r.value)}</span>`}<i class="pill ${r.tone}">${this.esc(r.badge)}</i></div>`).join("");
     return `<section class="panel"><div class="panelhead"><div><h2>${this.t("diagnosis")}</h2></div></div>
       <div class="diagcard">${this.ratingBlock(item, this.objectKey(item))}<div class="checks">${rows}</div>
       ${d.cause ? `<div class="cause ${d.tone}"><ha-icon icon="mdi:text-search"></ha-icon><div><strong>${this.t("causeLabel")}</strong><p>${this.esc(d.cause)}</p></div></div>` : ""}

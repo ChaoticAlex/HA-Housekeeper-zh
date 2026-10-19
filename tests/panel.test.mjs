@@ -385,6 +385,11 @@ test("unavailable with healthy integration and device blames reachability", () =
   assert.ok(d.hint);
 });
 
+test("diagnosis rows link the integration, the device and the working twin", () => {
+  const d = diagnoseWith([ENTRY, DEVICE], { duplicate_of: "light.x_ok" });
+  assert.deepEqual(Array.from(d.rows.map(r => r.link)), ["config_entry:e1", "device:d1", null, "entity:light.x_ok"]);
+});
+
 test("unavailable with a failed integration blames the integration", () => {
   const d = diagnoseWith([{ ...ENTRY, state: "setup_error", status: "problem" }, DEVICE], {});
   assert.equal(d.rows[0].tone, "red");
