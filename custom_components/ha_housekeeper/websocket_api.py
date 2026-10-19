@@ -75,7 +75,7 @@ from .ws_common import (
     _versioned,
     panel_session_only,
     scanner_plans,
-    sendable,
+    send_sendable,
     with_scanner,
 )
 
@@ -108,7 +108,7 @@ async def _send_inventory_result(
         "meta": {**result["meta"], "scan_health": scanner.health_report()},
         "monitor": scanner.monitor.report(),
     }
-    connection.send_result(msg["id"], sendable(_versioned(result)))
+    send_sendable(connection, msg["id"], _versioned(result))
 
 
 @websocket_api.require_admin
@@ -193,7 +193,7 @@ def websocket_detail(
         connection.send_error(msg["id"], "not_found", "Object not found in the latest scan")
         return
     # The attributes come straight from the entity, as any integration wrote them.
-    connection.send_result(msg["id"], sendable(details))
+    send_sendable(connection, msg["id"], details)
 
 
 @websocket_api.require_admin

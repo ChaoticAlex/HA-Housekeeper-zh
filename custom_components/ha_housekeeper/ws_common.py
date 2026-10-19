@@ -105,16 +105,33 @@ def sendable(result: dict[str, Any]) -> dict[str, Any]:
 
     A value JSON cannot hold makes Home Assistant answer only "Invalid JSON in response" and
     the panel shows nothing; entity attributes are the usual source. The cleaned copy keeps
-    the page working and the log names the paths to fix.
+    the page working and the log names the paths to fix. Raises when even the copy cannot be
+    sent (a cycle, nesting deeper than JSON allows).
     """
     try:
         json_bytes(result)
     except (TypeError, ValueError, OverflowError):
         bad: list[str] = []
         cleaned = json_safe(result, "", bad)
+        json_bytes(cleaned)
         _LOGGER.warning(
             "The reply held values JSON cannot carry and was cleaned before sending: %s",
             ", ".join(bad[:10]) or "unknown path",
         )
         return cleaned
     return result
+
+
+def send_sendable(
+    connection: websocket_api.ActiveConnection, msg_id: int, result: dict[str, Any]
+) -> None:
+    """Send ``result`` cleaned where needed; a reply that cannot be cleaned becomes an error."""
+    try:
+        payload = sendable(result)
+    except Exception:  # noqa: BLE001 - the panel gets a clear error instead of no answer
+        _LOGGER.warning("The reply could not be cleaned for sending", exc_info=True)
+        connection.send_error(
+            msg_id, "unsendable_reply", "The reply could not be sent; the log names the cause"
+        )
+        return
+    connection.send_result(msg_id, payload)
