@@ -322,6 +322,14 @@ def keep_days(hass: HomeAssistant) -> int | None:
     return retention["keep_days"] if retention["auto_purge"] is not False else None
 
 
+def auto_purge(hass: HomeAssistant) -> bool | None:
+    """Whether the recorder purges old data by itself; None when that is unknown."""
+    try:
+        return recorder_retention(hass)["auto_purge"]
+    except Exception:  # no recorder instance
+        return None
+
+
 def async_register(hass: HomeAssistant) -> None:
     """Register the commands of this part."""
     websocket_api.async_register_command(hass, websocket_recorder_costs)

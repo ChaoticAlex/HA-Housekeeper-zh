@@ -3684,6 +3684,7 @@ test("a plan shows its follow-up, expected end state and audit report; a regress
   const counted = el.simulationBlock({ ...plan, simulation: { ...plan.simulation, rows_counted: true, purge_rows: 1234, history_rows_kept: 56 } });
   assert.ok(counted.includes("recorder rows will be removed") && counted.includes("56 history rows stay"));
   const split = el.simulationBlock({ ...plan, recorder_keep_days: 10, simulation: { ...plan.simulation, removed: 1, removed_devices: 0, rows_counted: true, purge_rows: 0, history_rows_kept: 165, history_states_kept: 163, history_stats_kept: 2 } });
+  assert.ok(el.simulationBlock({ ...plan, recorder_auto_purge: false, simulation: { ...plan.simulation, rows_counted: true, purge_rows: 0, history_states_kept: 3, history_stats_kept: 0 } }).includes("3 stored states stay in the database for good"));
   assert.ok(split.includes("1 entity removed<") && split.includes("163 stored states stay in the database until the recorder deletes them after 10 days") && split.includes("2 rows of long-term statistics stay for good"));
   assert.ok(!sim.includes("recorder rows"), "no numbers without a count");
   const calls = [];
