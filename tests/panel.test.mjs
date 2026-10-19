@@ -4097,6 +4097,11 @@ test("the overview of an object offers its actions: decide a finding, replace a 
   el.data = before;
   const gone = el.actionsCard({ ...el.findObject("entity:sensor.a"), reason: "not_provided", not_provided_settled: true }, "entity:sensor.a");
   assert.ok(gone.includes('data-act-remove="sensor.a"') && !gone.includes("data-act-disable="), "an entity no longer provided is removed, not disabled");
+  const twinData = el.data;
+  el.data = { ...twinData, findings: [{ ...DATA.findings[0], key: "k1", ignored: false }, { rule_id: "entity.possible_duplicate", object_id: "sensor.a", classification: "possible_duplicate", confidence: 0.7, affected_object: "sensor.b", key: "kd", ignored: false }] };
+  const twin = el.findingRows("entity:sensor.a");
+  assert.ok(twin.includes("Replace by the working entity") && !twin.includes("Replace by another entity"), "with a working twin, replacing is offered once, at the duplicate");
+  el.data = twinData;
   assert.ok(el.labelForm({ object_type: "script", object_id: "script.x" }).includes("data-act-label-plan") && el.labelForm({ object_type: "device", object_id: "d1" }) === "", "scripts and scenes take a label too, devices not");
   el.startCleanup("replace_references", () => { el.replOld = "sensor.gone"; });
   assert.equal(el.view, "repair");
@@ -4475,7 +4480,8 @@ test("an entity has an Actions tab that holds what changes something; the overvi
   assert.ok(overview.includes("Next step") && !overview.includes("data-de-rename") && !overview.includes("data-stale-form"), "no forms on the overview");
   const actions = el.detailPanel("actions", ghost, key);
   assert.ok(actions.includes("Recommended") && actions.includes("Name and classify") && actions.includes("data-de-rename"));
-  assert.ok(actions.includes('class="actrow"') && actions.includes(">Open</button>") && (actions.match(/<section class="panel/g) || []).length === 1, "the forms are rows of one card");
+  assert.ok(actions.includes('class="actrow"') && (actions.match(/<section class="panel/g) || []).length === 1, "the forms are rows of one card");
+  assert.ok(/<div class="fbtns"><button class="btn primary" data-act-replace="sensor.ghost"/.test(actions) && !actions.includes(">Open</button>"), "the step that answers the finding leads its row");
   assert.ok(actions.includes("data-de-id") && !actions.includes('class="deform" data-de-rename><label'), "the controls sit on the right, the label is the row title");
   // a healthy entity has no next step
   assert.equal(el.nextStepBand({ ...ghost, status: "active" }, "entity:sensor.fine"), "");
