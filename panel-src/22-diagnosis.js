@@ -314,7 +314,7 @@ class DiagnosisMixin {
       integration ? [this.t("sumIntegration"), item.object_type === "config_entry" && this.findObject(`integration:${item.domain}`) ? `<button class="link" data-object="${this.esc(`integration:${item.domain}`)}" title="${this.esc(this.t("intToIntegration"))}">${this.esc(integration)}</button>` : linkTo(entryKey, integration)] : null,
       device ? [this.t("sumDevice"), linkTo(this.objectKey(device), device.name)] : null,
       area ? [this.t("sumArea"), linkTo(this.objectKey(area), area.name)] : null,
-      risk ? [this.t("sumRisk"), `<span class="pill ${risk.tone}">${this.esc(risk.text)}</span>`] : null,
+      risk ? [this.t(this.data.findings.some(f => this.findingKey(f) === key && !f.ignored && OUTAGE_RULES.includes(f.rule_id)) ? "sumRiskOutage" : "sumRisk"), `<span class="pill ${risk.tone}">${this.esc(risk.text)}</span>`] : null,
     ].filter(Boolean);
   }
 
