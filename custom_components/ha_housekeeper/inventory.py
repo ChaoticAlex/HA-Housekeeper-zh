@@ -562,6 +562,15 @@ def _age(item: dict[str, Any], now: datetime) -> timedelta | None:
     return max(now - datetime.fromisoformat(since), timedelta(0)) if since else None
 
 
+def _observed_as(item: dict[str, Any]) -> str:
+    """The classification the observation period follows.
+
+    An entity not provided is usually one that was unavailable before a restart: the period goes
+    on, so "observed since" does not start again with the new classification.
+    """
+    return "unavailable" if item.get("reason") == "not_provided" else item["status"]
+
+
 def _placeholder_age(item: dict[str, Any], now: datetime) -> timedelta | None:
     """How long Home Assistant has held the "restored" placeholder of an entity not provided."""
     since = item.get("last_changed")
@@ -1482,12 +1491,12 @@ class InventoryScanner:
         )
         if not preliminary:
             await self.observations.async_update(
-                {f"{kind}:{item['object_id']}": item["status"] for kind, item in tracked},
+                {f"{kind}:{item['object_id']}": _observed_as(item) for kind, item in tracked},
                 observed_at,
             )
         for kind, item in tracked:
             item["status_since"] = self.observations.since(
-                f"{kind}:{item['object_id']}", item["status"]
+                f"{kind}:{item['object_id']}", _observed_as(item)
             )
             if kind == "entity" and item["status"] in ("unavailable", "unknown"):
                 item["status_since"], item["status_since_source"] = outage_start(
@@ -2456,7 +2465,9 @@ class InventoryScanner:
         scenes: list[dict[str, Any]] = []
         edges: list[dict[str, str]] = []
         findings: list[dict[str, Any]] = []
+        registry = er.async_get(self.hass)
         for state in self.hass.states.async_all("scene"):
+            registry_entry = registry.async_get(state.entity_id)
             listed = state.attributes.get("entity_id", ())
             # A scene from a custom integration may list anything; only names can be linked.
             entity_ids = [
@@ -2496,6 +2507,7 @@ class InventoryScanner:
                     "status": "unavailable" if state.state == "unavailable" else "active",
                     "state": state.state,
                     "scene_id": state.attributes.get("id"),
+                    "device_id": registry_entry.device_id if registry_entry else None,
                     "entities": entity_ids,
                     "entity_count": len(entity_ids),
                     "missing_reference_count": len(missing),

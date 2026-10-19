@@ -103,6 +103,13 @@ def test_an_entity_not_provided_waits_like_an_outage_before_it_is_a_finding() ->
     )
 
 
+def test_an_entity_not_provided_keeps_the_observation_period_of_its_outage() -> None:
+    from custom_components.ha_housekeeper.inventory import _observed_as
+
+    assert _observed_as({"status": "orphaned", "reason": "not_provided"}) == "unavailable"
+    assert _observed_as({"status": "orphaned", "reason": "state_missing"}) == "orphaned"
+
+
 def test_unavailable_is_never_reported_as_orphaned() -> None:
     state = SimpleNamespace(state="unavailable")
     assert _entity_status(_entry(), state, {}, {})[0] == "unavailable"
