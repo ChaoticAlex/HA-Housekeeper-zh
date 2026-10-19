@@ -1122,10 +1122,13 @@ def judge_entity_action(
         reasons.append("critical_object")
     if kind == "remove_entity":
         # Disabling an entity its integration no longer provides changes nothing, so the
-        # quarantine would prove nothing; backup, confirmation and restore still apply. The
-        # entity must have been missing for a day of scans (``not_provided_settled``).
-        if item.get("reason") == NOT_PROVIDED and item.get("not_provided_settled"):
+        # quarantine would prove nothing; backup, confirmation and restore still apply. Before
+        # a day of scans without it (``not_provided_settled``) the person confirms it is gone:
+        # some integrations add their entities only after they count as loaded.
+        if item.get("reason") == NOT_PROVIDED:
             action["skips_quarantine"] = True
+            if not item.get("not_provided_settled"):
+                reasons.append("not_provided_recent")
         else:
             _quarantine_reasons(action, reasons, (quarantine or {}).get(object_id), now)
         action["restorable"] = restorable

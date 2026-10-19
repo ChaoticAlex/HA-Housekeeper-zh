@@ -247,7 +247,8 @@ def test_an_entity_no_longer_provided_needs_no_quarantine() -> None:
     new = judge_action("remove_entity", "sensor.new", index, [], {}, True, NOW)
     down = judge_action("remove_entity", "sensor.down", index, [], {}, True, NOW)
     assert gone["verdict"] == "ok" and gone["skips_quarantine"] is True
-    assert "not_quarantined" in new["reasons"] and "not_quarantined" in down["reasons"]
+    assert new["verdict"] == "review" and new["reasons"] == ["not_provided_recent"]
+    assert "not_quarantined" in down["reasons"]
 
 
 def test_the_journal_list_says_until_when_a_plan_is_watched() -> None:

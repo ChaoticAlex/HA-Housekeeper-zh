@@ -5,8 +5,9 @@ Entities:
 * ``disable_entity`` quarantines an entity by disabling it. Nothing is deleted, history and
   statistics are never touched, and the step can be undone while the entity is unchanged.
 * ``remove_entity`` removes the registry entry of an entity that has been in quarantine for at
-  least ``QUARANTINE_DAYS``, or right away when its loaded integration has not provided it for a
-  day (disabling such an entity would change nothing). A Home Assistant backup is created first
+  least ``QUARANTINE_DAYS``, or right away when its loaded integration no longer provides it
+  (disabling such an entity would change nothing; within the first day the person confirms it
+  is gone). A Home Assistant backup is created first
   and must complete, and the entry is stored in the journal so that it can be restored.
 
 Devices (same quarantine and backup rules; removing a device also removes its entities):
