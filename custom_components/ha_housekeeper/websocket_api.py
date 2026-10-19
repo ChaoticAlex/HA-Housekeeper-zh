@@ -73,9 +73,9 @@ from .writelock import write_holder
 from .ws_common import (
     _scanner,
     _versioned,
-    json_safe,
     panel_session_only,
     scanner_plans,
+    sendable,
     with_scanner,
 )
 
@@ -108,7 +108,7 @@ async def _send_inventory_result(
         "meta": {**result["meta"], "scan_health": scanner.health_report()},
         "monitor": scanner.monitor.report(),
     }
-    connection.send_result(msg["id"], json_safe(_versioned(result)))
+    connection.send_result(msg["id"], sendable(_versioned(result)))
 
 
 @websocket_api.require_admin
@@ -193,7 +193,7 @@ def websocket_detail(
         connection.send_error(msg["id"], "not_found", "Object not found in the latest scan")
         return
     # The attributes come straight from the entity, as any integration wrote them.
-    connection.send_result(msg["id"], json_safe(details))
+    connection.send_result(msg["id"], sendable(details))
 
 
 @websocket_api.require_admin
