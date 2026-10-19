@@ -20,7 +20,7 @@
 - **Priorität:** „Wurde nie ausgelöst“ und „Lange nicht ausgelöst“ sind bei Automationen, die Kritisches steuern (Alarm, Überflutung), nicht mehr „Hoch“ (Diskussion 33).
 - **Oberfläche:**
   - Das Menü am Zeilenende (⋮) wird nicht mehr am Rand der Karte abgeschnitten (Issue 32).
-  - Im Inventar erscheinen Automationen, Skripte und Szenen nur noch einmal und werden einmal gezählt, nicht zusätzlich als Entität (Issue 34).
+  - Im Inventar erscheinen Automationen, Skripte und Szenen nur noch einmal und werden einmal gezählt, nicht zusätzlich als Entität; die Detailseite verlinkt beide (Issue 34).
   - „In HA öffnen“ führt bei Szenen ohne Editor zur Geräteseite; „Entität öffnen“ gibt es auch für Szenen.
   - Bei einem ausgefallenen Gerät zeigt die Ursachendiagnose, dass alle Entitäten nicht verfügbar sind, statt „aktiv und stellt Entitäten bereit“; die Risiko-Zeile sagt, dass sie das Entfernen meint.
 
@@ -44,7 +44,7 @@
 - **Priority:** "Never triggered" and "Not triggered for a long time" are no longer "High" for automations that control something critical (alarm, flooding) (discussion 33).
 - **Interface:**
   - The row menu (⋮) is no longer cut off at the edge of the card (issue 32).
-  - The inventory lists and counts automations, scripts and scenes once, no longer also as an entity (issue 34).
+  - The inventory lists and counts automations, scripts and scenes once, no longer also as an entity; the detail page links both (issue 34).
   - "Open in HA" leads to the device page for scenes without an editor; "Open entity" is offered for scenes too.
   - For a device that is down, the diagnosis shows that all its entities are unavailable instead of “active and provides entities”; the risk row says it is about removing.
 

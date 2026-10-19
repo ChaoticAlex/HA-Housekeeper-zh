@@ -412,6 +412,15 @@ test("the detail summary links the integration, device and area of an entity", (
   assert.ok(['data-object="config_entry:e1"', 'data-object="device:d1"', 'data-object="area:a1"'].every(s => html.includes(s)));
 });
 
+test("the detail summary links an automation and its entity to each other", () => {
+  const { el } = panel();
+  const entity = { object_type: "entity", object_id: "automation.a", name: "A", status: "active" }, auto = { object_type: "automation", object_id: "automation.a", name: "A", status: "active" };
+  el.data = { ...DATA, objects: [...DATA.objects, entity, auto], findings: [] };
+  const rows = item => el.detailSummary(item, `${item.object_type}:${item.object_id}`).map(r => r[1]).join("");
+  assert.ok(rows(auto).includes('data-object="entity:automation.a"'));
+  assert.ok(rows(entity).includes('data-object="automation:automation.a"'));
+});
+
 test("unavailable with a failed integration blames the integration", () => {
   const d = diagnoseWith([{ ...ENTRY, state: "setup_error", status: "problem" }, DEVICE], {});
   assert.equal(d.rows[0].tone, "red");

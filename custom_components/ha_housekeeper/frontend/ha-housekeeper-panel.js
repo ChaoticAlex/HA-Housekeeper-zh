@@ -9,7 +9,7 @@ const TEXT = {
     allStatus: "Alle Zustände", search: "Name, ID, Integration …",
     name: "Name", type: "Typ", status: "Zustand", reason: "Begründung",
     tabsLabel: "Abschnitte des Objekts", tabOverview: "Übersicht", tabRelations: "Abhängigkeiten", tabTechnical: "Technische Daten", tabAttributes: "Attribute",
-    sumCause: "Ursache", sumIntegration: "Integration", sumDevice: "Gerät", sumArea: "Bereich", sumRisk: "Risiko beim Entfernen", riskNone: "keine Verwendung gefunden", riskHits: "{n} Verwendungen, davon sicher: {c}",
+    sumCause: "Ursache", sumIntegration: "Integration", sumDevice: "Gerät", sumArea: "Bereich", sumEntity: "Entität", sumBelongsTo: "Gehört zu", sumRisk: "Risiko beim Entfernen", riskNone: "keine Verwendung gefunden", riskHits: "{n} Verwendungen, davon sicher: {c}",
     since: "Beobachtet seit", dependencies: "Beziehungen", objects: "Objekte",
     findings: "Befunde", active: "Aktiv", stopped: "Gestoppt", app: "App", orphaned: "Verwaist",
     unavailable: "Nicht verfügbar", disabled: "Deaktiviert", unknown: "Unbekannt",
@@ -194,7 +194,7 @@ const TEXT = {
     allStatus: "All states", search: "Name, ID, integration …",
     name: "Name", type: "Type", status: "Status", reason: "Reason",
     tabsLabel: "Sections of the object", tabOverview: "Overview", tabRelations: "Dependencies", tabTechnical: "Technical data", tabAttributes: "Attributes",
-    sumCause: "Cause", sumIntegration: "Integration", sumDevice: "Device", sumArea: "Area", sumRisk: "Risk when removed", riskNone: "no use found", riskHits: "{n} uses, certain: {c}",
+    sumCause: "Cause", sumIntegration: "Integration", sumDevice: "Device", sumArea: "Area", sumEntity: "Entity", sumBelongsTo: "Belongs to", sumRisk: "Risk when removed", riskNone: "no use found", riskHits: "{n} uses, certain: {c}",
     since: "Observed since", dependencies: "Relations", objects: "Objects",
     findings: "Findings", active: "Active", stopped: "Stopped", app: "App", orphaned: "Orphaned",
     unavailable: "Unavailable", disabled: "Disabled", unknown: "Unknown",
@@ -5618,6 +5618,9 @@ class DiagnosisMixin {
       integration ? [this.t("sumIntegration"), item.object_type === "config_entry" && this.findObject(`integration:${item.domain}`) ? `<button class="link" data-object="${this.esc(`integration:${item.domain}`)}" title="${this.esc(this.t("intToIntegration"))}">${this.esc(integration)}</button>` : linkTo(entryKey, integration)] : null,
       device ? [this.t("sumDevice"), linkTo(this.objectKey(device), device.name)] : null,
       area ? [this.t("sumArea"), linkTo(this.objectKey(area), area.name)] : null,
+      // An automation, script or scene and its entity are one row in the inventory; each page links the other.
+      TWIN_TYPES.includes(item.object_type) && this.findObject(`entity:${item.object_id}`) ? [this.t("sumEntity"), linkTo(`entity:${item.object_id}`, item.object_id)] : null,
+      item.object_type === "entity" ? TWIN_TYPES.map(type => this.findObject(`${type}:${item.object_id}`)).filter(Boolean).map(twin => [this.t("sumBelongsTo"), linkTo(this.objectKey(twin), this.t(twin.object_type))])[0] || null : null,
       risk ? [this.t(this.data.findings.some(f => this.findingKey(f) === key && !f.ignored && OUTAGE_RULES.includes(f.rule_id)) ? "sumRiskOutage" : "sumRisk"), `<span class="pill ${risk.tone}">${this.esc(risk.text)}</span>`] : null,
     ].filter(Boolean);
   }
@@ -13057,6 +13060,7 @@ Object.assign(TEXT.en, {
 const NOTE_PLAN_KINDS = ["replace_references", "rename_entity", "migrate_meter"];
 
 const NOTE_TYPES = ["entity", "device", "config_entry", "area", "automation", "script"];
+const TWIN_TYPES = ["automation", "script", "scene"]; // objects whose entity the inventory does not list on its own
 
 class NotesMixin {
   notesList() { return this.data?.notes || []; }

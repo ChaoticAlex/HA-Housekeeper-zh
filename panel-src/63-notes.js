@@ -36,6 +36,7 @@ Object.assign(TEXT.en, {
 const NOTE_PLAN_KINDS = ["replace_references", "rename_entity", "migrate_meter"];
 
 const NOTE_TYPES = ["entity", "device", "config_entry", "area", "automation", "script"];
+const TWIN_TYPES = ["automation", "script", "scene"]; // objects whose entity the inventory does not list on its own
 
 class NotesMixin {
   notesList() { return this.data?.notes || []; }
