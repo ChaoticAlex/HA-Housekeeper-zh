@@ -314,7 +314,7 @@ async def websocket_storms(
 
 
 def keep_days(hass: HomeAssistant) -> int | None:
-    """How many days the recorder keeps states; None without a recorder or with automatic purge off."""
+    """How many days the recorder keeps states; None without a recorder or with its purge off."""
     try:
         retention = recorder_retention(hass)
     except Exception:  # no recorder instance: the window stands as asked

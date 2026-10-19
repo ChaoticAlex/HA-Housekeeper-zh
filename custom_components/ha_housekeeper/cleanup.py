@@ -1073,8 +1073,9 @@ def judge_entity_action(
     """Judge one entity candidate. Verdicts: ``ok`` (no known use), ``review``, ``blocked``.
 
     ``quarantine`` maps entity IDs to when Housekeeper disabled them; removal is only
-    allowed after ``QUARANTINE_DAYS``, except for an entity its integration no longer provides. ``restorable`` tells whether a removed entity could be
-    brought back (its config entry still exists).
+    allowed after ``QUARANTINE_DAYS``, except for an entity its integration no longer provides.
+    ``restorable`` tells whether a removed entity could be brought back (its config entry still
+    exists).
     """
     action: dict[str, Any] = {
         "kind": kind,
