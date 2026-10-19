@@ -115,7 +115,7 @@ def sendable(result: dict[str, Any]) -> dict[str, Any]:
         bad: list[str] = []
         cleaned = json_safe(result, "", bad)
         json_bytes(cleaned)
-        paths = ", ".join(bad[:10]) or "unknown path"
+        paths = ", ".join(bad) or "unknown path"
         if paths not in _WARNED:
             _WARNED.add(paths)
             _LOGGER.warning(
