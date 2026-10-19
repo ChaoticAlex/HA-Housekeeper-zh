@@ -4,17 +4,33 @@
 
 ### Neu
 
-- **Entitäten, die die Integration nicht mehr bereitstellt:** Sie werden als verwaist erkannt statt als „nicht verfügbar“. Sie lassen sich direkt entfernen, ohne Quarantäne, aber mit Vorschau, Backup und Wiederherstellen.
+- **Entitäten, die die Integration nicht mehr bereitstellt:** Sie werden als verwaist erkannt statt als „nicht verfügbar“, auch bei YAML-Entitäten. Sie lassen sich direkt entfernen, ohne Quarantäne, aber mit Vorschau, Backup und Wiederherstellen.
+- **Mögliche Duplikate:** Auch der umgekehrte Fall wird erkannt: Die alte `sensor.x` ist übrig, die neue `sensor.x_2` läuft.
+- **Ersetzen:** Bei einem Duplikat ist die funktionierende Entität vorbelegt; Vorschläge bei fehlenden Verweisen öffnen das Ersetzen mit diesem Ziel.
 - **Oberfläche:**
   - In der Ursachendiagnose öffnen Integration, Gerät und funktionierende Entität per Klick ihre Seite.
+  - In der Kopfzeile der Detailseite sind Integration, Gerät und Bereich verlinkt.
+  - Das Zeilenmenü eines Duplikat-Befunds öffnet die funktionierende Entität.
+
+### Behoben
+
+- **Oberfläche:** Das Menü am Zeilenende (⋮) wird nicht mehr am Rand der Karte abgeschnitten (Issue 32).
 
 ### English
 
 #### New
 
-- **Entities the integration no longer provides:** They are recognised as orphaned instead of "unavailable". They can be removed straight away, without quarantine, but with preview, backup and restore.
+- **Entities the integration no longer provides:** They are recognised as orphaned instead of "unavailable", YAML entities too. They can be removed straight away, without quarantine, but with preview, backup and restore.
+- **Possible duplicates:** The reverse case is recognised as well: the old `sensor.x` is left over, the new `sensor.x_2` works.
+- **Replace:** For a duplicate the working entity is filled in; suggestions for missing references open the replacement with that target.
 - **Interface:**
   - In the cause diagnosis, the integration, device and working entity open their page on click.
+  - In the header of the detail page, integration, device and area are links.
+  - The row menu of a duplicate finding opens the working entity.
+
+#### Fixed
+
+- **Interface:** The row menu (⋮) is no longer cut off at the edge of the card (issue 32).
 
 ## 1.10.2 - 2026-10-19
 
