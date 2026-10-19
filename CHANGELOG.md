@@ -6,6 +6,7 @@
 
 - **Entitäten, die die Integration nicht mehr bereitstellt:** Sie werden als verwaist erkannt statt als „nicht verfügbar“, auch bei YAML-Entitäten. Sie lassen sich direkt entfernen, ohne Quarantäne, aber mit Vorschau, Backup und Wiederherstellen.
 - **Mögliche Duplikate:** Auch der umgekehrte Fall wird erkannt: Die alte `sensor.x` ist übrig, die neue `sensor.x_2` läuft.
+- **Ausnahmen:** Regeln nach Integration gelten auch für den Befund „Integration nicht ladbar“, etwa für den Drucker-Eintrag, solange der Drucker aus ist (Diskussion 28).
 - **Ersetzen:** Bei einem Duplikat ist die funktionierende Entität vorbelegt; Vorschläge bei fehlenden Verweisen öffnen das Ersetzen mit diesem Ziel.
 - **Oberfläche:**
   - In der Ursachendiagnose öffnen Integration, Gerät und funktionierende Entität per Klick ihre Seite.
@@ -15,7 +16,9 @@
 
 ### Behoben
 
-- **Oberfläche:** Das Menü am Zeilenende (⋮) wird nicht mehr am Rand der Karte abgeschnitten (Issue 32).
+- **Oberfläche:**
+  - Das Menü am Zeilenende (⋮) wird nicht mehr am Rand der Karte abgeschnitten (Issue 32).
+  - „In HA öffnen“ führt bei Szenen ohne Editor zur Geräteseite; „Entität öffnen“ gibt es auch für Szenen.
 
 ### English
 
@@ -23,6 +26,7 @@
 
 - **Entities the integration no longer provides:** They are recognised as orphaned instead of "unavailable", YAML entities too. They can be removed straight away, without quarantine, but with preview, backup and restore.
 - **Possible duplicates:** The reverse case is recognised as well: the old `sensor.x` is left over, the new `sensor.x_2` works.
+- **Exceptions:** Rules by integration also cover the "integration cannot be loaded" finding, such as a printer's entry while the printer is off (discussion 28).
 - **Replace:** For a duplicate the working entity is filled in; suggestions for missing references open the replacement with that target.
 - **Interface:**
   - In the cause diagnosis, the integration, device and working entity open their page on click.
@@ -32,7 +36,9 @@
 
 #### Fixed
 
-- **Interface:** The row menu (⋮) is no longer cut off at the edge of the card (issue 32).
+- **Interface:**
+  - The row menu (⋮) is no longer cut off at the edge of the card (issue 32).
+  - "Open in HA" leads to the device page for scenes without an editor; "Open entity" is offered for scenes too.
 
 ## 1.10.2 - 2026-10-19
 

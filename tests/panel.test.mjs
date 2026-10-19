@@ -514,6 +514,7 @@ test("scripts and scenes get paths, diagnosis, finding keys and impact sources",
   const { el } = panel();
   assert.equal(el.haPath({ object_type: "script", object_id: "script.tidy" }), "/config/script/edit/tidy");
   assert.equal(el.haPath({ object_type: "scene", object_id: "scene.a", scene_id: "42" }), "/config/scene/edit/42");
+  assert.equal(el.haPath({ object_type: "scene", object_id: "scene.a", device_id: "d9" }), "/config/devices/device/d9");
   assert.equal(el.haPath({ object_type: "scene", object_id: "scene.a" }), "/config/entities?search=scene.a");
   assert.equal(el.findingKey({ rule_id: "script.missing_entity", object_id: "script.tidy" }), "script:script.tidy");
 
