@@ -557,6 +557,14 @@ async def test_scan_button_is_available_after_a_scan(hass: HomeAssistant) -> Non
     assert button.state != "unavailable"
 
 
+async def test_scan_survives_a_scene_that_lists_non_names(hass: HomeAssistant) -> None:
+    hass.states.async_set("scene.odd", "unknown", {"entity_id": [1, 2, "light.real"]})
+    scanner = InventoryScanner(hass)
+    await scanner.async_initialize()
+    await scanner.async_scan()
+    assert scanner.status["phase"] == "complete"
+
+
 async def _ws_setup(hass: HomeAssistant, hass_ws_client):
     from homeassistant.setup import async_setup_component
 

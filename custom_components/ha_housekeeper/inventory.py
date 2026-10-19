@@ -1079,6 +1079,10 @@ class InventoryScanner:
                 self._last_scan_end = time.monotonic()
                 return snapshot
             except Exception as err:
+                # The traceback only at debug level: it names the line, which the error text lacks.
+                _LOGGER.debug(
+                    "The scan failed in phase %s", self.status.get("phase"), exc_info=True
+                )
                 self.health.failed(datetime.now(UTC), str(self.status.get("phase")), err)
                 self.status.update(
                     running=False,
@@ -2407,7 +2411,13 @@ class InventoryScanner:
         edges: list[dict[str, str]] = []
         findings: list[dict[str, Any]] = []
         for state in self.hass.states.async_all("scene"):
-            entity_ids = [value for value in state.attributes.get("entity_id", ()) if value]
+            listed = state.attributes.get("entity_id", ())
+            # A scene from a custom integration may list anything; only names can be linked.
+            entity_ids = [
+                value
+                for value in (listed if isinstance(listed, (list, tuple)) else ())
+                if value and isinstance(value, str)
+            ]
             references = [
                 {
                     "kind": "entity",
