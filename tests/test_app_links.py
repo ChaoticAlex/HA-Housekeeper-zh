@@ -36,6 +36,7 @@ def test_links_by_host_name_and_by_source_but_never_by_name_alone() -> None:
         _entry("e4", "mqtt", "localhost", data={"broker": "core-mosquitto", "password": "x"}),
         _entry("e5", "other", "x", data={"url": "http://notcore-mosquitto-2:80"}),
         _entry("e6", "frigate", "ignored", source="ignore", data={"h": "ccab4aaf-frigate"}),
+        _entry("e7", "numbered", 12345),  # a title that is a number must not stop the scan
     ]
     edges = {(e["source"], e["target"]) for e in app_edges(entries, apps)}
     assert edges == {
