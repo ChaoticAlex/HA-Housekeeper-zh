@@ -25,6 +25,9 @@ FACT_LIMIT = 5
 RANK = {"none": 0, "info": 1, "low": 2, "medium": 3, "high": 4}
 OUTAGE_RULE = "config_entry.not_loaded"
 REAUTH_RULE = "config_entry.reauth"
+# An automation that does not fire is not broken: guarding something critical (an alarm, a leak
+# warning) is a reason for it to stay quiet, so criticality and many dependents do not raise these.
+IDLE_RULES = ("automation.never_triggered", "automation.stale")
 
 
 def _kind_critical(object_id: str, device_class: str | None) -> bool:
@@ -128,7 +131,9 @@ def _judge(
         facts.append({"fact": "runs_active"})
     elif kind in CONSUMERS and item is not None:
         facts.append({"fact": "runs_inactive"})
-    if high or len(sources) >= MANY:
+    if finding["rule_id"] in IDLE_RULES:
+        high = False
+    elif high or len(sources) >= MANY:
         if not high:
             facts.append({"fact": "many_dependents", "n": len(sources)})
         return "high", facts

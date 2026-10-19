@@ -79,6 +79,19 @@ def test_a_broken_reference_counts_by_what_the_automation_controls_and_whether_i
     )
 
 
+def test_an_automation_that_does_not_fire_is_not_high_for_guarding_something_critical() -> None:
+    objects = [_auto("automation.alarm"), _entity("siren.hall")]
+    edges = [_edge("automation:automation.alarm", "entity:siren.hall", "TARGETS")]
+    idle = lambda rule: {  # noqa: E731
+        "rule_id": rule,
+        "object_id": "automation.alarm",
+        "classification": "unused",
+    }
+    assert _impact(objects, edges, idle("automation.never_triggered"))[0] == "medium"
+    assert _impact(objects, edges, idle("automation.stale"))[0] == "medium"
+    assert _impact(objects, edges, idle("automation.disabled_long"))[0] == "high"
+
+
 def test_many_dependents_are_high_on_their_own() -> None:
     objects = [_entity("sensor.hub")] + [
         {"object_type": "dashboard", "object_id": f"d{i}", "status": "active"} for i in range(5)
