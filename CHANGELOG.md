@@ -1,5 +1,25 @@
 # Changelog
 
+## Unreleased
+
+### Behoben
+
+- **Backup-Schutz:** Backups anderer Werkzeuge (zum Beispiel Google Drive Backup) werden erkannt und zählen für die Prüfungen.
+
+### Geändert
+
+- **Diagnose:** Der Download enthält jetzt die Markierungen der Backups (ohne Namen), das hilft bei Meldungen zum Backup-Schutz.
+
+### English
+
+#### Fixed
+
+- **Backup protection:** Backups made by other tools (for example Google Drive Backup) are recognised and count for the checks.
+
+#### Changed
+
+- **Diagnostics:** The download now holds the flags of the backups (no names), which helps with reports about backup protection.
+
 ## 1.10.1 - 2026-10-19
 
 ### Behoben

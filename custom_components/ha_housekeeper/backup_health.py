@@ -399,11 +399,7 @@ def evaluate(
         return {"available": False, "checks": [], "backups": [], "overall": "unknown"}
     config, backups = state.get("config"), state.get("backups")
     selected = (
-        [
-            item
-            for item in backups
-            if item.get("automatic") is not None and item.get("ha_included") is not False
-        ]
+        [item for item in backups if item.get("ha_included") is not False]
         if backups is not None
         else None
     )
@@ -413,8 +409,9 @@ def evaluate(
         listing: list[dict[str, Any]] = []
         everything: list[dict[str, Any]] = []
     else:
-        # HA marks its scheduled backups True and its manual backups False. The Supervisor's
-        # app-update backups are False too, but hold no Home Assistant (``ha_included`` False).
+        # HA marks its scheduled backups True and its manual backups False; backups made by other
+        # tools (e.g. Google Drive Backup) have None and count too. The Supervisor's app-update
+        # backups hold no Home Assistant (``ha_included`` False) and are left out.
         everything = sorted(selected, key=lambda item: item["date"] or "", reverse=True)
         # The safety copies before a plan say nothing about the backup strategy.
         listing = [item for item in everything if not item.get("partial")]

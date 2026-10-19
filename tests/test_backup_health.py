@@ -185,13 +185,14 @@ def test_only_automatic_and_manual_backups_affect_the_report() -> None:
     app_update = backup(1, size=5, agents=("hassio.local",), automatic=False, ha_included=False)
     automatic = backup(10, size=1000)
     manual = backup(30, size=1100, automatic=False)
-    report, checks = judge(state([app_update, automatic, manual]))
-    assert report["backup_count"] == 2
-    assert [item["automatic"] for item in report["backups"]] == [True, False]
+    other_tool = backup(20, size=1050, automatic=None)  # e.g. Google Drive Backup
+    report, checks = judge(state([app_update, automatic, other_tool, manual]))
+    assert report["backup_count"] == 3
+    assert [item["automatic"] for item in report["backups"]] == [True, None, False]
     assert checks["newest"]["values"]["age_hours"] == 10
     assert checks["targets"]["level"] == "ok"
     assert checks["size"]["level"] == "ok"
-    assert checks["retention"]["values"]["count"] == 2
+    assert checks["retention"]["values"]["count"] == 3
     _, empty_checks = judge(state([app_update], config=config(agent_ids=[])))
     assert empty_checks["setup"]["level"] == "problem"
     assert empty_checks["newest"]["level"] == "problem"
