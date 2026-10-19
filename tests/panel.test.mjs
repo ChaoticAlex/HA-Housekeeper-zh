@@ -5561,6 +5561,7 @@ test("a finding row ends in an impact chip and a menu with the decisions; a hidd
   assert.ok(["keep", "snooze"].every(p => menu.includes(`data-decide-preset="${p}"`)) && menu.includes('data-decide-open="k1"') && menu.includes('data-auto-delete="automation.a"'));
   assert.equal(el.rowMenu({ ...f, ignored: true }), "");
   assert.equal(el.rowDecide(f), "");
+  assert.ok(el.rowMenu({ key: "k2", rule_id: "entity.possible_duplicate", object_id: "sensor.a_2", affected_object: "sensor.a" }).includes('data-object="entity:sensor.a"'), "a duplicate row opens its working twin from the menu");
 });
 
 test("an integration outage is a reason of its own, with a tile and a filter of the list bar", () => {
