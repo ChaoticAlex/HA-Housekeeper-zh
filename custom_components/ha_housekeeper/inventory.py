@@ -1581,6 +1581,14 @@ class InventoryScanner:
             if item["object_type"] in ("automation", "script", "scene") and "labels" not in item:
                 entry = registry.async_get(item["object_id"])
                 item["labels"] = sorted(entry.labels) if entry is not None else []
+        entity_by_id = {e["object_id"]: e for e in entities}
+        for item in automations:  # what the registry knows of the entity behind it, to show as one
+            twin = entity_by_id.get(item["object_id"])
+            if twin is not None and item["object_type"] in ("automation", "script", "scene"):
+                item["unique_id"] = twin["unique_id"]
+                item["platform"] = twin["platform"]
+                item["entity_status"] = twin["status"]
+                item["entity_reason"] = twin["reason"]
         findings = (
             _entity_findings(entities, observed_at, self.outage_levels)
             + duplicate_findings(

@@ -341,6 +341,10 @@ test("inventory lists an automation, script or scene once, not also as its entit
   assert.ok(!ids.includes("entity:automation.a"));
   el.typeFilter = "automation";
   assert.match(el.inventory(), /data-inv-sel="automation\.a"/);
+  el.data.objects.find(o => o.object_type === "automation").entity_status = "orphaned";
+  el.data.objects.find(o => o.object_type === "automation").entity_reason = "entity_disabled";
+  el._memo = null;
+  assert.match(el.inventory(), /Entity was disabled/);
 });
 
 test("inventory header selects and clears only the entities on the current page", () => {
