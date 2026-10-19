@@ -85,7 +85,9 @@ class DiagnosisMixin {
     } else if (item.object_type === "device") {
       const ids = item.config_entry_ids || [];
       ids.forEach(id => rows.push(this.integrationCheck(id).row));
-      rows.push(this.check(t("entities"), item.entity_count ? "ok" : "warn", this.formatNumber(item.entity_count), item.entity_count ? t("present") : t("empty")));
+      const down = this.data.findings.some(f => f.rule_id === "device.down" && f.object_id === item.object_id && !f.ignored);
+      rows.push(down ? this.check(t("entities"), "red", t("devAllDown", { n: this.formatNumber(item.entity_count) }), t("unavailable"))
+        : this.check(t("entities"), item.entity_count ? "ok" : "warn", this.formatNumber(item.entity_count), item.entity_count ? t("present") : t("empty")));
       cause = item.status === "disabled" ? t("cause_device_off") : item.status === "empty" ? t("cause_device_empty") : t("cause_device_active");
     } else if (item.object_type === "config_entry") {
       const state = item.state || "not_loaded";

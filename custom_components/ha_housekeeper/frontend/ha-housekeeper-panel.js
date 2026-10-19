@@ -5381,7 +5381,9 @@ class DiagnosisMixin {
     } else if (item.object_type === "device") {
       const ids = item.config_entry_ids || [];
       ids.forEach(id => rows.push(this.integrationCheck(id).row));
-      rows.push(this.check(t("entities"), item.entity_count ? "ok" : "warn", this.formatNumber(item.entity_count), item.entity_count ? t("present") : t("empty")));
+      const down = this.data.findings.some(f => f.rule_id === "device.down" && f.object_id === item.object_id && !f.ignored);
+      rows.push(down ? this.check(t("entities"), "red", t("devAllDown", { n: this.formatNumber(item.entity_count) }), t("unavailable"))
+        : this.check(t("entities"), item.entity_count ? "ok" : "warn", this.formatNumber(item.entity_count), item.entity_count ? t("present") : t("empty")));
       cause = item.status === "disabled" ? t("cause_device_off") : item.status === "empty" ? t("cause_device_empty") : t("cause_device_active");
     } else if (item.object_type === "config_entry") {
       const state = item.state || "not_loaded";
@@ -8845,7 +8847,7 @@ class CausesMixin {
 }
 Object.assign(TEXT.de, {
   causesTitle: "Ausfälle",
-  causeNone: "keine Entität betroffen", outageIntegrations: "{n} Integrationen", outageDevices: "{n} Geräte",
+  devAllDown: "alle {n} nicht verfügbar", causeNone: "keine Entität betroffen", outageIntegrations: "{n} Integrationen", outageDevices: "{n} Geräte",
   logTitle: "Im HA-Log", logLine: "Im HA-Log: {what}, zuletzt {when}", logLevel_warning: "{n}× Warnung", logLevel_error: "{n}× Fehler", logLevel_critical: "{n}× kritischer Fehler",
   cause_integration_down: "Integration {name} ist nicht geladen", cause_device_down: "Gerät {name} ist ganz ausgefallen",
   causeFollowers: "{n} Folgen", causeExplains: "erklärt {n} weitere Befunde", causeFollowOf: "Folge von {name}", withFollowers: "Nur Ursachen mit Folgen", viewLabel: "Ansicht", viewGrouped: "Gruppiert", viewFlat: "Einzeln", viewLocked: "Mit einem Filter ist die Liste immer einzeln.", cause_app_down: "App {name} ist gestoppt", cause_entity_missing: "Entität {name} existiert nicht", cause_device_missing: "Gerät {name} existiert nicht", cause_area_missing: "Bereich {name} existiert nicht", causeUsers: "{n} Automationen, Skripte oder Dashboards verweisen darauf", causeBelow: "{n} Integrationen hängen vermutlich daran", outageApps: "{n} Apps", outageTargets: "{n} fehlende Ziele", cause_service_missing: "Dienst {name} existiert nicht", cause_blueprint_missing: "Blueprint {name} existiert nicht", causeCallers: "{n} Automationen und Skripte rufen ihn auf", outageServices: "{n} fehlende Dienste", causeState: "Zustand: {state}", causeUses_automation: "{n} Automationen betroffen", causeUses_script: "{n} Skripte betroffen", causeUses_dashboard: "{n} Dashboards betroffen",
@@ -8853,7 +8855,7 @@ Object.assign(TEXT.de, {
 });
 Object.assign(TEXT.en, {
   causesTitle: "Outages",
-  causeNone: "no entity affected", outageIntegrations: "{n} integrations", outageDevices: "{n} devices",
+  devAllDown: "all {n} unavailable", causeNone: "no entity affected", outageIntegrations: "{n} integrations", outageDevices: "{n} devices",
   logTitle: "In the HA log", logLine: "In the HA log: {what}, last {when}", logLevel_warning: "{n}× warning", logLevel_error: "{n}× error", logLevel_critical: "{n}× critical error",
   cause_integration_down: "Integration {name} is not loaded", cause_device_down: "Device {name} is down completely",
   causeFollowers: "{n} follow-ups", causeExplains: "explains {n} more findings", causeFollowOf: "Follow-up of {name}", withFollowers: "Only causes with follow-ups", viewLabel: "View", viewGrouped: "Grouped", viewFlat: "One by one", viewLocked: "With a filter the list is always one by one.", cause_app_down: "App {name} is stopped", cause_entity_missing: "Entity {name} does not exist", cause_device_missing: "Device {name} does not exist", cause_area_missing: "Area {name} does not exist", causeUsers: "{n} automations, scripts or dashboards point to it", causeBelow: "{n} integrations probably depend on it", outageApps: "{n} apps", outageTargets: "{n} missing targets", cause_service_missing: "Service {name} does not exist", cause_blueprint_missing: "Blueprint {name} does not exist", causeCallers: "{n} automations and scripts call it", outageServices: "{n} missing services", causeState: "State: {state}", causeUses_automation: "{n} automations affected", causeUses_script: "{n} scripts affected", causeUses_dashboard: "{n} dashboards affected",
