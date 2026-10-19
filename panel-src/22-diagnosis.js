@@ -88,7 +88,12 @@ class DiagnosisMixin {
       const down = this.data.findings.some(f => f.rule_id === "device.down" && f.object_id === item.object_id && !f.ignored);
       rows.push(down ? this.check(t("entities"), "red", t("devAllDown", { n: this.formatNumber(item.entity_count) }), t("unavailable"))
         : this.check(t("entities"), item.entity_count ? "ok" : "warn", this.formatNumber(item.entity_count), item.entity_count ? t("present") : t("empty")));
-      cause = item.status === "disabled" ? t("cause_device_off") : item.status === "empty" ? t("cause_device_empty") : t("cause_device_active");
+      const downSince = down ? this.data.findings.find(f => f.rule_id === "device.down" && f.object_id === item.object_id)?.first_detected_at : null;
+      if (down) {
+        cause = t("cause_device_unavailable", { n: this.formatNumber(item.entity_count), span: downSince ? this.spanText(Math.max(0, (Date.now() - Date.parse(downSince)) / 3600000)) : "?" });
+        hint = t("hint_device_unavailable");
+        tone = "red";
+      } else cause = item.status === "disabled" ? t("cause_device_off") : item.status === "empty" ? t("cause_device_empty") : t("cause_device_active");
     } else if (item.object_type === "config_entry") {
       const state = item.state || "not_loaded";
       if (item.disabled_by) { rows.push(this.check(t("status"), "mute", item.name, t("disabled"))); cause = t("cause_entry_off"); }
