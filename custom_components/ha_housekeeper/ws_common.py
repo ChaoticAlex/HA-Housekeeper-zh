@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import functools
 import inspect
+import logging
 from collections.abc import Callable
 from typing import Any
 
 from homeassistant.auth.models import TOKEN_TYPE_NORMAL
 from homeassistant.components import websocket_api
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.json import json_bytes
 
 from .const import API_SCHEMA, DOMAIN
 from .inventory import InventoryScanner
@@ -19,6 +21,8 @@ RUNS_TIMEOUT = 20
 EXPOSURE_TIMEOUT = 20  # seconds
 STATISTICS_LAST_IDS = 50
 RELIABILITY_TIMEOUT = 120  # seconds; the recorder query is slow on a large database
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def _scanner(hass: HomeAssistant) -> InventoryScanner | None:
@@ -93,3 +97,43 @@ def _versioned(result: dict[str, Any]) -> dict[str, Any]:
     be raised. A copy is sent so cached snapshots never carry the marker.
     """
     return {**result, "schema": API_SCHEMA}
+
+
+def _plain(value: Any, path: str, bad: list[str]) -> Any:
+    """Copy ``value`` down to what JSON holds, noting the path of every value that had to change."""
+    if value is None or isinstance(value, (bool, int, float, str)):
+        return value
+    if isinstance(value, dict):
+        out = {}
+        for key, item in value.items():
+            if not isinstance(key, str):
+                bad.append(f"{path}/{key!r}")
+            out[str(key)] = _plain(item, f"{path}/{key}", bad)
+        return out
+    if isinstance(value, (list, tuple, set, frozenset)):
+        items = sorted(value, key=str) if isinstance(value, (set, frozenset)) else value
+        if not isinstance(value, (list, tuple)):
+            bad.append(path)
+        return [_plain(item, f"{path}[{i}]", bad) for i, item in enumerate(items)]
+    bad.append(path)
+    return value.isoformat() if hasattr(value, "isoformat") else str(value)
+
+
+def json_safe(result: dict[str, Any]) -> dict[str, Any]:
+    """Return ``result`` unchanged if Home Assistant can send it, else a cleaned copy.
+
+    A value JSON cannot hold makes Home Assistant answer only "Invalid JSON in response" and
+    the panel shows nothing. The cleaned copy keeps the page working and the log names the
+    paths to fix.
+    """
+    try:
+        json_bytes(result)
+    except (TypeError, ValueError, OverflowError):
+        bad: list[str] = []
+        cleaned = _plain(result, "", bad)
+        _LOGGER.warning(
+            "The inventory held values JSON cannot carry and was cleaned before sending: %s",
+            ", ".join(bad[:10]) or "unknown path",
+        )
+        return cleaned
+    return result

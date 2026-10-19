@@ -73,6 +73,7 @@ from .writelock import write_holder
 from .ws_common import (
     _scanner,
     _versioned,
+    json_safe,
     panel_session_only,
     scanner_plans,
     with_scanner,
@@ -107,7 +108,7 @@ async def _send_inventory_result(
         "meta": {**result["meta"], "scan_health": scanner.health_report()},
         "monitor": scanner.monitor.report(),
     }
-    connection.send_result(msg["id"], _versioned(result))
+    connection.send_result(msg["id"], json_safe(_versioned(result)))
 
 
 @websocket_api.require_admin

@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Behoben
+
+- **Inventar:** Enthält die Antwort einen Wert, den Home Assistant nicht als JSON senden kann („Invalid JSON in response“), lädt die Seite trotzdem; das Protokoll nennt die betroffenen Stellen.
+
+### English
+
+#### Fixed
+
+- **Inventory:** If the reply holds a value Home Assistant cannot send as JSON (“Invalid JSON in response”), the page still loads; the log names the affected places.
+
 ## 1.10.0 - 2026-10-18
 
 ### Neu
