@@ -229,8 +229,14 @@ def _entity_status(
     state: Any,
     config_entries: dict[str, Any],
     devices: dict[str, Any],
+    components: set[str] | frozenset[str] = frozenset(),
 ) -> tuple[str, str]:
-    """Classify an entity conservatively and explain why."""
+    """Classify an entity conservatively and explain why.
+
+    ``components`` is ``hass.config.components``; it names each platform set up successfully as
+    ``<platform>.<domain>``, which tells for an entity without a config entry (YAML) that its
+    platform runs.
+    """
     if entry.disabled_by is not None:
         return "disabled", "entity_disabled"
     if entry.device_id and entry.device_id not in devices:
@@ -244,15 +250,18 @@ def _entity_status(
     if state is None:
         return "orphaned", "state_missing"
     # Home Assistant keeps a "restored" placeholder for a registry entry its integration did not
-    # add. Only while that integration is loaded does it mean "no longer provided"; during
-    # start-up or a failed setup all its entities carry the placeholder.
-    if (
-        state.state == "unavailable"
-        and getattr(state, "attributes", {}).get("restored")
-        and entry.config_entry_id
-        and getattr(config_entries[entry.config_entry_id], "state", None) is ConfigEntryState.LOADED
-    ):
-        return "orphaned", "not_provided"
+    # add. Only while that integration (or YAML platform) runs does it mean "no longer provided";
+    # during start-up or a failed setup all its entities carry the placeholder.
+    if state.state == "unavailable" and getattr(state, "attributes", {}).get("restored"):
+        if entry.config_entry_id:
+            running = (
+                getattr(config_entries[entry.config_entry_id], "state", None)
+                is ConfigEntryState.LOADED
+            )
+        else:
+            running = f"{entry.platform}.{entry.entity_id.partition('.')[0]}" in components
+        if running:
+            return "orphaned", "not_provided"
     if state.state == "unavailable":
         return "unavailable", "state_unavailable"
     if state.state == "unknown":
@@ -273,10 +282,14 @@ def alias_texts(aliases: Any, computed_name: str | None = None) -> list[str]:
 
 
 def _entity_item(
-    entry: Any, state: Any, config_entries: dict[str, Any], devices: dict[str, Any]
+    entry: Any,
+    state: Any,
+    config_entries: dict[str, Any],
+    devices: dict[str, Any],
+    components: set[str] | frozenset[str] = frozenset(),
 ) -> dict[str, Any]:
     """Normalize one entity registry entry together with its live state."""
-    status, reason = _entity_status(entry, state, config_entries, devices)
+    status, reason = _entity_status(entry, state, config_entries, devices, components)
     return {
         "object_type": "entity",
         "object_id": entry.entity_id,
@@ -1355,7 +1368,11 @@ class InventoryScanner:
 
         entities = [
             _entity_item(
-                entry, self.hass.states.get(entry.entity_id), config_entries_by_id, devices_by_id
+                entry,
+                self.hass.states.get(entry.entity_id),
+                config_entries_by_id,
+                devices_by_id,
+                self.hass.config.components,
             )
             for entry in _registry_entries(entity_registry.entities)
         ]
