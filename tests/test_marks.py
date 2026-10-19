@@ -76,6 +76,13 @@ def test_keep_hides_nothing_but_blocks_cleanup_of_the_object_and_its_entities() 
     assert "marked_keep" not in entities["sensor.a"]
 
 
+def test_the_keep_label_blocks_cleanup_like_the_keep_mark() -> None:
+    objects, findings = _world()
+    objects[0]["labels"] = ["housekeeper_keep"]
+    apply_marks(objects, findings, {}, NOW)
+    assert objects[0]["marked_keep"] and not findings[0]["ignored"]
+
+
 def test_a_stored_mark_of_an_unknown_shape_is_dropped() -> None:
     assert _clean({"kind": "nope"}) is None and _clean("x") is None
     assert _clean({"kind": "keep", "reason": "x" * 500})["reason"] == "x" * 200

@@ -3,7 +3,7 @@
 Stored by Housekeeper only; Home Assistant stays untouched. A mark of an object hides the
 "not available" findings of that object (of a device: of its entities; of an integration or app: its
 "not loaded" and "app stopped" findings), never a broken reference.
-"Keep" also blocks every cleanup step on the object. A mark with a review date that has passed no
+"Keep" also blocks every cleanup step on the object; the label ``housekeeper_keep`` does the same. A mark with a review date that has passed no
 longer hides anything; the finding comes back as due.
 A mark can carry a time window (fixed hours, or while the sun is below the horizon): it hides only
 inside that window, plus a grace period after it, so a device that is on by day is watched by day.
@@ -18,7 +18,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
 from homeassistant.util import dt as dt_util
 
-from .const import MARKS_STORAGE_KEY, STORAGE_VERSION
+from .const import KEEP_LABEL, MARKS_STORAGE_KEY, STORAGE_VERSION
 from .ignored import REASON_LIMIT, VIAS, due
 
 SAVE_DELAY = 10
@@ -238,6 +238,10 @@ def apply_marks(
             device_of[item["object_id"]] = item.get("device_id")
         elif item["object_type"] == "device":
             devices[item["object_id"]] = item
+        if KEEP_LABEL in (
+            item.get("labels") or []
+        ):  # the label is a "keep" mark made in Home Assistant
+            item["marked_keep"] = True
         mark = marks.get(mark_key(item["object_type"], item["object_id"]))
         if mark is None:
             continue

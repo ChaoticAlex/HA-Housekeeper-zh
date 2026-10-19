@@ -75,6 +75,7 @@ JOURNAL_STORAGE_KEY: Final = f"{DOMAIN}.journal"
 QUARANTINE_DAYS: Final = 14
 IGNORE_LABEL: Final = "housekeeper_ignore"
 CRITICAL_LABEL: Final = "housekeeper_critical"
+KEEP_LABEL: Final = "housekeeper_keep"
 # Allowed range (min, max) per option, shared by the options flow and the panel command.
 OPTION_LIMITS: Final = {
     CONF_OUTAGE_INFO_MINUTES: (5, 1440),
