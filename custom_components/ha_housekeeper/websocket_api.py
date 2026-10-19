@@ -192,7 +192,8 @@ def websocket_detail(
     if details is None:
         connection.send_error(msg["id"], "not_found", "Object not found in the latest scan")
         return
-    connection.send_result(msg["id"], details)
+    # The attributes come straight from the entity, as any integration wrote them.
+    connection.send_result(msg["id"], json_safe(details))
 
 
 @websocket_api.require_admin

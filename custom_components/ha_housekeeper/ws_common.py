@@ -127,7 +127,7 @@ def json_safe(result: dict[str, Any]) -> dict[str, Any]:
     """Return ``result`` unchanged if Home Assistant can send it, else a cleaned copy.
 
     A value JSON cannot hold makes Home Assistant answer only "Invalid JSON in response" and
-    the panel shows nothing. The cleaned copy keeps the page working and the log names the
+    the panel shows nothing; entity attributes are the usual source. The cleaned copy keeps the page working and the log names the
     paths to fix.
     """
     try:
@@ -136,7 +136,7 @@ def json_safe(result: dict[str, Any]) -> dict[str, Any]:
         bad: list[str] = []
         cleaned = _plain(result, "", bad)
         _LOGGER.warning(
-            "The inventory held values JSON cannot carry and was cleaned before sending: %s",
+            "The reply held values JSON cannot carry and was cleaned before sending: %s",
             ", ".join(bad[:10]) or "unknown path",
         )
         return cleaned
