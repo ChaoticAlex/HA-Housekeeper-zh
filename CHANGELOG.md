@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+### Neu
+
+- **Entitäten, die die Integration nicht mehr bereitstellt:** Sie werden als verwaist erkannt statt als „nicht verfügbar“. Sie lassen sich direkt entfernen, ohne Quarantäne, aber mit Vorschau, Backup und Wiederherstellen.
+- **Oberfläche:**
+  - In der Ursachendiagnose öffnen Integration, Gerät und funktionierende Entität per Klick ihre Seite.
+
+### English
+
+#### New
+
+- **Entities the integration no longer provides:** They are recognised as orphaned instead of "unavailable". They can be removed straight away, without quarantine, but with preview, backup and restore.
+- **Interface:**
+  - In the cause diagnosis, the integration, device and working entity open their page on click.
+
 ## 1.10.2 - 2026-10-19
 
 ### Behoben
