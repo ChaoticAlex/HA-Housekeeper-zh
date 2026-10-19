@@ -35,7 +35,10 @@ INT_MIN, INT_MAX = -(2**63), 2**64 - 1  # what orjson writes; a larger number fa
 
 
 def json_safe(value: Any, path: str = "", bad: list[str] | None = None) -> Any:
-    """Convert runtime values to JSON-safe data; ``bad`` collects the paths turned into text."""
+    """Convert runtime values to JSON-safe data; ``bad`` collects the paths turned into text.
+
+    The paths are only built while ``bad`` is given.
+    """
     if isinstance(value, int) and not isinstance(value, bool) and not INT_MIN <= value <= INT_MAX:
         if bad is not None:
             bad.append(path)
@@ -47,15 +50,19 @@ def json_safe(value: Any, path: str = "", bad: list[str] | None = None) -> Any:
     if isinstance(value, Enum):
         return value.value
     if isinstance(value, Mapping):
+        if bad is None:
+            return {str(key): json_safe(child) for key, child in value.items()}
         out = {}
         for key, child in value.items():
-            if bad is not None and not isinstance(key, (str, int)):
+            if not isinstance(key, (str, int)):
                 bad.append(f"{path}/{key!r}")
             out[str(key)] = json_safe(child, f"{path}/{key}", bad)
         return out
     if isinstance(value, (set, frozenset)):
         value = sorted(value, key=str)
     if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        if bad is None:
+            return [json_safe(child) for child in value]
         return [json_safe(child, f"{path}[{i}]", bad) for i, child in enumerate(value)]
     if bad is not None:
         bad.append(path)
