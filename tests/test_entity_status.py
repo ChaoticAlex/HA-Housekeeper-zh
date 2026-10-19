@@ -63,6 +63,17 @@ def test_entity_status_table(entry, state, devices, config_entries, expected) ->
     assert _entity_status(entry, state_object, config_entries, devices) == expected
 
 
+def test_restored_placeholder_counts_as_not_provided_only_while_loaded() -> None:
+    from homeassistant.config_entries import ConfigEntryState
+
+    state = SimpleNamespace(state="unavailable", attributes={"restored": True})
+    entry = _entry(config_entry_id="c")
+    loaded = {"c": SimpleNamespace(disabled_by=None, state=ConfigEntryState.LOADED)}
+    failed = {"c": SimpleNamespace(disabled_by=None, state=ConfigEntryState.SETUP_RETRY)}
+    assert _entity_status(entry, state, loaded, {}) == ("orphaned", "not_provided")
+    assert _entity_status(entry, state, failed, {}) == ("unavailable", "state_unavailable")
+
+
 def test_unavailable_is_never_reported_as_orphaned() -> None:
     state = SimpleNamespace(state="unavailable")
     assert _entity_status(_entry(), state, {}, {})[0] == "unavailable"

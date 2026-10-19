@@ -54,7 +54,7 @@ class DiagnosisMixin {
       if (logged) rows.push(this.check(t("logTitle"), logged.level === "warning" ? "warn" : "red", this.logLine(logged), ""));
       switch (item.reason) {
         case "state_available": cause = t("cause_ok"); break;
-        case "entity_disabled": case "device_disabled": case "integration_disabled": case "device_missing": case "config_entry_missing":
+        case "entity_disabled": case "device_disabled": case "integration_disabled": case "device_missing": case "config_entry_missing": case "not_provided":
           cause = t(`cause_${item.reason}`); break;
         case "state_missing": cause = broken ? t("cause_state_missing_integration", broken) : t("cause_state_missing"); break;
         case "state_unavailable": cause = broken ? t("cause_state_unavailable_integration", broken) : t("cause_state_unavailable"); break;
@@ -70,7 +70,7 @@ class DiagnosisMixin {
       if (item.reason === "state_unavailable") hint = broken ? t("hint_integration") : t("hint_state_unavailable");
       else if (item.reason === "state_unknown") hint = t("hint_state_unknown");
       else if (item.reason === "state_missing" && broken) hint = t("hint_integration");
-      else if (["state_missing", "device_missing", "config_entry_missing"].includes(item.reason)) hint = t("hint_orphan");
+      else if (["state_missing", "not_provided", "device_missing", "config_entry_missing"].includes(item.reason)) hint = t("hint_orphan");
       if (item.duplicate_of) hint = t("hint_duplicate");
       if (stable?.info) {
         cause = `${t("cause_unstable", { level: t(stable.info.level === "flapping" ? "relFlapping" : "relUnstable") })} ${cause}`;

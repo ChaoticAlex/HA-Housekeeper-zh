@@ -35,6 +35,7 @@ const TEXT = {
     device_missing: "Zugehöriges Gerät existiert nicht mehr in der Geräte-Registry",
     config_entry_missing: "Zugehöriger Konfigurationseintrag fehlt", "config_entry.not_loaded": "Integration nicht geladen", "config_entry.reauth": "Anmeldung nötig", "device.down": "Gerät ganz ausgefallen", "automation.blocked": "Automation kann nicht starten: alle Auslöser sind ausgefallen", "automation.dead_actions": "Automation ändert nichts: alle Aktionen zielen auf ausgefallene Entitäten", "script.dead_actions": "Skript ändert nichts: alle Aktionen zielen auf ausgefallene Entitäten", "automation.dead_condition": "Eine Bedingung kann nie wahr werden: ausgefallene Entität", "app.stopped_in_use": "App gestoppt, Integration hängt vermutlich daran",
     state_missing: "Entität ist registriert, besitzt aber keinen Zustand",
+    not_provided: "Integration stellt die Entität nicht mehr bereit",
     state_unavailable: "Integration meldet den Zustand unavailable",
     state_unknown: "Integration meldet den Zustand unknown", state_available: "Zustand ist verfügbar",
     loading: "Inventar wird geladen …", loadError: "Inventar konnte nicht geladen werden", actionFailed: "Das hat nicht geklappt: {detail}", renderError: "Diese Ansicht konnte nicht angezeigt werden.",
@@ -165,6 +166,7 @@ const TEXT = {
     cause_device_missing: "Die Entität verweist auf ein Gerät, das nicht mehr in der Geräte-Registry existiert. Der Registry-Eintrag ist sehr wahrscheinlich ein Überbleibsel.",
     cause_config_entry_missing: "Die Integration, zu der die Entität gehört, wurde entfernt. Der Registry-Eintrag ist verwaist.",
     cause_state_missing: "Die Entität ist registriert, aber die Integration stellt sie nicht mehr bereit. Typisch nach dem Umbau einer Integration, geänderter unique_id oder entferntem Gerät.",
+    cause_not_provided: "Die Integration ist geladen, stellt diese Entität aber nicht mehr bereit. Home Assistant hält nur noch einen Platzhalter. Typisch nach dem Umbau einer Integration oder einer geänderten unique_id.",
     cause_state_missing_integration: "Die Integration ist nicht geladen ({state}). Deshalb fehlt der Zustand der Entität.",
     cause_state_unavailable: "Integration und Gerät sind vorhanden, aber die Integration meldet die Entität als nicht verfügbar. Meist ist das Gerät oder der Dienst nicht erreichbar, etwa ausgeschaltet, ohne Netzwerk oder Cloud-Ausfall.",
     cause_state_unavailable_integration: "Die Integration ist nicht geladen ({state}). Ihre Entitäten sind deshalb nicht verfügbar.",
@@ -218,6 +220,7 @@ const TEXT = {
     device_missing: "Related device no longer exists in the device registry",
     config_entry_missing: "Related config entry is missing", "config_entry.not_loaded": "Integration not loaded", "config_entry.reauth": "Login needed", "device.down": "Device is down completely", "automation.blocked": "Automation cannot start: all its triggers are out of order", "automation.dead_actions": "Automation changes nothing: all its actions target dead entities", "script.dead_actions": "Script changes nothing: all its actions target dead entities", "automation.dead_condition": "A condition can never be true: dead entity", "app.stopped_in_use": "App stopped, an integration probably depends on it",
     state_missing: "Entity is registered but has no state",
+    not_provided: "The integration no longer provides the entity",
     state_unavailable: "Integration reports unavailable",
     state_unknown: "Integration reports unknown", state_available: "State is available",
     loading: "Loading inventory …", loadError: "Could not load inventory", actionFailed: "That did not work: {detail}", renderError: "This view could not be shown.",
@@ -348,6 +351,7 @@ const TEXT = {
     cause_device_missing: "The entity points to a device that no longer exists in the device registry. The registry entry is very likely a leftover.",
     cause_config_entry_missing: "The integration this entity belongs to was removed. The registry entry is orphaned.",
     cause_state_missing: "The entity is registered, but the integration no longer provides it. Typical after an integration rework, a changed unique_id or a removed device.",
+    cause_not_provided: "The integration is loaded but no longer provides this entity. Home Assistant only keeps a placeholder. Typical after an integration rework or a changed unique_id.",
     cause_state_missing_integration: "The integration is not loaded ({state}), which is why the entity has no state.",
     cause_state_unavailable: "Integration and device exist, but the integration reports the entity as unavailable. Usually the device or service is unreachable, for example powered off, offline or a cloud outage.",
     cause_state_unavailable_integration: "The integration is not loaded ({state}), so its entities are unavailable.",
@@ -5335,7 +5339,7 @@ class DiagnosisMixin {
       if (logged) rows.push(this.check(t("logTitle"), logged.level === "warning" ? "warn" : "red", this.logLine(logged), ""));
       switch (item.reason) {
         case "state_available": cause = t("cause_ok"); break;
-        case "entity_disabled": case "device_disabled": case "integration_disabled": case "device_missing": case "config_entry_missing":
+        case "entity_disabled": case "device_disabled": case "integration_disabled": case "device_missing": case "config_entry_missing": case "not_provided":
           cause = t(`cause_${item.reason}`); break;
         case "state_missing": cause = broken ? t("cause_state_missing_integration", broken) : t("cause_state_missing"); break;
         case "state_unavailable": cause = broken ? t("cause_state_unavailable_integration", broken) : t("cause_state_unavailable"); break;
@@ -5351,7 +5355,7 @@ class DiagnosisMixin {
       if (item.reason === "state_unavailable") hint = broken ? t("hint_integration") : t("hint_state_unavailable");
       else if (item.reason === "state_unknown") hint = t("hint_state_unknown");
       else if (item.reason === "state_missing" && broken) hint = t("hint_integration");
-      else if (["state_missing", "device_missing", "config_entry_missing"].includes(item.reason)) hint = t("hint_orphan");
+      else if (["state_missing", "not_provided", "device_missing", "config_entry_missing"].includes(item.reason)) hint = t("hint_orphan");
       if (item.duplicate_of) hint = t("hint_duplicate");
       if (stable?.info) {
         cause = `${t("cause_unstable", { level: t(stable.info.level === "flapping" ? "relFlapping" : "relUnstable") })} ${cause}`;

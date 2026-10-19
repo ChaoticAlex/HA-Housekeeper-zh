@@ -243,6 +243,16 @@ def _entity_status(
         return "disabled", "integration_disabled"
     if state is None:
         return "orphaned", "state_missing"
+    # Home Assistant keeps a "restored" placeholder for a registry entry its integration did not
+    # add. Only while that integration is loaded does it mean "no longer provided"; during
+    # start-up or a failed setup all its entities carry the placeholder.
+    if (
+        state.state == "unavailable"
+        and getattr(state, "attributes", {}).get("restored")
+        and entry.config_entry_id
+        and getattr(config_entries[entry.config_entry_id], "state", None) is ConfigEntryState.LOADED
+    ):
+        return "orphaned", "not_provided"
     if state.state == "unavailable":
         return "unavailable", "state_unavailable"
     if state.state == "unknown":
@@ -568,7 +578,9 @@ def _entity_findings(
             "rule_id": f"entity.{item['reason']}",
             "object_id": item["object_id"],
             "classification": item["status"],
-            "confidence": 0.98 if item["reason"] == "config_entry_missing" else 0.75,
+            "confidence": 0.98
+            if item["reason"] in ("config_entry_missing", "not_provided")
+            else 0.75,
             "first_detected_at": item["status_since"],
             "evidence": [{"kind": item["reason"], "source": "entity_registry"}],
         }
