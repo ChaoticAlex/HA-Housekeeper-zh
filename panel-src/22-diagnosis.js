@@ -297,13 +297,16 @@ class DiagnosisMixin {
     const areaId = item.area_id || device?.area_id, area = areaId ? this.findObject(`area:${areaId}`) : null;
     const integration = item.object_type === "entity" ? item.platform : item.object_type === "config_entry" ? (item.integration_name || item.domain) : null;
     const impact = this.impact(item, key);
+    // An entity names its config entry (the integration page needs one), else the integration itself.
+    const entryKey = item.object_type !== "entity" ? null : item.config_entry_id && this.findObject(`config_entry:${item.config_entry_id}`) ? `config_entry:${item.config_entry_id}` : `integration:${item.platform}`;
+    const linkTo = (k, text) => k && this.findObject(k) ? `<button class="link" data-object="${this.esc(k)}">${this.esc(text)}</button>` : this.esc(text);
     const risk = impact ? { tone: impact.tone, text: impact.hits.length ? this.t("riskHits", { n: impact.hits.length, c: impact.certain }) : this.t("riskNone") } : null;
     return [
       item.reason ? [this.t("sumCause"), this.esc(this.t(item.reason))] : null,
       item.status_since ? [this.t("since"), this.esc(this.formatDate(item.status_since))] : null,
-      integration ? [this.t("sumIntegration"), item.object_type === "config_entry" && this.findObject(`integration:${item.domain}`) ? `<button class="link" data-object="${this.esc(`integration:${item.domain}`)}" title="${this.esc(this.t("intToIntegration"))}">${this.esc(integration)}</button>` : this.esc(integration)] : null,
-      device ? [this.t("sumDevice"), this.esc(device.name)] : null,
-      area ? [this.t("sumArea"), this.esc(area.name)] : null,
+      integration ? [this.t("sumIntegration"), item.object_type === "config_entry" && this.findObject(`integration:${item.domain}`) ? `<button class="link" data-object="${this.esc(`integration:${item.domain}`)}" title="${this.esc(this.t("intToIntegration"))}">${this.esc(integration)}</button>` : linkTo(entryKey, integration)] : null,
+      device ? [this.t("sumDevice"), linkTo(this.objectKey(device), device.name)] : null,
+      area ? [this.t("sumArea"), linkTo(this.objectKey(area), area.name)] : null,
       risk ? [this.t("sumRisk"), `<span class="pill ${risk.tone}">${this.esc(risk.text)}</span>`] : null,
     ].filter(Boolean);
   }

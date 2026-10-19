@@ -390,6 +390,13 @@ test("diagnosis rows link the integration, the device and the working twin", () 
   assert.deepEqual(Array.from(d.rows.map(r => r.link)), ["config_entry:e1", "device:d1", null, "entity:light.x_ok"]);
 });
 
+test("the detail summary links the integration, device and area of an entity", () => {
+  const { el } = panel();
+  el.data = { ...DATA, objects: [...DATA.objects, ENTRY, { ...DEVICE, area_id: "a1" }, { object_type: "area", object_id: "a1", name: "Keller" }], findings: [] };
+  const html = el.detailSummary({ object_type: "entity", object_id: "light.x", platform: "hue", config_entry_id: "e1", device_id: "d1" }, "entity:light.x").map(r => r[1]).join("");
+  assert.ok(['data-object="config_entry:e1"', 'data-object="device:d1"', 'data-object="area:a1"'].every(s => html.includes(s)));
+});
+
 test("unavailable with a failed integration blames the integration", () => {
   const d = diagnoseWith([{ ...ENTRY, state: "setup_error", status: "problem" }, DEVICE], {});
   assert.equal(d.rows[0].tone, "red");
