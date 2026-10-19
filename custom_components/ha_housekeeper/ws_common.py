@@ -23,6 +23,7 @@ STATISTICS_LAST_IDS = 50
 RELIABILITY_TIMEOUT = 120  # seconds; the recorder query is slow on a large database
 
 _LOGGER = logging.getLogger(__name__)
+INT_MIN, INT_MAX = -(2**63), 2**64 - 1  # what orjson writes; a larger number fails the whole reply
 
 
 def _scanner(hass: HomeAssistant) -> InventoryScanner | None:
@@ -101,6 +102,9 @@ def _versioned(result: dict[str, Any]) -> dict[str, Any]:
 
 def _plain(value: Any, path: str, bad: list[str]) -> Any:
     """Copy ``value`` down to what JSON holds, noting the path of every value that had to change."""
+    if isinstance(value, int) and not isinstance(value, bool) and not INT_MIN <= value <= INT_MAX:
+        bad.append(path)
+        return str(value)
     if value is None or isinstance(value, (bool, int, float, str)):
         return value
     if isinstance(value, dict):
