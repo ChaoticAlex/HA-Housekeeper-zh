@@ -1123,7 +1123,7 @@ def judge_entity_action(
     if kind == "remove_entity":
         # Disabling an entity its integration no longer provides changes nothing, so the
         # quarantine would prove nothing; backup, confirmation and restore still apply. The
-        # placeholder must have lasted a day (``not_provided_settled``, set by the scan).
+        # entity must have been missing for a day of scans (``not_provided_settled``).
         if item.get("reason") == NOT_PROVIDED and item.get("not_provided_settled"):
             action["skips_quarantine"] = True
         else:

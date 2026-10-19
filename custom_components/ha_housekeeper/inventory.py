@@ -140,9 +140,10 @@ from .watch import WATCH_KINDS, WatchStore, evaluate, make_before, next_due
 
 _LOGGER = logging.getLogger(__name__)
 SUGGEST_LIMIT = 200
-# An entity not provided for this long may be removed without quarantine: a placeholder that
-# lasts a day is no integration still waiting for its first data.
+# An entity not provided for this long may be removed without quarantine: one that stays so for a
+# day of scans, restarts included, is no integration still waiting for its first data.
 NOT_PROVIDED_SETTLED = timedelta(hours=24)
+NOT_PROVIDED_KEY = "not_provided:"  # observation key of that period, next to "entity:<id>"
 
 # Keys of the Energy dashboard preferences that name statistics, which are entity IDs.
 ENERGY_KEYS = frozenset(
@@ -569,6 +570,11 @@ def _observed_as(item: dict[str, Any]) -> str:
     on, so "observed since" does not start again with the new classification.
     """
     return "unavailable" if item.get("reason") == "not_provided" else item["status"]
+
+
+def _not_provided_settled(since: str | None, now: datetime) -> bool:
+    """Whether an entity has not been provided for a whole day of observation."""
+    return since is not None and now - datetime.fromisoformat(since) >= NOT_PROVIDED_SETTLED
 
 
 def _placeholder_age(item: dict[str, Any], now: datetime) -> timedelta | None:
@@ -1490,8 +1496,15 @@ class InventoryScanner:
             + [("config_entry", item) for item in integrations]
         )
         if not preliminary:
+            # An extra period per entity not provided: it survives restarts, which renew the
+            # placeholder, and ends as soon as the integration provides the entity again.
             await self.observations.async_update(
-                {f"{kind}:{item['object_id']}": _observed_as(item) for kind, item in tracked},
+                {f"{kind}:{item['object_id']}": _observed_as(item) for kind, item in tracked}
+                | {
+                    f"{NOT_PROVIDED_KEY}{item['object_id']}": "not_provided"
+                    for item in entities
+                    if item["reason"] == "not_provided"
+                },
                 observed_at,
             )
         for kind, item in tracked:
@@ -1504,8 +1517,12 @@ class InventoryScanner:
                 )
                 item["had_value"] = self.observations.had_value(f"{kind}:{item['object_id']}")
             if kind == "entity" and item["reason"] == "not_provided":
-                age = _placeholder_age(item, observed_at)
-                item["not_provided_settled"] = age is not None and age >= NOT_PROVIDED_SETTLED
+                item["not_provided_settled"] = _not_provided_settled(
+                    self.observations.since(
+                        f"{NOT_PROVIDED_KEY}{item['object_id']}", "not_provided"
+                    ),
+                    observed_at,
+                )
         if not preliminary:
             self.stale.observe(
                 entities,
