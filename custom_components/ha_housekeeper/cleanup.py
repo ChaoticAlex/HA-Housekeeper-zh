@@ -93,6 +93,8 @@ REMOVAL_KINDS = frozenset({"remove_entity", "remove_device", "forget_device"})
 QUARANTINE_KINDS = {"disable_entity": "entity", "disable_device": "device"}
 REMOVABLE_STATUSES = frozenset({"orphaned", "unavailable", "unknown", "disabled"})
 DISABLEABLE_STATUSES = frozenset({"orphaned", "unavailable", "unknown"})
+# The reason of an entity whose loaded integration no longer provides it (see inventory).
+NOT_PROVIDED = "not_provided"
 PLAN_MAX_AGE_HOURS = 24
 MAX_ACTIONS = 200
 # Only previews that were never started are limited by number; they cannot be confirmed after
@@ -1071,7 +1073,7 @@ def judge_entity_action(
     """Judge one entity candidate. Verdicts: ``ok`` (no known use), ``review``, ``blocked``.
 
     ``quarantine`` maps entity IDs to when Housekeeper disabled them; removal is only
-    allowed after ``QUARANTINE_DAYS``. ``restorable`` tells whether a removed entity could be
+    allowed after ``QUARANTINE_DAYS``, except for an entity its integration no longer provides. ``restorable`` tells whether a removed entity could be
     brought back (its config entry still exists).
     """
     action: dict[str, Any] = {
@@ -1118,7 +1120,12 @@ def judge_entity_action(
     if item.get("critical"):
         reasons.append("critical_object")
     if kind == "remove_entity":
-        _quarantine_reasons(action, reasons, (quarantine or {}).get(object_id), now)
+        # Disabling an entity its integration no longer provides changes nothing, so the
+        # quarantine would prove nothing; backup, confirmation and restore still apply.
+        if item.get("reason") == NOT_PROVIDED:
+            action["skips_quarantine"] = True
+        else:
+            _quarantine_reasons(action, reasons, (quarantine or {}).get(object_id), now)
         action["restorable"] = restorable
         if restorable is False:
             reasons.append("not_restorable")

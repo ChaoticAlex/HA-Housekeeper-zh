@@ -14,7 +14,9 @@ class DetailActionsMixin {
     const broken = open.some(f => f.classification === "broken_reference");
     if (item.object_type === "entity" && open.some(f => f.rule_id.startsWith("entity.") && ["orphaned", "unavailable"].includes(f.classification))) {
       out.push({ attr: `data-act-replace="${this.esc(item.object_id)}"`, icon: "mdi:swap-horizontal", label: this.t("actReplaceThis"), hint: "actHintReplace", finding: true });
-      if (item.status !== "disabled") out.push({ attr: `data-act-disable="${this.esc(item.object_id)}"`, icon: "mdi:cancel", label: this.t("actDisable"), hint: "actHintDisable", finding: true });
+      // Disabling an entity its integration no longer provides changes nothing; it can be removed straight away.
+      if (item.reason === "not_provided") out.push({ attr: `data-act-remove="${this.esc(item.object_id)}"`, icon: "mdi:delete-outline", label: this.t("actRemove"), hint: "actHintRemove", finding: true });
+      else if (item.status !== "disabled") out.push({ attr: `data-act-disable="${this.esc(item.object_id)}"`, icon: "mdi:cancel", label: this.t("actDisable"), hint: "actHintDisable", finding: true });
     }
     if (item.object_type === "automation" && open.some(f => f.rule_id === "automation.blocked")) {
       out.push({ attr: `data-act-disable-auto="${this.esc(item.object_id)}"`, icon: "mdi:cancel", label: this.t("actDisableAuto"), hint: "actHintDisableAuto", finding: true });
@@ -119,6 +121,14 @@ class DetailActionsMixin {
     this.render();
   }
 
+  async planRemove(entityId) {
+    try {
+      if (!await this.newPlan([{ kind: "remove_entity", object_id: entityId }])) return;
+      this.selected = null;
+    } catch (err) { this.failed(err); }
+    this.render();
+  }
+
   async planLabel(entityId, label) {
     try {
       if (!await this.newPlan([{ kind: "add_label", object_id: entityId, target: label }])) return;
@@ -145,6 +155,7 @@ class DetailActionsMixin {
     root.querySelectorAll("[data-act-exchange]").forEach(el => el.onclick = () => this.startCleanup("exchange_device", () => { const ex = this.exchangeState(); ex.oldDev = el.dataset.actExchange; ex.newDev = ""; ex.result = null; ex.choices = {}; }));
     root.querySelectorAll("[data-act-replace]").forEach(el => el.onclick = () => this.startCleanup("replace_references", () => { this.replOld = el.dataset.actReplace; this.replNew = ""; }));
     root.querySelectorAll("[data-act-disable]").forEach(el => el.onclick = () => this.startCleanup("disable_entity", () => this.cleanupSel.add(el.dataset.actDisable)));
+    root.querySelectorAll("[data-act-remove]").forEach(el => el.onclick = () => this.planRemove(el.dataset.actRemove));
     root.querySelectorAll("[data-act-disable-auto]").forEach(el => el.onclick = () => this.planDisable(el.dataset.actDisableAuto));
     root.querySelector("[data-act-label]")?.addEventListener("change", e => { this.actLabel = e.target.value; });
     root.querySelector("[data-act-label-plan]")?.addEventListener("click", e => this.planLabel(e.currentTarget.dataset.actLabelPlan, root.querySelector("[data-act-label]")?.value || this.actLabel));
@@ -152,14 +163,14 @@ class DetailActionsMixin {
 }
 Object.assign(TEXT.de, {
   actOpen: "Öffnen", tabActions: "Aktionen", nextStep: "Nächster Schritt", moreActions: "Weitere Aktionen", actGroupRecommended: "Empfohlen", actGroupName: "Benennen und einordnen", actGroupNotes: "Notizen", actOnlyNotes: "Hier legst du fest, was bei diesem Objekt normal ist, zum Beispiel „nachts offline“. Housekeeper meldet es dann nicht mehr als „nicht verfügbar“.", actMore: "Mehr", actLess: "Weniger", actLabelPreviewShort: "Vorschau", actGroupRecord: "Aufzeichnung und Überwachung", actNone: "Hier gibt es nichts zu tun.",
-  actionsTitle: "Was möchtest du tun?", actReplace: "Ersetzen:", actReplaceThis: "Durch andere Entität ersetzen", actDisable: "Deaktivieren planen", actDisableAuto: "Automation deaktivieren (Plan)", actHintDisableAuto: "Keiner ihrer Auslöser kann feuern. Der Plan schaltet sie aus, mit Vorschau, Bestätigung und Rückgängig.",
+  actionsTitle: "Was möchtest du tun?", actReplace: "Ersetzen:", actReplaceThis: "Durch andere Entität ersetzen", actDisable: "Deaktivieren planen", actRemove: "Entfernen planen", actHintRemove: "Die Integration stellt sie nicht mehr bereit, darum ohne Quarantäne: mit Vorschau, Backup und Wiederherstellen.", actDisableAuto: "Automation deaktivieren (Plan)", actHintDisableAuto: "Keiner ihrer Auslöser kann feuern. Der Plan schaltet sie aus, mit Vorschau, Bestätigung und Rückgängig.",
   actLabelTitle: "Label ergänzen", actLabelHint: "Fügt ein vorhandenes Label hinzu, zum Beispiel zum Filtern. Du siehst zuerst eine Vorschau.", actLabelPreview: "Vorschau erstellen",
   actPreviewOnly: "Hier startest du nur eine Vorschau. Geändert wird erst, wenn du sie bestätigst.",
   actEditInHa: "Eine einzelne Referenz entfernt Housekeeper nicht selbst. Öffne die Automation in Home Assistant und bearbeite sie dort.",
 });
 Object.assign(TEXT.en, {
   actOpen: "Open", tabActions: "Actions", nextStep: "Next step", moreActions: "More actions", actGroupRecommended: "Recommended", actGroupName: "Name and classify", actGroupNotes: "Notes", actOnlyNotes: "Here you say what is normal for this object, for example “offline at night”. Housekeeper then stops reporting it as “not available”.", actMore: "More", actLess: "Less", actLabelPreviewShort: "Preview", actGroupRecord: "Recording and monitoring", actNone: "There is nothing to do here.",
-  actionsTitle: "What would you like to do?", actReplace: "Replace:", actReplaceThis: "Replace by another entity", actDisable: "Plan to disable", actDisableAuto: "Disable automation (plan)", actHintDisableAuto: "None of its triggers can fire. The plan switches it off, with preview, confirmation and undo.",
+  actionsTitle: "What would you like to do?", actReplace: "Replace:", actReplaceThis: "Replace by another entity", actDisable: "Plan to disable", actRemove: "Plan to remove", actHintRemove: "Its integration no longer provides it, so no quarantine: with preview, backup and restore.", actDisableAuto: "Disable automation (plan)", actHintDisableAuto: "None of its triggers can fire. The plan switches it off, with preview, confirmation and undo.",
   actLabelTitle: "Add a label", actLabelHint: "Adds an existing label, for example for filtering. You see a preview first.", actLabelPreview: "Create preview",
   actPreviewOnly: "This only starts a preview. Nothing changes until you confirm it.",
   actEditInHa: "Housekeeper does not remove a single reference itself. Open the automation in Home Assistant and edit it there.",

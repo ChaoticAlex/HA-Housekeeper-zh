@@ -236,6 +236,15 @@ def test_not_restorable_removals_need_review() -> None:
     assert risky["verdict"] == "review" and "not_restorable" in risky["reasons"]
 
 
+def test_an_entity_no_longer_provided_needs_no_quarantine() -> None:
+    objects = [entity("sensor.gone", reason="not_provided"), entity("sensor.down", "unavailable")]
+    index = {o["object_id"]: o for o in objects}
+    gone = judge_action("remove_entity", "sensor.gone", index, [], {}, True, NOW)
+    down = judge_action("remove_entity", "sensor.down", index, [], {}, True, NOW)
+    assert gone["verdict"] == "ok" and gone["skips_quarantine"] is True
+    assert "not_quarantined" in down["reasons"]
+
+
 def test_the_journal_list_says_until_when_a_plan_is_watched() -> None:
     from custom_components.ha_housekeeper.cleanup import plan_summary
 
