@@ -23,19 +23,33 @@ def mark_duplicates(entities: list[dict[str, Any]]) -> None:
     Re-adding a device often creates ``sensor.x_2`` while the old ``sensor.x`` stays.
     Only an entity that is not working, from the same integration as a working
     entity with the unsuffixed name, is marked; two active entities are never.
+    The other way round (``sensor.x`` left over, ``sensor.x_2`` working) needs exactly one
+    working twin with the same original name, since a name like ``pm2_5`` also ends in a number.
     """
     by_id = {item["object_id"]: item for item in entities}
+    suffixed: dict[str, list[dict[str, Any]]] = {}
+    for item in entities:
+        domain, _, name = item["object_id"].partition(".")
+        if item["status"] == "active" and (match := SUFFIXED_NAME.match(name)):
+            suffixed.setdefault(f"{domain}.{match['base']}", []).append(item)
     for item in entities:
         item["duplicate_of"] = None
         if item["status"] not in LEFTOVER_STATUSES:
             continue
         domain, _, name = item["object_id"].partition(".")
         match = SUFFIXED_NAME.match(name)
-        if not match:
-            continue
-        twin = by_id.get(f"{domain}.{match['base']}")
+        twin = by_id.get(f"{domain}.{match['base']}") if match else None
         if twin and twin["status"] == "active" and twin["platform"] == item["platform"]:
             item["duplicate_of"] = twin["object_id"]
+            continue
+        newer = [
+            other
+            for other in suffixed.get(item["object_id"], [])
+            if other["platform"] == item["platform"]
+            and other.get("original_name") == item.get("original_name")
+        ]
+        if len(newer) == 1:
+            item["duplicate_of"] = newer[0]["object_id"]
 
 
 def duplicate_findings(entities: list[dict[str, Any]], keep: Any) -> list[dict[str, Any]]:
