@@ -80,7 +80,7 @@ from .dashboard_analysis import (
 from .db_health import database_summary
 from .entry_states import EntryStateHistory
 from .events import EventLog
-from .exceptions import ExceptionStore, traits, verdict
+from .exceptions import ExceptionStore, entry_traits, traits, verdict
 from .exceptions import matches as _hits
 from .goals import GoalStore
 from .hacs import hacs_by_domain, removed_issues
@@ -1769,8 +1769,11 @@ class InventoryScanner:
         """Let the exception rules hide or hold back a finding, or mark it as due after a delay."""
         if not self.exceptions.rules:
             return
-        kind = "entity" if "." in finding["object_id"] else "device"
-        found = traits(self.hass, kind, finding["object_id"])
+        if finding["rule_id"] == "config_entry.not_loaded":
+            found = entry_traits(self.hass, finding["object_id"])
+        else:
+            kind = "entity" if "." in finding["object_id"] else "device"
+            found = traits(self.hass, kind, finding["object_id"])
         if found is None:
             return
         result = verdict(

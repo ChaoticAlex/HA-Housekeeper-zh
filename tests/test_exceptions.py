@@ -13,6 +13,7 @@ from custom_components.ha_housekeeper.exceptions import (
     Traits,
     Vacation,
     clean_rule,
+    is_outage,
     matches,
     verdict,
 )
@@ -167,3 +168,12 @@ def test_a_calendar_keyword_looks_at_every_running_event() -> None:
     assert store.switch_state() == "off"
     store.set_vacation("calendar.main", 24, NOW, "")
     assert store.active()  # no keyword: every running event counts
+
+
+def test_a_config_entry_that_is_not_loaded_follows_the_rules_of_its_integration() -> None:
+    found = Traits(None, frozenset(), frozenset({"ipp"}))
+    finding = {**_outage(3), "rule_id": "config_entry.not_loaded", "classification": "problem"}
+    assert is_outage(finding)
+    assert verdict([_rule("integration", ["ipp"])], found, finding, NOW)["state"] == "hide"
+    delay = [_rule("integration", ["ipp"], "delay", 7)]
+    assert verdict(delay, found, finding, NOW)["state"] == "hold"

@@ -7,6 +7,9 @@ it lasted ``days`` days. An entity counts with its own area, or the one of its d
 none, and with its own labels and those of its device. A finding of a matching object that is
 hidden by a rule cannot be shown again one by one: what the object is decides.
 
+A config entry that is not loaded (a printer's integration while the printer is off) is covered by
+rules for its integration only, as it has no area, labels or entities of its own.
+
 A rule applies ``always`` or only ``vacation``: while the entity chosen as the vacation switch is
 ``on``. The outage of an object that a vacation rule covers counts from the end of the vacation;
 the grace period (hours) then holds the finding back unless a delay rule of its own says how long.
@@ -139,6 +142,14 @@ def traits(hass: HomeAssistant, object_type: str, object_id: str) -> Traits | No
     )
 
 
+def entry_traits(hass: HomeAssistant, entry_id: str) -> Traits | None:
+    """What counts for a config entry: only its integration, as it has no area or labels."""
+    entry = hass.config_entries.async_get_entry(entry_id)
+    if entry is None:
+        return None
+    return Traits(None, frozenset(), frozenset({entry.domain}))
+
+
 def matches(rule: dict[str, Any], found: Traits) -> bool:
     """Whether an enabled rule covers an object; its scope is looked at by ``verdict``."""
     if not rule["enabled"]:
@@ -166,7 +177,10 @@ def _since(finding: dict[str, Any]) -> datetime | None:
 
 def is_outage(finding: dict[str, Any]) -> bool:
     """Whether a finding is about an object that is not reachable, which a delay can wait for."""
-    return finding.get("classification") in AVAILABILITY or finding.get("rule_id") == "device.down"
+    return finding.get("classification") in AVAILABILITY or finding.get("rule_id") in (
+        "device.down",
+        "config_entry.not_loaded",
+    )
 
 
 def verdict(
