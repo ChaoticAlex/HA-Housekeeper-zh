@@ -59,15 +59,23 @@ class CleanupMixin {
     return (this.data.quarantine || []).filter(q => (q.object_type || "entity") === type).map(q => ({ item: this.findObject(`${type}:${q.object_id}`), finding: null, quarantine: q })).filter(r => r.item);
   }
 
+  // Entities a loaded integration has not provided for a day: removed without quarantine, so they
+  // stand with the quarantined ones and not among those to disable.
+  notProvidedRows() {
+    const held = new Set((this.data.quarantine || []).map(q => q.object_id));
+    return this.data.findings.filter(f => !f.ignored && f.rule_id === "entity.not_provided" && !held.has(f.object_id))
+      .map(f => ({ item: this.findObject(`entity:${f.object_id}`), finding: f })).filter(r => r.item?.not_provided_settled);
+  }
+
   cleanupCandidates(kind = this.cleanupKind) {
-    if (kind === "remove_entity") return this.quarantineRows("entity");
+    if (kind === "remove_entity") return [...this.quarantineRows("entity"), ...this.notProvidedRows()];
     if (kind === "remove_device" || kind === "forget_device") return this.quarantineRows("device");
     if (kind === "disable_device") return this.deviceCandidates();
     const seen = new Set(), rows = [];
     for (const f of this.data.findings) {
       if (f.ignored || !f.rule_id.startsWith("entity.") || !["orphaned", "unavailable"].includes(f.classification) || seen.has(f.object_id)) continue;
       const item = this.findObject(`entity:${f.object_id}`);
-      if (!item) continue;
+      if (!item || item.not_provided_settled) continue;
       seen.add(f.object_id);
       rows.push({ item, finding: f });
     }

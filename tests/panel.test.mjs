@@ -4090,6 +4090,10 @@ test("the overview of an object offers its actions: decide a finding, replace a 
   assert.ok(!auto.includes("data-act-disable"));
   const entity = el.actionsCard(el.findObject("entity:sensor.a"), "entity:sensor.a");
   assert.ok(entity.includes('data-act-disable="sensor.a"'));
+  const before = el.data;
+  el.data = { ...before, objects: before.objects.map(o => o.object_id === "sensor.a" ? { ...o, reason: "not_provided", not_provided_settled: true } : o), findings: [{ ...DATA.findings[0], rule_id: "entity.not_provided", key: "np", ignored: false }], quarantine: [] };
+  assert.ok(!el.cleanupCandidates("disable_entity").length && el.cleanupCandidates("remove_entity").some(r => r.item.object_id === "sensor.a"), "a settled entity not provided is removed, not disabled, in Cleanup too");
+  el.data = before;
   const gone = el.actionsCard({ ...el.findObject("entity:sensor.a"), reason: "not_provided", not_provided_settled: true }, "entity:sensor.a");
   assert.ok(gone.includes('data-act-remove="sensor.a"') && !gone.includes("data-act-disable="), "an entity no longer provided is removed, not disabled");
   assert.ok(el.labelForm({ object_type: "script", object_id: "script.x" }).includes("data-act-label-plan") && el.labelForm({ object_type: "device", object_id: "d1" }) === "", "scripts and scenes take a label too, devices not");
