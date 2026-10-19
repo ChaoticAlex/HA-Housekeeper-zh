@@ -14,8 +14,8 @@ class DetailActionsMixin {
     const broken = open.some(f => f.classification === "broken_reference");
     if (item.object_type === "entity" && open.some(f => f.rule_id.startsWith("entity.") && ["orphaned", "unavailable"].includes(f.classification))) {
       out.push({ attr: `data-act-replace="${this.esc(item.object_id)}"`, icon: "mdi:swap-horizontal", label: this.t("actReplaceThis"), hint: "actHintReplace", finding: true });
-      // Disabling an entity its integration no longer provides changes nothing; it can be removed straight away.
-      if (item.reason === "not_provided") out.push({ attr: `data-act-remove="${this.esc(item.object_id)}"`, icon: "mdi:delete-outline", label: this.t("actRemove"), hint: "actHintRemove", finding: true });
+      // Disabling an entity its integration no longer provides changes nothing; after a day it can be removed straight away.
+      if (item.reason === "not_provided" && item.not_provided_settled) out.push({ attr: `data-act-remove="${this.esc(item.object_id)}"`, icon: "mdi:delete-outline", label: this.t("actRemove"), hint: "actHintRemove", finding: true });
       else if (item.status !== "disabled") out.push({ attr: `data-act-disable="${this.esc(item.object_id)}"`, icon: "mdi:cancel", label: this.t("actDisable"), hint: "actHintDisable", finding: true });
     }
     if (item.object_type === "automation" && open.some(f => f.rule_id === "automation.blocked")) {

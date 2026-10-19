@@ -237,12 +237,17 @@ def test_not_restorable_removals_need_review() -> None:
 
 
 def test_an_entity_no_longer_provided_needs_no_quarantine() -> None:
-    objects = [entity("sensor.gone", reason="not_provided"), entity("sensor.down", "unavailable")]
+    objects = [
+        entity("sensor.gone", reason="not_provided", not_provided_settled=True),
+        entity("sensor.new", reason="not_provided", not_provided_settled=False),
+        entity("sensor.down", "unavailable"),
+    ]
     index = {o["object_id"]: o for o in objects}
     gone = judge_action("remove_entity", "sensor.gone", index, [], {}, True, NOW)
+    new = judge_action("remove_entity", "sensor.new", index, [], {}, True, NOW)
     down = judge_action("remove_entity", "sensor.down", index, [], {}, True, NOW)
     assert gone["verdict"] == "ok" and gone["skips_quarantine"] is True
-    assert "not_quarantined" in down["reasons"]
+    assert "not_quarantined" in new["reasons"] and "not_quarantined" in down["reasons"]
 
 
 def test_the_journal_list_says_until_when_a_plan_is_watched() -> None:

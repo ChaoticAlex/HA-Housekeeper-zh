@@ -140,6 +140,9 @@ from .watch import WATCH_KINDS, WatchStore, evaluate, make_before, next_due
 
 _LOGGER = logging.getLogger(__name__)
 SUGGEST_LIMIT = 200
+# An entity not provided for this long may be removed without quarantine: a placeholder that
+# lasts a day is no integration still waiting for its first data.
+NOT_PROVIDED_SETTLED = timedelta(hours=24)
 
 # Keys of the Energy dashboard preferences that name statistics, which are entity IDs.
 ENERGY_KEYS = frozenset(
@@ -559,12 +562,23 @@ def _age(item: dict[str, Any], now: datetime) -> timedelta | None:
     return max(now - datetime.fromisoformat(since), timedelta(0)) if since else None
 
 
+def _placeholder_age(item: dict[str, Any], now: datetime) -> timedelta | None:
+    """How long Home Assistant has held the "restored" placeholder of an entity not provided."""
+    since = item.get("last_changed")
+    return max(now - datetime.fromisoformat(since), timedelta(0)) if since else None
+
+
 def _reaches_info(item: dict[str, Any], now: datetime, levels: Levels | None) -> bool:
     """Whether an unavailable entity has been so long enough to be a finding.
 
     Orphaned entities always qualify; only an outage that is still younger than the first
-    threshold is left out. Without ``levels`` nothing is left out.
+    threshold is left out. An entity not provided waits as long: some integrations add their
+    entities only when the first data arrives, after they count as loaded. Without ``levels``
+    nothing is left out.
     """
+    if levels is not None and item.get("reason") == "not_provided":
+        age = _placeholder_age(item, now)
+        return age is not None and outage_level(age, levels) is not None
     if levels is None or item["status"] not in ("unavailable", "unknown"):
         return True
     age = _age(item, now)
@@ -1480,6 +1494,9 @@ class InventoryScanner:
                     item["status_since"], item.get("last_changed")
                 )
                 item["had_value"] = self.observations.had_value(f"{kind}:{item['object_id']}")
+            if kind == "entity" and item["reason"] == "not_provided":
+                age = _placeholder_age(item, observed_at)
+                item["not_provided_settled"] = age is not None and age >= NOT_PROVIDED_SETTLED
         if not preliminary:
             self.stale.observe(
                 entities,

@@ -84,6 +84,25 @@ def test_restored_yaml_entity_counts_as_not_provided_only_while_its_platform_run
     )
 
 
+def test_an_entity_not_provided_waits_like_an_outage_before_it_is_a_finding() -> None:
+    from datetime import UTC, datetime
+
+    now = datetime(2026, 10, 19, 12, tzinfo=UTC)
+    item = {
+        "object_id": "sensor.x",
+        "status": "orphaned",
+        "reason": "not_provided",
+        "status_since": None,
+        "last_changed": "2026-10-19T11:58:00+00:00",
+    }
+    levels = (15, 1, 24, 168)
+    assert _entity_findings([item], now, levels) == []
+    assert (
+        len(_entity_findings([{**item, "last_changed": "2026-10-19T11:00:00+00:00"}], now, levels))
+        == 1
+    )
+
+
 def test_unavailable_is_never_reported_as_orphaned() -> None:
     state = SimpleNamespace(state="unavailable")
     assert _entity_status(_entry(), state, {}, {})[0] == "unavailable"
