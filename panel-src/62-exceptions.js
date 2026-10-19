@@ -1,5 +1,13 @@
 // Exception rules: objects in an area or with a label are left out of the findings; mixed into the panel in 99-register.js.
 Object.assign(TEXT.de, {
+  allLabels: "Alle Labels", lblTitle: "Labels", lblHint: "Housekeeper kennt drei feste Labels. Du legst sie in Home Assistant mit genau diesem Namen an und weist sie Objekten zu; Housekeeper erstellt sie nicht selbst.",
+  lblOpenHa: "Labels in Home Assistant öffnen", lblCreated: "angelegt", lblMissing: "nicht angelegt", lblNoUse: "an keinem Objekt", lblUse: "an", lblShow: "Objekte anzeigen", lblCopy: "Name kopieren", lblCopied: "Kopiert",
+  lblKind_keep: "Nicht entfernen", lblKind_ignore: "Ignorieren", lblKind_critical: "Kritisch",
+  lblFx_keep_1: "Sperrt alle Bereinigungsschritte (deaktivieren, entfernen); das Gerät fehlt in „Aufräumen → Geräte deaktivieren“", lblFx_keep_0: "Blendet keine Befunde aus: Ein Ausfall wird weiter gemeldet",
+  lblFx_ignore_1: "Blendet die Befunde der Entität, Automation oder des Geräts (samt seiner Entitäten) aus", lblFx_ignore_2: "Nimmt das Objekt aus Richtlinien, Zuverlässigkeit, Ausfallstürmen und Exposition und sperrt Bereinigungsschritte", lblFx_ignore_0: "Auch Ausfälle werden nicht mehr gemeldet",
+  lblFx_critical_1: "Das Objekt zählt als wichtig; Ausfälle werden höher eingestuft", lblFx_critical_2: "Bereinigungsschritte müssen einzeln bestätigt werden; wirkt an Entität, Gerät oder Bereich", lblFx_critical_0: "Schlösser, Alarme, Rauch- und Wassermelder sind auch ohne Label kritisch",
+  lblHow: "So legst du es an: In Home Assistant unter Einstellungen → Bereiche, Labels & Zonen → Labels ein Label mit genau diesem Namen erstellen, dann Geräte oder Entitäten (auch mehrere auf einmal) auswählen und das Label zuweisen. Danach neu scannen.",
+  lblFoot: "Soll nur nichts aufgeräumt werden, nimm housekeeper_keep. Soll Housekeeper ein Objekt ganz in Ruhe lassen, nimm housekeeper_ignore oder einen Vermerk. Für Geräte, die oft aus sind, passen der Vermerk „Absichtlich offline“ und Ausnahmeregeln mit Frist besser. Die Zahlen stammen aus dem letzten Scan.",
   excTitle: "Ausnahmeregeln", excHint: "Housekeeper meldet Objekte nicht, auf die eine Regel passt: nach Bereich, Label, Integration, Typ (Domain), Gerät oder Entität. Die Regeln gelten nur in Housekeeper; Home Assistant bleibt unverändert. Das Label housekeeper_ignore wirkt zusätzlich fest.",
   excFormNew: "Regel anlegen", excFormEdit: "Regel bearbeiten", excAdd: "Regel hinzufügen", excEdit: "Ändern", excDelete: "Löschen", excLoading: "Regeln werden geladen …",
   excKind: "Art", excKind_area: "Bereich", excKind_label: "Label", excKind_integration: "Integration", excKind_domain: "Domain (Typ)", excTargets: "Auswahl", excNoTargets: "In Home Assistant gibt es dafür noch nichts zur Auswahl.",
@@ -32,6 +40,14 @@ Object.assign(TEXT.de, {
   vacRuleAfter: "Urlaub beendet, zurückgehalten bis {date}", vacRuleActive: "Urlaubsmodus aktiv",
 });
 Object.assign(TEXT.en, {
+  allLabels: "All labels", lblTitle: "Labels", lblHint: "Housekeeper knows three fixed labels. You create them in Home Assistant with exactly this name and assign them to objects; Housekeeper does not create them itself.",
+  lblOpenHa: "Open labels in Home Assistant", lblCreated: "created", lblMissing: "not created", lblNoUse: "on no object", lblUse: "on", lblShow: "Show objects", lblCopy: "Copy name", lblCopied: "Copied",
+  lblKind_keep: "Do not remove", lblKind_ignore: "Ignore", lblKind_critical: "Critical",
+  lblFx_keep_1: "Blocks every cleanup step (disable, remove); the device is missing from “Cleanup → Disable devices”", lblFx_keep_0: "Hides no findings: an outage is still reported",
+  lblFx_ignore_1: "Hides the findings of the entity, automation or device (and its entities)", lblFx_ignore_2: "Takes the object out of policies, reliability, outage storms and exposure and blocks cleanup steps", lblFx_ignore_0: "Outages are no longer reported either",
+  lblFx_critical_1: "The object counts as important; outages are rated higher", lblFx_critical_2: "Cleanup steps must be confirmed one by one; works on an entity, device or area", lblFx_critical_0: "Locks, alarms, smoke and water sensors are critical without the label too",
+  lblHow: "How to create it: in Home Assistant under Settings → Areas, labels & zones → Labels, create a label with exactly this name, then select devices or entities (several at once) and assign the label. Then scan again.",
+  lblFoot: "If you only want nothing cleaned up, use housekeeper_keep. If Housekeeper should leave an object completely alone, use housekeeper_ignore or a mark. For devices that are often off, the mark “Offline on purpose” and exception rules with a delay fit better. The numbers come from the last scan.",
   excTitle: "Exception rules", excHint: "Housekeeper does not report objects that a rule matches: by area, label, integration, type (domain), device or entity. The rules apply only in Housekeeper; Home Assistant stays unchanged. The label housekeeper_ignore keeps working on top.",
   excFormNew: "Add rule", excFormEdit: "Edit rule", excAdd: "Add rule", excEdit: "Change", excDelete: "Delete", excLoading: "Loading rules …",
   excKind: "Kind", excKind_area: "Area", excKind_label: "Label", excKind_integration: "Integration", excKind_domain: "Domain (type)", excTargets: "Selection", excNoTargets: "Home Assistant has nothing to choose from yet.",
@@ -142,12 +158,29 @@ class ExceptionsMixin {
     return `<section class="panel excgroup"><div class="panelhead"><div><h2>${this.t("excTitle")}</h2><p>${this.t("excHint")}</p></div>${add}</div>${seg}${warn}${body}${foot}</section>`;
   }
 
+  // The three labels Housekeeper reads: what each does, whether it exists in Home Assistant and how many objects carry it.
+  labelsCard() {
+    const rows = ["keep", "ignore", "critical"].map(kind => {
+      const id = `housekeeper_${kind}`, counts = new Map();
+      for (const o of this.invObjects()) if ((o.labels || []).includes(id)) counts.set(o.object_type, (counts.get(o.object_type) || 0) + 1);
+      const total = [...counts.values()].reduce((a, b) => a + b, 0), made = !!this.findObject(`label:${id}`);
+      const parts = [...counts].map(([type, n]) => `${this.esc(this.t(type))}: ${n}`).join(" · ");
+      const fx = (kind === "keep" ? [1, 0] : [1, 2, 0]).map(n => `<li${n ? "" : ' class="no"'}>${this.esc(this.t(`lblFx_${kind}_${n}`))}</li>`).join("");
+      const show = total ? `<button class="btn" data-jump="inventory" data-jump-lf="inventory|label|${id}">${this.t("lblShow")}</button>` : "";
+      return `<div class="labrow"><div><div class="statcell"><code>${id}</code> <span class="pill ${made ? "ok" : "warn"}">${this.t(made ? "lblCreated" : "lblMissing")}</span></div><p class="factnote">${this.esc(this.t(`lblKind_${kind}`))} · ${total ? `${this.t("lblUse")} ${parts}` : this.t("lblNoUse")}</p></div>
+        <ul class="labfx">${fx}</ul>
+        <div class="actions"><button class="btn quiet" data-copy="${id}">${this.t("lblCopy")}</button>${show}</div>
+        ${made ? "" : `<p class="factnote labhow">${this.esc(this.t("lblHow"))}</p>`}</div>`;
+    }).join("");
+    return `<section class="panel"><div class="panelhead"><div><h2>${this.t("lblTitle")}</h2><p>${this.t("lblHint")}</p></div><button class="btn" data-ha-path="/config/labels"><ha-icon icon="mdi:open-in-new"></ha-icon>${this.t("lblOpenHa")}</button></div>${rows}<div class="pad"><p class="factnote">${this.t("lblFoot")}</p></div></section>`;
+  }
+
   excCard() {
     if (!this.exc) { this.loadExceptions(); return `<section class="panel"><div class="panelhead"><div><h2>${this.t("excTitle")}</h2><p>${this.t("excHint")}</p></div></div><div class="pad"><p class="factnote">${this.t("excLoading")}</p></div></section>`; }
     const v = this.exc.vacation || {};
     const state = !v.entity ? "vacStateNone" : v.state === "on" ? "vacStateOn" : v.state && v.state !== "unavailable" && v.state !== "unknown" ? "vacStateOff" : "vacStateMissing";
     const pill = state ? ` <span class="pill ${!v.entity ? "warn" : v.state === "on" ? "ok" : "mute"}">${this.t(state)}</span>` : "";
-    return `${this.excRulesCard()}<section class="panel"><div class="panelhead"><div><h2>${this.t("vacTitle")}${pill}</h2><p>${this.t("vacHint")}</p></div></div>${this.vacationHtml()}</section>`;
+    return `${this.excRulesCard()}${this.labelsCard()}<section class="panel"><div class="panelhead"><div><h2>${this.t("vacTitle")}${pill}</h2><p>${this.t("vacHint")}</p></div></div>${this.vacationHtml()}</section>`;
   }
 
   vacationHtml() {
@@ -296,6 +329,9 @@ class ExceptionsMixin {
   }
 
   bindExceptions(root) {
+    root.querySelectorAll("[data-copy]").forEach(el => el.onclick = async () => {
+      try { await globalThis.navigator?.clipboard?.writeText(el.dataset.copy); el.textContent = this.t("lblCopied"); } catch (_) { /* no clipboard: the name stays selectable */ }
+    });
     const rules = () => this.excRules();
     root.querySelectorAll("[data-exc-edit]").forEach(el => el.onclick = () => this.openException(el.dataset.excEdit, el.dataset.excNew));
     root.querySelectorAll("[data-exc-delete]").forEach(el => el.onclick = () => this.saveExceptions(rules().filter(r => r.id !== el.dataset.excDelete), null));

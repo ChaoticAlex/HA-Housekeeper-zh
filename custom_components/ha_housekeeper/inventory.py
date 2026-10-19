@@ -1792,6 +1792,11 @@ class InventoryScanner:
         entry = registry.async_get(finding["object_id"])
         if entry is not None and IGNORE_LABEL in entry.labels:
             return "label"
+        # The label on a device also hides the device's own findings and those of its entities.
+        device_id = entry.device_id if entry is not None else finding["object_id"]
+        device = dr.async_get(self.hass).async_get(device_id) if device_id else None
+        if device is not None and IGNORE_LABEL in device.labels:
+            return "label"
         return None
 
     def _mark_ignored(self, finding: dict[str, Any], registry: Any) -> None:

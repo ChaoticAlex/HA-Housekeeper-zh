@@ -463,6 +463,32 @@ async def test_groups_and_helpers_link_their_members(hass: HomeAssistant) -> Non
     )
 
 
+async def test_the_ignore_label_on_a_device_hides_the_findings_of_its_entities(
+    hass: HomeAssistant,
+) -> None:
+    from homeassistant.helpers import device_registry as dr
+    from homeassistant.helpers import label_registry as lr
+    from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+    entry = MockConfigEntry(domain="test")
+    entry.add_to_hass(hass)
+    label = lr.async_get(hass).async_create("housekeeper_ignore")
+    device = dr.async_get(hass).async_get_or_create(
+        config_entry_id=entry.entry_id, identifiers={("test", "d")}
+    )
+    dr.async_get(hass).async_update_device(device.id, labels={label.label_id})
+    registry = er.async_get(hass)
+    inside = registry.async_get_or_create(
+        domain="sensor", platform="test", unique_id="in", device_id=device.id
+    )
+    outside = registry.async_get_or_create(domain="sensor", platform="test", unique_id="out")
+
+    snapshot = await InventoryScanner(hass).async_scan()
+    by_object = {f["object_id"]: f for f in snapshot["findings"]}
+    assert by_object[inside.entity_id]["ignored_by"] == "label"
+    assert by_object[outside.entity_id]["ignored"] is False
+
+
 async def test_findings_can_be_hidden_by_the_user_or_by_label(hass: HomeAssistant) -> None:
     """Hidden findings stay in the snapshot but no longer produce Repairs hints."""
     from homeassistant.helpers import issue_registry as ir

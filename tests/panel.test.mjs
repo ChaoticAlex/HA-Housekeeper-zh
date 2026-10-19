@@ -5971,3 +5971,19 @@ test("the exceptions card builds the editor with chips for areas and the shared 
   assert.equal(JSON.stringify(el.excDrafts(el.excForm).map(r => [r.kind, r.targets])), '[["area",["keller"]],["entity",["sensor.a","sensor.b"]]]');
   assert.match(el.excCard(), /data-exc-kind="any"[^>]*aria-pressed="true"/);
 });
+
+test("the inventory filters by label and the labels block counts what carries each label", () => {
+  const { el } = panel("en");
+  el.data = { ...DATA, objects: [
+    { object_type: "label", object_id: "housekeeper_keep", name: "housekeeper_keep", status: "active" },
+    { object_type: "device", object_id: "d1", name: "Proxy", status: "empty", labels: ["housekeeper_keep"] },
+    { object_type: "entity", object_id: "sensor.a", name: "A", status: "active", labels: ["housekeeper_keep"] },
+    { object_type: "entity", object_id: "sensor.b", name: "B", status: "active", labels: [] },
+  ] };
+  el.labelFilter = "housekeeper_keep";
+  assert.equal(JSON.stringify(Array.from(el.filtered().map(o => o.object_id))), JSON.stringify(["sensor.a", "d1"]));
+  const html = el.labelsCard();
+  assert.ok(html.includes("housekeeper_keep") && html.includes("Device: 1") && html.includes("Entity: 1"));
+  assert.ok(html.includes("data-jump-lf=\"inventory|label|housekeeper_keep\""));
+  assert.ok(html.includes("not created"), "the other two labels are not created yet");
+});
