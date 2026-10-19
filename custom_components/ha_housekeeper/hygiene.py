@@ -24,7 +24,8 @@ def mark_duplicates(entities: list[dict[str, Any]]) -> None:
     Only an entity that is not working, from the same integration as a working
     entity with the unsuffixed name, is marked; two active entities are never.
     The other way round (``sensor.x`` left over, ``sensor.x_2`` working) needs exactly one
-    working twin with the same original name, since a name like ``pm2_5`` also ends in a number.
+    working twin on the same device or with the same original name, since a name like ``pm2_5``
+    also ends in a number and a Hue room ``light.x_2`` is no copy of the lamp ``light.x``.
     """
     by_id = {item["object_id"]: item for item in entities}
     suffixed: dict[str, list[dict[str, Any]]] = {}
@@ -45,11 +46,18 @@ def mark_duplicates(entities: list[dict[str, Any]]) -> None:
         newer = [
             other
             for other in suffixed.get(item["object_id"], [])
-            if other["platform"] == item["platform"]
-            and other.get("original_name") == item.get("original_name")
+            if other["platform"] == item["platform"] and _same_thing(other, item)
         ]
         if len(newer) == 1:
             item["duplicate_of"] = newer[0]["object_id"]
+
+
+def _same_thing(one: dict[str, Any], other: dict[str, Any]) -> bool:
+    """Whether two entities name the same thing: one device, or one original name that is set."""
+    if one.get("device_id") and one.get("device_id") == other.get("device_id"):
+        return True
+    name = one.get("original_name")
+    return bool(name) and name == other.get("original_name")
 
 
 def duplicate_findings(entities: list[dict[str, Any]], keep: Any) -> list[dict[str, Any]]:
