@@ -4683,7 +4683,7 @@ class InventoryMixin {
     const st = this.invState();
     const rows = this.filtered();
     const pg = this.paginate("inventory", rows);
-    this._invPage = pg.rows.filter(item => item.object_type === "entity").map(item => item.object_id);
+    this._invPage = pg.rows.filter(item => this.invSelectable(item)).map(item => item.object_id);
     const { types, statuses } = this.memo("facets", [], () => ({
       types: [...new Set(this.invObjects().map(x => x.object_type))].sort(),
       statuses: [...new Set(this.invObjects().map(x => x.status))].sort(),
@@ -15910,19 +15910,24 @@ class EntityStateMixin {
   // The bar over the inventory table: how many entities are ticked and what can be done with them.
   invSelBar(rows) {
     const sel = this.invSel ||= new Set(), n = sel.size;
-    const entities = rows.filter(r => r.object_type === "entity");
+    const entities = rows.filter(r => this.invSelectable(r));
     if (!n && !entities.length) return rows.length ? `<div class="toolbar nosel"><span class="toolgap"></span>${this.viewCount(rows.length)}</div>` : "";
     const tooMany = n > MAX_PLAN_ACTIONS, busy = this.planBusy ? 'disabled aria-busy="true"' : "";
     const btn = (target, icon) => `<button class="btn" data-inv-state="${target}" ${n && !tooMany ? busy : "disabled"}><ha-icon icon="${icon}"></ha-icon>${this.t(`state${target[0].toUpperCase()}${target.slice(1)}`)}</button>`;
     return `<div class="toolbar${n ? "" : " nosel"}"><button class="btn quiet" data-inv-sel-all ${entities.length ? "" : "disabled"}>${this.t("stateAllFiltered", { count: this.formatNumber(entities.length) })}</button><button class="btn quiet" data-inv-sel-clear ${n ? "" : "disabled"}>${this.t("stateClear")}</button><span class="selcount" role="status">${this.t("stateSel", { count: n })}</span><span class="toolgap"></span><div class="fbtns">${btn("disable", "mdi:cancel")}${btn("enable", "mdi:check-circle-outline")}${btn("hide", "mdi:eye-off-outline")}${btn("unhide", "mdi:eye-outline")}</div>${this.viewCount(rows.length)}</div>${tooMany ? `<small class="error errpad" role="alert">${this.esc(this.t("stateTooMany", { max: MAX_PLAN_ACTIONS }))}</small>` : ""}`;
   }
 
+  // The inventory lists an automation, script or scene instead of its entity, so these rows switch that entity.
+  invSelectable(item) {
+    return item.object_type === "entity" || item.object_type === "automation" || item.object_type === "script" || item.object_type === "scene";
+  }
+
   invSelBox(item) {
-    if (item.object_type !== "entity") return "";
+    if (!this.invSelectable(item)) return "";
     return `<input type="checkbox" class="selbox" data-inv-sel="${this.esc(item.object_id)}" ${this.invSel?.has(item.object_id) ? "checked" : ""} aria-label="${this.esc(item.name)}">`;
   }
 
-  // Select only the entities on the current page; other inventory object types have no bulk action.
+  // Select only the entities (and automations, scripts, scenes) on the current page; other inventory object types have no bulk action.
   invHeadBox() {
     const ids = this._invPage || [];
     if (!ids.length) return "";
@@ -15945,7 +15950,7 @@ class EntityStateMixin {
       };
     }
     root.querySelector("[data-inv-sel-all]")?.addEventListener("click", () => {
-      this.invSel = new Set([...(this.invSel || []), ...this.filtered().filter(r => r.object_type === "entity").map(r => r.object_id)]); this.render();
+      this.invSel = new Set([...(this.invSel || []), ...this.filtered().filter(r => this.invSelectable(r)).map(r => r.object_id)]); this.render();
     });
     root.querySelector("[data-inv-sel-clear]")?.addEventListener("click", () => { this.invSel = new Set(); this.render(); });
     root.querySelectorAll("[data-inv-state]").forEach(el => el.addEventListener("click", () => this.makeStatePlan(el.dataset.invState)));

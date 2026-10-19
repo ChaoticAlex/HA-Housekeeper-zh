@@ -95,7 +95,7 @@ class InventoryMixin {
     const st = this.invState();
     const rows = this.filtered();
     const pg = this.paginate("inventory", rows);
-    this._invPage = pg.rows.filter(item => item.object_type === "entity").map(item => item.object_id);
+    this._invPage = pg.rows.filter(item => this.invSelectable(item)).map(item => item.object_id);
     const { types, statuses } = this.memo("facets", [], () => ({
       types: [...new Set(this.invObjects().map(x => x.object_type))].sort(),
       statuses: [...new Set(this.invObjects().map(x => x.status))].sort(),

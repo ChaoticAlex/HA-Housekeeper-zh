@@ -339,13 +339,15 @@ test("inventory lists an automation, script or scene once, not also as its entit
   const ids = el.filtered().map(o => `${o.object_type}:${o.object_id}`);
   for (const id of ["automation.a", "script.s", "scene.c"]) assert.equal(ids.filter(k => k.endsWith(`:${id}`)).length, 1);
   assert.ok(!ids.includes("entity:automation.a"));
+  el.typeFilter = "automation";
+  assert.match(el.inventory(), /data-inv-sel="automation\.a"/);
 });
 
 test("inventory header selects and clears only the entities on the current page", () => {
   const { el } = panel();
   el.typeFilter = "entity";
   assert.match(el.inventory(), /data-inv-sel-page/);
-  el.typeFilter = "automation";
+  el.typeFilter = "config_entry";
   assert.doesNotMatch(el.inventory(), /data-inv-sel-page/);
   el._invPage = ["sensor.a", "sensor.b"];
   el.invSel = new Set(["sensor.a", "sensor.other"]);
