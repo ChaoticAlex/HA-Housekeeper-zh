@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Behoben
+
+- **Backup-Schutz:** Backups anderer Werkzeuge (zum Beispiel Google Drive Backup) stehen in der Tabelle als „Anderes Werkzeug“ statt „Manuell“, denn Home Assistant weiß nicht, ob sie geplant waren.
+
+### English
+
+#### Fixed
+
+- **Backup protection:** Backups made by other tools (for example Google Drive Backup) show as “Other tool” instead of “Manual” in the table, because Home Assistant cannot tell whether they were scheduled.
+
+## Unreleased
+
 ### Neu
 
 - **Entitäten, die die Integration nicht mehr bereitstellt:** Sie werden als verwaist erkannt statt als „nicht verfügbar“, auch bei YAML-Entitäten, nach derselben Wartezeit wie ein Ausfall. Sie lassen sich direkt entfernen, ohne Quarantäne, aber mit Vorschau, Backup und Wiederherstellen, auch unter Bereinigen; am ersten Tag fragt die Vorschau nach, ob die Entität wirklich weg ist.

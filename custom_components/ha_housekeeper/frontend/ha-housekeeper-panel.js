@@ -851,7 +851,7 @@ Object.assign(TEXT.de, {
   bhPlansOk: "Für die {checked} zuletzt ausgeführten Pläne ist das Backup noch vorhanden.", bhPlansNote: "Für {missing} von {checked} zuletzt ausgeführten Plänen wurde das Backup nicht mehr gefunden (vermutlich durch die Aufbewahrung gelöscht).",
   bhAttestDate: "Datum", bhAttestSave: "Speichern", bhAttestClear: "Bestätigung zurücknehmen", bhAttestMark: "Als erledigt markieren", bhAttestTargets: "Externen Ablageort bestätigen", bhAttestEnc: "Als gewollt bestätigen", bhEncConfirmed: "Ohne Verschlüsselung, am {date} als gewollt bestätigt.", bhAttestAgain: "Erneut bestätigen", bhAttestCancel: "Abbrechen",
   bhListTitle: "Letzte Backups", bhAllProtected: "Alle (geschützt oder nicht)", bhColDate: "Datum", bhColSize: "Größe", bhColTargets: "Ziele", bhColProtected: "Verschlüsselt", bhYes: "Ja", bhNo: "Nein",
-  bhColKind: "Art", bhColContent: "Inhalt", bhAllKinds: "Alle Arten", bhKind_auto: "Automatisch", bhKind_manual: "Manuell", bhKind_own: "Housekeeper", bhContent_full: "Voll", bhContent_config: "Nur Konfiguration", bhContent_apps: "Nur Apps", bhFailedPill: "Teil fehlgeschlagen", bhOpen: "Details aufklappen", bhClose: "Details zuklappen",
+  bhColKind: "Art", bhColContent: "Inhalt", bhAllKinds: "Alle Arten", bhKind_auto: "Automatisch", bhKind_manual: "Manuell", bhKind_other: "Anderes Werkzeug", bhKind_own: "Housekeeper", bhContent_full: "Voll", bhContent_config: "Nur Konfiguration", bhContent_apps: "Nur Apps", bhFailedPill: "Teil fehlgeschlagen", bhOpen: "Details aufklappen", bhClose: "Details zuklappen",
   bhName: "Name", bhVersion: "HA-Version", bhDatabase: "Datenbank", bhApps: "Apps", bhFolders: "Ordner", bhSizes: "Größe je Ziel", bhFailed: "Fehlgeschlagen", bhId: "Backup-ID",
   bhGuideTitle: "So testest du eine Wiederherstellung", bhGuideSteps: "1. Eine Test-Instanz oder eine zweite Installation bereitstellen (nie zuerst die Hauptinstanz). 2. Dort ein aktuelles Backup einspielen: Einstellungen → System → Backups → Backup hochladen oder bei der Einrichtung wiederherstellen. 3. Prüfen, ob Integrationen, Automationen und Dashboards da sind. 4. Hier das Datum des Tests speichern. Housekeeper führt selbst nie eine Wiederherstellung aus.",
   todoBackupProblem: "Backup-Schutz: Problem",
@@ -883,7 +883,7 @@ Object.assign(TEXT.en, {
   bhPlansOk: "The backup of the {checked} most recently executed plans still exists.", bhPlansNote: "The backup of {missing} of the {checked} most recently executed plans was not found any more (probably deleted by the retention).",
   bhAttestDate: "Date", bhAttestSave: "Save", bhAttestClear: "Take back confirmation", bhAttestMark: "Mark as done", bhAttestTargets: "Confirm remote storage", bhAttestEnc: "Confirm as intended", bhEncConfirmed: "Without encryption, confirmed as intended on {date}.", bhAttestAgain: "Confirm again", bhAttestCancel: "Cancel",
   bhListTitle: "Latest backups", bhAllProtected: "All (protected or not)", bhColDate: "Date", bhColSize: "Size", bhColTargets: "Targets", bhColProtected: "Encrypted", bhYes: "Yes", bhNo: "No",
-  bhColKind: "Type", bhColContent: "Contents", bhAllKinds: "All types", bhKind_auto: "Automatic", bhKind_manual: "Manual", bhKind_own: "Housekeeper", bhContent_full: "Full", bhContent_config: "Configuration only", bhContent_apps: "Apps only", bhFailedPill: "Part failed", bhOpen: "Show details", bhClose: "Hide details",
+  bhColKind: "Type", bhColContent: "Contents", bhAllKinds: "All types", bhKind_auto: "Automatic", bhKind_manual: "Manual", bhKind_other: "Other tool", bhKind_own: "Housekeeper", bhContent_full: "Full", bhContent_config: "Configuration only", bhContent_apps: "Apps only", bhFailedPill: "Part failed", bhOpen: "Show details", bhClose: "Hide details",
   bhName: "Name", bhVersion: "HA version", bhDatabase: "Database", bhApps: "Apps", bhFolders: "Folders", bhSizes: "Size per target", bhFailed: "Failed", bhId: "Backup ID",
   bhGuideTitle: "How to test a restore", bhGuideSteps: "1. Set up a test instance or a second installation (never the main instance first). 2. Restore a recent backup there: Settings → System → Backups → upload a backup, or restore during setup. 3. Check that integrations, automations and dashboards are there. 4. Save the date of the test here. Housekeeper never performs a restore itself.",
   todoBackupProblem: "Backup protection: problem",
@@ -6188,8 +6188,9 @@ class BackupMixin {
     return `${row}<div class="bhattest"><label>${this.t("bhAttestDate")} <input type="date" data-bh-date="${c.id}" value="${today}" max="${today}"></label><button class="btn small primary" data-bh-save="${c.id}">${this.t("bhAttestSave")}</button><button class="bhcancel" data-bh-cancel>${this.t("bhAttestCancel")}</button>${clear}</div>`;
   }
 
-  // What a backup is: Housekeeper's own safety copy, one HA made on its schedule, or a manual one.
-  bhKind(b) { return b.own ? "own" : b.automatic ? "auto" : "manual"; }
+  // What a backup is: Housekeeper's own safety copy, one HA made on its schedule, a manual one, or one
+  // from another tool (HA has no flag for it, so it cannot tell scheduled from manual).
+  bhKind(b) { return b.own ? "own" : b.automatic === true ? "auto" : b.automatic === false ? "manual" : "other"; }
 
   bhKey(b) { return b.id || b.date || ""; }
 
@@ -6217,7 +6218,7 @@ class BackupMixin {
       { key: "protected", label: "bhColProtected", dir: "desc", get: b => (b.protected ? 1 : 0) },
     ];
     const bar = this.listBar(id, { table: true, dense: true, sorts, filters: [
-      { name: "kind", all: this.t("bhAllKinds"), options: ["auto", "manual", "own"].map(k => [k, this.t(`bhKind_${k}`)]) },
+      { name: "kind", all: this.t("bhAllKinds"), options: ["auto", "manual", "other", "own"].map(k => [k, this.t(`bhKind_${k}`)]) },
       { name: "protected", all: this.t("bhAllProtected"), options: [["yes", this.t("bhYes")], ["no", this.t("bhNo")]] },
     ] });
     const rows = this.refine(id, list, { text: b => [this.formatDate(b.date), b.name, ...(b.agents || [])].join(" "), filters: { kind: (b, v) => this.bhKind(b) === v, protected: (b, v) => Boolean(b.protected) === (v === "yes") }, sorts, tie: b => b.date });

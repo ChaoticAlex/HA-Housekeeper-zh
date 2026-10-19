@@ -101,8 +101,9 @@ class BackupMixin {
     return `${row}<div class="bhattest"><label>${this.t("bhAttestDate")} <input type="date" data-bh-date="${c.id}" value="${today}" max="${today}"></label><button class="btn small primary" data-bh-save="${c.id}">${this.t("bhAttestSave")}</button><button class="bhcancel" data-bh-cancel>${this.t("bhAttestCancel")}</button>${clear}</div>`;
   }
 
-  // What a backup is: Housekeeper's own safety copy, one HA made on its schedule, or a manual one.
-  bhKind(b) { return b.own ? "own" : b.automatic ? "auto" : "manual"; }
+  // What a backup is: Housekeeper's own safety copy, one HA made on its schedule, a manual one, or one
+  // from another tool (HA has no flag for it, so it cannot tell scheduled from manual).
+  bhKind(b) { return b.own ? "own" : b.automatic === true ? "auto" : b.automatic === false ? "manual" : "other"; }
 
   bhKey(b) { return b.id || b.date || ""; }
 
@@ -130,7 +131,7 @@ class BackupMixin {
       { key: "protected", label: "bhColProtected", dir: "desc", get: b => (b.protected ? 1 : 0) },
     ];
     const bar = this.listBar(id, { table: true, dense: true, sorts, filters: [
-      { name: "kind", all: this.t("bhAllKinds"), options: ["auto", "manual", "own"].map(k => [k, this.t(`bhKind_${k}`)]) },
+      { name: "kind", all: this.t("bhAllKinds"), options: ["auto", "manual", "other", "own"].map(k => [k, this.t(`bhKind_${k}`)]) },
       { name: "protected", all: this.t("bhAllProtected"), options: [["yes", this.t("bhYes")], ["no", this.t("bhNo")]] },
     ] });
     const rows = this.refine(id, list, { text: b => [this.formatDate(b.date), b.name, ...(b.agents || [])].join(" "), filters: { kind: (b, v) => this.bhKind(b) === v, protected: (b, v) => Boolean(b.protected) === (v === "yes") }, sorts, tie: b => b.date });
