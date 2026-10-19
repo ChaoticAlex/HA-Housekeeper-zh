@@ -32,6 +32,13 @@ class BrokenCardsMixin {
     return f.suggestions?.length ? this.t("brokenMaybe", { ids: f.suggestions.join(", ") }) : "";
   }
 
+  // The same as HTML: each suggestion opens the replacement with the missing ID and this one filled in.
+  suggestHtml(f) {
+    if (f.runtime_created || !f.suggestions?.length || !f.affected_object) return this.esc(this.suggestText(f));
+    const ids = f.suggestions.map(id => `<button type="button" class="linkbtn" data-act-replace="${this.esc(f.affected_object)}" data-repl-new="${this.esc(id)}">${this.esc(id)}</button>`);
+    return this.t("brokenMaybe", { ids: ids.join(", ") });
+  }
+
   // One entry per card for broken dashboard references with a known card; a card with a single one stays a plain row.
   groupBroken(list) {
     const groups = new Map(), out = [];

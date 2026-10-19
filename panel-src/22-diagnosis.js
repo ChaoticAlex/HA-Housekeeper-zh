@@ -99,13 +99,13 @@ class DiagnosisMixin {
         cause = t(item.error ? "cause_entry_problem_error" : "cause_entry_problem", { state: t(`cs_${state}`), error: item.error || "" }); hint = t("hint_integration");
       }
       const helperBroken = this.data.findings.filter(f => f.rule_id === "config_entry.missing_entity" && f.object_id === item.object_id);
-      helperBroken.forEach(f => rows.push(this.check(t("missing_entity"), "red", [f.affected_object, this.placeText(f), this.suggestText(f)].filter(Boolean).join(" · "), t("missing"))));
+      helperBroken.forEach(f => rows.push(this.check(t("missing_entity"), "red", [f.affected_object, this.placeText(f)].filter(Boolean).join(" · "), t("missing"), null, this.suggestHtml(f))));
       if (helperBroken.length) { cause = t("cause_helper_broken", { count: helperBroken.length }); hint = t("hint_helper_broken"); tone = "red"; }
     } else if (["automation", "script", "scene", "dashboard"].includes(item.object_type)) {
       const key = this.objectKey(item);
       const broken = this.data.findings.filter(f => this.findingKey(f) === key && f.rule_id.includes(".missing_"));
       const grouped = this.groupBroken(broken);
-      grouped.forEach(g => rows.push(g.members ? this.brokenGroupRow(g) : this.check(t(g.rule_id.split(".")[1]), "red", [g.affected_object, this.placeText(g), this.suggestText(g)].filter(Boolean).join(" · "), t("missing"))));
+      grouped.forEach(g => rows.push(g.members ? this.brokenGroupRow(g) : this.check(t(g.rule_id.split(".")[1]), "red", [g.affected_object, this.placeText(g)].filter(Boolean).join(" · "), t("missing"), null, this.suggestHtml(g))));
       if (item.object_type === "automation" && item.status === "disabled") rows.push(this.check(t("status"), "mute", t("automationOff"), t("disabled")));
       if (!broken.length) rows.push(this.check(t("dependencies"), "ok", t("refsResolved"), t("present")));
       const unused = item.object_type === "automation" ? this.data.findings.find(f => this.findingKey(f) === key && f.classification === "unused") : null;
@@ -129,7 +129,7 @@ class DiagnosisMixin {
     const d = this.diagnose(item);
     if (!d) return "";
     const icon = { ok: "mdi:check-circle", warn: "mdi:alert-circle", red: "mdi:close-circle", mute: "mdi:minus-circle", violet: "mdi:help-circle" };
-    const rows = d.rows.map(r => `<div class="check ${r.tone}"><ha-icon icon="${icon[r.tone] || icon.ok}"></ha-icon><b>${this.esc(r.label)}</b>${r.link && this.findObject(r.link) ? `<button type="button" class="linkbtn val" data-object="${this.esc(r.link)}">${this.esc(r.value)}</button>` : `<span class="val">${this.esc(r.value)}</span>`}<i class="pill ${r.tone}">${this.esc(r.badge)}</i></div>`).join("");
+    const rows = d.rows.map(r => `<div class="check ${r.tone}"><ha-icon icon="${icon[r.tone] || icon.ok}"></ha-icon><b>${this.esc(r.label)}</b>${r.link && this.findObject(r.link) ? `<button type="button" class="linkbtn val" data-object="${this.esc(r.link)}">${this.esc(r.value)}</button>` : `<span class="val">${this.esc(r.value)}${r.extra ? ` · ${r.extra}` : ""}</span>`}<i class="pill ${r.tone}">${this.esc(r.badge)}</i></div>`).join("");
     return `<section class="panel"><div class="panelhead"><div><h2>${this.t("diagnosis")}</h2></div></div>
       <div class="diagcard">${this.ratingBlock(item, this.objectKey(item))}<div class="checks">${rows}</div>
       ${d.cause ? `<div class="cause ${d.tone}"><ha-icon icon="mdi:text-search"></ha-icon><div><strong>${this.t("causeLabel")}</strong><p>${this.esc(d.cause)}</p></div></div>` : ""}

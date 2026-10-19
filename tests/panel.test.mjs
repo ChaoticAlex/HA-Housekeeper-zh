@@ -4883,6 +4883,7 @@ test("broken references of one dashboard card form one row with a readable place
   const diag = el.diagnose(el.data.objects[0]);
   assert.equal(diag.rows.filter(r => r.tone === "red").length, 1, "one diagnosis row per card");
   assert.ok(diag.hint.includes("custom:charger-card") && diag.hint.includes("3 of 4"), "the diagnosis names the abandoned card");
+  assert.ok(el.suggestHtml(list[1]).includes('data-act-replace="sensor.b" data-repl-new="sensor.b_new"'), "a suggestion opens the replacement filled in");
 });
 
 test("origin filter keeps only core or custom config entries", () => {
