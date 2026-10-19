@@ -3680,9 +3680,11 @@ test("a plan shows its follow-up, expected end state and audit report; a regress
   const follow = el.followupLine(plan);
   assert.ok(follow.includes("Regression") && follow.includes("2 new findings") && follow.includes("broken reference: automation.x"));
   const sim = el.simulationBlock(plan);
-  assert.ok(sim.includes("3 entities removed (1 devices)") && sim.includes("4 references replaced (Light: 4)") && sim.includes("1 certain uses remain") && sim.includes("2 uncertain or manual uses remain") && sim.includes("1 statistics likely orphaned") && sim.includes("Limits:"));
+  assert.ok(sim.includes("3 entities removed (1 device)") && sim.includes("4 references replaced (Light: 4)") && sim.includes("1 certain uses remain") && sim.includes("2 uncertain or manual uses remain") && sim.includes("1 statistics likely orphaned") && sim.includes("Limits:"));
   const counted = el.simulationBlock({ ...plan, simulation: { ...plan.simulation, rows_counted: true, purge_rows: 1234, history_rows_kept: 56 } });
   assert.ok(counted.includes("recorder rows will be removed") && counted.includes("56 history rows stay"));
+  const split = el.simulationBlock({ ...plan, recorder_keep_days: 10, simulation: { ...plan.simulation, removed: 1, removed_devices: 0, rows_counted: true, purge_rows: 0, history_rows_kept: 165, history_states_kept: 163, history_stats_kept: 2 } });
+  assert.ok(split.includes("1 entity removed<") && split.includes("163 stored states stay in the database until the recorder deletes them after 10 days") && split.includes("2 rows of long-term statistics stay for good"));
   assert.ok(!sim.includes("recorder rows"), "no numbers without a count");
   const calls = [];
   el._hass = { language: "en", callWS: async msg => { calls.push(msg); return { filename: "housekeeper-plan-p1.md", anonymized: !msg.anonymize === false, markdown: "# Audit report" }; } };

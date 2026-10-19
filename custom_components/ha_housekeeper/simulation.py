@@ -33,6 +33,7 @@ def simulate(actions: list[dict[str, Any]]) -> dict[str, Any]:
     statistics: set[str] = set()
     manual = 0
     purge_rows = kept_rows = purge_stat_rows = purge_states_rows = 0
+    kept_states = kept_stats = 0
     counted = False
     for action in runnable:
         kind, object_id = action["kind"], action["object_id"]
@@ -75,8 +76,11 @@ def simulate(actions: list[dict[str, Any]]) -> dict[str, Any]:
                     history["states"] if choice == "states" else 0
                 )
                 kept_rows += 0 if choice == "states" else history["states"]
+                kept_states += 0 if choice == "states" else history["states"]
             else:
                 kept_rows += history["statistics"] + history["states"]
+                kept_states += history["states"]
+                kept_stats += history["statistics"]
         if kind == "migrate_meter":
             meters += 1
         if kind in ("repair_counter", "repair_range"):
@@ -122,4 +126,7 @@ def simulate(actions: list[dict[str, Any]]) -> dict[str, Any]:
         "purge_stat_rows": purge_stat_rows,
         "purge_states_rows": purge_states_rows,
         "history_rows_kept": kept_rows,
+        # The recorder purges kept states after its retention; long-term statistics it keeps.
+        "history_states_kept": kept_states,
+        "history_stats_kept": kept_stats,
     }

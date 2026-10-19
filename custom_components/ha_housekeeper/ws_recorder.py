@@ -90,7 +90,7 @@ async def websocket_reliability(
     now = datetime.now(UTC)
     for row in result.get("entries", []):
         row["setup"] = scanner.entry_states.summary(row["entry_id"], now)
-    result["keep_days"] = _keep_days(hass)
+    result["keep_days"] = keep_days(hass)
     connection.send_result(msg["id"], _versioned(result))
 
 
@@ -309,16 +309,17 @@ async def websocket_storms(
         connection.send_error(msg["id"], "storms_failed", f"{type(err).__name__}: {err}")
         return
     reply = mark_excluded(hass, dict(result))
-    reply["keep_days"] = _keep_days(hass)
+    reply["keep_days"] = keep_days(hass)
     connection.send_result(msg["id"], _versioned(reply))
 
 
-def _keep_days(hass: HomeAssistant) -> int | None:
-    """How many days the recorder keeps; the panel notes a window that reaches further back."""
+def keep_days(hass: HomeAssistant) -> int | None:
+    """How many days the recorder keeps states; None without a recorder or with automatic purge off."""
     try:
-        return recorder_retention(hass)["keep_days"]
+        retention = recorder_retention(hass)
     except Exception:  # no recorder instance: the window stands as asked
         return None
+    return retention["keep_days"] if retention["auto_purge"] is not False else None
 
 
 def async_register(hass: HomeAssistant) -> None:

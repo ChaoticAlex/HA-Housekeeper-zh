@@ -974,6 +974,8 @@ async def _add_history(hass: HomeAssistant, snapshot: dict[str, Any], plan: dict
         rows = await count_history(hass, ids)
         if rows is not None:
             attach_history(plan, rows)
+            # The end state says when the recorder drops the states left behind.
+            plan["recorder_keep_days"] = ws_recorder.keep_days(hass)
 
 
 @websocket_api.require_admin

@@ -9023,9 +9023,9 @@ Object.assign(TEXT.de, {
   fu_class_broken_reference: "defekte Referenz", fu_class_unavailable: "nicht verfügbar", fu_class_recurring: "Gerät kehrt wieder",
   actFollowup: "Nachkontrolle meldet neue Funde", actFollowupHint: "Nach einem Plan sind neue Probleme aufgetreten.",
   reportButton: "Prüfbericht", reportNames: "Echte Namen und IDs verwenden", reportNamesHint: "Ohne Haken ersetzen Platzhalter alle Namen und IDs. So kannst du den Bericht teilen, ohne etwas preiszugeben.", reportDownload: "Herunterladen", reportCopy: "Kopieren", reportCopied: "Kopiert", reportFailed: "Bericht nicht erstellt: {reason}", reportAnonymous: "IDs und Namen sind durch Platzhalter ersetzt.",
-  simPurgeRows: "{count} Zeilen im Recorder werden entfernt", simPurgeStatRows: "Statistik: {count} Zeilen werden gelöscht", simPurgeStateRows: "Rohdaten: {count} gespeicherte Zustände werden gelöscht", simKeptRows: "{count} Zeilen Verlauf bleiben im Recorder, bis er sie bereinigt",
+  simPurgeRows: "{count} Zeilen im Recorder werden entfernt", simPurgeStatRows: "Statistik: {count} Zeilen werden gelöscht", simPurgeStateRows: "Rohdaten: {count} gespeicherte Zustände werden gelöscht", simKeptRows: "{count} Zeilen Verlauf bleiben in der Datenbank", simKeptStates: "{count} gespeicherte Zustände bleiben in der Datenbank, bis der Recorder sie nach {days} Tagen löscht", simKeptStatesOpen: "{count} gespeicherte Zustände bleiben in der Datenbank, bis der Recorder alte Daten löscht", simKeptStats: "{count} Zeilen Langzeitstatistik bleiben dauerhaft erhalten",
   simTitle: "Erwarteter Endzustand", simPurged: "{count} Statistiken werden gelöscht (nur per Backup umkehrbar)",
-  simRemoved: "{count} Entitäten entfernt ({devices} Geräte)", simDisabled: "{count} Entitäten deaktiviert ({devices} Geräte)", simReplaced: "{count} Referenzen ersetzt", simMeters: "{count} Zählerwechsel",
+  simRemoved: "{count} Entitäten entfernt", simRemovedOne: "1 Entität entfernt", simDisabled: "{count} Entitäten deaktiviert", simDisabledOne: "1 Entität deaktiviert", simDevices: " ({devices} Geräte)", simDevicesOne: " (1 Gerät)", simReplaced: "{count} Referenzen ersetzt", simMeters: "{count} Zählerwechsel",
   simCertain: "{count} sichere Verwendungen bleiben bestehen", simUncertain: "{count} unsichere oder manuelle Verwendungen bleiben bestehen", simOrphaned: "{count} Statistiken voraussichtlich verwaist", simBlocked: "{count} Aktionen laufen nicht",
   simLimits: "Grenzen: Die Datenbankdatei schrumpft erst nach einem Repack. Verweise in Vorlagen und außerhalb von Home Assistant sind nicht sicher prüfbar; eine Speicherersparnis wird nicht geschätzt.",
 });
@@ -9045,9 +9045,9 @@ Object.assign(TEXT.en, {
   fu_class_broken_reference: "broken reference", fu_class_unavailable: "unavailable", fu_class_recurring: "device came back",
   actFollowup: "Follow-up reports new findings", actFollowupHint: "New problems appeared after a cleanup plan.",
   reportButton: "Audit report", reportNames: "Use real names and IDs", reportNamesHint: "Without the tick, placeholders replace all names and IDs, so you can share the report without giving anything away.", reportDownload: "Download", reportCopy: "Copy", reportCopied: "Copied", reportFailed: "Report not created: {reason}", reportAnonymous: "IDs and names are replaced by placeholders.",
-  simPurgeRows: "{count} recorder rows will be removed", simPurgeStatRows: "Statistics: {count} rows are deleted", simPurgeStateRows: "Raw data: {count} stored states are deleted", simKeptRows: "{count} history rows stay in the recorder until it cleans them up",
+  simPurgeRows: "{count} recorder rows will be removed", simPurgeStatRows: "Statistics: {count} rows are deleted", simPurgeStateRows: "Raw data: {count} stored states are deleted", simKeptRows: "{count} history rows stay in the database", simKeptStates: "{count} stored states stay in the database until the recorder deletes them after {days} days", simKeptStatesOpen: "{count} stored states stay in the database until the recorder deletes old data", simKeptStats: "{count} rows of long-term statistics stay for good",
   simTitle: "Expected end state", simPurged: "{count} statistics will be deleted (reversible only from the backup)",
-  simRemoved: "{count} entities removed ({devices} devices)", simDisabled: "{count} entities disabled ({devices} devices)", simReplaced: "{count} references replaced", simMeters: "{count} meter switches",
+  simRemoved: "{count} entities removed", simRemovedOne: "1 entity removed", simDisabled: "{count} entities disabled", simDisabledOne: "1 entity disabled", simDevices: " ({devices} devices)", simDevicesOne: " (1 device)", simReplaced: "{count} references replaced", simMeters: "{count} meter switches",
   simCertain: "{count} certain uses remain", simUncertain: "{count} uncertain or manual uses remain", simOrphaned: "{count} statistics likely orphaned", simBlocked: "{count} actions will not run",
   simLimits: "Limits: the database file only shrinks after a repack. References inside templates and outside Home Assistant cannot be checked for certain; saved storage is not estimated.",
 });
@@ -9234,8 +9234,10 @@ class ExchangeMixin {
     const s = plan.simulation;
     if (!s) return "";
     const lines = [];
-    if (s.removed) lines.push(this.t("simRemoved", { count: s.removed, devices: s.removed_devices }));
-    if (s.disabled) lines.push(this.t("simDisabled", { count: s.disabled, devices: s.disabled_devices }));
+    // "1 entity", and the devices only when there are any.
+    const entities = (key, n, d) => `${n === 1 ? this.t(`${key}One`) : this.t(key, { count: n })}${d ? (d === 1 ? this.t("simDevicesOne") : this.t("simDevices", { devices: d })) : ""}`;
+    if (s.removed) lines.push(entities("simRemoved", s.removed, s.removed_devices));
+    if (s.disabled) lines.push(entities("simDisabled", s.disabled, s.disabled_devices));
     if (s.replaced) lines.push(this.t("simReplaced", { count: s.replaced }) + (s.replaced_by_source.length ? ` (${s.replaced_by_source.slice(0, 5).map(r => `${r.name}: ${r.count}`).join(", ")})` : ""));
     if (s.meters) lines.push(this.t("simMeters", { count: s.meters }));
     if (s.repaired) lines.push(this.t("simRepaired", { count: s.repaired }));
@@ -9243,7 +9245,7 @@ class ExchangeMixin {
     if (s.remaining_certain) lines.push(this.t("simCertain", { count: s.remaining_certain }));
     if (s.remaining_uncertain) lines.push(this.t("simUncertain", { count: s.remaining_uncertain }));
     if (s.statistics_orphaned_count) lines.push(this.t("simOrphaned", { count: s.statistics_orphaned_count }));
-    if (s.rows_counted) { const other = s.purge_rows - (s.purge_stat_rows || 0) - (s.purge_states_rows || 0); if (s.purge_stat_rows) lines.push(this.t("simPurgeStatRows", { count: this.formatNumber(s.purge_stat_rows) })); if (s.purge_states_rows) lines.push(this.t("simPurgeStateRows", { count: this.formatNumber(s.purge_states_rows) })); if (other > 0) lines.push(this.t("simPurgeRows", { count: this.formatNumber(other) })); if (s.history_rows_kept) lines.push(this.t("simKeptRows", { count: this.formatNumber(s.history_rows_kept) })); }
+    if (s.rows_counted) { const other = s.purge_rows - (s.purge_stat_rows || 0) - (s.purge_states_rows || 0); if (s.purge_stat_rows) lines.push(this.t("simPurgeStatRows", { count: this.formatNumber(s.purge_stat_rows) })); if (s.purge_states_rows) lines.push(this.t("simPurgeStateRows", { count: this.formatNumber(s.purge_states_rows) })); if (other > 0) lines.push(this.t("simPurgeRows", { count: this.formatNumber(other) })); if (s.history_states_kept === undefined) { if (s.history_rows_kept) lines.push(this.t("simKeptRows", { count: this.formatNumber(s.history_rows_kept) })); } else { if (s.history_states_kept) lines.push(this.t(plan.recorder_keep_days ? "simKeptStates" : "simKeptStatesOpen", { count: this.formatNumber(s.history_states_kept), days: plan.recorder_keep_days })); if (s.history_stats_kept) lines.push(this.t("simKeptStats", { count: this.formatNumber(s.history_stats_kept) })); } }
     if (s.blocked) lines.push(this.t("simBlocked", { count: s.blocked }));
     return `<div class="simbox"><details ${plan.status === "dry_run" ? "open" : ""}><summary>${this.t("simTitle")}</summary><ul class="simlist">${lines.map(l => `<li>${this.esc(l)}</li>`).join("")}</ul><p class="simlimits">${this.t("simLimits")}</p></details></div>`;
   }
