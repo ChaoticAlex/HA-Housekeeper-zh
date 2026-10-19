@@ -11,6 +11,7 @@
   - In der Ursachendiagnose öffnen Integration, Gerät und funktionierende Entität per Klick ihre Seite.
   - In der Kopfzeile der Detailseite sind Integration, Gerät und Bereich verlinkt.
   - Das Zeilenmenü eines Duplikat-Befunds öffnet die funktionierende Entität.
+  - Der erwartete Endzustand eines Plans sagt, wann der Recorder verbliebene Zustände löscht und dass Langzeitstatistik bleibt; „1 Entität“ statt „1 Entitäten (0 Geräte)“.
 
 ### Behoben
 
@@ -27,6 +28,7 @@
   - In the cause diagnosis, the integration, device and working entity open their page on click.
   - In the header of the detail page, integration, device and area are links.
   - The row menu of a duplicate finding opens the working entity.
+  - The expected end state of a plan says when the recorder deletes the states left behind and that long-term statistics stay; "1 entity" instead of "1 entities (0 devices)".
 
 #### Fixed
 
