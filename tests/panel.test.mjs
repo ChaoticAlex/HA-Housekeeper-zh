@@ -332,6 +332,15 @@ test("detail page renders for an orphaned entity and escapes the name", () => {
   assert.ok(shadow.innerHTML.includes('data-action="back"'));
 });
 
+test("inventory lists an automation, script or scene once, not also as its entity", () => {
+  const { el } = panel();
+  const pair = (type, id) => [{ object_type: "entity", object_id: id, name: id, status: "active" }, { object_type: type, object_id: id, name: id, status: "active" }];
+  el.data = { ...DATA, objects: [...DATA.objects, ...pair("automation", "automation.a"), ...pair("script", "script.s"), ...pair("scene", "scene.c")] };
+  const ids = el.filtered().map(o => `${o.object_type}:${o.object_id}`);
+  for (const id of ["automation.a", "script.s", "scene.c"]) assert.equal(ids.filter(k => k.endsWith(`:${id}`)).length, 1);
+  assert.ok(!ids.includes("entity:automation.a"));
+});
+
 test("inventory header selects and clears only the entities on the current page", () => {
   const { el } = panel();
   el.typeFilter = "entity";

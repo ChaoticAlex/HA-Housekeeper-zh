@@ -16,6 +16,14 @@ class InventoryMixin {
   get helperIdle() { return this.typeFilter === "helper" ? this.invState().f.idle || "" : ""; }
   set helperIdle(v) { this.invSetFilter("idle", v); }
 
+  // The objects the inventory lists: an automation, script or scene is one object, not also its registry entity.
+  invObjects() {
+    return this.memo("invObjects", [], () => {
+      const own = new Set(this.data.objects.filter(o => o.object_type === "automation" || o.object_type === "script" || o.object_type === "scene").map(o => o.object_id));
+      return this.data.objects.filter(o => !(o.object_type === "entity" && own.has(o.object_id)));
+    });
+  }
+
   filtered() {
     if (!this.data) return [];
     const st = this.invState(), q = st.q.trim().toLowerCase(), sort = st.sort, desc = st.dir === "desc";
@@ -24,7 +32,7 @@ class InventoryMixin {
       const { natural, ids } = this.collators();
       const reason = item => (item.reason ? this.t(item.reason) : item.missing_reference_count ? String(item.missing_reference_count) : "");
       const pick = item => sort === "status" ? item.status : sort === "type" ? item.object_type : sort === "since" ? item.status_since : sort === "version" ? item.integration_version : sort === "reason" ? reason(item) : sort === "entities" ? String(item.entity_count ?? "") : sort === "usedByCol" ? String(this.usedByCount(item) ?? "") : sort === "changedCol" ? (item.last_changed || "") : (item.name || item.object_id);
-      const rows = this.data.objects.filter(item => (!q || this.haystack(item).includes(q)) && (!type || (type === "helper" ? this.isHelper(item) : item.object_type === type))
+      const rows = this.invObjects().filter(item => (!q || this.haystack(item).includes(q)) && (!type || (type === "helper" ? this.isHelper(item) : item.object_type === type))
         && (!status || item.status === status)
         && (!(type === "helper" && idle) || this.isIdleHelper(item, Number(idle)))
         && (!origin || (item.object_type === "config_entry" && !!item.custom === (origin === "custom")))).map(item => ({ item, key: pick(item) }));
@@ -89,10 +97,10 @@ class InventoryMixin {
     const pg = this.paginate("inventory", rows);
     this._invPage = pg.rows.filter(item => item.object_type === "entity").map(item => item.object_id);
     const { types, statuses } = this.memo("facets", [], () => ({
-      types: [...new Set(this.data.objects.map(x => x.object_type))].sort(),
-      statuses: [...new Set(this.data.objects.map(x => x.status))].sort(),
+      types: [...new Set(this.invObjects().map(x => x.object_type))].sort(),
+      statuses: [...new Set(this.invObjects().map(x => x.status))].sort(),
     }));
-    const all = this.data.objects;
+    const all = this.invObjects();
     const tiles = this.invTypesCard(all);
     // Version and entity count only mean something for integrations; the helper columns for helpers.
     const integ = this.typeFilter === "config_entry", helperMode = this.typeFilter === "helper";
@@ -124,7 +132,7 @@ class InventoryMixin {
       ...integCols.map(k => ({ key: k, label: k, dir: k === "version" ? "asc" : "desc", cell: item => this.esc(k === "usedByCol" ? (this.usedByCount(item) == null ? "—" : this.formatNumber(this.usedByCount(item))) : k === "changedCol" ? (item.last_changed ? this.formatDate(item.last_changed) : "—") : item.object_type !== "config_entry" ? "—" : k === "version" ? (item.integration_version || "—") : this.formatNumber(item.entity_count ?? 0)) })),
     ];
     const table = rows.length ? this.listTable("inventory", columns, pg.rows, { cls: "inv", rowAttrs: item => `data-object="${this.esc(this.objectKey(item))}" tabindex="0" role="button" aria-label="${this.esc(item.name)}"` }) : `<div class="emptymsg">${this.t("noResults")}</div>`;
-    return `<div class="stack">${tiles}<div class="panel">${bar}${idleHint}${this.invSelBar(rows)}${table}${pg.footer || `<div class="tablefoot"><span>${this.formatNumber(rows.length)} ${this.t("of_total")} ${this.formatNumber(this.data.objects.length)} ${this.t("shown")}</span></div>`}</div></div>`;
+    return `<div class="stack">${tiles}<div class="panel">${bar}${idleHint}${this.invSelBar(rows)}${table}${pg.footer || `<div class="tablefoot"><span>${this.formatNumber(rows.length)} ${this.t("of_total")} ${this.formatNumber(all.length)} ${this.t("shown")}</span></div>`}</div></div>`;
   }
 
   // The types as a ring with a table beside it: the largest few, the rest behind a button. A row filters the list below (a
