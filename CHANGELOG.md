@@ -5,7 +5,7 @@
 ### Neu
 
 - **Entitäten, die die Integration nicht mehr bereitstellt:** Sie werden als verwaist erkannt statt als „nicht verfügbar“, auch bei YAML-Entitäten, nach derselben Wartezeit wie ein Ausfall. Nach einem Tag lassen sie sich direkt entfernen, ohne Quarantäne, aber mit Vorschau, Backup und Wiederherstellen, auch unter Bereinigen.
-- **Mögliche Duplikate:** Auch der umgekehrte Fall wird erkannt: Die alte `sensor.x` ist übrig, die neue `sensor.x_2` läuft.
+- **Mögliche Duplikate:** Auch der umgekehrte Fall wird erkannt: Die alte `sensor.x` ist übrig, die neue `sensor.x_2` läuft (gleiches Gerät oder gleicher Name).
 - **Ausnahmen:** Regeln nach Integration gelten auch für den Befund „Integration nicht ladbar“, etwa für den Drucker-Eintrag, solange der Drucker aus ist (Diskussion 28).
 - **Ersetzen:** Bei einem Duplikat ist die funktionierende Entität vorbelegt; Vorschläge bei fehlenden Verweisen öffnen das Ersetzen mit diesem Ziel.
 - **Oberfläche:**
@@ -28,7 +28,7 @@
 #### New
 
 - **Entities the integration no longer provides:** They are recognised as orphaned instead of "unavailable", YAML entities too, after the same wait as an outage. After a day they can be removed straight away, without quarantine, but with preview, backup and restore, in Cleanup too.
-- **Possible duplicates:** The reverse case is recognised as well: the old `sensor.x` is left over, the new `sensor.x_2` works.
+- **Possible duplicates:** The reverse case is recognised as well: the old `sensor.x` is left over, the new `sensor.x_2` works (same device or same name).
 - **Exceptions:** Rules by integration also cover the "integration cannot be loaded" finding, such as a printer's entry while the printer is off (discussion 28).
 - **Replace:** For a duplicate the working entity is filled in; suggestions for missing references open the replacement with that target.
 - **Interface:**
