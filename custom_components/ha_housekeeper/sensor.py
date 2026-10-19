@@ -21,7 +21,14 @@ from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN, NAME, SIGNAL_MONITOR_DEFINITIONS, SIGNAL_SCAN_COMPLETE
+from .const import (
+    DOMAIN,
+    NAME,
+    SIGNAL_MONITOR_DEFINITIONS,
+    SIGNAL_PLAN_ACTIVITY,
+    SIGNAL_SCAN_COMPLETE,
+    SIGNAL_SCAN_STARTED,
+)
 from .outage_levels import is_quiet
 from .scan_coverage import gaps
 from .scan_health import STATES
@@ -83,6 +90,28 @@ HEALTH_DESCRIPTION = SensorEntityDescription(
 )
 
 
+ACTIVITY_DESCRIPTION = SensorEntityDescription(
+    key="activity",
+    translation_key="activity",
+    icon="mdi:progress-clock",
+    device_class=SensorDeviceClass.ENUM,
+    options=["idle", "scanning", "cleanup", "starting"],
+)
+
+
+def activity(scanner: Any) -> str | None:
+    """What Housekeeper does right now; a plan outranks the scans it runs itself."""
+    if scanner is None:
+        return None
+    if scanner.cleanup.running:
+        return "cleanup"
+    if scanner.status["running"]:
+        return "scanning"
+    if scanner.warming_up:
+        return "starting"
+    return "idle"
+
+
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
@@ -91,6 +120,7 @@ async def async_setup_entry(
         [
             *(HousekeeperSensor(entry, description) for description in DESCRIPTIONS),
             ScanHealthSensor(entry, HEALTH_DESCRIPTION),
+            ActivitySensor(entry, ACTIVITY_DESCRIPTION),
         ]
     )
     scanner = hass.data[DOMAIN]["scanner"]
@@ -176,6 +206,18 @@ class ScanHealthSensor(HousekeeperSensor):
             if report
             else {}
         )
+
+
+class ActivitySensor(HousekeeperSensor):
+    """Whether a scan or a plan runs, for dashboards next to the scan button."""
+
+    async def async_added_to_hass(self) -> None:
+        self._update()
+        for signal in (SIGNAL_SCAN_STARTED, SIGNAL_SCAN_COMPLETE, SIGNAL_PLAN_ACTIVITY):
+            self.async_on_remove(async_dispatcher_connect(self.hass, signal, self._handle_update))
+
+    def _update(self) -> None:
+        self._attr_native_value = activity(self.hass.data.get(DOMAIN, {}).get("scanner"))
 
 
 class MonitorSensor(SensorEntity):

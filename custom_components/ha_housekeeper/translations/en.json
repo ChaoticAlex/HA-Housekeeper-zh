@@ -97,6 +97,15 @@
           "failed": "Failed",
           "preliminary": "Preliminary"
         }
+      },
+      "activity": {
+        "name": "Activity",
+        "state": {
+          "idle": "Idle",
+          "scanning": "Scanning",
+          "cleanup": "Plan running",
+          "starting": "Waiting for startup"
+        }
       }
     },
     "button": {

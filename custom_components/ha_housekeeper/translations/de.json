@@ -97,6 +97,15 @@
           "failed": "Fehlgeschlagen",
           "preliminary": "Vorläufig"
         }
+      },
+      "activity": {
+        "name": "Aktivität",
+        "state": {
+          "idle": "Bereit",
+          "scanning": "Scan läuft",
+          "cleanup": "Plan läuft",
+          "starting": "Wartet auf Start"
+        }
       }
     },
     "button": {

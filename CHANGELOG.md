@@ -13,6 +13,7 @@
   - Auch der umgekehrte Fall wird erkannt: Die alte `sensor.x` ist übrig, die neue `sensor.x_2` läuft (gleiches Gerät oder gleicher Name).
   - Beim Ersetzen ist die funktionierende Entität vorbelegt; Vorschläge bei fehlenden Verweisen öffnen das Ersetzen mit diesem Ziel.
 - **Ausnahmen:** Regeln nach Integration gelten auch für den Befund „Integration nicht ladbar“, etwa für den Drucker-Eintrag, solange der Drucker aus ist (Diskussion 28).
+- **Entität „Aktivität“:** Zeigt, ob Housekeeper gerade scannt, einen Plan ausführt, auf den Start von Home Assistant wartet oder bereit ist; passt auf ein Dashboard neben den Knopf „Scan starten“.
 
 ### Geändert
 
@@ -30,6 +31,7 @@
   - Das Label `housekeeper_ignore` an einem Gerät blendet auch dessen Befunde und die seiner Entitäten aus, nicht nur bei Entitäten und Automationen.
 - **Priorität:** „Wurde nie ausgelöst“ und „Lange nicht ausgelöst“ sind bei Automationen, die Kritisches steuern (Alarm, Überflutung), nicht mehr „Hoch“ (Diskussion 33).
 - **Inventar:** Automationen, Skripte und Szenen erscheinen nur noch einmal und werden einmal gezählt, nicht zusätzlich als Entität; die Detailseite verlinkt beide (Issue 34).
+- **Knopf „Scan starten“:** Er gilt während eines Scans nicht mehr als „nicht verfügbar“, darum meldet Housekeeper ihn nicht mehr selbst als flatternd (Issue 35).
 - **Oberfläche:**
   - Das Menü am Zeilenende (⋮) wird nicht mehr am Rand der Karte abgeschnitten (Issue 32).
   - „In HA öffnen“ führt bei Szenen ohne Editor zur Geräteseite; „Entität öffnen“ gibt es auch für Szenen.
@@ -51,6 +53,7 @@
   - The reverse case is recognised as well: the old `sensor.x` is left over, the new `sensor.x_2` works (same device or same name).
   - When replacing, the working entity is filled in; suggestions for missing references open the replacement with that target.
 - **Exceptions:** Rules by integration also cover the "integration cannot be loaded" finding, such as a printer's entry while the printer is off (discussion 28).
+- **Entity “Activity”:** Shows whether Housekeeper is scanning, running a plan, waiting for Home Assistant to start or idle; fits on a dashboard next to the “Start scan” button.
 
 #### Changed
 
@@ -68,6 +71,7 @@
   - The label `housekeeper_ignore` on a device also hides its findings and those of its entities, no longer only for entities and automations.
 - **Priority:** "Never triggered" and "Not triggered for a long time" are no longer "High" for automations that control something critical (alarm, flooding) (discussion 33).
 - **Inventory:** Automations, scripts and scenes appear once and are counted once, no longer also as an entity; the detail page links both (issue 34).
+- **“Start scan” button:** It is no longer “unavailable” during a scan, so Housekeeper no longer reports it as flapping itself (issue 35).
 - **Interface:**
   - The row menu (⋮) is no longer cut off at the edge of the card (issue 32).
   - "Open in HA" leads to the device page for scenes without an editor; "Open entity" is offered for scenes too.

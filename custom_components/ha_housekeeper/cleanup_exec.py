@@ -58,6 +58,7 @@ from homeassistant.helpers import area_registry as ar
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import label_registry as lr
+from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.util.file import write_utf8_file_atomic
 from homeassistant.util.yaml import dump, parse_yaml
 
@@ -97,7 +98,7 @@ from .cleanup import (
     registry_fingerprint,
     trim_is_plain,
 )
-from .const import DOMAIN, MAX_FILE_BACKUP, MAX_PLAN_SNAPSHOTS
+from .const import DOMAIN, MAX_FILE_BACKUP, MAX_PLAN_SNAPSHOTS, SIGNAL_PLAN_ACTIVITY
 from .db_health import (
     BACKUP_SPACE_SHARE,
     DISK_STOP_BYTES,
@@ -508,6 +509,7 @@ class CleanupRunner:
             "done": 0,
             "total": len(saved[2]),
         }
+        async_dispatcher_send(self.hass, SIGNAL_PLAN_ACTIVITY)
         self._task = self.hass.async_create_background_task(
             self._run(plan, saved[2], user_id), "HA Housekeeper cleanup run"
         )
@@ -589,6 +591,7 @@ class CleanupRunner:
                 "done": 0,
                 "total": 0,
             }
+            async_dispatcher_send(self.hass, SIGNAL_PLAN_ACTIVITY)
             journal.save()
 
     async def _others_idle(self, plan: dict[str, Any], writes_recorder: bool) -> bool:

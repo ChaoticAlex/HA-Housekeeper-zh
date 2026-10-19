@@ -14,8 +14,13 @@ from homeassistant import config_entries  # noqa: E402
 from homeassistant.core import HomeAssistant  # noqa: E402
 from homeassistant.data_entry_flow import FlowResultType  # noqa: E402
 from homeassistant.helpers import entity_registry as er  # noqa: E402
+from homeassistant.helpers.dispatcher import async_dispatcher_send  # noqa: E402
 
-from custom_components.ha_housekeeper.const import API_SCHEMA, DOMAIN  # noqa: E402
+from custom_components.ha_housekeeper.const import (  # noqa: E402
+    API_SCHEMA,
+    DOMAIN,
+    SIGNAL_SCAN_STARTED,
+)
 from custom_components.ha_housekeeper.inventory import (  # noqa: E402
     InventoryScanner,
     _device_config_entry_ids,
@@ -581,6 +586,22 @@ async def test_scan_button_is_available_after_a_scan(hass: HomeAssistant) -> Non
     await hass.async_block_till_done(wait_background_tasks=True)
     button = next(state for state in hass.states.async_all("button"))
     assert button.state != "unavailable"
+
+
+async def test_scan_button_stays_available_while_a_scan_runs(hass: HomeAssistant) -> None:
+    """Issue 35: Housekeeper saw its own button fail with every scan; the activity says it."""
+    result = await hass.config_entries.flow.async_init(
+        DOMAIN, context={"source": config_entries.SOURCE_USER}
+    )
+    await hass.config_entries.flow.async_configure(result["flow_id"], {})
+    await hass.async_block_till_done(wait_background_tasks=True)
+    scanner = hass.data[DOMAIN]["scanner"]
+    scanner.status["running"] = True
+    async_dispatcher_send(hass, SIGNAL_SCAN_STARTED)
+    await hass.async_block_till_done()
+    button = next(state for state in hass.states.async_all("button"))
+    assert button.state != "unavailable"
+    assert hass.states.get("sensor.ha_housekeeper_activity").state == "scanning"
 
 
 async def test_scan_survives_a_scene_that_lists_non_names(hass: HomeAssistant) -> None:

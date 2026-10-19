@@ -102,6 +102,8 @@ WARMUP_NAMES: Final = 4
 API_SCHEMA: Final = 1
 SIGNAL_SCAN_COMPLETE: Final = f"{DOMAIN}_scan_complete"
 SIGNAL_SCAN_STARTED: Final = f"{DOMAIN}_scan_started"
+# A cleanup plan starts or ends; the activity sensor follows it.
+SIGNAL_PLAN_ACTIVITY: Final = f"{DOMAIN}_plan_activity"
 SIGNAL_MONITOR_DEFINITIONS: Final = f"{DOMAIN}_monitor_definitions"
 SIGNAL_MONITOR_EVENT: Final = f"{DOMAIN}_monitor_event"
 
