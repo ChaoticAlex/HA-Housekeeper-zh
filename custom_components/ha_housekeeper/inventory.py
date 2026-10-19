@@ -193,11 +193,25 @@ def marked_keys(objects: list[dict[str, Any]]) -> frozenset[str]:
     )
 
 
+def listed_objects(objects: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The objects the inventory lists: an automation, script or scene, not also its entity."""
+    own = {i["object_id"] for i in objects if i["object_type"] in ("automation", "script", "scene")}
+    return [i for i in objects if not (i["object_type"] == "entity" and i["object_id"] in own)]
+
+
 def marked_status_counts(objects: list[dict[str, Any]]) -> dict[str, int]:
-    """How many marked objects there are per status, for the inventory status card."""
+    """How many marked objects there are per status, for the inventory status card.
+
+    Only listed objects count; a mark on the entity of an automation counts for the automation.
+    """
     marked = marked_keys(objects)
     return dict(
-        Counter(i["status"] for i in objects if f"{i['object_type']}:{i['object_id']}" in marked)
+        Counter(
+            i["status"]
+            for i in listed_objects(objects)
+            if f"{i['object_type']}:{i['object_id']}" in marked
+            or f"entity:{i['object_id']}" in marked
+        )
     )
 
 
@@ -1740,10 +1754,12 @@ class InventoryScanner:
                 "watch_hours": self.watch_hours,
                 "watch": self.watch_summary(),
                 "low_batteries": len(low_battery_ids(entities, self.low_battery_percent)),
-                "object_count": len(objects),
-                "status_counts": dict(Counter(item["status"] for item in objects)),
+                "object_count": len(listed_objects(objects)),
+                "status_counts": dict(Counter(item["status"] for item in listed_objects(objects))),
                 "marked_status_counts": marked_status_counts(objects),
-                "type_counts": dict(Counter(item["object_type"] for item in objects)),
+                "type_counts": dict(
+                    Counter(item["object_type"] for item in listed_objects(objects))
+                ),
                 "vacation": self.vacation_meta(findings),
                 "exception_rules": len(self.exceptions.rules),
             },

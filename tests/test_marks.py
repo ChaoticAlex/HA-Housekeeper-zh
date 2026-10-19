@@ -193,3 +193,20 @@ def test_marked_keys_cover_the_entities_of_a_marked_device():
         {"object_type": "entity", "object_id": "sensor.c", "mark": {"kind": "keep"}},
     ]
     assert marked_keys(objects) == {"device:d1", "entity:sensor.a"}
+
+
+def test_listed_objects_drop_the_entity_of_an_automation_and_count_its_mark_once():
+    from custom_components.ha_housekeeper.inventory import listed_objects, marked_status_counts
+
+    objects = [
+        {
+            "object_type": "entity",
+            "object_id": "automation.a",
+            "status": "active",
+            "mark": {"kind": "expected_offline"},
+        },
+        {"object_type": "automation", "object_id": "automation.a", "status": "active"},
+        {"object_type": "entity", "object_id": "sensor.a", "status": "active"},
+    ]
+    assert [i["object_type"] for i in listed_objects(objects)] == ["automation", "entity"]
+    assert marked_status_counts(objects) == {"active": 1}
