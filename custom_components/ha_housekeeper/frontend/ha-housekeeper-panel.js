@@ -606,7 +606,7 @@ Object.assign(TEXT.de, {
   confirmedSummaryDeviceRemove: "{count} Geräte werden samt Entitäten entfernt. Vorher legt Housekeeper ein Home-Assistant-Backup an und startet nur, wenn es erfolgreich ist. Wiederherstellen legt den Registry-Eintrag neu an; Entitäten stellt die Integration bereit, wenn sie es kann.",
   confirmedSummaryReplace: "In {count} Entitäts-Verweisen wird die alte durch die neue Entität ersetzt (Automationen, Skripte, Szenen, Dashboards, Energie). Vorher legt Housekeeper ein Home-Assistant-Backup an. Jede Quelle wird vorab gesichert und lässt sich zurücksetzen, solange sie unverändert ist.",
   quarantineHint: "Entitäten und Geräte, die Housekeeper deaktiviert hat. Entfernen ist frühestens nach {days} Tagen möglich. Mit „Aus Quarantäne holen“ aktivierst du ein Objekt wieder.",
-  deviceCandidatesHint: "Geräte ohne funktionierende Entitäten. Deaktivieren schickt sie in Quarantäne.", removalDeviceHint: "Geräte in Quarantäne. Entfernen ist erst nach {days} Tagen möglich.", deviceEntities: "{count} Entitäten", sortEntities: "Entitäten",
+  deviceCandidatesHint: "Geräte ohne funktionierende Entitäten. Deaktivieren schickt sie in Quarantäne.", removalDeviceHint: "Geräte in Quarantäne. Entfernen ist erst nach {days} Tagen möglich.", deviceEntities: "{count} Entitäten", deviceNoEntities: "Keine Entitäten", sortEntities: "Entitäten",
   replaceTitle: "Verweise ersetzen", replaceHint: "Ersetzt die alte Entität überall dort, wo sie exakt eingetragen ist: Automationen, Skripte, Szenen, Dashboards im Speichermodus und das Energie-Dashboard. Templates und YAML-Dashboards zeigt Housekeeper nur an. Die alte Entität bleibt unverändert; danach kannst du sie in Quarantäne schicken.",
   replaceOld: "Alte Entität (wird ersetzt)", replaceNew: "Neue Entität", replacePreview: "Vorschau erstellen", replaceChanges: "{count} Änderungen", replaceManual: "von Hand prüfen: {count} Templates", replaceNoSources: "Keine Verweise gefunden", replaceSummary: "{count} Änderungen in {sources} Quellen", replaceMoreChanges: "… und {count} weitere Änderungen in dieser Quelle", replaceMoreSources: "{count} weitere Quellen", replaceByHand: "Von Hand zu erledigen ({count})", srcTrigger: "Auslöser", srcCondition: "Bedingung", srcAction: "Aktion", energyDashboard: "Energie-Dashboard", replaceSources: "Quellen",
   recurringTitle: "Wiederkehrende Geräte", recurringHint: "Diese Geräte hat Housekeeper vergessen, doch die Integration hat sie wieder angelegt. Deaktivieren ist hier meist sinnvoller; oft muss das Gerät am Quellsystem (Hub, App, Cloud) entfernt werden.", recurringSince: "vergessen am {date} · Integration: {domains}",
@@ -639,7 +639,7 @@ Object.assign(TEXT.en, {
   confirmedSummaryDeviceRemove: "{count} devices will be removed together with their entities. Housekeeper creates a Home Assistant backup first and only continues if it succeeds. Restoring recreates the registry entry; the integration provides the entities if it can.",
   confirmedSummaryReplace: "In {count} entity references the old entity is replaced by the new one (automations, scripts, scenes, dashboards, Energy). Housekeeper creates a Home Assistant backup first. Each source is saved beforehand and can be put back while it is unchanged.",
   quarantineHint: "Entities and devices Housekeeper has disabled. Removal is possible no earlier than after {days} days. “Take out of quarantine” enables an object again.",
-  deviceCandidatesHint: "Devices without working entities. Disabling sends them to quarantine.", removalDeviceHint: "Devices in quarantine. Removal is possible only after {days} days.", deviceEntities: "{count} entities", sortEntities: "Entities",
+  deviceCandidatesHint: "Devices without working entities. Disabling sends them to quarantine.", removalDeviceHint: "Devices in quarantine. Removal is possible only after {days} days.", deviceEntities: "{count} entities", deviceNoEntities: "No entities", sortEntities: "Entities",
   replaceTitle: "Replace references", replaceHint: "Replaces the old entity wherever it is entered exactly: automations, scripts, scenes, storage-mode dashboards and the Energy dashboard. Housekeeper only lists templates and YAML dashboards. The old entity stays as it is; afterwards you can send it to quarantine.",
   replaceOld: "Old entity (to be replaced)", replaceNew: "New entity", replacePreview: "Create preview", replaceChanges: "{count} changes", replaceManual: "check by hand: {count} templates", replaceNoSources: "No references found", replaceSummary: "{count} changes in {sources} sources", replaceMoreChanges: "… and {count} more changes in this source", replaceMoreSources: "{count} more sources", replaceByHand: "To do by hand ({count})", srcTrigger: "Trigger", srcCondition: "Condition", srcAction: "Action", energyDashboard: "Energy dashboard", replaceSources: "Sources",
   recurringTitle: "Returning devices", recurringHint: "Housekeeper made Home Assistant forget these devices, but the integration created them again. Disabling usually makes more sense here; often the device has to be removed at the source (hub, app, cloud).", recurringSince: "forgotten on {date} · integration: {domains}",
@@ -3618,11 +3618,12 @@ class CleanupMixin {
     return this.navTiles("cleanup", tabs.map(t => ({ ...t, tone: t.count ? t.tone : "mute" })), open, this.t("cleanup"), true);
   }
 
-  // Devices without a working entity: nothing there to lose by quarantining them.
+  // Devices without a working entity: nothing there to lose by quarantining them. Marked, labelled or excepted ones stay out.
   deviceCandidates() {
     const members = new Map();
     for (const o of this.data.objects) if (o.object_type === "entity" && o.device_id) (members.get(o.device_id) || members.set(o.device_id, []).get(o.device_id)).push(o);
-    return this.data.objects.filter(o => o.object_type === "device" && o.status !== "disabled" && (members.get(o.object_id) || []).every(e => ["orphaned", "unavailable", "unknown", "disabled"].includes(e.status)))
+    const kept = o => o.marked_keep || o.excepted || (o.labels || []).includes("housekeeper_ignore");
+    return this.data.objects.filter(o => o.object_type === "device" && o.status !== "disabled" && !kept(o) && !(members.get(o.object_id) || []).some(kept) && (members.get(o.object_id) || []).every(e => ["orphaned", "unavailable", "unknown", "disabled"].includes(e.status)))
       .map(item => ({ item, finding: null, quarantine: null, count: (members.get(item.object_id) || []).length }));
   }
 
@@ -4339,7 +4340,7 @@ class CleanupMixin {
     this._cleanupVisible = pg.rows.filter(ready).map(r => r.item.object_id);
     const badge = r => {
       const left = r.quarantine ? limit - this.daysSince(r.quarantine.since) : 0;
-      return r.finding ? this.pill(r.finding.classification) : r.quarantine ? `<span class="pill ${left > 0 ? "mute" : "ok"}">${left > 0 ? this.t("daysLeftShort", { days: left }) : this.t("removalReady")}</span>` : `<span class="pill mute">${this.t("deviceEntities", { count: r.count })}</span>`;
+      return r.finding ? this.pill(r.finding.classification) : r.quarantine ? `<span class="pill ${left > 0 ? "mute" : "ok"}">${left > 0 ? this.t("daysLeftShort", { days: left }) : this.t("removalReady")}</span>` : `<span class="pill mute">${this.t(r.count ? "deviceEntities" : "deviceNoEntities", { count: r.count })}</span>`;
     };
     const recorderCol = this.cleanupKind === "remove_entity" && this.data?.meta?.recorder_available;
     const columns = [

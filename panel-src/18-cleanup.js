@@ -47,11 +47,12 @@ class CleanupMixin {
     return this.navTiles("cleanup", tabs.map(t => ({ ...t, tone: t.count ? t.tone : "mute" })), open, this.t("cleanup"), true);
   }
 
-  // Devices without a working entity: nothing there to lose by quarantining them.
+  // Devices without a working entity: nothing there to lose by quarantining them. Marked, labelled or excepted ones stay out.
   deviceCandidates() {
     const members = new Map();
     for (const o of this.data.objects) if (o.object_type === "entity" && o.device_id) (members.get(o.device_id) || members.set(o.device_id, []).get(o.device_id)).push(o);
-    return this.data.objects.filter(o => o.object_type === "device" && o.status !== "disabled" && (members.get(o.object_id) || []).every(e => ["orphaned", "unavailable", "unknown", "disabled"].includes(e.status)))
+    const kept = o => o.marked_keep || o.excepted || (o.labels || []).includes("housekeeper_ignore");
+    return this.data.objects.filter(o => o.object_type === "device" && o.status !== "disabled" && !kept(o) && !(members.get(o.object_id) || []).some(kept) && (members.get(o.object_id) || []).every(e => ["orphaned", "unavailable", "unknown", "disabled"].includes(e.status)))
       .map(item => ({ item, finding: null, quarantine: null, count: (members.get(item.object_id) || []).length }));
   }
 
@@ -768,7 +769,7 @@ class CleanupMixin {
     this._cleanupVisible = pg.rows.filter(ready).map(r => r.item.object_id);
     const badge = r => {
       const left = r.quarantine ? limit - this.daysSince(r.quarantine.since) : 0;
-      return r.finding ? this.pill(r.finding.classification) : r.quarantine ? `<span class="pill ${left > 0 ? "mute" : "ok"}">${left > 0 ? this.t("daysLeftShort", { days: left }) : this.t("removalReady")}</span>` : `<span class="pill mute">${this.t("deviceEntities", { count: r.count })}</span>`;
+      return r.finding ? this.pill(r.finding.classification) : r.quarantine ? `<span class="pill ${left > 0 ? "mute" : "ok"}">${left > 0 ? this.t("daysLeftShort", { days: left }) : this.t("removalReady")}</span>` : `<span class="pill mute">${this.t(r.count ? "deviceEntities" : "deviceNoEntities", { count: r.count })}</span>`;
     };
     const recorderCol = this.cleanupKind === "remove_entity" && this.data?.meta?.recorder_available;
     const columns = [
