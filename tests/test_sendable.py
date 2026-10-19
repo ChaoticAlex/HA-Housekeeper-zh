@@ -16,6 +16,9 @@ def test_sendable_cleans_unsendable_values(caplog) -> None:
     cleaned = sendable({"o": Odd(), "l": [{"t": (1, 2)}], (1, 2): "k", "n": 2**70})
     assert cleaned == {"o": "odd", "l": [{"t": [1, 2]}], "(1, 2)": "k", "n": str(2**70)}
     assert "/o" in caplog.text
+    caplog.clear()
+    sendable({"o": Odd(), "l": [{"t": (1, 2)}], (1, 2): "k", "n": 2**70})
+    assert "cleaned before sending" not in caplog.text  # the same paths are logged once
 
 
 def test_a_reply_that_cannot_be_cleaned_becomes_an_error() -> None:

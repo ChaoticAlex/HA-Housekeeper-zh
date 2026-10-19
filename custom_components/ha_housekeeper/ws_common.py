@@ -24,6 +24,7 @@ STATISTICS_LAST_IDS = 50
 RELIABILITY_TIMEOUT = 120  # seconds; the recorder query is slow on a large database
 
 _LOGGER = logging.getLogger(__name__)
+_WARNED: set[str] = set()  # cleaned paths already in the log; the panel asks again on every view
 
 
 def _scanner(hass: HomeAssistant) -> InventoryScanner | None:
@@ -114,10 +115,13 @@ def sendable(result: dict[str, Any]) -> dict[str, Any]:
         bad: list[str] = []
         cleaned = json_safe(result, "", bad)
         json_bytes(cleaned)
-        _LOGGER.warning(
-            "The reply held values JSON cannot carry and was cleaned before sending: %s",
-            ", ".join(bad[:10]) or "unknown path",
-        )
+        paths = ", ".join(bad[:10]) or "unknown path"
+        if paths not in _WARNED:
+            _WARNED.add(paths)
+            _LOGGER.warning(
+                "The reply held values JSON cannot carry and was cleaned before sending: %s",
+                paths,
+            )
         return cleaned
     return result
 
