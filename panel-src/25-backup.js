@@ -26,6 +26,23 @@ class BackupMixin {
 
   bhList(items) { return items?.length ? items.map(i => this.esc(i)).join(", ") : this.t("bhNone"); }
 
+  // A backup target as a person calls it: "hassio.local" is the device, "hassio.<name>" a network
+  // storage they named themselves, anything else an integration (the account part is left out).
+  bhAgent(id) {
+    const [domain, ...rest] = String(id).split("."), name = rest.join(".");
+    const brands = { google_drive: "Google Drive", onedrive: "OneDrive", onedrive_for_business: "OneDrive for Business", dropbox: "Dropbox", cloud: "Nabu Casa", synology_dsm: "Synology", webdav: "WebDAV", backblaze_b2: "Backblaze B2", idrive_e2: "IDrive e2", cloudflare_r2: "Cloudflare R2", azure_storage: "Azure Storage" };
+    if (String(id).endsWith(".local")) return { label: this.t("bhAgentLocal"), local: true };
+    if (domain === "hassio" && name) return { label: this.t("bhAgentNetwork", { name }), local: false };
+    const plain = domain.replace(/_/g, " ");
+    return { label: brands[domain] || plain.charAt(0).toUpperCase() + plain.slice(1), local: false };
+  }
+
+  bhAgents(items) { return items?.length ? items.map(i => this.esc(this.bhAgent(i).label)).join(", ") : this.t("bhNone"); }
+
+  bhAgentPills(items) {
+    return items?.length ? `<span style="display:inline-flex;gap:4px;flex-wrap:wrap">${items.map(i => { const a = this.bhAgent(i); return `<span class="pill ${a.local ? "mute" : "ok"}" title="${this.esc(i)}">${this.esc(a.label)}</span>`; }).join("")}</span>` : this.t("bhNone");
+  }
+
   // The sentence for one check; the backend sends numbers and ids only.
   bhText(c) {
     const v = c.values || {}, t = (k, vars) => this.t(k, vars);
@@ -33,20 +50,20 @@ class BackupMixin {
       case "setup":
         if (c.level === "problem") return t("bhSetupProblem");
         if (c.level === "note") return t("bhSetupNote");
-        return t("bhSetupOk", { agents: this.bhList(v.agents), recurrence: t(`bhRec_${v.recurrence}`) });
+        return t("bhSetupOk", { agents: this.bhAgents(v.agents), recurrence: t(`bhRec_${v.recurrence}`) });
       case "newest":
         return v.age_hours === null || v.age_hours === undefined ? t("bhNewestNone") : t("bhNewestText", { age: this.bhAge(v.age_hours), limit: this.bhAge(v.limit_hours) });
       case "last_run": {
         if (c.level === "unknown") return t("bhRunUnknown");
         const parts = [];
         if (v.failed_attempt) parts.push(t("bhRunFailed", { attempted: this.formatDate(v.attempted), completed: v.completed ? this.formatDate(v.completed) : t("bhNever") }));
-        if (v.failed_agents?.length) parts.push(t("bhRunAgents", { agents: this.bhList(v.failed_agents) }));
+        if (v.failed_agents?.length) parts.push(t("bhRunAgents", { agents: this.bhAgents(v.failed_agents) }));
         return parts.length ? parts.join(" ") : t("bhRunOk", { completed: this.formatDate(v.completed) });
       }
       case "targets":
-        if (v.at && !v.remote?.length) return t("bhTargetsConfirmed", { local: this.bhList(v.local), date: this.bhDay(v.at) });
-        if (v.at) return t("bhTargetsOkConfirmed", { local: this.bhList(v.local), remote: this.bhList(v.remote), date: this.bhDay(v.at) });
-        return c.level === "ok" ? t("bhTargetsOk", { local: this.bhList(v.local), remote: this.bhList(v.remote) }) : c.level === "note" ? t("bhTargetsNote", { local: this.bhList(v.local) }) : "";
+        if (v.at && !v.remote?.length) return t("bhTargetsConfirmed", { local: this.bhAgents(v.local), date: this.bhDay(v.at) });
+        if (v.at) return t("bhTargetsOkConfirmed", { local: this.bhAgents(v.local), remote: this.bhAgents(v.remote), date: this.bhDay(v.at) });
+        return c.level === "ok" ? t("bhTargetsOk", { local: this.bhAgents(v.local), remote: this.bhAgents(v.remote) }) : c.level === "note" ? t("bhTargetsNote", { local: this.bhAgents(v.local) }) : "";
       case "size":
         if (c.level === "unknown") return t("bhSizeUnknown");
         return t(c.level === "ok" ? "bhSizeOk" : "bhSizeNote", { size: this.formatBytes(v.size), expected: this.formatBytes(v.expected), percent: Math.round(v.ratio * 100) });
@@ -70,7 +87,7 @@ class BackupMixin {
         if (c.level === "note") return t(v.scheduled === false ? "bhContentNoDbSet" : "bhContentNoDb");
         return t("bhContentOk", { apps: this.formatNumber(v.apps ?? 0), folders: this.formatNumber(v.folders ?? 0) });
       case "remote_age": {
-        const row = a => `${this.esc(a.agent)}: ${this.bhAge(a.age_hours)}`;
+        const row = a => `${this.esc(this.bhAgent(a.agent).label)}: ${this.bhAge(a.age_hours)}`;
         return c.level === "note"
           ? t("bhRemoteStale", { items: (v.agents || []).filter(a => (v.stale || []).includes(a.agent)).map(row).join(", "), limit: this.bhAge(v.limit_hours) })
           : t("bhRemoteOk", { items: (v.agents || []).map(row).join(", ") });
@@ -142,7 +159,7 @@ class BackupMixin {
       { key: "kind", label: "bhColKind", sortable: false, cell: b => `<span class="pill ${b.own ? "warn" : "mute"}">${this.t(`bhKind_${this.bhKind(b)}`)}</span>` },
       { key: "content", label: "bhColContent", sortable: false, cell: b => `<span class="pill ${this.bhContent(b) === "full" ? "ok" : "mute"}">${this.t(`bhContent_${this.bhContent(b)}`)}</span>${this.bhFailed(b).length ? `<span class="pill red bhfail">${this.t("bhFailedPill")}</span>` : ""}` },
       { key: "size", label: "bhColSize", dir: "desc", cell: b => this.esc(this.formatBytes(b.size)) },
-      { key: "targets", label: "bhColTargets", sortable: false, cell: b => this.bhList(b.agents) },
+      { key: "targets", label: "bhColTargets", sortable: false, cell: b => this.bhAgentPills(b.agents) },
       { key: "protected", label: "bhColProtected", dir: "desc", cell: b => this.t(b.protected ? "bhYes" : "bhNo") },
     ];
     const table = rows.length ? this.listTable(id, columns, pg.rows, { cls: "bh", rowAttrs: b => `data-bh-row="${this.esc(this.bhKey(b))}" tabindex="0" role="button" aria-expanded="${open(b)}"`, after: b => this.bhDetail(b) }) : `<div class="emptymsg">${this.noMatches(id)}</div>`;

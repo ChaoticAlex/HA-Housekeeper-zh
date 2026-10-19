@@ -1667,7 +1667,7 @@ const BACKUP_REPORT = {
   checks: [
     { id: "setup", level: "ok", values: { agents: ["hassio.local", "cloud.cloud"], recurrence: "daily" } },
     { id: "newest", level: "problem", values: { age_hours: 70, limit_hours: 36, date: "2026-10-05T10:00:00+00:00", recurrence: "daily" } },
-    { id: "last_run", level: "problem", values: { attempted: "2026-10-08T03:00:00+00:00", completed: "2026-10-05T03:00:00+00:00", failed_agents: ["cloud.<b>"], failed_attempt: true } },
+    { id: "last_run", level: "problem", values: { attempted: "2026-10-08T03:00:00+00:00", completed: "2026-10-05T03:00:00+00:00", failed_agents: ["<b>.x"], failed_attempt: true } },
     { id: "targets", level: "note", values: { local: ["hassio.local"], remote: [] } },
     { id: "size", level: "note", values: { size: 524288000, expected: 1048576000, ratio: 0.5, baseline: 3 } },
     { id: "retention", level: "ok", values: { copies: 3, days: null, count: 2, oldest_days: 6.4 } },
@@ -1689,8 +1689,8 @@ test("the backup card puts text and a word next to every level and escapes what 
   assert.ok(shadow.innerHTML.includes("Backups") && shadow.innerHTML.includes("Checking backups"));
   await el.loadBackup();
   const html = shadow.innerHTML;
-  for (const text of ["Targets and schedule", "Targets: hassio.local, cloud.cloud · schedule: daily", "3 days ago · limit for the schedule: 36 h",
-    "The last attempt", "no backup; last success", "Targets with errors: cloud.&lt;b&gt;", "Local only (hassio.local)", "500 MB instead of about 1,000 MB (50 %)",
+  for (const text of ["Targets and schedule", "Targets: Local, Nabu Casa · schedule: daily", "3 days ago · limit for the schedule: 36 h",
+    "The last attempt", "no backup; last success", "Targets with errors: &lt;b&gt;", "Local only (Local)", "500 MB instead of about 1,000 MB (50 %)",
     "Retention: 3 backups · present: 2, the oldest 6 days old", "No backup password set.", "Not confirmed yet", "Last on", "37 days ago",
     "not found any more", "Latest backups", "How to test a restore", "Housekeeper never performs a restore itself"]) assert.ok(html.includes(text), text);
   for (const word of [">OK<", ">Note<", ">Problem<"]) assert.ok(html.includes(word), word);
@@ -5642,6 +5642,8 @@ test("object lists share one table: device entities, integration entries, remind
   assert.ok(rem.includes('data-lsort="reminders|due') && rem.includes('data-rem-open="r1"') && rem.includes('data-lf="reminders|state"'));
   assert.ok(el.bhBackups([{ date: "2026-10-01T10:00:00+00:00", size: 1000, agents: ["backup.local"], protected: true }]).includes('data-lsort="bhbackups|size'));
   assert.deepEqual([true, false, null, undefined].map(automatic => el.bhKind({ automatic })), ["auto", "manual", "other", "other"], "a backup without the flag is from another tool, not a manual one");
+  assert.deepEqual(["hassio.local", "backup.local", "hassio.Backup", "google_drive.me_gmail_com", "cloud.cloud", "foo_bar.x"].map(id => el.bhAgent(id).label), ["Local", "Local", "Network storage: Backup", "Google Drive", "Nabu Casa", "Foo bar"], "targets are named, accounts left out");
+  assert.ok(el.bhAgent("hassio.local").local && !el.bhAgent("hassio.Backup").local);
   assert.ok(rem.includes('data-rem-row="r1"') && rem.includes('role="button"'), "the row opens the history");
   assert.ok(rem.includes('data-lf-set="reminders|state|soon"') && rem.includes('data-lf-set="reminders||"'), "the key figures set the state filter");
   assert.ok(rem.includes('data-exp-menu="reminders"') && !rem.includes("data-export-list") && el._exporters.reminders.rows()[0][0] === "Filter", "the list exports to CSV");
@@ -5903,7 +5905,7 @@ test("the new backup checks say what failed, which target is stale and how much 
     { id: "space", level: "problem", values: { free: 800 * 1024 ** 2, size: 1024 ** 3, need: 1.5 * 1024 ** 3 } },
   ] };
   const html = el.backupCard();
-  assert.ok(html.includes("Parts of the newest backup failed: Cloudflared, ssl") && html.includes("Too old (limit 36 h): cloud.cloud: 9 days") && html.includes("Only 800 MB free, the last backup was 1 GB"));
+  assert.ok(html.includes("Parts of the newest backup failed: Cloudflared, ssl") && html.includes("Too old (limit 36 h): Nabu Casa: 9 days") && html.includes("Only 800 MB free, the last backup was 1 GB"));
   assert.ok(html.includes("Storage and content") && html.includes("Content") && html.includes("Room for the next backup"));
 });
 

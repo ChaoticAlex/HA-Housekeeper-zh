@@ -6,11 +6,19 @@
 
 - **Backup-Schutz:** Backups anderer Werkzeuge (zum Beispiel Google Drive Backup) stehen in der Tabelle als „Anderes Werkzeug“ statt „Manuell“, denn Home Assistant weiß nicht, ob sie geplant waren.
 
+### Geändert
+
+- **Backup-Schutz:** Die Ziele eines Backups stehen mit lesbaren Namen („Lokal“, „Netzwerkspeicher: …“, „Google Drive“) als Pillen statt als Kennungen; das Konto fällt weg.
+
 ### English
 
 #### Fixed
 
 - **Backup protection:** Backups made by other tools (for example Google Drive Backup) show as “Other tool” instead of “Manual” in the table, because Home Assistant cannot tell whether they were scheduled.
+
+#### Changed
+
+- **Backup protection:** The targets of a backup show readable names (“Local”, “Network storage: …”, “Google Drive”) as pills instead of IDs; the account part is left out.
 
 ## Unreleased
 
