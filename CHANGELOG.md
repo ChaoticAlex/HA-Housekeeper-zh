@@ -2,26 +2,6 @@
 
 ## Unreleased
 
-### Behoben
-
-- **Backup-Schutz:** Backups anderer Werkzeuge (zum Beispiel Google Drive Backup) stehen in der Tabelle als „Anderes Werkzeug“ statt „Manuell“, denn Home Assistant weiß nicht, ob sie geplant waren.
-
-### Geändert
-
-- **Backup-Schutz:** Die Ziele eines Backups stehen mit lesbaren Namen („Lokal“, „Netzwerkspeicher: …“, „Google Drive“) als Pillen statt als Kennungen; das Konto fällt weg.
-
-### English
-
-#### Fixed
-
-- **Backup protection:** Backups made by other tools (for example Google Drive Backup) show as “Other tool” instead of “Manual” in the table, because Home Assistant cannot tell whether they were scheduled.
-
-#### Changed
-
-- **Backup protection:** The targets of a backup show readable names (“Local”, “Network storage: …”, “Google Drive”) as pills instead of IDs; the account part is left out.
-
-## Unreleased
-
 ### Neu
 
 - **Entitäten, die die Integration nicht mehr bereitstellt:** Sie werden als verwaist erkannt statt als „nicht verfügbar“, auch bei YAML-Entitäten, nach derselben Wartezeit wie ein Ausfall. Sie lassen sich direkt entfernen, ohne Quarantäne, aber mit Vorschau, Backup und Wiederherstellen, auch unter Bereinigen; am ersten Tag fragt die Vorschau nach, ob die Entität wirklich weg ist.
@@ -43,6 +23,9 @@
   - Im Inventar erscheinen Automationen, Skripte und Szenen nur noch einmal und werden einmal gezählt, nicht zusätzlich als Entität; die Detailseite verlinkt beide (Issue 34).
   - „In HA öffnen“ führt bei Szenen ohne Editor zur Geräteseite; „Entität öffnen“ gibt es auch für Szenen.
   - Bei einem ausgefallenen Gerät zeigt die Ursachendiagnose, dass alle Entitäten nicht verfügbar sind, statt „aktiv und stellt Entitäten bereit“; die Risiko-Zeile sagt, dass sie das Entfernen meint.
+- **Backup-Schutz:**
+  - Backups anderer Werkzeuge (zum Beispiel Google Drive Backup) stehen in der Tabelle als „Anderes Werkzeug“ statt „Manuell“, denn Home Assistant weiß nicht, ob sie geplant waren.
+  - Die Ziele eines Backups stehen mit lesbaren Namen („Lokal“, „Netzwerkspeicher: …“, „Google Drive“) als Pillen statt als Kennungen; das Konto fällt weg.
 
 ### English
 
@@ -67,6 +50,9 @@
   - The inventory lists and counts automations, scripts and scenes once, no longer also as an entity; the detail page links both (issue 34).
   - "Open in HA" leads to the device page for scenes without an editor; "Open entity" is offered for scenes too.
   - For a device that is down, the diagnosis shows that all its entities are unavailable instead of “active and provides entities”; the risk row says it is about removing.
+- **Backup protection:**
+  - Backups made by other tools (for example Google Drive Backup) show as “Other tool” instead of “Manual” in the table, because Home Assistant cannot tell whether they were scheduled.
+  - The targets of a backup show readable names (“Local”, “Network storage: …”, “Google Drive”) as pills instead of IDs; the account part is left out.
 
 ## 1.10.2 - 2026-10-19
 
