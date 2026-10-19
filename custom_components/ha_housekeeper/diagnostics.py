@@ -13,6 +13,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import __version__ as HA_VERSION
 from homeassistant.core import HomeAssistant
 
+from .backup_health import collect
 from .const import DOMAIN
 
 
@@ -24,6 +25,7 @@ async def async_get_config_entry_diagnostics(
     if scanner is None:
         return {"home_assistant": HA_VERSION, "loaded": False}
 
+    backups = await collect(hass)
     snapshot = scanner.snapshot
     findings = snapshot["findings"] if snapshot else []
     # Only the kind of the last error: its message can name entities.
@@ -43,6 +45,26 @@ async def async_get_config_entry_diagnostics(
                 "unchecked": len(snapshot["meta"].get("unchecked") or []),
             }
             if snapshot
+            else None
+        ),
+        # Backup flags only, no names or ids: shows how a backup tool marks its backups.
+        "backups": (
+            [
+                {
+                    key: item.get(key)
+                    for key in (
+                        "automatic",
+                        "ha_included",
+                        "own",
+                        "partial",
+                        "protected",
+                        "database",
+                    )
+                }
+                | {"agents": item.get("agents")}
+                for item in backups["backups"][:10]
+            ]
+            if backups.get("backups")
             else None
         ),
         "edge_count": len(snapshot["edges"]) if snapshot else 0,
