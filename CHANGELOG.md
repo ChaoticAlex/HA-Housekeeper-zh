@@ -4,9 +4,10 @@
 
 ### Behoben
 
-- **Scan:** Ein Konfigurationseintrag mit einer Zahl als Titel ließ den ersten Scan scheitern („'int' object has no attribute 'lower'“).
-- **Scan:** Eine Szene, die etwas anderes als Namen auflistet, lässt den Scan nicht mehr scheitern; bei einem Fehler steht im Debug-Protokoll, wo er auftrat.
-- **Scan-Button:** „Scan starten“ bleibt nach einem Scan nicht mehr nicht verfügbar.
+- **Scan:**
+  - Ein Konfigurationseintrag mit einer Zahl als Titel ließ den ersten Scan scheitern („'int' object has no attribute 'lower'“).
+  - Eine Szene, die etwas anderes als Namen auflistet, lässt den Scan nicht mehr scheitern; bei einem Fehler steht im Debug-Protokoll, wo er auftrat.
+  - „Scan starten“ bleibt nach einem Scan nicht mehr nicht verfügbar.
 - **Backup-Schutz:** Backups anderer Werkzeuge (zum Beispiel Google Drive Backup) werden erkannt und zählen für die Prüfungen.
 
 ### Geändert
@@ -17,9 +18,10 @@
 
 #### Fixed
 
-- **Scan:** A config entry whose title is a number made the first scan fail (“'int' object has no attribute 'lower'”).
-- **Scan:** A scene that lists something other than names no longer makes the scan fail; on an error the debug log says where it happened.
-- **Scan button:** “Start scan” no longer stays unavailable after a scan.
+- **Scan:**
+  - A config entry whose title is a number made the first scan fail (“'int' object has no attribute 'lower'”).
+  - A scene that lists something other than names no longer makes the scan fail; on an error the debug log says where it happened.
+  - “Start scan” no longer stays unavailable after a scan.
 - **Backup protection:** Backups made by other tools (for example Google Drive Backup) are recognised and count for the checks.
 
 #### Changed
