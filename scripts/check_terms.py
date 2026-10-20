@@ -20,10 +20,22 @@ PANEL = ROOT
 
 # 术语表：英文词 -> 必须出现的中文词。仅在英文原文出现该词时检查。
 TERMS = [
-    ("entity", "实体"), ("entities", "实体"), ("device", "设备"), ("area", "区域"),
-    ("automation", "自动化"), ("script", "脚本"), ("scene", "场景"), ("dashboard", "仪表盘"),
-    ("integration", "集成"), ("recorder", "记录器"), ("quarantine", "隔离"),
-    ("backup", "备份"), ("statistics", "统计"), ("battery", "电量"),
+    # (英文词, 可接受的中文写法)。同一英文词常有不同义项：
+    # battery 既可指"电量水平"，也可指"物理电池/蓄电池"。
+    ("entity", ["实体"]),
+    ("entities", ["实体"]),
+    ("device", ["设备"]),
+    ("area", ["区域"]),
+    ("automation", ["自动化"]),
+    ("script", ["脚本"]),
+    ("scene", ["场景"]),
+    ("dashboard", ["仪表盘"]),
+    ("integration", ["集成"]),
+    ("recorder", ["记录器"]),
+    ("quarantine", ["隔离"]),
+    ("backup", ["备份"]),
+    ("statistics", ["统计"]),
+    ("battery", ["电量", "电池"]),
 ]
 # 禁用译法：出现即视为术语漂移。
 FORBIDDEN = {
@@ -85,11 +97,11 @@ def main() -> int:
     for k, value in zh.items():
         english = re.sub(r"\{\w+\}", " ", quoted.sub(" ", en.get(k, ""))).lower()
         skip = EXEMPT_TERMS.get(k, set())
-        for word, wanted in TERMS:
+        for word, accepted in TERMS:
             if word in skip:
                 continue
-            if re.search(rf"\b{word}\b", english) and wanted not in value:
-                term_miss.append((k, word, wanted))
+            if re.search(rf"\b{word}\b", english) and not any(a in value for a in accepted):
+                term_miss.append((k, word, "/".join(accepted)))
                 break
     forbidden = [(k, bad) for k, value in zh.items()
                  for _good, bads in FORBIDDEN.items() for bad in bads if bad in value]
