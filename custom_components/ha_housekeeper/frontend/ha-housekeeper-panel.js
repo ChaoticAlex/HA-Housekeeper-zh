@@ -19476,7 +19476,7 @@ Object.assign(TEXT.zh, {
   "aboutIntroPlan": "每一次改动都会经过计划：预览、备份，以及你的确认。",
   "aboutIntroSafe": "它绝不会自行改动或删除任何内容。",
   "actNewCriticalHint": "自上次扫描以来：不可用、失效引用或问题",
-  "actNone": "无需处理。上次扫描：{date}。",
+  "actNone": "这里没有需要处理的内容。",
   "actQuarantineHint": "你确认后即可移除",
   "actSub": "按紧急程度排序",
   "actions": "动作",
