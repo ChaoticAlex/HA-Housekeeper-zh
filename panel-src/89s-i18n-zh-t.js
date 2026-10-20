@@ -37,7 +37,7 @@ Object.assign(TEXT.zh, {
   "polAlso_user_old_tokens": "天数：{ids}",
   "polDays": "上次登录于 {n} 天前",
   "polDesc_companion_silent": "某伴侣应用设备被监视的传感器至少 30 天没有任何上报。多是被遗留下来的旧手机。时间从开始监视时算起，因此是“至少”。处于省电模式的手机也可能长时间静默。仅为提示；删除需在 Home Assistant 设置中操作。",
-  "polDesc_dashboard_custom_cards": "该仪表盘使用了自定义卡片，但没有注册对应的仪表板资源。单张卡片是否真的被加载无法从此判断；此处只计入这一确定情形。",
+  "polDesc_dashboard_custom_cards": "该仪表盘使用了自定义卡片，但没有注册对应的仪表盘资源。单张卡片是否真的被加载无法从此判断；此处只计入这一确定情形。",
   "polDesc_dashboard_disabled_entities": "该仪表盘包含已停用实体的卡片。",
   "polDesc_dashboard_duplicate_cards": "同一卡片以相同设置在同一列表中出现了多次。",
   "polDesc_dashboard_navigation": "某个卡片打开了一个视图，而被读取的仪表盘并没有该视图。指向 Home Assistant 其它部分的链接不做判断。",
