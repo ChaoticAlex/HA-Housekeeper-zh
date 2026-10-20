@@ -99,7 +99,27 @@ REASONS_EN = {
     "rule_no_value": "no numeric value",
     "rule_no_timestamp": "update time unknown",
 }
-MONITOR_REASONS = {"de": REASONS_DE, "en": REASONS_EN}
+REASONS_ZH = {
+    "missing": "对象不存在",
+    "disabled": "已停用",
+    "orphaned": "孤立",
+    "unavailable": "不可用",
+    "problem": "集成未加载",
+    "source_unread": "数据源未读取",
+    "scan_unverified": "扫描结果不可靠",
+    "automation.blocked": "自动化被阻断",
+    "automation.dead_actions": "自动化动作指向失效引用",
+    "automation.dead_condition": "自动化条件指向失效引用",
+    "broken_reference": "失效引用",
+    "stopped": "应用已停止",
+    "rule_stale": "数值未按时更新",
+    "rule_below_min": "低于最小值",
+    "rule_unavailable_long": "不可用时间过长",
+    "rule_waiting": "宽限期进行中",
+    "rule_no_value": "无数值",
+    "rule_no_timestamp": "更新时间未知",
+}
+MONITOR_REASONS = {"de": REASONS_DE, "en": REASONS_EN, "zh": REASONS_ZH}
 MONITOR_TEXTS = {
     "de": {
         "uncertain_open": "Prüfung unvollständig; letzter bestätigter Defekt ({last_reason}) bleibt ungeklärt.",
@@ -112,6 +132,12 @@ MONITOR_TEXTS = {
         "uncertain": "Check incomplete.",
         "impaired": "Important function impaired: {reason}",
         "link": "Open home functions",
+    },
+    "zh": {
+        "uncertain_open": "检查不完整；上次确认的故障（{last_reason}）仍未解决。",
+        "uncertain": "检查不完整。",
+        "impaired": "重要功能受影响：{reason}",
+        "link": "打开家居功能",
     },
 }
 

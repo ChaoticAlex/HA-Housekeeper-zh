@@ -28,6 +28,10 @@ TEXTS = {
         "HA Housekeeper: new broken references",
         "{count} new broken reference(s): {names}. [Open findings](/{url}?view=findingsNav&filter=broken_reference)",
     ),
+    "zh": (
+        "HA Housekeeper：出现新的失效引用",
+        "{count} 个新的失效引用：{names}。[查看发现项](/{url}?view=findingsNav&filter=broken_reference)",
+    ),
 }
 
 
