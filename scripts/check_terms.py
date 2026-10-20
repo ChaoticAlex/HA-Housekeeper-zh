@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PANEL = ROOT / "panel-src"
+PANEL = ROOT
 
 # 术语表：英文词 -> 必须出现的中文词。仅在英文原文出现该词时检查。
 TERMS = [
@@ -40,10 +40,20 @@ EXEMPT_TERMS = {
     "sysColPlace": {"area"},
 }
 NODE_DUMP = """
-const fs=require('fs'),d=process.argv[1];let s='';
-for(const f of fs.readdirSync(d).filter(f=>f.includes('i18n')).sort()) s+=fs.readFileSync(d+'/'+f,'utf8')+'\\n';
-s+='TEXT;';const T=eval(s);
-console.log(JSON.stringify({de:T.de,en:T.en,zh:T.zh||{}}));
+// 载入构建后的面板单文件，得到真实的 TEXT 对象：
+// 词条不只在 *-i18n-*.js 里，41-causes.js、62-known.js 等模块也用 Object.assign(TEXT.en, …)
+const fs=require('fs'),vm=require('vm'),path=require('path');
+const root=process.argv[1];
+const src=fs.readFileSync(path.join(root,'custom_components/ha_housekeeper/frontend/ha-housekeeper-panel.js'),'utf8');
+const shadow={innerHTML:'',querySelectorAll:()=>[],querySelector:()=>null};
+class El{attachShadow(){return shadow} addEventListener(){} }
+const ctx={HTMLElement:El,customElements:{get:()=>undefined,define:()=>{}},
+ document:{createElement:()=>({click(){},remove(){},appendChild(){},setAttribute(){},style:{}}),body:{appendChild(){}},head:{appendChild:()=>{}},getElementById:()=>null},
+ Intl,Map,Set,JSON,String,Number,Array,Object,Math,Date,setTimeout:()=>0,clearTimeout:()=>{},
+ localStorage:{getItem:()=>null,setItem:()=>{}},window:{addEventListener(){},removeEventListener(){},location:{pathname:'/'},history:{}},
+ navigator:{language:'zh-Hans'},Promise,RegExp,Error,Boolean,Function,Symbol,URLSearchParams};
+vm.runInNewContext(src+';this.TEXT=TEXT;',ctx);
+console.log(JSON.stringify({en:ctx.TEXT.en,zh:ctx.TEXT.zh||{}}));
 """
 
 
