@@ -73,7 +73,7 @@ def main() -> int:
     # 引号内的示例（如 “New automation”）保持原样，不参与术语匹配
     quoted = re.compile(r"[“\"\'`][^”\"\'`]*[”\"\'`]")
     for k, value in zh.items():
-        english = quoted.sub(" ", en.get(k, "")).lower()
+        english = re.sub(r"\{\w+\}", " ", quoted.sub(" ", en.get(k, ""))).lower()
         skip = EXEMPT_TERMS.get(k, set())
         for word, wanted in TERMS:
             if word in skip:
