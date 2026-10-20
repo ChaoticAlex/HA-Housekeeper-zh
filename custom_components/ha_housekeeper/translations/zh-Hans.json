@@ -48,7 +48,7 @@
     },
     "broken_automations": {
       "title": "{count} 个存在失效引用的发现项",
-      "description": "Housekeeper 在自动化、脚本、场景、仪表板、分组或辅助元素中发现 {count} 个指向已不存在的实体、设备或区域的引用。[在 Housekeeper 中查看]({link})。不会自动改动任何内容。"
+      "description": "Housekeeper 在自动化、脚本、场景、仪表盘、分组或辅助元素中发现 {count} 个指向已不存在的实体、设备或区域的引用。[在 Housekeeper 中查看]({link})。不会自动改动任何内容。"
     },
     "scan_failing": {
       "title": "Housekeeper 扫描持续失败",
