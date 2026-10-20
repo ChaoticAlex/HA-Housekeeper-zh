@@ -31,6 +31,12 @@ FORBIDDEN = {
     "隔离": ["检疫"],
     "记录器": ["录音机", "录音器"],
 }
+# 语境豁免：这些键里的英文词不是 Home Assistant 的术语含义，不该按术语表强制。
+# updColGroup/updAllGroups 的 "area" 指更新分组（系统/应用/HACS/设备），不是 HA 的"区域"。
+EXEMPT_TERMS = {
+    "updColGroup": {"area"},
+    "updAllGroups": {"area"},
+}
 NODE_DUMP = """
 const fs=require('fs'),d=process.argv[1];let s='';
 for(const f of fs.readdirSync(d).filter(f=>f.includes('i18n')).sort()) s+=fs.readFileSync(d+'/'+f,'utf8')+'\\n';
@@ -66,7 +72,10 @@ def main() -> int:
     quoted = re.compile(r"[“\"\'`][^”\"\'`]*[”\"\'`]")
     for k, value in zh.items():
         english = quoted.sub(" ", en.get(k, "")).lower()
+        skip = EXEMPT_TERMS.get(k, set())
         for word, wanted in TERMS:
+            if word in skip:
+                continue
             if re.search(rf"\b{word}\b", english) and wanted not in value:
                 term_miss.append((k, word, wanted))
                 break
