@@ -18,7 +18,7 @@ class ThemeMixin {
     if ([20, 50, 100].includes(saved.pageSize)) prefs.pageSize = saved.pageSize;
     if (START_VIEWS.includes(saved.startView)) prefs.startView = saved.startView;
     if (["list", "graph"].includes(saved.graphMode)) prefs.graphMode = saved.graphMode;
-    if (["auto", "de", "en"].includes(saved.language)) prefs.language = saved.language;
+    if (["auto", "de", "en", "zh"].includes(saved.language)) prefs.language = saved.language;
     return prefs;
   }
 
