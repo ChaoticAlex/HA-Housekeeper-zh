@@ -51,6 +51,8 @@ EXEMPT_TERMS = {
     "updAllGroups": {"area"},
     # 系统页的 "Area" 指文件/目录所在位置，不是 HA 的区域
     "sysColPlace": {"area"},
+    # exStep1 里的 entities: 是 configuration.yaml 的键名，翻译会破坏配置
+    "exStep1": {"entity", "entities"},
 }
 NODE_DUMP = """
 // 载入构建后的面板单文件，得到真实的 TEXT 对象：
