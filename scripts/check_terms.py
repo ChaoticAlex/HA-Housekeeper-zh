@@ -36,6 +36,8 @@ FORBIDDEN = {
 EXEMPT_TERMS = {
     "updColGroup": {"area"},
     "updAllGroups": {"area"},
+    # 系统页的 "Area" 指文件/目录所在位置，不是 HA 的区域
+    "sysColPlace": {"area"},
 }
 NODE_DUMP = """
 const fs=require('fs'),d=process.argv[1];let s='';
