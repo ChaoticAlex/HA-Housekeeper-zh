@@ -62,8 +62,10 @@ def main() -> int:
     bad_ph = [(k, sorted(placeholders(en[k]) ^ placeholders(zh[k])))
               for k in zh if k in en and placeholders(en[k]) != placeholders(zh[k])]
     term_miss = []
+    # 引号内的示例（如 “New automation”）保持原样，不参与术语匹配
+    quoted = re.compile(r"[“\"\'`][^”\"\'`]*[”\"\'`]")
     for k, value in zh.items():
-        english = en.get(k, "").lower()
+        english = quoted.sub(" ", en.get(k, "")).lower()
         for word, wanted in TERMS:
             if re.search(rf"\b{word}\b", english) and wanted not in value:
                 term_miss.append((k, word, wanted))
